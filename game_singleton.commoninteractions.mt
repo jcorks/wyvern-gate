@@ -285,7 +285,10 @@ return {
               for(0, itemCount)::(index) {
                 @:item = Item.new(
                   base:Item.database.getRandomFiltered(
-                    filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= island.tier
+                    filter:::(value) <- 
+                      value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                      value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                      && value.tier <= island.tier
                   ),
                   rngEnchantHint:true
                 );

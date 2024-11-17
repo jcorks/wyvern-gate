@@ -20,18 +20,16 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:FLAGS = {
+@:TRAIT = {
   AILMENT : 1,
   BUFF : 2,
   DEBUFF : 4,
-  SPECIAL : 8
-};
-
-
-@:TRAITS = {
+  SPECIAL : 8,
+  
   // Means the holder will always go first. Ties are randomly decided
-  ALWAYS_FIRST : 1,
-}
+  ALWAYS_FIRST : 16,
+  
+};
 
 
   ////////////////////// SPECIAL EFFECTS
@@ -60,8 +58,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 1,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -93,8 +90,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 1,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 50
     ),
@@ -116,8 +112,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable : true,
     blockPoints: 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -148,8 +143,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable : false,
     blockPoints: 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAttackOther ::(from, item, holder, to, damage) {
@@ -175,8 +169,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable : true,
     blockPoints: 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAttackOther ::(from, item, holder, to, damage) {
@@ -209,8 +202,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable : true,
     blockPoints: 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to, damage) {
@@ -242,8 +234,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable : true,
     blockPoints: 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -279,8 +270,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 1,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEX: 20
     ),
@@ -335,8 +325,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 1,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -362,8 +351,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -388,8 +376,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -412,8 +399,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -443,8 +429,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -474,7 +459,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 1,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(ATK:-50, DEF:200),
     events : {
@@ -496,7 +480,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(DEF:-50, ATK:200),
     events : {
@@ -519,7 +502,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(ATK:-50, SPD:100, DEX:100),
     events : { 
@@ -540,7 +522,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 1,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(SPD:-50, DEF:200),
     events : {
@@ -562,7 +543,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(ATK:-50, INT:200),
     events : {
@@ -584,7 +564,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(SPD:-30, DEF:-30, ATK:200, DEX:100),
     events : {
@@ -604,10 +583,9 @@ Effect.newEntry(
     description: 'For incoming physical attacks, negate the damage and send half of the would-be damage back to the attacker.',
     battleOnly : true,
     stackable: false,
-    traits : 0,
     stats: StatSet.new(),
     blockPoints : 0,
-    flags : 0,
+    traits : 0,
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(
@@ -646,8 +624,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
@@ -691,7 +668,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -727,8 +703,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -756,8 +731,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       INT: 100
     ),
@@ -782,8 +756,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 100
     ),
@@ -807,8 +780,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 10
     ),
@@ -839,7 +811,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -859,7 +830,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -883,7 +853,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -906,8 +875,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -933,8 +901,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -965,7 +932,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -989,7 +955,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1020,7 +985,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1057,7 +1021,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1088,7 +1051,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1112,7 +1074,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1136,8 +1097,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 10
     ),
@@ -1171,7 +1131,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1194,7 +1153,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1219,7 +1177,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1242,8 +1199,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK:70
     ),
@@ -1267,8 +1223,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK:25
     ),
@@ -1291,7 +1246,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1314,8 +1268,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF:70
     ),
@@ -1338,8 +1291,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF:25
     ),
@@ -1363,7 +1315,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1386,8 +1337,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       INT:70
     ),
@@ -1410,8 +1360,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       INT:70
     ),
@@ -1434,7 +1383,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1457,8 +1405,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEX:70
     ),
@@ -1482,7 +1429,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(DEX:25),
     events : { 
@@ -1504,7 +1450,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(
     ),
@@ -1527,8 +1472,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       SPD:70
     ),
@@ -1551,8 +1495,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       SPD:25
     ),
@@ -1578,8 +1521,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 50
     ),
@@ -1599,8 +1541,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 50
     ),
@@ -1620,8 +1561,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK: 40
     ),
@@ -1642,8 +1582,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 70,
       ATK: 70
@@ -1678,8 +1617,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK: 100
     ),
@@ -1699,8 +1637,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 100
     ),
@@ -1721,8 +1658,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 100
     ),
@@ -1743,8 +1679,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -1768,8 +1703,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
 
@@ -1793,8 +1727,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -1818,8 +1751,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
 
@@ -1845,8 +1777,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -1882,7 +1813,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -1904,7 +1834,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -1928,7 +1857,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -1974,8 +1902,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1993,8 +1920,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -2012,7 +1938,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -2037,7 +1962,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -2074,7 +1998,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {      
@@ -2107,7 +2030,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -2146,8 +2068,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(ATK:30),
     events : {
       onAffliction ::(from, item, holder) {
@@ -2169,8 +2090,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(ATK:30),
     events : {
     
@@ -2186,8 +2106,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(ATK:70),
     events : {}
   }
@@ -2200,10 +2119,9 @@ Effect.newEntry(
     description: 'Vines grow on holder. SPD -10%.',
     battleOnly : true,
     stackable: true,        
-    traits : 0,
     stats: StatSet.new(SPD:-10),
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
+    traits : TRAIT.DEBUFF,
     events : {
       
       onRemoveEffect ::(from, item, holder) {          
@@ -2225,10 +2143,9 @@ Effect.newEntry(
     description: 'Every turn, holder takes 1 to 4 poison damage. SPD -10%',
     battleOnly : true,
     stackable: true,
-    traits : 0,
     stats: StatSet.new(SPD:-10),
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
+    traits : TRAIT.DEBUFF,
 
     events : {    
       onRemoveEffect ::(from, item, holder) {   
@@ -2255,8 +2172,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(SPD:-10),
     events : {
       onRemoveEffect ::(from, item, holder) {          
@@ -2280,8 +2196,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(SPD:-10),
     events : {    
       onRemoveEffect ::(from, item, holder) {          
@@ -2307,7 +2222,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(SPD:-10),
     events : {    
@@ -2332,8 +2246,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(SPD:-10),
     events : {    
       onRemoveEffect ::(from, item, holder) {          
@@ -2357,8 +2270,7 @@ Effect.newEntry(
     battleOnly : false,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -2405,8 +2317,7 @@ Effect.newEntry(
     battleOnly : false,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -2451,8 +2362,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onRemoveEffect ::(from, item, holder) {
@@ -2491,8 +2401,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -2516,10 +2425,9 @@ Effect.newEntry(
     description: 'The holder is unable to act.',
     battleOnly : true,
     stackable: false,
-    traits : 0,
     stats: StatSet.new(),
     blockPoints : 0,
-    flags : 0,
+    traits : 0,
     events : {
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' realizes ' + from.name + "'s argument was complete junk!")
@@ -2541,12 +2449,11 @@ Effect.newEntry(
     description: 'The holder is not properly balanced. ATK -90%.',
     battleOnly : true,
     stackable: false,
-    traits : 0,
     stats: StatSet.new(
       ATK: -90
     ),
     blockPoints : 0,
-    flags : 0,
+    traits : 0,
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' lost balance!');
@@ -2567,11 +2474,10 @@ Effect.newEntry(
     description: 'All multi-hit attack damage from the holder are nullified.',
     battleOnly : true,
     stackable: false,
-    traits : 0,
     stats: StatSet.new(
     ),
     blockPoints : 0,
-    flags : Effect.FLAGS.DEBUFF,
+    traits : Effect.TRAIT.DEBUFF,
     events : {
       onPreAttackOther ::(from, item, holder, to, damage) {
         if (damage.isMultihit) ::<= {
@@ -2590,11 +2496,10 @@ Effect.newEntry(
     description: 'All multi-hit attack damage targetting the holder are nullified.',
     battleOnly : true,
     stackable: false,
-    traits : 0,
     stats: StatSet.new(
     ),
     blockPoints : 0,
-    flags : Effect.FLAGS.BUFF,
+    traits : Effect.TRAIT.BUFF,
     events : {
       onPreAttacked ::(from, item, holder, attacker, damage) {
         if (damage.isMultihit) ::<= {
@@ -2615,13 +2520,12 @@ Effect.newEntry(
     description: 'The holder is is desparate. HP -50%, DEF -100%. Attacks to others are 2.5 times more damaging.',
     battleOnly : true,
     stackable: false,
-    traits : 0,
     stats: StatSet.new(
       DEF: -100,
       HP: -50
     ),
     blockPoints : 0,
-    flags : 0,
+    traits : 0,
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' became desparate!');
@@ -2646,13 +2550,12 @@ Effect.newEntry(
     description: 'The holder is is magically enlarged. HP +50%, DEF +50%',
     battleOnly : true,
     stackable: false,
-    traits : 0,
     stats: StatSet.new(
       DEF: 50,
       HP: 50
     ),
     blockPoints : 0,
-    flags : 0,
+    traits : 0,
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' became enlarged!');
@@ -2673,9 +2576,8 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    traits : 0,
     stats: StatSet.new(),
-    flags : FLAGS.DEBUFF,
+    traits : TRAIT.DEBUFF,
     events : {
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' broke free from the grapple!')
@@ -2696,8 +2598,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
@@ -2716,7 +2617,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -2736,7 +2636,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -2758,7 +2657,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -2777,8 +2675,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
@@ -2805,8 +2702,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK: 20
     ),
@@ -2823,8 +2719,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(
       DEF: -20
     ),
@@ -2840,8 +2735,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(
       ATK: -20
     ),
@@ -2857,8 +2751,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 20
     ),
@@ -2875,8 +2768,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       
     ),
@@ -2907,8 +2799,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK:35,
       DEF:35,
@@ -2929,8 +2820,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       
     ),
@@ -2959,8 +2849,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       
     ),
@@ -2993,7 +2882,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -3022,8 +2910,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3060,8 +2947,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3084,8 +2970,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -3105,8 +2990,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK:25,
       SPD:25
@@ -3127,8 +3011,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3148,7 +3031,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -3176,8 +3058,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.AILMENT,
-    traits : 0,
+    traits : TRAIT.AILMENT,
     stats: StatSet.new(
       ATK: -20,
       DEF: -20,
@@ -3217,7 +3098,6 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -3245,8 +3125,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3282,8 +3161,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3313,8 +3191,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3342,8 +3219,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 100
     ),
@@ -3369,8 +3245,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -3398,8 +3273,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.AILMENT,
-    traits : 0,
+    traits : TRAIT.AILMENT,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3435,8 +3309,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.AILMENT,
-    traits : 0,
+    traits : TRAIT.AILMENT,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3466,8 +3339,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.AILMENT,
-    traits : 0,
+    traits : TRAIT.AILMENT,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3502,8 +3374,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : FLAGS.AILMENT,
-    traits : 0,
+    traits : TRAIT.AILMENT,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
@@ -3532,8 +3403,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : FLAGS.AILMENT,
-    traits : 0,
+    traits : TRAIT.AILMENT,
     stats: StatSet.new(
       SPD: -100,
       ATK: -100
@@ -3565,8 +3435,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(
       SPD: -100,
       DEF: -100
@@ -3598,8 +3467,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : FLAGS.SPECIAL,
-    traits : 0,
+    traits : TRAIT.SPECIAL,
     stats: StatSet.new(
     ),
     events : {
@@ -3629,8 +3497,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : -3,
-    flags : FLAGS.AILMENT,
-    traits : 0,
+    traits : TRAIT.AILMENT,
     stats: StatSet.new(
       DEF: -50
     ),
@@ -3660,8 +3527,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
 
@@ -3687,11 +3553,10 @@ Effect.newEntry(
     id : 'base:elemental-shield',
     description: 'Completely nullifies fire, ice, and thunder damage types.',
     battleOnly : true,
-    traits : 0,
     stats: StatSet.new(),
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
+    traits : TRAIT.BUFF,
     events : {
 
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3718,8 +3583,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3740,8 +3604,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3762,8 +3625,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3784,8 +3646,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3805,8 +3666,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3826,8 +3686,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -3849,8 +3708,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAddEffect ::(from, holder, item, effectData) {
@@ -3888,8 +3746,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAddEffect ::(from, holder, item, effectData) {
@@ -3930,8 +3787,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAddEffect ::(from, holder, item, effectData) {
@@ -3971,8 +3827,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAddEffect ::(from, holder, item, effectData) {
@@ -4010,8 +3865,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAddEffect ::(from, holder, item, effectData) {
@@ -4050,8 +3904,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAddEffect ::(from, holder, item, effectData) {
@@ -4090,8 +3943,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4119,8 +3971,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4140,8 +3991,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4162,8 +4012,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4191,8 +4040,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4216,8 +4064,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4244,8 +4091,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4268,8 +4114,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4298,8 +4143,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4320,8 +4164,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4348,8 +4191,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4369,8 +4211,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4398,8 +4239,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to) {
@@ -4421,8 +4261,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(
       ATK: -15,
       SPD: -15
@@ -4451,8 +4290,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
 
@@ -4498,8 +4336,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAttackOther ::(from, item, holder, to, damage) {
@@ -4547,8 +4384,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onEffectRemoveForced ::(from, holder, item, effectData) {
@@ -4558,8 +4394,8 @@ Effect.newEntry(
         
         holder.addEffect(
           id: Effect.getRandomFiltered(::(value) <- 
-            (value.traits & Effect.TRAITS.SPECIAL) == 0 &&
-            (value.traits & Effect.TRAITS.BUFF) != 0
+            (value.traits & Effect.TRAIT.SPECIAL) == 0 &&
+            (value.traits & Effect.TRAIT.BUFF) != 0
           ),
           durationTurns: 3,
           from:holder
@@ -4577,8 +4413,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : 0,
+    traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
       onEffectRemoveForced ::(from, holder, item, effectData) {
@@ -4588,10 +4423,10 @@ Effect.newEntry(
         
         holder.addEffect(
           id: Effect.getRandomFiltered(::(value) <- 
-            (value.traits & Effect.TRAITS.SPECIAL) == 0 &&
+            (value.traits & Effect.TRAIT.SPECIAL) == 0 &&
             (
-              (value.traits & Effect.TRAITS.DEBUFF) != 0 ||
-              (value.traits & Effect.TRAITS.AILMENT) != 0
+              (value.traits & Effect.TRAIT.DEBUFF) != 0 ||
+              (value.traits & Effect.TRAIT.AILMENT) != 0
             )
           ),
           durationTurns: 3,
@@ -4611,8 +4446,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -4673,8 +4507,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -4733,8 +4566,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.DEBUFF,
-    traits : TRAITS.ALWAYS_FIRST,
+    traits : TRAIT.DEBUFF | TRAIT.ALWAYS_FIRST,
     stats: StatSet.new(),
     events : {
     }
@@ -4750,8 +4582,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: false,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -4791,8 +4622,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
     events : {
@@ -4850,8 +4680,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -4873,8 +4702,7 @@ Effect.newEntry(
     battleOnly : true,
     stackable: true,
     blockPoints : 0,
-    flags : FLAGS.BUFF,
-    traits : 0,
+    traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -4894,19 +4722,15 @@ Effect.newEntry(
 @:Effect = Database.new(
   name: "Wyvern.Effect",
   statics : {
-    FLAGS : {
-      get ::<- FLAGS
+    TRAIT : {
+      get ::<- TRAIT
     },
     
-    TRAITS : {
-      get ::<- TRAITS
-    },
-    
-    FLAGS_TO_DOMINANT_SYMBOL ::(flag) {
-      when(flag & FLAGS.SPECIAL) '?';
-      when(flag & FLAGS.AILMENT) '!';
-      when(flag & FLAGS.BUFF)    '+';
-      when(flag & FLAGS.DEBUFF)  '-';
+    TRAITS_TO_DOMINANT_SYMBOL ::(flag) {
+      when(flag & TRAIT.SPECIAL) '?';
+      when(flag & TRAIT.AILMENT) '!';
+      when(flag & TRAIT.BUFF)    '+';
+      when(flag & TRAIT.DEBUFF)  '-';
       return '?'
     }
   },
@@ -4916,7 +4740,6 @@ Effect.newEntry(
     description : String,
     battleOnly : Boolean,
     stats : StatSet.type,
-    flags : Number,
     traits : Number,
     blockPoints : Number,
     events : Object,

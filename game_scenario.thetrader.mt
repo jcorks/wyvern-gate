@@ -316,8 +316,10 @@
                     spoils->push(value:
                       Item.new(
                         base:Item.database.getRandomFiltered(
-                          filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                                      && value.tier <= world.island.tier
+                          filter:::(value) <- 
+                            value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                            value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                            && value.tier <= world.island.tier
                         ),
                         rngEnchantHint:true
                       )
@@ -333,8 +335,10 @@
                       spoils->push(value:
                         Item.new(
                           base:Item.database.getRandomFiltered(
-                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                                        && value.tier <= world.island.tier + 1
+                            filter:::(value) <- 
+                              value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                              && value.tier <= world.island.tier + 1
                           ),
                           rngEnchantHint:true, 
                           forceEnchant:true
@@ -403,8 +407,9 @@
                       spoils->push(value:
                         Item.new(
                           base:Item.database.getRandomFiltered(
-                            filter:::(value) <- value.isUnique == false
-                                        && value.tier <= world.island.tier
+                            filter:::(value) <- 
+                              value.hasNoTrait(:Item.TRAIT.UNIQUE)
+                              && value.tier <= world.island.tier
                           ),
                           rngEnchantHint:true
                         )
@@ -425,8 +430,9 @@
           spoils->push(value:
             Item.new(
               base:Item.database.getRandomFiltered(
-                filter:::(value) <- value.isUnique == false
-                          && value.hasQuality
+                filter:::(value) <- 
+                  value.hasTraits(:Item.TRAIT.HAS_QUALITY) &&
+                  value.hasNoTrait(:Item.TRAIT.UNIQUE)         
               ),
               qualityHint : 'base:masterwork',
               rngEnchantHint:true
@@ -447,7 +453,7 @@
           @:current = state.member.getEquipped(slot);
           
           // ignore equipping hand things that arent weapons.
-          when(slot == Entity.EQUIP_SLOTS.HAND_LR && (item.base.attributes & Item.ATTRIBUTE.WEAPON == 0))
+          when(slot == Entity.EQUIP_SLOTS.HAND_LR && (item.base.traits & Item.TRAIT.WEAPON == 0))
             spoilsFiltered->push(value:item);
           
           // simply take
@@ -1789,7 +1795,7 @@
 
               // decide popular items for next day
               if (world.island.tier > 0 && state.days % 3 == 1) ::<= {        
-                @:which = [...Item.database.getAll()]->filter(by::(value) <- value.isUnique == false);
+                @:which = [...Item.database.getAll()]->filter(by::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE));
                 state.popular = [
                   random.removeArrayItem(list:which),
                   random.removeArrayItem(list:which),
@@ -2380,7 +2386,7 @@
                   match(choice) {                    
                     (1): ::<= {
                     
-                      when ((item.base.attributes & Item.ATTRIBUTE.KEY_ITEM) != 0)
+                      when ((item.base.traits & Item.TRAIT.KEY_ITEM) != 0)
                         windowEvent.queueMessage(
                           text:'You feel unable to part with this.'
                         )
@@ -3149,7 +3155,7 @@ return {
     keyhome.name = 'Key: Home';
     
     @:Island = import(module:'game_mutator.island.mt');
-    keyhome.setIslandGenAttributes(
+    keyhome.setIslandGenTraits(
       nameHint:namegen.island(), 
       levelHint:story.levelHint,
       idHint: 'thetrader:starting-island',
@@ -3188,7 +3194,7 @@ return {
       party.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
                       && value.tier <= world.island.tier
           ),
           from:p0, 
@@ -3608,7 +3614,7 @@ return {
             @:key = Item.new(base:Item.database.find(id:'base:wyvern-key'));
             @:namegen = import(module:'game_singleton.namegen.mt');
             @:name = namegen.island();
-            key.setIslandGenAttributes(
+            key.setIslandGenTraits(
               levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->ceil,
               nameHint: name,
               tierHint: world.island.tier + 1,
@@ -3973,7 +3979,7 @@ return {
         @:key = Item.new(base:Item.database.find(id:'base:wyvern-key'));
         @:namegen = import(module:'game_singleton.namegen.mt');
         @:name = namegen.island();
-        key.setIslandGenAttributes(
+        key.setIslandGenTraits(
           levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->ceil,
           nameHint: name,
           tierHint: world.island.tier + 1,
@@ -4095,11 +4101,11 @@ return {
       useEffects : [
       ],
       equipEffects : [],
-      attributes : 
-        Item.ATTRIBUTE.SHARP  |
-        Item.ATTRIBUTE.METAL  |
-        Item.ATTRIBUTE.KEY_ITEM|
-        Item.ATTRIBUTE.UNIQUE
+      traits : 
+        Item.TRAIT.SHARP  |
+        Item.TRAIT.METAL  |
+        Item.TRAIT.KEY_ITEM|
+        Item.TRAIT.UNIQUE
 
       ,
       onCreate ::(item, user, creationHint) {
@@ -4133,10 +4139,10 @@ return {
       ],
 
       equipEffects : [],
-      attributes : 
-        Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.HAS_MATERIAL
+      traits : 
+        Item.TRAIT.SHARP |
+        Item.TRAIT.METAL |
+        Item.TRAIT.HAS_MATERIAL
       ,
       onCreate ::(item, creationHint) {}
 
@@ -4169,10 +4175,10 @@ return {
       ],
 
       equipEffects : [],
-      attributes : 
-        Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.HAS_MATERIAL
+      traits : 
+        Item.TRAIT.SHARP |
+        Item.TRAIT.METAL |
+        Item.TRAIT.HAS_MATERIAL
       ,
       onCreate ::(item, creationHint) {}
 

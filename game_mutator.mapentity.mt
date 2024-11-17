@@ -293,7 +293,13 @@ MapEntity.Task.database.newEntry(
       text: '....Mortal...'
     );
 
-    @:items = fetchAllPartyItems()->filter(by::(value) <- value.base.hasMaterial || value.base.isApparel || value.base.hasQuality);
+    @:items = fetchAllPartyItems()->filter(by::(value) <- 
+      value.base.hasAnyTraits(:
+        Item.TRAIT.METAL |
+        Item.TRAIT.APPAREL |
+        Item.TRAIT.HAS_QUALITY
+      )
+    );
     when (items->size == 0) ::<= {
       windowEvent.queueMessage(
         speaker: '???',

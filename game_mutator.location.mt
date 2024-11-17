@@ -130,7 +130,7 @@ Location.database.newEntry(data:{
       // no weight, as the value scales
       location.inventory.add(item:
         Item.new(
-          base:Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false
+          base:Item.database.getRandomFiltered(filter::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
                   && value.tier <= location.landmark.island.tier
       
           ),
@@ -200,7 +200,7 @@ Location.database.newEntry(data:{
       // no weight, as the value scales
       location.inventory.add(
         item:Item.new(
-          base:Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false
+          base:Item.database.getRandomFiltered(filter::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
                   && value.tier <= location.landmark.island.tier
       
           ),
@@ -348,7 +348,7 @@ Location.database.newEntry(data:{
       location.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false &&
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
                       location.ownedBy.level >= value.levelMinimum
                       && value.tier <= location.landmark.island.tier
           ),
@@ -605,9 +605,9 @@ Location.database.newEntry(data:{
         item:Item.new(
           base: Item.database.getRandomFiltered(
             filter::(value) <- (
-              value.isUnique == false && 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
               location.ownedBy.level >= value.levelMinimum &&
-              value.attributes & Item.ATTRIBUTE.METAL
+              value.traits & Item.TRAIT.METAL
             )
           )
         )
@@ -1103,8 +1103,10 @@ Location.database.newEntry(data:{
     location.inventory.add(item:
       Item.new(
         base:Item.database.getRandomFiltered(
-          filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                      && value.tier <= location.landmark.island.tier
+          filter:::(value) <- 
+            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+            value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
+            value.tier <= location.landmark.island.tier
         ),
         rngEnchantHint:true, 
         forceEnchant:true
@@ -1195,8 +1197,10 @@ Location.database.newEntry(data:{
       location.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                        && value.tier <= location.landmark.island.tier + 1
+            filter:::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
+              && value.tier <= location.landmark.island.tier + 1
           ),
           rngEnchantHint:true, 
           forceEnchant:true
@@ -1468,7 +1472,7 @@ Location.database.newEntry(data:{
       location.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isApparel == true
+            filter:::(value) <- value.hasTraits(:TRAIT.APPAREL)
           ),
           apparelHint: 'base:wool-plus',
           rngEnchantHint:true
@@ -1649,7 +1653,7 @@ Location.database.newEntry(data:{
       location.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.hasQuality == true
+            filter:::(value) <- value.hasTraits(:Item.TRAIT.HAS_QUALITY)
           ),
           qualityHint: random.pickArrayItem(list:qualities),
           rngEnchantHint:true
@@ -1721,7 +1725,7 @@ Location.database.newEntry(data:{
       location.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) 
                       && value.tier <= location.landmark.island.tier
           ),
           rngEnchantHint:true
@@ -1732,8 +1736,9 @@ Location.database.newEntry(data:{
     location.inventory.add(item:
       Item.new(
         base:Item.database.getRandomFiltered(
-          filter:::(value) <- value.isUnique == false
-                    && value.hasQuality
+          filter:::(value) <- 
+            base.hasNoTrait(:TRAIT.UNIQUE) &&
+            base.hasTraits(:TRAIT.HAS_QUALITY)          
         ),
         qualityHint : 'base:masterwork',
         rngEnchantHint:true

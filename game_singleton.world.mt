@@ -821,7 +821,7 @@
         return save;        
       },
 
-      loadIslandID ::(id, islandGenAttributes, skipSave) {
+      loadIslandID ::(id, islandGenTraits, skipSave) {
         // first load existing save. The save has all the current islands 
         @:instance = import(:'game_singleton.instance.mt');
 
@@ -842,7 +842,7 @@
         @alreadyLoaded;
         if (which == empty) ::<= {
           @:newIsland = Island.new(
-            *{worldID : id, ...(if (islandGenAttributes) islandGenAttributes else {})}
+            *{worldID : id, ...(if (islandGenTraits) islandGenTraits else {})}
           );
 
           alreadyLoaded = newIsland;
@@ -887,7 +887,7 @@
           key.islandID = this.getNextID();
         }
 
-        this.loadIslandID(id:key.islandID, islandGenAttributes:key.islandGenAttributes);
+        this.loadIslandID(id:key.islandID, islandGenTraits:key.islandGenTraits);
       },
      
       

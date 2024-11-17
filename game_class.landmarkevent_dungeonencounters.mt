@@ -67,7 +67,9 @@
 
           ref.inventory.clear();
           @:itembase = Item.database.getRandomWeightedFiltered(
-            filter:::(value) <- value.isUnique == false && value.tier <= island_.tier          
+            filter:::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.tier <= island_.tier          
           );
           if (itembase.id != 'base:none') ::<={
             @:itemInstance = Item.new(base:itembase, rngEnchantHint:true);

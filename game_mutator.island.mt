@@ -388,8 +388,8 @@ Island.database.newEntry(
           // add a weapon
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
-              value.isUnique == false &&
-              value.attributes & Item.ATTRIBUTE.WEAPON
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.traits & Item.TRAIT.WEAPON
           );
             
           entity.equip(
@@ -424,8 +424,8 @@ Island.database.newEntry(
           // add a weapon
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
-              value.isUnique == false &&
-              value.attributes & Item.ATTRIBUTE.WEAPON
+              value.hasNoTrait(:Item.TRAIT.UNIQUE)&&
+              value.traits & Item.TRAIT.WEAPON
           );
             
           entity.equip(
@@ -457,8 +457,8 @@ Island.database.newEntry(
           // add a weapon
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
-              value.isUnique == false &&
-              value.attributes & Item.ATTRIBUTE.WEAPON
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.traits & Item.TRAIT.WEAPON
           );
             
           entity.equip(
@@ -474,7 +474,7 @@ Island.database.newEntry(
           // add some armor!
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
-              value.isUnique == false &&
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
               value.equipType == Item.TYPE.ARMOR
           );;
             

@@ -220,9 +220,8 @@
           @item = Item.new(
             base: Item.database.getRandomFiltered(
               filter::(value) <- (
-                value.isUnique == false &&
-                value.hasMaterial == true &&
-                value.hasQuality == true
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                value.hasTraits(:Item.TRAIT.METAL | Item.TRAIT.HAS_QUALITY)
               )
             ),
             rngEnchantHint:true,     
@@ -647,7 +646,7 @@
           foreach(ally.effectStack.getAll()) ::(k, v) {
             @:eff = Effect.find(:v.id);
             
-            categories[Effect.FLAGS_TO_DOMINANT_SYMBOL(:eff.flags)] += 1;
+            categories[Effect.TRAIT_TO_DOMINANT_SYMBOL(:eff.flags)] += 1;
           }
           
           // to preserve order

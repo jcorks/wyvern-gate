@@ -861,7 +861,7 @@ ItemEnchant.database.newEntry(
   data : {
     name : 'Minor Aura',
     id : 'base:minor-aura',
-    description : 'Enchanted with a simple aura that boosts all attributes slightly.',
+    description : 'Enchanted with a simple aura that boosts all traits slightly.',
     equipMod : StatSet.new(
       HP : 10,
       AP : 10,

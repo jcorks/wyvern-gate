@@ -36,7 +36,7 @@ return {
     /// No state items are initialized, but this can be done 
     /// manually in the defineMutator startup function.
     /// By default, the state will always provide the "base"
-    /// attribute, which refers to the DatabaseItem that this 
+    /// trait, which refers to the DatabaseItem that this 
     /// Mutator is based on.
     items => Object,
     
@@ -90,7 +90,7 @@ return {
     /// No state items are initialized, but this can be done 
     /// manually in the defineMutator startup function.
     /// By default, the state will always provide the "base"
-    /// attribute, which refers to the DatabaseItem that this 
+    /// trait, which refers to the DatabaseItem that this 
     /// Mutator is based on.
     items => Object,
     

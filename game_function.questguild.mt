@@ -224,12 +224,15 @@
       // no weight, as the value scales
       @:item = Item.new(
         base:Item.database.getRandomFiltered(
-          filter:::(value) <- value.isUnique == false 
+          filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
                     && value.tier <= location.landmark.island.tier &&
-                    value.hasQuality && value.hasMaterial &&
+                    value.hasTraits(
+                      Item.TRAIT.HAS_QUALITY |
+                      Item.TRAIT.METAL
+                    ) &&
                     (
-                      ((value.attributes & Item.ATTRIBUTE.WEAPON) != 0) ||
-                      ((value.attributes & Item.ATTRIBUTE.SHIELD) != 0) ||
+                      ((value.traits & Item.TRAIT.WEAPON) != 0) ||
+                      ((value.traits & Item.TRAIT.SHIELD) != 0) ||
                       (value.equipType == Item.TYPE.ARMOR)
                     )
                       

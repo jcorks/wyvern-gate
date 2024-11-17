@@ -295,7 +295,7 @@ return {
 
 
     
-    keyhome.setIslandGenAttributes(
+    keyhome.setIslandGenTraits(
       nameHint:namegen.island(), 
       levelHint:story.levelHint,
       idHint: 'base:starting-island',
@@ -323,7 +323,7 @@ return {
         base: Item.database.find(id:'base:wyvern-key')
       );
       @:name = namegen.island();
-      key.setIslandGenAttributes(
+      key.setIslandGenTraits(
         nameHint:name, 
         levelHint:story.levelHint,
         extraLandmarks : [
@@ -395,16 +395,6 @@ return {
       
 
       party.inventory.maxItems = 50
-      for(0, 20) ::(i) {
-        party.inventory.add(
-          item:Item.new(
-            base:Item.database.getRandomFiltered(
-                filter:::(value) <- value.isUnique == false && value.hasQuality
-            ),
-            rngEnchantHint:true
-          )
-        )
-      };
       */
       
       
@@ -2734,11 +2724,11 @@ return {
         'thechosen:sentimental-box',
       ],
       equipEffects : [],
-      attributes : 
-        Item.ATTRIBUTE.SHARP  |
-        Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.UNIQUE |
-        Item.ATTRIBUTE.UNIQUE
+      traits : 
+        Item.TRAIT.SHARP  |
+        Item.TRAIT.METAL |
+        Item.TRAIT.UNIQUE |
+        Item.TRAIT.UNIQUE
       ,
       onCreate ::(item, user, creationHint) {   
 
@@ -2778,11 +2768,11 @@ return {
       equipEffects : [
         "base:burning"
       ],
-      attributes : 
-        Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.KEY_ITEM |
-        Item.ATTRIBUTE.UNIQUE
+      traits : 
+        Item.TRAIT.SHARP |
+        Item.TRAIT.METAL |
+        Item.TRAIT.KEY_ITEM |
+        Item.TRAIT.UNIQUE
       ,
       onCreate ::(item, user, creationHint) {   
       
@@ -2793,7 +2783,7 @@ return {
           island : empty
         }
         breakpoint();
-        item.setIslandGenAttributes(
+        item.setIslandGenTraits(
           levelHint:  story.levelHint,
           nameHint:   'Island of Fire',
           tierHint : 0,
@@ -2835,11 +2825,11 @@ return {
       equipEffects : [
         "base:icy"
       ],
-      attributes : 
-        Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.KEY_ITEM |
-        Item.ATTRIBUTE.UNIQUE
+      traits : 
+        Item.TRAIT.SHARP |
+        Item.TRAIT.METAL |
+        Item.TRAIT.KEY_ITEM |
+        Item.TRAIT.UNIQUE
       ,
       onCreate ::(item, user, creationHint) {   
       
@@ -2850,7 +2840,7 @@ return {
           island : empty
         }
 
-        item.setIslandGenAttributes(
+        item.setIslandGenTraits(
           levelHint:  story.levelHint+1,
           nameHint:   'Island of Ice',
           tierHint : 1,
@@ -2891,11 +2881,11 @@ return {
       equipEffects : [
         "base:shock"
       ],
-      attributes : 
-        Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.KEY_ITEM |
-        Item.ATTRIBUTE.UNIQUE
+      traits : 
+        Item.TRAIT.SHARP |
+        Item.TRAIT.METAL |
+        Item.TRAIT.KEY_ITEM |
+        Item.TRAIT.UNIQUE
 
 
       ,
@@ -2908,7 +2898,7 @@ return {
           island : empty
         }
 
-        item.setIslandGenAttributes(
+        item.setIslandGenTraits(
           levelHint:  story.levelHint+2,
           nameHint:   'Island of Thunder',
           tierHint : 2,
@@ -2949,11 +2939,11 @@ return {
       equipEffects : [
         "base:shimmering"
       ],
-      attributes : 
-        Item.ATTRIBUTE.SHARP |
-        Item.ATTRIBUTE.METAL |
-        Item.ATTRIBUTE.KEY_ITEM|
-        Item.ATTRIBUTE.UNIQUE
+      traits : 
+        Item.TRAIT.SHARP |
+        Item.TRAIT.METAL |
+        Item.TRAIT.KEY_ITEM|
+        Item.TRAIT.UNIQUE
 
       ,
       onCreate ::(item, user, creationHint) {   
@@ -2965,7 +2955,7 @@ return {
           island : empty
         }
 
-        item.setIslandGenAttributes(
+        item.setIslandGenTraits(
           levelHint:  story.levelHint+3,
           nameHint:   'Island of Light',
           tierHint : 3,
@@ -3284,7 +3274,9 @@ return {
                         windowEvent.queueMessage(speaker:'Kaedjaal', text:'Excellent. Let me, in exchange, give you this.');   
                         @:item = Item.new(
                           base:Item.database.getRandomFiltered(
-                            filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial
+                            filter:::(value) <- 
+                                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS | Item.TRAIT.METAL)
                           ),
                           rngEnchantHint:true, 
                           colorHint:'base:red', 
@@ -3527,7 +3519,9 @@ return {
                           
                           @:prize = Item.new(
                             base: Item.database.getRandomFiltered(
-                              filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.hasMaterial && value.attributes & Item.ATTRIBUTE.WEAPON
+                              filter:::(value) <- 
+                                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS | Item.TRAIT.METAL | Item.TRAIT.WEAPON)
                             ),
                             rngEnchantHint:true, 
                             colorHint:'base:blue', 
@@ -3873,7 +3867,7 @@ return {
                         );                
                       }
 
-                      when (item.base.hasQuality == false) ::<= {
+                      when (item.base.hasTraits(:Item.TRAIT.HAS_QUALITY)) ::<= {
                         windowEvent.queueMessage(speaker:'Juhriikaal', text:'Chosen I am sorry, this item cannot have its quality improved.');                
                       }
                       
@@ -3889,7 +3883,9 @@ return {
                         topWeight: 0.5,
                         leftWeight: 0.5,
                         prompt:'Choose an item to sacrifice:',
-                        filter ::(item) <- item.base.hasQuality && item.quality == enhanced.quality && item != enhanced,
+                        filter ::(item) <- 
+                          item.base.hasTraits(:Item.TRAIT.HAS_QUALITY) && 
+                          item.quality == enhanced.quality && item != enhanced,
                         onPick ::(item) {
                           when (item == empty) ::<= {
                             windowEvent.queueMessage(speaker:'Juhriikaal', text:'Oh... It looks like you have no item elligible as a catalyst for this item. I am sorry. Remember: catalysts need to be the same quality as the item to enhance.');                
@@ -3902,7 +3898,7 @@ return {
                           }
 
 
-                          when (catalyst.base.hasQuality == false) ::<= {   
+                          when (catalyst.base.hasTraits(:Item.TRAIT.HAS_QUALITY) == false) ::<= {   
                             windowEvent.queueMessage(speaker:'Juhriikaal', text:'Chosen I am sorry, this item cannot be used as a catalyst for the spell.');                
                           }
                           

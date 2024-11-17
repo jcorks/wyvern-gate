@@ -487,7 +487,7 @@ Species.newEntry(data:{
 })
 
 Species.newEntry(data:{
-  name : 'Possum',
+  name : 'Opossum',
   id : 'base:possum',
   rarity : 40,
   description: 'A marsupial race of medium stature.',

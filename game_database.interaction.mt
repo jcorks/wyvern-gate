@@ -516,11 +516,13 @@ Interaction.newEntry(
                           for(0, 50)::(i) {
                             @newItem = Item.new(
                               base: Item.database.getRandomFiltered(
-                                filter::(value) <- (
-                                  value.isUnique == false &&
-                                  value.hasMaterial == true &&
-                                  value.hasQuality == true
-                                )
+                                filter::(value) <- value.hasTraits(:
+                                    Item.TRAIT.UNIQUE |
+                                    Item.HAS_QUALITY
+                                ) && value.hasAnyTraits(:
+                                    Item.TRAIT.METAL |
+                                    Item.TRAIT.APPAREL
+                                ) 
                               ),
                               rngEnchantHint:true,     
                               qualityHint : random.pickArrayItem(list:itemQualities),
@@ -742,7 +744,7 @@ Interaction.newEntry(
       party.inventory.remove(item:ores[0]);
       party.inventory.remove(item:ores[1]);
       
-      @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.attributes & Item.ATTRIBUTE.RAW_METAL));            
+      @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.traits & Item.TRAIT.RAW_METAL));            
       windowEvent.queueMessage(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
       party.inventory.add(item:metal);          
         
@@ -807,7 +809,7 @@ Interaction.newEntry(
           when(item == empty) empty;
 
 
-          when ((item.base.attributes & Item.ATTRIBUTE.KEY_ITEM) != 0)
+          when ((item.base.traits & Item.TRAIT.KEY_ITEM) != 0)
             windowEvent.queueMessage(
               text:'You feel unable to give this away.'
             )
@@ -1091,7 +1093,7 @@ Interaction.newEntry(
     
       @:Entity = import(module:'game_class.entity.mt');
 
-      @:items = party.inventory.items->filter(by:::(value) <- value.base.attributes & Item.ATTRIBUTE.RAW_METAL);
+      @:items = party.inventory.items->filter(by:::(value) <- value.base.traits & Item.TRAIT.RAW_METAL);
       when(items->keycount == 0)
         windowEvent.queueMessage(text:'No suitable ingots or materials were found in the party inventory.');
 
@@ -1722,10 +1724,9 @@ Interaction.newEntry(
       @:getAWeapon = ::(from)<-
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- (
-              value.isUnique == false &&
-              value.attributes & Item.ATTRIBUTE.WEAPON
-            )
+            filter:::(value) <- value.hasTraits(
+              :Item.TRAIT.WEAPON 
+            ) && value.hasNoTrait(:Item.TRAIT.UNIQUE)
           )
         )          
       ;
@@ -2112,7 +2113,12 @@ Interaction.newEntry(
             
             @:item = Item.new(
               base:Item.database.getRandomFiltered(
-                filter:::(value) <- value.isUnique == false && value.canHaveEnchants && value.tier <= world.island.tier+2
+                filter:::(value) <- 
+                  value.hasTraits(:
+                    Item.TRAIT.CAN_HAVE_ENCHANTMENTS
+                  ) && value.hasNoTrait(:
+                    Item.TRAIT.UNIQUE
+                  ) && value.tier <= world.island.tier+2
               ),
               rngEnchantHint:true
             );
@@ -2359,7 +2365,7 @@ Interaction.newEntry(
             topWeight : 0.5,
             leftWeight : 0.5,
             filter::(item) <-
-              item.base.canHaveEnchants &&
+              item.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) && 
               item.enchantsCount < item.base.enchantLimit
             ,
             onPick::(item) {
@@ -2553,7 +2559,7 @@ Interaction.newEntry(
         
         windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
         item = Item.database.getRandomFiltered(filter:::(value) <- 
-          value.attributes & Item.ATTRIBUTE.WEAPON &&
+          value.traits & Item.TRAIT.WEAPON &&
           !value.isUnique
         );
         },
@@ -2568,7 +2574,7 @@ Interaction.newEntry(
         
         windowEvent.queueMessage(speaker: 'Sylvia', text: '"Here! Thanks again."');
         item = Item.database.getRandomFiltered(filter:::(value) <- 
-          (value.attributes & Item.ATTRIBUTE.WEAPON ||
+          (value.traits & Item.TRAIT.WEAPON ||
            value.equipType == Item.TYPE.RING ||
            value.equipType == Item.TYPE.TRINKET) &&
           value.isUnique

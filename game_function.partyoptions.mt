@@ -403,7 +403,7 @@ return ::{
                               item.describe();
 
                             when(choice == 3) ::<= {
-                              when (!item.base.canHaveEnchants)
+                              when (!item.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
                                 windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
                             
                             
@@ -473,7 +473,7 @@ return ::{
                         },
                         // Rename 
                         (4):::<= {
-                          when (!member.getEquipped(slot).base.canHaveEnchants)
+                          when (!member.getEquipped(slot).base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
                             windowEvent.queueMessage(text:member.getEquipped(slot).name + ' cannot be renamed.');
                           @:name = import(module:"game_function.name.mt");
                           name(

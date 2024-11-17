@@ -59,7 +59,7 @@ Quest.database.newEntry(
       quest.name = issuer.name + '\'s Item';
       quest.data.item = Item.new(
         base:Item.database.getRandomFiltered(
-          filter:::(value) <- value.isUnique == false
+          filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
         ),
         rngEnchantHint:true, 
         forceEnchant:true
@@ -317,8 +317,8 @@ Quest.database.newEntry(
           // add a weapon
           @:wep = Item.database.getRandomFiltered(
             filter:::(value) <-
-              value.isUnique == false &&
-              value.attributes & Item.ATTRIBUTE.WEAPON
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.traits & Item.TRAIT.WEAPON
           );
             
           ent.equip(
@@ -398,7 +398,9 @@ Quest.database.newEntry(
       state.rewardItems = [
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+            filter:::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
           ),
           rngEnchantHint:true, 
           forceEnchant:true
@@ -412,8 +414,10 @@ Quest.database.newEntry(
         state.rewardItems = [
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                          && value.tier <= 1
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                && value.tier <= 1
             ),
             rngEnchantHint:true, 
             forceEnchant:true
@@ -428,8 +432,10 @@ Quest.database.newEntry(
         state.rewardItems = [
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                          && value.tier <= 1
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                && value.tier <= 1
             ),
             rngEnchantHint:true, 
             forceEnchant:true
@@ -441,8 +447,10 @@ Quest.database.newEntry(
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                          && value.tier <= 2
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                && value.tier <= 2
             ),
             rngEnchantHint:true, 
             forceEnchant:true
@@ -458,7 +466,10 @@ Quest.database.newEntry(
         state.rewardItems = [
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+              
                           && value.tier <= 2
             ),
             rngEnchantHint:true, 
@@ -471,7 +482,9 @@ Quest.database.newEntry(
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
                           && value.tier <= 3
             ),
             rngEnchantHint:true, 
@@ -487,7 +500,9 @@ Quest.database.newEntry(
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
                           && value.tier <= 4
             ),
             rngEnchantHint:true, 
@@ -503,7 +518,9 @@ Quest.database.newEntry(
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
                           && value.tier <= 4
             ),
             rngEnchantHint:true, 
@@ -515,7 +532,7 @@ Quest.database.newEntry(
       state.rewardItems->push(:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false && value.equipType == Item.TYPE.RING
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) && value.equipType == Item.TYPE.RING
           ),
           rngEnchantHint:true, 
           forceEnchant:true
@@ -529,8 +546,10 @@ Quest.database.newEntry(
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                          && value.tier > 2
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                && value.tier > 2
             ),
             rngEnchantHint:true, 
             forceEnchant:true
@@ -541,7 +560,7 @@ Quest.database.newEntry(
       state.rewardItems->push(:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false && value.equipType == Item.TYPE.TRINKET
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) && value.equipType == Item.TYPE.TRINKET
           ),
           rngEnchantHint:true, 
           forceEnchant:true
@@ -555,8 +574,10 @@ Quest.database.newEntry(
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                          && value.tier >= 3
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                && value.tier >= 3
             ),
             rngEnchantHint:true, 
             forceEnchant:true
@@ -567,7 +588,7 @@ Quest.database.newEntry(
       state.rewardItems->push(:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false &&
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
               value.tier > 1
           ),
           qualityHint : 'base:masterwork',
@@ -585,8 +606,10 @@ Quest.database.newEntry(
         state.rewardItems->push(:
           Item.new(
             base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                          && value.tier >= 3
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                && value.tier >= 3
             ),
             qualityHint : 'base:masterwork',
             rngEnchantHint:true, 
@@ -598,7 +621,7 @@ Quest.database.newEntry(
       state.rewardItems->push(:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false &&
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
               value.equipType == Item.TYPE.RING
           ),
           qualityHint : 'base:masterwork',
@@ -611,7 +634,7 @@ Quest.database.newEntry(
       state.rewardItems->push(:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.isUnique == false &&
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
               value.equipType == Item.TYPE.TRINKET
           ),
           qualityHint : 'base:divine',

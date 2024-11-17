@@ -21,6 +21,11 @@
 @:LOOKUP = {};
 @:ItemType = Object.newType(name:'Wyvern.Database.Item');
 
+@:hasTraits::(items)   <- (_.traits & items) == items
+@:hasAnyTrait::(items) <- (_.traits & items) != 0
+@:hasNoTrait::(items)  <- (_.traits & items) == 0
+
+
 @:Database = class(
   name : 'Wyvern.Database',
   statics : {
@@ -89,6 +94,9 @@
             item[key] = {get::<-val}
         }             
         item.databaseName = databaseNameGetter;
+        item.hasTraits = hasTraits;
+        item.hasAnyTrait = hasAnyTrait;
+        item.hasNoTrait = hasNoTrait;
         item->setIsInterface(enabled:true);
         
         items_[item.id] = item;

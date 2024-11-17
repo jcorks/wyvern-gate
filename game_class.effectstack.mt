@@ -534,10 +534,10 @@
         @:listTraits ::(flags) {
           @:out = [];
           
-          if (flags & Effect.FLAGS.SPECIAL) out->push(:'Special');
-          if (flags & Effect.FLAGS.AILMENT) out->push(:'Status Ailment');
-          if (flags & Effect.FLAGS.BUFF)    out->push(:'Buff');
-          if (flags & Effect.FLAGS.DEBUFF)  out->push(:'Debuff');
+          if (flags & Effect.TRAIT.SPECIAL) out->push(:'Special');
+          if (flags & Effect.TRAIT.AILMENT) out->push(:'Status Ailment');
+          if (flags & Effect.TRAIT.BUFF)    out->push(:'Buff');
+          if (flags & Effect.TRAIT.DEBUFF)  out->push(:'Debuff');
           
           when(out->size == 0)
             'None'
@@ -559,7 +559,7 @@
         
         @:items = this.getAll()->map(to::(value) { 
           @:effect = Effect.find(:value.id);
-          @:symbol = Effect.FLAGS_TO_DOMINANT_SYMBOL(:effect.flags);
+          @:symbol = Effect.TRAIT_TO_DOMINANT_SYMBOL(:effect.flags);
           return [
             limit(:'(' + symbol + ') ' + effect.name),
             [

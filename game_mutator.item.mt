@@ -52,7 +52,7 @@
   TWOHANDED  : 5
 }
   
-@:ATTRIBUTE = {
+@:TRAIT = {
   BLUNT         : 2 << 0,
   SHARP         : 2 << 1,
   FLAT          : 2 << 2,
@@ -64,26 +64,14 @@
   KEY_ITEM      : 2 << 8,
   STACKABLE     : 2 << 9,
   HAS_QUALITY   : 2 << 10,
-  HAS_MATERIAL  : 2 << 11,
-  APPAREL       : 2 << 12,
-  CAN_HAVE_ENCHANTMENTS : 2 << 13, 
-  CAN_HAVE_TRIGGER_ENCHANTMENTS : 2 << 14, 
-  HAS_COLOR     : 2 << 15,
-  HAS_SIZE      : 2 << 16,
-  UNIQUE        : 2 << 17
+  APPAREL       : 2 << 11,
+  CAN_HAVE_ENCHANTMENTS : 2 << 12, 
+  CAN_HAVE_TRIGGER_ENCHANTMENTS : 2 << 13, 
+  HAS_COLOR     : 2 << 14,
+  HAS_SIZE      : 2 << 15,
+  UNIQUE        : 2 << 16
 }
 
-/*
-    canHaveEnchants : false,
-    canHaveTriggerEnchants : false,
-    hasQuality : false,
-    hasMaterial : false,
-    isApparel : false,
-    canBeColored : false,
-    hasSize : false,
-    isUnique -> ATTRIBUTES.RARE
-    keyItem -> ATTRIBUTES.KEY_ITEM
-*/
 
 @:USE_TARGET_HINT = {
   ONE   : 0,  
@@ -135,10 +123,10 @@ Item.database.newEntry(
     useTargetHint : USE_TARGET_HINT.ONE,
     useEffects : [],
     equipEffects : [],
-    attributes : 
-      ATTRIBUTE.UNIQUE,
-      ATTRIBUTE.KEY_ITEM,
-      ATTRIBUTE.STACKABLE
+    traits : 
+      TRAIT.UNIQUE,
+      TRAIT.KEY_ITEM,
+      TRAIT.STACKABLE
     blockPoints : 0,
     onCreate ::(item, creationHint) {},
     possibleArts : [],
@@ -173,12 +161,12 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [
   ],
-  attributes : 
-    ATTRIBUTE.FRAGILE |
-    ATTRIBUTE.APPAREL |
-    ATTRIBUTE.UNIQUE |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS
+  traits : 
+    TRAIT.FRAGILE |
+    TRAIT.APPAREL |
+    TRAIT.UNIQUE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS
 })
 
 Item.database.newEntry(data : {
@@ -209,14 +197,14 @@ Item.database.newEntry(data : {
   equipEffects : [
     'base:auto-life',
   ],
-  attributes : 
-    ATTRIBUTE.FRAGILE  
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_COLOR |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.UNIQUE
+  traits : 
+    TRAIT.FRAGILE |
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_COLOR |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.UNIQUE
 
 })
 
@@ -246,9 +234,9 @@ Item.database.newEntry(data : {
   possibleArts : [],
   equipEffects : [
   ],
-  attributes : 
-    ATTRIBUTE.FRAGILE |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.FRAGILE |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -264,7 +252,6 @@ Item.database.newEntry(data : {
   equipType: TYPE.HAND,
   weight : 2,
   rarity : 100,
-  canBeColored : false,
   tier: 0,
   basePrice: 100,
   levelMinimum : 1,
@@ -283,9 +270,9 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [
   ],
-  attributes : 
-    ATTRIBUTE.FRAGILE |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.FRAGILE |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -317,9 +304,9 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [
   ],
-  attributes : 
-    ATTRIBUTE.FRAGILE |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.FRAGILE |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -351,9 +338,9 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [
   ],
-  attributes : 
-    ATTRIBUTE.FRAGILE |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.FRAGILE |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 })  
@@ -384,9 +371,9 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [
   ],
-  attributes : 
-    ATTRIBUTE.FRAGILE |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.FRAGILE |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -427,8 +414,8 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [
   ],
-  attributes : 
-    ATTRIBUTE.FRAGILE
+  traits : 
+    TRAIT.FRAGILE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -450,7 +437,6 @@ Item.database.newEntry(data : {
   tier: 0,
   levelMinimum : 1,
   enchantLimit : 0,
-  hasQuality : false,
   possibleArts : [],
   useTargetHint : USE_TARGET_HINT.ONE,
   blockPoints : 0,
@@ -464,9 +450,9 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [
   ],
-  attributes : 
-    ATTRIBUTE.FRAGILE |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.FRAGILE |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -504,12 +490,11 @@ Item.database.newEntry(data : {
     'base:non-combat-weapon' // high chance to deflect, but when it deflects, the weapon breaks
     
   ],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.HAS_SIZE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -548,12 +533,11 @@ Item.database.newEntry(data : {
   possibleArts : [
     'base:stun'
   ],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.HAS_SIZE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -594,12 +578,11 @@ Item.database.newEntry(data : {
   ],
 
 
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -638,12 +621,11 @@ Item.database.newEntry(data : {
     'base:stab'
   ],
 
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.HAS_SIZE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -680,15 +662,14 @@ Item.database.newEntry(data : {
   ],
 
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
   ,
   onCreate ::(item, creationHint) {}
@@ -727,16 +708,15 @@ Item.database.newEntry(data : {
   ],
 
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
 
   ,
@@ -775,16 +755,15 @@ Item.database.newEntry(data : {
   ],
 
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
 
   ,
@@ -825,17 +804,16 @@ Item.database.newEntry(data : {
   ],
 
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP  |
-    ATTRIBUTE.METAL  |
-    ATTRIBUTE.SHIELD |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP  |
+    TRAIT.METAL  |
+    TRAIT.SHIELD |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
     
   ,
@@ -876,17 +854,16 @@ Item.database.newEntry(data : {
   ],
 
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT  |
-    ATTRIBUTE.METAL  |
-    ATTRIBUTE.SHIELD |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT  |
+    TRAIT.METAL  |
+    TRAIT.SHIELD |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
     
   ,
@@ -925,16 +902,15 @@ Item.database.newEntry(data : {
     'base:fling',
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
 
   ,
@@ -973,16 +949,15 @@ Item.database.newEntry(data : {
     'base:fling',
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
 
   ,
@@ -1022,16 +997,15 @@ Item.database.newEntry(data : {
     'base:fling',
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
 
   ,
@@ -1071,16 +1045,15 @@ Item.database.newEntry(data : {
     'base:fling',
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
 
   ,
@@ -1120,16 +1093,15 @@ Item.database.newEntry(data : {
     'base:fling',
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1145,7 +1117,6 @@ Item.database.newEntry(data : {
   rarity : 300,
   weight : 4,
   basePrice: 120,
-  hasSize : true,
   tier: 2,
   levelMinimum : 1,
   enchantLimit : 10,
@@ -1169,15 +1140,14 @@ Item.database.newEntry(data : {
     'base:fling',
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1216,14 +1186,14 @@ Item.database.newEntry(data : {
     'base:break-item'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1261,14 +1231,14 @@ Item.database.newEntry(data : {
     'base:break-item'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.WEAPON |
+    TRAIT.METAL |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1306,15 +1276,14 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1350,15 +1319,14 @@ Item.database.newEntry(data : {
     'base:triplestrike'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1393,12 +1361,11 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.HAS_SIZE |
+    TRAIT.HAS_COLOR
 
 
   ,
@@ -1438,15 +1405,14 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1483,15 +1449,14 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1528,15 +1493,14 @@ Item.database.newEntry(data : {
     'base:fling',
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1553,7 +1517,6 @@ Item.database.newEntry(data : {
   weight : 8,
   basePrice: 40,
   levelMinimum : 1,
-  hasSize : true,
   tier: 1,
   enchantLimit : 10,
   useTargetHint : USE_TARGET_HINT.ONE,
@@ -1574,15 +1537,14 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1628,15 +1590,14 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR    
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1679,15 +1640,14 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1726,15 +1686,14 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1772,15 +1731,14 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.WEAPON |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
   
@@ -1810,11 +1768,11 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.APPAREL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR  
+  traits : 
+    TRAIT.APPAREL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.HAS_COLOR  
   
   ,
   onCreate ::(item, creationHint) {}
@@ -1846,11 +1804,11 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.APPAREL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR  
+  traits : 
+    TRAIT.APPAREL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.HAS_COLOR  
   ,
   onCreate ::(item, creationHint) {}
   
@@ -1879,11 +1837,11 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.APPAREL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR  
+  traits : 
+    TRAIT.APPAREL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.HAS_COLOR  
   
   ,
   onCreate ::(item, creationHint) {}
@@ -1914,11 +1872,11 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.APPAREL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR    
+  traits : 
+    TRAIT.APPAREL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.HAS_COLOR    
   ,
   onCreate ::(item, creationHint) {}
   
@@ -1949,14 +1907,13 @@ Item.database.newEntry(data : {
   possibleArts : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_SIZE |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR  
+  traits : 
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR  
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1985,11 +1942,11 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.APPAREL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR    
+  traits : 
+    TRAIT.APPAREL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.HAS_COLOR    
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2020,11 +1977,11 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.APPAREL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR    
+  traits : 
+    TRAIT.APPAREL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.HAS_COLOR    
   
   ,
   onCreate ::(item, creationHint) {}
@@ -2054,11 +2011,11 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.APPAREL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR    
+  traits : 
+    TRAIT.APPAREL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.HAS_COLOR    
   
   ,
   onCreate ::(item, creationHint) {}
@@ -2089,11 +2046,10 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_COLOR      
+  traits : 
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_COLOR      
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2124,11 +2080,11 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.APPAREL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR    
+  traits : 
+    TRAIT.APPAREL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.HAS_COLOR    
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2159,12 +2115,11 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2195,14 +2150,13 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2233,14 +2187,13 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.BLUNT |
-    ATTRIBUTE.METAL |
-    ATTRIBUTE.HAS_MATERIAL |
-    ATTRIBUTE.HAS_QUALITY |
-    ATTRIBUTE.CAN_HAVE_ENCHANTMENTS |
-    ATTRIBUTE.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    ATTRIBUTE.HAS_COLOR
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.HAS_QUALITY |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2281,9 +2234,9 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.METAL
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2319,10 +2272,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.RAW_METAL |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:copper';
@@ -2358,10 +2311,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.RAW_METAL |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:iron';
@@ -2395,10 +2348,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.RAW_METAL |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:steel';
@@ -2434,10 +2387,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.RAW_METAL |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:mythril';
@@ -2471,10 +2424,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.RAW_METAL |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:quicksilver';
@@ -2508,10 +2461,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.RAW_METAL |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:adamantine';
@@ -2546,10 +2499,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.RAW_METAL |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:sunstone';
@@ -2583,10 +2536,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.RAW_METAL |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:moonstone';
@@ -2620,10 +2573,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.RAW_METAL |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.RAW_METAL |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {
     item.data.RAW_MATERIAL = 'base:dragonglass';
@@ -2656,10 +2609,10 @@ Item.database.newEntry(data : {
     'base:fling'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.STACKABLE |
-    ATTRIBUTE.UNIQUE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.STACKABLE |
+    TRAIT.UNIQUE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2692,9 +2645,9 @@ Item.database.newEntry(data : {
     'base:consume-item'     
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP|
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP|
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2727,10 +2680,10 @@ Item.database.newEntry(data : {
     'base:consume-item'     
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.STACKABLE |
-    ATTRIBUTE.UNIQUE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.STACKABLE |
+    TRAIT.UNIQUE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2764,10 +2717,10 @@ Item.database.newEntry(data : {
     'base:consume-item'     
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.STACKABLE |
-    ATTRIBUTE.UNIQUE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.STACKABLE |
+    TRAIT.UNIQUE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2808,8 +2761,8 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP
+  traits : 
+    TRAIT.SHARP
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2844,9 +2797,9 @@ Item.database.newEntry(data : {
     'base:break-item'
   ],
   equipEffects : [],
-  attributes : 
-    ATTRIBUTE.SHARP |
-    ATTRIBUTE.STACKABLE
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.STACKABLE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2880,9 +2833,9 @@ Item.database.newEntry(data : {
     'base:break-item'
   ],
   equipEffects : [],
-  attributes :     
-    ATTRIBUTE.STACKABLE |
-    ATTRIBUTE.UNIQUE
+  traits :     
+    TRAIT.STACKABLE |
+    TRAIT.UNIQUE
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2990,18 +2943,18 @@ Item.database.newEntry(data : {
     useEffects : [
     ],
     equipEffects : [],
-    attributes : 
-      ATTRIBUTE.SHARP  |
-      ATTRIBUTE.METAL |
-      ATTRIBUTE.UNIQUE |
-      ATTRIBUTE.HAS_COLOR
+    traits : 
+      TRAIT.SHARP  |
+      TRAIT.METAL |
+      TRAIT.UNIQUE |
+      TRAIT.HAS_COLOR
     ,
     onCreate ::(item, user, creationHint) {
       @:capitalize = import(:'game_function.capitalize.mt');
       item.name = random.pickArrayItem(:keyQualifiers) + ' Key (' + capitalize(:item.color.name) + ')';
       @:world = import(module:'game_singleton.world.mt');
       @:Island = import(:'game_mutator.island.mt');
-      item.setIslandGenAttributes(
+      item.setIslandGenTraits(
         levelHint : if (world != empty && world.island != empty) (world.island.levelMax + 1)*1.2 else 1,
         tierHint : if (world != empty && world.island != empty) world.island.tier + 1 else 0,
         idHint : Island.database.getRandomFiltered(::(value) <- (value.traits & Island.TRAITS.SPECIAL) == 0).id
@@ -3059,9 +3012,9 @@ none.name = 'None';
   }
 
   @baseName =
-  if (state.base.isApparel && state.apparel)
+  if (state.base.hasTraits(:TRAIT.APPAREL) && state.apparel)
     state.apparel.name + ' ' + state.base.name
-  else if (state.base.hasMaterial && state.material != empty)
+  else if (state.base.hasTraits(:TRAIT.METAL) && state.material != empty)
     state.material.name + ' ' + state.base.name
   else 
     state.base.name
@@ -3072,7 +3025,7 @@ none.name = 'None';
     
   @enchantName = getEnchantTag(state);
   
-  state.customName = if (state.base.hasQuality && state.quality != empty)
+  state.customName = if (state.base.hasTraits(:TRAIT.HAS_QUALITY) && state.quality != empty)
     state.quality.name + ' ' + baseName + enchantName 
   else
     baseName + enchantName;
@@ -3157,19 +3110,19 @@ none.name = 'None';
     ),
     if (state.size == -1) '' else 'It is ' + sizeToString(state) + '. ',
     if (state.hasEmblem) (
-      if (base.isApparel) 
+      if (base.hasTraits(:TRAIT.APPAREL)) 
         'The maker\'s emblem is sewn on it. '
       else
         'The maker\'s emblem is engraved on it. '
     ) else 
       '',
-    if (base.hasQuality && state.quality != empty) state.quality.description + ' ' else '',
-    if (base.hasMaterial) state.material.description + ' ' else '',
-    if (base.isApparel) state.apparel.description + ' ' else '',
+    if (base.hasTraits(:TRAIT.HAS_QUALITY) && state.quality != empty) state.quality.description + ' ' else '',
+    if (base.hasTraits(:TRAIT.METAL)) state.material.description + ' ' else '',
+    if (base.hasTraits(:TRAIT.APPAREL)) state.apparel.description + ' ' else '',
     if (base.blockPoints == 1) 'This equipment helps block an additional part of the body while equipped in combat.' else '',
     if (base.blockPoints > 1) 'This equipment helps block multiple additional parts of the body while equipped in combat.' else '',
   ]);
-  if (base.canBeColored) ::<= {
+  if (base.hasTraits(:TRAIT.HAS_COLOR)) ::<= {
     out = out->replace(key:'$color$', with:state.color.name);
     out = out->replace(key:'$design$', with:state.design.name);
   }
@@ -3185,7 +3138,7 @@ none.name = 'None';
   name : 'Wyvern.Item',  
   statics : {
     TYPE : {get::<-TYPE},
-    ATTRIBUTE : {get::<-ATTRIBUTE},
+    TRAIT : {get::<-TRAIT},
     USE_TARGET_HINT : {get::<-USE_TARGET_HINT},
     NONE : {get ::<- none}
   },
@@ -3239,7 +3192,7 @@ none.name = 'None';
       equipMod : StatSet.type,
       enchantLimit : Number,
       equipEffects : Object,
-      attributes : Number,
+      traits : Number,
       useTargetHint : Number,
       onCreate : Function,
       basePrice : Number,
@@ -3292,7 +3245,7 @@ none.name = 'None';
       state.improvementEXP = 0;
       state.data = {};
       
-      if (base.hasSize)   
+      if (base.hasTraits(:TRAIT.SIZE))   
         assignSize(*_);
       foreach(base.equipEffects)::(i, effect) {
         state.equipEffects->push(value:effect);
@@ -3304,7 +3257,7 @@ none.name = 'None';
       
       
       
-      if (base.hasQuality) ::<= {
+      if (base.hasTraits(:TRAIT.HAS_QUALITY)) ::<= {
         // random chance to have a maker's emblem on it, indicating 
         // made with love and care
         if (random.try(percentSuccess:15)) ::<= {
@@ -3334,7 +3287,7 @@ none.name = 'None';
       }
       
 
-      if (base.hasMaterial) ::<= {
+      if (base.hasTraits(:TRAIT.METAL)) ::<= {
         if (materialHint == empty) ::<= {
           state.material = Material.getRandomWeightedFiltered(
             filter::(value) <- value.tier <= world.island.tier,
@@ -3346,7 +3299,7 @@ none.name = 'None';
         state.stats.add(stats:state.material.statMod);
       }
 
-      if (base.isApparel) ::<= {
+      if (base.hasTraits(:TRAIT.APPAREL)) ::<= {
         if (apparelHint == empty) ::<= {
           state.apparel = ApparelMaterial.getRandomWeightedFiltered(
             filter::(value) <- value.tier <= world.island.tier,
@@ -3359,7 +3312,7 @@ none.name = 'None';
       }        
 
       
-      if (base.canHaveEnchants) ::<= {
+      if (base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)) ::<= {
         if (enchantHint != empty) ::<= {
           this.addEnchant(mod:ItemEnchant.new(
             base:ItemEnchant.database.find(id:enchantHint)
@@ -3386,7 +3339,7 @@ none.name = 'None';
               else
                 ItemEnchant.database.getRandomFiltered(
                   filter::(value) <- 
-                  value.tier <= world.island.tier && (if (base.canHaveTriggerEnchants == false) value.triggerConditionEffects->keycount == 0 else true)
+                  value.tier <= world.island.tier && (if (base.hasTraits(:TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS == false) value.triggerConditionEffects->keycount == 0 else true)
                 )
             )
             this.addEnchant(mod);
@@ -3395,7 +3348,7 @@ none.name = 'None';
       }
 
 
-      if (base.canBeColored) ::<= {
+      if (base.hasTraits(:TRAIT.HAS_COLOR)) ::<= {
         state.color = if (colorHint) ItemColor.find(id:colorHint) else ItemColor.getRandom();
         state.stats.add(stats:state.color.equipMod);
         state.design = if (designHint) ItemDesign.find(id:designHint) else ItemDesign.getRandom();
@@ -3493,7 +3446,7 @@ none.name = 'None';
     },
       
       
-    setIslandGenAttributes ::(levelHint, nameHint, tierHint, extraLandmarks, idHint) {
+    setIslandGentraits ::(levelHint, nameHint, tierHint, extraLandmarks, idHint) {
       @:state = _.state;
       if (levelHint)  
         state.islandLevelHint = levelHint;
@@ -3510,7 +3463,7 @@ none.name = 'None';
         state.islandIDhint = idHint;
     },
     
-    islandGenAttributes : {
+    islandGentraits : {
       get ::{ 
         @:Island = import(:'game_mutator.island.mt');
         return {
@@ -3701,8 +3654,6 @@ none.name = 'None';
     worldID : {
       get ::<- _.state.worldID
     },
-    
-    hasAttribute ::(attribute) <- (_.state.base.attributes & attribute) != 0,
       
     maxOut ::{
       _.state.intuition = 20;

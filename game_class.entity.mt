@@ -692,45 +692,31 @@
         state.inventory.add(item:
           Item.new(
             base: Item.database.getRandomFiltered(
-              filter:::(value) <- value.isUnique == false && value.canHaveEnchants
-                            && value.tier <= island.tier
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                && value.tier <= island.tier
             ),
             rngEnchantHint:true
           )
         );
 
         if (state.faveWeapon == empty)
-          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0 && value.tier <= island.tier)
+          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- 
+            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+            (value.traits & Item.TRAIT.WEAPON) != 0 && value.tier <= island.tier)
       } else ::<= {
         if (state.faveWeapon == empty)
-          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false && (value.attributes & Item.ATTRIBUTE.WEAPON) != 0)
+          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- 
+            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+            (value.traits & Item.TRAIT.WEAPON) != 0 && value.tier <= island.tier)
       }
       state.inventory.addGold(amount:(random.number() * 100)->ceil);
-      state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.isUnique == false)
+      state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
 
 
 
 
-
-      /*
-      ::<={
-        [0, 1+(random.number()*3)->floor]->for(do:::(i) {
-          @:item = Item.database.getRandomWeightedFiltered(
-            filter:::(value) <- level >= value.levelMinimum &&
-                      value.isUnique == false
-            
-          );
-          if (item.name != 'None') ::<={
-            @:itemInstance = item.new();
-            if (itemInstance.enchantsCount == 0) 
-              inventory.add(item:itemInstance);
-          }
-          
-          
-        });
-        
-      }
-      */
 
       return this;
     },   
@@ -1657,7 +1643,7 @@
         // pretty nifty!
         /*
         when (dodgeable && 
-            (this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.attributes & Item.ATTRIBUTE.SHIELD) && 
+            (this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).base.traits & Item.TRAIT.SHIELD) && 
             random.try(percentSuccess:15)) ::<= {
           windowEvent.queueMessage(text:random.pickArrayItem(list:[
             this.name + ' defends against ' + from.name + '\'s attack with their shield!',         
@@ -1877,7 +1863,7 @@
       state.canMake = [];
       foreach(Item.database.getRandomSet(
           count:if (this.profession.id == 'base:blacksmith') 10 else 2,
-          filter::(value) <- value.hasMaterial == true
+          filter::(value) <- value.hasTraits(:Item.TRAIT.METAL)
       )) ::(k, val) {
         state.canMake->push(value:val.id);
       }

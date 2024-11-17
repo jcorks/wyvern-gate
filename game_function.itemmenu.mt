@@ -182,7 +182,7 @@ return ::(
   
   choiceNames->push(value:'Rename');
   choices->push(value::{
-    when (!choiceItem.base.canHaveEnchants)
+    when (!choiceItem.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
       windowEvent.queueMessage(text:choiceItem.name + ' cannot be renamed.');
     
     @:name = import(module:"game_function.name.mt");
@@ -209,7 +209,7 @@ return ::(
     windowEvent.queueAskBoolean(
       prompt:'Are you sure you wish to throw away the ' + choiceItem.name + '?',
       onChoice::(which) {
-        when ((choiceItem.base.attributes & Item.ATTRIBUTE.KEY_ITEM) != 0)
+        when ((choiceItem.base.traits & Item.TRAIT.KEY_ITEM) != 0)
           windowEvent.queueMessage(
             text:'You feel unable to throw this away.'
           )

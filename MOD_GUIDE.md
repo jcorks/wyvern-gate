@@ -146,13 +146,13 @@ Throughout the game, many things require repetitive structures because many diff
 These are controlled by Databases. Many database instances are used throughout the program. Each file containing 
 a database is prefixed with `game_database.` so databases are clearly visible.
 
-When created, Databases contain a name and a set of typed attributes that database entries must follow.
+When created, Databases contain a name and a set of typed traits that database entries must follow.
 Consider this database from game_database.material.mt:
 
 ```
 @:Material = Database.new(
     name : 'Wyvern.Material',
-    attributes : {
+    traits : {
         name : String,
         rarity : Number,
         tier : Number,
@@ -166,7 +166,7 @@ Consider this database from game_database.material.mt:
 
 
 In this database, entries can have a name, rarity, tier, description, stats, and a price modifier. Each 
-attribute is checked against the type that is labeled, so if a new material is defined and the rarity is 
+traits is checked against the type that is labeled, so if a new material is defined and the rarity is 
 not set, or is set to be something other than a Number, an error is thrown.
 
 Here is an example database entry:
