@@ -2929,8 +2929,8 @@ Arts.newEntry(
         onEnter :: {
           targets[0].removeEffectsByFilter(
             ::(value) <- 
-              ((Arts.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0) ||
-              ((Arts.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0)
+              ((Arts.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+              ((Arts.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
           );
         }
       );
@@ -6562,7 +6562,7 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:which = random.scrambled(:allies)->filter(
         ::(value) <- value.effectStack.getAllByFilter(
-          ::(value) <- (Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0
+          ::(value) <- (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0
         )->size > 0
       );
       when(which->size == 0) false;
@@ -6578,7 +6578,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
 
-      @:filter = ::(value) <- (Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0
+      @:filter = ::(value) <- (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0
 
       @:hasAny = targets[0].effectStack.getAllByFilter(:filter)->size > 0;
       targets[0].removeEffectsByFilter(:filter);
@@ -6605,8 +6605,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:which = random.scrambled(:allies)->filter(
         ::(value) <- value.effectStack.getAllByFilter(
-          ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0) ||
-                       ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0)
+          ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+                       ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
         )->size > 0
       );
       when(which->size == 0) false;
@@ -6622,8 +6622,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
 
-      @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0) ||
-                              ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0)
+      @:filter = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+                              ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
 
       @:hasAny = targets[0].effectStack.getAllByFilter(:filter)->size > 0;
       targets[0].removeEffectsByFilter(:filter);
@@ -6651,8 +6651,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:which = random.scrambled(:allies)->filter(
         ::(value) <- value != user && value.effectStack.getAllByFilter(
-          ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0) ||
-                       ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0)
+          ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+                       ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
         )->size > 0
       );
       when(which->size == 0) false;
@@ -6668,8 +6668,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
 
 
-      @:condition = ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0) ||
-                                 ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0)
+      @:condition = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+                                 ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
       @toput = [];
       foreach(targets) ::(k, v) {
         when(v == user) empty;
@@ -6716,7 +6716,7 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:which = random.scrambled(:enemies)->filter(
         ::(value) <- value != user && value.effectStack.getAllByFilter(
-          ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.BUFF) != 0)
+          ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0)
         )->size > 0
       );
       when(which->size == 0) false;
@@ -6730,7 +6730,7 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
-      @:condition = ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.BUFF) != 0)
+      @:condition = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0)
 
       @:which = random.scrambled(:targets)->filter(
         ::(value) <- value != user && value.effectStack.getAllByFilter(
@@ -6834,8 +6834,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:which = random.scrambled(:allies)->filter(
         ::(value) <- value.effectStack.getAllByFilter(
-          ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0) ||
-                       ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0)
+          ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+                       ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
         )->size > 0
       );
       when(which->size == 0) false;
@@ -6851,8 +6851,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       
-      @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0) ||
-                              ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0)
+      @:filter = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+                              ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
       
       foreach(targets) ::(k, target) {
         target.removeEffectsByFilter(:filter);
@@ -6876,7 +6876,7 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:which = random.scrambled(:enemies)->filter(
         ::(value) <- value.effectStack.getAllByFilter(
-          ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.BUFF) != 0)
+          ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0)
         )->size > 0
       );
       when(which->size == 0) false;
@@ -6892,7 +6892,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       
-      @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.BUFF) != 0)      
+      @:filter = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0)      
       foreach(targets) ::(k, target) {
         target.removeEffectsByFilter(:filter);
       }
@@ -6916,8 +6916,8 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:Effect = import(module:'game_database.effect.mt');
       @:which = user.effectStack.getAllByFilter(
-          ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0) ||
-                       ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0)
+          ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0) ||
+                       ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0)
         )
       when(which->size == 0) false;
       
@@ -6931,8 +6931,8 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
-      @:filter = ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0) ||
-                              ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0)
+      @:filter = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0) ||
+                              ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0)
      
      
      
@@ -6968,14 +6968,14 @@ Arts.newEntry(
       when(
         enemies->filter(
           ::(value) <- value.effectStack.getAllByFilter(
-            ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.BUFF) != 0)
+            ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0)
           )->size > 0
         )
         ||
         allies->filter(
           ::(value) <- value.effectStack.getAllByFilter(
-            ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0) ||
-                         ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0)
+            ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0) ||
+                         ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0)
           )->size > 0
         )
       ) [...allies, ...enemies];
@@ -7082,7 +7082,7 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:which = random.scrambled(:enemies)->filter(
         ::(value) <- value != user && value.effectStack.getAllByFilter(
-          ::(value) <- ((Effect.find(:value.id).flags & Effect.TRAIT.BUFF) != 0)
+          ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0)
         )->size > 0
       );
       when(which->size == 0) false;
@@ -7173,8 +7173,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:able = random.scrambled(:enemies->filter(::(value) <- 
         value.effectStack.getAll()->filter(::(value) <- 
-          ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF)  != 0) ||
-          ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0)
+          ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  != 0) ||
+          ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0)
         )->size > 0));
       when(able->size == 0) false;
           
@@ -7189,8 +7189,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
-        ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF)  != 0) ||
-        ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0)
+        ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  != 0) ||
+        ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0)
       )]
       
       when(all->size == 0) Arts.FAIL;
@@ -7220,7 +7220,7 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:able = enemies->filter(::(value) <- 
         value.effectStack.getAll()->filter(::(value) <- 
-          ((Effect.find(:value.id).flags & Effect.TRAIT.BUFF)  != 0)
+          ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF)  != 0)
         )->size > 0)
       when(able->size == 0) false;
       return [able[0]];
@@ -7234,7 +7234,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
-          ((Effect.find(:value.id).flags & Effect.TRAIT.BUFF)  != 0)
+          ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF)  != 0)
       )]
       when(all->size == 0) Arts.FAIL;
       
@@ -7262,7 +7262,7 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @:able = enemies->filter(::(value) <- 
         value.effectStack.getAll()->filter(::(value) <- 
-          (Effect.find(:value.id).flags & Effect.TRAIT.BUFF)  != 0
+          (Effect.find(:value.id).traits & Effect.TRAIT.BUFF)  != 0
         )->size > 0)
       when(able->size == 0) false;
       return [able[0]];
@@ -7276,7 +7276,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
-        (Effect.find(:value.id).flags & Effect.TRAIT.BUFF)  != 0
+        (Effect.find(:value.id).traits & Effect.TRAIT.BUFF)  != 0
       )]
       
       when(all->size == 0) Arts.FAIL;
@@ -7633,8 +7633,8 @@ Arts.newEntry(
       return {:::} {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- 
-            (Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0 ||
-            (Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF)  != 0
+            (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0 ||
+            (Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  != 0
           )->size > 0) 
             send(:[v]);
         }      
@@ -7652,13 +7652,13 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       @total = 0;
       @oldBad = targets[0].effectStack.getAllByFilter(::(value) <- 
-        (Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0 ||
-        (Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF)  != 0
+        (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0 ||
+        (Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  != 0
       );
       when(oldBad->size == 0) Arts.FAIL;
       targets[0].removeEffectsByFilter(::(value) <- 
-        (Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0 ||
-        (Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF)  != 0      
+        (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0 ||
+        (Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  != 0      
       );
             
       targets[0].healAP(amount:oldBad->size * 2);
@@ -7687,7 +7687,7 @@ Arts.newEntry(
       return {:::} {
         foreach([...enemies, ...allies]) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- 
-            (Effect.find(:value.id).flags & Effect.TRAIT.BUFF) != 0
+            (Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0
           )->size > 0) 
             send(:[v]);
         }      
@@ -7737,8 +7737,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       // only use it offensively when you dont have buffs
       when (user.effectStack.getAllByFilter(::(value) <- 
-        ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0) ||
-        ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0)
+        ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0) ||
+        ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0)
       )->size == 0) false;
 
     },
@@ -7787,8 +7787,8 @@ Arts.newEntry(
       @:Effect = import(module:'game_database.effect.mt');
       // only use it offensively when you dont have buffs
       when (user.effectStack.getAllByFilter(::(value) <- 
-        ((Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0) ||
-        ((Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0)
+        ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0) ||
+        ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0)
       )->size == 0) false;
 
     },
@@ -8891,8 +8891,8 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:Effect = import(module:'game_database.effect.mt');
       when(user.effectStack.getAllByFilter(::(value) <-
-        (Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF)  == 0 &&
-        (Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) == 0
+        (Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  == 0 &&
+        (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) == 0
       )->size == 0) false;
     },
     oncePerBattle : false,
@@ -8904,8 +8904,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:which = user.effectStack.getAllByFilter(::(value) <-
-        (Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF)  == 0 &&
-        (Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) == 0
+        (Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  == 0 &&
+        (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) == 0
       );
       
       when(which->size == 0) Arts.FAIL;
@@ -8939,8 +8939,8 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:Effect = import(module:'game_database.effect.mt');
       when(user.effectStack.getAllByFilter(::(value) <-
-        (Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF)  != 0 ||
-        (Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0
+        (Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  != 0 ||
+        (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0
       )->size == 0) false;
     },
     oncePerBattle : false,
@@ -8952,8 +8952,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:which = user.effectStack.getAllByFilter(::(value) <-
-        (Effect.find(:value.id).flags & Effect.TRAIT.DEBUFF)  != 0 ||
-        (Effect.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0
+        (Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  != 0 ||
+        (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0
       );
 
       when(which->size == 0) Arts.FAIL;
@@ -9327,7 +9327,7 @@ Arts.newEntry(
       @:whom = (allies)->filter(::(value) <-
         {:::} {
           foreach(value.effectStack.getAll()) ::(k, eff) {
-            if ((Effect.find(:eff.id).flags & Effect.TRAIT.BUFF) != 0)
+            if ((Effect.find(:eff.id).traits & Effect.TRAIT.BUFF) != 0)
               send(:true);
           }
           
@@ -10135,8 +10135,8 @@ Arts.newEntry(
         onEnter :: {
           targets[0].removeEffectsByFilter(
             ::(value) <- 
-              ((Arts.find(:value.id).flags & Effect.TRAIT.AILMENT) != 0) ||
-              ((Arts.find(:value.id).flags & Effect.TRAIT.DEBUFF) != 0)
+              ((Arts.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+              ((Arts.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
           );
         }
       );

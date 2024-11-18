@@ -559,12 +559,12 @@
         
         @:items = this.getAll()->map(to::(value) { 
           @:effect = Effect.find(:value.id);
-          @:symbol = Effect.TRAIT_TO_DOMINANT_SYMBOL(:effect.flags);
+          @:symbol = Effect.TRAIT_TO_DOMINANT_SYMBOL(:effect.traits);
           return [
             limit(:'(' + symbol + ') ' + effect.name),
             [
               'Name:        ' + effect.name,
-              'Traits:      ' + listTraits(:effect.flags),
+              'Traits:      ' + listTraits(:effect.traits),
               'Turns left:  ' + turnCount(:value), 
               'Description: ' + effect.description
             ]

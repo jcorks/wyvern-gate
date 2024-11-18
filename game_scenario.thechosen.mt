@@ -1165,6 +1165,33 @@ return {
           @:world = import(module:'game_singleton.world.mt');
           @:Event = import(module:'game_mutator.event.mt');
 
+          @:proceed ::{
+            if (location.targetLandmark == empty) ::<={
+              @:Landmark = import(module:'game_mutator.landmark.mt');
+             
+              @:id = location.landmark.island.base.id;
+             
+              location.targetLandmark = Landmark.new(
+                island : location.landmark.island,
+                base: Landmark.database.find(id:
+                  match(id) {
+                    ('thechosen:island-of-fire'):    'thechosen:fire-wyvern-dimension',
+                    ('thechosen:island-of-ice'):     'thechosen:ice-wyvern-dimension',
+                    ('thechosen:island-of-thunder'): 'thechosen:thunder-wyvern-dimension',
+                    ('thechosen:island-of-light'):   'thechosen:light-wyvern-dimension'
+                  }
+                )
+              )
+              location.targetLandmark.loadContent();
+              location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
+            }
+            @:instance = import(module:'game_singleton.instance.mt');
+
+            instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
+            canvas.clear();          
+          }
+
+
           if (location.contested == true) ::<= {
 
 
@@ -1188,30 +1215,47 @@ return {
             );
                 
           } else ::<= {
+            windowEvent.queueMessage(
+              text: 'This looks to be the last floor...'
+            );
 
-            if (location.targetLandmark == empty) ::<={
-              @:Landmark = import(module:'game_mutator.landmark.mt');
-             
-              @:id = location.landmark.island.base.id;
-             
-              location.targetLandmark = Landmark.new(
-                island : location.landmark.island,
-                base: Landmark.database.find(id:
-                  match(id) {
-                    ('thechosen:island-of-fire'):    'thechosen:fire-wyvern-dimension',
-                    ('thechosen:island-of-ice'):     'thechosen:ice-wyvern-dimension',
-                    ('thechosen:island-of-thunder'): 'thechosen:thunder-wyvern-dimension',
-                    ('thechosen:island-of-light'):   'thechosen:light-wyvern-dimension'
-                  }
-                )
-              )
-              location.targetLandmark.loadContent();
-              location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
-            }
-            @:instance = import(module:'game_singleton.instance.mt');
+            windowEvent.queueMessage(
+              text: '...Oh! It looks like theres a path to the entrance, too.'
+            );
 
-            instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
-            canvas.clear();
+            windowEvent.queueChoices(
+              prompt: 'Do which?',
+              choices : [
+                'Proceed, unaware of what lies ahead',
+                'Go back to entrance',
+                'Wait for now'
+              ],
+              
+              onChoice::(choice) <-
+                match(choice) {
+                  (1): proceed(),
+                  (2)::<= {
+                    windowEvent.queueMessage(
+                      text: 'You return to the entrance.',
+                      renderable :{
+                        render ::{
+                          canvas.blackout();
+                        }   
+                      }
+                    );
+                    
+                    windowEvent.queueCustom(
+                      onEnter::{
+                        @:instance = import(module:'game_singleton.instance.mt');
+                        instance.visitCurrentIsland();             
+                      }
+                    )
+                  },
+                  
+                  (3): empty
+                }
+            );
+
           }
         }
       }
@@ -2675,7 +2719,6 @@ return {
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
-        flags : 0,
         stats: StatSet.new(),
         traits : 0,
         
