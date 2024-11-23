@@ -178,6 +178,35 @@ return ::(
       );     
     });
   }
+
+
+  choiceNames->push(value:'Mark Favorite');
+  choices->push(value::{
+    @:symbols = [
+      'None',
+      '&',
+      '@',
+      '!',
+      '#',
+      '$',
+      '%',
+      '^',
+      '*',
+      '+',
+      '-'
+    ]
+    windowEvent.queueChoices(
+      prompt: 'Mark with which symbol?',
+      choices : symbols,
+      canCancel : true,
+      onChoice ::(choice) {
+        when(choice == 1)
+          choiceItem.faveMark = '';
+          
+        choiceItem.faveMark = symbols[choice-1];
+      }
+    );
+  });
   
   
   choiceNames->push(value:'Rename');

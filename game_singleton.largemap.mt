@@ -276,7 +276,7 @@
               //scale *= scale;
               
               @lenSecondary = 1 + random.integer(from:5, to:9) * scale * 0.5;
-              @len = random.integer(from:0, to: 2) + scale*3;
+              @len = random.integer(from:2, to: 2);
               
               
               

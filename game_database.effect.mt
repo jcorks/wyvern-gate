@@ -929,10 +929,8 @@ Effect.newEntry(
     name : 'Trigger Regen',
     id : 'base:trigger-regen',
     description: 'Heals 2 HP.',
-    battleOnly : true,
-    stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.BATTLE_ONLY,
     stats: StatSet.new(
     ),
     events : {

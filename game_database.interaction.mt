@@ -518,7 +518,7 @@ Interaction.newEntry(
                               base: Item.database.getRandomFiltered(
                                 filter::(value) <- value.hasTraits(:
                                     Item.TRAIT.UNIQUE |
-                                    Item.HAS_QUALITY
+                                    Item.TRAIT.HAS_QUALITY
                                 ) && value.hasAnyTrait(:
                                     Item.TRAIT.METAL |
                                     Item.TRAIT.APPAREL
@@ -795,16 +795,16 @@ Interaction.newEntry(
         windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');              
 
 
-      @:pickItem = import(module:'game_function.pickitemprices.mt');
+      @:pickItem = import(module:'game_function.pickitem.mt');
       pickItem(
         inventory:party.inventory,
         canCancel: true,
         leftWeight: 0.5,
         topWeight: 0.5,
+        showPrices : true,
         onGetPrompt:: <-  'Sell which? (current: ' + g(g:party.inventory.gold) + ')',
         goldMultiplier: (0.5 / 5)*0.5,
-        header : ['Item', 'Price'],
-        leftJustified : [true, false],
+        header : ['Item', 'Price', ''],
         onPick::(item) {
           when(item == empty) empty;
 
@@ -918,7 +918,6 @@ Interaction.newEntry(
           }
         );
       }
-      @:pickItem = import(module:'game_function.pickitemprices.mt');
       
       when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
         windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');              

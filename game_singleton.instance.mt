@@ -624,7 +624,8 @@ return empty;
         windowEvent.queueMessage(
           text: 'A game by Johnathan "Rasa" Corkery\n'+
               'https://github.com/jcorks/\n\n' + 
-              'Additional Arts Design : Baph @lovelyabomination\n' +
+              'Additional Arts Design \n' +
+              ' & Game Consultation   : Baph @lovelyabomination\n' +
               'Additional support     : Adrian "Radscale" Hernik\n' +
               'Playtesting            : Baph @lovelyabomination\n' +
               '                         Caleb Dron\n' +
@@ -633,12 +634,14 @@ return empty;
         
         windowEvent.queueMessage(
           text: 'Special thanks to:\n' +
+                'Pigeon\n' + 
                 'Citrus\n' + 
                 'Meiyuu\n' +
                 'Drassy\n' +
                 'Nido\n' +
                 'Maztitos\n' +
-                'Dr. San'
+                'Dr. San\n'+
+                'aeotepiia'
         );
 
         windowEvent.queueMessage(

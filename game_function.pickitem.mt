@@ -17,24 +17,45 @@
 */
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
+@:choicesColumns = import(module:'game_function.choicescolumns.mt');
+@:g = import(module:'game_function.g.mt');
 
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter, keep, pageAfter, onCancel) {
+
+return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter, keep, pageAfter, onCancel, showPrices, goldMultiplier, header) {
   @names = []
   @items = []
   @picked;
   @cancelled = false;
+
+  @:gold = ::(value) {
+    @go = value.price * goldMultiplier;
+    go = go->ceil;
+    return if (go < 1)
+      '?G' /// ooooh mysterious!
+    else
+      g(g:go);
+  }
+
   windowEvent.queueNestedResolve(
     onEnter :: {
-      windowEvent.queueChoices(
+      when(inventory.items->size == 0) ::<={
+        windowEvent.queueMessage(text: "The inventory is empty.");
+      }
+    
+    
+      choicesColumns(
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
         prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
         onGetPrompt: onGetPrompt,
         canCancel: canCancel,
         jumpTag: 'pickItem',
+        separator: '|',
+        leftJustified : [true, false, true],
         pageAfter: pageAfter,
+        header : header,
         onCancel::{cancelled = true;},
         onHover : if (onHover)
           ::(choice) {
@@ -45,20 +66,45 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
           empty,
         renderable : renderable,
         onGetChoices ::{
+          @:Item = import(:'game_mutator.item.mt'); 
         
           items = if (filter != empty)
             inventory.items->filter(by:filter)
           else  
             [...inventory.items]
           ;
-        
-          names = [...items]->map(to:::(value) {
-            return value.name;
+          @:alreadyCounted = [];
+
+          items = items->filter(::(value) {
+            when(value.base.hasNoTrait(:Item.TRAIT.STACKABLE)) true;
+            if (alreadyCounted[value.base.id] == empty) 
+              alreadyCounted[value.base.id] = 0;
+            alreadyCounted[value.base.id] += 1;
+            when(alreadyCounted[value.base.id] == 1) true;
+            return false;
           });
-          when(names->keycount == 0) ::<={
-            windowEvent.queueMessage(text: "The inventory is empty.");
-          }
-          return names;
+
+          names = [...items]->map(to:::(value) <- 
+            value.name
+          );
+          
+          @:amounts = items->map(to:::(value) <-
+            if (alreadyCounted[value.base.id]->type == Number && alreadyCounted[value.base.id] > 1)
+              'x'+alreadyCounted[value.base.id]  
+            else if (value.faveMark != '')
+              ' ' + value.faveMark
+            else
+              ''
+          );
+          
+          @:prices = items->map(to:::(value) <- 
+            if (showPrices != true) 
+              ''
+            else
+              gold(:value)
+          )
+
+          return [names, prices, amounts];
         },
         keep: if (keep == empty) true else keep,
         onChoice ::(choice) {

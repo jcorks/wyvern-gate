@@ -69,7 +69,8 @@
   CAN_HAVE_TRIGGER_ENCHANTMENTS : 2 << 13, 
   HAS_COLOR     : 2 << 14,
   HAS_SIZE      : 2 << 15,
-  UNIQUE        : 2 << 16
+  UNIQUE        : 2 << 16,
+  MEANT_TO_BE_USED : 2 << 17
 }
 
 
@@ -236,7 +237,8 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.MEANT_TO_BE_USED
   ,
   onCreate ::(item, creationHint) {}
 
@@ -272,7 +274,8 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.MEANT_TO_BE_USED
   ,
   onCreate ::(item, creationHint) {}
 
@@ -306,7 +309,8 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.MEANT_TO_BE_USED    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -340,7 +344,8 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.MEANT_TO_BE_USED    
   ,
   onCreate ::(item, creationHint) {}
 })  
@@ -373,7 +378,8 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.MEANT_TO_BE_USED    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -452,7 +458,8 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.MEANT_TO_BE_USED    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2647,7 +2654,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   traits : 
     TRAIT.SHARP|
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.MEANT_TO_BE_USED    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2683,7 +2691,8 @@ Item.database.newEntry(data : {
   traits : 
     TRAIT.SHARP |
     TRAIT.STACKABLE |
-    TRAIT.UNIQUE
+    TRAIT.UNIQUE |
+    TRAIT.MEANT_TO_BE_USED    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2720,7 +2729,8 @@ Item.database.newEntry(data : {
   traits : 
     TRAIT.SHARP |
     TRAIT.STACKABLE |
-    TRAIT.UNIQUE
+    TRAIT.UNIQUE |
+    TRAIT.MEANT_TO_BE_USED    
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3173,7 +3183,8 @@ none.name = 'None';
     statsBase : empty,
     design : empty,
     data : empty,
-    worldID : -1
+    worldID : -1,
+    faveMark : '',
   },
   
   database : Database.new(
@@ -3653,6 +3664,11 @@ none.name = 'None';
     
     worldID : {
       get ::<- _.state.worldID
+    },
+    
+    faveMark : {
+      get ::<- _.state.faveMark,
+      set ::(value) <- _.state.faveMark = value
     },
       
     maxOut ::{

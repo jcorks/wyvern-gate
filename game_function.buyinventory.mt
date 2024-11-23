@@ -1,4 +1,4 @@
-@:pickItem = import(module:'game_function.pickitemprices.mt');
+@:pickItem = import(module:'game_function.pickitem.mt');
 @:g = import(module:'game_function.g.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -14,13 +14,13 @@ return ::(inventory, shopkeep, onDone) {
     canCancel: true,
     leftWeight: 0.6,
     topWeight: 0.5,
+    showPrices : true,
     onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',
     goldMultiplier: (0.5 / 5),
     onHover ::(item) {
       hoveredItem = item;
     },
-    header : ['Item', 'Price'],
-    leftJustified : [true, false],
+    header : ['Item', 'Price', ''],
     
     renderable : {
       render ::{

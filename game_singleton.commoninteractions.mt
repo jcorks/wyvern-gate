@@ -583,6 +583,12 @@ return {
         return party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) != -1
       },
       onSelect::(entity, location) {
+        @:this = entity;
+        when(this.isIncapacitated())
+          windowEvent.queueMessage(
+            text: this.name + ' is not currently able to talk.'
+          );                            
+
         @:world = import(module:'game_singleton.world.mt');
         @:quest = world.party.quests[world.party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID)];
         when (quest.isComplete == false) 

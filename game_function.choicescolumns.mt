@@ -22,7 +22,10 @@ return ::(*args) {
   @headerCompiled;
   @headerSrc = args.header;
   @leftJustified = args.leftJustified => Object;
+  @separator = ' ' + (if (args.separator == empty) '|' else args.separator) + ' ';
   @:convertToChoices::(columns => Object, header) {
+
+  
     @padBlock = [];
     @:padColumnRow::(text, size, leftJustified) {
       padBlock->setSize(size:0);
@@ -53,6 +56,8 @@ return ::(*args) {
         
       columnSizes[i] = max;
     }
+    
+    breakpoint();
 
     @:choices = [];  
     @:combine = [];
@@ -69,8 +74,8 @@ return ::(*args) {
         );
         
         // padding between columns
-        if (i != columns->size-1)
-          combine->push(value: ' | ');
+        if (i != columns->size-1 && columnSizes[i+1] > 0)
+          combine->push(value: separator);
       }
 
 
