@@ -421,7 +421,7 @@ Interaction.newEntry(
                   prompt: 'Wager which?',
                   topWeight : 0.5,
                   leftWeight : 0.5,
-                  onPick::(item) {
+                  onPick::(item, equippedBy) {
                     when(item == empty) ::<= {
                       windowEvent.queueMessage(
                         speaker: 'Wandering Gamblist',
@@ -445,9 +445,10 @@ Interaction.newEntry(
                           speaker: 'Wandering Gamblist',
                           text: '"Ah, well. Perhaps next time. A gamble is a gamble, after all."'                  
                         );
-                        party.inventory.remove(item);
-                        if (item.equippedBy != empty)
-                          item.equippedBy.unequipItem(item:item);
+                        if (equippedBy != empty)
+                          equippedBy.unequipItem(item:item);
+
+                        item.throwOut();
                           
                         if (item.name->contains(key:'Wyvern Key of'))
                           world.accoladeEnable(name:'gotRidOfWyvernKey');    
@@ -2367,7 +2368,7 @@ Interaction.newEntry(
               item.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) && 
               item.enchantsCount < item.base.enchantLimit
             ,
-            onPick::(item) {
+            onPick::(item, equippedBy) {
               when(item == empty) empty;
               windowEvent.queueMessage(text:'This will add the enchant ' + location.data.enchant.name + ' to the ' + item.name + '. This change is permanent.');
               windowEvent.queueAskBoolean(
@@ -2376,12 +2377,12 @@ Interaction.newEntry(
                   when(which == false) empty;
                   world.accoladeIncrement(name:'enchantmentsReceived');
                   windowEvent.queueMessage(text:'The stand glows along with the item for a time before returning to normal.');
-                  @:whom = item.equippedBy;
                   @oldStats;
                   @slot
-                  if (whom != empty) ::<= {
-                    oldStats = StatSet.new(state:whom.stats.save());
-                    slot = whom.unequipItem(item, silent:true);
+                  @:whom = equippedBy;
+                  if (equippedBy != empty) ::<= {
+                    oldStats = StatSet.new(state:equippedBy.stats.save());
+                    slot = equippedBy.unequipItem(item, silent:true);
                   }
                   item.addEnchant(mod:location.data.enchant);
                   location.data.enchant = empty;

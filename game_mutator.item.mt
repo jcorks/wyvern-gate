@@ -135,6 +135,34 @@ Item.database.newEntry(
 )
 
 
+Item.database.newEntry(
+  data : {
+    name : 'Unused 7',
+    id : 'base:placeholder',
+    description : '',
+    examine : '',
+    equipType : TYPE.HAND,
+    equipMod : StatSet.new(),
+    weight: 0,
+    rarity: 100,
+    levelMinimum : 1,
+    tier: 0,
+    enchantLimit : 0,
+    basePrice: 0,
+    enchantLimit : 0,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    useEffects : [],
+    equipEffects : [],
+    traits : 
+      TRAIT.UNIQUE |
+      TRAIT.KEY_ITEM |
+      TRAIT.STACKABLE,
+    blockPoints : 0,
+    onCreate ::(item, creationHint) {},
+    possibleArts : [],
+  }
+)
+
 Item.database.newEntry(data : {
   name : "Mei\'s Bow",
   id: 'base:meis-bow',
@@ -1341,6 +1369,50 @@ Item.database.newEntry(data : {
 })  
 
 Item.database.newEntry(data : {
+  name : "Knuckle",
+  id : 'base:knuckle',
+  description: 'Designed to be worn on the fists for close combat. It has an $color$ trim with a $design$ design.',
+  examine : '',
+  equipType: TYPE.HAND,
+  rarity : 300,
+  weight : 0.5,
+  tier: 0,
+  basePrice: 35,
+  enchantLimit : 10,
+  levelMinimum : 1,
+  useTargetHint : USE_TARGET_HINT.ONE,
+
+  blockPoints : 0,
+  equipMod : StatSet.new(
+    ATK: 15,
+    DEF: -20,
+    SPD: 40,
+    DEX: 50
+  ),
+  useEffects : [
+    'base:fling',
+  ],
+  possibleArts : [
+    'base:counter',
+    'base:doublestrike',
+    'base:triplestrike'
+  ],
+  equipEffects : [],
+  traits : 
+    TRAIT.SHARP |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
+
+  ,
+  onCreate ::(item, creationHint) {}
+
+})  
+
+
+Item.database.newEntry(data : {
   name : "Smithing Hammer",
   id : 'base:smithing-hammer',
   description: 'A basic hammer meant for smithing.',
@@ -1432,7 +1504,7 @@ Item.database.newEntry(data : {
   examine : '',
   equipType: TYPE.TWOHANDED,
   rarity : 100,
-  weight : 8,
+  weight : 5,
   basePrice: 105,
   tier: 0,
   levelMinimum : 1,
@@ -3216,8 +3288,6 @@ none.name = 'None';
   ),
   
   private : {
-    container : Nullable,
-    equippedBy : Nullable
   },
   
   interface : {
@@ -3428,25 +3498,6 @@ none.name = 'None';
     equipModBase : {
       get ::<- _.state.statsBase
     },
-    
-    container : {
-      get :: {
-        return _.container;
-      },
-      
-      set ::(value) {
-        @:Inventory = import(module:'game_class.inventory.mt');
-        _.container = value => Inventory.type;
-      }
-    },
-      
-    equippedBy : {
-      set ::(value) {
-        _.equippedBy = value;
-      },
-      
-      get ::<- _.equippedBy
-    },
 
     arts : {
       get ::<- if (_.state.arts == empty) empty else _.state.arts
@@ -3497,13 +3548,9 @@ none.name = 'None';
     },
       
       
-    resetContainer :: {
-      _.container = empty;
-    },
             
     throwOut :: {
-      when(_.container == empty) empty;
-      _.container.remove(item:_.this);
+      _.state.base = Item.database.find(:'base:none');
     },
       
     color : {

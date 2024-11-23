@@ -5,7 +5,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 
 
-@:levelUp::(item, onDone) {
+@:levelUp::(item, user, onDone) {
   @:statChoices = [
     'HP',
     'AP',
@@ -42,9 +42,9 @@
       
       item.equipModBase.load(serialized:newStats.save());
       
-      if (item.equippedBy != empty) ::<= {
+      if (user != empty) ::<= {
         @:oldStats = StatSet.new();
-        @equiper = item.equippedBy;
+        @equiper = user;
         oldStats.load(serialized:equiper.stats.save());
         
         @slot = equiper.unequipItem(item, silent:true);
@@ -68,7 +68,7 @@
 }
 
 
-@:addExpAnimated::(item, other, exp, onDone) {
+@:addExpAnimated::(item, user, other, exp, onDone) {
   @remainingForLevel = item.improvementEXPtoNext - item.improvementEXP;
   windowEvent.queueDisplay(
     leftWeight: 0.5,
@@ -140,6 +140,7 @@
           onEnter :: {      
             levelUp(
               item : item,
+              user : user,
               onDone :: {
                 addExpAnimated(item, other, exp, onDone);
               }
@@ -180,7 +181,7 @@
 }
 
 
-@:improve::(item) {
+@:improve::(item, user) {
   @:party = import(module:'game_singleton.world.mt').party;
           
   @:others = party.inventory.items->filter(by:::(value) <- value.material == item.material && value != item);
@@ -214,6 +215,7 @@
           
           addExpAnimated(
             item,
+            user,
             other,
             exp,
             onDone ::{
@@ -276,7 +278,7 @@ return ::(user, item, inBattle) {
     prompt:'Improve ' + item.name + '?',
     onChoice::(which) {
       when(which == false) empty; 
-      improve(item);
+      improve(item, user);
     }
   );
 }

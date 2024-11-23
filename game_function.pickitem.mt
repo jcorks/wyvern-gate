@@ -23,7 +23,25 @@
 
 
 
-return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, onHover, renderable, filter, keep, pageAfter, onCancel, showPrices, goldMultiplier, header) {
+return ::(
+  inventory => Inventory.type, 
+  canCancel => Boolean, 
+  onPick => Function, 
+  alternateNames, // map item to name string
+  leftWeight, 
+  topWeight, 
+  prompt, 
+  onGetPrompt, 
+  onHover, 
+  renderable, 
+  filter, 
+  keep, 
+  pageAfter, 
+  onCancel, 
+  showPrices, 
+  goldMultiplier, 
+  header
+) {
   @names = []
   @items = []
   @picked;
@@ -60,7 +78,7 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
         onHover : if (onHover)
           ::(choice) {
             when(choice == 0) empty;
-            onHover(item:inventory.items[choice-1])
+            onHover(item:items[choice-1])
           }
         else 
           empty,
@@ -85,12 +103,15 @@ return ::(inventory => Inventory.type, canCancel => Boolean, onPick => Function,
           });
 
           names = [...items]->map(to:::(value) <- 
-            value.name
+            if (alternateNames && alternateNames[value])
+              alternateNames[value]
+            else 
+              value.name
           );
           
           @:amounts = items->map(to:::(value) <-
             if (alreadyCounted[value.base.id]->type == Number && alreadyCounted[value.base.id] > 1)
-              'x'+alreadyCounted[value.base.id]  
+              '(x'+alreadyCounted[value.base.id]+')' 
             else if (value.faveMark != '')
               ' ' + value.faveMark
             else

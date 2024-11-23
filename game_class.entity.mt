@@ -727,10 +727,6 @@
     afterLoad :: {
       @:state = _.state;
       @:this = _.this;
-      foreach(state.equips) ::(k, equip) {
-        when(equip == empty) empty;
-        equip.equippedBy = this;
-      }
       state.battleAI.setUser(user:this);
     },
 
@@ -2311,7 +2307,6 @@
         }        
       }
       
-      item.equippedBy = this;
       
       if (_.effectStack) ::<= {
         foreach(item.equipEffects)::(index, effect) {
@@ -2379,7 +2374,6 @@
       when (current == empty) empty;
       state.equips[slot] = empty;        
       
-      current.equippedBy = empty;
 
 
       if (_.effectStack) ::<= {

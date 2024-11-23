@@ -79,6 +79,7 @@
       },
       
       getItem ::(condition, remove) {      
+        @heldBy;
         @:which = ::<= {
           @key = this.inventory.items->filter(:condition);
           when (key->size != 0) key[0];
@@ -89,6 +90,7 @@
               foreach(Entity.EQUIP_SLOTS) ::(n, slot) {
                 @:wep = member.getEquipped(slot);
                 if (condition(:wep)) ::<= {
+                  heldBy = member;
                   send(message:wep);
                 }
               }
@@ -96,8 +98,8 @@
           }        
         }
         if (remove) ::<= {
-          if (which.equippedBy != empty)
-            which.equippedBy.unequipItem(item:which);
+          if (heldBy != empty)
+            heldBy.unequipItem(item:which);
           which.throwOut();
         }
         return which;

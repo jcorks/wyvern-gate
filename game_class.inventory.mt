@@ -45,7 +45,6 @@
         when (item.base.id == 'base:none') false; // never accept None as a real item
         when (state.items->keycount == state.maxItems) false;
         state.items->push(value:item);
-        item.container = this;
         return true;
       },
       
@@ -64,7 +63,6 @@
         when(index == -1) empty;
         
         state.items->remove(key:index);
-        item.resetContainer();
         return item;
       },
       
@@ -106,26 +104,21 @@
       
       items : {
         get :: {
+          state.items = state.items->filter(::(value) <- value.base.id != 'base:none');
           return [...state.items];
         }
       },
       
       isEmpty : {
-        get ::<- state.items->keycount == 0
+        get ::<- this.items->keycount == 0
       },
       
       isFull : {
-        get :: <- state.items->keycount >= state.maxItems
+        get :: <- this.items->keycount >= state.maxItems
       },
       
       slotsLeft : {
-        get ::<- state.maxItems - state.items->keycount
-      },
-      
-      afterLoad ::{ 
-        foreach(state.items) ::(k, item) {
-          item.container = this;        
-        }
+        get ::<- state.maxItems - this.items->keycount
       }
     }
   }

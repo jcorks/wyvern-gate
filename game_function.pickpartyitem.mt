@@ -22,8 +22,10 @@
 
 return ::(canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, filter) {
   @:world = import(module:'game_singleton.world.mt');
-  @listNames = []
-  @listReal = []
+  @:inv = world.party.inventory.clone();
+  @:altNames = {};
+  @:equippedBy = {};
+  
 
   foreach(world.party.members) ::(k, member) {
     @:prefix = member.name + ": ";
@@ -34,37 +36,27 @@ return ::(canCancel => Boolean, onPick => Function, leftWeight, topWeight, promp
       when(item.base.id == 'base:none') empty;
       
       when(filter != empty && ! filter(item)) empty;
-      listNames->push(value: prefix + item.name);
-      listReal->push(value:item);
+
+      inv.add(:item);
+      altNames[item] = prefix + item.name;
+      equippedBy[item] = member;
     }
   }
   
-  foreach(world.party.inventory.items) ::(k, item) {
-    when(filter != empty && ! filter(item)) empty;
-    listReal->push(value:item);
-    listNames->push(value:item.name);
-  }
-  
+  @:pickItem = import(:'game_function.pickitem.mt');
 
-  when(listNames->keycount == 0) ::<={
-    windowEvent.queueMessage(text: "No items were found.");
-    onPick();
-  }
-
-  windowEvent.queueChoices(
+  pickItem(
+    inventory : inv,
     leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
     topWeight:  if (topWeight == empty)  1 else topWeight => Number,
+    filter,
+    alternateNames : altNames,
     prompt: if (prompt == empty) 'Choose a party item:' else prompt => String,
     onGetPrompt: onGetPrompt,
     canCancel: canCancel,
-    jumpTag: 'pickItem',
-    onGetChoices ::{
-      return listNames;
-    },
     keep:true,
-    onChoice ::(choice) {
-      when(choice == 0) onPick();
-      onPick(item:listReal[choice-1]);
+    onPick ::(item) {
+      onPick(item, equippedBy:equippedBy[item]);
     }
   );
 }

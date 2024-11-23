@@ -316,21 +316,22 @@ return ::{
 
 
                   @equip = ::{
+                    @:pickItem = import(:'game_function.pickitem.mt');
 
-                    @:items = party.inventory.items->filter(by:::(value) <- member.getSlotsForItem(item:value)->findIndex(value:slot) != -1);
-                    @:itemNames = [...items]->map(to:::(value) <- value.name);
-                    itemNames->push(value:'[Nothing]');
-                    @hovered;
-                    @:none = Item.new(base:Item.database.find(id:'base:none'));
-                    windowEvent.queueChoices(
+                    @:inv = party.inventory.clone();
+                    @:ph = Item.new(base:Item.database.find(id:'base:placeholder'));
+                    ph.name = '[Nothing]';
+                    inv.add(:ph);
+                    @hovered
+                    pickItem(
                       leftWeight: 0.8,
                       topWeight: 0.5,
-                      choices:itemNames,
+                      filter: ::(value) <- value.base.id == 'base:placeholder' || member.getSlotsForItem(item:value)->findIndex(value:slot) != -1,
+                      inventory : inv,
                       prompt: member.name + ': ' + slotToName(slot),
                       canCancel: true,
                       keep:true,
                       pageAfter: 9,
-                      jumpTag: 'EquipWhich',
                       renderable : {
                         render ::{
                           menuRenderable.render();
@@ -338,7 +339,8 @@ return ::{
                           
                           when(hovered == empty) empty;
                           
-                          @other = if (items[hovered] == empty) none else items[hovered];
+                          
+                          @other = hovered;
                           @:lines = StatSet.diffRateToLines(
                             stats:member.getEquipped(slot).equipMod, 
                             other:other.equipMod
@@ -353,15 +355,12 @@ return ::{
                           
                         }
                       },
-                      onHover::(choice) {
-                        hovered = choice-1;
-                      },
+                      onHover ::(item) <- hovered = item,
                       
-                      onChoice:::(choice) {
-                        @:index = choice -1;
+                      onPick:::(item) {
 
                         // unequip
-                        when (index == items->keycount) ::<= {
+                        when (item.base.id == 'base:placeholder') ::<= {
                           @item = member.getEquipped(slot);
                           if (item != empty && item.base.name != 'None') ::<= {
                             when(party.inventory.isFull)
@@ -375,10 +374,9 @@ return ::{
                             member.unequipItem(item);
                             party.inventory.add(item);
                           }
-                          windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
+                          windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true, doResolveNext:true);
                         }
                         
-                        @item = items[index];
 
                         windowEvent.queueChoices(
                           choices: ['Equip', 'Check', 'Rename', 'Compare'],
@@ -396,7 +394,7 @@ return ::{
                                 slot, 
                                 inventory:party.inventory
                               );
-                              windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
+                              windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true, doResolveNext:true);
                             }
                             
                             when(choice == 2) 
@@ -412,7 +410,7 @@ return ::{
                                 prompt: 'New item name:',
                                 onDone::(name) {
                                   item.name = name;
-                                  windowEvent.jumpToTag(name:'EquipWhich', goBeforeTag:true, doResolveNext:true);
+                                  windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true, doResolveNext:true);
                                 }
                               );
                             }

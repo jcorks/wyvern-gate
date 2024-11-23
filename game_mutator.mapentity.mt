@@ -264,7 +264,7 @@ MapEntity.Task.database.newEntry(
 
 // specter
 ::<= {
-
+  @:itemToEquipper = [];
   @:fetchAllPartyItems ::{
     @:party = world.party;
     @:items = [...party.inventory.items];
@@ -276,6 +276,7 @@ MapEntity.Task.database.newEntry(
         when(item.base.id == 'base:none') empty;
         
         items->push(value:item);
+        itemToEquipper[item] = member;
       }        
     }
     return items;
@@ -332,7 +333,7 @@ MapEntity.Task.database.newEntry(
     
     @:theDesired = items[items->size-1];
     windowEvent.queueMessage(
-      text: '... The ' + theDesired.name + (if (theDesired.equippedBy != empty) " that " + theDesired.equippedBy.name + " holds" else '') + "... It now belongs to the Shrines..."
+      text: '... The ' + theDesired.name + (if (itemToEquipper[theDesired] != empty) " that " + itemToEquipper[theDesired].name + " holds" else '') + "... It now belongs to the Shrines..."
     );
 
     windowEvent.queueMessage(
@@ -384,11 +385,11 @@ MapEntity.Task.database.newEntry(
         
         
         // else you agree to fork it over and live another day 
-        if (theDesired.equippedBy != empty) ::<= {
+        if (itemToEquipper[theDesired] != empty) ::<= {
           windowEvent.queueMessage(
-            text: 'The ' + theDesired.name + ' vanished from ' + theDesired.equippedBy.name + '!'
+            text: 'The ' + theDesired.name + ' vanished from ' + itemToEquipper[theDesired].name + '!'
           );
-          theDesired.equippedBy.unequipItem(item:theDesired);
+          itemToEquipper[theDesired].unequipItem(item:theDesired);
         } else 
           windowEvent.queueMessage(
             text: 'The ' + theDesired.name + ' vanished from the party\'s inventory!'

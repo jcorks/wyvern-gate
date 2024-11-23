@@ -3802,7 +3802,7 @@ return {
                   );              
                 }
                 
-                @:doSpell::(enhanced, catalyst) {
+                @:doSpell::(enhanced, catalyst, equippedBy) {
 
                   @:newQual = ::<= {
                     // default -> Apprentice
@@ -3839,7 +3839,7 @@ return {
                       if (random.flipCoin()) ::<= {
                         windowEvent.queueMessage(text:'...before flashing!');  
                         windowEvent.queueMessage(speaker:'Juhriikaal', text:'Ah! It looks like it was successful.');                
-                        @:whom = enhanced.equippedBy;
+                        @:whom = equippedBy;
                         @oldStats;
                         @slot;
                         if (whom != empty) ::<= {
@@ -3856,7 +3856,7 @@ return {
                         windowEvent.queueMessage(speaker:'Juhriikaal', text:'Well... Sometimes this happens. Materialization magic is quite volatile...');                
                       }
                       
-                      world.party.inventory.remove(item:catalyst);
+                      catalyst.throwOut();
                       world.party.inventory.subtractGold(amount:500);
                       tryAgain();
                     }
@@ -3892,7 +3892,7 @@ return {
                     topWeight: 0.5,
                     leftWeight: 0.5,
                     prompt:'Choose an item to enhance:',
-                    onPick ::(item) {
+                    onPick ::(item, equippedBy) {
                       when (item == empty) ::<= {
                         windowEvent.queueMessage(speaker:'Juhriikaal', text:'Ah I see. I will still be here if you change your mind.');
                         windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);
@@ -3901,6 +3901,7 @@ return {
                           onLeave::{doNext();}                  
                         );                
                       }
+                      @:holder = equippedBy;
 
                       when (item.base.hasTraits(:Item.TRAIT.HAS_QUALITY)) ::<= {
                         windowEvent.queueMessage(speaker:'Juhriikaal', text:'Chosen I am sorry, this item cannot have its quality improved.');                
@@ -3921,7 +3922,7 @@ return {
                         filter ::(item) <- 
                           item.base.hasTraits(:Item.TRAIT.HAS_QUALITY) && 
                           item.quality == enhanced.quality && item != enhanced,
-                        onPick ::(item) {
+                        onPick ::(item, equippedBy) {
                           when (item == empty) ::<= {
                             windowEvent.queueMessage(speaker:'Juhriikaal', text:'Oh... It looks like you have no item elligible as a catalyst for this item. I am sorry. Remember: catalysts need to be the same quality as the item to enhance.');                
                             tryAgain();                      
@@ -3946,7 +3947,7 @@ return {
                           windowEvent.queueMessage(speaker:'Juhriikaal', text:'Now. Let me cast the spell.');                
                           windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);
                           
-                          doSpell(enhanced, catalyst);                       
+                          doSpell(enhanced, catalyst, equippedBy:holder);                       
                         }
                       )
                     }
