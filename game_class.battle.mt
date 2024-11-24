@@ -451,7 +451,7 @@
 
 
         // may have died this turn.
-        when (ent.isIncapacitated()) ::<={
+        when (!ent.canActThisTurn()) ::<={
           endTurn();
         }
         
@@ -461,24 +461,9 @@
           action.turnIndex += 1;
           
           
-          @:ret = ent.useArt(
-            art:action.art,
-            targets:action.targets,
-            targetParts:action.targetParts,
-            targetDefendParts: [],
-            turnIndex : action.turnIndex,
-            extraData : action.extraData
-          );
-          ent.flags.add(flag:StateFlags.WENT);
-
+          this.entityCommitAction(action:actions[ent]);
           
-          if (action.turnIndex >= action.art.durationTurns || ret == Arts.CANCEL_MULTITURN) ::<= {
-            actions[ent] = empty;
-          }
-          endTurn();
         } else ::<= {
-
-
           // normal turn: request action from the act function
           // given by the caller
           @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
@@ -487,9 +472,9 @@
             user:ent,
             landmark:landmark_
           );
-          if (onAct_) onAct_();
-          
         }        
+        if (onAct_) onAct_();
+
       });
     }
     
@@ -700,6 +685,7 @@
         onStart,
         onEnd => Function
       ) {
+        actions = {} 
         defeated = {};
         onTurn_ = onTurn;
         onAct_ = onAct;
@@ -1036,7 +1022,7 @@
         @:entAct = if (from != empty) from else entityTurn;
       
         // failsafe. not normally needed.
-        when (entAct.isIncapacitated())
+        when (!entAct.canActThisTurn())
           endTurn();
         
         @:passesCheck ::{
@@ -1077,8 +1063,13 @@
               art.name != 'Use Item')
               entAct.flags.add(flag:StateFlags.ABILITY);
 
-            if (art.durationTurns > 0 && useArtReturn != Arts.CANCEL_MULTITURN) ::<= {
-              actions[entAct] = action;
+            if (art.durationTurns > 0) ::<= {
+              breakpoint();
+              if (actions[entAct] == action && (action.turnIndex >= art.durationTurns || useArtReturn == Arts.CANCEL_MULTITURN)) ::<= {
+                actions[entAct] = empty;
+              } else if (useArtReturn != Arts.CANCEL_MULTITURN) ::<= {
+                actions[entAct] = action;
+              }
             }
 
 
@@ -1113,7 +1104,7 @@
       
         // react andy time
         @checkReactions ::(onPass, onReject) {
-          @toReact = getAll()->filter(::(value) <- value.isIncapacitated() == false && value.deck.containsReaction());
+          @toReact = getAll()->filter(::(value) <- value.canActThisTurn() && value.deck.containsReaction());
           toReact->sort(:::(a, b) <- a.stats.SPD > b.stats.SPD);
           when(toReact->size == 0)
             onPass();
@@ -1132,7 +1123,7 @@
                 when(action == empty)
                   tryNext();
                   
-                when(reactor.isIncapacitated())
+                when(!reactor.canActThisTurn())
                   windowEvent.queueCustom(
                     onEnter ::{
                       tryNext();
@@ -1207,7 +1198,6 @@
         }
       
       
-        action.turnIndex = 0;
         entAct.deck.discardFromHand(card:action.card);
         windowEvent.onResolveAll(
           onDone :: {
@@ -1228,7 +1218,7 @@
                   onPass::{
                     windowEvent.queueCustom(
                       onEnter ::{
-                        when (entAct.isIncapacitated())
+                        when (!entAct.canActThisTurn())
                           endTurn();
                         chooseDefend(::{
                           doAction();

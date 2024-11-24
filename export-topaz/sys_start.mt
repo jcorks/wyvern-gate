@@ -142,10 +142,16 @@ return ::(terminal, arg, onDone) {
             ) {
 
                 //Paths.enter(::{                
+                    @:Filesystem = import(:'Matte.System.Filesystem');
                     @:outputPath =  'WYVERNSAVE_' + slot;
                     @:basePath = Topaz.Resources.getPath();
+
+
+                    when (data->type == String && data == '') 
+                        Filesystem.remove(path:basePath + '/' + outputPath);
+                
+                
                     
-                    @:Filesystem = import(:'Matte.System.Filesystem');
                     Filesystem.writeJSON(
                       path: basePath + '/' + outputPath,
                       object:data 

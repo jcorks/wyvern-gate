@@ -868,6 +868,7 @@
           island = alreadyLoaded 
         else ::<= {
           island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
+          State.weightCheck(:which);
           island.load(serialized:which);
         }
         

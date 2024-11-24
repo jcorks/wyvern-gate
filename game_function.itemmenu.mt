@@ -76,7 +76,9 @@ return ::(
           commitAction(action:BattleAction.new(
               card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
               targets: [all[choice-1]],
-              extraData : [choiceItem]
+              extraData : [choiceItem],
+              turnIndex : 0,
+              targetParts : []
             ) 
           );              
           if (windowEvent.canJumpToTag(name:'Item'))
@@ -105,7 +107,9 @@ return ::(
           commitAction(action:BattleAction.new(
               card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
               targets: if (choice == 1) party.members else enemies,
-              extraData : [choiceItem]
+              extraData : [choiceItem],
+              turnIndex : 0,
+              targetParts : []
             ) 
           );          
           if (windowEvent.canJumpToTag(name:'Item'))
@@ -119,7 +123,9 @@ return ::(
         commitAction(action:BattleAction.new(
             card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
             targets: [...party.members, ...enemies],
-            extraData : [choiceItem]
+            extraData : [choiceItem],
+            turnIndex : 0,
+            targetParts : []
           ) 
         );          
         if (windowEvent.canJumpToTag(name:'Item'))
@@ -131,7 +137,9 @@ return ::(
         commitAction(action:BattleAction.new(
             card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
             targets: [],
-            extraData : [choiceItem]
+            extraData : [choiceItem],
+            turnIndex : 0,
+            targetParts : []
           ) 
         );          
         if (windowEvent.canJumpToTag(name:'Item'))
@@ -160,7 +168,9 @@ return ::(
       commitAction(action:BattleAction.new(
         card : ArtsDeck.synthesizeHandCard(id:'base:equip-item'),
         targets: [user],
-        extraData : [choiceItem, party.inventory]
+        extraData : [choiceItem, party.inventory],
+        turnIndex : 0,
+        targetParts : []
       ));       
       if (windowEvent.canJumpToTag(name:'Item'))
         windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);      

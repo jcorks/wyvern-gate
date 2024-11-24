@@ -331,7 +331,7 @@ return empty;
                           }
                           
                           if (data.worldlyTether != empty) ::<= {
-                            this.savestate(saveOverride:'', nameOverride:'_Quick Save_');
+                            this.savestate(saveOverride:'', nameOverride:'.Quick Save.');
                           }
 
                           pointOfNoReturn(
@@ -1104,7 +1104,7 @@ return empty;
         @:data = world.save();
         data.worldlyTether = 'This binding may be removed, but be aware: there may be consequences. Those who are more inclined to deal with the arcane arts maybe have an easier time avoiding these.';   
         onSaveState(
-          slot:'_Quick Save_',
+          slot:'.Quick Save.',
           data
         )
       },

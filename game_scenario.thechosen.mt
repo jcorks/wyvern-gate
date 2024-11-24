@@ -737,7 +737,6 @@ return {
         fieldFormatters : {
           ('Name') ::(item) <- item.name,
           ('ID') ::(item) <- item.id,
-          ('Battle only?') ::(item) <- if (item.battleOnly) 'yes' else 'no',
           ('Flags') ::(item) {
             @:traits = [];
             @trait = item.flags;
@@ -2715,7 +2714,6 @@ return {
         name : 'Sentimental Box',
         id : 'thechosen:sentimental-box',
         description: 'Opens the box.',
-        battleOnly : true,
         skipTurn : false,
         stackable: true,
         blockPoints : 0,

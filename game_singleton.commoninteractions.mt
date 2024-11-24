@@ -138,7 +138,9 @@ return {
           BattleAction.new(
             card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
             targets: [],
-            extraData: {}
+            extraData: {},
+            turnIndex : 0,
+            targetParts : []
           )        
         );
       }

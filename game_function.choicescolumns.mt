@@ -57,7 +57,6 @@ return ::(*args) {
       columnSizes[i] = max;
     }
     
-    breakpoint();
 
     @:choices = [];  
     @:combine = [];

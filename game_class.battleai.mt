@@ -36,6 +36,7 @@
 
       onCommit(:BattleAction.new(
         card: ArtsDeck.synthesizeHandCard(id:'base:attack'),
+        turnIndex : 0,
 
         targets: [
           Random.pickArrayItem(list:enemies)
@@ -170,6 +171,7 @@
         }
         onCommit(:BattleAction.new(
           card,
+          turnIndex : 0,
           targets: targets,
           targetParts : targetParts,
           extraData: {}            
@@ -193,6 +195,7 @@
             acts->push(:BattleAction.new(
               card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
               targets: [],
+              turnIndex : 0,
               targetParts : [],
               extraData: {}
             ))

@@ -576,7 +576,8 @@
     requestsRemove : Boolean,
     onInteract : Function,
     abilitiesUsedBattle : Nullable,
-    owns : Nullable
+    owns : Nullable,
+    canActThisTurn : Boolean
   },
   
   
@@ -768,6 +769,7 @@
       _.requestsRemove = false;
       _.abilitiesUsedBattle = {}
       _.effectStack = EffectStack.new(parent:this);
+      _.canActThisTurn = true;
       foreach(this.species.passives)::(index, passiveName) {
         this.effectStack.addInnate(id:passiveName);
       }      
@@ -1164,6 +1166,12 @@
       @:equips = state.equips;
       this.effectStack.endTurn();
     },
+    
+    canActThisTurn :: {
+      when(_.this.isIncapacitated()) false;
+      when(_.canActThisTurn == false) false;
+      return true;
+    },
 
     // lets the entity know that their turn has come.      
     actTurn ::() => Boolean {
@@ -1179,8 +1187,13 @@
         name : 'onNextTurn'
       );      
       this.checkStatChanged();
+      @:priv = _;
+      _.canActThisTurn = true;
 
-      when(rets->findIndexCondition(::(value) <- value.returned == false) != -1) false;
+      when(rets->findIndexCondition(::(value) <- value.returned == false) != -1) ::<= {
+        priv.canActThisTurn = false;
+        return false;
+      }
       
       if (this.stats.SPD < 0) ::<= {
         windowEvent.queueMessage(text:this.name + ' cannot move! (negative speed)');
@@ -1194,6 +1207,7 @@
 
       if (act == false)
         this.flags.add(flag:StateFlags.SKIPPED);
+      _.canActThisTurn = act;
       return act;
     },
 
@@ -2547,6 +2561,7 @@
                     chooseOnePart(onDone::(which){
                       battleAction = BattleAction.new(
                         card,
+                        turnIndex : 0,
                         targets: [all[choice-1]],
                         targetParts: [which],
                         extraData: {}
@@ -2555,6 +2570,7 @@
                   } else ::<= {
                     battleAction = BattleAction.new(
                       card,
+                      turnIndex : 0,
                       targets: [all[choice-1]],
                       targetParts: [Entity.normalizedDamageTarget()],
                       extraData: {}
@@ -2568,6 +2584,7 @@
               battleAction=
                 BattleAction.new(
                   card,
+                  turnIndex : 0,
                   targets: allies,
                   targetParts: [...allies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
                   extraData: {}
@@ -2579,6 +2596,7 @@
               battleAction=
                 BattleAction.new(
                   card,
+                  turnIndex : 0,
                   targets: enemies,
                   targetParts: [...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
                   extraData: {}                
@@ -2589,6 +2607,7 @@
               battleAction=
                 BattleAction.new(
                   card,
+                  turnIndex : 0,
                   targets: [...allies, ...enemies],
                   targetParts: [...allies, ...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
                   extraData: {}                
@@ -2601,6 +2620,7 @@
               battleAction=
                 BattleAction.new(
                   card,
+                  turnIndex : 0,
                   targets: [],
                   targetParts : [],
                   extraData: {}                
@@ -2619,7 +2639,9 @@
               battleAction=
                 BattleAction.new(
                   card,
+                  turnIndex : 0,
                   targets: random.pickArrayItem(list:all),
+                  targetParts : [Entity.normalizedDamageTarget()],
                   extraData: {}                
                 )
             }
