@@ -283,7 +283,10 @@ var startGame = function(touch) {
               
             case 'save': {
               var storage = window['localStorage'];
-              storage[data.name] = data.data;                
+              if (data.data == undefined || data.data == '' || data.data == '""')
+                    delete storage[data.name];
+              else 
+                    storage[data.name] = data.data;                
 
               postMessageWorker({
                   command: 'deliverSaves',
