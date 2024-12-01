@@ -27,30 +27,12 @@
 //@:input = import(module:'input.mt');
 
 
-@:godot_sendLine = getExternalFunction(:"wyvern_gate__native__godot_send_line");
 @:godot_requestExit = getExternalFunction(:"wyvern_gate__native__godot_request_exit");
 
 @MOD_DIR = './mods';
 
 
-@currentCanvas;
-@canvasChanged = false;
 
-@:rerender = ::{
-  console.clear();
-  @:lines = currentCanvas;
-  foreach(lines) ::(index, line) {
-    godot_sendLine(index, line);
-  }
-  canvasChanged = false;   
-  canvas.onFrameComplete();
-}
-canvas.onCommit = ::(lines, renderNow){
-  currentCanvas = lines;
-  canvasChanged = true;
-  //if (renderNow != empty)
-    rerender();
-}
 
 
 

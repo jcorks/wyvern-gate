@@ -16,20 +16,37 @@ default_font_size = 16
 
 [node name="Canvas" type="Control" parent="."]
 unique_name_in_owner = true
+texture_filter = 1
 layout_mode = 3
 anchors_preset = 0
 offset_right = 1151.0
 offset_bottom = 645.0
+scale = Vector2(2, 2)
 script = ExtResource("2_q7hah")
 canvasTheme = SubResource("Theme_2eiqc")
+color = Color(0.727562, 0.942157, 0.895118, 1)
 
 [node name="ErrorLabel" type="RichTextLabel" parent="Canvas"]
 unique_name_in_owner = true
 modulate = Color(1, 0, 0, 1)
 layout_mode = 0
-offset_right = 1153.0
-offset_bottom = 651.0
+offset_right = 582.0
+offset_bottom = 318.0
 theme = SubResource("Theme_hc8ym")
+
+[node name="Background" type="ColorRect" parent="Canvas"]
+unique_name_in_owner = true
+z_index = -3
+layout_mode = 0
+offset_top = 1.0
+offset_right = 1149.0
+offset_bottom = 648.0
+color = Color(0.127604, 0.127565, 0.229391, 1)
 
 [node name="Matte" type="Matte" parent="."]
 script = ExtResource("1_ls3qc")
+
+[node name="Timer" type="Timer" parent="Matte"]
+unique_name_in_owner = true
+wait_time = 0.042
+autostart = true

@@ -14,3 +14,11 @@ config/name="Wyvern-Gate"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+flowerwall_pp_autoload="*res://addons/flowerwall_postprocess/scenes/flowerwall_pp.tscn"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/flowerwall_postprocess/plugin.cfg")
