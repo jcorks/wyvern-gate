@@ -14,16 +14,17 @@ env = SConscript("godot-cpp/SConstruct")
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=["src/"])
-sources = Glob("src/*.cpp")
-sources += Glob("../../export-cli/matte/src/*.c");
-sources += Glob("../../export-cli/matte/src/rom/native.c 
+env['CC'] = env['CXX'] # because of the C code it tries to be "smart"
+sources = Glob("../export-cli/matte/src/*.c")
+sources += Glob("../export-cli/matte/src/rom/native.c")
+sources += Glob("src/*.cpp")
 
-CPPFLAGS += ["-DMATTE_USE_SYSTEM_EXTENSIONS", "-DMATTE_USE_SYSTEM_EXTENSIONS__BASIC"]
-CXXFLAGS += ["-lm", "-lpthread"]
+env.Append(CPPFLAGS=["-DMATTE_USE_SYSTEM_EXTENSIONS", "-DMATTE_USE_SYSTEM_EXTENSIONS__BASIC"])
+env.Append(CXXFLAGS=["-lm", "-lpthread"])
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
-        "project/bin/libmatte.{}.{}.framework/libgdexample.{}.{}".format(
+        "project/bin/matte.{}.{}.framework/matte.{}.{}".format(
             env["platform"], env["target"], env["platform"], env["target"]
         ),
         source=sources,
@@ -31,17 +32,17 @@ if env["platform"] == "macos":
 elif env["platform"] == "ios":
     if env["ios_simulator"]:
         library = env.StaticLibrary(
-            "project/bin/libmatte.{}.{}.simulator.a".format(env["platform"], env["target"]),
+            "project/bin/matte.{}.{}.simulator.a".format(env["platform"], env["target"]),
             source=sources,
         )
     else:
         library = env.StaticLibrary(
-            "project/bin/libmatte.{}.{}.a".format(env["platform"], env["target"]),
+            "project/bin/matte.{}.{}.a".format(env["platform"], env["target"]),
             source=sources,
         )
 else:
     library = env.SharedLibrary(
-        "project/bin/libmatte{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "project/bin/matte{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 

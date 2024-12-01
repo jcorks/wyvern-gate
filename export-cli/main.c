@@ -5,6 +5,11 @@
 #include "matte/src/matte_store.h"
 #include "matte/src/matte_string.h"
 
+#ifdef __WIN32__
+#include <windows.h>
+#include <stdio.h>
+#endif
+
 
 
 // Provided by native.c, binds native function implementations 
@@ -27,6 +32,11 @@ static int contains_arg(int argc, char ** argv, const char * hint) {
 
 // Sets up Matte runtime and runs cli.mt
 int main(int argc, char ** argv) {
+    #ifdef __WIN32__
+        SetConsoleOutputCP(CP_UTF8);
+        setvbuf(stdout, NULL, _IOFBF, 1000);
+    #endif
+
     matte_t * m = matte_create();
     
     wyvern_gate_add_native(m);

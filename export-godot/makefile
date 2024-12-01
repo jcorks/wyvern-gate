@@ -1,1 +1,2 @@
-scons platform=windows
+all:
+	scons platform=windows

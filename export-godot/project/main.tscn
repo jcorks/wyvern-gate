@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://tlfvax555a0o"]
+
+[ext_resource type="Script" path="res://matte.gd" id="1_ls3qc"]
+[ext_resource type="Script" path="res://canvas.gd" id="2_q7hah"]
+[ext_resource type="FontFile" uid="uid://ceho7qf2yyayw" path="res://font.ttf" id="3_slbsg"]
+
+[sub_resource type="Theme" id="Theme_2eiqc"]
+default_font = ExtResource("3_slbsg")
+default_font_size = 16
+
+[sub_resource type="Theme" id="Theme_hc8ym"]
+default_font = ExtResource("3_slbsg")
+default_font_size = 16
+
+[node name="Main" type="Node2D"]
+
+[node name="Canvas" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1151.0
+offset_bottom = 645.0
+script = ExtResource("2_q7hah")
+canvasTheme = SubResource("Theme_2eiqc")
+
+[node name="ErrorLabel" type="RichTextLabel" parent="Canvas"]
+unique_name_in_owner = true
+modulate = Color(1, 0, 0, 1)
+layout_mode = 0
+offset_right = 1153.0
+offset_bottom = 651.0
+theme = SubResource("Theme_hc8ym")
+
+[node name="Matte" type="Matte" parent="."]
+script = ExtResource("1_ls3qc")
