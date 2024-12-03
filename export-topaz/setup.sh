@@ -6,7 +6,7 @@ git clone https://github.com/jcorks/topaz/
 cd ./topaz/ && git pull && cd ..
 cd ../ && ./git_hooks/post-commit && cd ./export-topaz
 cp ../GIT_COMMIT ./output/
-cp ./sys_* ./output/
+cp ./topaz_* ./output/
 cd ./topaz/system/script/matte/src
 ./get_matte.sh
 cd ./matte

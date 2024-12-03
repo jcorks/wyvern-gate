@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:Topaz = import(module:'Topaz');
-@:paths = import(module:'sys_path.mt');
+@:paths = import(module:'topaz_paths.mt');
 return ::<= {
 
 

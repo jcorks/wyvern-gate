@@ -19,7 +19,7 @@
 //@:Random = import(module:'singleton.random.mt');
 @:Topaz   = import(module:'Topaz');
 @:class   = import(module:'Matte.Core.Class');
-@:Settings = import(:'sys_settings.mt');
+@:Settings = import(:'topaz_settings.mt');
 @:display = Topaz.ViewManager.getDefault();
 
 
@@ -31,7 +31,7 @@ display.setParameter(
 
 // create font asset
 @:font = Topaz.Resources.createDataAssetFromPath(
-    path:'sys_FSEX300.ttf',
+    path:'topaz_font.ttf',
     name:'Monospace'
 );
 Topaz.FontManager.registerFont(asset:font);
@@ -40,8 +40,8 @@ Topaz.FontManager.registerFont(asset:font);
 
 if (Settings.getObject().disableShaders != true) ::<= {
     @:shader = Topaz.Resources.createDataAssetFromPath(
-        path:'sys_crt.glsl',
-        name:'sys_crt.glsl'
+        path:'topaz_crt.glsl',
+        name:'topaz_crt.glsl'
     );
 
     @:ret = display.setPostProcessShader(

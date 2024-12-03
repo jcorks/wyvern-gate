@@ -89,7 +89,7 @@ int main(int argc, char ** argv) {
         
     }
 
-    path = topaz_string_create_from_c_str("sys_main.mt");
+    path = topaz_string_create_from_c_str("topaz_main.mt");
         
 
     

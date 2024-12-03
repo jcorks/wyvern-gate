@@ -1,52 +1,49 @@
-/*
-    Wyvern Gate, a procedural, console-based RPG
-    Copyright (C) 2023, Johnathan Corkery (jcorkery@umich.edu)
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
 @:Topaz = import(module:'Topaz');
-@Shell = import(module:'sys_shell.mt');
-@:Paths = import(module:'sys_path.mt');
+@:Terminal = import(module:'topaz_terminal.mt');
+@Settings = import(:'topaz_settings.mt');
+@:settings = Settings.getObject();
+
+
+
+
+@:Shell = import(module:'topaz_shell.mt');
+@:Topaz = import(module:'Topaz');
 @:JSON = import(module:'Matte.Core.JSON');
-@:Settings = import(module:'sys_settings.mt')
+@:Settings = import(module:'topaz_settings.mt')
 
 @:FRAME_ANIMATION_POST_MS = 32;
 
+
+@:Paths = import(:'topaz_paths.mt');
+
+
+
+
 Paths.setMainPath(::<= {
-        return {:::} {
-            foreach(Topaz.getArguments()) ::(k, arg) {
-                if (arg->contains(key:'savelocation:'))
-                    send(
-                        message:arg->substr(
-                            from:'savelocation:'->length, 
-                            to:arg->length-1
-                        )
-                    ) 
-                        
-            }
-            
-            return Topaz.Resources.getPath();
+    return {:::} {
+        foreach(Topaz.getArguments()) ::(k, arg) {
+            if (arg->contains(key:'savelocation:'))
+                send(
+                    message:arg->substr(
+                        from:'savelocation:'->length, 
+                        to:arg->length-1
+                    )
+                ) 
+                    
         }
+        
+        return Topaz.Resources.getPath();
     }
-)
+})
 @MOD_DIR = 'mods';
 
 
 
 
 
-return ::(terminal, arg, onDone) {
+@:start = ::(terminal, arg, onDone) {
     terminal.clear();
     terminal.print(line:'Starting program...');
     @counter = 10;
@@ -290,3 +287,64 @@ return ::(terminal, arg, onDone) {
 
     }
 }
+
+
+    
+
+
+// if topaz is detected, setup its canvas and main loop
+
+@:term = Terminal.new();
+
+@:PADDING = 6;
+@:display = Topaz.ViewManager.getDefault();
+@:displayWidth = ::{
+    return display.getParameter(param:Topaz.Display.Parameter.Width);
+}
+
+@:displayHeight = ::{
+    return display.getParameter(param:Topaz.Display.Parameter.Height);
+}
+
+display.setName(name:"tOS");
+
+term.setPosition(value:{
+    x: -term.widthPixels/2 + PADDING/2 - 2,
+    y:  term.heightPixels/2+ PADDING/2
+});
+
+display.getViewport().resize(
+    width :term.widthPixels + PADDING*2,
+    height:term.heightPixels + PADDING*2
+);
+
+
+display.getViewport().attach(child:term);
+//display.getViewport().setFiltered(enabled:false);
+
+if (settings.fullscreen == true || settings.fullscreen == empty)
+    display.setParameter(
+        param:Topaz.Display.Parameter.Fullscreen,
+        value:true
+    );
+    
+if (settings.showConsole == true) ::<= {
+    Topaz.Console.enable(:true);
+    Topaz.Console.print(:'Hello! This is the debug console for Wyvern Gate. Errors will be listed here in full.')
+}
+
+
+
+term.clear();
+Shell.start(terminal:term);
+start(terminal:term, onDone::{
+    term.clear();
+    term.print(line:'Shutting down...');
+
+    @counter = 100;
+    Shell.onProgramCycle = ::{
+        counter -= 1;
+        if (counter <= 0 && Number.random() > 0.9)
+            Topaz.quit();
+    }
+});

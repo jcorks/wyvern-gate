@@ -17,7 +17,7 @@ return class(
         @onProgramCycle = ::{}
         @onProgramUnicode = ::(unicode){}
         @onProgramKeyboard = ::(input, value){}
-        @programActive = false;
+        @programActive = true;
         @padHint = 0;
         @padListener;
 
@@ -44,21 +44,6 @@ return class(
         }
 
         @:runCommand = ::(command, arg) {
-            @:mod = import(module:'sys_'+command+'.mt');
-            programActive = true;
-            {:::} {
-                mod(terminal:term, arg, onDone::(message){
-                    printPrompt();
-                    programActive = false;
-                    onProgramCycle = ::{}
-                    onProgramUnicode = ::(unicode){}
-                    onProgramKeyboard = ::(input, value){}
-                });
-            } : {
-                onError:::(message) {
-                    endProgramError(message);
-                }
-            }
         }
         
         @:padDirStates = [
@@ -317,7 +302,7 @@ return class(
                                   ||
                                 ((input == Topaz.Key.enter) && altHeld)
                             ) ::<= {
-                                @:Settings = import(:'sys_settings.mt');
+                                @:Settings = import(:'topaz_settings.mt');
                                 @:props = {
                                     fullscreen : if(Topaz.ViewManager.getDefault().getParameter(param:Topaz.Display.Parameter.Fullscreen)==1) false else true
                                 }
