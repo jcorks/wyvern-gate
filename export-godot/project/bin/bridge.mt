@@ -28,6 +28,7 @@
 
 
 @:godot_requestExit = getExternalFunction(:"wyvern_gate__native__godot_request_exit");
+@:godot_updateSettings = getExternalFunction(:"wyvern_gate__native__godot_update_settings");
 
 @MOD_DIR = './mods';
 
@@ -63,6 +64,14 @@
 instance.mainMenu(
   canvasWidth: 80,
   canvasHeight: 22,
+  features :
+    instance.FEATURES.FULLSCREEN |
+    instance.FEATURES.CRT_SHADER |
+    instance.FEATURES.INPUT_MAPPING |
+    instance.FEATURES.AUDIO |
+    instance.FEATURES.BGFG |
+    instance.FEATURES.DEBUGGING,
+
   onSaveState :::(
     slot,
     data
@@ -134,6 +143,7 @@ instance.mainMenu(
   },
   
   onSaveSettings ::(data){
+    godot_updateSettings(:data);
     enterNewLocation(
       path: './',
       action::(filesystem) {

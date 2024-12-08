@@ -1727,7 +1727,7 @@
               world.party.inventory.addGold(amount:rent);
               @investments = rent;
               if (rent > 0)
-                status = status + "  Rent     : +" + g(g:rent) + "\n";
+                status = status + "  Rent       : +" + g(g:rent) + "\n";
               
 
               rent = 0;
@@ -1759,7 +1759,7 @@
               world.party.inventory.addGold(amount:rent);
               investments += rent;
               if (rent != 0)
-                status = status + "  Businesses   : " + (if (rent >= 0) '+' + g(g:rent) else g(g:rent)) + "\n";
+                status = status + "  Businesses : " + (if (rent >= 0) '+' + g(g:rent) else g(g:rent)) + "\n";
 
 
               status 
@@ -3047,7 +3047,13 @@
   InteractionMenuEntry.new(
     name: 'Hire with contract',
     keepInteractionMenu: true,
-    filter ::(entity)<- true,
+    filter ::(entity) {
+      @:world = import(module:'game_singleton.world.mt');
+      @:party = world.party;
+      @:trader = world.scenario.data.trader;
+
+      return trader.state.sellingLevel >= LEVEL_HIRE_EMPLOYEES;
+    },
     onSelect ::(entity, location) {
       @:this = entity;
       when(this.isIncapacitated())

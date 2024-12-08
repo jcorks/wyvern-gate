@@ -228,7 +228,10 @@ return class(
         "bgColor" : {"r":[0-1], "g":[0-1], "b":[0-1]},
         "fgColor" : {"r":[0-1], "g":[0-1], "b":[0-1]},
       */
-      BGFG : 32      
+      BGFG : 32,
+
+      // Enables Matte debugging
+      DEBUGGING : 64
     };
     @features_ = 0;
     
@@ -280,7 +283,8 @@ return class(
         settings.volumeBGM = 0.5;
         settings.volumeSFX = 0.7;
         settings.bgColor = [33, 33, 58];
-        settings.fgColor = [128, 255, 212];
+        settings.fgColor = [186, 240, 228];
+        settings.debugMode = false;
         this.updateSettings();
       },
       
@@ -299,12 +303,32 @@ return class(
         foreach(FEATURES) ::(k, i) <-
           if ((features_ & i) != 0)
             match(i) {
+              (FEATURES.DEBUGGING): ::<={
+                opts->push(:'Debug Mode');
+                optActs->push(::{
+                  windowEvent.queueAskBoolean(
+                    onGetPrompt::<- 'Toggle Debug Mode? (currently: ' + (if(settings.debugMode) 'Enabled' else 'Disabled') + ')',
+                    onChoice::(which) {
+                      when(which == false) empty;
+                      settings.debugMode = !settings.debugMode;
+                      this.updateSettings();
+
+                      windowEvent.queueMessage(
+                        text: 'A restart of the program is required for this to take effect. We recommend disabling fullscreen and running a console mode for debugging.'
+                      )
+                    }
+                  );
+                });
+              },
+
+
               (FEATURES.FULLSCREEN): ::<={
                 opts->push(:'Fullscreen');
                 optActs->push(::{
                   windowEvent.queueAskBoolean(
                     onGetPrompt::<- 'Toggle fullscreen? (currently: ' + (if(settings.fullscreen) 'Enabled' else 'Disabled') + ')',
                     onChoice::(which) {
+                      when(which == false) empty;
                       settings.fullscreen = !settings.fullscreen;
                       this.updateSettings();
                     }
@@ -319,6 +343,7 @@ return class(
                   windowEvent.queueAskBoolean(
                     onGetPrompt::<- 'Toggle CRT? (currently: ' + (if(settings.crtShader) 'Enabled' else 'Disabled') + ')',
                     onChoice::(which) {
+                      when(which == false) empty;
                       settings.crtShader = !settings.crtShader;
                       this.updateSettings();
                     }
@@ -423,8 +448,10 @@ return class(
         if (settings == empty) ::<= {
           settings = {}
           this.defaultSettings();
-        } else 
+        } else ::<= {
           settings = JSON.decode(string:settings);
+          this.updateSettings();
+        }
         
 
 

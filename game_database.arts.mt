@@ -2436,7 +2436,7 @@ Arts.newEntry(
     id : 'base:fire',
     notifCommit : '$1 casts Fire on $2!',
     notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.ONE,
+    targetMode : TARGET_MODE.ONEPART,
     description: 'Magick that damages a target with fire based on INT. Additional levels increase its potency.',
     keywords : [],
     durationTurns: 0,
@@ -6807,7 +6807,7 @@ Arts.newEntry(
                   
 
       foreach(effects) ::(k, v) {
-        @:newEffect = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.TRAIT.SPECIAL) == 0);
+        @:newEffect = Effect.getRandomFiltered(::(value) <- (value.traits & Effect.TRAIT.SPECIAL) == 0);
         user.addEffect(
           durationTurns: v.duration,
           id:newEffect.id,
@@ -7282,7 +7282,7 @@ Arts.newEntry(
       when(all->size == 0) Arts.FAIL;
             
       foreach(all) ::(k, v) {
-        @:id = Effect.getRandomFiltered(::(value) <- (value.flags & Effect.TRAIT.SPECIAL) == 0).id;
+        @:id = Effect.getRandomFiltered(::(value) <- (value.traits & Effect.TRAIT.SPECIAL) == 0).id;
         targets[0].addEffect(from:user, id, durationTurns:
           v.duration
         );              

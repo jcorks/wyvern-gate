@@ -103,7 +103,7 @@ return ::(
           });
 
           names = [...items]->map(to:::(value) <- 
-            if (alternateNames && alternateNames[value])
+            if ((alternateNames != empty) && alternateNames[value])
               alternateNames[value]
             else 
               value.name
