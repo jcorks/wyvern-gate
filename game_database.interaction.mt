@@ -2364,9 +2364,9 @@ Interaction.newEntry(
             },
             topWeight : 0.5,
             leftWeight : 0.5,
-            filter::(item) <-
-              item.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) && 
-              item.enchantsCount < item.base.enchantLimit
+            filter::(value) <-
+              value.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) && 
+              value.enchantsCount < value.base.enchantLimit
             ,
             onPick::(item, equippedBy) {
               when(item == empty) empty;

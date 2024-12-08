@@ -953,19 +953,7 @@ return {
     commonInteractions.options.save,
     commonInteractions.options.quickSave,
     commonInteractions.options.system,
-    commonInteractions.options.quit,
-    
-    
-    InteractionMenuEntry.new(
-      name : 'Test...',
-      keepInteractionMenu : true,
-      filter::(island, landmark) <- true,
-      onSelect::(island, landmark) {
-        @:world = import(module:'game_singleton.world.mt');
-        world.party.gainProfessionExp(exp:200);
-      }
-    )
-    
+    commonInteractions.options.quit,    
   ],
   
   accolades :[
@@ -1340,7 +1328,8 @@ return {
         ],
         requiredLocations : [
           'thechosen:final-stairs',
-          'base:small-chest'
+          'base:small-chest',
+          'base:enchantment-stand'
         ],
         mapHint:{},
         onIncrementTime ::(landmark, island){},
@@ -1388,11 +1377,11 @@ return {
 
           // the standard set
           {id: 'base:fountain', rarity:18},
-          {id: 'base:potion-shop', rarity: 17},
+          {id: 'base:potion-shop', rarity: 20},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 11},
-          {id: 'base:enchantment-stand', rarity: 18},
+          {id: 'base:enchantment-stand', rarity: 12},
 
 
           {id: 'base:healing-circle', rarity:20},
@@ -1404,7 +1393,8 @@ return {
         ],
         requiredLocations : [
           'thechosen:stairs-down',
-          'thechosen:stairs-down'
+          'thechosen:stairs-down',
+          'base:enchantment-stand'
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_ALPHA
@@ -1469,7 +1459,8 @@ return {
         ],
         requiredLocations : [
           'thechosen:stairs-down',
-          'base:locked-chest'
+          'base:locked-chest',
+          'base:enchantment-stand'
           
         ],
         mapHint:{
@@ -1538,13 +1529,13 @@ return {
         ],
         requiredLocations : [
           'thechosen:stairs-down',
-          'base:locked-chest',
           'base:small-chest',
 
           'base:warp-point',
           'base:warp-point',
           'base:warp-point',
-          'base:warp-point'
+          'base:warp-point',
+          'base:enchantment-stand'
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_GAMMA
@@ -1613,8 +1604,8 @@ return {
         ],
         requiredLocations : [
           'thechosen:stairs-down',
-          'base:locked-chest',
           'base:small-chest',
+          'base:enchantment-stand',
           
           'base:warp-point',
           'base:warp-point',
@@ -3917,9 +3908,9 @@ return {
                         topWeight: 0.5,
                         leftWeight: 0.5,
                         prompt:'Choose an item to sacrifice:',
-                        filter ::(item) <- 
-                          item.base.hasTraits(:Item.TRAIT.HAS_QUALITY) && 
-                          item.quality == enhanced.quality && item != enhanced,
+                        filter ::(value) <- 
+                          value.base.hasTraits(:Item.TRAIT.HAS_QUALITY) && 
+                          value.quality == enhanced.quality && value != enhanced,
                         onPick ::(item, equippedBy) {
                           when (item == empty) ::<= {
                             windowEvent.queueMessage(speaker:'Juhriikaal', text:'Oh... It looks like you have no item elligible as a catalyst for this item. I am sorry. Remember: catalysts need to be the same quality as the item to enhance.');                

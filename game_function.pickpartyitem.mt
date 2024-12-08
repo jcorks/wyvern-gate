@@ -35,7 +35,7 @@ return ::(canCancel => Boolean, onPick => Function, leftWeight, topWeight, promp
       when(item == empty) empty;
       when(item.base.id == 'base:none') empty;
       
-      when(filter != empty && ! filter(item)) empty;
+      when(filter != empty && ! filter(value:item)) empty;
 
       inv.add(:item);
       altNames[item] = prefix + item.name;

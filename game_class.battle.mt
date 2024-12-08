@@ -173,24 +173,17 @@
     windowEvent.queueMessage(text: 'What\'s this? They dropped something during the fight...');
 
     @:lootTable = [
-      {
-        func::{
-          windowEvent.queueMessage(text: 'It turned out to be junk.');
-        },
-        rarity: 100 / 30
-      },
-      
       {   
         func::{
           windowEvent.queueMessage(text: 'Jackpot! They dropped some gold!');
-          @:amount = (200 + random.number()*300)->floor;
+          @:amount = (1000 + random.number()*700)->floor;
           windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
           party.addGoldAnimated(
             amount:amount,
             onDone::{}
           );
         },
-        rarity: 100 / 40
+        rarity: 5
       },
 
       {   
@@ -238,7 +231,7 @@
           party.inventory.add(item);
             
         },
-        rarity: 100 / 30
+        rarity: 2
       },
 
       

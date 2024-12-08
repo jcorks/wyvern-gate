@@ -2913,7 +2913,7 @@ Arts.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Removes all status ailments and most negative effects. Additional levels have no benefit.",
-    keywords : ['base:ailment'],
+    keywords : ['base:ailments'],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC | TRAITS.HEAL,

@@ -258,12 +258,12 @@ Landmark.database.newEntry(
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
       {id: 'base:fountain', rarity:18},
-      {id: 'base:potion-shop', rarity: 17},
-      {id: 'base:wyvern-statue', rarity: 15},
+      {id: 'base:potion-shop', rarity: 25},
+      {id: 'base:wyvern-statue', rarity: 20},
       {id: 'base:small-chest', rarity: 16},
       {id: 'base:locked-chest', rarity: 11},
       {id: 'base:magic-chest', rarity: 15},
-      {id: 'base:enchantment-stand', rarity: 20},
+      {id: 'base:enchantment-stand', rarity: 15},
 
       {id: 'base:healing-circle', rarity:35},
 
@@ -274,7 +274,7 @@ Landmark.database.newEntry(
     requiredLocations : [
       'base:stairs-down',
       'base:stairs-down',
-      'base:locked-chest',
+      'base:enchantment-stand',
       'base:small-chest',
       'base:small-chest',
       'base:warp-point',
@@ -332,12 +332,12 @@ Landmark.database.newEntry(
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
       {id: 'base:fountain', rarity:18},
-      {id: 'base:potion-shop', rarity: 17},
-      {id: 'base:enchantment-stand', rarity: 18},
-      {id: 'base:wyvern-statue', rarity: 15},
+      {id: 'base:potion-shop', rarity: 25},
+      {id: 'base:wyvern-statue', rarity: 20},
       {id: 'base:small-chest', rarity: 16},
       {id: 'base:locked-chest', rarity: 11},
       {id: 'base:magic-chest', rarity: 15},
+      {id: 'base:enchantment-stand', rarity: 15},
 
       {id: 'base:healing-circle', rarity:35},
 
@@ -395,7 +395,8 @@ Landmark.database.newEntry(
     requiredLocations : [
       'base:treasure-pit',
       'base:small-chest',
-      'base:small-chest'
+      'base:small-chest',
+      'base:enchantment-stand'
     ],
     mapHint:{},
     onIncrementTime ::(landmark, island){},
