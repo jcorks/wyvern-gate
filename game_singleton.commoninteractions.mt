@@ -225,11 +225,12 @@ return {
 
     
     system : InteractionMenuEntry.new(
-      name: 'System',
+      name: 'Settings',
       keepInteractionMenu : true,
-      filter ::(island, landmark) <- true,
+      filter ::(island, landmark) <- import(:'game_singleton.instance.mt').hasOptions(),
       onSelect::(island, landmark) {
-      
+        @:instance = import(:'game_singleton.instance.mt')
+        instance.optionsMenu();
       }
     )
   },

@@ -188,12 +188,223 @@ return class(
     }
     
     
+    @:FEATURES = {
+      // whether this instance supports fullscreen or not
+      /* 
+        "fullscreen" : boolean
+      */
+      FULLSCREEN : 1,
+      
+      // whether this instance supports a CRT shader or not
+      /* 
+        "crtShader" : "Boolean"
+      */
+      CRT_SHADER : 2,
+      
+      // Controls how each button should be mapped
+      /*
+        "inputConfirm" : "PAD_BUTTON_NAME"
+        "inputDeny"    : "PAD_BUTTON_NAME"
+        "inputLeft"    : "PAD_BUTTON_NAME"
+        "inputRight"   : "PAD_BUTTON_NAME"
+        "inputUp"      : "PAD_BUTTON_NAME"
+        "inputDown"    : "PAD_BUTTON_NAME"
+      */
+      INPUT_MAPPING : 4,
+      
+      // whether this instance supports audio
+      // provides controls for 
+      // BGM, PC noises, SFX
+      /*
+        "volume"    : Number [0-1]
+        "volumeBGM" : Number [0-1]
+        "volumeSFX" : Number [0-1]
+      */
+      AUDIO : 16,
+      
+      // Whether this instance supports background / foreground 
+      // color modification
+      /*
+        "bgColor" : {"r":[0-1], "g":[0-1], "b":[0-1]},
+        "fgColor" : {"r":[0-1], "g":[0-1], "b":[0-1]},
+      */
+      BGFG : 32      
+    };
+    @features_ = 0;
+    
+    @:colorMenu::(onChange, prompt, value)  {
+      windowEvent.queueChoices(
+        prompt,
+        onGetChoices ::<- [
+          'Red:   ' + (100*value[0]/255)->floor + '%',
+          'Green: ' + (100*value[1]/255)->floor + '%',
+          'Blue:  ' + (100*value[2]/255)->floor + '%'
+        ],
+        
+        canCancel: true,
+        keep : true,
+        
+        onChoice::(choice) {
+          choice = choice-1;
+          windowEvent.queueSlider(
+            canCancel : true,
+            increments : 255,
+            defaultValue : value[choice] / 255,
+            onChoice ::(fraction){},
+            prompt: (match(choice) {
+              (0): 'Red',
+              (1): 'Green',
+              (2): 'Blue'
+            }) + ' Amount',
+            onHover ::(fraction) {
+              value[choice] = (fraction * 255)->round;
+              onChange();
+            }
+          );
+        }
+      );
+    }
+    
     
     this.interface = {
+      FEATURES : {
+        get :: <- FEATURES
+      },
+      
+      hasFeatures ::<- features_ != 0,
+      
+      defaultSettings ::{
+        settings.fullscreen = true;
+        settings.crtShader = true;
+        settings.volume = 1;
+        settings.volumeBGM = 0.5;
+        settings.volumeSFX = 0.7;
+        settings.bgColor = [33, 33, 58];
+        settings.fgColor = [128, 255, 212];
+        this.updateSettings();
+      },
+      
+      optionsMenu:: {
+        @:opts = ['Reset to default'];
+        @:optActs = [::{
+          windowEvent.queueAskBoolean(
+            prompt: 'Reset all settings?',
+            onChoice::(which) {
+              if (which == true)
+                this.defaultSettings();
+            }
+          );
+        }];
+        breakpoint();
+        foreach(FEATURES) ::(k, i) <-
+          if ((features_ & i) != 0)
+            match(i) {
+              (FEATURES.FULLSCREEN): ::<={
+                opts->push(:'Fullscreen');
+                optActs->push(::{
+                  windowEvent.queueAskBoolean(
+                    onGetPrompt::<- 'Toggle fullscreen? (currently: ' + (if(settings.fullscreen) 'Enabled' else 'Disabled') + ')',
+                    onChoice::(which) {
+                      settings.fullscreen = !settings.fullscreen;
+                      this.updateSettings();
+                    }
+                  );
+                });
+              },
+
+
+              (FEATURES.CRT_SHADER): ::<={
+                opts->push(:'CRT Effect');
+                optActs->push(::{
+                  windowEvent.queueAskBoolean(
+                    onGetPrompt::<- 'Toggle CRT? (currently: ' + (if(settings.crtShader) 'Enabled' else 'Disabled') + ')',
+                    onChoice::(which) {
+                      settings.crtShader = !settings.crtShader;
+                      this.updateSettings();
+                    }
+                  );
+                });
+              },
+              
+              (FEATURES.BGFG): ::<={
+                opts->push(:'Background color');
+                optActs->push(::{
+                  colorMenu(prompt: 'BG Color', onChange::<- this.updateSettings(), value:settings.bgColor);
+                });
+
+                opts->push(:'Foreground color');
+                optActs->push(::{
+                  colorMenu(prompt: 'FG Color', onChange::<- this.updateSettings(), value:settings.fgColor);
+                });
+
+              },              
+
+              (FEATURES.AUDIO): ::<={
+                opts->push(:'Volume: Game');
+                optActs->push(::{
+                  windowEvent.queueSlider(
+                    onGetPrompt ::<- 'Volume :' + (settings.volume * 100)->floor,
+                    defaultValue : settings.volume,
+                    onChoice::(value){},
+                    increments : 100,
+                    onHover ::(fraction) {
+                      settings.volume = fraction;
+                      this.updateSettings();
+                    },
+                    canCancel : true
+                  )
+                });
+
+                opts->push(:'Volume: SFX');
+                optActs->push(::{
+                  windowEvent.queueSlider(
+                    onGetPrompt ::<- 'SFX Volume :' + (settings.volumeSFX * 100)->floor,
+                    defaultValue : settings.volumeSFX,
+                    onChoice::(value){},
+                    increments : 100,
+                    onHover ::(fraction) {
+                      settings.volumeSFX = fraction;
+                      this.updateSettings();
+                    },
+                    canCancel : true
+                  )
+                });
+
+                opts->push(:'Volume: BGM');
+                optActs->push(::{
+                  windowEvent.queueSlider(
+                    onGetPrompt ::<- 'BGM Volume :' + (settings.volumeBGM * 100)->floor,
+                    defaultValue : settings.volumeBGM,
+                    onChoice::(value){},
+                    increments : 100,
+                    onHover ::(fraction) {
+                      settings.volumeBGM = fraction;
+                      this.updateSettings();
+                    },
+                    canCancel : true
+                  )
+                });
+              }
+            }
+        windowEvent.queueChoices(
+          prompt: 'Settings',
+          choices : opts,
+          onChoice::(choice) {
+            optActs[choice-1]();
+          },
+          keep : true,
+          canCancel: true
+        );
+      },
+      
+      updateSettings::{
+        onSaveSettings_(data:JSON.encode(object:settings));      
+      },
 
       mainMenu ::(
         canvasWidth => Number,
         canvasHeight=> Number,
+        features => Number,
         onSaveState => Function, // for saving,
         onLoadState => Function,
         onListSlots => Function,
@@ -202,18 +413,17 @@ return class(
         onLoadSettings => Function,
         onQuit => Function
       ) {
+        features_ = features;
         canvas.resize(width:canvasWidth, height:canvasHeight);
         this.onSaveState = onSaveState;
         this.onLoadState = onLoadState;        
 
         onSaveSettings_ = onSaveSettings;
         settings = onLoadSettings();
-        if (settings == empty)
-          settings = {
-            unlockedScenarios : false,
-            //  other default settings here
-          }
-        else 
+        if (settings == empty) ::<= {
+          settings = {}
+          this.defaultSettings();
+        } else 
           settings = JSON.decode(string:settings);
         
 
@@ -539,6 +749,14 @@ return empty;
               );
             });
           }
+
+          if (this.hasFeatures()) ::<= {
+            choiceNames->push(value: 'Settings');
+            choiceActions->push(value ::{
+              this.optionsMenu();
+            });
+          }
+
           
           choiceNames->push(value: 'Credits');
           choiceActions->push(value ::{
