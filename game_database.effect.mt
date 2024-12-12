@@ -3887,7 +3887,7 @@ Effect.newEntry(
 Effect.newEntry(
   data : {
     name : 'Freezing',
-    id : 'base:frozen',
+    id : 'base:freezing',
     description: 'Attacks have 10% chance to inflict Frozen for 2 turns.',
     stackable: true,
     blockPoints : 0,

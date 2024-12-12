@@ -82,7 +82,7 @@
 @:SIGHT_RAY_EPSILON = 0.4;
 
 
-@:SETTINGS_MASK  = 0x110000;
+@:SETTINGS_MASK    = 0x110000;
 @:IS_WALLED_MASK   = 0x010000;
 @:IS_OBSCURED_MASK = 0x100000;
 
@@ -193,25 +193,47 @@
     @neighbors = [];
     @aStarPQCompareTable;
 
-    @:drawTarget::(x, y) {
-      canvas.movePen(x:x-1, y:y-1);  
-      canvas.drawChar(:'┌');
-      canvas.movePen(x:x  , y:y-1);  
-      canvas.drawChar(:'─');
-      canvas.movePen(x:x+1, y:y-1);  
-      canvas.drawChar(:'┐');
-      canvas.movePen(x:x-1, y:y);  
-      canvas.drawChar(:'│');
-      canvas.movePen(x:x+1, y:y);  
-      canvas.drawChar(:'│');
 
+    @:drawTarget = ::<= {
+    
+      @:targetTable = [
+        '┌',
+        '─',
+        '┐',
+        
+        '│',
+        '│',
 
-      canvas.movePen(x:x-1, y:y+1);  
-      canvas.drawChar(:'└');
-      canvas.movePen(x:x, y:y+1);  
-      canvas.drawChar(:'─');
-      canvas.movePen(x:x+1, y:y+1);  
-      canvas.drawChar(:'┘');
+        '└',
+        '─',
+        '┘'
+      ]
+      
+      @:targetOffsets = [
+        [-1, -1],
+        [ 0, -1],
+        [ 1, -1],
+        
+        [ 1,  0],
+        [-1,  0],
+
+        [-1,  1],
+        [ 0,  1],
+        [ 1,  1]
+      ]
+    
+      return ::(x, y, itemX, itemY) {
+        foreach(targetTable) ::(k, char) {
+          @:dx = targetOffsets[k][0];
+          @:dy = targetOffsets[k][1];
+          @at = itemX+dx+((itemY+dy)*width);
+
+          if (scenery[at] == 0 || this.sceneryAt(x:itemX+dx, y:itemY+dy) == ' ') ::<= {
+            canvas.movePen(x:x+dx, y:y+dy);  
+            canvas.drawChar(:char);
+          }        
+        }
+      }
     }
 
     
@@ -565,7 +587,7 @@
             @:discovered = items[items->keycount-1].discovered;
             
             if (discovered == true)
-              targets->push(:{x:x, y:y});
+              targets->push(:{x:x, y:y, itemX:itemX, itemY:itemY});
               
             importantItems->push(:{
               ch:if (discovered == false) '?' else items[items->keycount-1].symbol,
@@ -703,7 +725,7 @@
             @:discovered = items[items->keycount-1].discovered;
             
             if (discovered == true)
-              targets->push(:{x:x, y:y});
+              targets->push(:{x:x, y:y, itemX:itemX, itemY:itemY});
               
             importantItems->push(:{
               ch:if (discovered == false) '?' else items[items->keycount-1].symbol,

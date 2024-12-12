@@ -23,7 +23,8 @@
 
 @:TRAITS = {
   SPECIAL : 1,
-  SUMMON : 2
+  SUMMON : 2,
+  ETHEREAL : 4
 };
 
 
@@ -1017,7 +1018,7 @@ Species.newEntry(data:{
   qualities : [
   ],
   swarms: true,
-  traits : TRAITS.SPECIAL,
+  traits : TRAITS.SPECIAL | TRAITS.ETHEREAL,
   canBlock : false,
   passives : [
     'base:apparition'

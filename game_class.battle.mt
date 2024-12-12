@@ -152,7 +152,6 @@
     if (inv != empty)
       forcedAcquisition->push(value:inv);
   }
-  breakpoint();
 
   foreach(forcedAcquisition) ::(i, inv) {
     foreach(inv.items) ::(n, item) {
@@ -166,79 +165,6 @@
         onDone::{}
       );
     }
-  }
-
-
-  if (rngLoot && random.try(percentSuccess:7)) ::<= {
-    windowEvent.queueMessage(text: 'What\'s this? They dropped something during the fight...');
-
-    @:lootTable = [
-      {   
-        func::{
-          windowEvent.queueMessage(text: 'Jackpot! They dropped some gold!');
-          @:amount = (1000 + random.number()*700)->floor;
-          windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
-          party.addGoldAnimated(
-            amount:amount,
-            onDone::{}
-          );
-        },
-        rarity: 5
-      },
-
-      {   
-        func::{
-          windowEvent.queueMessage(text: 'Oh wow, they dropped something rare-looking!');
-          
-          when(party.inventory.slotsLeft < 1) ::<= {
-            windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
-          }
-          @itemMaterials = [
-            'base:gold',
-            'base:crystal',
-            'base:mythril',
-            'base:quicksilver',
-            'base:dragonglass',
-            'base:sunstone',
-            'base:moonstone',
-            'base:adamantine'
-          ]
-          
-          @itemQualities = [
-            'base:kings',
-            'base:queens',
-            'base:masterwork',
-            'base:legendary'
-          ]
-          
-          @item = Item.new(
-            base: Item.database.getRandomFiltered(
-              filter::(value) <- (
-                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
-                value.hasTraits(:Item.TRAIT.METAL | Item.TRAIT.HAS_QUALITY)
-              )
-            ),
-            rngEnchantHint:true,     
-            qualityHint : random.pickArrayItem(list:itemQualities),
-            materialHint : random.pickArrayItem(list:itemMaterials)
-          )  
-
-
-          @message = 'The party found ' + correctA(word:item.name);
-          windowEvent.queueMessage(text: message);
-
-
-          party.inventory.add(item);
-            
-        },
-        rarity: 2
-      },
-
-      
-    ]
-    
-
-    random.pickArrayItemWeighted(list:lootTable).func();
   }
     
     

@@ -607,7 +607,8 @@ Location.database.newEntry(data:{
             filter::(value) <- (
               value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
               location.ownedBy.level >= value.levelMinimum &&
-              value.traits & Item.TRAIT.METAL
+              (value.traits & Item.TRAIT.METAL) &&
+              (value.traits & Item.TRAIT.HAS_QUALITY)
             )
           )
         )

@@ -704,6 +704,45 @@
           )
         );
 
+
+        if (random.try(percentSuccess:7)) ::<= {
+          @itemMaterials = [
+            'base:gold',
+            'base:crystal',
+            'base:mythril',
+            'base:quicksilver',
+            'base:dragonglass',
+            'base:sunstone',
+            'base:moonstone',
+            'base:adamantine',
+            'base:ray',
+            'base:ethereal',
+          ]
+          
+          @itemQualities = [
+            'base:kings',
+            'base:queens',
+            'base:masterwork',
+            'base:legendary',
+            'base:divine',
+          ]
+          
+          @item = Item.new(
+            base: Item.database.getRandomFiltered(
+              filter::(value) <- (
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                value.hasTraits(:Item.TRAIT.METAL | Item.TRAIT.HAS_QUALITY)
+              )
+            ),
+            rngEnchantHint:true,     
+            qualityHint : random.pickArrayItem(list:itemQualities),
+            materialHint : random.pickArrayItem(list:itemMaterials)
+          )  
+
+          state.inventory.add(item);
+            
+        }
+      
         if (state.faveWeapon == empty)
           state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- 
             value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
@@ -1875,7 +1914,7 @@
       state.canMake = [];
       foreach(Item.database.getRandomSet(
           count:if (this.profession.id == 'base:blacksmith') 10 else 2,
-          filter::(value) <- value.hasTraits(:Item.TRAIT.METAL)
+          filter::(value) <- value.hasTraits(:Item.TRAIT.METAL | Item.TRAIT.HAS_QUALITY)
       )) ::(k, val) {
         state.canMake->push(value:val.id);
       }
@@ -2853,14 +2892,14 @@
       // inefficient, but idc        
       @:describeDual::(qual0, qual1, index) {
         return random.pickArrayItem(list:[
-          'They have ' + qual0.name + 
+          'They have ' + (if (qual0.plural == true || qual0.countable == false) qual0.name else correctA(:qual0.name)) + 
               (if (qual0.plural) ' that are ' else ' that is ') 
             + qual0.description + ', and their '
             + qual1.name + 
               (if (qual1.plural) ' are ' else ' is ') 
             + qual1.description + '. ',
 
-          'They have ' + qual0.name + 
+          'They have ' + (if (qual0.plural == true || qual0.countable == false) qual0.name else correctA(:qual0.name)) + 
               (if (qual0.plural) ' that are ' else ' that is ') 
             + qual0.description + ', and their '
             + qual1.name + 
@@ -2871,8 +2910,8 @@
           this.name + '\'s ' + qual0.name + 
               (if (qual0.plural) ' are ' else ' is ') 
             + qual0.description + ', and they have '
-            + (if (qual1.plural == false) correctA(word:qual1.name) else qual1.name) + 
-              (if (qual1.plural) ' which are ' else ' which is ') 
+            + (if (qual1.plural == true || qual1.countable == false) qual1.name else correctA(word:qual1.name)) + 
+              (if (qual1.plural && qual1.countable) ' which are ' else ' which is ') 
             + qual1.description + '. ',
         ]);
       }
@@ -2880,15 +2919,15 @@
       @:describeSingle::(qual, index) {
         return random.pickArrayItem(list:[
           this.name + '\'s ' + qual.name + 
-              (if (qual.plural) ' are ' else ' is ') 
+              (if (qual.plural && qual.countable) ' are ' else ' is ') 
             + qual.description + '. ',
 
           'Their ' + qual.name + 
-              (if (qual.plural) ' are ' else ' is ') 
+              (if (qual.plural && qual.countable) ' are ' else ' is ') 
             + qual.description + '. ',              
 
           'Their ' + qual.name + 
-              (if (qual.plural) ' are ' else ' is ') 
+              (if (qual.plural && qual.countable) ' are ' else ' is ') 
             + qual.description + '. '   
         ]);
       }

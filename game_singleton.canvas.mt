@@ -96,6 +96,17 @@
 @:CHAR__TOP = '═';
 @:CHAR__BOTTOM = '─';
 
+/// @singleon Wyvern.Canvas
+///
+/// Canvas is the main class that handles rendering operations 
+/// to the text buffer. While [#Wyvern.WindowEvent] handles 
+/// higher-level output and management, Wyvern.Canvas can be used 
+/// to create custom effects and animations.
+///
+/// The typical use-case is to provide Wyvern.WindowEvent with 
+/// custom rendering operations, which typically require working
+/// Wyvern.Canvas
+///
 return class(
   name: 'Wyvern.Canvas',
   define:::(this) {

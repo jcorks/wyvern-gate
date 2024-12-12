@@ -1171,22 +1171,22 @@
 
                 if (state.sellingLevel == LEVEL_HIRE_EMPLOYEES) 
                   windowEvent.queueMessage(
-                    text: 'You are now high enough level to hire employees. Employees can be hired to explore dungeons for you, join your party, and more.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP0 + ': Shop upgrades: stock size.'
+                    text: 'You are now a high enough level to hire employees. Employees can be hired to explore dungeons for you, join your party, and more.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP0 + ': Shop upgrades: stock size.'
                   );
 
                 if (state.sellingLevel == LEVEL_UPGRADE_SHOP0) 
                   windowEvent.queueMessage(
-                    text: 'You are now high enough level to expand your shop, allowing you to spend G to hold more items in your shop\'s stock. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP1 + ' : Shop upgrades: additional store fronts.'
+                    text: 'You are now a high enough level to expand your shop, allowing you to spend G to hold more items in your shop\'s stock. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP1 + ' : Shop upgrades: additional store fronts.'
                   );
                 
                 if (state.sellingLevel == LEVEL_UPGRADE_SHOP1) 
                   windowEvent.queueMessage(
-                    text: 'You are now high enough level to add additional store fronts, allowing you to upgrade your shop to have your employees sell you items on your behalf. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_BUY_PROPERTY + ' : Buying/selling property.'
+                    text: 'You are now a high enough level to add additional store fronts, allowing you to upgrade your shop to have your employees sell you items on your behalf. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_BUY_PROPERTY + ' : Buying/selling property.'
                   );
 
                 if (state.sellingLevel == LEVEL_BUY_PROPERTY) 
                   windowEvent.queueMessage(
-                    text: 'You are now high enough level to buy and sell property. Properties are any homes and businesses in towns and cities.'
+                    text: 'You are now a high enough level to buy and sell property. Properties are any homes and businesses in towns and cities.'
                   );
 
 
