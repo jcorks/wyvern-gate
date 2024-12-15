@@ -1390,6 +1390,20 @@
         // TODO: add weapon affinities if phys and equip weapon
         // phys is always assumed to be with equipped weapon
 
+
+        @critChance = (this.stats.LUK - target.stats.LUK) / 100;
+        if (critChance < 0.001) critChance = 0.001;
+        critChance *= 100;
+        if (critChance > 25) critChance = 25;
+        if (random.try(percentSuccess:critChance) || ((dmg.traits & Damage.TRAITS.FORCE_CRIT) != 0)) ::<={
+          if (dmg.amount < 5) dmg.amount = 5;
+          dmg.amount *= 2.5;
+          dmg.traits |= Damage.TRAITS.IS_CRIT;
+          isCrit = true;
+        }
+
+
+
         effectStack.emitEvent(
           name: 'onPreAttackOther',
           to : target, 
@@ -1411,9 +1425,7 @@
         when(dmg.amount <= 0) empty;
 
 
-        @critChance = (this.stats.LUK - target.stats.LUK) / 100;
-        if (critChance < 0.001) critChance = 0.001;
-        critChance *= 100;
+
         @isCrit = false;
         @isHitHead = false;
         @isLimbHit = false;
@@ -1422,12 +1434,6 @@
         @missHead = false;
         @missBody = false;
         @missLimb = false;
-        if (critChance > 25) critChance = 25;
-        if (random.try(percentSuccess:critChance) || dmg.forceCrit) ::<={
-          if (dmg.amount < 5) dmg.amount = 5;
-          dmg.amount *= 2.5;
-          isCrit = true;
-        }
 
 
         @backupStats;
@@ -1548,7 +1554,7 @@
 
         @isDexed = false;
         @isDefed = false;
-        if (!target.isIncapacitated() && random.try(percentSuccess:33) && dmg.forceDEFbypass != true) ::<= {
+        if (!target.isIncapacitated() && random.try(percentSuccess:33) && ((dmg.traits & Damage.TRAITS.FORCE_DEF_BYPASS) == 0)) ::<= {
           if (this.stats.DEX > target.stats.DEF) ::<= {       
             windowEvent.queueMessage(
               text: target.name + ' tried to completely nullify the damage, but ' + this.name + ' went through ' + target.name + '\'s defenses thanks to their high DEX!'

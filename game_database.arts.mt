@@ -410,7 +410,7 @@ Arts.newEntry(
               amount: Arts.find(:'base:doublestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -428,7 +428,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:doublestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart : targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -472,7 +472,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -490,7 +490,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -507,7 +507,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -1449,7 +1449,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:sheer-cold').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -1595,7 +1595,7 @@ Arts.newEntry(
               amount: Arts.find(:'base:combo-strike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -1611,7 +1611,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:combo-strike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -2634,7 +2634,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:ice').baseDamage(level, user),
                 damageType : Damage.TYPE.ICE,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               )
             );
           }
@@ -2672,7 +2672,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:frozen-flame').baseDamage(level, user),
                 damageType : Damage.TYPE.ICE,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               )
             );
           }
@@ -2745,7 +2745,7 @@ Arts.newEntry(
                 amount:Arts.find(:'base:explosion').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               )
             );
           }
@@ -2823,7 +2823,7 @@ Arts.newEntry(
                 amount:Arts.find(:'base:thunder').baseDamage(level, user),
                 damageType : Damage.TYPE.THUNDER,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               )
             );
           }
@@ -2863,7 +2863,7 @@ Arts.newEntry(
                 amount:Arts.find(:'base:wild-swing').baseDamage(level, user),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               ),
               targetPart: Entity.normalizedDamageTarget(),
               targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -7894,7 +7894,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:b195').baseDamage(level, user),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               ),
               targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
               targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -7957,7 +7957,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:b196').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               ),
               targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
               targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -10192,6 +10192,187 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:multi-guard', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Premonition',
+    id : 'base:b251',
+    notifCommit : "$1 casts Premonition!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:premonition'],
+    description: "Grants the Premonition effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:premonition', durationTurns:3);
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Calcification',
+    id : 'base:b253',
+    notifCommit : "$1 casts Calcification!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:calcification'],
+    description: "Grants the Calcification effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:calcification', durationTurns:3);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Crustacean Maneuver',
+    id : 'base:b254',
+    notifCommit : "$1 prepares for incoming damage!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:crustacean-maneuver'],
+    description: "Grants the Crustacean Maneuver effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : false,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:crustacean-maneuver', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Lucky Charm',
+    id : 'base:b255',
+    notifCommit : "$1 casts Lucky Charm",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:lucky-charm'],
+    description: "Grants the Lucky Charm effect to the target for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : true,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:lucky-charm', durationTurns:2);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Spirit Loan',
+    id : 'base:b256',
+    notifCommit : "$1 casts Spirit Loan",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:spirit-loan'],
+    description: "Grants the Spirit Loan effect to the target for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : true,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:spirit-loan', durationTurns:2);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Procrastinate Death',
+    id : 'base:b257',
+    notifCommit : "$1 casts Procrastinate Death",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:procrastinate-death'],
+    description: "Grants the Procrastinate Death effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : true,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:procrastinate-death', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Cheat Death',
+    id : 'base:b258',
+    notifCommit : "$1 casts Cheat Death",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:cheat-death', 'base:stunned'],
+    description: "Grants the Procrastinate Death effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : true,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:procrastinate-death', durationTurns:3);
     }
   }
 )
