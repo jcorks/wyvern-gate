@@ -238,6 +238,10 @@
   args:
     - to: the one getting knocked out
 
+  Event:    onDurationEnd 
+  About:    called before removal of the effect due to its duration being 0
+  returns:  ignored 
+
 */
 
 @:EffectStack = LoadableClass.create(
@@ -510,6 +514,10 @@
             inSet[e] = true;
           }
         }
+        this.emitEvent(
+          name : 'onDurationEnd',
+          filter ::(value) <- inSet[value] == true
+        );        
         
         this.removeByFilter(::(value) <- inSet[value] == true);        
       },

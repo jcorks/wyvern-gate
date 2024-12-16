@@ -148,7 +148,7 @@ Effect.newEntry(
           text: holder.name + '\'s attack bypassed ' + to.name +'\'s DEF!'
         );
 
-        damage.forceDEFbypass = true;
+        damage.traits |= Damage.TRAITS.FORCE_DEF_BYPASS;
         holder.removeEffectInstance(:
           holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:take-aim')[0]
         )
@@ -2389,7 +2389,7 @@ Effect.newEntry(
     traits : Effect.TRAIT.DEBUFF,
     events : {
       onPreAttackOther ::(from, item, holder, to, damage) {
-        if (damage.isMultihit) ::<= {
+        if ((damage.traits & Damage.TRAITS.MULTIHIT) != 0) ::<= {
           windowEvent.queueMessage(text: holder.name + '\'s Dampen Multi-hit nullified the attack!');
           damage.amount = 0;
         }
@@ -4531,15 +4531,204 @@ Effect.newEntry(
     name : 'Multi Guard',
     id : 'base:light-guard',
     description: 'Multi-hit damage from others to the holder is reduced to 1.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (attacker != holder && ((damage.traits & Damage.TRAITS.MULTIHIT) != 0)) ::<= {
+          windowEvent.queueMessage(text:holder.name + ' is protected from the damage thanks to Light Guard!');
+          damage.amount = 1;            
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Premonition',
+    id : 'base:premonition',
+    description: 'All critical hits are reduced to 1 damage.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (attacker != holder && ((damage.traits & Damage.TRAITS.IS_CRIT) != 0)) ::<= {
+          windowEvent.queueMessage(text:holder.name + ' is protected from critical hit damage thanks to Premonition!');
+          damage.amount = 1;            
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Crustacean Maneuver',
+    id : 'base:crustacean-maneuver',
+    description: 'All attacks are nullified. Holder cannot move while this effect is active.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreAttack ::(from, item, holder, attacker, damage) {
+        if (attacker != holder) ::<= {
+          windowEvent.queueMessage(text:holder.name + ' is protected from damage thanks to the Crustacean Maneuver!');
+          damage.amount = 1;            
+        }
+      }
+
+      onNextTurn ::(from, item, holder, duration) {        
+        windowEvent.queueMessage(text:holder.name + ' is preparing for incoming damage!');
+        return false;
+      },
+    }
+  }
+)
+
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Lucky Charm',
+    id : 'base:lucky-charm',
+    description: '20% chance to avoid death once, granting 1 HP. On revival, all stacks of Lucky Charm are removed.',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage) {
-        if (attacker != holder) ::<= {
-          windowEvent.queueMessage(text:holder.name + ' is protected from the damage thanks to Light Guard!');
-          damage.amount = 1;            
+        if (holder.hp == 0) ::<= {
+     
+          if (random.try(percentSuccess:20)) ::<= {
+            windowEvent.queueMessage(text:holder.name + " glows!");
+
+            @:Entity = import(module:'game_class.entity.mt');
+            damage.amount = 0;
+            holder.heal(amount:1);
+
+            holder.effectStack.removeAllByID(:'base:lucky-charm');
+          }        
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Spirit Loan',
+    id : 'base:spirit-loan',
+    description: 'Avoids death, but sends a Dark blast to another ally upon revival that deals damage equivalent to the ally\'s total health. If there are no other allies, revival happens regardless.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when(holder.battle == empty) empty;
+        if (holder.hp == 0) ::<= {
+          windowEvent.queueMessage(text:holder.name + " glows!");
+          holder.effectStack.removeAllByID(:'base:spirit-loan');
+
+          @:Entity = import(module:'game_class.entity.mt');
+          damage.amount = 0;
+          holder.heal(amount:1);
+
+
+          @forWhomItTolls = holder.battle.getAllies(:holder)->filter(::(value) <- value != holder);
+          when(forWhomItTolls->size) ::<= {
+            @:victim = random.pickArrayItem(:forWhomItTolls);
+            victim.damage(
+              attacker: holder,
+              damage : Damage.new(
+                amount : victim.stats.HP,
+                damageType: Damage.TYPE.DARK,
+                damageClass : Damage.CLASS.HP
+              ),
+              dodgeable : false,
+              exact: true
+            );
+          }
+        }
+      }
+    }
+  }
+)
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Procrastinate Death',
+    id : 'base:procrastinate-death',
+    description: 'The next time the holder would die, their HP is set to 1 and this effect is removed. If this effect is never triggered prior to removal, the holder receives Dark damage equal to their total health.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when(holder.battle == empty) empty;
+        if (holder.hp == 0) ::<= {
+          windowEvent.queueMessage(text:holder.name + " glows!");
+          holder.effectStack.removeAllByID(:'base:procrastinate-death');
+
+          @:Entity = import(module:'game_class.entity.mt');
+          damage.amount = 0;
+          holder.heal(amount:1);
+        }
+      },
+
+      onDurationEnd ::(from, item, holder, duration) {
+        @:victim = holder;
+        victim.damage(
+          attacker: holder,
+          damage : Damage.new(
+            amount : victim.stats.HP,
+            damageType: Damage.TYPE.DARK,
+            damageClass : Damage.CLASS.HP
+          ),
+          dodgeable : false,
+          exact: true
+        );
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Cheat Death',
+    id : 'base:cheat-death',
+    description: 'Avoids death, but when avoided stuns the holder for 2 turns.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when(holder.battle == empty) empty;
+        if (holder.hp == 0) ::<= {
+          windowEvent.queueMessage(text:holder.name + " glows!");
+          holder.effectStack.removeAllByID(:'base:cheat-death');
+
+          @:Entity = import(module:'game_class.entity.mt');
+          damage.amount = 0;
+          holder.heal(amount:1);
+
+          holder.addEffect(from:holder, id:'base:stunned', durationTurns:2);                        
         }
       }
     }
