@@ -123,6 +123,7 @@
         "game_struct.battleaction.mt",
         "game_struct.interactionmenuentry.mt",
         "game_struct.mt",
+        "game_function.boot.mt",
         
         'main.external.mt',
         'Matte.Core.Class',

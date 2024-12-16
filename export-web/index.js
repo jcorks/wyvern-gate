@@ -134,6 +134,8 @@ var postMessageWorker = function(data) {
 
 
 const fullscreenEnter = function(element) {
+    element.style.width = "100vw";
+    element.style.height = "100vh";
     if (element.requestFullscreen) {
         element.requestFullscreen(
             {

@@ -2401,7 +2401,7 @@ Effect.newEntry(
 Effect.newEntry(
   data : {
     name : 'Multi-hit Guard',
-    id : 'base:dampen-multi-hit',
+    id : 'base:multi-hit-guard',
     description: 'All multi-hit attack damage targetting the holder are nullified.',
     stackable: false,
     stats: StatSet.new(

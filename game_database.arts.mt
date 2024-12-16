@@ -6549,7 +6549,7 @@ Arts.newEntry(
 // ver 0.2.0 starting supports
 Arts.newEntry(
   data: {
-    name: '@b169',
+    name: 'Refresh',
     id : 'base:b169',
     notifCommit : '$2 is covered in a soothing aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6592,7 +6592,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b170',
+    name: 'Purification',
     id : 'base:b170',
     notifCommit : '$2 is covered in a soothing aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6638,7 +6638,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b171',
+    name: 'Osmotic Sponge',
     id : 'base:b171',
     notifCommit : '$1\'s allies are covered in a mysterious light!',
     notifFail : Arts.NO_NOTIF,
@@ -6703,7 +6703,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b172',
+    name: 'Chaotic Slurp',
     id : 'base:b172',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
@@ -6764,7 +6764,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b173',
+    name: 'Sip of Chaos',
     id : 'base:b173',
     notifCommit : '$1 is covered in a myserious light!',
     notifFail : '... But nothing happened!',
@@ -6821,7 +6821,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b174',
+    name: 'Miasma Expungement',
     id : 'base:b174',
     notifCommit : 'Everyone is covered in soothing aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6863,7 +6863,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b175',
+    name: 'Joy Expungement',
     id : 'base:b175',
     notifCommit : '$1 is covered in an ominous aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6904,7 +6904,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b176',
+    name: 'Radiation State',
     id : 'base:b176',
     notifCommit : '$1 and $2 are covered in a myserious light!',
     notifFail : '... But nothing happened!',
@@ -6953,7 +6953,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b177',
+    name: 'Chaotic Redistribution',
     id : 'base:b177',
     notifCommit : 'Everyone is covered in a weird aura!',
     notifFail : Arts.NO_NOTIF,
@@ -7069,7 +7069,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b179',
+    name: 'Chaotic Funnel',
     id : 'base:b179',
     notifCommit : '$1 and $2 are covered in a mysterious light!',
     notifFail : '... But nothing happened!',
@@ -7117,7 +7117,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b180',
+    name: 'Restorative Resonance',
     id : 'base:b180',
     notifCommit : 'Everyone is covered in a weird aura!',
     notifFail : '... But nothing happened!',
@@ -7160,7 +7160,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b181',
+    name: 'Banish Conversion: Negative',
     id : 'base:b181',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7207,7 +7207,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b182',
+    name: 'Banish Conversion: Positive',
     id : 'base:b182',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7249,7 +7249,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b183',
+    name: 'Quantum Rearrangement',
     id : 'base:b183',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7294,7 +7294,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b184',
+    name: 'Destructive Resonance',
     id : 'base:b184',
     notifCommit : 'A mystical light befalls everyone!',
     notifFail : Arts.NO_NOTIF,
@@ -7349,7 +7349,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b185',
+    name: 'Banish Conversion: Ultima',
     id : 'base:b185',
     notifCommit : 'A mystical light befalls everyone!',
     notifFail : Arts.NO_NOTIF,
@@ -7409,7 +7409,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b186',
+    name: 'Banishing Regurgitation',
     id : 'base:b186',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7448,7 +7448,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b187',
+    name: 'Poison Empowerment',
     id : 'base:b187',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7491,7 +7491,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b188',
+    name: 'Burning Empowerment',
     id : 'base:b188',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7533,7 +7533,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b189',
+    name: 'Paralysis Empowerment',
     id : 'base:b189',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7576,7 +7576,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b190',
+    name: 'Petrification Empowerment',
     id : 'base:b190',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7619,7 +7619,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b191',
+    name: 'Negativity Empowerment',
     id : 'base:b191',
     notifCommit : 'A soothing light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7673,7 +7673,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b192',
+    name: 'Bestow State',
     id : 'base:b192',
     notifCommit : '$2 and $1 glow ominously!',
     notifFail : '...But nothing happened!',
@@ -7724,7 +7724,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b193',
+    name: 'Gifting Tether',
     id : 'base:b193',
     notifCommit : '$1 lunges at $2!',
     notifFail : Arts.NO_NOTIF,
@@ -7774,7 +7774,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b194',
+    name: 'Exchange of Blows',
     id : 'base:b194',
     notifCommit : '$1 begins to glow as they attack $2!',
     notifFail : Arts.NO_NOTIF,
@@ -7851,7 +7851,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b195',
+    name: 'Venomous Redirection',
     id : 'base:b195',
     notifCommit : '$1 focuses their energy!',
     notifFail : '...But nothing happened!',
@@ -7911,7 +7911,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b196',
+    name: 'Explosive Redirection',
     id : 'base:b196',
     notifCommit : 'A warmth emanates from $1!',
     notifFail : '...But nothing happened!',
@@ -7972,7 +7972,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b197',
+    name: 'Unlock Senses',
     id : 'base:b197',
     notifCommit : '$1 focuses inward!',
     notifFail : '...But nothing happened!',
@@ -8006,7 +8006,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b198',
+    name: 'Bound Weapon',
     id : 'base:b198',
     notifCommit : '$1 begins to glow!',
     notifFail : '...But nothing happened!',
@@ -8093,7 +8093,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b199',
+    name: 'Momentum Preparation',
     id : 'base:b199',
     notifCommit : '$1 takes a defensive stance!',
     notifFail : '...But nothing happened!',
@@ -8120,7 +8120,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b200',
+    name: 'Burning Conversion',
     id : 'base:b200',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8158,7 +8158,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b201',
+    name: 'Icy Conversion',
     id : 'base:b201',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8197,7 +8197,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b202',
+    name: 'Shock Conversion',
     id : 'base:b202',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8235,7 +8235,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: 'Blind Conversion',
     id : 'base:b202-2',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8273,7 +8273,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: 'Petrified Conversion',
     id : 'base:b202-3',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8311,7 +8311,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b203',
+    name: 'Full Shift Conversion',
     id : 'base:b203',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8363,7 +8363,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b205',
+    name: 'Resonant Rush',
     id : 'base:b205',
     notifCommit : '$1 attacks $2!',
     notifFail : Arts.NO_NOTIF,
@@ -8404,7 +8404,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b206',
+    name: 'Resonant Blast',
     id : 'base:b206',
     notifCommit : '$1 attacks $2! with a magical beam of light!',
     notifFail : Arts.NO_NOTIF,
@@ -8445,7 +8445,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b207',
+    name: 'Pyre Unleashed',
     id : 'base:b207',
     notifCommit : '$1 attacks $2! with fiery might!',
     notifFail : Arts.NO_NOTIF,
@@ -8501,7 +8501,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b208',
+    name: 'Glacier Unleashed',
     id : 'base:b208',
     notifCommit : '$1 attacks $2! with cold might!',
     notifFail : Arts.NO_NOTIF,
@@ -8557,7 +8557,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b209',
+    name: 'Pylon Unleashed',
     id : 'base:b209',
     notifCommit : '$1 attacks $2! with electrifying might!',
     notifFail : Arts.NO_NOTIF,
@@ -8612,7 +8612,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b210',
+    name: 'Feedback Cascade',
     id : 'base:b210',
     notifCommit : '$1 summons an explosion!',
     notifFail : Arts.NO_NOTIF,
@@ -8666,7 +8666,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b211',
+    name: 'Chaotic Shift',
     id : 'base:b211',
     notifCommit : 'A light engulfs everyone',
     notifFail : Arts.NO_NOTIF,
@@ -8696,7 +8696,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b214',
+    name: 'Shift Boost',
     id : 'base:b214',
     notifCommit : '$1 begins to glow!',
     notifFail : Arts.NO_NOTIF,
@@ -8721,7 +8721,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b215',
+    name: 'Elemental Radiation',
     id : 'base:b215',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
@@ -8818,7 +8818,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b216',
+    name: 'Elemental Transmutation',
     id : 'base:b216',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -8879,7 +8879,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b217',
+    name: 'Resonant Empowerment',
     id : 'base:b217',
     notifCommit : "$1 begins to glow!",
     notifFail : "...but nothing happened!",
@@ -8927,7 +8927,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b218',
+    name: 'Resonant Debilitation',
     id : 'base:b218',
     notifCommit : "$1 begins to glow!",
     notifFail : "...but nothing happened!",
@@ -8974,7 +8974,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b219',
+    name: 'Expel: Brimstone',
     id : 'base:b219',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9012,7 +9012,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b220',
+    name: 'Expel: Misalignment',
     id : 'base:b220',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9051,7 +9051,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b221',
+    name: 'Expel: Growth',
     id : 'base:b221',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9092,7 +9092,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b222',
+    name: 'Expel: Banishment',
     id : 'base:b222',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9128,7 +9128,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b223',
+    name: 'Expel Control',
     id : 'base:b223',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9165,7 +9165,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b224',
+    name: 'Expel: Ultima',
     id : 'base:b224',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9201,7 +9201,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b225',
+    name: 'Refortification Ultima',
     id : 'base:b225',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9252,7 +9252,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b226',
+    name: 'Clean Blessing',
     id : 'base:b226',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9282,7 +9282,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b227',
+    name: 'Clean Curse',
     id : 'base:b227',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9313,7 +9313,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b228',
+    name: 'Resonant Tessellation',
     id : 'base:b228',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9370,7 +9370,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b229',
+    name: 'Take Aim',
     id : 'base:b229',
     notifCommit : "$1 takes aim!",
     notifFail : Arts.NO_NOTIF,
@@ -9629,7 +9629,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@base:b233',
+    name: 'Dampen Multi-hit',
     id : 'base:b233',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
@@ -9658,7 +9658,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@base:b234',
+    name: 'Multi-hit Guard',
     id : 'base:b234',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
@@ -9803,7 +9803,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b238',
+    name: 'Future Moment',
     id : 'base:b238',
     notifCommit : "$1 glows!",
     notifFail : Arts.NO_NOTIF,
@@ -9860,7 +9860,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b239',
+    name: 'Boomerang',
     id : 'base:b239',
     notifCommit : "$1 glows!",
     notifFail : "...But nothing happened!",
@@ -9945,7 +9945,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b241',
+    name: 'Divination',
     id : 'base:b241',
     notifCommit : Arts.NO_NOTIF,
     notifFail : "...But nothing happened!",
@@ -10069,7 +10069,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b244',
+    name: 'Resonant Soulfire',
     id : 'base:b244',
     notifCommit : '$1 attacks in a focused blast $2!',
     notifFail : Arts.NO_NOTIF,

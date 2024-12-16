@@ -118,6 +118,7 @@ canvas.onCommit = ::(lines, renderNow){
 instance.mainMenu(
   canvasHeight: 24,
   canvasWidth: 80,
+  features : 0,
     
   onSaveState :::(
     slot,
