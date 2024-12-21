@@ -4708,6 +4708,10 @@ Effect.newEntry(
 )
 
 
+
+
+
+
 Effect.newEntry(
   data : {
     name : 'Cheat Death',
@@ -4729,6 +4733,36 @@ Effect.newEntry(
           holder.heal(amount:1);
 
           holder.addEffect(from:holder, id:'base:stunned', durationTurns:2);                        
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Death Reflection',
+    id : 'base:death-reflection',
+    description: 'Grants a 25% chance to reflect death onto a random combatant instead of the holder.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when(holder.battle == empty) empty;
+        if (holder.hp == 0) ::<= {
+          windowEvent.queueMessage(text:holder.name + " glows!");
+          holder.effectStack.removeAllByID(:'base:death-reflection');
+
+          @:Entity = import(module:'game_class.entity.mt');
+          damage.amount = 0;
+          holder.heal(amount:1);
+          
+          @:victim = random.pickArrayItem(:holder.battle.getAll()->filter(::(value) <- value != holder));
+          windowEvent.queueMessage(text:holder.name + " avoids death at the cost of " + victim.name + '\'s life!');
+          victim.kill();
         }
       }
     }

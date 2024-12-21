@@ -10360,7 +10360,7 @@ Arts.newEntry(
     notifFail : "...But nothing happened!",
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:cheat-death', 'base:stunned'],
-    description: "Grants the Procrastinate Death effect to the target for 3 turns.",
+    description: "Grants the Cheat Death effect to the target for 3 turns.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -10372,7 +10372,32 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      targets[0].addEffect(from:user, id:'base:procrastinate-death', durationTurns:3);
+      targets[0].addEffect(from:user, id:'base:cheat-death', durationTurns:3);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Death Reflection',
+    id : 'base:b258',
+    notifCommit : "$1 casts Death Reflection",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:death-reflection'],
+    description: "Grants the Death Reflection effect.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : true,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:death-reflection', durationTurns:99999999);
     }
   }
 )

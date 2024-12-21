@@ -1666,9 +1666,7 @@
         when(target.isDead == false && hpWas0 && target.hp == 0) ::<= {
           this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
           target.flags.add(flag:StateFlags.DIED);
-          target.kill(from:this);        
-          
-          animateDeath(:target);
+          target.kill(from:this);                  
         }
 
         return true;
@@ -2182,6 +2180,9 @@
 
       state.flags.add(flag:StateFlags.DIED);
       state.isDead = true;        
+      
+      if (silent != true)
+        animateDeath(:this);
     },
     
     addEffect::(from => Object, id => String, durationTurns => Number, item, innate) {
