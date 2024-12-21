@@ -165,6 +165,8 @@ isTag[TAG__SPARSE_ARRAY] = true;
       ::<= {
         when(value[TAG__ID] != empty) ::<= {
           output[key] = ALREADY_SERIALIZED[value[TAG__ID]];
+          if (output[key] == empty)
+            error(:"Somehow, a worldID object has its copy requested before the source appeared. Not sure how this happened!");
         }
         when(value[TAG__LOADABLE_CLASS] != empty) ::<= {
           @:cl = LoadableClass.load(name:value[TAG__LOADABLE_CLASS]);

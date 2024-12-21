@@ -995,7 +995,7 @@
         y = y->floor;
         
         when(x < 0 || y < 0 || x >= width || y >= height)
-          error(detail:'Bad\n');
+          error(detail:'Bad');
         
         @loc = itemIndex[x + y * (width)];
         if (loc == empty) ::<= {

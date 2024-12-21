@@ -83,7 +83,11 @@
     @:base = effect.name + (if (counts > 1) "(x"+counts+")" else "");
     when(effectIDs->findIndex(:id) == -1) "   " + base;
 
-    return (if (isAdding)"++ " else "-- ") + base + ": " + effect.description;
+    when (effectIDs->size == 1)
+      (if (isAdding)"++ " else "-- ") + base + ": " + effect.description;
+
+
+    return (if (isAdding)"++ " else "-- ") + base;
   }
   
   
@@ -93,7 +97,7 @@
     when(line == empty) empty;
     lines->push(:line);
   }
-  
+  breakpoint();
   windowEvent.queueDisplay(
     prompt: this.name + ' - Effects Changed!',
     lines: canvas.refitLines(input:lines)
@@ -433,18 +437,21 @@
 
 @initializeEffectStackProper ::(this, state) {
   
-  
+  @:items = [];
   if (state.innateEffects != empty) ::<= {
     foreach(state.innateEffects) ::(i, v) {
       this.effectStack.addInnate(id:v);
+      items->push(:v);
     }
   }
   
   foreach(this.profession.passives)::(index, passiveName) {
+    items->push(:passiveName);
     this.effectStack.add(
       id:passiveName,
       from:this,
-      duration:999999999999
+      duration:999999999999,
+      noNotify : true
     );
   }
 
@@ -452,14 +459,23 @@
   foreach(state.equips) ::(i, item) {
     when(item == empty) empty;
     foreach(item.equipEffects)::(index, effect) {
+      items->push(:effect);
       this.effectStack.add(
         id:effect,
         item,
         from:this,
-        duration:999999999999
+        duration:999999999999,
+        noNotify : true
       );
     }
   }
+  
+  if (items->size > 0)
+    this.notifyEffect(
+      isAdding: true,
+      effectIDs : items
+    );
+  
   
   this.effectStack.subscribe(
     ::(*args) {
@@ -2437,9 +2453,9 @@
 
       if (_.effectStack) ::<= {
         foreach(current.equipEffects) ::(i, id) {
-          this.effectStack.removeInnate(
-            item: current,
-            id
+          this.effectStack.removeByFilter(::(value) <-
+            value.id == id &&
+            value.item == current
           );
         }
       }

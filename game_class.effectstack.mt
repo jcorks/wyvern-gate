@@ -334,7 +334,7 @@
       
       getAll : getAll,
       
-      add::(id, duration => Number, item, from) {
+      add::(id, duration => Number, item, from, noNotify) {
         @effect = Effect.find(:id);
         @:Item = import(module:'game_mutator.item.mt');
         
@@ -359,7 +359,7 @@
         
         this.emitEvent(name: 'onAffliction', filter::(value) <- r == value);
 
-        if (holder != empty && holder.battle != empty) ::<= {
+        if (noNotify != true && holder != empty && holder.battle != empty) ::<= {
           holder.notifyEffect(
             isAdding: true,
             effectIDs : [id]
@@ -567,7 +567,7 @@
         
         @:items = this.getAll()->map(to::(value) { 
           @:effect = Effect.find(:value.id);
-          @:symbol = Effect.TRAIT_TO_DOMINANT_SYMBOL(:effect.traits);
+          @:symbol = Effect.TRAITS_TO_DOMINANT_SYMBOL(:effect.traits);
           return [
             limit(:'(' + symbol + ') ' + effect.name),
             [
