@@ -1748,7 +1748,7 @@ Location.database.newEntry(data:{
 
     location.inventory.add(item:
       Item.new(
-        base:Item.database.find(id:'perfect-arts-crystal')
+        base:Item.database.find(id:'base:perfect-arts-crystal')
       )
     );    
 

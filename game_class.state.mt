@@ -30,14 +30,14 @@
 @:TAG__LOADABLE_CLASS = '$c';
 @:TAG__SPARSE_ARRAY = '$sa';
 @:TAG__WEIGHT = "$w";
+@:TAG__ID = "$key";
 
 @:isTag = {};
 isTag[TAG__IS_DATABASE] = true;
 isTag[TAG__LOADABLE_CLASS] = true;
 isTag[TAG__SPARSE_ARRAY] = true;
 
-@DEBUG_SERIALIZED = empty;
-@DEBUG_SERIALIZED_REV = empty;
+@ALREADY_SERIALIZED = empty;
 
 @:weight ::(s) {
   @key = 1;
@@ -66,8 +66,23 @@ isTag[TAG__SPARSE_ARRAY] = true;
     (Function): error(detail:'Functions are not allowed to be serialized'),
     
     default: ::<= {
-      if (DEBUG_SERIALIZED != empty && DEBUG_SERIALIZED[value] != empty)
-        error(detail:'Already serialized object! likely infinite recursion (or at the very least erroneous instance copies)');
+      when (ALREADY_SERIALIZED != empty && ALREADY_SERIALIZED[value]) ::<= {
+        {:::} {
+          @:h = value.worldID;
+          if (value.worldID->type != Number)
+            error();
+            
+        } : {
+          onError::(message) {
+            error(detail:'Only classes with a worldID can be serialized multiple times. Please ensure that only one copy of non-worldID objects get saved.');
+          }
+        }
+
+        return {
+          (TAG__ID) : value.worldID
+        }
+        //error(detail:'Already serialized object! likely infinite recursion (or at the very least erroneous instance copies)');
+      }
 
       @:obj = {:::} {
         // database items are always saved as strings.
@@ -78,9 +93,8 @@ isTag[TAG__SPARSE_ARRAY] = true;
             id : value.id
           };
 
-        if (DEBUG_SERIALIZED != empty) ::<= {
-          DEBUG_SERIALIZED[value] = DEBUG_SERIALIZED_REV->size;
-          DEBUG_SERIALIZED_REV->push(value);
+        if (ALREADY_SERIALIZED != empty) ::<= {
+          ALREADY_SERIALIZED[value] = true;
         }
 
         // tagged classes get instantiated and loaded with their state
@@ -147,52 +161,66 @@ isTag[TAG__SPARSE_ARRAY] = true;
 
     
     default: ::<= {
-      when(value[TAG__LOADABLE_CLASS] != empty) ::<= {
-        @:cl = LoadableClass.load(name:value[TAG__LOADABLE_CLASS]);
-        if (cl == empty)
-          error(detail:'Looks like a save file contained a LoadableClass that hasnt been loaded yet or is missing entirely. Check your mods and check your save file version!');
-        output[key] = (cl).new(parent, state:value);
-      }
-      when(value[TAG__IS_DATABASE] != empty) ::<= {
-        @:database = Database.Lookup[value.database];
-        output[key] = database.find(id:value.id);
-      }
       
-      when(value[TAG__SPARSE_ARRAY] != empty) ::<= {
-        @:out = [];
-        for(0, value->size) ::(i) {
-          deserialize(
-            parent,
-            output:out,
-            key:Number.parse(string:i),
-            value:value[i]
-          )
-        }   
-        output[key] = out;
+      ::<= {
+        when(value[TAG__ID] != empty) ::<= {
+          output[key] = ALREADY_SERIALIZED[value[TAG__ID]];
+        }
+        when(value[TAG__LOADABLE_CLASS] != empty) ::<= {
+          @:cl = LoadableClass.load(name:value[TAG__LOADABLE_CLASS]);
+          if (cl == empty)
+            error(detail:'Looks like a save file contained a LoadableClass that hasnt been loaded yet or is missing entirely. Check your mods and check your save file version!');
+          output[key] = (cl).new(parent, state:value);
+        }
+        when(value[TAG__IS_DATABASE] != empty) ::<= {
+          @:database = Database.Lookup[value.database];
+          output[key] = database.find(id:value.id);
+        }
+        
+        when(value[TAG__SPARSE_ARRAY] != empty) ::<= {
+          @:out = [];
+          for(0, value->size) ::(i) {
+            deserialize(
+              parent,
+              output:out,
+              key:Number.parse(string:i),
+              value:value[i]
+            )
+          }   
+          output[key] = out;
+        }
+        
+        if (value->size > 0) ::<= {
+          @:out = [];
+          for(0, value->size) ::(i) {
+            deserialize(
+              parent,
+              output:out,
+              key:i,
+              value:value[i]
+            )
+          }   
+          output[key] = out;      
+        } else ::<= {
+          @:out = [];
+          foreach(value) ::(k, v) {
+            deserialize(
+              parent,
+              output:out,
+              key:k,
+              value:v
+            )
+          }   
+          output[key] = out;      
+        }
       }
-      
-      if (value->size > 0) ::<= {
-        @:out = [];
-        for(0, value->size) ::(i) {
-          deserialize(
-            parent,
-            output:out,
-            key:i,
-            value:value[i]
-          )
-        }   
-        output[key] = out;      
-      } else ::<= {
-        @:out = [];
-        foreach(value) ::(k, v) {
-          deserialize(
-            parent,
-            output:out,
-            key:k,
-            value:v
-          )
-        }   
-        output[key] = out;      
+      {:::} {
+        if ((output[key]->keys->filter(::(value) <- value->type == String)->findIndex(:'worldID')) != -1)
+          ALREADY_SERIALIZED[output[key].worldID] = output[key]
+      } : {
+        onError::(message) {
+          // nuthin
+        }
       }
     }
   }
@@ -201,8 +229,7 @@ isTag[TAG__SPARSE_ARRAY] = true;
 
 @:State = {
   startRootSerializeGuard ::{
-    DEBUG_SERIALIZED = [];
-    DEBUG_SERIALIZED_REV = [];
+    ALREADY_SERIALIZED = [];
   },
   
   weightEmplace ::(data) {
@@ -250,8 +277,7 @@ isTag[TAG__SPARSE_ARRAY] = true;
   },
   
   endRootSerializeGuard ::{
-    DEBUG_SERIALIZED = empty;
-    DEBUG_SERIALIZED_REV = empty;  
+    ALREADY_SERIALIZED = empty;
   },
   
   create ::(items) {

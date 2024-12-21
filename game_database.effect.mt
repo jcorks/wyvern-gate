@@ -4583,7 +4583,7 @@ Effect.newEntry(
           windowEvent.queueMessage(text:holder.name + ' is protected from damage thanks to the Crustacean Maneuver!');
           damage.amount = 1;            
         }
-      }
+      },
 
       onNextTurn ::(from, item, holder, duration) {        
         windowEvent.queueMessage(text:holder.name + ' is preparing for incoming damage!');

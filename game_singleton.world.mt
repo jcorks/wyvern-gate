@@ -196,6 +196,7 @@
       @:story = import(module:'game_singleton.story.mt');
       
       @:currentIsland = this.island;
+      
       this.island = Island.new(
         base : Island.database.find(:'base:none'),
         createEmpty : true
@@ -896,36 +897,39 @@
       
       load ::(serialized) {
         breakpoint();
-
-        if (!State.weightCheck(:serialized)) ::<= {
-          @:instance = import(:'game_singleton.instance.mt');
-          instance.x = true;
-        }
-      
-        if (serialized.rng != empty)
-          random.load(:serialized.rng);
-        
-        state.load(parent:this, serialized:serialized.world, loadFirst:['scenario']);
-        
-        island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
-        island.load(:serialized.islands[state.currentIslandID]);
-        landmark = {:::} {  
-          breakpoint();    
-          foreach(island.landmarks) ::(k, v) {
-            if (v.worldID == state.currentLandmarkID)
-              send(:v);
-          } 
-          
-          // orphanedLandmark
-          when (state.currentLandmarkID != -1 && serialized.orphanedLandmark) ::<= {
-            @:Landmark = import(module:'game_mutator.landmark.mt');
-            @:l = Landmark.new(parent: island.map, state:serialized.orphanedLandmark);
-            return l;
+        State.startRootSerializeGuard();
+        ::<= {
+          if (!State.weightCheck(:serialized)) ::<= {
+            @:instance = import(:'game_singleton.instance.mt');
+            instance.x = true;
           }
+        
+          if (serialized.rng != empty)
+            random.load(:serialized.rng);
           
-          state.currentLandmarkID = -1;
-          return empty;
+          state.load(parent:this, serialized:serialized.world, loadFirst:['scenario']);
+          
+          island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
+          island.load(:serialized.islands[state.currentIslandID]);
+          landmark = {:::} {  
+            breakpoint();    
+            foreach(island.landmarks) ::(k, v) {
+              if (v.worldID == state.currentLandmarkID)
+                send(:v);
+            } 
+            
+            // orphanedLandmark
+            when (state.currentLandmarkID != -1 && serialized.orphanedLandmark) ::<= {
+              @:Landmark = import(module:'game_mutator.landmark.mt');
+              @:l = Landmark.new(parent: island.map, state:serialized.orphanedLandmark);
+              return l;
+            }
+            
+            state.currentLandmarkID = -1;
+            return empty;
+          }
         }
+        State.endRootSerializeGuard();
       }
     }
   }

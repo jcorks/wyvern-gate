@@ -1349,7 +1349,6 @@ return empty;
       
       quicksave :: {
         @:data = world.save();
-        data.worldlyTether = 'This binding may be removed, but be aware: there may be consequences. Those who are more inclined to deal with the arcane arts maybe have an easier time avoiding these.';   
         onSaveState(
           slot:'.Quick Save.',
           data
