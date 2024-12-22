@@ -4385,6 +4385,7 @@ return {
             world.party.inventory.add(item:Item.new(
               base:Item.database.find(id:'base:pink-potion')
             ));
+
             
             @tome = Item.new(
               base:Item.database.find(id:'base:tome'),

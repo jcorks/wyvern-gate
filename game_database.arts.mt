@@ -10402,6 +10402,31 @@ Arts.newEntry(
   }
 )
 
+Arts.newEntry(
+  data: {
+    name: 'Prismatic Wisp',
+    id : 'base:prismatic-wisp',
+    notifCommit : "$1 casts Prismatic Wisp",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:ailments'],
+    description: "Gives the target a random status ailment for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    oncePerBattle : true,
+    canBlock : true,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:random.pickArrayItem(:AILMENTS), durationTurns:3);
+    }
+  }
+)
+
 };
 
 Arts = class(

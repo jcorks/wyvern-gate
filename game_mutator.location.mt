@@ -375,6 +375,7 @@ Location.database.newEntry(data:{
       'base:buy:shop',
       'base:sell:shop',
       'base:bag:shop',
+      'base:appraise',
       'base:talk',
       'base:examine'
     ],
@@ -1745,6 +1746,17 @@ Location.database.newEntry(data:{
         rngEnchantHint:true
       )
     );    
+
+    location.inventory.add(item:
+      Item.new(
+        base:Item.database.getRandomFiltered(
+          filter:::(value) <- 
+            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+            value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)          
+        ),
+        forceNeedsAppraisal : true
+      )
+    );   
 
     location.inventory.add(item:
       Item.new(

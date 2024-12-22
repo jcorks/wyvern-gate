@@ -883,6 +883,146 @@ Interaction.newEntry(
   }
 );
 
+Interaction.newEntry(
+  data : {
+    name : 'Appraise',
+    id :  'base:appraise',
+    keepInteractionMenu : true,
+    onInteract ::(location, party) {
+      @:world = import(module:'game_singleton.world.mt');
+      when(location.ownedBy == empty)
+        windowEvent.queueMessage(
+          text: "No one is at the shop to appraise anything."
+        );
+        
+      when(location.ownedBy.isIncapacitated())
+        windowEvent.queueMessage(
+          text: location.ownedBy.name + ' is incapacitated and cannot appraise anything.'
+        );
+
+
+      when (location.peaceful == false && location.ownedBy != empty) ::<= {
+        windowEvent.queueMessage(
+          speaker: location.ownedBy.name,
+          text: "You're not welcome here!!"
+        );
+        world.battle.start(
+          party,              
+          allies: party.members,
+          enemies: [location.ownedBy],
+          landmark: {},
+          onEnd::(result) {
+            @:instance = import(module:'game_singleton.instance.mt');
+            if (!world.battle.partyWon()) 
+              instance.gameOver(reason:'The party was wiped out.');
+          }
+        );
+      }
+      
+      when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
+        windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');              
+
+      
+      
+      @:appraisable = party.inventory.items->filter(::(value) <- value.needsAppraisal);
+      when (appraisable->size == 0) ::<= {
+        windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"You do not seem to have anything in your inventory that is appraisable."');              
+      }
+      
+      windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"Ah, you seem to have some things I can appraise. It costs 75G for the first appraisal and an additional 50G for each appraisal of the same item."');              
+      windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"If you think I am incorrect, you can ask for further appraisals. Just know that it will cost more..."');              
+
+      @:appraise ::(item){
+        windowEvent.queueMessage(speaker: location.ownedBy.name, text: 
+          random.pickArrayItem(:[
+            '"Let\'s see here..."',
+            '"Hmmm..."',
+            '"Ah, it looks like..."',
+            '"Interesting..."'
+          ])
+        );              
+        
+        world.party.inventory.remove(:item);
+        @:newItem = item.appraise();
+        
+        windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"Here\'s what I think:"');
+        newItem.describe();
+        
+        @:decide = ::{
+          windowEvent.queueChoices(
+            prompt: newItem.name + '...',
+            
+            choices: [
+              'Check again',
+              'Accept appraisal',
+              'Deny appraisal'
+            ],
+            canCancel : false,
+            
+            onChoice::(choice) {
+              when(choice == 1) ::<= {
+                newItem.describe();
+                decide();
+              }
+              when(choice == 3) ::<= {
+                windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"Hmm, perhaps I was mistaken..."');
+                party.inventory.add(:item);
+              }
+              
+              windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"Excellent. Happy to help."');
+              party.inventory.add(:newItem);
+            }
+          );
+        }
+        decide();
+      }
+
+
+      @:appraisePick ::{
+        @:pickItem = import(module:'game_function.pickitem.mt');
+        pickItem(
+          inventory: party.inventory,
+          filter ::(value) <- value.needsAppraisal,
+          canCancel: true,
+          leftWeight : 0.5,
+          topWeight : 0.5,
+          keep : true,
+          prompt: 'Appraise which?',
+          onPick::(item) {
+            @:cost = 75 + item.appraisalCount*50;
+            
+            when (cost > party.inventory.gold) ::<= {
+              windowEvent.queueMessage(:"The party cannot afford the cost of the appraisal");
+              appraisePick();
+            }
+            
+            windowEvent.queueAskBoolean(
+              prompt: 'Appraise '+item.name+ ' for ' + g(:cost) + '?',
+              onChoice::(which) {
+                party.addGoldAnimated(
+                  amount: -cost,
+                  onDone ::{
+                    appraise(:item);                  
+                  }
+                );
+              }
+            );
+          }
+        );       
+      }
+
+      windowEvent.queueAskBoolean(
+        prompt: "Appraise items?",
+        onChoice ::(which) {
+          when(which == false) empty;
+          appraisePick();         
+        }
+      );
+      
+    }
+  }
+)
+
 
 Interaction.newEntry(
   data : {

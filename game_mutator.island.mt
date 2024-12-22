@@ -311,7 +311,7 @@ Island.database.newEntry(
           'base:cycle',     //5
           'base:diversify', //3
           'base:brace',     //3
-          'base:agility',   //3
+          'base:prismatic-wisp', //3
           'base:mind-games',//3
         ];
         

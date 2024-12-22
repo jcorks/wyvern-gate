@@ -1934,7 +1934,7 @@
       state.canMake = [];
       foreach(Item.database.getRandomSet(
           count:if (this.profession.id == 'base:blacksmith') 10 else 2,
-          filter::(value) <- value.hasTraits(:Item.TRAIT.METAL | Item.TRAIT.HAS_QUALITY)
+          filter::(value) <- value.hasTraits(:Item.TRAIT.METAL | Item.TRAIT.HAS_QUALITY) && value.hasNoTrait(:Item.TRAIT.UNIQUE)
       )) ::(k, val) {
         state.canMake->push(value:val.id);
       }
