@@ -79,6 +79,14 @@ ArtsTerm.newEntry(
 );
 
 
+ArtsTerm.newEntry(
+  data : {
+    name : 'Revival Effect',
+    id : 'base:revival-effect',
+    description : 'Revival Effects are those that heal someone from a knockout or prevents death.'
+  }
+);
+
 
 }
 

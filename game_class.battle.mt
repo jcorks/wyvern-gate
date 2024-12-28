@@ -970,7 +970,7 @@
         
         @pendingChoices = [];
         @:art = Arts.find(id:action.card.id);
-        if (world.party != empty && art.canBlock && action.targets->size > 0) ::<= {
+        if (world.party != empty && ((art.traits & Arts.TRAITS.CAN_BLOCK) != 0) && action.targets->size > 0) ::<= {
           pendingChoices = [...action.targets]->filter(by::(value) <- world.party.leader == value);
         }
       

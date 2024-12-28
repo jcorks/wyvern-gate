@@ -209,24 +209,18 @@
             topWeight: 0
           );
         }
-      
-        this.addSupportArt(id:arts[0].id);
-        windowEvent.queueMessage(
-          topWeight: 1,
-          text: 'A new Art has been revealed!',
-          renderable : {
-            render :: {newArtRender(:arts[0]);}
-          }
-        );
-        
-        this.addSupportArt(id:arts[1].id);
-        windowEvent.queueMessage(
-          topWeight: 1,
-          text: 'A new Art has been revealed!',
-          renderable : {
-            render ::{newArtRender(:arts[1]);}
-          }
-        );
+
+        foreach(arts) ::(k, v) {      
+          this.addSupportArt(id:v.id);
+          windowEvent.queueMessage(
+            topWeight: 1,
+            text: 'A new Art has been revealed!',
+            renderable : {
+              render :: {newArtRender(:v);}
+            }
+          );
+        }
+
 
         windowEvent.queueMessage(
           text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'

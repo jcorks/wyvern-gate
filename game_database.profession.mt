@@ -38,7 +38,8 @@
 */
 
 @:TRAITS = {
-  NON_COMBAT : 1
+  NON_COMBAT : 1,
+  PACIFIST : 2, // only waits.
 }
 
 @:reset ::{
@@ -1056,6 +1057,36 @@ Profession.newEntry(data:{
     'base:shock'
   ]
 })
+
+Profession.newEntry(data:{
+  name: 'Defensive Pylon',
+  id : 'base:defensive-pylon',
+  traits : TRAITS.PACIFIST,
+  weaponAffinity: 'base:knuckle',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 2,
+    INT: 7,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 7
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+  ],
+  passives : [
+    'base:shock'
+  ]
+})
+
 
 Profession.newEntry(data:{
   name: 'Guiding Light',

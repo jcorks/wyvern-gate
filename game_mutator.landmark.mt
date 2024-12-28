@@ -263,7 +263,6 @@ Landmark.database.newEntry(
       {id: 'base:small-chest', rarity: 16},
       {id: 'base:locked-chest', rarity: 11},
       {id: 'base:magic-chest', rarity: 15},
-      {id: 'base:enchantment-stand', rarity: 15},
 
       {id: 'base:healing-circle', rarity:35},
 

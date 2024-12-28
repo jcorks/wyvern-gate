@@ -1074,6 +1074,86 @@ Interaction.newEntry(
 
 Interaction.newEntry(
   data : {
+    name : 'Purchase Art',
+    id :  'base:buy:arts',
+    keepInteractionMenu : true,
+    onInteract ::(location, party) {
+      @:world = import(module:'game_singleton.world.mt');
+      @:Arts = import(:'game_database.arts.mt');
+      @:ArtsDeck = import(:'game_class.artsdeck.mt');
+      
+
+      when(location.ownedBy == empty)
+        windowEvent.queueMessage(
+          text: "No one is at the shop to sell you anything."
+        );
+        
+      when(location.ownedBy.isIncapacitated())
+        windowEvent.queueMessage(
+          text: location.ownedBy.name + ' is incapacitated and cannot provide this service.'
+        );
+
+      windowEvent.queueMessage(
+        speaker: 'Arts Tecker',
+        text: '"Here\'s what I have. Take a look. Each costs 125G."'
+      );
+
+
+
+
+      if (location.data.arts == empty) ::<= {
+        location.data.arts = [];
+        
+        for(0, 15)::(i) {
+          location.data.arts->push(:Arts.getRandomFiltered(::(value) <-
+            value.hasNoTrait(:Arts.TRAITS.SPECIAL) &&
+            value.hasTraits(:Arts.TRAITS.SUPPORT)
+          ).id);
+        }
+      }
+      
+
+      @:pickArt = import(:'game_function.pickart.mt');
+      pickArt(
+        onGetList::<- location.data.arts,
+        keep: true,
+        canCancel: true,
+        prompt: 'Arts for sale:',
+        onChoice ::(art, category) {
+          art = Arts.find(:art);
+          
+          windowEvent.queueAskBoolean(
+            prompt: 'Learn new Support Arts for 125G?',
+            onChoice::(which) {
+              when(which == false) empty;
+
+
+              when(world.party.inventory.gold < 125)
+                windowEvent.queueMessage(
+                  text: 'The party cannot afford this Art.'
+                );
+
+
+              world.party.addGoldAnimated(amount:-125, onDone::{
+                location.data.arts->remove(:location.data.arts->findIndex(:art.id));
+                world.party.queueCollectSupportArt(arts:[art]);
+              });
+            }      
+          );
+         
+        },
+        canCancel: true 
+      );
+        
+    }
+  }
+)
+
+
+
+
+Interaction.newEntry(
+  data : {
     name : 'Uncover Art',
     id :  'base:uncover:arts',
     keepInteractionMenu : true,

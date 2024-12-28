@@ -189,8 +189,9 @@
           @:allies = battle.getAllies(:user_);
 
           @:Entity = import(module:'game_class.entity.mt');        
+          @:Profession = import(module:'game_database.profession.mt');        
         
-          when(enemies->keycount == 0 || enemies->findIndexCondition(::(value) <- !value.isIncapacitated()) == -1)
+          when(((user_.profession.traits & Profession.TRAITS.PACIFIST) != 0) || enemies->keycount == 0 || enemies->findIndexCondition(::(value) <- !value.isIncapacitated()) == -1)
             
             acts->push(:BattleAction.new(
               card: ArtsDeck.synthesizeHandCard(id:'base:wait'),

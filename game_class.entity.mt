@@ -1852,6 +1852,11 @@
               name: 'onKnockout',
               to: this
             );
+            
+          this.effectStack.emitEvent(
+            name: 'onKnockedOut',
+            from: attacker
+          );
         }
 
         return true;
@@ -2498,7 +2503,7 @@
       @:this = _.this;
       @:abilitiesUsedBattle = _.abilitiesUsedBattle;
       
-      when (abilitiesUsedBattle != empty && art.oncePerBattle && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
+      when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAITS.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
         text: this.name + " tried to use " + art.name + ", but already was used and could not be used!"
       );
       if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
@@ -2783,7 +2788,7 @@
         @:card = action.card;
 
         @:art = Arts.find(:card.id);
-        when (abilitiesUsedBattle != empty && art.oncePerBattle && abilitiesUsedBattle[card.id] == true) ::<= {
+        when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAITS.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[card.id] == true) ::<= {
           windowEvent.queueMessage(
             text: this.name + " tried to use " + card.name + ", but already was used and could not be used again!"
           ) 
