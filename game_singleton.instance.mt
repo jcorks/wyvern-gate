@@ -436,6 +436,8 @@ return class(
         preloadMods => Function,
         onSaveSettings => Function,
         onLoadSettings => Function,
+        playSFX => Function,
+        playBGM => Function,
         onQuit => Function
       ) {
         features_ = features;

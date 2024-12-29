@@ -242,6 +242,17 @@
   About:    called before removal of the effect due to its duration being 0
   returns:  ignored 
 
+  Event:    onKnockedOut 
+  About:    called after the holder gets knocked out.
+  returns:  ignored 
+  args:
+    - from: the one who caused it.
+
+  Event:    onDurationEnd 
+  About:    called before removal of the effect due to its duration being 0
+  returns:  ignored 
+
+
 */
 
 @:EffectStack = LoadableClass.create(
@@ -542,10 +553,11 @@
         @:listTraits ::(flags) {
           @:out = [];
           
-          if (flags & Effect.TRAIT.SPECIAL) out->push(:'Special');
-          if (flags & Effect.TRAIT.AILMENT) out->push(:'Status Ailment');
-          if (flags & Effect.TRAIT.BUFF)    out->push(:'Buff');
-          if (flags & Effect.TRAIT.DEBUFF)  out->push(:'Debuff');
+          if (flags & Effect.TRAIT.SPECIAL)  out->push(:'Special');
+          if (flags & Effect.TRAIT.AILMENT)  out->push(:'Status Ailment');
+          if (flags & Effect.TRAIT.BUFF)     out->push(:'Buff');
+          if (flags & Effect.TRAIT.DEBUFF)   out->push(:'Debuff');
+          if (flags & Effect.TRAIT.REVIVAL)  out->push(:'Revival');
           
           when(out->size == 0)
             'None'

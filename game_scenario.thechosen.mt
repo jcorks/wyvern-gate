@@ -1381,7 +1381,6 @@ return {
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 11},
-          {id: 'base:enchantment-stand', rarity: 12},
 
 
           {id: 'base:healing-circle', rarity:20},
@@ -1446,7 +1445,6 @@ return {
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
-          {id: 'base:enchantment-stand', rarity: 11},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 12},
@@ -1515,7 +1513,6 @@ return {
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
-          {id: 'base:enchantment-stand', rarity: 11},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 11},
@@ -1590,7 +1587,6 @@ return {
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
-          {id: 'base:enchantment-stand', rarity: 11},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 11},
@@ -4761,7 +4757,7 @@ return {
         'base:wild-swing',
         'base:triplestrike',
         'base:leg-sweep',
-        'base:flight',
+        'base:summon-defensive-pylon',
         'base:flash',
         'base:unarm'
       ],

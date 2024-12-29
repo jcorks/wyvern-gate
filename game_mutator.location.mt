@@ -443,6 +443,7 @@ Location.database.newEntry(data:{
     "A mystical and exotic shop that provides services rather than goods.",
   ],
   interactions : [
+    'base:buy:arts',
     'base:trade:arts',
     'base:uncover:arts',
     'base:talk',
@@ -487,9 +488,24 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
 
   },
-  
-  onIncrementTime::(location, time) {
-  
+    
+  onIncrementTime::(location) {
+    @:world = import(module:'game_singleton.world.mt');
+    @:Arts = import(:'game_database.arts.mt');
+    if (world.time == world.TIME.MIDNIGHT) ::<= {
+      when (location.data.arts == empty) empty;
+      @:items = random.scrambled(:location.data.arts);
+
+      items->setSize(:(items->size / 2)->floor);
+        
+      for(items->size, 15)::(i) {
+        location.data.arts->push(:Arts.getRandomFiltered(::(value) <-
+          value.hasNoTrait(:Arts.TRAITS.SPECIAL) &&
+          value.hasTraits(:Arts.TRAITS.SUPPORT)
+
+        ).id);
+      }          
+    }
   }
 })
 
