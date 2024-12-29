@@ -7222,7 +7222,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
       return {:::} {
         foreach(allies) ::(k, v) {
-          when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified')->size > 0) 
+          when (v.hp < v.stats.HP || v.effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified')->size > 0) 
             send(:[v]);
         }      
         

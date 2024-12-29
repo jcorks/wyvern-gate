@@ -7,9 +7,9 @@ return ::(onBooted) {
       {
         chance : 0.4,
         lines : [
-          'CX Systems, 2023',
-          'RAM: 512K... OK!',
-          'CPU Check: X80 - pIII, Compute Systemes LLC.',
+          'Personal Computer KP-X, Vector Inc. 1993',
+          'RAM: 4MB... OK!',
+          'CPU Check: X80 - pIII @25 MHz, Compute Systemes LLC.',
           'Checking BIOS integrity...'
         ]
       },

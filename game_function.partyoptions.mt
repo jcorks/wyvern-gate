@@ -101,7 +101,48 @@ return ::{
 
   
   @:viewArts::(member) {
-    member.editDeck();
+    windowEvent.queueChoices(
+      leftWeight: 1,
+      topWeight : 1,
+      prompt: member.name + 's decks:',
+      keep : true,
+      canCancel: true,
+      onGetChoices::<- [
+        ...(member.deckTemplateNames->map(::(value) <- 
+          if (member.getEquippedDeckName() == value) 
+            '* ' + value 
+          else 
+            '  ' + value
+        )), 
+        'Make new deck...'
+      ],
+      onChoice::(choice) {
+        when(choice-1 == member.deckTemplateNames->size) ::<= {
+          import(:'game_function.name.mt')(
+            prompt: 'New deck name:',
+            canCancel: true,
+            onDone ::(name) {
+              member.addDeck(:name);
+            }
+          );
+        }
+        @:deckName = member.deckTemplateNames[choice-1];
+        windowEvent.queueChoices(
+          prompt: 'Deck: ' + deckName,
+          choices: ['Equip deck', 'Edit...'],
+          leftWeight : 1,
+          topWeight : 1,
+          keep : true,
+          canCancel: true,
+          onChoice::(choice) {
+            when(choice-1 == 0)
+              member.equipDeck(name:deckName);
+              
+            member.editDeck(:deckName);            
+          }
+        );
+      }
+    );
   }
   
   @:professionMenu ::(member) {

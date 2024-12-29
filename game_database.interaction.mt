@@ -1074,7 +1074,7 @@ Interaction.newEntry(
 
 Interaction.newEntry(
   data : {
-    name : 'Purchase Art',
+    name : 'Purchase Arts',
     id :  'base:buy:arts',
     keepInteractionMenu : true,
     onInteract ::(location, party) {

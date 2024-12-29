@@ -45,6 +45,7 @@
 @:MIN_SUPPORT_COUNT = 5;
 @:DAMAGE_RNG_SPREAD = 0.3;
 @:PROF_EXP_PER_KNOCKOUT = 35;
+@:DECK_MIN_ART_COUNT = 25;
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -124,12 +125,16 @@
   return temp->keys;
 }
 
+@:newDeckTemplate ::<- {
+  supportArts : [],
+  professionArts : []
+}
 
 
 
 @:assembleDeck ::(this, state) {
   @:deck = ArtsDeck.new(profession: this.profession.id);
-  
+  @:set = state.deckTemplates[state.equippedDeck];
   
   deck.subscribe(::(event, card) {
     match(event) {
@@ -163,22 +168,17 @@
   }  
   
   // profession boosts
-  foreach(state.equippedProfessionArts) ::(k, v) {
+  foreach(set.professionArts) ::(k, v) {
     deck.addArt(id:v);
   }
   
   
   @:world = import(module:'game_singleton.world.mt');
-  if (this.supportArts) ::<= {
-    foreach(this.supportArts)::(k, v) {
+  if (set.supportArts) ::<= {
+    foreach(set.supportArts)::(k, v) {
       deck.addArt(id:v);
     }
   }
-    
- 
-  
-
-  
   
   return deck;
 }
@@ -578,8 +578,8 @@
     level : 0,
     data : empty,
     deck : empty,
-    supportArts : empty,
-    equippedProfessionArts : empty,
+    deckTemplates : empty,
+    equippedDeck : 'MAIN',
     professionArts : empty,
     innateEffects : empty,
     professionProgress : empty
@@ -614,11 +614,11 @@
       state.innateEffects = innateEffects;
       
       state.worldID = world.getNextID();
+      state.deckTemplates = {
+        MAIN : newDeckTemplate()
+      };
 
       // starting supports
-      state.supportArts = [
-        
-      ];
       state.stats = StatSet.new(
         HP:1,
         AP:random.integer(from:8, to:14),
@@ -678,7 +678,6 @@
 
       state.professionProgress = [];
       state.professionArts = [];
-      state.equippedProfessionArts = [];
 
       if (state.profession.traits & Profession.TRAITS.NON_COMBAT) ::<= {
         for(0, 21) ::(i) {
@@ -858,12 +857,16 @@
     
     
     supportArts : {
-      get ::<- _.state.supportArts,
-      set ::(value) <- _.state.supportArts = value
+      get ::<- _.state.deckTemplates[_.state.equippedDeck].supportArts,
+      set ::(value) <- _.state.deckTemplates[_.state.equippedDeck].supportArts = value
     },
     
     professionArts : {
       get ::<- [..._.state.professionArts]
+    },
+    
+    deckTemplateNames : {
+      get ::<- _.state.deckTemplates->keys
     },
       
     blockPoints : {
@@ -887,29 +890,72 @@
       }
     },
     
-    editDeck ::{
+    addDeck ::(name) {
+      @:state = _.state;
+      @:this = _.this;
+      
+      state.deckTemplates[name] = newDeckTemplate();
+    },
+    
+    getEquippedDeckName ::<- _.state.equippedDeck,
+    
+    equipDeck ::(name, silent) {
+      @:state = _.state;
+      @:this = _.this;
+
+      when (state.deckTemplates->keys->findIndex(:name) == -1) 
+        error(:"No such deck is equippable. Check your code!");
+
+      @:set = state.deckTemplates[name];
+      when(this.calculateDeckSize(:set) < DECK_MIN_ART_COUNT)
+        windowEvent.queueMessage(
+          text: "Deck "+name+' has too few cards to be equipped. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize(:set) + ' out of the minimum of ' + DECK_MIN_ART_COUNT + '.'
+        );
+      
+      if (silent != true)
+        windowEvent.queueMessage(
+          text: this.name + ' is now using the deck ' + name + '.'
+        );
+
+      _.state.equippedDeck = name;
+    },
+    
+    editDeck ::(which) {
       @:state = _.state;
       @:this = _.this;
       @:pickArt = import(:'game_function.pickart.mt');
       
+      @:set = state.deckTemplates[which];
+      if (set == empty)
+        error(:'Incorrect deck name');
+      
+      
       
       @:equipped::{
-        when(this.supportArts->size == 0)
+        when(set.supportArts->size == 0)
           windowEvent.queueMessage(
             text: this.name + ' currently has no Support Arts. View the Trunk to add some.'
           );
       
         @:pickArt = import(:'game_function.pickart.mt');
         pickArt( 
-          prompt : 'Equipped:', 
+          onGetPrompt :: {
+            @:size = this.calculateDeckSize(:set);
+            return which + ': ' + (if(size <= DECK_MIN_ART_COUNT) 
+                ''+size + ' / ' + DECK_MIN_ART_COUNT + ' cards'
+              else
+                ''+size + ' cards'
+            )
+          },
+           
           onGetList :: {
-            return this.supportArts;
+            return set.supportArts;
           },
           canCancel:true,
           keep: true,
           onChoice::(choice) {
             @:which = choice;
-            @:id = this.supportArts[which];
+            @:id = set.supportArts[which];
             
             when(id == empty) empty;
             
@@ -924,12 +970,12 @@
               onChoice::(choice) {
                 @:world = import(module:'game_singleton.world.mt');
                 
-                when (state.supportArts->size == MIN_SUPPORT_COUNT) ::<= {
+                when (set.supportArts->size == MIN_SUPPORT_COUNT) ::<= {
                   windowEvent.queueMessage(text: 'Each person must have at least 5 supports in their deck. Please try adding a different Support to this person\'s deck before removing this Art.');
                 }
                 
                 world.party.addSupportArt(id:art.id);
-                state.supportArts->remove(:state.supportArts->findIndex(:art.id));
+                set.supportArts->remove(:set.supportArts->findIndex(:art.id));
               }
             );
 
@@ -973,13 +1019,13 @@
               canCancel: true,
               onChoice::(choice) {
                 @:world = import(module:'game_singleton.world.mt');
-                when(state.supportArts->findIndex(:id) != -1)
+                when(set.supportArts->findIndex(:id) != -1)
                   windowEvent.queueMessage(
                     text: 'Only one of each kind of Support Art can be equipped at a time.'
                   );
                 
                 world.party.takeSupportArt(id:art.id);
-                state.supportArts->push(:art.id);
+                set.supportArts->push(:art.id);
               }
             );
           }
@@ -1000,7 +1046,7 @@
           onGetList ::<- this.getUnequippedProfessionArts(),
           canCancel: true,
           onChoice ::(art, category) {
-            state.equippedProfessionArts->push(:art);
+            set.professionArts->push(:art);
           }
         );
       }
@@ -1010,12 +1056,23 @@
       @:start ::{
         pickArt(
           keep:true,
-          prompt: this.name + ' Arts:', 
+          onGetPrompt :: {
+            @:size = this.calculateDeckSize(:set);
+            return which + ': ' + (if(size <= DECK_MIN_ART_COUNT) 
+                ''+size + ' / ' + DECK_MIN_ART_COUNT + ' cards'
+              else
+                ''+size + ' cards'
+            )
+          },
+
+
+
           onCancel ::{
-            when(this.calculateDeckSize() < 25) ::<= {
+            when(this.calculateDeckSize(:set) < DECK_MIN_ART_COUNT && state.equippedDeck == which) ::<= {
               windowEvent.queueMessage(
-                text: this.name + '\'s deck has too few cards. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize() + ' out of the minimum of 25.'
+                text: this.name + '\'s deck has too few cards to keep equipped. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize(:set) + ' out of the minimum of ' + DECK_MIN_ART_COUNT + '.'
               );
+              breakpoint();
               
               start();
             }
@@ -1029,14 +1086,14 @@
             ] else [empty, empty]]);
 
             categories->push(:['Profession:',::<= {
-              @:profArts = [...state.equippedProfessionArts];
+              @:profArts = [...set.professionArts];
               for(profArts->size, 5) ::(i) {
                 profArts->push(:empty);
               }
               return profArts;
             }]);
 
-            categories->push(:['Support:', [...this.supportArts]]);
+            categories->push(:['Support:', [...set.supportArts]]);
             categories->push(:[' Add support...', []]);
             return categories;
           },
@@ -1058,7 +1115,7 @@
                 onChoice::(choice) {
                   @:world = import(module:'game_singleton.world.mt');
                   world.party.addSupportArt(id:art);
-                  state.supportArts->remove(:state.supportArts->findIndex(:art));
+                  set.supportArts->remove(:set.supportArts->findIndex(:art));
                 
                 }
               )
@@ -1084,8 +1141,8 @@
                 onChoice::(choice) {
                   when(choice == 0) empty;
                   
-                  state.equippedProfessionArts->remove(:
-                    state.equippedProfessionArts->findIndex(:art)
+                  set.professionArts->remove(:
+                    set.professionArts->findIndex(:art)
                   );
                 }
               );
@@ -1097,7 +1154,7 @@
       start();
     },
 
-    viewDeckArts ::(prompt) {
+    viewDeckArts ::(prompt, which) {
       @:this = _.this;
       @:state = _.state;
       // add weapon
@@ -1110,12 +1167,13 @@
           hand.arts[1]
         ]])
       }  
+      @:set = state.deckTemplates[state.equippedDeck];
 
       // profession boosts
-      categories->push(:['Profession:', [...state.equippedProfessionArts]]);
+      categories->push(:['Profession:', [...set.professionArts]]);
 
-      if (this.supportArts) ::<= {
-        categories->push(:['Support:', [...this.supportArts]]);;
+      if (set.supportArts) ::<= {
+        categories->push(:['Support:', [...set.supportArts]]);;
       }
 
       
@@ -1138,23 +1196,29 @@
       _.state.shield = 0;
     },
     
-    calculateDeckSize ::{
+    calculateDeckSize ::(set){
       @:state = _.state;
       @:this = _.this;
       @:pickArt = import(:'game_function.pickart.mt');
       
-      return [
-          ...this.supportArts, 
-          ...state.equippedProfessionArts,
-          ...(if (state.equips[EQUIP_SLOTS.HAND_LR]) 
-            [
-              state.equips[EQUIP_SLOTS.HAND_LR].arts[0],        
-              state.equips[EQUIP_SLOTS.HAND_LR].arts[1]
-            ]
-          else 
-            []
-          )
-        ]->reduce(::(previous, value) <-
+      if (set == empty)
+        set = state.deckTemplates[state.equippedDeck];
+      
+      @:cards = [
+        ...set.supportArts, 
+        ...set.professionArts,
+        ...(if (state.equips[EQUIP_SLOTS.HAND_LR]) 
+          [
+            state.equips[EQUIP_SLOTS.HAND_LR].arts[0],        
+            state.equips[EQUIP_SLOTS.HAND_LR].arts[1]
+          ]
+        else 
+          []
+        )
+      ]      
+      
+      when(cards->size == 0) 0;
+      return cards->reduce(::(previous, value) <-
           (if (previous == empty) 0 else previous) + 
           ArtsDeck.artIDtoCount(:value)
         );    
@@ -2106,26 +2170,22 @@
       );
     },
     
-    equipProfessionArt::(id) {
-      @:state = _.state;
-      state.equippedProfessionArts->push(:id);
-    },
     
     removeAllProfessionArts ::{
       @:state = _.state;
-      state.professionArts = [];
+      state.deckTemplates[state.equippedDeck].professionArts = [];
     },
     
     equipAllProfessionArts:: {
       @:state = _.state;
-      state.equippedProfessionArts = [...state.professionArts];
+      state.deckTemplates[state.equippedDeck].professionArts = [...state.professionArts];
     },
     
     getUnequippedProfessionArts:: {
       @:state = _.state;
 
       return state.professionArts->filter(::(value) <-
-        (state.equippedProfessionArts->findIndex(:value) == -1)
+        (state.deckTemplates[state.equippedDeck].professionArts->findIndex(:value) == -1)
       )
     },
       
