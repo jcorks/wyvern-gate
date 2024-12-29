@@ -352,6 +352,7 @@ Location.database.newEntry(data:{
                       location.ownedBy.level >= value.levelMinimum
                       && value.tier <= location.landmark.island.tier
           ),
+          forceNeedsAppraisal : false,
           rngEnchantHint:true
         )
       );
@@ -604,6 +605,7 @@ Location.database.newEntry(data:{
 
       location.inventory.add(
         item:Item.new(
+          forceNeedsAppraisal : false,
           base: Item.database.getRandomFiltered(
             filter::(value) <- (
               value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
@@ -1476,6 +1478,7 @@ Location.database.newEntry(data:{
           base:Item.database.getRandomFiltered(
             filter:::(value) <- value.hasTraits(:Item.TRAIT.APPAREL)
           ),
+          forceNeedsAppraisal : false,
           apparelHint: 'base:wool-plus',
           rngEnchantHint:true
         )
@@ -1657,6 +1660,7 @@ Location.database.newEntry(data:{
           base:Item.database.getRandomFiltered(
             filter:::(value) <- value.hasTraits(:Item.TRAIT.HAS_QUALITY)
           ),
+          forceNeedsAppraisal : false,
           qualityHint: random.pickArrayItem(list:qualities),
           rngEnchantHint:true
         )
