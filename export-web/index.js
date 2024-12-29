@@ -304,6 +304,18 @@ var startGame = function(touch) {
               break;
             }
             
+            case 'sfx' : {
+              // play a sound
+              data.name
+            }
+
+            case 'bgm' : {
+              // play a sound
+              data.name
+              data.loop
+            }
+
+            
             case 'error' : {
               reportError(
                   "git info: " + GIT_VERSION + "\n\n" +

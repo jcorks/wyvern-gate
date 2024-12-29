@@ -295,6 +295,14 @@ instance.mainMenu(
     return mods;  
   },
   
+  playSFX ::(name) {
+    
+  },
+  
+  playBGM ::(name, loop) {
+  
+  },
+  
   onQuit :: {
     LOOP_DONE = true;
   }

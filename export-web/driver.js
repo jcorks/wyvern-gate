@@ -203,6 +203,16 @@
         }
         return matte.store.createObjectArray(argsA);            
     });
+    
+    
+    matte.setExternalFunction('external_onPlaySFX', ['a'], function(fn, args) {
+        Worker.playSFX(args[0]);         
+    });    
+
+    matte.setExternalFunction('external_onPlayBGM', ['a', 'b'], function(fn, args) {
+        Worker.playBGM(args[0], args[1]);         
+    });    
+    
 
       
     matte.setExternalFunction('external_onLoadState', ['a'], function(fn, args) {

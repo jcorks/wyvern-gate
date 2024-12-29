@@ -30,6 +30,10 @@
 @:godot_requestExit = getExternalFunction(:"wyvern_gate__native__godot_request_exit");
 @:godot_updateSettings = getExternalFunction(:"wyvern_gate__native__godot_update_settings");
 
+@:godot_onPlaySFX = getExternalFunction(:"wyvern_gate__native__godot_on_play_sfx");
+@:godot_onPlayBGM = getExternalFunction(:"wyvern_gate__native__godot_on_play_bgm");
+
+
 @MOD_DIR = './mods';
 
 
@@ -124,6 +128,9 @@ instance.mainMenu(
       }
     }
   },
+  
+  onPlaySFX::(name) <-  godot_onPlaySFX(a:name),
+  onPlaySFX::(name, loop) <-  godot_onPlaySFX(a:name, b:loop),
   
   onLoadSettings ::{
     return {:::} {

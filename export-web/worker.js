@@ -83,6 +83,22 @@ Worker = (function() {
             });            
         },
         
+        playSFX : function(name) {
+            postMessageJSON({
+                command: 'sfx',
+                name : name
+            });
+        },
+
+        playBGM : function(name, loop) {
+            postMessageJSON({
+                command: 'bgm',
+                name : name,
+                loop : loop
+            });
+        },
+
+        
         throwMatteError : function(message) {
             postMessageJSON({
                 command: 'error',

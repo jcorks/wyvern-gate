@@ -49,6 +49,50 @@ static matteValue_t update_settings(
 	return matte_store_new_value(store);
 }
 
+static matteValue_t on_play_sfx(
+	matteVM_t * vm, 
+	matteValue_t fn, 
+	const matteValue_t * args, 
+	void * userData
+) {
+
+	Matte * m = (Matte*)userData;
+	matteStore_t * store = matte_vm_get_store(vm);
+	std::string str(matte_string_get_c_str(matte_value_string_get_string_unsafe(store, args[0])));
+
+
+	m->playSFX(
+		str
+	);
+
+	return matte_store_new_value(store);
+}
+
+
+
+static matteValue_t on_play_bgm(
+	matteVM_t * vm, 
+	matteValue_t fn, 
+	const matteValue_t * args, 
+	void * userData
+) {
+
+	Matte * m = (Matte*)userData;
+	matteStore_t * store = matte_vm_get_store(vm);
+	std::string str(matte_string_get_c_str(matte_value_string_get_string_unsafe(store, args[0])));
+
+
+    bool loop = matte_value_as_boolean(args[1]);
+
+	m->playBGM(
+		str,
+		loop
+	);
+
+	return matte_store_new_value(store);
+}
+
+
 static matteValue_t request_exit(
 	matteVM_t * vm, 
 	matteValue_t fn, 
@@ -87,6 +131,14 @@ void Matte::_bind_methods() {
 
 	ADD_SIGNAL(
 		MethodInfo("on_send_settings", PropertyInfo(Variant::STRING, "data"))
+	);
+
+	ADD_SIGNAL(
+		MethodInfo("on_play_sfx", PropertyInfo(Variant::STRING, "name"))
+	);
+
+	ADD_SIGNAL(
+		MethodInfo("on_play_bgm", PropertyInfo(Variant::STRING, "name"), PropertyInfo(Variant::BOOLEAN, "loop"))
 	);
 
 
@@ -166,6 +218,29 @@ void Matte::initializeVM() {
         NULL
     );	
 
+    matte_add_external_function(
+        ctx,
+        "wyvern_gate__native__godot_on_play_bgm",
+        on_play_bgm,
+        this,
+        
+        "name",
+        "loop",
+        // argument names
+        NULL
+    );	
+
+
+    matte_add_external_function(
+        ctx,
+        "wyvern_gate__native__godot_on_play_sfx",
+        on_play_sfx,
+        this,
+        
+        "name",
+        // argument names
+        NULL
+    );	
     matte_vm_import(
         vm,
         MATTE_VM_STR_CAST(vm, "bridge.mt"),
@@ -212,6 +287,16 @@ void Matte::sendLine(int index, const std::string & str) {
 void Matte::sendError(const std::string & str) {
 	emit_signal("on_send_error", str.c_str());
 }
+
+void Matte::playSFX(const std::string & str) {
+	emit_signal("on_play_sfx", str.c_str());
+}
+
+void Matte::playBGM(const std::string & str, bool loop) {
+	emit_signal("on_play_bgm", str.c_str(), loop);
+}
+
+
 
 void Matte::sendSettings(const std::string & str) {
 	emit_signal("on_send_settings", str.c_str());

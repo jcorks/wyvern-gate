@@ -436,8 +436,8 @@ return class(
         preloadMods => Function,
         onSaveSettings => Function,
         onLoadSettings => Function,
-        playSFX => Function,
-        playBGM => Function,
+        onPlaySFX => Function,
+        onPlayBGM => Function, // if name is unrecognized, will halt playing music.
         onQuit => Function
       ) {
         features_ = features;

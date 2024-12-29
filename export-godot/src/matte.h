@@ -27,6 +27,8 @@ public:
 	void sendLine(int index, const std::string & line);
 	void sendError(const std::string & line);
 	void sendSettings(const std::string & line);
+	void playSFX(const std::string & name);
+	void playBGM(const std::string & name, bool loop);
 	void enableDebugging();
 	void requestExit();
 
