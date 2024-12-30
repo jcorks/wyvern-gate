@@ -295,11 +295,11 @@ instance.mainMenu(
     return mods;  
   },
   
-  playSFX ::(name) {
+  onPlaySFX ::(name) {
     
   },
   
-  playBGM ::(name, loop) {
+  onPlayBGM ::(name, loop) {
   
   },
   

@@ -920,6 +920,19 @@
       _.state.equippedDeck = name;
     },
     
+    removeDeck ::(which) {
+      @:state = _.state;
+      @:this = _.this;
+
+      when(which == state.equippedDeck) empty;
+      @:world = import(module:'game_singleton.world.mt');
+      
+      foreach(state.deckTemplates[which].supportArts) ::(k, v) {
+        world.party.addSupportArt(id:v);
+      }
+      state.deckTemplates->remove(:which);
+    },
+    
     editDeck ::(which) {
       @:state = _.state;
       @:this = _.this;
