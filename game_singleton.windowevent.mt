@@ -389,11 +389,21 @@
   
         @cursorPageTop = 0;
 
-        if (choice == CURSOR_ACTIONS.UP) ::<= {
-          cursorPos -= 1;
-        }
-        if(choice == CURSOR_ACTIONS.DOWN) ::<= {
-          cursorPos += 1;
+        if (data.horizontalFlow) ::<= {
+          if (choice == CURSOR_ACTIONS.LEFT) ::<= {
+            cursorPos -= 1;
+          }
+          if(choice == CURSOR_ACTIONS.RIGHT) ::<= {
+            cursorPos += 1;
+          }
+        
+        } else ::<= {
+          if (choice == CURSOR_ACTIONS.UP) ::<= {
+            cursorPos -= 1;
+          }
+          if(choice == CURSOR_ACTIONS.DOWN) ::<= {
+            cursorPos += 1;
+          }
         }
 
         if (cursorPos < 0) cursorPos = choices->keycount-1;
@@ -458,9 +468,15 @@
         
         
         
-        
-        if (choice == CURSOR_ACTIONS.UP||
-          choice == CURSOR_ACTIONS.DOWN) ::<= {
+        @:affectsChoice = if (data.horizontalFlow)
+          choice == CURSOR_ACTIONS.LEFT ||
+          choice == CURSOR_ACTIONS.RIGHT        
+        else 
+          choice == CURSOR_ACTIONS.UP ||
+          choice == CURSOR_ACTIONS.DOWN        
+        ;
+
+        if (affectsChoice) ::<= {
           sound.playSFX(:"cursor");
           data.defaultChoice = (cursorPos+1);
         }
@@ -1396,7 +1412,8 @@
         onGetHeader, 
         onCancel, 
         pageAfter, 
-        hideWindow
+        hideWindow,
+        horizontalFlow
       ) {
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
@@ -1421,7 +1438,8 @@
             renderable:renderable,
             jumpTag : jumpTag,
             header : header,
-            onGetHeader : onGetHeader
+            onGetHeader : onGetHeader,
+            horizontalFlow : horizontalFlow
           });
         }]);
         return getResolveQueue()->size-1;
