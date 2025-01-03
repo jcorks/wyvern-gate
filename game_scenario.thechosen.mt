@@ -355,11 +355,14 @@ return {
     @:chosenProfs = []
     
     for(0, 5) ::(i) {
-      @:prof = Profession.getRandomFiltered(::(value) <- 
+      @:prof = 'base:alchemist';
+      /*
+      Profession.getRandomFiltered(::(value) <- 
         ((value.traits & Profession.TRAITS.NON_COMBAT) == 0) && 
         value.learnable &&
         chosenProfs[value.id] != true
       ).id;
+      */
       
       chosenProfs[prof] = true;
       @:p0 = island.newInhabitant(

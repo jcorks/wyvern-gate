@@ -4238,7 +4238,7 @@ Arts.newEntry(
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
       @:item = Item.new(
-        base:Item.database.find(id:'base:potion');
+        base:Item.database.find(id:'base:potion'),
         creationHint:0
       );
 
@@ -4291,7 +4291,7 @@ Arts.newEntry(
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
       @:item = Item.new(
-        base:Item.database.find(id:'base:potion');
+        base:Item.database.find(id:'base:potion'),
         creationHint:1
       );
 
@@ -4344,7 +4344,7 @@ Arts.newEntry(
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
       @:item = Item.new(
-        base:Item.database.find(id:'base:potion');
+        base:Item.database.find(id:'base:potion'),
         creationHint:2
       );
 
@@ -4456,7 +4456,7 @@ Arts.newEntry(
             }
             
             windowEvent.queueMessage(
-              text: 'Mixing ' + alreadyPicked.name + ' with ' + item.name '.'
+              text: 'Mixing ' + alreadyPicked.name + ' with ' + item.name + '.'
             );
             
             windowEvent.queueAskBoolean(
@@ -4490,7 +4490,7 @@ Arts.newEntry(
               }
             );  
           }
-        }
+        )
       }
       pick();
     }

@@ -583,7 +583,7 @@ Profession.newEntry(data:{
   arts : [
     'base:scavenge',
     'base:make-heal-potion',
-    'base:make-buff-position',   //X -3 ingredient pack, +1 pink potion 
+    'base:make-buff-potion',   //X -3 ingredient pack, +1 pink potion 
     'base:make-debuff-potion',   //X -3 ingredient pack, +1 cyan ption 
     'base:make-essence',  //X etc (poison)
     'base:mix-potion',  //X petrify
