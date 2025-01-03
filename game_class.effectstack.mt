@@ -347,6 +347,9 @@
       
       add::(id, duration => Number, item, from, noNotify) {
         @effect = Effect.find(:id);
+        if (effect.hasTraits(:Effect.TRAIT.INSTANTANEOUS))
+          duration = 0;
+          
         @:Item = import(module:'game_mutator.item.mt');
         
         if (item == empty)

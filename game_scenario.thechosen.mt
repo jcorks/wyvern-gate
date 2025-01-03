@@ -4335,7 +4335,7 @@ return {
           },
           ['', 'Opening the box reveals items inside!'],
           ['', 'The party receives 125G.'],
-          ['', 'The party receives 3 Pink Potions.'],
+          ['', 'The party receives 3 Potions.'],
           ['', 'The party receives a Life Crystal.'],
           ['', 'The party receives an Arts Crystal.'],
           ['', 'The party also receives an equippable Tome.'],
@@ -4373,13 +4373,13 @@ return {
 
 
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:pink-potion')
+              base:Item.database.find(id:'base:potion')
             ));
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:pink-potion')
+              base:Item.database.find(id:'base:potion')
             ));
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:pink-potion')
+              base:Item.database.find(id:'base:potion')
             ));
 
             

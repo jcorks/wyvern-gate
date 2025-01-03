@@ -581,12 +581,12 @@ Profession.newEntry(data:{
   levelMinimum : 1,
 
   arts : [
-    'base:pink-brew',   //X -3 ingredient pack, +1 pink potion 
-    'base:cyan-brew',   //X -3 ingredient pack, +1 cyan ption 
-    'base:green-brew',  //X etc (poison)
-    'base:orange-brew',   //X etc (explosion)
-    'base:purple-brew',   //X etc (health + ap)
-    'base:black-brew',  //X petrify
+    'base:scavenge',
+    'base:make-heal-potion',
+    'base:make-buff-position',   //X -3 ingredient pack, +1 pink potion 
+    'base:make-debuff-potion',   //X -3 ingredient pack, +1 cyan ption 
+    'base:make-essence',  //X etc (poison)
+    'base:mix-potion',  //X petrify
   ],
   passives : [
     'base:alchemists-scavenging' // find 1 Ingredient Pack

@@ -28,7 +28,11 @@
   
   // Means the holder will always go first. Ties are randomly decided
   ALWAYS_FIRST : 16,
-  REVIVAL : 32
+  REVIVAL : 32,
+  
+  // Overrides duration to always be 0. effect stack will not report these if alone 
+  // in a change.
+  INSTANTANEOUS : 64
   
   
 };
@@ -1747,7 +1751,7 @@ Effect.newEntry(
     description: 'The item is destroyed in the process of its effects',
     stackable: true,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1767,7 +1771,7 @@ Effect.newEntry(
     description: 'The item is destroyed in the process of misuse or strain',
     stackable: true,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1789,7 +1793,7 @@ Effect.newEntry(
     description: 'The item is violently lunged at a target, likely causing damage. The target may catch the item.',
     stackable: true,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1828,12 +1832,12 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
-    name : 'HP Recovery: All',
+    name : 'Major Recovery',
     id : 'base:hp-recovery-all',
     description: 'Heals 100% of HP.',
     stackable: true,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1845,16 +1849,51 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
-    name : 'AP Recovery: All',
+    name : 'Major Soothing',
     id : 'base:ap-recovery-all',
     description: 'Heals 100% of AP.',
     stackable: true,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
         holder.healAP(amount:holder.stats.AP);
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Minor Healing',
+    id : 'base:hp-recovery-half',
+    description: 'Heals 50% of HP.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
+    stats: StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        holder.heal(amount:holder.stats.HP*0.5);
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Minor Soothing',
+    id : 'base:ap-recovery-half',
+    description: 'Heals 50% of AP.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
+    stats: StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        holder.healAP(amount:holder.stats.AP*0.5);
       }
     }
   }
