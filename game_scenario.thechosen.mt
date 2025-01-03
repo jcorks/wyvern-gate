@@ -355,11 +355,14 @@ return {
     @:chosenProfs = []
     
     for(0, 5) ::(i) {
-      @:prof = Profession.getRandomFiltered(::(value) <- 
+      @:prof = 'base:alchemist';
+      /*
+      Profession.getRandomFiltered(::(value) <- 
         ((value.traits & Profession.TRAITS.NON_COMBAT) == 0) && 
         value.learnable &&
         chosenProfs[value.id] != true
       ).id;
+      */
       
       chosenProfs[prof] = true;
       @:p0 = island.newInhabitant(
@@ -4335,7 +4338,7 @@ return {
           },
           ['', 'Opening the box reveals items inside!'],
           ['', 'The party receives 125G.'],
-          ['', 'The party receives 3 Pink Potions.'],
+          ['', 'The party receives 3 Potions.'],
           ['', 'The party receives a Life Crystal.'],
           ['', 'The party receives an Arts Crystal.'],
           ['', 'The party also receives an equippable Tome.'],
@@ -4373,13 +4376,13 @@ return {
 
 
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:pink-potion')
+              base:Item.database.find(id:'base:potion')
             ));
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:pink-potion')
+              base:Item.database.find(id:'base:potion')
             ));
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:pink-potion')
+              base:Item.database.find(id:'base:potion')
             ));
 
             

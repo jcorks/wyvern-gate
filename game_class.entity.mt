@@ -79,6 +79,7 @@
     when (alreadyPosted[id] == true) empty;
     alreadyPosted[id] = true;
     @:effect = Effect.find(id:id);
+    when(effect.hasTraits(:Effect.TRAIT.INSTANTANEOUS)) empty;
     @:counts = this.effectStack.getAllByFilter(::(value) <- value.id == id)->size;
     
     @:base = effect.name + (if (counts > 1) "(x"+counts+")" else "");
@@ -98,6 +99,9 @@
     when(line == empty) empty;
     lines->push(:line);
   }
+  
+  when(lines->size == 0) empty;
+  
   breakpoint();
   windowEvent.queueDisplay(
     prompt: this.name + ' - Effects Changed!',

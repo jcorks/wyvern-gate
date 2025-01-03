@@ -124,6 +124,10 @@
               breakpoint();
               state.members->remove(key:index);
               windowEvent.queueMessage(text:m.name + ' has been removed from the party.');
+              if (state.leader == index) ::<= {
+                state.leader = (index+1)%state.members->size;
+              } 
+                
               send();
             }            
           }

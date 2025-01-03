@@ -330,18 +330,22 @@ Location.database.newEntry(data:{
   @:restockShop::(location) {
     when(location.ownedBy == empty) empty;
 
-    @:addMissing ::(id) {
-      if (location.inventory.items->findIndexCondition(::(value) <- value.base.id == id) == -1)
+    @:addMissing ::(id, minCount) {
+      @:found = location.inventory.items->filter(::(value) <- value.base.id == id)->size;
+
+      for(found, if (minCount == empty) 1 else minCount) ::(i) {
         location.inventory.add(item:Item.new(base:Item.database.find(
           id
-        )));        
+        )));  
+      }
     }
 
 
-    addMissing(:'base:arts-crystal');
-    addMissing(:'base:pickaxe');
-    addMissing(:'base:smithing-hammer');
-    addMissing(:'base:wyvern-key');
+    addMissing(id:'base:arts-crystal');
+    addMissing(id:'base:pickaxe');
+    addMissing(id:'base:smithing-hammer');
+    addMissing(id:'base:wyvern-key');
+    addMissing(id:'base:potion', minCount:5);
     
     for(location.inventory.items->size, 30 + (location.ownedBy.level / 4)->ceil)::(i) {
       // no weight, as the value scales
@@ -1574,15 +1578,13 @@ Location.database.newEntry(data:{
     @:nameGen = import(module:'game_singleton.namegen.mt');
     @:story = import(module:'game_singleton.story.mt');
 
-    for(0, 14)::(i) {
+    for(0, 21)::(i) {
       @:item = Item.new(
-        base:Item.database.getRandomFiltered(
-          filter:::(value) <- value.name->contains(key:'Potion')
-        )
+        base:Item.database.find(:'base:potion')
       );
       
       // scalping is bad!
-      item.price *= 10;
+      item.price *= 5;
 
       location.inventory.add(item);
     }

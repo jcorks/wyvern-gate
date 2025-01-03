@@ -315,14 +315,14 @@ Item.database.newEntry(data : {
 
 
 Item.database.newEntry(data : {
-  name : "Pink Potion",
-  id : 'base:pink-potion',
-  description: 'Pink-colored potions are known to be for recovery of injuries',
+  name : "Potion",
+  id : 'base:potion',
+  description: 'Provides effects upon use. Most effects last 5 turns if they\'re not instant.',
   examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
   equipType: TYPE.HAND,
   weight : 2,
   rarity : 100,
-  basePrice: 20,
+  basePrice: 40,
   tier: 0,
   levelMinimum : 1,
   enchantLimit : 0,
@@ -333,7 +333,6 @@ Item.database.newEntry(data : {
     DEX: -10   // its oddly shaped.
   ),
   useEffects : [
-    'base:hp-recovery-all',
     'base:consume-item'     
   ],
   possibleArts : [],
@@ -341,28 +340,102 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
     TRAIT.MEANT_TO_BE_USED
   ,
-  onCreate ::(item, creationHint) {}
+  onCreate ::(item, creationHint) {
+    @:Effect = import(module:'game_database.effect.mt');
+    @kind = if (creationHint->type == Number)
+      creationHint 
+    else
+      random.pickArrayItem(:[0, 1, 2]);
+      
+      
+    @:supply = ::(which)<-
+      match(which) {
+        (0): random.pickArrayItem(:[
+          'base:hp-recovery-all',
+          'base:ap-recovery-all',
+          'base:hp-recovery-half',
+          'base:ap-recovery-half',
+          'base:regeneration-rune',
+          'base:shield-rune',
+          'base:cure-rune'
+        ]),
+        
+        
 
+       (1):random.pickArrayItem(:[
+          'base:scorching',
+          'base:sharp',
+          'base:burning',
+          'base:icy',
+          'base:freezing',
+          'base:shock',
+          'base:paralyzing',
+          'base:toxic',
+          'base:seeping',
+          'base:shimmering',
+          'base:petrifying',
+          'base:dark',
+          'base:blinding',
+        ]),
+
+        (2):random.pickArrayItem(:[
+          'base:poisoned',
+          'base:burned',
+          'base:frozen',
+          'base:paralyzed',
+          'base:blind',
+          'base:bleeding',
+          'base:petrified'
+        ])
+      }
+    ;
+    
+    ::<= { 
+      // rare potion   
+      when (random.try(percentSuccess:10) && creationHint->type != Number) ::<= {
+        item.name = random.pickArrayItem(:keyQualifiers) + ' Potion';
+      
+        // FULL random
+        when(random.flipCoin()) ::<= {
+          @:rollRandom = ::<- supply(:random.integer(from:0, to:2));
+          
+          for(0, random.integer(from:2, to:6)) ::(i) {
+            item.useEffects->push(:rollRandom());
+          }
+        }
+        
+        
+        // fortified random
+        for(0, random.integer(from:2, to:3)) ::(i) {
+          item.useEffects->push(:supply(:kind));
+        }
+      }
+      
+      // normal potion
+      @:eff = supply(:kind);
+      item.name = 'Potion: ' + Effect.find(:eff).name;
+      item.useEffects->push(:eff);
+    }
+    item.price += item.base.basePrice * item.useEffects->size;
+  }
 
 })
 
 
 Item.database.newEntry(data : {
-  name : "Purple Potion",
-  id : 'base:purple-potion',
-  description: 'Purple-colored potions are known to combine the effects of pink and cyan potions',
-  examine : 'These potions are handy, as the effects of ',
+  name : "Essence",
+  id : 'base:essence',
+  description: 'Provides an effect upon use. Most effects last 3 turns if they\'re not instant.',
+  examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
   equipType: TYPE.HAND,
   weight : 2,
   rarity : 100,
-  tier: 0,
-  basePrice: 100,
+  basePrice: 200,
+  tier: 2,
   levelMinimum : 1,
   enchantLimit : 0,
-  possibleArts : [],
   useTargetHint : USE_TARGET_HINT.ONE,
   blockPoints : 0,
   equipMod : StatSet.new(
@@ -370,125 +443,29 @@ Item.database.newEntry(data : {
     DEX: -10   // its oddly shaped.
   ),
   useEffects : [
-    'base:hp-recovery-all',
-    'base:ap-recovery-all',
     'base:consume-item'     
   ],
+  possibleArts : [],
   equipEffects : [
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
     TRAIT.MEANT_TO_BE_USED
   ,
-  onCreate ::(item, creationHint) {}
+  onCreate ::(item, creationHint) {
+    @:Effect = import(module:'game_database.effect.mt');
+    @:effect = Effect.getRandomFiltered(::(value) <- value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL));
+    item.name = 'Essence of ' + effect.name;
+    item.useEffects->push(:effect.id);
+  }
+
+})
 
 
-})  
-
-Item.database.newEntry(data : {
-  name : "Green Potion",
-  id : 'base:green-potion',
-  description: 'Green-colored potions are known to be toxic.',
-  examine : 'Often used offensively, these potions are known to be used as poison once used and doused on a target.',
-  equipType: TYPE.HAND,
-  weight : 2,
-  rarity : 100,
-  basePrice: 20,
-  tier: 0,
-  levelMinimum : 1,
-  enchantLimit : 0,
-  possibleArts : [],
-  useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:poisoned',
-    'base:consume-item'     
-  ],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED    
-  ,
-  onCreate ::(item, creationHint) {}
 
 
-})  
-
-Item.database.newEntry(data : {
-  name : "Orange Potion",
-  id : 'base:orange-potion',
-  description: 'Orange-colored potions are known to be volatile.',
-  examine : 'Often used offensively, these potions are known to explode on contact.',
-  equipType: TYPE.HAND,
-  weight : 2,
-  rarity : 100,
-  basePrice: 20,
-  levelMinimum : 1,
-  tier: 0,
-  enchantLimit : 0,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:explode',
-    'base:consume-item'     
-  ],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED    
-  ,
-  onCreate ::(item, creationHint) {}
-})  
 
 
-Item.database.newEntry(data : {
-  name : "Black Potion",
-  id : 'base:black-potion',
-  description: 'Black-colored potions are known to be toxic to all organic life.',
-  examine : 'Often used offensively, these potions are known to cause instant petrification.',
-  equipType: TYPE.HAND,
-  weight : 2,
-  rarity : 100,
-  basePrice: 20,
-  tier: 0,
-  levelMinimum : 1,
-  enchantLimit : 0,
-  possibleArts : [],
-  useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:petrified',
-    'base:consume-item'     
-  ],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED    
-  ,
-  onCreate ::(item, creationHint) {}
-
-
-})  
 
 
 /*
@@ -534,41 +511,6 @@ Item.database.newEntry(data : {
 */
 
 
-
-Item.database.newEntry(data : {
-  name : "Cyan Potion",
-  id : 'base:cyan-potion',
-  description: 'Cyan-colored potions are known to be for recovery of mental fatigue.',
-  examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
-  equipType: TYPE.HAND,
-  rarity : 100,
-  weight : 2,    
-  basePrice: 20,
-  tier: 0,
-  levelMinimum : 1,
-  enchantLimit : 0,
-  possibleArts : [],
-  useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:ap-recovery-all',
-    'base:consume-item'     
-  ],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED    
-  ,
-  onCreate ::(item, creationHint) {}
-
-
-})
 
 Item.database.newEntry(data : {
   name : "Pitchfork",
@@ -3781,8 +3723,10 @@ none.name = 'None';
         recalculateName(*_);
       return exp;
     },
-
-
+    
+    useEffects : {
+      get ::<- _.state.useEffects
+    },
       
     describe ::(by) {
       @:state = _.state;
@@ -3823,7 +3767,8 @@ none.name = 'None';
             @out = '';
             when (state.useEffects->keycount == 0) 'None.';
             foreach(state.useEffects)::(i, effect) {
-              out = out + '- ' + Effect.find(id:effect).description + '\n';
+              @:eff = Effect.find(id:effect);
+              out = out + eff.name + ': ' + eff.description + '\n';
             }
             return out;
           } else '',

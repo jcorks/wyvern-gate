@@ -20,7 +20,7 @@
 @:Entity = import(module:'game_class.entity.mt');
 
 
-return ::(canCancel => Boolean, onPick => Function, leftWeight, topWeight, prompt, onGetPrompt, filter) {
+return ::(canCancel => Boolean, onPick => Function, keep, onCancel, leftWeight, topWeight, prompt, onGetPrompt, filter) {
   @:world = import(module:'game_singleton.world.mt');
   @:inv = world.party.inventory.clone();
   @:altNames = {};
@@ -54,7 +54,8 @@ return ::(canCancel => Boolean, onPick => Function, leftWeight, topWeight, promp
     prompt: if (prompt == empty) 'Choose a party item:' else prompt => String,
     onGetPrompt: onGetPrompt,
     canCancel: canCancel,
-    keep:true,
+    onCancel : onCancel,
+    keep:if (keep == empty) true else keep,
     onPick ::(item) {
       onPick(item, equippedBy:equippedBy[item]);
     }

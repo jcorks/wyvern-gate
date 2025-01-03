@@ -3869,8 +3869,8 @@ Arts.newEntry(
     description: "Uses an item from the user's inventory.",
     keywords : [],
     durationTurns: 0,
-    kind : KIND.ABILITY,
-    traits : 0,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SPECIAL,
     rarity : RARITY.RARE,
     isSupport: false,
     usageHintAI: USAGE_HINT.DONTUSE,
@@ -3879,15 +3879,15 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:item = extraData[0];
       when (targets->size == 0) ::<= {
-        foreach(item.base.useEffects)::(index, effect) {  
-          user.addEffect(from:user, id:effect, item:item, durationTurns:0);              
+        foreach(item.useEffects)::(index, effect) {  
+          user.addEffect(from:user, id:effect, item:item, durationTurns:10);              
         }
       }
 
       
-      foreach(item.base.useEffects)::(index, effect) {  
+      foreach(item.useEffects)::(index, effect) {  
         foreach(targets)::(t, target) {
-          target.addEffect(from:user, id:effect, item:item, durationTurns:0);              
+          target.addEffect(from:user, id:effect, item:item, durationTurns:10);              
         }
       }
     }
@@ -4204,17 +4204,17 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: 'Pink Brew',
-    id : 'base:pink-brew',
+    name: 'Make: Heal Potion',
+    id : 'base:make-heal-potion',
     notifCommit : '$1 attempts to make a potion!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a pink potion.',
+    description: 'Uses 2 Ingredients to make a healing potion.',
     keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
-    rarity : RARITY.COMMON,
+    rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
@@ -4237,13 +4237,18 @@ Arts.newEntry(
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
-      windowEvent.queueMessage(text: '... and made a Pink Potion!');
+      @:item = Item.new(
+        base:Item.database.find(id:'base:potion'),
+        creationHint:0
+      );
+
+      windowEvent.queueMessage(text: '... and made a ' + item.name);
       windowEvent.queueCustom(
         onEnter :: {
 
           inventory.removeByID(id:'base:ingredient');
           inventory.removeByID(id:'base:ingredient');
-          inventory.add(item:Item.new(base:Item.database.find(id:'base:pink-potion')));              
+          inventory.add(item);              
         }
       );
     }
@@ -4252,17 +4257,17 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: 'Cyan Brew',
-    id : 'base:cyan-brew',
+    name: 'Make: Buff Potion',
+    id : 'base:make-buff-potion',
     notifCommit : '$1 attempts to make a potion!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a cyan potion.',
+    description: 'Uses 2 Ingredients to make a buffing potion.',
     keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
-    rarity : RARITY.COMMON,
+    rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
@@ -4285,122 +4290,18 @@ Arts.newEntry(
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
-      windowEvent.queueMessage(text: '... and made a Cyan Potion!');
+      @:item = Item.new(
+        base:Item.database.find(id:'base:potion'),
+        creationHint:1
+      );
 
+      windowEvent.queueMessage(text: '... and made a ' + item.name);
       windowEvent.queueCustom(
         onEnter :: {
+
           inventory.removeByID(id:'base:ingredient');
           inventory.removeByID(id:'base:ingredient');
-          inventory.add(item:
-            Item.new(
-              base:Item.database.find(id:'base:cyan-potion')
-            )
-          );        
-        }
-      );        
-    }
-  }
-)
-
-
-Arts.newEntry(
-  data: {
-    name: 'Green Brew',
-    id : 'base:green-brew',
-    notifCommit : '$1 attempts to make a potion!',
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a green potion.',
-    keywords: ['base:ingredient'],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : 0,
-    rarity : RARITY.COMMON,
-    usageHintAI : USAGE_HINT.DONTUSE,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      @:world = import(module:'game_singleton.world.mt');
-      @inventory;
-      if (world.party.isMember(entity:user)) ::<= {
-        inventory = world.party.inventory;
-      } else ::<= {
-        inventory = user.inventory;
-      }
-      
-      @count = 0;
-      foreach(inventory.items)::(i, item) {
-        if (item.base.id == 'base:ingredient') ::<= {
-          count += 1;
-        }
-      }
-      
-      when(count < 2)
-        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
-
-      windowEvent.queueMessage(text: '... and made a Green Potion!');
-      windowEvent.queueCustom(
-        onEnter :: {
-          inventory.removeByID(id:'base:ingredient');
-          inventory.removeByID(id:'base:ingredient');
-          inventory.add(
-            item:Item.new(
-              base:Item.database.find(id:'base:green-potion')
-          ));       
-        }
-      );         
-    }
-  }
-)
-
-
-
-Arts.newEntry(
-  data: {
-    name: 'Orange Brew',
-    id : 'base:orange-brew',
-    notifCommit : '$1 attempts to make a potion!',
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make an orange potion.',
-    keywords: ['base:ingredient'],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : 0,
-    rarity : RARITY.COMMON,
-    usageHintAI : USAGE_HINT.DONTUSE,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      @:world = import(module:'game_singleton.world.mt');
-      @inventory;
-      if (world.party.isMember(entity:user)) ::<= {
-        inventory = world.party.inventory;
-      } else ::<= {
-        inventory = user.inventory;
-      }
-      
-      @count = 0;
-      foreach(inventory.items)::(i, item) {
-        if (item.base.id == 'base:ingredient') ::<= {
-          count += 1;
-        }
-      }
-      
-      when(count < 2)
-        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
-
-      windowEvent.queueMessage(text: '... and made a Orange Potion!');
-
-      windowEvent.queueCustom(
-        onEnter :: {
-          inventory.removeByID(id:'base:ingredient');
-          inventory.removeByID(id:'base:ingredient');
-          inventory.add(item:
-            Item.new(
-              base:Item.database.find(id:'base:orange-potion')
-            )
-          );              
+          inventory.add(item);              
         }
       );
     }
@@ -4409,12 +4310,117 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: 'Purple Brew',
-    id : 'base:purple-brew',
+    name: 'Make: Debuff Potion',
+    id : 'base:make-debuff-potion',
     notifCommit : '$1 attempts to make a potion!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a purple potion.',
+    description: 'Uses 2 Ingredients to make a debuffing potion.',
+    keywords: ['base:ingredient'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:world = import(module:'game_singleton.world.mt');
+      @inventory;
+      if (world.party.isMember(entity:user)) ::<= {
+        inventory = world.party.inventory;
+      } else ::<= {
+        inventory = user.inventory;
+      }
+      
+      @count = 0;
+      foreach(inventory.items)::(i, item) {
+        if (item.base.id == 'base:ingredient') ::<= {
+          count += 1;
+        }
+      }
+      
+      when(count < 2)
+        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
+
+      @:item = Item.new(
+        base:Item.database.find(id:'base:potion'),
+        creationHint:2
+      );
+
+      windowEvent.queueMessage(text: '... and made a ' + item.name);
+      windowEvent.queueCustom(
+        onEnter :: {
+
+          inventory.removeByID(id:'base:ingredient');
+          inventory.removeByID(id:'base:ingredient');
+          inventory.add(item);              
+        }
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Make: Essence',
+    id : 'base:make-essence',
+    notifCommit : '$1 attempts to make essence!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Uses 2 Ingredients to make an essence of an effect.',
+    keywords: ['base:ingredient'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:world = import(module:'game_singleton.world.mt');
+      @inventory;
+      if (world.party.isMember(entity:user)) ::<= {
+        inventory = world.party.inventory;
+      } else ::<= {
+        inventory = user.inventory;
+      }
+      
+      @count = 0;
+      foreach(inventory.items)::(i, item) {
+        if (item.base.id == 'base:ingredient') ::<= {
+          count += 1;
+        }
+      }
+      
+      when(count < 2)
+        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
+
+      @:item = Item.new(
+        base:Item.database.find(id:'base:essence')
+      );
+
+      windowEvent.queueMessage(text: '... and made a ' + item.name);
+      windowEvent.queueCustom(
+        onEnter :: {
+
+          inventory.removeByID(id:'base:ingredient');
+          inventory.removeByID(id:'base:ingredient');
+          inventory.add(item);              
+        }
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Mix Potion',
+    id : 'base:mix-potion',
+    notifCommit : '$1 attempts to combine 2 Potions!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Uses 2 Potions to make a new Potion of combined effects.',
     keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -4432,32 +4438,64 @@ Arts.newEntry(
         inventory = user.inventory;
       }
       
-      @count = 0;
-      foreach(inventory.items)::(i, item) {
-        if (item.base.id == 'base:ingredient') ::<= {
-          count += 1;
-        }
-      }
       
-      when(count < 2)
-        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
-
-      windowEvent.queueMessage(text: '... and made a Purple Potion!');
-      windowEvent.queueCustom(
-        onEnter :: {
-          inventory.removeByID(id:'base:ingredient');
-          inventory.removeByID(id:'base:ingredient');
-          inventory.add(
-            item:Item.new(
-              base:Item.database.find(id:'base:purple-potion')
-            )
-          );              
-        }
-      )
+      @:pickPartyItem = import(:'game_function.pickitem.mt');
+      @alreadyPicked = empty;
+      @:pick :: {
+        pickPartyItem(
+          canCancel:false,
+          filter::(value) <- value.base == 'base:potion' && alreadyPicked != value,
+          onCancel ::{
+            alreadyPicked = empty;
+            pick();
+          },
+          onPick ::(item) {
+            when (alreadyPicked == empty) ::<= {
+              alreadyPicked = item;
+              pick();
+            }
+            
+            windowEvent.queueMessage(
+              text: 'Mixing ' + alreadyPicked.name + ' with ' + item.name + '.'
+            );
+            
+            windowEvent.queueAskBoolean(
+              prompt: 'Mix these 2?',
+              onChoice::(which) {
+                when(which == false) ::<= {
+                  alreadyPicked = empty;
+                  pick();
+                }
+                
+                @:mixed = Item.new(
+                  base: Item.database.find(id:'base:potion')
+                );
+                
+                mixed.name = user.name + '\'s Potion';
+                mixed.useEffects = [
+                  'base:consume-item',
+                  ...[alreadyPicked.useEffects->filter(::(value) <- value != 'consume-item')],
+                  ...[item.useEffects->filter(::(value) <- value != 'consume-item')]
+                ]
+                
+                alreadyPicked.throwOut();
+                item.throwOut();
+                inventory.remove(:alreadyPicked);
+                inventory.remove(:item);
+                windowEvent.queueMessage(
+                  text: 'A new potion has been brewed!'
+                );
+                
+                item.describe();
+              }
+            );  
+          }
+        )
+      }
+      pick();
     }
   }
 )
-
 
 Arts.newEntry(
   data: {
@@ -4470,7 +4508,7 @@ Arts.newEntry(
     keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
-    traits : TRAITS.COSTLESS,
+    traits : 0,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -4492,56 +4530,8 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
-  data: {
-    name: 'Black Brew',
-    id : 'base:black-brew',
-    notifCommit : '$1 attempts to make a potion!',
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a black potion.',
-    keywords: ['base:ingredient'],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : 0,
-    rarity : RARITY.COMMON,
-    usageHintAI : USAGE_HINT.DONTUSE,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      @:world = import(module:'game_singleton.world.mt');
-      @inventory;
-      if (world.party.isMember(entity:user)) ::<= {
-        inventory = world.party.inventory;
-      } else ::<= {
-        inventory = user.inventory;
-      }
-      
-      @count = 0;
-      foreach(inventory.items)::(i, item) {
-        if (item.base.id == 'base:ingredient') ::<= {
-          count += 1;
-        }
-      }
-      
-      when(count < 2)
-        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
-      windowEvent.queueMessage(text: '... and made a Black Potion!');
-      windowEvent.queueCustom(
-        onEnter :: {
-          inventory.removeByID(id:'base:ingredient');
-          inventory.removeByID(id:'base:ingredient');
-          inventory.add(
-            item:Item.new(
-              base:Item.database.find(id:'base:black-potion')
-            )
-          );   
-        }
-      )             
-    }
-  }
-)
+
 
 
 Arts.newEntry(
