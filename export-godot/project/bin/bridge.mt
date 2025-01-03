@@ -41,7 +41,6 @@
 
 
 
-
 @:console = import(module:'Matte.System.ConsoleIO');
 //input();
 
@@ -130,7 +129,7 @@ instance.mainMenu(
   },
   
   onPlaySFX::(name) <-  godot_onPlaySFX(a:name),
-  onPlaySFX::(name, loop) <-  godot_onPlaySFX(a:name, b:loop),
+  onPlayBGM::(name, loop) <-  godot_onPlayBGM(a:name, b:loop),
   
   onLoadSettings ::{
     return {:::} {

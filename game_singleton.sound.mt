@@ -33,7 +33,7 @@ return class(
       },
       
       playSFX ::(name)<- sfx(:name),
-      playBGM ::(name)<- bgm(:name),
+      playBGM ::(name, loop)<- bgm(name, loop),
       stopBGM ::(name)<- bgm()
     }
   }

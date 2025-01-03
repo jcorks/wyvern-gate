@@ -19,6 +19,7 @@
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:Database = import(module:'game_class.database.mt');
 @:State = import(module:'game_class.state.mt');
+@:sound = import(module:'game_singleton.sound.mt');
 
 
 @:StateType = State.create(
@@ -87,7 +88,10 @@ Landmark.database.newEntry(
     onCreate ::(landmark, island){},
     onIncrementTime ::(landmark, island){},
     onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {}
+    onVisit ::(landmark, island) {
+      sound.playBGM(name:'town-2', loop:true);
+
+    }
   }
 )
 
@@ -138,7 +142,9 @@ Landmark.database.newEntry(
     onCreate ::(landmark, island){},
     onIncrementTime ::(landmark, island){},
     onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {}
+    onVisit ::(landmark, island) {
+      sound.playBGM(name:'town-2', loop:true);
+    }
     
   }
 )

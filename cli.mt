@@ -296,7 +296,7 @@ instance.mainMenu(
   },
   
   onPlaySFX ::(name) {
-    
+    breakpoint();
   },
   
   onPlayBGM ::(name, loop) {

@@ -49,6 +49,7 @@ import(module:'game_singleton.commoninteractions.mt');
 import(module:'game_function.questguild.mt');
 
 
+
 @:Database = import(module:'game_class.database.mt');
 
 
@@ -66,6 +67,7 @@ import(module:'game_function.questguild.mt');
 @:namegen = import(module:'game_singleton.namegen.mt');
 @:LargeMap = import(module:'game_singleton.largemap.mt');
 @:Scenario = import(module:'game_mutator.scenario.mt');
+@:sound = import(module:'game_singleton.sound.mt');
 
 import(module:'game_function.pickpartyitem.mt');
 import(module:'game_function.itemimprove.mt');
@@ -280,8 +282,8 @@ return class(
         settings.fullscreen = true;
         settings.crtShader = true;
         settings.volume = 1;
-        settings.volumeBGM = 0.5;
-        settings.volumeSFX = 0.7;
+        settings.volumeBGM = 0.3;
+        settings.volumeSFX = 0.5;
         settings.bgColor = [33, 33, 58];
         settings.fgColor = [186, 240, 228];
         settings.debugMode = false;
@@ -440,6 +442,11 @@ return class(
         onPlayBGM => Function, // if name is unrecognized, will halt playing music.
         onQuit => Function
       ) {
+        sound.setup(
+          nativeSFX: onPlaySFX,
+          nativeBGM: onPlayBGM
+        )
+
         features_ = features;
         canvas.resize(width:canvasWidth, height:canvasHeight);
         this.onSaveState = onSaveState;
@@ -814,9 +821,10 @@ return empty;
         }
         loadMods(mods);
 
-
+        sound.playBGM(name:'boot', loop:false);
         (import(:'game_function.boot.mt'))(          
           onBooted :: {
+            sound.playBGM(name:"title", loop:false)
             windowEvent.queueChoices(
               onGetChoices ::{
                 return genChoices();
@@ -978,6 +986,7 @@ return empty;
       visitCurrentIsland ::(restorePos, atGate, onReady) {  
         @:island = world.island;
         
+
         // check if we're AT a location.
         island.map.title = "(Map of " + island.name + ')';
 
@@ -1023,7 +1032,7 @@ return empty;
 
       islandTravel ::{
         @:island = world.island;
-        breakpoint();        
+        sound.playBGM(name:'world', loop:true);
         when(island == empty)
           error(detail:'No island to make a menu for! Use visitIsland() to set the current island.');
         

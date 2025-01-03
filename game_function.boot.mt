@@ -1,5 +1,6 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
+@:sound = import(module:'game_singleton.sound.mt');
 
 return ::(onBooted) {
   @:anims = [
@@ -46,6 +47,9 @@ return ::(onBooted) {
       },
     ],
     [
+      {
+        postboot : true
+      },
       {
         clear : true,
         chance : 1,
@@ -169,6 +173,12 @@ return ::(onBooted) {
             alreadyPrinted = [];
           anim->remove(key:0)
         }
+
+        when(currentIter.postboot) ::<= {
+          sound.playBGM(name:'boot-post', loop:false);
+          currentIter = empty;
+          drawTerminal();
+        }
         
         if (currentIter.typing == true) ::<= {
           if (currentIter.iter == empty)
@@ -184,6 +194,8 @@ return ::(onBooted) {
               alreadyPrinted[alreadyPrinted->size-1] = (if (currentIter.header) currentIter.header else '') + currentIter.lines[0]; 
               currentIter = empty;
             }
+
+            sound.playSFX(:'keyboard');
           }
         } else ::<= {      
           if (Number.random() < currentIter.chance) ::<= {

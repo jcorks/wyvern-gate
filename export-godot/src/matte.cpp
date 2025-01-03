@@ -81,8 +81,11 @@ static matteValue_t on_play_bgm(
 	matteStore_t * store = matte_vm_get_store(vm);
 	std::string str(matte_string_get_c_str(matte_value_string_get_string_unsafe(store, args[0])));
 
+	printf("play request for BGM %s\n", str.c_str());
 
-    bool loop = matte_value_as_boolean(args[1]);
+
+
+    bool loop = matte_value_as_boolean(store, args[1]);
 
 	m->playBGM(
 		str,
@@ -138,7 +141,7 @@ void Matte::_bind_methods() {
 	);
 
 	ADD_SIGNAL(
-		MethodInfo("on_play_bgm", PropertyInfo(Variant::STRING, "name"), PropertyInfo(Variant::BOOLEAN, "loop"))
+		MethodInfo("on_play_bgm", PropertyInfo(Variant::STRING, "name"), PropertyInfo(Variant::INT, "loop"))
 	);
 
 
@@ -224,8 +227,8 @@ void Matte::initializeVM() {
         on_play_bgm,
         this,
         
-        "name",
-        "loop",
+        "a",
+        "b",
         // argument names
         NULL
     );	
@@ -237,7 +240,7 @@ void Matte::initializeVM() {
         on_play_sfx,
         this,
         
-        "name",
+        "a",
         // argument names
         NULL
     );	
