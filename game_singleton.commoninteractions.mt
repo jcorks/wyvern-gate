@@ -469,7 +469,7 @@ return {
     wait : InteractionMenuEntry.new(
       name : 'Wait',
       keepInteractionMenu : false,
-      filter::(island, landmark) <- true,
+      filter::(island, landmark) <- landmark != empty,
       onSelect::(island, landmark) {
         @:Landmark = import(module:'game_mutator.landmark.mt');
         @:world = import(module:'game_singleton.world.mt');

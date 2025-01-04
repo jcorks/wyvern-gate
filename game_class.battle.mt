@@ -961,12 +961,6 @@
         if (requiresAP)
           entAct.ap -= AP_COST;
           
-        if (Arts.find(:action.card.id).kind == Arts.KIND.EFFECT && action.card.level > 1) ::<= {
-          windowEvent.queueMessage(
-            text : 'The Art had ' + (action.card.level-1) + ' counter(s)!'
-          );
-          entAct.healAP(amount:action.card.level-1);
-        }
           
           
         @:Entity = import(module:'game_class.entity.mt');
@@ -983,6 +977,14 @@
         }
       
         @:finish ::(useArtReturn) {
+
+          if (Arts.find(:action.card.id).kind == Arts.KIND.EFFECT && action.card.level > 1) ::<= {
+            windowEvent.queueMessage(
+              text : 'The Art had ' + (action.card.level-1) + ' counter(s)!'
+            );
+            entAct.healAP(amount:action.card.level-1);
+          }
+
 
           if (art.kind == Arts.KIND.ABILITY) ::<= {
             entAct.flags.add(flag:StateFlags.WENT);

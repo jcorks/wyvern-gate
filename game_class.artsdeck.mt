@@ -38,19 +38,24 @@
   ]
   
   @:energySymbols = [
-    '-',
-    '=',
     '_',
+    '=',
+    '.',
     '~',
   ];
 
-  @:drawRectangle::(x, y, width, height, handCard) {
+  @:drawRectangle::(x, y, width, height, handCard, showEnergy) {
     canvas.movePen(x:x, y:y); canvas.drawRectangle(text: ' ', width:width, height: height);        
     canvas.movePen(x:x, y:y); canvas.drawChar(text:'┌');
     canvas.movePen(x:x+width-1, y:y); canvas.drawChar(text:'┐');
     for(1, width-1)::(i) {
       canvas.movePen(x:x+i, y:y);      canvas.drawChar(text:'─');
-      canvas.movePen(x:x+i, y:y+height-1); canvas.drawChar(text:(energySymbols)[handCard.energy]);
+      canvas.movePen(x:x+i, y:y+height-1); canvas.drawChar(text:
+          if (showEnergy) 
+            (energySymbols)[handCard.energy]
+          else 
+            '─'
+        );
     }
 
     canvas.movePen(x:x, y:y+height-1); canvas.drawChar(text:'└');
@@ -63,10 +68,10 @@
   }
 
 
-  return ::(x, y, handCard, flipped) {
+  return ::(x, y, handCard, flipped, showEnergy) {
     @:art = Arts.find(id:handCard.id);
-    drawRectangle(x, y, width:CARD_WIDTH, height:CARD_HEIGHT, handCard);
-    drawRectangle(x:x+1, y:y+1, width:CARD_WIDTH-2, height:(CARD_HEIGHT/2)->floor, handCard);
+    drawRectangle(x, y, width:CARD_WIDTH, height:CARD_HEIGHT, handCard, showEnergy);
+    drawRectangle(x:x+1, y:y+1, width:CARD_WIDTH-2, height:(CARD_HEIGHT/2)->floor, handCard, showEnergy);
 
 
     // inner graphic box
@@ -118,7 +123,7 @@
   }
 }
 
-@:renderArt::(user, handCard, topWeight, leftWeight, maxWidth){
+@:renderArt::(user, handCard, topWeight, leftWeight, maxWidth, showEnergy){
   if (maxWidth == empty) maxWidth = 1;
   @:art = Arts.find(id:handCard.id);
   @baseDamageMax;
@@ -141,9 +146,9 @@
     " - Rarity: " + getRarity(:art.rarity),
     " - Traits: " + getTraits(:handCard),
     (if (art.kind == Arts.KIND.ABILITY)
-      " - (Lv. " + handCard.level + ') - ' + en
+      " - (Lv. " + handCard.level + ') - ' + (if(showEnergy)en else '')
     else 
-      " - " + en),
+      " - " + (if(showEnergy)en else '')),
     art.description,
     if (user != empty && baseDamageMin != empty) 'Around: ' + baseDamageMin + ' - ' + baseDamageMax + " damage" else '',
   ]
@@ -170,7 +175,7 @@
 }
 
 @selected = 0;
-@:renderCards ::(user, cards, enabled){
+@:renderCards ::(user, cards, enabled, showEnergy){
   @index;
   if (enabled != empty) ::<= {
     index = enabled[selected]
@@ -187,11 +192,11 @@
   @:y = canvas.height - (CARD_HEIGHT);
   
   for(0, cards->size) ::(i) {
-    renderCard(x, y:y + (if (i == index) -1 else 0), handCard:cards[i]);
+    renderCard(x, y:y + (if (i == index) -1 else 0), handCard:cards[i], showEnergy);
     x += fitWidth;
     
     if (i == index) ::<= {
-      renderArt(user, handCard:cards[i], topWeight:0.1);
+      renderArt(user, handCard:cards[i], topWeight:0.1, showEnergy);
     }
     
   }
@@ -244,7 +249,7 @@
       windowEvent.queueCustom(
         onEnter::{
           bg = canvas.addBackground(::{
-            renderCards(user, cards);
+            renderCards(user, cards, showEnergy:true);
           });
         }
       );
@@ -595,7 +600,7 @@
         windowEvent.queueNestedResolve(
           onEnter ::{
             bg = canvas.addBackground(::{
-              renderCards(user, cards:state.hand, enabled);
+              renderCards(user, cards:state.hand, enabled, showEnergy:true);
             });
         
             windowEvent.queueChoices(
@@ -681,7 +686,7 @@
                           );
                         } else ::<= {
                           windowEvent.queueMessage(
-                            text: 'The Art was sacrificed to increase the ' + Arts.find(id:handCard.id).name + ' card\'s AP counter to ' + handCard.level + '.'
+                            text: 'The Art was sacrificed to increase the ' + Arts.find(id:handCard.id).name + ' card\'s AP counter to ' + (handCard.level-1) + '.'
                           );                        
                         }
                       }

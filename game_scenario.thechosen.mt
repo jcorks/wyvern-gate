@@ -355,21 +355,27 @@ return {
     @:chosenProfs = []
     
     for(0, 5) ::(i) {
-      @:prof = 'base:alchemist';
-      /*
-      Profession.getRandomFiltered(::(value) <- 
+      @:prof = Profession.getRandomFiltered(::(value) <- 
         ((value.traits & Profession.TRAITS.NON_COMBAT) == 0) && 
         value.learnable &&
         chosenProfs[value.id] != true
       ).id;
-      */
       
       chosenProfs[prof] = true;
       @:p0 = island.newInhabitant(
         levelHint:story.levelHint-1,
         professionHint: prof
       );
+
+
+
       p0.normalizeStats();
+      
+      if (p0.stats.HP < 6) ::<= {
+        @:stats = p0.stats.save();
+        stats.HP = 6;
+        p0.stats.load(:stats);
+      }
       choices->push(value:p0);
     }
 
@@ -4376,13 +4382,16 @@ return {
 
 
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:potion')
+              base:Item.database.find(id:'base:potion'),
+              creationHint:0
             ));
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:potion')
+              base:Item.database.find(id:'base:potion'),
+              creationHint:0
             ));
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:potion')
+              base:Item.database.find(id:'base:potion'),
+              creationHint:0
             ));
 
             

@@ -105,7 +105,7 @@
   'Superb',
   'Remarkable',
   'Sordid',
-  'Rusty',
+  'Rustic',
   'Remarkable',
   'Rough',
   'Wise',
@@ -313,115 +313,143 @@ Item.database.newEntry(data : {
 
 })
 
-
-Item.database.newEntry(data : {
-  name : "Potion",
-  id : 'base:potion',
-  description: 'Provides effects upon use. Most effects last 5 turns if they\'re not instant.',
-  examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
-  equipType: TYPE.HAND,
-  weight : 2,
-  rarity : 100,
-  basePrice: 40,
-  tier: 0,
-  levelMinimum : 1,
-  enchantLimit : 0,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:consume-item'     
-  ],
-  possibleArts : [],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.MEANT_TO_BE_USED
-  ,
-  onCreate ::(item, creationHint) {
-    @:Effect = import(module:'game_database.effect.mt');
-    @kind = if (creationHint->type == Number)
-      creationHint 
-    else
-      random.pickArrayItem(:[0, 1, 2]);
-      
-      
-    @:supply = ::(which)<-
-      match(which) {
-        (0): random.pickArrayItem(:[
-          'base:hp-recovery-all',
-          'base:ap-recovery-all',
-          'base:hp-recovery-half',
-          'base:ap-recovery-half',
-          'base:regeneration-rune',
-          'base:shield-rune',
-          'base:cure-rune'
-        ]),
-        
-        
-
-       (1):random.pickArrayItem(:[
-          'base:scorching',
-          'base:sharp',
-          'base:burning',
-          'base:icy',
-          'base:freezing',
-          'base:shock',
-          'base:paralyzing',
-          'base:toxic',
-          'base:seeping',
-          'base:shimmering',
-          'base:petrifying',
-          'base:dark',
-          'base:blinding',
-        ]),
-
-        (2):random.pickArrayItem(:[
-          'base:poisoned',
-          'base:burned',
-          'base:frozen',
-          'base:paralyzed',
-          'base:blind',
-          'base:bleeding',
-          'base:petrified'
-        ])
-      }
-    ;
+::<= {
+  @:healEffects = [
+    'base:hp-recovery-all',
+    'base:ap-recovery-all',
+    'base:hp-recovery-half',
+    'base:ap-recovery-half',
+    'base:regeneration-rune',
+    'base:cure-rune'
+  ]
+  
+  @:buffEffects = [
+    'base:scorching',
+    'base:sharp',
+    'base:burning',
+    'base:icy',
+    'base:freezing',
+    'base:shock',
+    'base:paralyzing',
+    'base:toxic',
+    'base:seeping',
+    'base:shimmering',
+    'base:petrifying',
+    'base:dark',
+    'base:blinding',
+  ]
+  
+  
+  @:debuffEffects = [
+    'base:poisoned',
+    'base:burned',
+    'base:frozen',
+    'base:paralyzed',
+    'base:blind',
+    'base:bleeding',
+    'base:petrified'
+  ]
+  
+  
+  @:overridePotionNames = {
+    'base:regeneration' : 'Regeneration',
+    'base:cure-rune'    : 'Delayed Healing',
+    'base:icy'          : 'Cold',
+    'base:sharp'        : 'Bleeding',
+    'base:dark'         : 'Darkness',
     
-    ::<= { 
-      // rare potion   
-      when (random.try(percentSuccess:10) && creationHint->type != Number) ::<= {
-        item.name = random.pickArrayItem(:keyQualifiers) + ' Potion';
+    'base:poisoned'     : 'Poison',
+    'base:burned'       : 'Acid',
+    'base:frozen'       : 'Frost',
+    'base:paralyzed'    : 'Paralysis',
+    'base:blind'        : 'Blindness',
+    'base:bleeding'     : 'Hemorrhaging',
+    'base:petrified'    : 'Petrification'
+  
+  }
+  
+  
+
+
+  Item.database.newEntry(data : {
+    name : "Potion",
+    id : 'base:potion',
+    description: 'Provides effects upon use. Most effects last 5 turns if they\'re not instant.',
+    examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
+    equipType: TYPE.HAND,
+    weight : 2,
+    rarity : 100,
+    basePrice: 40,
+    tier: 0,
+    levelMinimum : 1,
+    enchantLimit : 0,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    blockPoints : 0,
+    equipMod : StatSet.new(
+      SPD: -2, // itll slow you down
+      DEX: -10   // its oddly shaped.
+    ),
+    useEffects : [
+      'base:consume-item'     
+    ],
+    possibleArts : [],
+    equipEffects : [
+    ],
+    traits : 
+      TRAIT.FRAGILE |
+      TRAIT.MEANT_TO_BE_USED
+    ,
+    onCreate ::(item, creationHint) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @kind = if (creationHint->type == Number)
+        creationHint 
+      else
+        random.pickArrayItem(:[0, 1, 2]);
+        
+        
+      @:supply = ::(which)<-
+        match(which) {
+          (0): random.pickArrayItem(:healEffects),
+          (1):random.pickArrayItem(:buffEffects),
+          (2):random.pickArrayItem(:debuffEffects)
+        }
+      ;
       
-        // FULL random
-        when(random.flipCoin()) ::<= {
-          @:rollRandom = ::<- supply(:random.integer(from:0, to:2));
+      ::<= { 
+        // rare potion   
+        when (random.try(percentSuccess:10) && creationHint->type != Number) ::<= {
+          item.name = random.pickArrayItem(:keyQualifiers) + ' Potion';
+        
+          // FULL random
+          when(random.flipCoin()) ::<= {
+            @:rollRandom = ::<- supply(:random.integer(from:0, to:2));
+            
+            for(0, random.integer(from:2, to:6)) ::(i) {
+              item.useEffects->push(:rollRandom());
+            }
+          }
           
-          for(0, random.integer(from:2, to:6)) ::(i) {
-            item.useEffects->push(:rollRandom());
+          
+          // fortified random
+          for(0, random.integer(from:2, to:3)) ::(i) {
+            item.useEffects->push(:supply(:kind));
           }
         }
         
-        
-        // fortified random
-        for(0, random.integer(from:2, to:3)) ::(i) {
-          item.useEffects->push(:supply(:kind));
-        }
+        // normal potion
+        @:eff = supply(:kind);
+        item.name = 'Potion of ' + (if (overridePotionNames[eff] != empty) 
+            overridePotionNames[eff] 
+          else 
+            Effect.find(:eff).name
+        );
+        item.useEffects->push(:eff);
       }
-      
-      // normal potion
-      @:eff = supply(:kind);
-      item.name = 'Potion: ' + Effect.find(:eff).name;
-      item.useEffects->push(:eff);
+      item.price += item.base.basePrice * item.useEffects->size;
     }
-    item.price += item.base.basePrice * item.useEffects->size;
-  }
 
-})
+  })
+}
 
 
 Item.database.newEntry(data : {
@@ -3365,7 +3393,7 @@ none.name = 'None';
       state.improvementEXP = 0;
       state.data = {};
       state.needsAppraisal = if (forceNeedsAppraisal != empty) forceNeedsAppraisal
-        else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess:2)) true else false;
+        else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess:4)) true else false;
       breakpoint();
       
       if (base.hasTraits(:TRAIT.HAS_SIZE))   
@@ -3725,7 +3753,8 @@ none.name = 'None';
     },
     
     useEffects : {
-      get ::<- _.state.useEffects
+      get ::<- _.state.useEffects,
+      set ::(value) <- _.state.useEffects = value
     },
       
     describe ::(by) {
@@ -3768,7 +3797,7 @@ none.name = 'None';
             when (state.useEffects->keycount == 0) 'None.';
             foreach(state.useEffects)::(i, effect) {
               @:eff = Effect.find(id:effect);
-              out = out + eff.name + ': ' + eff.description + '\n';
+              out = out + ' - ' + eff.name + ': ' + eff.description + '\n';
             }
             return out;
           } else '',

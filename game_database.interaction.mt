@@ -541,6 +541,13 @@ Interaction.newEntry(
                           });
                           
                           itemChoices = itemChoices->subset(from:0, to:6);
+                          itemChoices->push(:Item.new(
+                              base: Item.database.find(:'base:life-crystal'),
+                              rngEnchantHint:true,     
+                              qualityHint : random.pickArrayItem(list:itemQualities),
+                              materialHint : random.pickArrayItem(list:itemMaterials)
+                            )
+                          );
                           
                           @:Inventory = import(module:'game_class.inventory.mt');
                           @inv = Inventory.new(size: 30);

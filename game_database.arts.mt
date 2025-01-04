@@ -4242,7 +4242,7 @@ Arts.newEntry(
         creationHint:0
       );
 
-      windowEvent.queueMessage(text: '... and made a ' + item.name);
+      windowEvent.queueMessage(text: '... and made a ' + item.name + '!');
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -4295,7 +4295,7 @@ Arts.newEntry(
         creationHint:1
       );
 
-      windowEvent.queueMessage(text: '... and made a ' + item.name);
+      windowEvent.queueMessage(text: '... and made a ' + item.name + '!');
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -4348,7 +4348,7 @@ Arts.newEntry(
         creationHint:2
       );
 
-      windowEvent.queueMessage(text: '... and made a ' + item.name);
+      windowEvent.queueMessage(text: '... and made a ' + item.name + '!');
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -4400,7 +4400,7 @@ Arts.newEntry(
         base:Item.database.find(id:'base:essence')
       );
 
-      windowEvent.queueMessage(text: '... and made a ' + item.name);
+      windowEvent.queueMessage(text: '... and made a ' + item.name + '!');
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -4439,17 +4439,18 @@ Arts.newEntry(
       }
       
       
-      @:pickPartyItem = import(:'game_function.pickitem.mt');
+      @:pickPartyItem = import(:'game_function.pickpartyitem.mt');
       @alreadyPicked = empty;
       @:pick :: {
         pickPartyItem(
-          canCancel:false,
-          filter::(value) <- value.base == 'base:potion' && alreadyPicked != value,
+          canCancel:true,
+          filter::(value) <- value.base.id == 'base:potion' && alreadyPicked != value,
           onCancel ::{
             alreadyPicked = empty;
             pick();
           },
-          onPick ::(item) {
+          keep : false,
+          onPick ::(item, equippedBy) {
             when (alreadyPicked == empty) ::<= {
               alreadyPicked = item;
               pick();
@@ -4486,7 +4487,8 @@ Arts.newEntry(
                   text: 'A new potion has been brewed!'
                 );
                 
-                item.describe();
+                mixed.describe();
+                inventory.add(item:mixed);
               }
             );  
           }
