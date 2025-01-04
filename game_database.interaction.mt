@@ -514,16 +514,16 @@ Interaction.newEntry(
                             'base:legendary'
                           ]
                           
-                          for(0, 50)::(i) {
+                          for(0, 6)::(i) {
                             @newItem = Item.new(
                               base: Item.database.getRandomFiltered(
                                 filter::(value) <- value.hasTraits(:
-                                    Item.TRAIT.UNIQUE |
                                     Item.TRAIT.HAS_QUALITY
                                 ) && value.hasAnyTrait(:
                                     Item.TRAIT.METAL |
                                     Item.TRAIT.APPAREL
-                                ) 
+                                ) && value.hasNoTrait(:Item.TRAIT.UNIQUE)
+
                               ),
                               rngEnchantHint:true,     
                               qualityHint : random.pickArrayItem(list:itemQualities),
@@ -531,16 +531,7 @@ Interaction.newEntry(
                             )  
                             itemChoices->push(value:newItem);                  
                           }
-                          
-                          itemChoices->sort(comparator::(a, b) {
-                            @diffA = (a.price - itemPrice)->abs;
-                            @diffB = (b.price - itemPrice)->abs;
-                            when (diffA < diffB) -1;
-                            when (diffA > diffB)  1;
-                            return 0;
-                          });
-                          
-                          itemChoices = itemChoices->subset(from:0, to:6);
+
                           itemChoices->push(:Item.new(
                               base: Item.database.find(:'base:life-crystal'),
                               rngEnchantHint:true,     

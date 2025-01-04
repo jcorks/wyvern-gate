@@ -345,6 +345,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:pickaxe');
     addMissing(id:'base:smithing-hammer');
     addMissing(id:'base:wyvern-key');
+    addMissing(id:'base:life-crystal');
     addMissing(id:'base:potion', minCount:5);
     
     for(location.inventory.items->size, 30 + (location.ownedBy.level / 4)->ceil)::(i) {

@@ -5028,6 +5028,7 @@ Arts.newEntry(
       if (world.party.isMember(:user)) ::<= {
         pickitem(
           canCancel: false,
+          keep: false,
           inventory : world.party.inventory,
           onPick ::(item){
             world.party.inventory.remove(:item);
