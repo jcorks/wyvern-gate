@@ -4262,7 +4262,7 @@ Effect.newEntry(
           (Damage.TYPE.THUNDER) : 'base:shock',
           (Damage.TYPE.LIGHT) : 'base:shimmering',
           (Damage.TYPE.DARK) : 'base:dark',
-          (Damage.TYPE.POISON) : 'base:poison'
+          (Damage.TYPE.POISON) : 'base:toxic'
         }
         
         when(id == empty) empty;
@@ -5172,6 +5172,405 @@ Effect.newEntry(
     }
   }
 )    
+
+
+Effect.newEntry(
+  data : {
+    name : 'Static Shield',
+    id : 'base:static-shield',
+    description: 'Incoming lightning damage is reduced by 75%. Incoming attacks deal 1 - 4 lighting damage to the attacker.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, to, damage) {
+        if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
+          windowEvent.queueMessage(
+            text: 'Incoming thunder damage was reduced!'
+          );
+          damage.amount *= 0.25;
+        }
+      },
+      
+      onPostAttacked ::(attacker, holder, item, damage) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Static Shield causes damage to ' + attacker.name + '!'
+        );
+        
+        attacker.damage(attacker:holder, damage:Damage.new(
+          amount : random.integer(from:1, to:4),
+          damageType:Damage.TYPE.THUNDER,
+          damageClass:Damage.CLASS.HP
+        ),dodgeable: false, exact:true);
+      }
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : 'Scorching Shield',
+    id : 'base:scorching-shield',
+    description: 'Incoming fire damage is reduced by 75%. Incoming attacks deal 1 - 4 fire damage to the attacker.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, to, damage) {
+        if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+          windowEvent.queueMessage(
+            text: 'Incoming fire damage was reduced!'
+          );
+          damage.amount *= 0.25;
+        }
+      },
+      
+      onPostAttacked ::(attacker, holder, item, damage) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Scorching Shield causes damage to ' + attacker.name + '!'
+        );
+        
+        attacker.damage(attacker:holder, damage:Damage.new(
+          amount : random.integer(from:1, to:4),
+          damageType:Damage.TYPE.FIRE,
+          damageClass:Damage.CLASS.HP
+        ),dodgeable: false, exact:true);
+      }
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : 'Freezing Shield',
+    id : 'base:freezing-shield',
+    description: 'Incoming ice damage is reduced by 75%. Incoming attacks deal 1 - 4 ice damage to the attacker.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, to, damage) {
+        if (damage.damageType == Damage.TYPE.ICE) ::<= {
+          windowEvent.queueMessage(
+            text: 'Incoming ice damage was reduced!'
+          );
+          damage.amount *= 0.25;
+        }
+      },
+      
+      onPostAttacked ::(attacker, holder, item, damage) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Freezing Shield causes damage to ' + attacker.name + '!'
+        );
+        
+        attacker.damage(attacker:holder, damage:Damage.new(
+          amount : random.integer(from:1, to:4),
+          damageType:Damage.TYPE.ICE,
+          damageClass:Damage.CLASS.HP
+        ),dodgeable: false, exact:true);
+      }
+    }
+  }
+)    
+
+
+
+::<= {
+
+@:explode::(holder) {
+  windowEvent.queueMessage(
+    text: holder.name + '\'s Acid Dust explodes!'
+  );
+  holder.removeEffectInstance(:
+    (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:acid-dust'))[0]
+  )
+
+  
+  @targets = [holder];
+  if (holder.battle)
+    targets = holder.battle.getAllies(:holder);
+  
+  foreach(targets) ::(k, v) {      
+    v.damage(attacker:holder, damage:Damage.new(
+      amount : random.integer(from:4, to:6),
+      damageType:Damage.TYPE.FIRE,
+      damageClass:Damage.CLASS.HP
+    ),dodgeable: false, exact:true);
+  }
+}
+
+Effect.newEntry(
+  data : {
+    name : 'Acid Dust',
+    id : 'base:acid-dust',
+    description: 'Upon recieving fire-based damage or receiving the Burning effect, the holder and any allies take 4 - 6 fire damage.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+    
+      onPostAddEffect(holder, from, item, effectData) {
+        when(effectData.id != 'base:burning') empty;
+        explode(holder);
+      },
+         
+      onPostDamage ::(attacker, holder, item, damage) {
+        when(damage.damageType != Damage.TYPE.FIRE) empty;
+        explode(holder);
+      }
+    }
+  }
+)    
+}
+
+
+
+
+
+::<= {
+
+@:explode::(holder) {
+  windowEvent.queueMessage(
+    text: holder.name + '\'s Conduction Dust explodes!'
+  );
+  holder.removeEffectInstance(:
+    (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:conduction-dust'))[0]
+  )
+
+  
+  @targets = [holder];
+  if (holder.battle)
+    targets = holder.battle.getAllies(:holder);
+  
+  foreach(targets) ::(k, v) {      
+    v.damage(attacker:holder, damage:Damage.new(
+      amount : random.integer(from:4, to:6),
+      damageType:Damage.TYPE.THUNDER,
+      damageClass:Damage.CLASS.HP
+    ),dodgeable: false, exact:true);
+  }
+}
+
+Effect.newEntry(
+  data : {
+    name : 'Conduction Dust',
+    id : 'base:conduction-dust',
+    description: 'Upon recieving thunder-based damage or receiving the Shock effect, the holder and any allies take 4 - 6 thunder damage.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+    
+      onPostAddEffect(holder, from, item, effectData) {
+        when(effectData.id != 'base:shock') empty;
+        explode(holder);
+      },
+         
+      onPostDamage ::(attacker, holder, item, damage) {
+        when(damage.damageType != Damage.TYPE.THUNDER) empty;
+        explode(holder);
+      }
+    }
+  }
+)    
+}
+
+
+::<= {
+
+@:explode::(holder) {
+  windowEvent.queueMessage(
+    text: holder.name + '\'s Conduction Dust explodes!'
+  );
+  holder.removeEffectInstance(:
+    (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:conduction-dust'))[0]
+  )
+
+  
+  @targets = [holder];
+  if (holder.battle)
+    targets = holder.battle.getAllies(:holder);
+  
+  foreach(targets) ::(k, v) {      
+    v.damage(attacker:holder, damage:Damage.new(
+      amount : random.integer(from:4, to:6),
+      damageType:Damage.TYPE.THUNDER,
+      damageClass:Damage.CLASS.HP
+    ),dodgeable: false, exact:true);
+  }
+}
+
+Effect.newEntry(
+  data : {
+    name : 'Conduction Dust',
+    id : 'base:conduction-dust',
+    description: 'Upon recieving thunder-based damage or receiving the Shock effect, the holder and any allies take 4 - 6 thunder damage.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+    
+      onPostAddEffect(holder, from, item, effectData) {
+        when(effectData.id != 'base:shock') empty;
+        explode(holder);
+      },
+         
+      onPostDamage ::(attacker, holder, item, damage) {
+        when(damage.damageType != Damage.TYPE.THUNDER) empty;
+        explode(holder);
+      }
+    }
+  }
+)    
+}
+
+::<= {
+
+@:explode::(holder) {
+  windowEvent.queueMessage(
+    text: holder.name + '\'s Conduction Dust explodes!'
+  );
+  holder.removeEffectInstance(:
+    (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:conduction-dust'))[0]
+  )
+
+  
+  @targets = [holder];
+  if (holder.battle)
+    targets = holder.battle.getAllies(:holder);
+  
+  foreach(targets) ::(k, v) {      
+    v.damage(attacker:holder, damage:Damage.new(
+      amount : random.integer(from:4, to:6),
+      damageType:Damage.TYPE.THUNDER,
+      damageClass:Damage.CLASS.HP
+    ),dodgeable: false, exact:true);
+  }
+}
+
+Effect.newEntry(
+  data : {
+    name : 'Crystalized Dust',
+    id : 'base:crystalized-dust',
+    description: 'Upon recieving ice-based damage or receiving the Icy effect, the holder and any allies take 4 - 6 ice damage.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+    
+      onPostAddEffect(holder, from, item, effectData) {
+        when(effectData.id != 'base:icy') empty;
+        explode(holder);
+      },
+         
+      onPostDamage ::(attacker, holder, item, damage) {
+        when(damage.damageType != Damage.TYPE.ICE) empty;
+        explode(holder);
+      }
+    }
+  }
+)    
+
+
+
+}
+
+
+Effect.newEntry(
+  data : {
+    name : 'Embarrassed',
+    id : 'base:embarrassed',
+    description: 'When the holder attacks the original caster, 50% chance to miss.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        when(from != to) empty;
+        when(random.coinFlip()) empty;
+        windowEvent.queueMessage(
+          text: holder.name + '\'s embarrassment caused the attack to miss!'
+        );
+
+        damage.amount *= 0;
+      }
+    }
+  }
+)  
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Enraged',
+    id : 'base:enraged',
+    description: 'When the holder attacks the original caster, 33% of damage is inflicted to the holder as well.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        when(from != to) empty;
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Enraged caused recoil damage!'
+        );
+
+        holder.damage(attacker:holder, damage:Damage.new(
+          amount : (damage.amount * 0.33)->ceil,
+          damageType:damage.damageType,
+          damageClass:damage.damageClass
+        ),dodgeable: false, exact:true);          
+
+
+      }
+    }
+  }
+)    
+
+
+Effect.newEntry(
+  data : {
+    name : 'Self-Illusion',
+    id : 'base:self-illusion',
+    description: 'When the holder attacks the original caster, it is inflicted on their self instead.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        when(from != to) empty;
+        when(holder.isIncapacitated()) empty;
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Self-Illusion made the attack directed back!'
+        );
+        
+        holder.attack(
+          target:holder,
+          damage: Damage.new(
+            amount: damage.amount,
+            damageType : damage.damageType,
+            damageClass: damage.damageClass
+          )
+        );
+        
+        damage.amount = 0;              
+      }
+    }
+  }
+)    
+
+
+
 
 
 }

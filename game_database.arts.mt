@@ -5357,7 +5357,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
+    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -10361,10 +10361,374 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      targets[0].addEffect(from:user, id:'base:charmed', durationTurns:2);
+      targets[0].addEffect(from:user, id:'base:charmed', durationTurns:3);
     }
   }
 )
+
+
+Arts.newEntry(
+  data: {
+    name: 'Static Shield',
+    id : 'base:b277',
+    notifCommit : "$1 casts Static Shield!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:static-shield'],
+    description: "Grants the Static Shield effect to a target for 3 turns",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:static-shield', durationTurns:3);
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Scorching Shield',
+    id : 'base:b278',
+    notifCommit : "$1 casts Scorching Shield!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:scorching-shield'],
+    description: "Grants the Scorching Shield effect to a target for 3 turns",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:scorching-shield', durationTurns:3);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Freezing Shield',
+    id : 'base:b279',
+    notifCommit : "$1 casts Freezing Shield!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:freezing-shield'],
+    description: "Grants the Freezing Shield effect to a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:freezing-shield', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Acid Dust',
+    id : 'base:b280',
+    notifCommit : "$1 throws acidic dust on $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:acid-dust'],
+    description: "Inflicts the Acid Dust effect on a target",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:acid-dust', durationTurns:999999999);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Conduction Dust',
+    id : 'base:b281',
+    notifCommit : "$1 throws conductive dust on $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:conduction-dust'],
+    description: "Inflicts the Conduction Dust effect on a target",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:conduction-dust', durationTurns:999999999);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Crystalized Dust',
+    id : 'base:b282',
+    notifCommit : "$1 throws crystalized dust on $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:crystalized-dust'],
+    description: "Inflicts the Crystalized Dust effect on a target.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : ,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:crystalized-dust', durationTurns:999999999);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Humiliate',
+    id : 'base:b290',
+    notifCommit : "$1 attempts to humiliate $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:embarrassed'],
+    description: "Inflicts the Embarrassed effect on a target for 4 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:embarrassed', durationTurns:4);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Enraged',
+    id : 'base:b291',
+    notifCommit : "$1 attempts to enrage $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:enraged'],
+    description: "Inflicts the Enraged effect on a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:enraged', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Imposter',
+    id : 'base:b292',
+    notifCommit : "$1 casts Imposter on $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:self-illusion'],
+    description: "Inflicts the Self-Illusion effect on a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:self-illusion', durationTurns:3);
+    }
+  }
+)
+
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Static Infusion',
+    id : 'base:b294',
+    notifCommit : "$1 casts Static Infusion!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:paralysis', 'base:shock'],
+    description: "Grants the Shock effect to the user for a long time, but also inflicts Paralysis for 1 turn.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:paralysis', durationTurns:1);
+      user.addEffect(from:user, id:'base:shock', durationTurns:999999999999);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Burning Infusion',
+    id : 'base:b295',
+    notifCommit : "$1 casts Burning Infusion!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:burned', 'base:burning'],
+    description: "Grants the Burning effect to the user for a long time, but also inflicts Burned for 3 turn.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:burned', durationTurns:1);
+      user.addEffect(from:user, id:'base:burning', durationTurns:999999999999);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Icy Infusion',
+    id : 'base:b296',
+    notifCommit : "$1 casts Icy Infusion!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:frozen', 'base:icy'],
+    description: "Grants the Icy effect to the user for a long time, but also inflicts Frozen for 1 turn.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:frozen', durationTurns:1);
+      user.addEffect(from:user, id:'base:icy', durationTurns:999999999999);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Elemental Contract',
+    id : 'base:b296',
+    notifCommit : "$1 casts Elemental Contract!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:attack-shifts'],
+    description: "Grants an Attack Shift of the user's choice, but also inflicts a random negative effect for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:world = import(module:'game_singleton.world.mt');
+
+
+      @:which = [
+        'base:burning',
+        'base:icy',
+        'base:shock',
+        'base:shimmering',
+        'base:dark',
+        'base:toxic'
+      ];
+
+      @:done::(id) {
+        user.addEffect(from:user, id:Effect.getRandomFiltered(::(value) <- 
+          value.hasAnyTrait(:Effect.TRAIT.DEBUFF | Effect.TRAIT.AILMENT) &&
+          value.hasNoTrait(:Effect.TRAIT.SPECIAL | Effect.TRAIT.INSTANTANEOUS)
+        ), durationTurns:3);
+        user.addEffect(from:user, id:which, durationTurns:999999999999);
+      }
+
+      when(world.party.isMember(:user)) ::<= {
+        windowEvent.queueMessage(
+          text: 'An elemental imp was summoned!'
+        );
+        
+        if (user
+        
+        windowEvent.queueMessage(
+          speaker: 'Elemental Imp',
+          text: '"Okay, whaddya want. Make it quick."'
+        );
+
+        
+        windowEvent.queueChoices(
+          canCancel: false,
+          keep: false,
+          prompt: 'Grant which?',
+          choices : which->map(::(value) <- Effect.find(:value).name);
+          onChoice::(choice) {
+            done(which[choice-1]);
+            windowEvent.queueMessage(
+              speaker: 'Elemental Imp',
+              text: '"Pleasure doin\' business with ya!"'
+            );
+          }
+        );
+      }
+      
+      
+      done(:random.pickArrayItem(:which));
+    }
+  }
+)
+
+
 
 };
 
