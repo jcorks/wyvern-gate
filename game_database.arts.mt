@@ -10728,6 +10728,50 @@ Arts.newEntry(
   }
 )
 
+Arts.newEntry(
+  data: {
+    name: 'Chaotic Elemental',
+    id : 'base:b298',
+    notifCommit : "$1 casts Chaotic Elemental!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ALL,
+    keywords : ['base:attack-shifts'],
+    description: "Manifests a chaotic entity that randomly grants two combatants with an Attack Shift, and 2 combatants with a negative effect for 5 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:world = import(module:'game_singleton.world.mt');
+
+
+      @:which = [
+        'base:burning',
+        'base:icy',
+        'base:shock',
+        'base:shimmering',
+        'base:dark',
+        'base:toxic'
+      ];
+      
+      for(0, 2)::(i) {
+        random.pickArrayItem(:targets).addEffect(from:user, id:random.pickArrayItem(:which), durationTurns:5)
+      }
+
+      for(0, 2)::(i) {
+        random.pickArrayItem(:targets).addEffect(from:user, id:Effect.getRandomFiltered(::(value) <- 
+          value.hasAnyTrait(:Effect.TRAIT.DEBUFF | Effect.TRAIT.AILMENT) &&
+          value.hasNoTrait(:Effect.TRAIT.SPECIAL | Effect.TRAIT.INSTANTANEOUS)
+        ), durationTurns:5);
+      }
+    }
+  }
+)
+
 
 
 };
