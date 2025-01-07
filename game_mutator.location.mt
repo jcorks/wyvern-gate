@@ -330,18 +330,23 @@ Location.database.newEntry(data:{
   @:restockShop::(location) {
     when(location.ownedBy == empty) empty;
 
-    @:addMissing ::(id) {
-      if (location.inventory.items->findIndexCondition(::(value) <- value.base.id == id) == -1)
+    @:addMissing ::(id, minCount) {
+      @:found = location.inventory.items->filter(::(value) <- value.base.id == id)->size;
+
+      for(found, if (minCount == empty) 1 else minCount) ::(i) {
         location.inventory.add(item:Item.new(base:Item.database.find(
           id
-        )));        
+        )));  
+      }
     }
 
 
-    addMissing(:'base:arts-crystal');
-    addMissing(:'base:pickaxe');
-    addMissing(:'base:smithing-hammer');
-    addMissing(:'base:wyvern-key');
+    addMissing(id:'base:arts-crystal');
+    addMissing(id:'base:pickaxe');
+    addMissing(id:'base:smithing-hammer');
+    addMissing(id:'base:wyvern-key');
+    addMissing(id:'base:life-crystal');
+    addMissing(id:'base:potion', minCount:5);
     
     for(location.inventory.items->size, 30 + (location.ownedBy.level / 4)->ceil)::(i) {
       // no weight, as the value scales
@@ -352,6 +357,7 @@ Location.database.newEntry(data:{
                       location.ownedBy.level >= value.levelMinimum
                       && value.tier <= location.landmark.island.tier
           ),
+          forceNeedsAppraisal : false,
           rngEnchantHint:true
         )
       );
@@ -375,6 +381,7 @@ Location.database.newEntry(data:{
       'base:buy:shop',
       'base:sell:shop',
       'base:bag:shop',
+      'base:appraise',
       'base:talk',
       'base:examine'
     ],
@@ -441,6 +448,7 @@ Location.database.newEntry(data:{
     "A mystical and exotic shop that provides services rather than goods.",
   ],
   interactions : [
+    'base:buy:arts',
     'base:trade:arts',
     'base:uncover:arts',
     'base:talk',
@@ -485,9 +493,24 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
 
   },
-  
-  onIncrementTime::(location, time) {
-  
+    
+  onIncrementTime::(location) {
+    @:world = import(module:'game_singleton.world.mt');
+    @:Arts = import(:'game_database.arts.mt');
+    if (world.time == world.TIME.MIDNIGHT) ::<= {
+      when (location.data.arts == empty) empty;
+      @:items = random.scrambled(:location.data.arts);
+
+      items->setSize(:(items->size / 2)->floor);
+        
+      for(items->size, 15)::(i) {
+        location.data.arts->push(:Arts.getRandomFiltered(::(value) <-
+          value.hasNoTrait(:Arts.TRAITS.SPECIAL) &&
+          value.hasTraits(:Arts.TRAITS.SUPPORT)
+
+        ).id);
+      }          
+    }
   }
 })
 
@@ -603,11 +626,13 @@ Location.database.newEntry(data:{
 
       location.inventory.add(
         item:Item.new(
+          forceNeedsAppraisal : false,
           base: Item.database.getRandomFiltered(
             filter::(value) <- (
               value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
               location.ownedBy.level >= value.levelMinimum &&
-              value.traits & Item.TRAIT.METAL
+              (value.traits & Item.TRAIT.METAL) &&
+              (value.traits & Item.TRAIT.HAS_QUALITY)
             )
           )
         )
@@ -1474,6 +1499,7 @@ Location.database.newEntry(data:{
           base:Item.database.getRandomFiltered(
             filter:::(value) <- value.hasTraits(:Item.TRAIT.APPAREL)
           ),
+          forceNeedsAppraisal : false,
           apparelHint: 'base:wool-plus',
           rngEnchantHint:true
         )
@@ -1553,15 +1579,13 @@ Location.database.newEntry(data:{
     @:nameGen = import(module:'game_singleton.namegen.mt');
     @:story = import(module:'game_singleton.story.mt');
 
-    for(0, 14)::(i) {
+    for(0, 21)::(i) {
       @:item = Item.new(
-        base:Item.database.getRandomFiltered(
-          filter:::(value) <- value.name->contains(key:'Potion')
-        )
+        base:Item.database.find(:'base:potion')
       );
       
       // scalping is bad!
-      item.price *= 10;
+      item.price *= 5;
 
       location.inventory.add(item);
     }
@@ -1655,6 +1679,7 @@ Location.database.newEntry(data:{
           base:Item.database.getRandomFiltered(
             filter:::(value) <- value.hasTraits(:Item.TRAIT.HAS_QUALITY)
           ),
+          forceNeedsAppraisal : false,
           qualityHint: random.pickArrayItem(list:qualities),
           rngEnchantHint:true
         )
@@ -1747,7 +1772,18 @@ Location.database.newEntry(data:{
 
     location.inventory.add(item:
       Item.new(
-        base:Item.database.find(id:'perfect-arts-crystal')
+        base:Item.database.getRandomFiltered(
+          filter:::(value) <- 
+            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+            value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)          
+        ),
+        forceNeedsAppraisal : true
+      )
+    );   
+
+    location.inventory.add(item:
+      Item.new(
+        base:Item.database.find(id:'base:perfect-arts-crystal')
       )
     );    
 

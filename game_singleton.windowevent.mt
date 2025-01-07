@@ -19,6 +19,7 @@
 
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:class = import(module:'Matte.Core.Class');
+@:sound = import(module:'game_singleton.sound.mt');
 
 
 @:MAX_LINES_TEXTBOX = 10;
@@ -388,11 +389,21 @@
   
         @cursorPageTop = 0;
 
-        if (choice == CURSOR_ACTIONS.UP) ::<= {
-          cursorPos -= 1;
-        }
-        if(choice == CURSOR_ACTIONS.DOWN) ::<= {
-          cursorPos += 1;
+        if (data.horizontalFlow) ::<= {
+          if (choice == CURSOR_ACTIONS.LEFT) ::<= {
+            cursorPos -= 1;
+          }
+          if(choice == CURSOR_ACTIONS.RIGHT) ::<= {
+            cursorPos += 1;
+          }
+        
+        } else ::<= {
+          if (choice == CURSOR_ACTIONS.UP) ::<= {
+            cursorPos -= 1;
+          }
+          if(choice == CURSOR_ACTIONS.DOWN) ::<= {
+            cursorPos += 1;
+          }
         }
 
         if (cursorPos < 0) cursorPos = choices->keycount-1;
@@ -457,9 +468,16 @@
         
         
         
-        
-        if (choice == CURSOR_ACTIONS.UP||
-          choice == CURSOR_ACTIONS.DOWN) ::<= {
+        @:affectsChoice = if (data.horizontalFlow)
+          choice == CURSOR_ACTIONS.LEFT ||
+          choice == CURSOR_ACTIONS.RIGHT        
+        else 
+          choice == CURSOR_ACTIONS.UP ||
+          choice == CURSOR_ACTIONS.DOWN        
+        ;
+
+        if (affectsChoice) ::<= {
+          sound.playSFX(:"cursor");
           data.defaultChoice = (cursorPos+1);
         }
         
@@ -499,6 +517,7 @@
       }
         
       when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= { 
+        sound.playSFX(:"cancel");
         @res;
         if (data.onCancel) 
           res = data.onCancel();
@@ -510,6 +529,7 @@
       
       when(choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         onChoice(choice:cursorPos + 1);
+        sound.playSFX(:"confirm");
         data.rendered = empty;
         return true;
       }
@@ -610,6 +630,7 @@
       }
         
       when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
+        sound.playSFX(:"cancel");
         @res;
         if (data.onCancel) 
           res = data.onCancel();
@@ -620,6 +641,7 @@
       
       when(choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         onChoice(fraction:cursorPos);
+        sound.playSFX(:"confirm");
         data.rendered = empty;
         return true;
       }
@@ -659,6 +681,7 @@
 
       when(choice == CURSOR_ACTIONS.CANCEL ||
          choice == CURSOR_ACTIONS.CONFIRM) ::<= {
+        sound.playSFX(:"confirm");
         onMenu();
         resolveNext();
         return false;
@@ -846,6 +869,9 @@
         if (choice == CURSOR_ACTIONS.DOWN)
           y += 1;
 
+        sound.playSFX(:"cursor");
+
+
         if (x < 0) x = width-1;
         if (x >= width) x = 0;
         if (y < 0) y = height-1;
@@ -917,11 +943,13 @@
         
         
       when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
+        sound.playSFX(:"confirm");
         onChoice(choice:which + 1);
         return true;
       }
         
       if (canCancel && choice == CURSOR_ACTIONS.CANCEL) ::<= {
+        sound.playSFX(:"cancel");
         @res;
         if (data.onCancel) 
           res = data.onCancel();
@@ -1034,6 +1062,9 @@
             data.busy = false;
             return false;
           } 
+
+          sound.playSFX(:if (input == CURSOR_ACTIONS.CONFIRM) "confirm" else "cancel");
+
           // if queued in a set, remove remaining waiting
           if (input == CURSOR_ACTIONS.CANCEL && data.setID != empty) ::<= {
             removeSetID(:data.setID)
@@ -1381,7 +1412,8 @@
         onGetHeader, 
         onCancel, 
         pageAfter, 
-        hideWindow
+        hideWindow,
+        horizontalFlow
       ) {
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
@@ -1406,7 +1438,8 @@
             renderable:renderable,
             jumpTag : jumpTag,
             header : header,
-            onGetHeader : onGetHeader
+            onGetHeader : onGetHeader,
+            horizontalFlow : horizontalFlow
           });
         }]);
         return getResolveQueue()->size-1;

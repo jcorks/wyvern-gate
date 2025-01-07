@@ -30,6 +30,7 @@ return ::(
   canCancel,
   onCancel,
   prompt,
+  onGetPrompt,
   keep,
   onHover
 ) {
@@ -90,6 +91,7 @@ return ::(
   windowEvent.queueChoices(
     choices,
     prompt,
+    onGetPrompt,
     leftWeight: 1,
     topWeight: 0.5,
     maxWidth: 0.3,

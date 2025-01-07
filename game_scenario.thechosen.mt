@@ -366,7 +366,16 @@ return {
         levelHint:story.levelHint-1,
         professionHint: prof
       );
+
+
+
       p0.normalizeStats();
+      
+      if (p0.stats.HP < 6) ::<= {
+        @:stats = p0.stats.save();
+        stats.HP = 6;
+        p0.stats.load(:stats);
+      }
       choices->push(value:p0);
     }
 
@@ -1381,7 +1390,6 @@ return {
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 11},
-          {id: 'base:enchantment-stand', rarity: 12},
 
 
           {id: 'base:healing-circle', rarity:20},
@@ -1446,7 +1454,6 @@ return {
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
-          {id: 'base:enchantment-stand', rarity: 11},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 12},
@@ -1515,7 +1522,6 @@ return {
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
-          {id: 'base:enchantment-stand', rarity: 11},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 11},
@@ -1590,7 +1596,6 @@ return {
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
-          {id: 'base:enchantment-stand', rarity: 11},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 11},
@@ -4339,7 +4344,7 @@ return {
           },
           ['', 'Opening the box reveals items inside!'],
           ['', 'The party receives 125G.'],
-          ['', 'The party receives 3 Pink Potions.'],
+          ['', 'The party receives 3 Potions.'],
           ['', 'The party receives a Life Crystal.'],
           ['', 'The party receives an Arts Crystal.'],
           ['', 'The party also receives an equippable Tome.'],
@@ -4377,14 +4382,18 @@ return {
 
 
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:pink-potion')
+              base:Item.database.find(id:'base:potion'),
+              creationHint:0
             ));
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:pink-potion')
+              base:Item.database.find(id:'base:potion'),
+              creationHint:0
             ));
             world.party.inventory.add(item:Item.new(
-              base:Item.database.find(id:'base:pink-potion')
+              base:Item.database.find(id:'base:potion'),
+              creationHint:0
             ));
+
             
             @tome = Item.new(
               base:Item.database.find(id:'base:tome'),
@@ -4760,7 +4769,7 @@ return {
         'base:wild-swing',
         'base:triplestrike',
         'base:leg-sweep',
-        'base:flight',
+        'base:summon-defensive-pylon',
         'base:flash',
         'base:unarm'
       ],

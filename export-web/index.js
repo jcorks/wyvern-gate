@@ -134,6 +134,8 @@ var postMessageWorker = function(data) {
 
 
 const fullscreenEnter = function(element) {
+    element.style.width = "100vw";
+    element.style.height = "100vh";
     if (element.requestFullscreen) {
         element.requestFullscreen(
             {
@@ -301,6 +303,18 @@ var startGame = function(touch) {
               endMessage.style.display = 'block';
               break;
             }
+            
+            case 'sfx' : {
+              // play a sound
+              data.name
+            }
+
+            case 'bgm' : {
+              // play a sound
+              data.name
+              data.loop
+            }
+
             
             case 'error' : {
               reportError(

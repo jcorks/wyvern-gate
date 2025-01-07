@@ -6,13 +6,62 @@ extends Matte
 @export var repeat_time: float =  0.1;
 @export var initial_wait: float = 0.4;
 
+@onready var SFX_Cancel: AudioStreamPlayer = %SFX_Cancel;
+@onready var SFX_Confirm: AudioStreamPlayer = %SFX_Confirm;
+@onready var SFX_Cursor: AudioStreamPlayer = %SFX_Cursor;
+@onready var SFX_Keyboard = %SFX_Keyboard;
+
+
+@onready var BGM_Title: AudioStreamPlayer = %BGM_Title;
+@onready var BGM_Boot: AudioStreamPlayer = %BGM_Boot;
+@onready var BGM_Bootpost: AudioStreamPlayer = %BGM_Bootpost;
+@onready var BGM_World: AudioStreamPlayer = %BGM_World;
+@onready var BGM_Town2: AudioStreamPlayer = %BGM_Town2;
+
+
+
+    
+func rangeToDB(val: float):
+    if (val < 0.0001): val = 0.0001;
+    if (val > 0.99): val = 0.99;
+    return 20 * log(val) / log(10);
+
+var lastBGM: AudioStreamPlayer;
+func playBGM(which):
+    if lastBGM != null:
+        lastBGM.stop();
+    which.play();
+    lastBGM = which;
+
 var l = 0;
 var debug = false;
+var keepSending = true;
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
     timer.connect("timeout", func():
-        send_input(-1);  
+        if (keepSending):
+            send_input(-1);  
     )
+    
+    connect("on_play_sfx", func(name):
+        if (name == 'cancel'): SFX_Cancel.play();
+        if (name == 'cursor'): SFX_Cursor.play();
+        if (name == 'confirm'): SFX_Confirm.play();
+        if (name == 'keyboard'): SFX_Keyboard.play();
+        
+        print(str("Request to play ", name));
+    )
+        
+    
+    connect("on_play_bgm", func(name, loop):
+        if (name == 'title'): playBGM(BGM_Title);
+        if (name == 'boot'): playBGM(BGM_Boot);
+        if (name == 'boot-post'): playBGM(BGM_Bootpost);
+        if (name == 'world'): playBGM(BGM_World);
+        if (name == 'town-2'): playBGM(BGM_Town2);
+    
+        print(str("Request to play BGM", name));
+    )    
     
     connect("on_send_line", func(index, str): 
         canvas.set_line(index, str)
@@ -24,6 +73,7 @@ func _ready() -> void:
             print(str("MATTE VM ERROR: ", strn))
         else:
             print(strn)
+        keepSending = false;
     )
 
     connect("on_send_settings", func(str): 
@@ -32,6 +82,18 @@ func _ready() -> void:
             debug = true;
             print("Enabled debug mode.");
             enable_debugging();
+            
+        if (settings.has("volumeSFX")):
+            print(str("set volume sfx", settings.volumeSFX, " ", rangeToDB(settings.volumeSFX), "db"))
+            var sfxBus = AudioServer.get_bus_index("SFX");
+            AudioServer.set_bus_volume_db(sfxBus, rangeToDB(settings.volumeSFX));
+
+        if (settings.has("volumeBGM")):
+            print(str("set volume bgm", settings.volumeSFX, " ", rangeToDB(settings.volumeBGM), "db"))
+            var sfxBus = AudioServer.get_bus_index("BGM");
+            AudioServer.set_bus_volume_db(sfxBus, rangeToDB(settings.volumeBGM));
+
+            
         canvas.apply_settings(settings)
     )
 

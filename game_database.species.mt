@@ -23,7 +23,8 @@
 
 @:TRAITS = {
   SPECIAL : 1,
-  SUMMON : 2
+  SUMMON : 2,
+  ETHEREAL : 4
 };
 
 
@@ -891,6 +892,32 @@ Species.newEntry(data:{
 })
 
 Species.newEntry(data:{
+  name : 'Defensive Pylon',
+  id : 'base:defensive-pylon',
+  rarity : 2000000000000,
+  description: 'A good buddy.',
+  growth : StatSet.new(
+    HP : 4,
+    AP : 1,
+    ATK: 7,
+    DEF: 10,
+    INT: 7,
+    LUK: 1,
+    SPD: 2,
+    DEX: 4
+  ),
+  qualities : [
+
+  ],
+  swarms : false,
+  canBlock : false,
+  
+  traits : TRAITS.SPECIAL  | TRAITS.SUMMON,
+  passives : [
+  ]
+})
+
+Species.newEntry(data:{
   name : 'Ice Elemental',
   id : 'base:ice-elemental',
   rarity : 2000000000000,
@@ -1017,7 +1044,7 @@ Species.newEntry(data:{
   qualities : [
   ],
   swarms: true,
-  traits : TRAITS.SPECIAL,
+  traits : TRAITS.SPECIAL | TRAITS.ETHEREAL,
   canBlock : false,
   passives : [
     'base:apparition'

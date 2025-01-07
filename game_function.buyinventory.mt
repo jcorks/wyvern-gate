@@ -12,7 +12,7 @@ return ::(inventory, shopkeep, onDone) {
   pickItem(
     inventory,
     canCancel: true,
-    leftWeight: 0.6,
+    leftWeight: 1,
     topWeight: 0.5,
     showPrices : true,
     onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',

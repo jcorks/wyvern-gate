@@ -70,7 +70,8 @@
   HAS_COLOR     : 2 << 14,
   HAS_SIZE      : 2 << 15,
   UNIQUE        : 2 << 16,
-  MEANT_TO_BE_USED : 2 << 17
+  MEANT_TO_BE_USED : 2 << 17,
+  CAN_BE_APPRAISED : 2 << 18
 }
 
 
@@ -91,6 +92,80 @@
 
 @none;
 
+
+// The keys have qualifiers not normal for 
+// average objects to highlight their power.
+@:keyQualifiers = [
+  'Mysterious',
+  'Sentimental',
+  'Lucid',
+  'Impressive',
+  'Foolish',
+  'Placid',
+  'Superb',
+  'Remarkable',
+  'Sordid',
+  'Rustic',
+  'Remarkable',
+  'Rough',
+  'Wise',
+  'Faint',
+  'Feeble',
+  'Ethereal',
+  'Romantic',
+  'Belligerent',
+  'Ancient',
+  'Wakeful',
+  'Tawdry',
+  'Gruesome',
+  'Shivering',
+  'Obeisant',
+  'Cheerful',
+  'Curious',
+  'Sincere',
+  'Truthful',
+  'Wealthy',
+  'Righteous',
+  'Recondite',
+  'Faded',
+  'Mellow',
+  'Evanescent',
+  'Nascent',
+  'Vague',
+  'Honorable',
+  'Placid',
+  'Elated',
+  'Shivering',
+  'Miscreant',
+  'Abstract',
+  'Wily',
+  'Witty',
+  'Inquisitive',
+  'Ill-fated',
+  'Acrid',
+  'Simple',
+  'Overwrought',
+  'Abrupt',
+  'Hypnotic',
+  'Languid',
+  'Bashful',
+  'Knowledgeable',
+  'Illustrious',
+  'Perpetual',
+  'Puzzling',
+  'Vacuous',
+  'Boorish',
+  'Direful',
+  'Steady',
+  'Cynical',
+  'Chivalrous',
+  'Imminent',
+  'Ceaseless',
+  'Careless',
+  'Ubiquitous',
+  'Unending',
+  'Relentless'
+];
 
 
 
@@ -233,21 +308,160 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.UNIQUE
 
 })
 
+::<= {
+  @:healEffects = [
+    'base:hp-recovery-all',
+    'base:ap-recovery-all',
+    'base:hp-recovery-half',
+    'base:ap-recovery-half',
+    'base:regeneration-rune',
+    'base:cure-rune'
+  ]
+  
+  @:buffEffects = [
+    'base:scorching',
+    'base:sharp',
+    'base:burning',
+    'base:icy',
+    'base:freezing',
+    'base:shock',
+    'base:paralyzing',
+    'base:toxic',
+    'base:seeping',
+    'base:shimmering',
+    'base:petrifying',
+    'base:dark',
+    'base:blinding',
+  ]
+  
+  
+  @:debuffEffects = [
+    'base:poisoned',
+    'base:burned',
+    'base:frozen',
+    'base:paralyzed',
+    'base:blind',
+    'base:bleeding',
+    'base:petrified'
+  ]
+  
+  
+  @:overridePotionNames = {
+    'base:regeneration' : 'Regeneration',
+    'base:cure-rune'    : 'Delayed Healing',
+    'base:icy'          : 'Cold',
+    'base:sharp'        : 'Bleeding',
+    'base:dark'         : 'Darkness',
+    
+    'base:poisoned'     : 'Poison',
+    'base:burned'       : 'Acid',
+    'base:frozen'       : 'Frost',
+    'base:paralyzed'    : 'Paralysis',
+    'base:blind'        : 'Blindness',
+    'base:bleeding'     : 'Hemorrhaging',
+    'base:petrified'    : 'Petrification'
+  
+  }
+  
+  
+
+
+  Item.database.newEntry(data : {
+    name : "Potion",
+    id : 'base:potion',
+    description: 'Provides effects upon use. Most effects last 5 turns if they\'re not instant.',
+    examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
+    equipType: TYPE.HAND,
+    weight : 2,
+    rarity : 100,
+    basePrice: 40,
+    tier: 0,
+    levelMinimum : 1,
+    enchantLimit : 0,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    blockPoints : 0,
+    equipMod : StatSet.new(
+      SPD: -2, // itll slow you down
+      DEX: -10   // its oddly shaped.
+    ),
+    useEffects : [
+      'base:consume-item'     
+    ],
+    possibleArts : [],
+    equipEffects : [
+    ],
+    traits : 
+      TRAIT.FRAGILE |
+      TRAIT.MEANT_TO_BE_USED
+    ,
+    onCreate ::(item, creationHint) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @kind = if (creationHint->type == Number)
+        creationHint 
+      else
+        random.pickArrayItem(:[0, 1, 2]);
+        
+        
+      @:supply = ::(which)<-
+        match(which) {
+          (0): random.pickArrayItem(:healEffects),
+          (1):random.pickArrayItem(:buffEffects),
+          (2):random.pickArrayItem(:debuffEffects)
+        }
+      ;
+      
+      ::<= { 
+        // rare potion   
+        when (random.try(percentSuccess:10) && creationHint->type != Number) ::<= {
+          item.name = random.pickArrayItem(:keyQualifiers) + ' Potion';
+        
+          // FULL random
+          when(random.flipCoin()) ::<= {
+            @:rollRandom = ::<- supply(:random.integer(from:0, to:2));
+            
+            for(0, random.integer(from:2, to:6)) ::(i) {
+              item.useEffects->push(:rollRandom());
+            }
+          }
+          
+          
+          // fortified random
+          for(0, random.integer(from:2, to:3)) ::(i) {
+            item.useEffects->push(:supply(:kind));
+          }
+        }
+        
+        // normal potion
+        @:eff = supply(:kind);
+        item.name = 'Potion of ' + (if (overridePotionNames[eff] != empty) 
+            overridePotionNames[eff] 
+          else 
+            Effect.find(:eff).name
+        );
+        item.useEffects->push(:eff);
+      }
+      item.price += item.base.basePrice * item.useEffects->size;
+    }
+
+  })
+}
+
 
 Item.database.newEntry(data : {
-  name : "Pink Potion",
-  id : 'base:pink-potion',
-  description: 'Pink-colored potions are known to be for recovery of injuries',
+  name : "Essence",
+  id : 'base:essence',
+  description: 'Provides an effect upon use. Most effects last 3 turns if they\'re not instant.',
   examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
   equipType: TYPE.HAND,
   weight : 2,
   rarity : 100,
-  basePrice: 20,
-  tier: 0,
+  basePrice: 200,
+  tier: 2,
   levelMinimum : 1,
   enchantLimit : 0,
   useTargetHint : USE_TARGET_HINT.ONE,
@@ -257,7 +471,6 @@ Item.database.newEntry(data : {
     DEX: -10   // its oddly shaped.
   ),
   useEffects : [
-    'base:hp-recovery-all',
     'base:consume-item'     
   ],
   possibleArts : [],
@@ -265,154 +478,22 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
     TRAIT.MEANT_TO_BE_USED
   ,
-  onCreate ::(item, creationHint) {}
-
+  onCreate ::(item, creationHint) {
+    @:Effect = import(module:'game_database.effect.mt');
+    @:effect = Effect.getRandomFiltered(::(value) <- value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL));
+    item.name = 'Essence of ' + effect.name;
+    item.useEffects->push(:effect.id);
+  }
 
 })
 
 
-Item.database.newEntry(data : {
-  name : "Purple Potion",
-  id : 'base:purple-potion',
-  description: 'Purple-colored potions are known to combine the effects of pink and cyan potions',
-  examine : 'These potions are handy, as the effects of ',
-  equipType: TYPE.HAND,
-  weight : 2,
-  rarity : 100,
-  tier: 0,
-  basePrice: 100,
-  levelMinimum : 1,
-  enchantLimit : 0,
-  possibleArts : [],
-  useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:hp-recovery-all',
-    'base:ap-recovery-all',
-    'base:consume-item'     
-  ],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED
-  ,
-  onCreate ::(item, creationHint) {}
 
 
-})  
-
-Item.database.newEntry(data : {
-  name : "Green Potion",
-  id : 'base:green-potion',
-  description: 'Green-colored potions are known to be toxic.',
-  examine : 'Often used offensively, these potions are known to be used as poison once used and doused on a target.',
-  equipType: TYPE.HAND,
-  weight : 2,
-  rarity : 100,
-  basePrice: 20,
-  tier: 0,
-  levelMinimum : 1,
-  enchantLimit : 0,
-  possibleArts : [],
-  useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:poisoned',
-    'base:consume-item'     
-  ],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED    
-  ,
-  onCreate ::(item, creationHint) {}
 
 
-})  
-
-Item.database.newEntry(data : {
-  name : "Orange Potion",
-  id : 'base:orange-potion',
-  description: 'Orange-colored potions are known to be volatile.',
-  examine : 'Often used offensively, these potions are known to explode on contact.',
-  equipType: TYPE.HAND,
-  weight : 2,
-  rarity : 100,
-  basePrice: 20,
-  levelMinimum : 1,
-  tier: 0,
-  enchantLimit : 0,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:explode',
-    'base:consume-item'     
-  ],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED    
-  ,
-  onCreate ::(item, creationHint) {}
-})  
-
-
-Item.database.newEntry(data : {
-  name : "Black Potion",
-  id : 'base:black-potion',
-  description: 'Black-colored potions are known to be toxic to all organic life.',
-  examine : 'Often used offensively, these potions are known to cause instant petrification.',
-  equipType: TYPE.HAND,
-  weight : 2,
-  rarity : 100,
-  basePrice: 20,
-  tier: 0,
-  levelMinimum : 1,
-  enchantLimit : 0,
-  possibleArts : [],
-  useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:petrified',
-    'base:consume-item'     
-  ],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED    
-  ,
-  onCreate ::(item, creationHint) {}
-
-
-})  
 
 
 /*
@@ -458,41 +539,6 @@ Item.database.newEntry(data : {
 */
 
 
-
-Item.database.newEntry(data : {
-  name : "Cyan Potion",
-  id : 'base:cyan-potion',
-  description: 'Cyan-colored potions are known to be for recovery of mental fatigue.',
-  examine : 'Potions like these are so common that theyre often unmarked and trusted as-is. The hue of this potion is distinct.',
-  equipType: TYPE.HAND,
-  rarity : 100,
-  weight : 2,    
-  basePrice: 20,
-  tier: 0,
-  levelMinimum : 1,
-  enchantLimit : 0,
-  possibleArts : [],
-  useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
-  equipMod : StatSet.new(
-    SPD: -2, // itll slow you down
-    DEX: -10   // its oddly shaped.
-  ),
-  useEffects : [
-    'base:ap-recovery-all',
-    'base:consume-item'     
-  ],
-  equipEffects : [
-  ],
-  traits : 
-    TRAIT.FRAGILE |
-    TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED    
-  ,
-  onCreate ::(item, creationHint) {}
-
-
-})
 
 Item.database.newEntry(data : {
   name : "Pitchfork",
@@ -704,6 +750,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR
 
   ,
@@ -750,6 +797,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -798,6 +846,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR
 
 
@@ -847,6 +896,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -897,6 +947,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -944,6 +995,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -990,6 +1042,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
@@ -1039,6 +1092,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -1087,6 +1141,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -1135,6 +1190,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
@@ -1181,6 +1237,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
@@ -1227,6 +1284,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -1272,6 +1330,7 @@ Item.database.newEntry(data : {
     TRAIT.METAL |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -1317,6 +1376,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -1360,6 +1420,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -1403,6 +1464,7 @@ Item.database.newEntry(data : {
     TRAIT.METAL |
     TRAIT.WEAPON |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
 
@@ -1490,6 +1552,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
@@ -1534,6 +1597,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
@@ -1578,6 +1642,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
@@ -1622,6 +1687,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
@@ -1675,6 +1741,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR    
   ,
@@ -1725,6 +1792,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
@@ -1771,12 +1839,60 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
 
 })
+
+
+Item.database.newEntry(data : {
+  name : "Battelaxe",
+  id : 'base:battleaxe',
+  description: 'An axe meant for combat with a $design$ design. The end is tied with a $color$ fabric.',
+  examine : 'A common choice for those who wish to cause harm and have the arm to back it up.',
+  equipType: TYPE.TWOHANDED,
+  rarity : 350,
+  weight : 10,
+  levelMinimum : 1,
+  enchantLimit : 10,
+  basePrice: 250,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  tier: 2,
+  possibleArts : [
+    'base:stun',
+    'base:big-swing',
+    'base:leg-sweep'
+  ],
+
+  // fatigued
+  blockPoints : 2,
+  equipMod : StatSet.new(
+    ATK: 75,
+    DEF: 10,
+    SPD: -25,
+    DEX: -25
+  ),
+  useEffects : [
+    'base:fling'
+  ],
+  equipEffects : [],
+  traits : 
+    TRAIT.BLUNT |
+    TRAIT.METAL |
+    TRAIT.WEAPON |
+    TRAIT.HAS_SIZE |
+    TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
+    TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.HAS_COLOR
+  ,
+  onCreate ::(item, creationHint) {}
+
+})
+
 
 
 Item.database.newEntry(data : {
@@ -1816,6 +1932,7 @@ Item.database.newEntry(data : {
     TRAIT.WEAPON |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
@@ -1851,6 +1968,7 @@ Item.database.newEntry(data : {
     TRAIT.APPAREL |
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR  
   
   ,
@@ -1887,6 +2005,7 @@ Item.database.newEntry(data : {
     TRAIT.APPAREL |
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR  
   ,
   onCreate ::(item, creationHint) {}
@@ -1920,6 +2039,7 @@ Item.database.newEntry(data : {
     TRAIT.APPAREL |
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR  
   
   ,
@@ -1955,6 +2075,7 @@ Item.database.newEntry(data : {
     TRAIT.APPAREL |
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR    
   ,
   onCreate ::(item, creationHint) {}
@@ -1991,6 +2112,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR  
   ,
@@ -2025,6 +2147,7 @@ Item.database.newEntry(data : {
     TRAIT.APPAREL |
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR    
   ,
   onCreate ::(item, creationHint) {}
@@ -2060,6 +2183,7 @@ Item.database.newEntry(data : {
     TRAIT.APPAREL |
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR    
   
   ,
@@ -2093,6 +2217,7 @@ Item.database.newEntry(data : {
   traits : 
     TRAIT.APPAREL |
     TRAIT.HAS_QUALITY |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.HAS_COLOR    
   
@@ -2128,6 +2253,7 @@ Item.database.newEntry(data : {
   traits : 
     TRAIT.METAL |
     TRAIT.HAS_QUALITY |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR      
   ,
   onCreate ::(item, creationHint) {}
@@ -2163,6 +2289,7 @@ Item.database.newEntry(data : {
     TRAIT.APPAREL |
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR    
   ,
   onCreate ::(item, creationHint) {}
@@ -2198,6 +2325,7 @@ Item.database.newEntry(data : {
     TRAIT.BLUNT |
     TRAIT.METAL |
     TRAIT.HAS_QUALITY |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
@@ -2235,6 +2363,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR
   ,
   onCreate ::(item, creationHint) {}
@@ -2271,6 +2400,7 @@ Item.database.newEntry(data : {
     TRAIT.METAL |
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
+    TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR
   ,
@@ -2926,79 +3056,7 @@ Item.database.newEntry(data : {
 
   
 ::<= {
-  // The keys have qualifiers not normal for 
-  // average objects to highlight their power.
-  @:keyQualifiers = [
-    'Mysterious',
-    'Sentimental',
-    'Lucid',
-    'Impressive',
-    'Foolish',
-    'Placid',
-    'Superb',
-    'Remarkable',
-    'Sordid',
-    'Rusty',
-    'Remarkable',
-    'Rough',
-    'Wise',
-    'Faint',
-    'Feeble',
-    'Ethereal',
-    'Romantic',
-    'Belligerent',
-    'Ancient',
-    'Wakeful',
-    'Tawdry',
-    'Gruesome',
-    'Shivering',
-    'Obeisant',
-    'Cheerful',
-    'Curious',
-    'Sincere',
-    'Truthful',
-    'Wealthy',
-    'Righteous',
-    'Recondite',
-    'Faded',
-    'Mellow',
-    'Evanescent',
-    'Nascent',
-    'Vague',
-    'Honorable',
-    'Placid',
-    'Elated',
-    'Shivering',
-    'Miscreant',
-    'Abstract',
-    'Wily',
-    'Witty',
-    'Inquisitive',
-    'Ill-fated',
-    'Acrid',
-    'Simple',
-    'Overwrought',
-    'Abrupt',
-    'Hypnotic',
-    'Languid',
-    'Bashful',
-    'Knowledgeable',
-    'Illustrious',
-    'Perpetual',
-    'Puzzling',
-    'Vacuous',
-    'Boorish',
-    'Direful',
-    'Steady',
-    'Cynical',
-    'Chivalrous',
-    'Imminent',
-    'Ceaseless',
-    'Careless',
-    'Ubiquitous',
-    'Unending',
-    'Relentless'
-  ];
+
   Item.database.newEntry(data : {
     name : "Wyvern Key",
     id : 'base:wyvern-key',
@@ -3085,6 +3143,9 @@ none.name = 'None';
 }
 
 @:recalculateName = ::(state) {
+  when(state.needsAppraisal) 
+    state.customName = '???? ' + state.base.name;
+
   when (state.customPrefix != '') ::<= {
     state.customName = state.customPrefix + getEnchantTag(state);
     if (state.improvements > 0) ::<= {
@@ -3179,6 +3240,10 @@ none.name = 'None';
 @:calculateDescription ::(this, state){
   @:Arts = import(module:'game_database.arts.mt');
   @:base = this.base;
+  
+  when(state.needsAppraisal)
+    'It is clearly ' + correctA(:base.name) + '... Though, it\'s hard to discern anything else from this mysterious item. It should be appraised by someone.'
+  
   @out = String.combine(strings:[
     base.description,
     ' ',
@@ -3257,6 +3322,9 @@ none.name = 'None';
     data : empty,
     worldID : -1,
     faveMark : '',
+    needsAppraisal : false,
+    appraisalCount : 0
+
   },
   
   database : Database.new(
@@ -3282,7 +3350,6 @@ none.name = 'None';
       tier : Number,
       blockPoints : Number,
       possibleArts : Object
-    
     },
     reset     
   ),
@@ -3291,7 +3358,7 @@ none.name = 'None';
   },
   
   interface : {
-    defaultLoad::(base, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, artsHint, forceEnchant) {
+    defaultLoad::(base, creationHint, qualityHint, enchantHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, artsHint, forceEnchant, forceEnchantCount, forceNeedsAppraisal) {
       @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
       @:ItemQuality = import(module:'game_database.itemquality.mt');
       @:ItemColor = import(module:'game_database.itemcolor.mt');
@@ -3325,6 +3392,9 @@ none.name = 'None';
       state.improvements = 0;
       state.improvementEXP = 0;
       state.data = {};
+      state.needsAppraisal = if (forceNeedsAppraisal != empty) forceNeedsAppraisal
+        else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess:4)) true else false;
+      breakpoint();
       
       if (base.hasTraits(:TRAIT.HAS_SIZE))   
         assignSize(*_);
@@ -3401,8 +3471,8 @@ none.name = 'None';
         }
 
         
-        if (rngEnchantHint != empty && (random.try(percentSuccess:25) || forceEnchant)) ::<= {
-          @enchantCount = random.integer(from:1, to:match(world.island.tier) {
+        if (state.needsAppraisal == false && rngEnchantHint != empty && (random.try(percentSuccess:25) || forceEnchant)) ::<= {
+          @enchantCount = if (forceEnchantCount) forceEnchantCount else random.integer(from:1, to:match(world.island.tier) {
             (6, 7, 8, 9, 10):  8,
             (3,4,5):  4,
             (1, 2):  2,
@@ -3444,6 +3514,11 @@ none.name = 'None';
         
       state.price = (state.price)->ceil;
       
+      if (state.needsAppraisal) ::<= {
+        state.price = 1;
+      }      
+      
+      
       base.onCreate(item:this, creationHint);
       recalculateName(*_);
       
@@ -3469,6 +3544,45 @@ none.name = 'None';
         _.state.customPrefix = value;
         recalculateName(*_);
       }
+    },
+    
+    needsAppraisal : {
+      get :: <-  _.state.needsAppraisal
+    },
+
+    appraisalCount : {
+      get :: <- _.state.appraisalCount,
+      set ::(value => Number) {
+        _.state.appraisalCount = value
+      }
+    },
+    
+    // returns a new item representing the appraisal.
+    // appraisals always have:
+    appraise ::{
+      @:Material = import(module:'game_database.material.mt');
+      @:ApparelMaterial = import(module:'game_database.apparelmaterial.mt');
+      @:ItemQuality = import(module:'game_database.itemquality.mt');
+      @:Arts = import(module:'game_database.arts.mt');
+      @:base = _.state.base;
+      @:item = Item.new(
+        base,
+        forceEnchantCount: random.integer(from:3, to:7),
+        forceEnchant : true,
+        rngEnchantHint : true,
+        forceNeedsAppraisal : false,
+        artsHint : [
+          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAITS.SPECIAL) == 0)).id,
+          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAITS.SPECIAL) == 0)).id,
+          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAITS.SPECIAL) == 0)).id
+        ],
+        qualityHint : if ((base.traits & TRAIT.HAS_QUALITY) != 0) ItemQuality.getRandom().id,
+        materialHint : if ((base.traits & TRAIT.METAL) != 0) Material.getRandom().id,
+        apparelHint : if ((base.traits & TRAIT.APPAREL) != 0) ApparelMaterial.getRandom().id
+      );
+      item.name = random.pickArrayItem(:keyQualifiers) + ' ' + base.name;
+      _.state.appraisalCount += 1;
+      return item;
     },
     
     quality : {
@@ -3637,8 +3751,11 @@ none.name = 'None';
         recalculateName(*_);
       return exp;
     },
-
-
+    
+    useEffects : {
+      get ::<- _.state.useEffects,
+      set ::(value) <- _.state.useEffects = value
+    },
       
     describe ::(by) {
       @:state = _.state;
@@ -3679,7 +3796,8 @@ none.name = 'None';
             @out = '';
             when (state.useEffects->keycount == 0) 'None.';
             foreach(state.useEffects)::(i, effect) {
-              out = out + '- ' + Effect.find(id:effect).description + '\n';
+              @:eff = Effect.find(id:effect);
+              out = out + ' - ' + eff.name + ': ' + eff.description + '\n';
             }
             return out;
           } else '',

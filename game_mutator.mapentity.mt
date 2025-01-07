@@ -140,6 +140,7 @@ MapEntity.Task.database.newEntry(
   @:aggressive = ::(speed, data, mapEntity) {
     @:map = mapEntity.controller.map;
     when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE) ::<= {
+      @:pos = mapEntity.position;
       mapEntity.remove();
       @:landmark = mapEntity.controller.landmark;
 
@@ -174,12 +175,30 @@ MapEntity.Task.database.newEntry(
         },
         
         onEnd::(result) {
+          @:Location = import(module:'game_mutator.location.mt');
+          @:Species = import(module:'game_database.species.mt');
           when(!world.battle.partyWon()) ::<= {
             @:windowEvent = import(module:'game_singleton.windowevent.mt');
 
             @:instance = import(module:'game_singleton.instance.mt');
             instance.gameOver(reason: 'The party has been wiped out.');
           }
+          foreach(mapEntity.entities) ::(i, entity) {
+            when(entity.species.traits & Species.TRAITS.ETHEREAL) empty;
+            mapEntity.controller.landmark.addLocation(
+              location : Location.new(
+                landmark: mapEntity.controller.landmark,
+                x:pos.x,
+                y:pos.y,
+                ownedByHint: entity,
+                base: Location.database.find(:'base:body')
+              )
+            );
+          }
+
+
+          
+          
         }
       ); 
 
@@ -690,6 +709,10 @@ MapEntity.Task.database.newEntry(
       
       tag : {
         get ::<- state.tag
+      },
+      
+      position : {
+        get ::<- map_.getItem(data:this)
       },
     
       step :: {

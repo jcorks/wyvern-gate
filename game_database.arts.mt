@@ -53,18 +53,21 @@
 @:TRAITS = {
   PHYSICAL : 1,
   MAGIC : 2,
-  HEAL : 4,
-  FIRE : 8,
-  ICE : 16,
-  THUNDER : 32,
+  HEAL : 2**2,
+  FIRE : 2**3,
+  ICE : 2**4,
+  THUNDER : 2**5,
   
-  SUPPORT : 128,
-  LIGHT : 256,
-  DARK : 512,
-  POISON : 1024,
-  SPECIAL : 2048,
-  COSTLESS : 4096,
-  MULTIHIT : 8192
+  SUPPORT : 2**6,
+  LIGHT : 2**7,
+  DARK : 2**8,
+  POISON : 2**9,
+  SPECIAL : 2**10,
+  COSTLESS : 2**11,
+  MULTIHIT : 2**12,
+  
+  CAN_BLOCK : 2**13,
+  ONCE_PER_BATTLE : 2**14
 }
 
 
@@ -114,6 +117,7 @@
 @:g = import(module:'game_function.g.mt');
 @:Entity = import(module:'game_class.entity.mt');
 @:StatSet = import(module:'game_class.statset.mt');
+@:Effect = import(module:'game_database.effect.mt');
 Arts.newEntry(
   data: {
     name: 'Attack',
@@ -126,10 +130,8 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL | TRAITS.SPECIAL | TRAITS.COSTLESS,
+    traits : TRAITS.PHYSICAL | TRAITS.SPECIAL | TRAITS.COSTLESS | TRAITS.CAN_BLOCK,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.5) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -167,10 +169,8 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -225,9 +225,7 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     baseDamage ::(level, user) <- (user.stats.ATK * (0.2) + user.stats.DEX * (0.5)) * (1 + 0.1*(level-1)),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
@@ -261,12 +259,10 @@ Arts.newEntry(
     durationTurns: 0,
     keywords : ['base:paralyzed'],
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage ::(level, user) <- user.stats.DEX * (0.5),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
@@ -307,8 +303,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
@@ -340,12 +334,10 @@ Arts.newEntry(
     durationTurns: 0,
     keywords : [],
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage ::(level, user)<- user.stats.ATK * (0.5 + 0.15 * level),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -393,12 +385,10 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT,
+    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT | TRAITS.CAN_BLOCK,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -410,7 +400,7 @@ Arts.newEntry(
               amount: Arts.find(:'base:doublestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -428,7 +418,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:doublestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart : targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -453,12 +443,10 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT,
+    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
@@ -472,7 +460,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -490,7 +478,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -507,7 +495,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
             targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -534,8 +522,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -562,8 +548,6 @@ Arts.newEntry(
     traits : 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -593,8 +577,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
 
@@ -630,9 +612,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
     traits : TRAITS.MAGIC,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -669,8 +649,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {
       @:world = import(module:'game_singleton.world.mt');
       return user.stats.INT * (if (world.time >= world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);
@@ -718,8 +696,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {
       @:world = import(module:'game_singleton.world.mt');
       return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);    
@@ -767,8 +743,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     traits : TRAITS.MAGIC | TRAITS.FIRE,
     baseDamage ::(level, user) {
       @:world = import(module:'game_singleton.world.mt');
@@ -819,8 +793,6 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
@@ -863,8 +835,6 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
@@ -907,8 +877,6 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
@@ -956,8 +924,6 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -989,8 +955,6 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
@@ -1034,8 +998,6 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
@@ -1078,8 +1040,6 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
@@ -1122,8 +1082,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       when (!random.try(percentSuccess:50+(level-1)*10)) Arts.FAIL;
@@ -1164,8 +1122,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
 
@@ -1214,12 +1170,10 @@ Arts.newEntry(
     keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(i, enemy) {
@@ -1257,12 +1211,10 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach(targets)::(index, target) {
@@ -1298,12 +1250,10 @@ Arts.newEntry(
     keywords : ['base:grappling', 'base:grappled'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
 
@@ -1342,11 +1292,9 @@ Arts.newEntry(
     durationTurns: 0,
     kind : KIND.ABILITY,
     rarity : RARITY.UNCOMMON,
-    canBlock : true,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
     baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.2),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickItem = import(module:'game_function.pickitem.mt');
@@ -1390,12 +1338,10 @@ Arts.newEntry(
     keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.3),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1431,12 +1377,10 @@ Arts.newEntry(
     keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.ICE | TRAITS.MULTIHIT,
+    traits : TRAITS.MAGIC | TRAITS.ICE | TRAITS.MULTIHIT | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage ::(level, user) <- user.stats.ATK * (0.4) * (1 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
 
@@ -1449,7 +1393,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:sheer-cold').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -1519,8 +1463,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1542,12 +1484,10 @@ Arts.newEntry(
     keywords : ['base:grappled', 'base:grappling'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
@@ -1577,12 +1517,10 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT,
+    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
@@ -1595,7 +1533,7 @@ Arts.newEntry(
               amount: Arts.find(:'base:combo-strike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -1611,7 +1549,7 @@ Arts.newEntry(
               amount:Arts.find(:'base:combo-strike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
-              isMultihit : true
+              traits: Damage.TRAITS.MULTIHIT
             ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -1637,8 +1575,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1664,8 +1600,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
 
@@ -1700,8 +1634,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage::(level, user) <- user.stats.INT * (1.2),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1729,8 +1661,6 @@ Arts.newEntry(
     traits : TRAITS.MAGIC,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1756,8 +1686,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1783,8 +1711,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1811,8 +1737,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       @:effects = targets[0].effectStack.getAll()->filter(by:::(value) <- 
@@ -1851,12 +1775,10 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL | TRAITS.POISON,
+    traits : TRAITS.PHYSICAL | TRAITS.POISON | TRAITS.CAN_BLOCK,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage ::(level, user)<- user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1891,12 +1813,10 @@ Arts.newEntry(
     keywords : ['base:petrified'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL | TRAITS.LIGHT,
+    traits : TRAITS.PHYSICAL | TRAITS.LIGHT | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1930,14 +1850,12 @@ Arts.newEntry(
     keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.REACTION,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.ONCE_PER_BATTLE,
     rarity : RARITY.UNCOMMON,
-    canBlock : false,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       breakpoint();
     },
-    oncePerBattle : true,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -1962,11 +1880,9 @@ Arts.newEntry(
     durationTurns: 0,
     kind : KIND.REACTION,
     rarity : RARITY.RARE,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.ONCE_PER_BATTLE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : true,
-    canBlock : false,
     baseDamage::(level, user) <- 15,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       when(random.try(percentSuccess:30)) Arts.FAIL;
@@ -1996,12 +1912,10 @@ Arts.newEntry(
     keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.REACTION,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.ONCE_PER_BATTLE,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : true,
-    canBlock : false,
     baseDamage::(level, user) <- 10,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
@@ -2038,12 +1952,10 @@ Arts.newEntry(
     keywords : ['base:bleeding'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -2080,8 +1992,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -2109,8 +2019,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -2137,8 +2045,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {        
       @:chance = random.number();
@@ -2196,8 +2102,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -2248,8 +2152,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
@@ -2298,8 +2200,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
@@ -2348,8 +2248,6 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
@@ -2400,8 +2298,6 @@ Arts.newEntry(
         @:Species = import(module:'game_database.species.mt');
         return [...enemies]->filter(::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size > 0;
     },
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
@@ -2445,8 +2341,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (1.2) * (1 + (level-1)*0.15),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -2481,8 +2375,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.6) * (1 + (level-1)*0.08),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
@@ -2523,8 +2415,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (2.0) * (1 + (level-1) * 0.15),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -2567,8 +2457,6 @@ Arts.newEntry(
           return false
         })
     },
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
@@ -2620,8 +2508,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.6 + (0.2)*(level-1)),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
@@ -2634,7 +2520,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:ice').baseDamage(level, user),
                 damageType : Damage.TYPE.ICE,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               )
             );
           }
@@ -2659,8 +2545,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.75) * (1 + (level-1)* 0.15),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
@@ -2672,7 +2556,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:frozen-flame').baseDamage(level, user),
                 damageType : Damage.TYPE.ICE,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               )
             );
           }
@@ -2700,8 +2584,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       when (!random.try(percentSuccess:40 + level*10)) Arts.FAIL;
@@ -2732,8 +2614,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.85) * (1 + (level-1)*0.1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
@@ -2745,7 +2625,7 @@ Arts.newEntry(
                 amount:Arts.find(:'base:explosion').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               )
             );
           }
@@ -2770,8 +2650,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
@@ -2809,8 +2687,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) <- user.stats.INT * (0.45),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       for(0, 4 + (level-1)*2)::(index) {
@@ -2823,7 +2699,7 @@ Arts.newEntry(
                 amount:Arts.find(:'base:thunder').baseDamage(level, user),
                 damageType : Damage.TYPE.THUNDER,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               )
             );
           }
@@ -2845,12 +2721,10 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT,
+    traits : TRAITS.PHYSICAL | TRAITS.MULTIHIT | TRAITS.CAN_BLOCK,
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage::(level, user) <- user.stats.ATK * (0.9),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       for(0, 4 + (level-1)*2)::(index) {
@@ -2863,7 +2737,7 @@ Arts.newEntry(
                 amount:Arts.find(:'base:wild-swing').baseDamage(level, user),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               ),
               targetPart: Entity.normalizedDamageTarget(),
               targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -2890,8 +2764,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -2920,8 +2792,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -2953,8 +2823,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach(targets)::(i, target) {
@@ -2984,8 +2852,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach(targets)::(i, target) {
@@ -3015,8 +2881,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3043,8 +2907,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3071,8 +2933,6 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3099,8 +2959,6 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -3130,8 +2988,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
@@ -3163,8 +3019,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3192,8 +3046,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueMessage(
@@ -3226,8 +3078,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -3275,8 +3125,6 @@ Arts.newEntry(
     traits : TRAITS.PHYSICAL,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3305,8 +3153,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -3351,8 +3197,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3379,8 +3223,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3410,8 +3252,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3439,8 +3279,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3468,8 +3306,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach(targets) ::(k, v) {
@@ -3500,8 +3336,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3531,8 +3365,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -3563,8 +3395,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -3594,8 +3424,6 @@ Arts.newEntry(
     traits : 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -3625,8 +3453,6 @@ Arts.newEntry(
     traits : 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -3656,8 +3482,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -3688,8 +3512,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -3719,8 +3541,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -3750,8 +3570,6 @@ Arts.newEntry(
     traits : TRAITS.SPECIAL | TRAITS.COSTLESS,
     kind : KIND.ABILITY,
     rarity : RARITY.COMMON,
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.healAP(amount:3);
@@ -3775,8 +3593,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3803,8 +3619,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3831,8 +3645,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3860,8 +3672,6 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     usageHintAI: USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:which = [
@@ -3900,8 +3710,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3929,8 +3737,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3958,8 +3764,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -3988,8 +3792,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -4016,8 +3818,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -4044,8 +3844,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -4071,27 +3869,25 @@ Arts.newEntry(
     description: "Uses an item from the user's inventory.",
     keywords : [],
     durationTurns: 0,
-    kind : KIND.ABILITY,
-    traits : 0,
+    kind : KIND.EFFECT,
+    traits : TRAITS.SPECIAL,
     rarity : RARITY.RARE,
     isSupport: false,
     usageHintAI: USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:item = extraData[0];
       when (targets->size == 0) ::<= {
-        foreach(item.base.useEffects)::(index, effect) {  
-          user.addEffect(from:user, id:effect, item:item, durationTurns:0);              
+        foreach(item.useEffects)::(index, effect) {  
+          user.addEffect(from:user, id:effect, item:item, durationTurns:10);              
         }
       }
 
       
-      foreach(item.base.useEffects)::(index, effect) {  
+      foreach(item.useEffects)::(index, effect) {  
         foreach(targets)::(t, target) {
-          target.addEffect(from:user, id:effect, item:item, durationTurns:0);              
+          target.addEffect(from:user, id:effect, item:item, durationTurns:10);              
         }
       }
     }
@@ -4152,8 +3948,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(user, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:item = extraData[0];
@@ -4182,8 +3976,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -4212,8 +4004,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -4248,8 +4038,6 @@ Arts.newEntry(
         when(allies->size == 0) false;        
         return [random.pickArrayItem(:allies)];    
     },
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
@@ -4289,8 +4077,6 @@ Arts.newEntry(
         when(enemies->size == 0) false;
         return [random.pickArrayItem(:enemies)];    
     },
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
@@ -4329,8 +4115,6 @@ Arts.newEntry(
         when(enemies->size == 0) false;
         return [random.pickArrayItem(:enemies)];
     },
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
@@ -4370,8 +4154,6 @@ Arts.newEntry(
         when(allies->size == 0) false;
         return [random.pickArrayItem(:allies)];
     },
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
@@ -4406,8 +4188,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       
@@ -4424,21 +4204,19 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: 'Pink Brew',
-    id : 'base:pink-brew',
+    name: 'Make: Heal Potion',
+    id : 'base:make-heal-potion',
     notifCommit : '$1 attempts to make a potion!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a pink potion.',
+    description: 'Uses 2 Ingredients to make a healing potion.',
     keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
-    rarity : RARITY.COMMON,
+    rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -4459,13 +4237,18 @@ Arts.newEntry(
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
-      windowEvent.queueMessage(text: '... and made a Pink Potion!');
+      @:item = Item.new(
+        base:Item.database.find(id:'base:potion'),
+        creationHint:0
+      );
+
+      windowEvent.queueMessage(text: '... and made a ' + item.name + '!');
       windowEvent.queueCustom(
         onEnter :: {
 
           inventory.removeByID(id:'base:ingredient');
           inventory.removeByID(id:'base:ingredient');
-          inventory.add(item:Item.new(base:Item.database.find(id:'base:pink-potion')));              
+          inventory.add(item);              
         }
       );
     }
@@ -4474,21 +4257,19 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: 'Cyan Brew',
-    id : 'base:cyan-brew',
+    name: 'Make: Buff Potion',
+    id : 'base:make-buff-potion',
     notifCommit : '$1 attempts to make a potion!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a cyan potion.',
+    description: 'Uses 2 Ingredients to make a buffing potion.',
     keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
-    rarity : RARITY.COMMON,
+    rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -4509,126 +4290,18 @@ Arts.newEntry(
       when(count < 2)
         windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
-      windowEvent.queueMessage(text: '... and made a Cyan Potion!');
+      @:item = Item.new(
+        base:Item.database.find(id:'base:potion'),
+        creationHint:1
+      );
 
+      windowEvent.queueMessage(text: '... and made a ' + item.name + '!');
       windowEvent.queueCustom(
         onEnter :: {
+
           inventory.removeByID(id:'base:ingredient');
           inventory.removeByID(id:'base:ingredient');
-          inventory.add(item:
-            Item.new(
-              base:Item.database.find(id:'base:cyan-potion')
-            )
-          );        
-        }
-      );        
-    }
-  }
-)
-
-
-Arts.newEntry(
-  data: {
-    name: 'Green Brew',
-    id : 'base:green-brew',
-    notifCommit : '$1 attempts to make a potion!',
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a green potion.',
-    keywords: ['base:ingredient'],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : 0,
-    rarity : RARITY.COMMON,
-    usageHintAI : USAGE_HINT.DONTUSE,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      @:world = import(module:'game_singleton.world.mt');
-      @inventory;
-      if (world.party.isMember(entity:user)) ::<= {
-        inventory = world.party.inventory;
-      } else ::<= {
-        inventory = user.inventory;
-      }
-      
-      @count = 0;
-      foreach(inventory.items)::(i, item) {
-        if (item.base.id == 'base:ingredient') ::<= {
-          count += 1;
-        }
-      }
-      
-      when(count < 2)
-        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
-
-      windowEvent.queueMessage(text: '... and made a Green Potion!');
-      windowEvent.queueCustom(
-        onEnter :: {
-          inventory.removeByID(id:'base:ingredient');
-          inventory.removeByID(id:'base:ingredient');
-          inventory.add(
-            item:Item.new(
-              base:Item.database.find(id:'base:green-potion')
-          ));       
-        }
-      );         
-    }
-  }
-)
-
-
-
-Arts.newEntry(
-  data: {
-    name: 'Orange Brew',
-    id : 'base:orange-brew',
-    notifCommit : '$1 attempts to make a potion!',
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make an orange potion.',
-    keywords: ['base:ingredient'],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : 0,
-    rarity : RARITY.COMMON,
-    usageHintAI : USAGE_HINT.DONTUSE,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      @:world = import(module:'game_singleton.world.mt');
-      @inventory;
-      if (world.party.isMember(entity:user)) ::<= {
-        inventory = world.party.inventory;
-      } else ::<= {
-        inventory = user.inventory;
-      }
-      
-      @count = 0;
-      foreach(inventory.items)::(i, item) {
-        if (item.base.id == 'base:ingredient') ::<= {
-          count += 1;
-        }
-      }
-      
-      when(count < 2)
-        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
-
-      windowEvent.queueMessage(text: '... and made a Orange Potion!');
-
-      windowEvent.queueCustom(
-        onEnter :: {
-          inventory.removeByID(id:'base:ingredient');
-          inventory.removeByID(id:'base:ingredient');
-          inventory.add(item:
-            Item.new(
-              base:Item.database.find(id:'base:orange-potion')
-            )
-          );              
+          inventory.add(item);              
         }
       );
     }
@@ -4637,12 +4310,117 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: 'Purple Brew',
-    id : 'base:purple-brew',
+    name: 'Make: Debuff Potion',
+    id : 'base:make-debuff-potion',
     notifCommit : '$1 attempts to make a potion!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a purple potion.',
+    description: 'Uses 2 Ingredients to make a debuffing potion.',
+    keywords: ['base:ingredient'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:world = import(module:'game_singleton.world.mt');
+      @inventory;
+      if (world.party.isMember(entity:user)) ::<= {
+        inventory = world.party.inventory;
+      } else ::<= {
+        inventory = user.inventory;
+      }
+      
+      @count = 0;
+      foreach(inventory.items)::(i, item) {
+        if (item.base.id == 'base:ingredient') ::<= {
+          count += 1;
+        }
+      }
+      
+      when(count < 2)
+        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
+
+      @:item = Item.new(
+        base:Item.database.find(id:'base:potion'),
+        creationHint:2
+      );
+
+      windowEvent.queueMessage(text: '... and made a ' + item.name + '!');
+      windowEvent.queueCustom(
+        onEnter :: {
+
+          inventory.removeByID(id:'base:ingredient');
+          inventory.removeByID(id:'base:ingredient');
+          inventory.add(item);              
+        }
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Make: Essence',
+    id : 'base:make-essence',
+    notifCommit : '$1 attempts to make essence!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Uses 2 Ingredients to make an essence of an effect.',
+    keywords: ['base:ingredient'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:world = import(module:'game_singleton.world.mt');
+      @inventory;
+      if (world.party.isMember(entity:user)) ::<= {
+        inventory = world.party.inventory;
+      } else ::<= {
+        inventory = user.inventory;
+      }
+      
+      @count = 0;
+      foreach(inventory.items)::(i, item) {
+        if (item.base.id == 'base:ingredient') ::<= {
+          count += 1;
+        }
+      }
+      
+      when(count < 2)
+        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
+
+      @:item = Item.new(
+        base:Item.database.find(id:'base:essence')
+      );
+
+      windowEvent.queueMessage(text: '... and made a ' + item.name + '!');
+      windowEvent.queueCustom(
+        onEnter :: {
+
+          inventory.removeByID(id:'base:ingredient');
+          inventory.removeByID(id:'base:ingredient');
+          inventory.add(item);              
+        }
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Mix Potion',
+    id : 'base:mix-potion',
+    notifCommit : '$1 attempts to combine 2 Potions!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Uses 2 Potions to make a new Potion of combined effects.',
     keywords: ['base:ingredient'],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -4650,8 +4428,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -4662,32 +4438,66 @@ Arts.newEntry(
         inventory = user.inventory;
       }
       
-      @count = 0;
-      foreach(inventory.items)::(i, item) {
-        if (item.base.id == 'base:ingredient') ::<= {
-          count += 1;
-        }
-      }
       
-      when(count < 2)
-        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
-
-      windowEvent.queueMessage(text: '... and made a Purple Potion!');
-      windowEvent.queueCustom(
-        onEnter :: {
-          inventory.removeByID(id:'base:ingredient');
-          inventory.removeByID(id:'base:ingredient');
-          inventory.add(
-            item:Item.new(
-              base:Item.database.find(id:'base:purple-potion')
-            )
-          );              
-        }
-      )
+      @:pickPartyItem = import(:'game_function.pickpartyitem.mt');
+      @alreadyPicked = empty;
+      @:pick :: {
+        pickPartyItem(
+          canCancel:true,
+          filter::(value) <- value.base.id == 'base:potion' && alreadyPicked != value,
+          onCancel ::{
+            alreadyPicked = empty;
+            pick();
+          },
+          keep : false,
+          onPick ::(item, equippedBy) {
+            when (alreadyPicked == empty) ::<= {
+              alreadyPicked = item;
+              pick();
+            }
+            
+            windowEvent.queueMessage(
+              text: 'Mixing ' + alreadyPicked.name + ' with ' + item.name + '.'
+            );
+            
+            windowEvent.queueAskBoolean(
+              prompt: 'Mix these 2?',
+              onChoice::(which) {
+                when(which == false) ::<= {
+                  alreadyPicked = empty;
+                  pick();
+                }
+                
+                @:mixed = Item.new(
+                  base: Item.database.find(id:'base:potion')
+                );
+                
+                mixed.name = user.name + '\'s Potion';
+                mixed.useEffects = [
+                  'base:consume-item',
+                  ...[alreadyPicked.useEffects->filter(::(value) <- value != 'consume-item')],
+                  ...[item.useEffects->filter(::(value) <- value != 'consume-item')]
+                ]
+                
+                alreadyPicked.throwOut();
+                item.throwOut();
+                inventory.remove(:alreadyPicked);
+                inventory.remove(:item);
+                windowEvent.queueMessage(
+                  text: 'A new potion has been brewed!'
+                );
+                
+                mixed.describe();
+                inventory.add(item:mixed);
+              }
+            );  
+          }
+        )
+      }
+      pick();
     }
   }
 )
-
 
 Arts.newEntry(
   data: {
@@ -4704,8 +4514,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -4724,58 +4532,8 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
-  data: {
-    name: 'Black Brew',
-    id : 'base:black-brew',
-    notifCommit : '$1 attempts to make a potion!',
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Uses 2 Ingredients to make a black potion.',
-    keywords: ['base:ingredient'],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : 0,
-    rarity : RARITY.COMMON,
-    usageHintAI : USAGE_HINT.DONTUSE,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      @:world = import(module:'game_singleton.world.mt');
-      @inventory;
-      if (world.party.isMember(entity:user)) ::<= {
-        inventory = world.party.inventory;
-      } else ::<= {
-        inventory = user.inventory;
-      }
-      
-      @count = 0;
-      foreach(inventory.items)::(i, item) {
-        if (item.base.id == 'base:ingredient') ::<= {
-          count += 1;
-        }
-      }
-      
-      when(count < 2)
-        windowEvent.queueMessage(text: '... but didn\'t have enough ingredients!');
 
-      windowEvent.queueMessage(text: '... and made a Black Potion!');
-      windowEvent.queueCustom(
-        onEnter :: {
-          inventory.removeByID(id:'base:ingredient');
-          inventory.removeByID(id:'base:ingredient');
-          inventory.add(
-            item:Item.new(
-              base:Item.database.find(id:'base:black-potion')
-            )
-          );   
-        }
-      )             
-    }
-  }
-)
+
 
 
 Arts.newEntry(
@@ -4793,8 +4551,6 @@ Arts.newEntry(
     traits : 0,
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       when (user.battle.getAllies(:user)->any(condition:::(value) <- value == targets[0]))
@@ -4875,8 +4631,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
@@ -4912,8 +4666,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       when(turnIndex == 0) ::<= {
@@ -4985,12 +4737,10 @@ Arts.newEntry(
       keywords: [],
       durationTurns: 0,
       kind : KIND.ABILITY,
-      traits : TRAITS.PHYSICAL,
+      traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
       rarity : RARITY.RARE,
       usageHintAI : USAGE_HINT.OFFENSIVE,
       shouldAIuse ::(user, reactTo, enemies, allies) {},
-      oncePerBattle : false,
-      canBlock : true,
       baseDamage ::(level, user) {},
       onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {        
 
@@ -5038,8 +4788,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.drawArt(count:2);
@@ -5062,8 +4810,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
@@ -5088,8 +4834,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       targets[0].discardArt();
@@ -5112,8 +4856,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:oldHand = [...user.deck.hand]
@@ -5140,8 +4882,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
@@ -5165,8 +4905,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.deck.hand = [];
@@ -5195,8 +4933,6 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
       when(user.hp == user.stats.HP) false;
     },
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.deck.hand = [];
@@ -5224,8 +4960,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickitem = import(:'game_function.pickitem.mt');
@@ -5261,8 +4995,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -5296,6 +5028,7 @@ Arts.newEntry(
       if (world.party.isMember(:user)) ::<= {
         pickitem(
           canCancel: false,
+          keep: false,
           inventory : world.party.inventory,
           onPick ::(item){
             world.party.inventory.remove(:item);
@@ -5324,8 +5057,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickitem = import(:'game_function.pickitem.mt');
@@ -5362,8 +5093,6 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -5396,8 +5125,6 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
@@ -5421,8 +5148,6 @@ Arts.newEntry(
     traits : TRAITS.SUPPORT,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
@@ -5446,8 +5171,6 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       user.discardArt();
@@ -5477,8 +5200,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) <- 2,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
@@ -5515,8 +5236,6 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       targets[0].heal(amount:2, isShield:true);           
@@ -5543,8 +5262,6 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
       when(allies->findIndex(:reactTo) != -1) false;
     },
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       return true;
@@ -5564,10 +5281,8 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
+    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -5598,15 +5313,13 @@ Arts.newEntry(
     notifCommit : '$1 and $2 start to glow!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Deal a physical attack to target which has a base damage value equal to how much HP is missing from this character\'s current max HP.",
+    description: "Deal a physical attack to target which has a base damage value equal to how much HP is missing from this character\'s current max HP. This damage is unblockable.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       when(user.hp == user.stats.HP) false;
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
@@ -5643,8 +5356,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
@@ -5652,7 +5363,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].addEffect(from:user, id:'base:banishing-light', durationTurns:9999); 
+          targets[0].addEffect(from:user, id:'base:banishing-light', durationTurns:99999999); 
         }
       )
     }
@@ -5674,10 +5385,8 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
+    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.3),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -5724,8 +5433,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 1,
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
@@ -5765,8 +5472,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5808,11 +5513,9 @@ Arts.newEntry(
       when(user.hp > 1) false
       when(allies->findIndex(:reactTo) != -1) false
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.REACTION,
     traits : TRAITS.SUPPORT,
-    rarity : RARITY.COMMON,
+    rarity : RARITY.RARE,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
@@ -5850,8 +5553,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5900,8 +5601,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5940,8 +5639,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -5981,8 +5678,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -6032,8 +5727,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -6058,8 +5751,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -6127,8 +5818,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
@@ -6152,8 +5841,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -6178,10 +5865,8 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
+    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) <- user.stats.HP + user.stats.DEF/3,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6223,8 +5908,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -6249,8 +5932,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
@@ -6277,15 +5958,13 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       for(0, 2) ::(i) {
-        targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);      
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:9999999999);      
       }
     }
   }
@@ -6303,8 +5982,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.RARE,
@@ -6331,8 +6008,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -6359,8 +6034,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -6389,8 +6062,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.EPIC,
@@ -6424,8 +6095,6 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       
@@ -6549,7 +6218,7 @@ Arts.newEntry(
 // ver 0.2.0 starting supports
 Arts.newEntry(
   data: {
-    name: '@b169',
+    name: 'Refresh',
     id : 'base:b169',
     notifCommit : '$2 is covered in a soothing aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6569,10 +6238,8 @@ Arts.newEntry(
       
       return [which[0]];
     },
-    oncePerBattle : true,
-    canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT,
+    traits : TRAITS.SUPPORT | TRAITS.ONCE_PER_BATTLE,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6592,7 +6259,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b170',
+    name: 'Purification',
     id : 'base:b170',
     notifCommit : '$2 is covered in a soothing aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6613,10 +6280,8 @@ Arts.newEntry(
       
       return [which[0]];
     },
-    oncePerBattle : true,
-    canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.ONCE_PER_BATTLE,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6638,7 +6303,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b171',
+    name: 'Osmotic Sponge',
     id : 'base:b171',
     notifCommit : '$1\'s allies are covered in a mysterious light!',
     notifFail : Arts.NO_NOTIF,
@@ -6658,8 +6323,6 @@ Arts.newEntry(
       when(which->size == 0) false;
       return which;
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -6703,7 +6366,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b172',
+    name: 'Chaotic Slurp',
     id : 'base:b172',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
@@ -6722,8 +6385,6 @@ Arts.newEntry(
       when(which->size == 0) false;
       return which;
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -6764,7 +6425,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b173',
+    name: 'Sip of Chaos',
     id : 'base:b173',
     notifCommit : '$1 is covered in a myserious light!',
     notifFail : '... But nothing happened!',
@@ -6779,8 +6440,6 @@ Arts.newEntry(
         )->size == 0) false;
       return [user];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -6821,7 +6480,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b174',
+    name: 'Miasma Expungement',
     id : 'base:b174',
     notifCommit : 'Everyone is covered in soothing aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6842,8 +6501,6 @@ Arts.newEntry(
       
       return [...allies, ...enemies];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -6863,7 +6520,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b175',
+    name: 'Joy Expungement',
     id : 'base:b175',
     notifCommit : '$1 is covered in an ominous aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6883,8 +6540,6 @@ Arts.newEntry(
       
       return [...allies, ...enemies];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -6904,7 +6559,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b176',
+    name: 'Radiation State',
     id : 'base:b176',
     notifCommit : '$1 and $2 are covered in a myserious light!',
     notifFail : '... But nothing happened!',
@@ -6923,8 +6578,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:which)];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -6953,7 +6606,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b177',
+    name: 'Chaotic Redistribution',
     id : 'base:b177',
     notifCommit : 'Everyone is covered in a weird aura!',
     notifFail : Arts.NO_NOTIF,
@@ -6983,8 +6636,6 @@ Arts.newEntry(
       
       return false;
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -7028,10 +6679,8 @@ Arts.newEntry(
       when(user.hp < user.stats.HP/2) [user];
       return false;
     },
-    oncePerBattle : true,
-    canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.ONCE_PER_BATTLE,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -7069,7 +6718,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b179',
+    name: 'Chaotic Funnel',
     id : 'base:b179',
     notifCommit : '$1 and $2 are covered in a mysterious light!',
     notifFail : '... But nothing happened!',
@@ -7088,8 +6737,6 @@ Arts.newEntry(
       when(which->size == 0) false;
       return [which[0]];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -7117,7 +6764,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b180',
+    name: 'Restorative Resonance',
     id : 'base:b180',
     notifCommit : 'Everyone is covered in a weird aura!',
     notifFail : '... But nothing happened!',
@@ -7139,8 +6786,6 @@ Arts.newEntry(
         return false;
       }
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7160,7 +6805,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b181',
+    name: 'Banish Conversion: Negative',
     id : 'base:b181',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7180,8 +6825,6 @@ Arts.newEntry(
           
       return [able[0]]
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7207,7 +6850,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b182',
+    name: 'Banish Conversion: Positive',
     id : 'base:b182',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7225,8 +6868,6 @@ Arts.newEntry(
       when(able->size == 0) false;
       return [able[0]];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7249,7 +6890,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b183',
+    name: 'Quantum Rearrangement',
     id : 'base:b183',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7267,8 +6908,6 @@ Arts.newEntry(
       when(able->size == 0) false;
       return [able[0]];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7294,12 +6933,12 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b184',
+    name: 'Destructive Resonance',
     id : 'base:b184',
     notifCommit : 'A mystical light befalls everyone!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
-    description: "Deals damage to each combatant based on their respective number of effects.",
+    description: "Deals damage to each combatant equal to their respective number of effects.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -7322,8 +6961,6 @@ Arts.newEntry(
       
       return false;
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -7349,7 +6986,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b185',
+    name: 'Banish Conversion: Ultima',
     id : 'base:b185',
     notifCommit : 'A mystical light befalls everyone!',
     notifFail : Arts.NO_NOTIF,
@@ -7377,8 +7014,6 @@ Arts.newEntry(
       
       return false;
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -7409,7 +7044,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b186',
+    name: 'Banishing Regurgitation',
     id : 'base:b186',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7426,8 +7061,6 @@ Arts.newEntry(
           
       return [random.pickArrayItem(:enemies)];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7448,7 +7081,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b187',
+    name: 'Poison Empowerment',
     id : 'base:b187',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7467,8 +7100,6 @@ Arts.newEntry(
         return false;
       }
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7491,7 +7122,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b188',
+    name: 'Burning Empowerment',
     id : 'base:b188',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7510,8 +7141,6 @@ Arts.newEntry(
         return false;
       }
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7533,7 +7162,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b189',
+    name: 'Paralysis Empowerment',
     id : 'base:b189',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7552,8 +7181,6 @@ Arts.newEntry(
         return false;
       }
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7576,7 +7203,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b190',
+    name: 'Petrification Empowerment',
     id : 'base:b190',
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7588,15 +7215,13 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
       return {:::} {
         foreach(allies) ::(k, v) {
-          when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified')->size > 0) 
+          when (v.hp < v.stats.HP || v.effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified')->size > 0) 
             send(:[v]);
         }      
         
         return false;
       }
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7619,7 +7244,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b191',
+    name: 'Negativity Empowerment',
     id : 'base:b191',
     notifCommit : 'A soothing light is cast on $2!',
     notifFail : '...But nothing happened!',
@@ -7642,8 +7267,6 @@ Arts.newEntry(
         return false;
       }
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7673,7 +7296,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b192',
+    name: 'Bestow State',
     id : 'base:b192',
     notifCommit : '$2 and $1 glow ominously!',
     notifFail : '...But nothing happened!',
@@ -7695,8 +7318,6 @@ Arts.newEntry(
         return false;
       }
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -7724,7 +7345,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b193',
+    name: 'Gifting Tether',
     id : 'base:b193',
     notifCommit : '$1 lunges at $2!',
     notifFail : Arts.NO_NOTIF,
@@ -7742,10 +7363,8 @@ Arts.newEntry(
       )->size == 0) false;
 
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.PHYSICAL,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -7774,7 +7393,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b194',
+    name: 'Exchange of Blows',
     id : 'base:b194',
     notifCommit : '$1 begins to glow as they attack $2!',
     notifFail : Arts.NO_NOTIF,
@@ -7792,10 +7411,8 @@ Arts.newEntry(
       )->size == 0) false;
 
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.ABILITY,
-    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.PHYSICAL,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     baseDamage::(level, user) <- user.stats.ATK * (0.2) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -7851,7 +7468,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b195',
+    name: 'Venomous Redirection',
     id : 'base:b195',
     notifCommit : '$1 focuses their energy!',
     notifFail : '...But nothing happened!',
@@ -7867,10 +7484,8 @@ Arts.newEntry(
       )->size == 0) false;
 
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.MULTIHIT,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.MULTIHIT | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     baseDamage::(level, user) <- user.stats.ATK * (0.35) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -7894,7 +7509,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:b195').baseDamage(level, user),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               ),
               targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
               targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -7911,7 +7526,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b196',
+    name: 'Explosive Redirection',
     id : 'base:b196',
     notifCommit : 'A warmth emanates from $1!',
     notifFail : '...But nothing happened!',
@@ -7927,8 +7542,6 @@ Arts.newEntry(
       )->size == 0) false;
 
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC | TRAITS.MULTIHIT,
     rarity : RARITY.RARE,
@@ -7957,7 +7570,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:b196').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
                 damageClass: Damage.CLASS.HP,
-                isMultihit : true
+                traits: Damage.TRAITS.MULTIHIT
               ),
               targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
               targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
@@ -7972,7 +7585,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b197',
+    name: 'Unlock Senses',
     id : 'base:b197',
     notifCommit : '$1 focuses inward!',
     notifFail : '...But nothing happened!',
@@ -7988,8 +7601,6 @@ Arts.newEntry(
       )->size == 0) false;
 
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -8006,7 +7617,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b198',
+    name: 'Bound Weapon',
     id : 'base:b198',
     notifCommit : '$1 begins to glow!',
     notifFail : '...But nothing happened!',
@@ -8017,8 +7628,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.ABILITY,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -8093,7 +7702,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b199',
+    name: 'Momentum Preparation',
     id : 'base:b199',
     notifCommit : '$1 takes a defensive stance!',
     notifFail : '...But nothing happened!',
@@ -8104,8 +7713,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT,
     rarity : RARITY.UNCOMMON,
@@ -8120,7 +7727,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b200',
+    name: 'Burning Conversion',
     id : 'base:b200',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8139,8 +7746,6 @@ Arts.newEntry(
       when(a->size == 0) false;
       return [random.scrambled(:a)[0]];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -8158,7 +7763,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b201',
+    name: 'Icy Conversion',
     id : 'base:b201',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8177,8 +7782,6 @@ Arts.newEntry(
       when(a->size == 0) false;
       return [random.scrambled(:a)[0]];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -8197,7 +7800,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b202',
+    name: 'Shock Conversion',
     id : 'base:b202',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8216,8 +7819,6 @@ Arts.newEntry(
       when(a->size == 0) false;
       return [random.scrambled(:a)[0]];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -8235,7 +7836,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: 'Blind Conversion',
     id : 'base:b202-2',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8254,8 +7855,6 @@ Arts.newEntry(
       when(a->size == 0) false;
       return [random.scrambled(:a)[0]];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -8273,7 +7872,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@',
+    name: 'Petrified Conversion',
     id : 'base:b202-3',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8292,8 +7891,6 @@ Arts.newEntry(
       when(a->size == 0) false;
       return [random.scrambled(:a)[0]];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -8311,7 +7908,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b203',
+    name: 'Full Shift Conversion',
     id : 'base:b203',
     notifCommit : '$1 glows!',
     notifFail : '...But nothing happened!',
@@ -8335,8 +7932,6 @@ Arts.newEntry(
       when(a->size == 0) false;
       return [random.scrambled(:a)[0]];
     },
-    oncePerBattle : false,
-    canBlock : false,
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -8363,7 +7958,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b205',
+    name: 'Resonant Rush',
     id : 'base:b205',
     notifCommit : '$1 attacks $2!',
     notifFail : Arts.NO_NOTIF,
@@ -8373,10 +7968,8 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.3) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8404,7 +7997,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b206',
+    name: 'Resonant Blast',
     id : 'base:b206',
     notifCommit : '$1 attacks $2! with a magical beam of light!',
     notifFail : Arts.NO_NOTIF,
@@ -8414,10 +8007,8 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL,
+    traits : TRAITS.PHYSICAL | TRAITS.CAN_BLOCK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- user.stats.INT * (0.3) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8445,7 +8036,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b207',
+    name: 'Pyre Unleashed',
     id : 'base:b207',
     notifCommit : '$1 attacks $2! with fiery might!',
     notifFail : Arts.NO_NOTIF,
@@ -8463,10 +8054,8 @@ Arts.newEntry(
       
       return [random.scrambled(:whom)[0]];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
-    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- 2,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8501,7 +8090,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b208',
+    name: 'Glacier Unleashed',
     id : 'base:b208',
     notifCommit : '$1 attacks $2! with cold might!',
     notifFail : Arts.NO_NOTIF,
@@ -8519,10 +8108,8 @@ Arts.newEntry(
       
       return [random.scrambled(:whom)[0]];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
-    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- 2,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8557,7 +8144,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b209',
+    name: 'Pylon Unleashed',
     id : 'base:b209',
     notifCommit : '$1 attacks $2! with electrifying might!',
     notifFail : Arts.NO_NOTIF,
@@ -8575,10 +8162,8 @@ Arts.newEntry(
       
       return [random.scrambled(:whom)[0]];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
-    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC | TRAITS.CAN_BLOCK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- 2,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8612,7 +8197,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b210',
+    name: 'Feedback Cascade',
     id : 'base:b210',
     notifCommit : '$1 summons an explosion!',
     notifFail : Arts.NO_NOTIF,
@@ -8628,8 +8213,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:enemies)]
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.ABILITY,
     traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -8666,7 +8249,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b211',
+    name: 'Chaotic Shift',
     id : 'base:b211',
     notifCommit : 'A light engulfs everyone',
     notifFail : Arts.NO_NOTIF,
@@ -8677,8 +8260,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -8696,7 +8277,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b214',
+    name: 'Shift Boost',
     id : 'base:b214',
     notifCommit : '$1 begins to glow!',
     notifFail : Arts.NO_NOTIF,
@@ -8707,8 +8288,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -8721,7 +8300,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b215',
+    name: 'Elemental Radiation',
     id : 'base:b215',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
@@ -8735,10 +8314,8 @@ Arts.newEntry(
         ATTACK_SHIFTS->findIndex(:value.id) != -1
       )->size == 0) false;
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.ABILITY,
-    traits : TRAITS.PHYSICAL | TRAITS.MAGIC,
+    traits : TRAITS.PHYSICAL | TRAITS.MAGIC | TRAITS.CAN_BLOCK,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) <- user.stats.INT * (0.3 * level),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8818,7 +8395,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b216',
+    name: 'Elemental Transmutation',
     id : 'base:b216',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -8832,8 +8409,6 @@ Arts.newEntry(
         ATTACK_SHIFTS->findIndex(:value.id) != -1
       )->size == 0) false;
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -8879,7 +8454,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b217',
+    name: 'Resonant Empowerment',
     id : 'base:b217',
     notifCommit : "$1 begins to glow!",
     notifFail : "...but nothing happened!",
@@ -8895,8 +8470,6 @@ Arts.newEntry(
         (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) == 0
       )->size == 0) false;
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -8927,7 +8500,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b218',
+    name: 'Resonant Debilitation',
     id : 'base:b218',
     notifCommit : "$1 begins to glow!",
     notifFail : "...but nothing happened!",
@@ -8943,8 +8516,6 @@ Arts.newEntry(
         (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0
       )->size == 0) false;
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -8974,7 +8545,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b219',
+    name: 'Expel: Brimstone',
     id : 'base:b219',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -8993,8 +8564,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:which)];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9012,7 +8581,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b220',
+    name: 'Expel: Misalignment',
     id : 'base:b220',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9031,8 +8600,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:which)];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9051,7 +8618,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b221',
+    name: 'Expel: Growth',
     id : 'base:b221',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9071,8 +8638,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:which)];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9092,7 +8657,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b222',
+    name: 'Expel: Banishment',
     id : 'base:b222',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9110,8 +8675,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:which)];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9128,13 +8691,13 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b223',
+    name: 'Expel Control',
     id : 'base:b223',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:stunned'],
-    description: "Remove then Stunned effect from target. Draw a card.",
+    description: "Remove the Stunned effect from target. Draw a card.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -9146,8 +8709,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:which)];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -9165,7 +8726,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b224',
+    name: 'Expel: Ultima',
     id : 'base:b224',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9183,8 +8744,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:which)];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -9201,13 +8760,13 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b225',
+    name: 'Refortification Ultima',
     id : 'base:b225',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : [],
-    description: "Re-adds all given by target's equipment to the target.",
+    description: "Copies all Effects given by target's equipment and gives them to the target again.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -9225,8 +8784,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:which)];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -9252,7 +8809,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b226',
+    name: 'Clean Blessing',
     id : 'base:b226',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9263,8 +8820,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9282,7 +8837,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b227',
+    name: 'Clean Curse',
     id : 'base:b227',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9293,8 +8848,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9313,7 +8866,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b228',
+    name: 'Resonant Tessellation',
     id : 'base:b228',
     notifCommit : "$1 begins to glow!",
     notifFail : Arts.NO_NOTIF,
@@ -9339,8 +8892,6 @@ Arts.newEntry(
       
       return [random.pickArrayItem(:whom)];
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.EPIC,
@@ -9370,7 +8921,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b229',
+    name: 'Take Aim',
     id : 'base:b229',
     notifCommit : "$1 takes aim!",
     notifFail : Arts.NO_NOTIF,
@@ -9381,8 +8932,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.PHYSICAL,
     rarity : RARITY.RARE,
@@ -9406,8 +8955,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9436,8 +8983,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9465,8 +9010,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -9494,8 +9037,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -9523,8 +9064,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -9552,8 +9091,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -9581,8 +9118,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -9610,8 +9145,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -9629,7 +9162,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@base:b233',
+    name: 'Dampen Multi-hit',
     id : 'base:b233',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
@@ -9640,8 +9173,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9658,7 +9189,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@base:b234',
+    name: 'Multi-hit Guard',
     id : 'base:b234',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
@@ -9669,8 +9200,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9699,8 +9228,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9762,8 +9289,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9788,8 +9313,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9803,7 +9326,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b238',
+    name: 'Future Moment',
     id : 'base:b238',
     notifCommit : "$1 glows!",
     notifFail : Arts.NO_NOTIF,
@@ -9814,8 +9337,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.REACTION,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9860,7 +9381,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b239',
+    name: 'Boomerang',
     id : 'base:b239',
     notifCommit : "$1 glows!",
     notifFail : "...But nothing happened!",
@@ -9871,8 +9392,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.REACTION,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9930,8 +9449,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.REACTION,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -9945,7 +9462,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b241',
+    name: 'Divination',
     id : 'base:b241',
     notifCommit : Arts.NO_NOTIF,
     notifFail : "...But nothing happened!",
@@ -9956,8 +9473,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.REACTION,
     traits : 0,
     rarity : RARITY.UNCOMMON,
@@ -10026,8 +9541,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.REACTION,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -10053,8 +9566,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.REACTION,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -10069,7 +9580,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: '@b244',
+    name: 'Resonant Soulfire',
     id : 'base:b244',
     notifCommit : '$1 attacks in a focused blast $2!',
     notifFail : Arts.NO_NOTIF,
@@ -10079,8 +9590,6 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.ABILITY,
     traits : TRAITS.MAGIC,
     rarity : RARITY.RARE,
@@ -10126,8 +9635,6 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    oncePerBattle : false,
-    canBlock : false,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -10158,8 +9665,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.COMMON,
@@ -10184,8 +9689,6 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    oncePerBattle : false,
-    canBlock : true,
     kind : KIND.EFFECT,
     traits : TRAITS.MAGIC,
     rarity : RARITY.UNCOMMON,
@@ -10195,6 +9698,1081 @@ Arts.newEntry(
     }
   }
 )
+
+
+Arts.newEntry(
+  data: {
+    name: 'Premonition',
+    id : 'base:b251',
+    notifCommit : "$1 casts Premonition!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:premonition'],
+    description: "Grants the Premonition effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:premonition', durationTurns:3);
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Calcification',
+    id : 'base:b253',
+    notifCommit : "$1 casts Calcification!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:calcification'],
+    description: "Grants the Calcification effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:calcification', durationTurns:3);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Crustacean Maneuver',
+    id : 'base:b254',
+    notifCommit : "$1 prepares for incoming damage!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:crustacean-maneuver'],
+    description: "Grants the Crustacean Maneuver effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:crustacean-maneuver', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Lucky Charm',
+    id : 'base:b255',
+    notifCommit : "$1 casts Lucky Charm",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:lucky-charm'],
+    description: "Grants the Lucky Charm effect to the target for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC | TRAITS.ONCE_PER_BATTLE,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:lucky-charm', durationTurns:2);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Spirit Loan',
+    id : 'base:b256',
+    notifCommit : "$1 casts Spirit Loan",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:spirit-loan'],
+    description: "Grants the Spirit Loan effect to the target for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC | TRAITS.ONCE_PER_BATTLE,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:spirit-loan', durationTurns:2);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Procrastinate Death',
+    id : 'base:b257',
+    notifCommit : "$1 casts Procrastinate Death",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:procrastinate-death'],
+    description: "Grants the Procrastinate Death effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC | TRAITS.ONCE_PER_BATTLE,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:procrastinate-death', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Cheat Death',
+    id : 'base:b258',
+    notifCommit : "$1 casts Cheat Death",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:cheat-death', 'base:stunned'],
+    description: "Grants the Cheat Death effect to the target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC | TRAITS.ONCE_PER_BATTLE,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:cheat-death', durationTurns:3);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Death Reflection',
+    id : 'base:b259',
+    notifCommit : "$1 casts Death Reflection",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:death-reflection'],
+    description: "Grants the Death Reflection effect.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:death-reflection', durationTurns:99999999);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Prismatic Wisp',
+    id : 'base:prismatic-wisp',
+    notifCommit : "$1 casts Prismatic Wisp",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:ailments'],
+    description: "Gives the target a random status ailment for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:random.pickArrayItem(:AILMENTS), durationTurns:2);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Limit Break',
+    id : 'base:b260',
+    notifCommit : "$1 casts Limit Break",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:limit-break', 'base:limit-reached'],
+    description: "Grants the Limit Break effect to the caster.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:limit-break', durationTurns:999999999);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Resonant Doomsday',
+    id : 'base:b261',
+    notifCommit : "$1 casts Resonant Doomsday",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:revival-effect'],
+    description: "For each Revival effect on a target, deal damage 5 damage. Remove all Revival effects from target.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = enemies->filter(::(value) <- value.effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL)); 
+      when (which->size == 0) false;
+      return [random.pickArrayItem(:which)];
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:all = targets[0].effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL); 
+      when(all->size == 0) Arts.FAIL;
+
+
+      targets[0].effectStack.removeByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL)
+      
+      foreach(all) ::(k, v) {
+        targets[0].damage(attacker:user, damage:Damage.new(
+          amount:5,
+          damageType:Damage.TYPE.DARK,
+          damageClass:Damage.CLASS.HP
+        ),dodgeable: false, exact:true);
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Shared Salvation',
+    id : 'base:b263',
+    notifCommit : "$1 casts Shared Salvation",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:revival-effect'],
+    description: "Copy all of the user's Revival effects to a target.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when(user.effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL)->size == 0) false;
+      
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:Effect = import(module:'game_database.effect.mt');
+      @:all = targets[0].effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL); 
+      when(all->size == 0) Arts.FAIL;
+
+      
+      foreach(all) ::(k, v) {
+        targets[0].addEffect(
+          from: user,
+          id: v.id,
+          durationTurns: v.duration
+        );
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Deathly Empowerment',
+    id : 'base:b264',
+    notifCommit : "$1 casts Deathly Empowerment",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ALL,
+    keywords : ['base:revival-effect', 'base:aura'],
+    description: "Each combatant gains a stack of the Aura effect for each of the Revival effects on them.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = allies->filter(::(value) <- value.effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL)); 
+      when (which->size == 0) false;
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @count = 0;
+      foreach(targets)::(k, target) {
+        @:all = target.effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL); 
+
+        
+        foreach(all) ::(k, v) {
+          target.addEffect(
+            from: user,
+            id: 'base:aura',
+            durationTurns: 99999999
+          );
+        }
+        count += 1;
+      }
+      if (count == 0) Arts.FAIL;
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Purgatory',
+    id : 'base:b265',
+    notifCommit : "$1 casts Purgatory!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ALL,
+    keywords : ['base:revival-effect', 'base:shield-aura', 'base:banish'],
+    description: "Each combatant gains a stack of the Shield Aura effect and 4 stacks of Banish for each of the Revival effects on them.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:which = allies->filter(::(value) <- value.effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL)); 
+      when (which->size == 0) false;
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @count = 0;
+      foreach(targets)::(k, target) {
+        @:all = target.effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL); 
+
+        
+        foreach(all) ::(k, v) {
+          target.addEffect(
+            from: user,
+            id: 'base:shield-aura',
+            durationTurns: 99999999
+          );
+          
+          for(0, 4) ::(k, v) {
+            target.addEffect(
+              from: user,
+              id: 'base:banish',
+              durationTurns: 99999999
+            );          
+          }
+        }
+        count += 1;
+      }
+      if (count == 0) Arts.FAIL;
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Deathly Gamble',
+    id : 'base:b266',
+    notifCommit : "$1 casts Deathly Gamble!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ALL,
+    keywords : ['base:revival-effect'],
+    description: "Randomly selects a combatant with no Revival effects. If the combatant is knocked out, they heal 50% of their HP. If the combatant is not knocked out, they receive damage equal to their remaining HP, knocking them out.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:pool = targets->filter(::(value) <- value.effectStack.getAllByFilter(::(value) <- (value.traits & Effect.TRAIT.REVIVAL) == 0));
+      when(pool->size == 0) Arts.FAIL;
+
+      @:victim = random.pickArrayItem(:pool);
+      if (victim.hp == 0) ::<= {
+        victim.heal(amount:(victim.stats.HP/2)->ceil);
+      } else ::<= {
+        victim.damage(attacker:user, damage:Damage.new(
+          amount:(victim.hp/2)->ceil,
+          damageType:Damage.TYPE.PHYS,
+          damageClass:Damage.CLASS.HP
+        ),dodgeable: false, exact: true);        
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Deathless Overflow',
+    id : 'base:b267',
+    notifCommit : "$1 casts Deathless Overflow!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:deathless-overflow', 'base:banish'],
+    description: "Grants the Deathless Overflow effect.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:deathless-overflow', durationTurns:999999999);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Soul Buffer',
+    id : 'base:b271',
+    notifCommit : "$1 casts Soul Buffer!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:soul-buffer'],
+    description: "Grants the Soul Buffer effect for one turn.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:soul-buffer', durationTurns:1);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Body Buffer',
+    id : 'base:b272',
+    notifCommit : "$1 casts Body Buffer!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:body-buffer'],
+    description: "Grants the Body Buffer effect for one turn.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:body-buffer', durationTurns:1);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Chaotic Barrier',
+    id : 'base:b273',
+    notifCommit : "$1 casts Chaotic Barrier!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ALL,
+    keywords : ['base:perfect-barrier'],
+    description: "Grants the Perfect Barrier effect to a random combatant for 2 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      random.pickArrayItem(:targets).addEffect(from:user, id:'base:perfect-barrier', durationTurns:1);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Summon: Defensive Pylon',
+    id : 'base:summon-defensive-pylon',
+    notifCommit : '$1 summons a Defensive Pylon!',
+    notifFail : '...but the summoning fizzled!',
+    targetMode : TARGET_MODE.ONE,
+    description: 'Summons a defensive pylon that casts Soul Guard upon creation on the target indefinitely.',
+    keywords : ['base:soul-guard', 'base:paralyzed'],
+    durationTurns: 0,
+    kind : KIND.ABILITY,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:world = import(module:'game_singleton.world.mt');
+      @:Species = import(module:'game_database.species.mt');
+
+      // limit 2 summons at a time.
+      when ([...user.battle.getAllies(:user)]->filter(
+        ::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size >= 2
+      ) Arts.FAIL
+
+
+      @:Entity = import(module:'game_class.entity.mt');
+      @:sprite = Entity.new(
+        island : world.island,
+        speciesHint: 'base:defensive-pylon',
+        professionHint: 'base:defensive-pylon',
+        levelHint:4 + level
+      );
+      sprite.name = targets[0].name + '\'s Pylon';
+            
+      @:battle = user.battle;
+      
+      
+      targets[0].addEffect(
+        from: sprite,
+        id: 'base:soul-guard',
+        durationTurns: 9999999999
+      );
+      
+
+      windowEvent.queueCustom(
+        onEnter :: {
+
+          battle.join(
+            group: [sprite],
+            sameGroupAs:targets[0]
+          );
+        }
+      )
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Soul Split',
+    id : 'base:b283',
+    notifCommit : "$1 casts Soul Split!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:soul-split'],
+    description: "Grants the Soul Split effect to a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when(allies->size == 1) false;
+      return [random.pickArrayItem(:allies->filter(::(value) <- value != user))[0]];
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:soul-split', durationTurns:3);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Soul Projection',
+    id : 'base:b284',
+    notifCommit : "$1 casts Soul Projection!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:soul-projection, base:concentrating'],
+    description: "Grants the Soul Projection effect to a target for 2 turns. Inflicts the Concentrating effect on the user for 1 turn.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when(allies->size == 1) false;
+      return [random.pickArrayItem(:allies->filter(::(value) <- value != user))[0]];
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:concentrating', durationTurns:1);
+      targets[0].addEffect(from:user, id:'base:soul-projection', durationTurns:2);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Charm',
+    id : 'base:b286',
+    notifCommit : "$1 casts Charm!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:charmed'],
+    description: "Inflicts the Charmed effect for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:charmed', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Static Shield',
+    id : 'base:b277',
+    notifCommit : "$1 casts Static Shield!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:static-shield'],
+    description: "Grants the Static Shield effect to a target for 3 turns",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:static-shield', durationTurns:3);
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Scorching Shield',
+    id : 'base:b278',
+    notifCommit : "$1 casts Scorching Shield!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:scorching-shield'],
+    description: "Grants the Scorching Shield effect to a target for 3 turns",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:scorching-shield', durationTurns:3);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Freezing Shield',
+    id : 'base:b279',
+    notifCommit : "$1 casts Freezing Shield!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:freezing-shield'],
+    description: "Grants the Freezing Shield effect to a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:freezing-shield', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Acid Dust',
+    id : 'base:b280',
+    notifCommit : "$1 throws acidic dust on $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:acid-dust'],
+    description: "Inflicts the Acid Dust effect on a target",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:acid-dust', durationTurns:999999999);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Conduction Dust',
+    id : 'base:b281',
+    notifCommit : "$1 throws conductive dust on $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:conduction-dust'],
+    description: "Inflicts the Conduction Dust effect on a target",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:conduction-dust', durationTurns:999999999);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Crystalized Dust',
+    id : 'base:b282',
+    notifCommit : "$1 throws crystalized dust on $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:crystalized-dust'],
+    description: "Inflicts the Crystalized Dust effect on a target.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : ,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:crystalized-dust', durationTurns:999999999);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Humiliate',
+    id : 'base:b290',
+    notifCommit : "$1 attempts to humiliate $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:embarrassed'],
+    description: "Inflicts the Embarrassed effect on a target for 4 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:embarrassed', durationTurns:4);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Enraged',
+    id : 'base:b291',
+    notifCommit : "$1 attempts to enrage $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:enraged'],
+    description: "Inflicts the Enraged effect on a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:enraged', durationTurns:3);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Imposter',
+    id : 'base:b292',
+    notifCommit : "$1 casts Imposter on $2!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ONE,
+    keywords : ['base:self-illusion'],
+    description: "Inflicts the Self-Illusion effect on a target for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      targets[0].addEffect(from:user, id:'base:self-illusion', durationTurns:3);
+    }
+  }
+)
+
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Static Infusion',
+    id : 'base:b294',
+    notifCommit : "$1 casts Static Infusion!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:paralysis', 'base:shock'],
+    description: "Grants the Shock effect to the user for a long time, but also inflicts Paralysis for 1 turn.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:paralysis', durationTurns:1);
+      user.addEffect(from:user, id:'base:shock', durationTurns:999999999999);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Burning Infusion',
+    id : 'base:b295',
+    notifCommit : "$1 casts Burning Infusion!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:burned', 'base:burning'],
+    description: "Grants the Burning effect to the user for a long time, but also inflicts Burned for 3 turn.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:burned', durationTurns:1);
+      user.addEffect(from:user, id:'base:burning', durationTurns:999999999999);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Icy Infusion',
+    id : 'base:b296',
+    notifCommit : "$1 casts Icy Infusion!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:frozen', 'base:icy'],
+    description: "Grants the Icy effect to the user for a long time, but also inflicts Frozen for 1 turn.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:frozen', durationTurns:1);
+      user.addEffect(from:user, id:'base:icy', durationTurns:999999999999);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Elemental Contract',
+    id : 'base:b296',
+    notifCommit : "$1 casts Elemental Contract!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:attack-shifts'],
+    description: "Grants an Attack Shift of the user's choice, but also inflicts a random negative effect for 3 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:world = import(module:'game_singleton.world.mt');
+
+
+      @:which = [
+        'base:burning',
+        'base:icy',
+        'base:shock',
+        'base:shimmering',
+        'base:dark',
+        'base:toxic'
+      ];
+
+      @:done::(id) {
+        user.addEffect(from:user, id:Effect.getRandomFiltered(::(value) <- 
+          value.hasAnyTrait(:Effect.TRAIT.DEBUFF | Effect.TRAIT.AILMENT) &&
+          value.hasNoTrait(:Effect.TRAIT.SPECIAL | Effect.TRAIT.INSTANTANEOUS)
+        ), durationTurns:3);
+        user.addEffect(from:user, id:which, durationTurns:999999999999);
+      }
+
+      when(world.party.isMember(:user)) ::<= {
+        windowEvent.queueMessage(
+          text: 'An elemental imp was summoned!'
+        );
+        
+        if (user
+        
+        windowEvent.queueMessage(
+          speaker: 'Elemental Imp',
+          text: '"Okay, whaddya want. Make it quick."'
+        );
+
+        
+        windowEvent.queueChoices(
+          canCancel: false,
+          keep: false,
+          prompt: 'Grant which?',
+          choices : which->map(::(value) <- Effect.find(:value).name);
+          onChoice::(choice) {
+            done(which[choice-1]);
+            windowEvent.queueMessage(
+              speaker: 'Elemental Imp',
+              text: '"Pleasure doin\' business with ya!"'
+            );
+          }
+        );
+      }
+      
+      
+      done(:random.pickArrayItem(:which));
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Chaotic Elemental',
+    id : 'base:b298',
+    notifCommit : "$1 casts Chaotic Elemental!",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.ALL,
+    keywords : ['base:attack-shifts'],
+    description: "Manifests a chaotic entity that randomly grants two combatants with an Attack Shift, and 2 combatants with a negative effect for 5 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      @:world = import(module:'game_singleton.world.mt');
+
+
+      @:which = [
+        'base:burning',
+        'base:icy',
+        'base:shock',
+        'base:shimmering',
+        'base:dark',
+        'base:toxic'
+      ];
+      
+      for(0, 2)::(i) {
+        random.pickArrayItem(:targets).addEffect(from:user, id:random.pickArrayItem(:which), durationTurns:5)
+      }
+
+      for(0, 2)::(i) {
+        random.pickArrayItem(:targets).addEffect(from:user, id:Effect.getRandomFiltered(::(value) <- 
+          value.hasAnyTrait(:Effect.TRAIT.DEBUFF | Effect.TRAIT.AILMENT) &&
+          value.hasNoTrait(:Effect.TRAIT.SPECIAL | Effect.TRAIT.INSTANTANEOUS)
+        ), durationTurns:5);
+      }
+    }
+  }
+)
+
+
 
 };
 
@@ -10257,13 +10835,11 @@ Arts = class(
     // If returns an object, should contain the targets for 
     // that Art that should be used
     shouldAIuse : Function, 
-    oncePerBattle : Boolean,
     kind : Number,
     traits : Number,
     rarity : Number,
     baseDamage : Function,
     durationTurns : Number, // multiduration turns supercede the choice of action
-    canBlock : Boolean, // whether the targets get a chance to block
 
     onAction : Function
   },

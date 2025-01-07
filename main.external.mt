@@ -88,6 +88,16 @@
 
 @:external_getInput    = getExternalFunction(name:'external_getInput');
 
+// Called when game requests to play a sound.
+// Takes the name of a sound
+@external_onPlaySFX    = getExternalFunction(name:'external_onPlaySFX');
+
+
+// Called when game requests to play a song.
+// Takes the name of a sound and whether to loop
+@external_onPlayBGM    = getExternalFunction(name:'external_onPlayBGM');
+
+
 
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 
@@ -118,6 +128,7 @@ canvas.onCommit = ::(lines, renderNow){
 instance.mainMenu(
   canvasHeight: 24,
   canvasWidth: 80,
+  features : 0,
     
   onSaveState :::(
     slot,
@@ -140,6 +151,14 @@ instance.mainMenu(
   
   onSaveSettings ::(data) {
     external_onSaveSettings(a:data);
+  },
+  
+  onPlaySFX ::(name) {
+    external_onPlaySFX(a:name);
+  },
+
+  onPlayBGM ::(name, loop) {
+    external_onPlayBGM(a:name, b:loop);
   },
 
   preloadMods :: {

@@ -238,6 +238,21 @@
   args:
     - to: the one getting knocked out
 
+  Event:    onDurationEnd 
+  About:    called before removal of the effect due to its duration being 0
+  returns:  ignored 
+
+  Event:    onKnockedOut 
+  About:    called after the holder gets knocked out.
+  returns:  ignored 
+  args:
+    - from: the one who caused it.
+
+  Event:    onDurationEnd 
+  About:    called before removal of the effect due to its duration being 0
+  returns:  ignored 
+
+
 */
 
 @:EffectStack = LoadableClass.create(
@@ -330,8 +345,11 @@
       
       getAll : getAll,
       
-      add::(id, duration => Number, item, from) {
+      add::(id, duration => Number, item, from, noNotify) {
         @effect = Effect.find(:id);
+        if (effect.hasTraits(:Effect.TRAIT.INSTANTANEOUS))
+          duration = 0;
+          
         @:Item = import(module:'game_mutator.item.mt');
         
         if (item == empty)
@@ -355,7 +373,7 @@
         
         this.emitEvent(name: 'onAffliction', filter::(value) <- r == value);
 
-        if (holder != empty && holder.battle != empty) ::<= {
+        if (noNotify != true && holder != empty && holder.battle != empty) ::<= {
           holder.notifyEffect(
             isAdding: true,
             effectIDs : [id]
@@ -510,6 +528,10 @@
             inSet[e] = true;
           }
         }
+        this.emitEvent(
+          name : 'onDurationEnd',
+          filter ::(value) <- inSet[value] == true
+        );        
         
         this.removeByFilter(::(value) <- inSet[value] == true);        
       },
@@ -534,10 +556,11 @@
         @:listTraits ::(flags) {
           @:out = [];
           
-          if (flags & Effect.TRAIT.SPECIAL) out->push(:'Special');
-          if (flags & Effect.TRAIT.AILMENT) out->push(:'Status Ailment');
-          if (flags & Effect.TRAIT.BUFF)    out->push(:'Buff');
-          if (flags & Effect.TRAIT.DEBUFF)  out->push(:'Debuff');
+          if (flags & Effect.TRAIT.SPECIAL)  out->push(:'Special');
+          if (flags & Effect.TRAIT.AILMENT)  out->push(:'Status Ailment');
+          if (flags & Effect.TRAIT.BUFF)     out->push(:'Buff');
+          if (flags & Effect.TRAIT.DEBUFF)   out->push(:'Debuff');
+          if (flags & Effect.TRAIT.REVIVAL)  out->push(:'Revival');
           
           when(out->size == 0)
             'None'
@@ -559,7 +582,7 @@
         
         @:items = this.getAll()->map(to::(value) { 
           @:effect = Effect.find(:value.id);
-          @:symbol = Effect.TRAIT_TO_DOMINANT_SYMBOL(:effect.traits);
+          @:symbol = Effect.TRAITS_TO_DOMINANT_SYMBOL(:effect.traits);
           return [
             limit(:'(' + symbol + ') ' + effect.name),
             [

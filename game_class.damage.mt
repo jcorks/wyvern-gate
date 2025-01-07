@@ -33,30 +33,34 @@
   AP : 1
 }
 
+@:TRAITS = {
+  MULTIHIT : 1,
+  FORCE_CRIT : 2,
+  FORCE_DEF_BYPASS : 4,
+  IS_CRIT : 8
+}
+
 @:type = Object.newType(
   name: 'Wyvern.Damage',
   layout : {
     damageClass : Number,
     amount : Number,
     damageType : Number,
-    forceCrit : Boolean,
-    forceDEFbypass : Boolean,
-    isMultihit : Boolean
+    traits : Number
   }
 );
 
 @:Damage = {
   TYPE : TYPE,
+  TRAITS : TRAITS,
   CLASS : CLASS,
   type : type,
-  new ::(amount, damageType, damageClass, isMultihit) {
+  new ::(amount, damageType, damageClass, traits) {
     @:out = Object.instantiate(type);
     out.damageClass = damageClass;
     out.damageType = damageType;
     out.amount = amount;
-    out.forceCrit = false;
-    out.forceDEFbypass = false;
-    out.isMultihit = if (isMultihit == empty) false else isMultihit;
+    out.traits = if (traits == empty) 0 else traits;
     return out;
   }
 }

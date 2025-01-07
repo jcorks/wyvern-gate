@@ -7,6 +7,7 @@
 @currentCanvas;
 @canvasChanged = false;
 
+
 @:rerender = ::{
   @:lines = currentCanvas;
   foreach(lines) ::(index, line) {

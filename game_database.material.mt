@@ -291,6 +291,8 @@ Material.newEntry(
     pricePercentMod: 150
   }
 )
+
+
 }
 
 @:Material = Database.new(

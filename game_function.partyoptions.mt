@@ -101,7 +101,76 @@ return ::{
 
   
   @:viewArts::(member) {
-    member.editDeck();
+    @:deleteDeck ::(name) {
+      when (member.getEquippedDeckName() == name)
+        windowEvent.queueMessage(
+          text:'This deck is currently equipped and cannot be removed. Only unequipped decks can be removed.'
+        )
+
+        
+      windowEvent.queueMessage(
+        text:'If the deck is removed, all of the Support Arts will be sent back to the trunk. This operation cannot be undone.'
+      )
+      
+      windowEvent.queueAskBoolean(
+        prompt: 'Remove deck ' + name +'?',
+        onChoice::(which) {
+          when(which == false) empty;
+          
+          member.removeDeck(:name);
+          windowEvent.jumpToTag(name:'DECKMENU');
+        }
+      );
+    
+    }
+  
+    windowEvent.queueChoices(
+      leftWeight: 1,
+      topWeight : 1,
+      prompt: member.name + 's decks:',
+      keep : true,
+      jumpTag : 'DECKMENU',
+      canCancel: true,
+      onGetChoices::<- [
+        ...(member.deckTemplateNames->map(::(value) <- 
+          if (member.getEquippedDeckName() == value) 
+            '* ' + value 
+          else 
+            '  ' + value
+        )), 
+        'Make new deck...'
+      ],
+      onChoice::(choice) {
+        when(choice-1 == member.deckTemplateNames->size) ::<= {
+          import(:'game_function.name.mt')(
+            prompt: 'New deck name:',
+            canCancel: true,
+            onDone ::(name) {
+              member.addDeck(:name);
+            }
+          );
+        }
+        @:deckName = member.deckTemplateNames[choice-1];
+        windowEvent.queueChoices(
+          prompt: 'Deck: ' + deckName,
+          choices: ['Equip deck', 'Edit...', 'Remove'],
+          leftWeight : 1,
+          topWeight : 1,
+          keep : true,
+          canCancel: true,
+          onChoice::(choice) {
+            when(choice-1 == 0)
+              member.equipDeck(name:deckName);
+              
+            when(choice-1 == 1)
+              member.editDeck(:deckName);            
+              
+              
+            deleteDeck(:deckName);
+          }
+        );
+      }
+    );
   }
   
   @:professionMenu ::(member) {

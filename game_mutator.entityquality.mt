@@ -39,6 +39,7 @@ EntityQuality.database.newEntry(
     id : 'base:fur',
     appearanceChance : 1,
     plural : false,
+    countable : false,
     descriptions : [
       '$0',
       '$0 with $1',
@@ -65,7 +66,7 @@ EntityQuality.database.newEntry(
       'light brown',
       'black',
       'grey',
-      'orange',
+      'light grey',
       'yellow',
       'goldenrod',
       'grey',
@@ -102,7 +103,7 @@ EntityQuality.database.newEntry(
       'light brown',
       'black',
       'grey',
-      'orange',
+      'light grey',
       'yellow',
       'goldenrod',
       'grey',
@@ -117,6 +118,7 @@ EntityQuality.database.newEntry(
     id : 'base:face',
     appearanceChance : 0.3,
     plural : false,
+    countable : true,
     descriptions : [
       '$0',
       'hard to read but seems $0',
@@ -168,6 +170,7 @@ EntityQuality.database.newEntry(
     id : 'base:scales',
     appearanceChance : 1,
     plural : true,
+    countable : true,
     descriptions : [
       '$0',
       '$0 with $1',
@@ -249,6 +252,7 @@ EntityQuality.database.newEntry(
     id : 'base:feathers',
     appearanceChance : 1,
     plural : true,
+    countable : true,
     descriptions : [
       '$0'
     ],
@@ -295,6 +299,7 @@ EntityQuality.database.newEntry(
     id : 'base:eyes',
     appearanceChance : 1,
     plural : true,
+    countable : true,
     descriptions : [
       '$2 with $1',
       '$0 and $2',
@@ -361,6 +366,7 @@ EntityQuality.database.newEntry(
     name : 'ears',
     id : 'base:ears',
     plural : true,
+    countable : true,
     appearanceChance : 1,
     descriptions : [
       '$0',
@@ -392,6 +398,7 @@ EntityQuality.database.newEntry(
     name : 'horns',
     id : 'base:horns',
     plural : true,
+    countable : true,
     appearanceChance : 0.5,
     descriptions : [
       '$0',
@@ -442,6 +449,7 @@ EntityQuality.database.newEntry(
     name : 'tail',
     id : 'base:tail',
     plural : false,
+    countable : true,
     appearanceChance : 1,
     descriptions : [
       '$0',
@@ -469,7 +477,7 @@ EntityQuality.database.newEntry(
     trait1qualifierChance : 0.2,
     trait1qualifiers : [],
     trait1 : [
-      'expressive'
+      'fluffy'
     ],
     
     
@@ -488,6 +496,7 @@ EntityQuality.database.newEntry(
     id : 'base:snout',
     appearanceChance : 1,
     plural : false,
+    countable : true,
     descriptions : [
       '$0',
     ],
@@ -521,6 +530,7 @@ EntityQuality.database.newEntry(
     id : 'base:body',
     appearanceChance : 1,
     plural : false,
+    countable : true,
     descriptions : [
       '$0',
       '$0 and $1',
@@ -580,6 +590,7 @@ EntityQuality.database.newEntry(
       name : String,
       id : String,
       plural : Boolean,
+      countable : Boolean,
       appearanceChance : Number,
       descriptions : Object,
       trait0 : Object,
@@ -670,6 +681,12 @@ EntityQuality.database.newEntry(
       plural : {
         get :: {
           return state.base.plural;
+        },
+      },
+
+      countable : {
+        get :: {
+          return state.base.countable;
         },
       },
       

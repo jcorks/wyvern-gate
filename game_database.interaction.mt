@@ -514,16 +514,16 @@ Interaction.newEntry(
                             'base:legendary'
                           ]
                           
-                          for(0, 50)::(i) {
+                          for(0, 6)::(i) {
                             @newItem = Item.new(
                               base: Item.database.getRandomFiltered(
                                 filter::(value) <- value.hasTraits(:
-                                    Item.TRAIT.UNIQUE |
                                     Item.TRAIT.HAS_QUALITY
                                 ) && value.hasAnyTrait(:
                                     Item.TRAIT.METAL |
                                     Item.TRAIT.APPAREL
-                                ) 
+                                ) && value.hasNoTrait(:Item.TRAIT.UNIQUE)
+
                               ),
                               rngEnchantHint:true,     
                               qualityHint : random.pickArrayItem(list:itemQualities),
@@ -531,16 +531,14 @@ Interaction.newEntry(
                             )  
                             itemChoices->push(value:newItem);                  
                           }
-                          
-                          itemChoices->sort(comparator::(a, b) {
-                            @diffA = (a.price - itemPrice)->abs;
-                            @diffB = (b.price - itemPrice)->abs;
-                            when (diffA < diffB) -1;
-                            when (diffA > diffB)  1;
-                            return 0;
-                          });
-                          
-                          itemChoices = itemChoices->subset(from:0, to:6);
+
+                          itemChoices->push(:Item.new(
+                              base: Item.database.find(:'base:life-crystal'),
+                              rngEnchantHint:true,     
+                              qualityHint : random.pickArrayItem(list:itemQualities),
+                              materialHint : random.pickArrayItem(list:itemMaterials)
+                            )
+                          );
                           
                           @:Inventory = import(module:'game_class.inventory.mt');
                           @inv = Inventory.new(size: 30);
@@ -883,6 +881,146 @@ Interaction.newEntry(
   }
 );
 
+Interaction.newEntry(
+  data : {
+    name : 'Appraise',
+    id :  'base:appraise',
+    keepInteractionMenu : true,
+    onInteract ::(location, party) {
+      @:world = import(module:'game_singleton.world.mt');
+      when(location.ownedBy == empty)
+        windowEvent.queueMessage(
+          text: "No one is at the shop to appraise anything."
+        );
+        
+      when(location.ownedBy.isIncapacitated())
+        windowEvent.queueMessage(
+          text: location.ownedBy.name + ' is incapacitated and cannot appraise anything.'
+        );
+
+
+      when (location.peaceful == false && location.ownedBy != empty) ::<= {
+        windowEvent.queueMessage(
+          speaker: location.ownedBy.name,
+          text: "You're not welcome here!!"
+        );
+        world.battle.start(
+          party,              
+          allies: party.members,
+          enemies: [location.ownedBy],
+          landmark: {},
+          onEnd::(result) {
+            @:instance = import(module:'game_singleton.instance.mt');
+            if (!world.battle.partyWon()) 
+              instance.gameOver(reason:'The party was wiped out.');
+          }
+        );
+      }
+      
+      when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
+        windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');              
+
+      
+      
+      @:appraisable = party.inventory.items->filter(::(value) <- value.needsAppraisal);
+      when (appraisable->size == 0) ::<= {
+        windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"You do not seem to have anything in your inventory that is appraisable."');              
+      }
+      
+      windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"Ah, you seem to have some things I can appraise. It costs 75G for the first appraisal and an additional 50G for each appraisal of the same item."');              
+      windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"If you think I am incorrect, you can ask for further appraisals. Just know that it will cost more..."');              
+
+      @:appraise ::(item){
+        windowEvent.queueMessage(speaker: location.ownedBy.name, text: 
+          random.pickArrayItem(:[
+            '"Let\'s see here..."',
+            '"Hmmm..."',
+            '"Ah, it looks like..."',
+            '"Interesting..."'
+          ])
+        );              
+        
+        world.party.inventory.remove(:item);
+        @:newItem = item.appraise();
+        
+        windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"Here\'s what I think:"');
+        newItem.describe();
+        
+        @:decide = ::{
+          windowEvent.queueChoices(
+            prompt: newItem.name + '...',
+            
+            choices: [
+              'Check again',
+              'Accept appraisal',
+              'Deny appraisal'
+            ],
+            canCancel : false,
+            
+            onChoice::(choice) {
+              when(choice == 1) ::<= {
+                newItem.describe();
+                decide();
+              }
+              when(choice == 3) ::<= {
+                windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"Hmm, perhaps I was mistaken..."');
+                party.inventory.add(:item);
+              }
+              
+              windowEvent.queueMessage(speaker: location.ownedBy.name, text: '"Excellent. Happy to help."');
+              party.inventory.add(:newItem);
+            }
+          );
+        }
+        decide();
+      }
+
+
+      @:appraisePick ::{
+        @:pickItem = import(module:'game_function.pickitem.mt');
+        pickItem(
+          inventory: party.inventory,
+          filter ::(value) <- value.needsAppraisal,
+          canCancel: true,
+          leftWeight : 0.5,
+          topWeight : 0.5,
+          keep : true,
+          prompt: 'Appraise which?',
+          onPick::(item) {
+            @:cost = 75 + item.appraisalCount*50;
+            
+            when (cost > party.inventory.gold) ::<= {
+              windowEvent.queueMessage(:"The party cannot afford the cost of the appraisal");
+              appraisePick();
+            }
+            
+            windowEvent.queueAskBoolean(
+              prompt: 'Appraise '+item.name+ ' for ' + g(:cost) + '?',
+              onChoice::(which) {
+                party.addGoldAnimated(
+                  amount: -cost,
+                  onDone ::{
+                    appraise(:item);                  
+                  }
+                );
+              }
+            );
+          }
+        );       
+      }
+
+      windowEvent.queueAskBoolean(
+        prompt: "Appraise items?",
+        onChoice ::(which) {
+          when(which == false) empty;
+          appraisePick();         
+        }
+      );
+      
+    }
+  }
+)
+
 
 Interaction.newEntry(
   data : {
@@ -934,6 +1072,86 @@ Interaction.newEntry(
 
 Interaction.newEntry(
   data : {
+    name : 'Purchase Arts',
+    id :  'base:buy:arts',
+    keepInteractionMenu : true,
+    onInteract ::(location, party) {
+      @:world = import(module:'game_singleton.world.mt');
+      @:Arts = import(:'game_database.arts.mt');
+      @:ArtsDeck = import(:'game_class.artsdeck.mt');
+      
+
+      when(location.ownedBy == empty)
+        windowEvent.queueMessage(
+          text: "No one is at the shop to sell you anything."
+        );
+        
+      when(location.ownedBy.isIncapacitated())
+        windowEvent.queueMessage(
+          text: location.ownedBy.name + ' is incapacitated and cannot provide this service.'
+        );
+
+      windowEvent.queueMessage(
+        speaker: 'Arts Tecker',
+        text: '"Here\'s what I have. Take a look. Each costs 125G."'
+      );
+
+
+
+
+      if (location.data.arts == empty) ::<= {
+        location.data.arts = [];
+        
+        for(0, 15)::(i) {
+          location.data.arts->push(:Arts.getRandomFiltered(::(value) <-
+            value.hasNoTrait(:Arts.TRAITS.SPECIAL) &&
+            value.hasTraits(:Arts.TRAITS.SUPPORT)
+          ).id);
+        }
+      }
+      
+
+      @:pickArt = import(:'game_function.pickart.mt');
+      pickArt(
+        onGetList::<- location.data.arts,
+        keep: true,
+        canCancel: true,
+        prompt: 'Arts for sale:',
+        onChoice ::(art, category) {
+          art = Arts.find(:art);
+          
+          windowEvent.queueAskBoolean(
+            prompt: 'Learn new Support Arts for 125G?',
+            onChoice::(which) {
+              when(which == false) empty;
+
+
+              when(world.party.inventory.gold < 125)
+                windowEvent.queueMessage(
+                  text: 'The party cannot afford this Art.'
+                );
+
+
+              world.party.addGoldAnimated(amount:-125, onDone::{
+                location.data.arts->remove(:location.data.arts->findIndex(:art.id));
+                world.party.queueCollectSupportArt(arts:[art]);
+              });
+            }      
+          );
+         
+        },
+        canCancel: true 
+      );
+        
+    }
+  }
+)
+
+
+
+
+Interaction.newEntry(
+  data : {
     name : 'Uncover Art',
     id :  'base:uncover:arts',
     keepInteractionMenu : true,
@@ -962,7 +1180,6 @@ Interaction.newEntry(
 
       windowEvent.queueAskBoolean(
         prompt: 'Learn new Support Arts for 150G?',
-        canCancel : true,
         onChoice::(which) {
           when(which == false) empty;
           

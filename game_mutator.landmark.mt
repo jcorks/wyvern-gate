@@ -19,6 +19,7 @@
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:Database = import(module:'game_class.database.mt');
 @:State = import(module:'game_class.state.mt');
+@:sound = import(module:'game_singleton.sound.mt');
 
 
 @:StateType = State.create(
@@ -87,7 +88,10 @@ Landmark.database.newEntry(
     onCreate ::(landmark, island){},
     onIncrementTime ::(landmark, island){},
     onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {}
+    onVisit ::(landmark, island) {
+      sound.playBGM(name:'town-2', loop:true);
+
+    }
   }
 )
 
@@ -138,7 +142,9 @@ Landmark.database.newEntry(
     onCreate ::(landmark, island){},
     onIncrementTime ::(landmark, island){},
     onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {}
+    onVisit ::(landmark, island) {
+      sound.playBGM(name:'town-2', loop:true);
+    }
     
   }
 )
@@ -263,7 +269,6 @@ Landmark.database.newEntry(
       {id: 'base:small-chest', rarity: 16},
       {id: 'base:locked-chest', rarity: 11},
       {id: 'base:magic-chest', rarity: 15},
-      {id: 'base:enchantment-stand', rarity: 15},
 
       {id: 'base:healing-circle', rarity:35},
 

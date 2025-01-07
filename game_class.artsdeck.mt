@@ -7,12 +7,21 @@
 @:Effect = import(module:'game_database.effect.mt');
 
 
+
+@:ENERGY = {
+    A : 0,
+    B : 1,
+    C : 2,
+    D : 3
+}
+
 @:HandCard = Object.newType(
   name: 'Wyvern.HandCard',
   layout : {
     id : String,
     owner: Nullable,
-    level : Number
+    level : Number,
+    energy : Number
   }
 );
 
@@ -27,14 +36,26 @@
     '^^',
     '**',
   ]
+  
+  @:energySymbols = [
+    '_',
+    '=',
+    '.',
+    '~',
+  ];
 
-  @:drawRectangle::(x, y, width, height) {
+  @:drawRectangle::(x, y, width, height, handCard, showEnergy) {
     canvas.movePen(x:x, y:y); canvas.drawRectangle(text: ' ', width:width, height: height);        
     canvas.movePen(x:x, y:y); canvas.drawChar(text:'┌');
     canvas.movePen(x:x+width-1, y:y); canvas.drawChar(text:'┐');
     for(1, width-1)::(i) {
       canvas.movePen(x:x+i, y:y);      canvas.drawChar(text:'─');
-      canvas.movePen(x:x+i, y:y+height-1); canvas.drawChar(text:'─');
+      canvas.movePen(x:x+i, y:y+height-1); canvas.drawChar(text:
+          if (showEnergy) 
+            (energySymbols)[handCard.energy]
+          else 
+            '─'
+        );
     }
 
     canvas.movePen(x:x, y:y+height-1); canvas.drawChar(text:'└');
@@ -47,10 +68,10 @@
   }
 
 
-  return ::(x, y, handCard, flipped) {
+  return ::(x, y, handCard, flipped, showEnergy) {
     @:art = Arts.find(id:handCard.id);
-    drawRectangle(x, y, width:CARD_WIDTH, height:CARD_HEIGHT);
-    drawRectangle(x:x+1, y:y+1, width:CARD_WIDTH-2, height:(CARD_HEIGHT/2)->floor);
+    drawRectangle(x, y, width:CARD_WIDTH, height:CARD_HEIGHT, handCard, showEnergy);
+    drawRectangle(x:x+1, y:y+1, width:CARD_WIDTH-2, height:(CARD_HEIGHT/2)->floor, handCard, showEnergy);
 
 
     // inner graphic box
@@ -63,7 +84,11 @@
 
       if (art.kind == Arts.KIND.ABILITY) ::<= {
         canvas.movePen(x:x+1, y:y+base+1); canvas.drawText(text:'Lv. ' + handCard.level);
-      }
+      } else ::<= {
+        if (handCard.level > 1) ::<= {
+          canvas.movePen(x:x+1, y:y+base+1); canvas.drawText(text:' x' + (handCard.level-1));        
+        }
+      } 
     }      
   }
 }
@@ -98,7 +123,7 @@
   }
 }
 
-@:renderArt::(user, handCard, topWeight, leftWeight, maxWidth){
+@:renderArt::(user, handCard, topWeight, leftWeight, maxWidth, showEnergy){
   if (maxWidth == empty) maxWidth = 1;
   @:art = Arts.find(id:handCard.id);
   @baseDamageMax;
@@ -108,6 +133,8 @@
     baseDamageMin = user.getArtMinDamage(:handCard);
     baseDamageMax = user.getArtMaxDamage(:handCard);
   }
+  
+  @:en = 'Energy: ' + (['A', 'B', 'C', 'D'])[handCard.energy];
 
   @:lines = [
     art.name,
@@ -118,10 +145,10 @@
     },
     " - Rarity: " + getRarity(:art.rarity),
     " - Traits: " + getTraits(:handCard),
-    if (art.kind == Arts.KIND.ABILITY)
-      " - (Lv. " + handCard.level + ') - '
+    (if (art.kind == Arts.KIND.ABILITY)
+      " - (Lv. " + handCard.level + ') - ' + (if(showEnergy)en else '')
     else 
-      "",
+      " - " + (if(showEnergy)en else '')),
     art.description,
     if (user != empty && baseDamageMin != empty) 'Around: ' + baseDamageMin + ' - ' + baseDamageMax + " damage" else '',
   ]
@@ -148,23 +175,28 @@
 }
 
 @selected = 0;
-@:renderCards ::(user, cards, enabled){
+@:renderCards ::(user, cards, enabled, showEnergy){
   @index;
   if (enabled != empty) ::<= {
     index = enabled[selected]
   } else 
     index = selected;
 
+  @fitWidth = CARD_WIDTH;
 
-  @x = (canvas.width / 3)->floor;
-  @:y = canvas.height - (CARD_HEIGHT+1);
+  @x = (canvas.width / 2 - (CARD_WIDTH/2) * cards->size)->floor;
+  if (x < 1)
+    fitWidth = 3;
+
+
+  @:y = canvas.height - (CARD_HEIGHT);
   
   for(0, cards->size) ::(i) {
-    renderCard(x, y:y + (if (i == index) -1 else 0), handCard:cards[i]);
-    x += CARD_WIDTH;
+    renderCard(x, y:y + (if (i == index) -1 else 0), handCard:cards[i], showEnergy);
+    x += fitWidth;
     
     if (i == index) ::<= {
-      renderArt(user, handCard:cards[i], topWeight:0.1);
+      renderArt(user, handCard:cards[i], topWeight:0.1, showEnergy);
     }
     
   }
@@ -203,6 +235,7 @@
       @c = Object.instantiate(type:HandCard);
       c.level = if (level == empty) 1 else level;
       c.id = id;
+      c.energy = random.pickArrayItem(:ENERGY->values);
       return c;
     },
     
@@ -216,7 +249,7 @@
       windowEvent.queueCustom(
         onEnter::{
           bg = canvas.addBackground(::{
-            renderCards(user, cards);
+            renderCards(user, cards, showEnergy:true);
           });
         }
       );
@@ -251,6 +284,7 @@
       card.id = id;
       card.owner = if (noDeck == true) empty else state;
       card.level = if (Profession.find(:state.profession).arts->findIndex(:id) == -1) 1 else 2;
+      card.energy = random.pickArrayItem(:ENERGY->values);
       state.hand->push(value:card);
       emitEvent(event:EVENTS.DRAW, card);
       return card;
@@ -566,13 +600,23 @@
         windowEvent.queueNestedResolve(
           onEnter ::{
             bg = canvas.addBackground(::{
-              renderCards(user, cards:state.hand, enabled);
+              renderCards(user, cards:state.hand, enabled, showEnergy:true);
             });
         
             windowEvent.queueChoices(
               hideWindow : true,
+              horizontalFlow: true,
               keep : true,
-              onGetChoices ::<- [...enabled]->map(::(value)<- '' + value),
+              onGetChoices :: {
+                enabled = [];
+                for(0, state.hand->size) ::(i) {
+                  if(
+                    filter == empty ||
+                    filter(:state.hand[i])
+                  ) enabled->push(:i);
+                }
+                return [...enabled]->map(::(value)<- '' + value)
+              },
               jumpTag : 'ARTSDECKCHOOSE',
               onHover::(choice) {
                 selected = choice-1;
@@ -604,25 +648,27 @@
                     );
                   }
                 ];
-                
-                if (act == 'Use' && Arts.find(:handCard.id).kind == Arts.KIND.ABILITY) ::<= {
-                  choices->push(:'Level up');
+                                
+                @:upgradable = Arts.find(:handCard.id).kind == Arts.KIND.ABILITY ||
+                               Arts.find(:handCard.id).kind == Arts.KIND.EFFECT;
+                if (act == 'Use' && upgradable) ::<= {
+                  @:isAbility = Arts.find(:handCard.id).kind == Arts.KIND.ABILITY;
+                  choices->push(:if (isAbility) 'Level up' else 'Add counter');
                   choiceActions->push(::{
                     // need at least 2 of the same kind
-                    when([...state.hand]->filter(::(value) <- value.id == handCard.id)->size < 2) ::<= {
+                    when([...state.hand]->filter(::(value) <- value.energy == handCard.energy)->size < 2) ::<= {
                       windowEvent.queueMessage(
-                        text: 'Leveling Ability Arts requires more than 1 of the same Ability.'
+                        text: 'Enhancing Arts requires more than 1 of the same Energy type.'
                       );
                     } 
                     
                     windowEvent.queueMessage(
-                      text: 'Choose the ' + Arts.find(id:handCard.id).name + ' Art to combine with this one.'
+                      text: 'Choose an Art to combine with this one.'
                     );    
                     
-                    @:choiceCards = [...state.hand]->filter(::(value) <- value.id == handCard.id && value != handCard);
+                    @:choiceCards = [...state.hand]->filter(::(value) <- value.energy == handCard.energy && value != handCard);
                     @:choices = [...choiceCards]->map(::(value) {
-                      @:art = Arts.find(id:value.id);
-                      return art.name + ' - Lv.' + value.level;
+                      return Arts.find(:value.id).name;
                     });
                     
                     windowEvent.queueChoices(
@@ -634,9 +680,15 @@
                           discardIndex: this.hand->findIndex(:choiceCards[choice-1])
                         );
 
-                        windowEvent.queueMessage(
-                          text: 'The card was sacrificed to increase the ' + Arts.find(id:handCard.id).name + ' art to Lv. ' + handCard.level + '.'
-                        );
+                        if (isAbility) ::<= {
+                          windowEvent.queueMessage(
+                            text: 'The Art was sacrificed to increase the ' + Arts.find(id:handCard.id).name + ' art to Lv. ' + handCard.level + '.'
+                          );
+                        } else ::<= {
+                          windowEvent.queueMessage(
+                            text: 'The Art was sacrificed to increase the ' + Arts.find(id:handCard.id).name + ' card\'s AP counter to ' + (handCard.level-1) + '.'
+                          );                        
+                        }
                       }
                     );
                   });

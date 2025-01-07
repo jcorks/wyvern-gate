@@ -38,7 +38,8 @@
 */
 
 @:TRAITS = {
-  NON_COMBAT : 1
+  NON_COMBAT : 1,
+  PACIFIST : 2, // only waits.
 }
 
 @:reset ::{
@@ -580,12 +581,12 @@ Profession.newEntry(data:{
   levelMinimum : 1,
 
   arts : [
-    'base:pink-brew',   //X -3 ingredient pack, +1 pink potion 
-    'base:cyan-brew',   //X -3 ingredient pack, +1 cyan ption 
-    'base:green-brew',  //X etc (poison)
-    'base:orange-brew',   //X etc (explosion)
-    'base:purple-brew',   //X etc (health + ap)
-    'base:black-brew',  //X petrify
+    'base:scavenge',
+    'base:make-heal-potion',
+    'base:make-buff-potion',   //X -3 ingredient pack, +1 pink potion 
+    'base:make-debuff-potion',   //X -3 ingredient pack, +1 cyan ption 
+    'base:make-essence',  //X etc (poison)
+    'base:mix-potion',  //X petrify
   ],
   passives : [
     'base:alchemists-scavenging' // find 1 Ingredient Pack
@@ -1056,6 +1057,36 @@ Profession.newEntry(data:{
     'base:shock'
   ]
 })
+
+Profession.newEntry(data:{
+  name: 'Defensive Pylon',
+  id : 'base:defensive-pylon',
+  traits : TRAITS.PACIFIST,
+  weaponAffinity: 'base:knuckle',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 2,
+    INT: 7,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 7
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+  ],
+  passives : [
+    'base:shock'
+  ]
+})
+
 
 Profession.newEntry(data:{
   name: 'Guiding Light',

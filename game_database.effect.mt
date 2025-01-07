@@ -27,7 +27,12 @@
   SPECIAL : 8,
   
   // Means the holder will always go first. Ties are randomly decided
-  ALWAYS_FIRST : 16
+  ALWAYS_FIRST : 16,
+  REVIVAL : 32,
+  
+  // Overrides duration to always be 0. effect stack will not report these if alone 
+  // in a change.
+  INSTANTANEOUS : 64
   
   
 };
@@ -148,7 +153,7 @@ Effect.newEntry(
           text: holder.name + '\'s attack bypassed ' + to.name +'\'s DEF!'
         );
 
-        damage.forceDEFbypass = true;
+        damage.traits |= Damage.TRAITS.FORCE_DEF_BYPASS;
         holder.removeEffectInstance(:
           holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:take-aim')[0]
         )
@@ -1746,7 +1751,7 @@ Effect.newEntry(
     description: 'The item is destroyed in the process of its effects',
     stackable: true,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1766,7 +1771,7 @@ Effect.newEntry(
     description: 'The item is destroyed in the process of misuse or strain',
     stackable: true,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1788,7 +1793,7 @@ Effect.newEntry(
     description: 'The item is violently lunged at a target, likely causing damage. The target may catch the item.',
     stackable: true,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1827,12 +1832,12 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
-    name : 'HP Recovery: All',
+    name : 'Major Recovery',
     id : 'base:hp-recovery-all',
     description: 'Heals 100% of HP.',
     stackable: true,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1844,16 +1849,51 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
-    name : 'AP Recovery: All',
+    name : 'Major Soothing',
     id : 'base:ap-recovery-all',
     description: 'Heals 100% of AP.',
     stackable: true,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
         holder.healAP(amount:holder.stats.AP);
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Minor Healing',
+    id : 'base:hp-recovery-half',
+    description: 'Heals 50% of HP.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
+    stats: StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        holder.heal(amount:holder.stats.HP*0.5);
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Minor Soothing',
+    id : 'base:ap-recovery-half',
+    description: 'Heals 50% of AP.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
+    stats: StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        holder.healAP(amount:holder.stats.AP*0.5);
       }
     }
   }
@@ -2389,7 +2429,7 @@ Effect.newEntry(
     traits : Effect.TRAIT.DEBUFF,
     events : {
       onPreAttackOther ::(from, item, holder, to, damage) {
-        if (damage.isMultihit) ::<= {
+        if ((damage.traits & Damage.TRAITS.MULTIHIT) != 0) ::<= {
           windowEvent.queueMessage(text: holder.name + '\'s Dampen Multi-hit nullified the attack!');
           damage.amount = 0;
         }
@@ -2401,7 +2441,7 @@ Effect.newEntry(
 Effect.newEntry(
   data : {
     name : 'Multi-hit Guard',
-    id : 'base:dampen-multi-hit',
+    id : 'base:multi-hit-guard',
     description: 'All multi-hit attack damage targetting the holder are nullified.',
     stackable: false,
     stats: StatSet.new(
@@ -2800,7 +2840,7 @@ Effect.newEntry(
     description: '50% chance to fully revive if damaged while at 0 HP. This breaks the item.',
     stackable: true,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {
@@ -2827,6 +2867,42 @@ Effect.newEntry(
     }
   }
 )   
+
+Effect.newEntry(
+  data : {
+    name : 'Auto-Life',
+    id : 'base:auto-life',
+    description: '50% chance to fully revive if damaged while at 0 HP. This breaks the item.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.REVIVAL,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (holder.hp == 0) ::<= {
+          windowEvent.queueMessage(text:holder.name + " glows!");
+          holder.unequipItem(item, silent:true);
+          item.throwOut();            
+
+
+          if (random.try(percentSuccess:50)) ::<= {
+
+            @:Entity = import(module:'game_class.entity.mt');
+          
+            damage.amount = 0;
+            holder.heal(amount:holder.stats.HP);
+
+            windowEvent.queueMessage(text:'The ' + item.name + " shatters after reviving " + holder.name + "!");
+          } else ::<= {
+            windowEvent.queueMessage(text:'The ' + item.name + " failed to revive " + holder.name + "!");
+            
+          }
+        }
+      }
+    }
+  }
+)  
+
 
 
 Effect.newEntry(
@@ -3887,7 +3963,7 @@ Effect.newEntry(
 Effect.newEntry(
   data : {
     name : 'Freezing',
-    id : 'base:frozen',
+    id : 'base:freezing',
     description: 'Attacks have 10% chance to inflict Frozen for 2 turns.',
     stackable: true,
     blockPoints : 0,
@@ -4186,7 +4262,7 @@ Effect.newEntry(
           (Damage.TYPE.THUNDER) : 'base:shock',
           (Damage.TYPE.LIGHT) : 'base:shimmering',
           (Damage.TYPE.DARK) : 'base:dark',
-          (Damage.TYPE.POISON) : 'base:poison'
+          (Damage.TYPE.POISON) : 'base:toxic'
         }
         
         when(id == empty) empty;
@@ -4529,15 +4605,15 @@ Effect.newEntry(
 Effect.newEntry(
   data : {
     name : 'Multi Guard',
-    id : 'base:light-guard',
+    id : 'base:multi-guard',
     description: 'Multi-hit damage from others to the holder is reduced to 1.',
-    stackable: true,
+    stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage) {
-        if (attacker != holder) ::<= {
+        if (attacker != holder && ((damage.traits & Damage.TRAITS.MULTIHIT) != 0)) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from the damage thanks to Light Guard!');
           damage.amount = 1;            
         }
@@ -4545,6 +4621,955 @@ Effect.newEntry(
     }
   }
 )
+
+
+Effect.newEntry(
+  data : {
+    name : 'Premonition',
+    id : 'base:premonition',
+    description: 'All critical hits are reduced to 1 damage.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (attacker != holder && ((damage.traits & Damage.TRAITS.IS_CRIT) != 0)) ::<= {
+          windowEvent.queueMessage(text:holder.name + ' is protected from critical hit damage thanks to Premonition!');
+          damage.amount = 1;            
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Crustacean Maneuver',
+    id : 'base:crustacean-maneuver',
+    description: 'All attacks are nullified. Holder cannot move while this effect is active.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreAttack ::(from, item, holder, attacker, damage) {
+        if (attacker != holder) ::<= {
+          windowEvent.queueMessage(text:holder.name + ' is protected from damage thanks to the Crustacean Maneuver!');
+          damage.amount = 1;            
+        }
+      },
+
+      onNextTurn ::(from, item, holder, duration) {        
+        windowEvent.queueMessage(text:holder.name + ' is preparing for incoming damage!');
+        return false;
+      },
+    }
+  }
+)
+
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Lucky Charm',
+    id : 'base:lucky-charm',
+    description: '20% chance to avoid death once, granting 1 HP. On revival, all stacks of Lucky Charm are removed.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.REVIVAL,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (holder.hp == 0) ::<= {
+     
+          if (random.try(percentSuccess:20)) ::<= {
+            windowEvent.queueMessage(text:holder.name + " glows!");
+
+            @:Entity = import(module:'game_class.entity.mt');
+            damage.amount = 0;
+            holder.heal(amount:1);
+
+            holder.effectStack.removeAllByID(:'base:lucky-charm');
+          }        
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Spirit Loan',
+    id : 'base:spirit-loan',
+    description: 'Avoids death, but sends a Dark blast to another ally upon revival that deals damage equivalent to the ally\'s total health. If there are no other allies, revival happens regardless.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.REVIVAL,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when(holder.battle == empty) empty;
+        if (holder.hp == 0) ::<= {
+          windowEvent.queueMessage(text:holder.name + " glows!");
+          holder.effectStack.removeAllByID(:'base:spirit-loan');
+
+          @:Entity = import(module:'game_class.entity.mt');
+          damage.amount = 0;
+          holder.heal(amount:1);
+
+
+          @forWhomItTolls = holder.battle.getAllies(:holder)->filter(::(value) <- value != holder);
+          when(forWhomItTolls->size) ::<= {
+            @:victim = random.pickArrayItem(:forWhomItTolls);
+            victim.damage(
+              attacker: holder,
+              damage : Damage.new(
+                amount : victim.stats.HP,
+                damageType: Damage.TYPE.DARK,
+                damageClass : Damage.CLASS.HP
+              ),
+              dodgeable : false,
+              exact: true
+            );
+          }
+        }
+      }
+    }
+  }
+)
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Procrastinate Death',
+    id : 'base:procrastinate-death',
+    description: 'The next time the holder would die, their HP is set to 1 and this effect is removed. If this effect is never triggered prior to removal, the holder receives Dark damage equal to their total health.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.REVIVAL,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when(holder.battle == empty) empty;
+        if (holder.hp == 0) ::<= {
+          windowEvent.queueMessage(text:holder.name + " glows!");
+          holder.effectStack.removeAllByID(:'base:procrastinate-death');
+
+          @:Entity = import(module:'game_class.entity.mt');
+          damage.amount = 0;
+          holder.heal(amount:1);
+        }
+      },
+
+      onDurationEnd ::(from, item, holder, duration) {
+        @:victim = holder;
+        victim.damage(
+          attacker: holder,
+          damage : Damage.new(
+            amount : victim.stats.HP,
+            damageType: Damage.TYPE.DARK,
+            damageClass : Damage.CLASS.HP
+          ),
+          dodgeable : false,
+          exact: true
+        );
+      }
+    }
+  }
+)
+
+
+
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Cheat Death',
+    id : 'base:cheat-death',
+    description: 'Avoids death, but when avoided stuns the holder for 2 turns.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.REVIVAL,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when(holder.battle == empty) empty;
+        if (holder.hp == 0) ::<= {
+          windowEvent.queueMessage(text:holder.name + " glows!");
+          holder.effectStack.removeAllByID(:'base:cheat-death');
+
+          @:Entity = import(module:'game_class.entity.mt');
+          damage.amount = 0;
+          holder.heal(amount:1);
+
+          holder.addEffect(from:holder, id:'base:stunned', durationTurns:2);                        
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Death Reflection',
+    id : 'base:death-reflection',
+    description: 'Grants a 25% chance to reflect death onto a random combatant instead of the holder.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.REVIVAL,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when(holder.battle == empty) empty;
+        if (holder.hp == 0) ::<= {
+          windowEvent.queueMessage(text:holder.name + " glows!");
+          holder.effectStack.removeAllByID(:'base:death-reflection');
+
+          @:Entity = import(module:'game_class.entity.mt');
+          damage.amount = 0;
+          holder.heal(amount:1);
+          
+          @:victim = random.pickArrayItem(:holder.battle.getAll()->filter(::(value) <- value != holder));
+          windowEvent.queueMessage(text:holder.name + " avoids death at the cost of " + victim.name + '\'s life!');
+          victim.kill();
+        }
+      }
+    }
+  }
+)
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Limit Break',
+    id : 'base:limit-break',
+    description: 'If damage would cause the holder to get knocked out, the holder gains 50% of their HP and inflicts the Limit Reached effect.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.REVIVAL,
+    stats: StatSet.new(),
+    events : {      
+      onKnockedOut ::(from, item, holder) {
+        when(holder.battle == empty) empty;
+        windowEvent.queueMessage(text:holder.name + " glows!");
+        holder.effectStack.removeAllByID(:'base:limit-break');
+
+        @:Entity = import(module:'game_class.entity.mt');
+        holder.heal(amount:(holder.stats.HP / 2)->ceil);
+        holder.addEffect(from:holder, id:'base:limit-reached', durationTurns:99999999);
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Limit Reached',
+    id : 'base:limit-reached',
+    description: 'The holder getting knocked out will also kill the holder.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {      
+      onKnockedOut ::(from, item, holder) {
+        when(holder.battle == empty) empty;
+        windowEvent.queueMessage(text:holder.name + " has reached their limit...");
+        holder.effectStack.removeAllByID(:'base:limit-reached');
+
+        @:Entity = import(module:'game_class.entity.mt');
+        holder.kill();
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Aura',
+    id : 'base:aura',
+    description: 'ATK,DEF,INT,SPD,DEX +70%, gains an additional block point.',
+    stackable: true,
+    blockPoints : 1,
+    traits : 0,
+    stats: StatSet.new(
+      ATK:70, 
+      DEF:70,
+      INT:70,
+      SPD:70,
+      DEX:70
+    ),
+    events : {
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : 'Shield Aura',
+    id : 'base:shield-aura',
+    description: 'DEF +70%, gains an additional block point, and reduces both incoming and outgoing damage by 1.',
+    stackable: true,
+    blockPoints : 1,
+    traits : 0,
+    stats: StatSet.new(
+      DEF:70
+    ),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        damage.amount -= 1;
+        if (damage.amount < 0)
+          damage.amount = 0;
+        windowEvent.queueMessage(text:holder.name + "'s Shield Aura reduced damage!");
+      },
+
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Shield Aura reduced the moved effectiveness!'
+        );
+
+        damage.amount -= 1;
+        if (damage.amount < 0)
+          damage.amount = 0;
+      }      
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Deathless Overflow',
+    id : 'base:deathless-overflow',
+    description: 'If damage would cause the holder to get knocked out, the holder gains 50% of their HP. Holder gain 5 Banish stacks.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF | TRAIT.REVIVAL,
+    stats: StatSet.new(),
+    events : {      
+      onKnockedOut ::(from, item, holder) {
+        when(holder.battle == empty) empty;
+        windowEvent.queueMessage(text:holder.name + " glows!");
+        holder.effectStack.removeAllByID(:'base:deathless-overflow');
+
+        @:Entity = import(module:'game_class.entity.mt');
+        holder.heal(amount:(holder.stats.HP / 2)->ceil);
+        for(0, 5) ::(i) {
+          holder.addEffect(from:holder, id:'base:banish', durationTurns:99999999);
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Soul Buffer',
+    id : 'base:soul-buffer',
+    description: 'Prevents all non-physical damage.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (damage.damageType != Damage.TYPE.PHYS) ::<= { 
+          windowEvent.queueMessage(text:holder.name + "'s Soul Buffer negates the damage!");
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Body Buffer',
+    id : 'base:body-buffer',
+    description: 'Prevents all physical damage.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        if (damage.damageType != Damage.TYPE.PHYS) ::<= { 
+          windowEvent.queueMessage(text:holder.name + "'s Body Buffer negates the damage!");
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Perfect Barrier',
+    id : 'base:perfect-barrier',
+    description: 'Prevents all damage.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        windowEvent.queueMessage(text:holder.name + "'s Perfect Barrier negates the damage!");
+        damage.amount = 0;
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Soul Guard',
+    id : 'base:soul-guard',
+    description: '1/4th chance that the caster nullifies damage done to the holder if the caster is conscious. Upon successful blocking, has a 1/4th chance to cause Paralysis indefinitely.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when (from.isIncapacitated()) empty;
+        when (attacker == empty) empty;
+    
+        when(random.try(percentSuccess:75)) empty;
+        damage.amount = 0;
+        windowEvent.queueMessage(text:holder.name + "'s Soul Guard negates the damage!");
+
+        when(random.try(percentSuccess:75)) empty;
+        attacker.addEffect(from, id:'base:paralyzed',durationTurns:999999999);
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Soul Split',
+    id : 'base:soul-split',
+    description: 'Splits incoming damage between the holder and caster.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when (from.isIncapacitated()) empty;
+        when (attacker == empty) empty;
+    
+        when(random.try(percentSuccess:75)) empty;
+        damage.amount = 0;
+        windowEvent.queueMessage(text:holder.name + "'s Soul Guard negates the damage!");
+
+        when(random.try(percentSuccess:75)) empty;
+        attacker.addEffect(from, id:'base:paralyzed',durationTurns:999999999);
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Soul Split',
+    id : 'base:soul-split',
+    description: 'Redistributes incoming damage between the holder and caster evenly.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        windowEvent.queueMessage(text:holder.name + "'s Soul Split splits damage!");
+
+
+        damage.amount *= 0.5;
+
+        from.damage(attacker:attacker, damage:Damage.new(
+          amount : damage.amount,
+          damageType:damage.damageType,
+          damageClass:damage.damageClass
+        ),dodgeable: false);          
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Soul Projection',
+    id : 'base:soul-projection',
+    description: 'Original caster receives damage instead of the holder.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {      
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        windowEvent.queueMessage(text:holder.name + "'s Soul Projection redirects damage!");
+        from.damage(attacker:attacker, damage:Damage.new(
+          amount : damage.amount,
+          damageType:damage.damageType,
+          damageClass:damage.damageClass
+        ),dodgeable: false);          
+        damage.amount = 0;
+
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Concentrating',
+    id : 'base:concentrating',
+    description: 'Unable to act. Unable to block.',
+    stackable: false,
+    blockPoints : -3,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onNextTurn ::(from, item, holder, duration) {        
+        windowEvent.queueMessage(text:holder.name + ' is concentrating and unable to act!');
+        return false;
+      }
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : 'Charmed',
+    id : 'base:charmed',
+    description: 'Attacks from the holder that target the original caster is reduced by 50%',
+    stackable: true,
+    blockPoints : -3,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        when (to != from) empty;
+      
+        windowEvent.queueMessage(
+          text: holder.name + '\'s attack was halved due to being Charmed!'
+        );
+        damage.amount *= 0.5;
+      }
+    }
+  }
+)    
+
+
+Effect.newEntry(
+  data : {
+    name : 'Static Shield',
+    id : 'base:static-shield',
+    description: 'Incoming lightning damage is reduced by 75%. Incoming attacks deal 1 - 4 lighting damage to the attacker.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, to, damage) {
+        if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
+          windowEvent.queueMessage(
+            text: 'Incoming thunder damage was reduced!'
+          );
+          damage.amount *= 0.25;
+        }
+      },
+      
+      onPostAttacked ::(attacker, holder, item, damage) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Static Shield causes damage to ' + attacker.name + '!'
+        );
+        
+        attacker.damage(attacker:holder, damage:Damage.new(
+          amount : random.integer(from:1, to:4),
+          damageType:Damage.TYPE.THUNDER,
+          damageClass:Damage.CLASS.HP
+        ),dodgeable: false, exact:true);
+      }
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : 'Scorching Shield',
+    id : 'base:scorching-shield',
+    description: 'Incoming fire damage is reduced by 75%. Incoming attacks deal 1 - 4 fire damage to the attacker.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, to, damage) {
+        if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+          windowEvent.queueMessage(
+            text: 'Incoming fire damage was reduced!'
+          );
+          damage.amount *= 0.25;
+        }
+      },
+      
+      onPostAttacked ::(attacker, holder, item, damage) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Scorching Shield causes damage to ' + attacker.name + '!'
+        );
+        
+        attacker.damage(attacker:holder, damage:Damage.new(
+          amount : random.integer(from:1, to:4),
+          damageType:Damage.TYPE.FIRE,
+          damageClass:Damage.CLASS.HP
+        ),dodgeable: false, exact:true);
+      }
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : 'Freezing Shield',
+    id : 'base:freezing-shield',
+    description: 'Incoming ice damage is reduced by 75%. Incoming attacks deal 1 - 4 ice damage to the attacker.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, to, damage) {
+        if (damage.damageType == Damage.TYPE.ICE) ::<= {
+          windowEvent.queueMessage(
+            text: 'Incoming ice damage was reduced!'
+          );
+          damage.amount *= 0.25;
+        }
+      },
+      
+      onPostAttacked ::(attacker, holder, item, damage) {
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Freezing Shield causes damage to ' + attacker.name + '!'
+        );
+        
+        attacker.damage(attacker:holder, damage:Damage.new(
+          amount : random.integer(from:1, to:4),
+          damageType:Damage.TYPE.ICE,
+          damageClass:Damage.CLASS.HP
+        ),dodgeable: false, exact:true);
+      }
+    }
+  }
+)    
+
+
+
+::<= {
+
+@:explode::(holder) {
+  windowEvent.queueMessage(
+    text: holder.name + '\'s Acid Dust explodes!'
+  );
+  holder.removeEffectInstance(:
+    (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:acid-dust'))[0]
+  )
+
+  
+  @targets = [holder];
+  if (holder.battle)
+    targets = holder.battle.getAllies(:holder);
+  
+  foreach(targets) ::(k, v) {      
+    v.damage(attacker:holder, damage:Damage.new(
+      amount : random.integer(from:4, to:6),
+      damageType:Damage.TYPE.FIRE,
+      damageClass:Damage.CLASS.HP
+    ),dodgeable: false, exact:true);
+  }
+}
+
+Effect.newEntry(
+  data : {
+    name : 'Acid Dust',
+    id : 'base:acid-dust',
+    description: 'Upon recieving fire-based damage or receiving the Burning effect, the holder and any allies take 4 - 6 fire damage.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+    
+      onPostAddEffect(holder, from, item, effectData) {
+        when(effectData.id != 'base:burning') empty;
+        explode(holder);
+      },
+         
+      onPostDamage ::(attacker, holder, item, damage) {
+        when(damage.damageType != Damage.TYPE.FIRE) empty;
+        explode(holder);
+      }
+    }
+  }
+)    
+}
+
+
+
+
+
+::<= {
+
+@:explode::(holder) {
+  windowEvent.queueMessage(
+    text: holder.name + '\'s Conduction Dust explodes!'
+  );
+  holder.removeEffectInstance(:
+    (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:conduction-dust'))[0]
+  )
+
+  
+  @targets = [holder];
+  if (holder.battle)
+    targets = holder.battle.getAllies(:holder);
+  
+  foreach(targets) ::(k, v) {      
+    v.damage(attacker:holder, damage:Damage.new(
+      amount : random.integer(from:4, to:6),
+      damageType:Damage.TYPE.THUNDER,
+      damageClass:Damage.CLASS.HP
+    ),dodgeable: false, exact:true);
+  }
+}
+
+Effect.newEntry(
+  data : {
+    name : 'Conduction Dust',
+    id : 'base:conduction-dust',
+    description: 'Upon recieving thunder-based damage or receiving the Shock effect, the holder and any allies take 4 - 6 thunder damage.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+    
+      onPostAddEffect(holder, from, item, effectData) {
+        when(effectData.id != 'base:shock') empty;
+        explode(holder);
+      },
+         
+      onPostDamage ::(attacker, holder, item, damage) {
+        when(damage.damageType != Damage.TYPE.THUNDER) empty;
+        explode(holder);
+      }
+    }
+  }
+)    
+}
+
+
+::<= {
+
+@:explode::(holder) {
+  windowEvent.queueMessage(
+    text: holder.name + '\'s Conduction Dust explodes!'
+  );
+  holder.removeEffectInstance(:
+    (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:conduction-dust'))[0]
+  )
+
+  
+  @targets = [holder];
+  if (holder.battle)
+    targets = holder.battle.getAllies(:holder);
+  
+  foreach(targets) ::(k, v) {      
+    v.damage(attacker:holder, damage:Damage.new(
+      amount : random.integer(from:4, to:6),
+      damageType:Damage.TYPE.THUNDER,
+      damageClass:Damage.CLASS.HP
+    ),dodgeable: false, exact:true);
+  }
+}
+
+Effect.newEntry(
+  data : {
+    name : 'Conduction Dust',
+    id : 'base:conduction-dust',
+    description: 'Upon recieving thunder-based damage or receiving the Shock effect, the holder and any allies take 4 - 6 thunder damage.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+    
+      onPostAddEffect(holder, from, item, effectData) {
+        when(effectData.id != 'base:shock') empty;
+        explode(holder);
+      },
+         
+      onPostDamage ::(attacker, holder, item, damage) {
+        when(damage.damageType != Damage.TYPE.THUNDER) empty;
+        explode(holder);
+      }
+    }
+  }
+)    
+}
+
+::<= {
+
+@:explode::(holder) {
+  windowEvent.queueMessage(
+    text: holder.name + '\'s Conduction Dust explodes!'
+  );
+  holder.removeEffectInstance(:
+    (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:conduction-dust'))[0]
+  )
+
+  
+  @targets = [holder];
+  if (holder.battle)
+    targets = holder.battle.getAllies(:holder);
+  
+  foreach(targets) ::(k, v) {      
+    v.damage(attacker:holder, damage:Damage.new(
+      amount : random.integer(from:4, to:6),
+      damageType:Damage.TYPE.THUNDER,
+      damageClass:Damage.CLASS.HP
+    ),dodgeable: false, exact:true);
+  }
+}
+
+Effect.newEntry(
+  data : {
+    name : 'Crystalized Dust',
+    id : 'base:crystalized-dust',
+    description: 'Upon recieving ice-based damage or receiving the Icy effect, the holder and any allies take 4 - 6 ice damage.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+    
+      onPostAddEffect(holder, from, item, effectData) {
+        when(effectData.id != 'base:icy') empty;
+        explode(holder);
+      },
+         
+      onPostDamage ::(attacker, holder, item, damage) {
+        when(damage.damageType != Damage.TYPE.ICE) empty;
+        explode(holder);
+      }
+    }
+  }
+)    
+
+
+
+}
+
+
+Effect.newEntry(
+  data : {
+    name : 'Embarrassed',
+    id : 'base:embarrassed',
+    description: 'When the holder attacks the original caster, 50% chance to miss.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        when(from != to) empty;
+        when(random.coinFlip()) empty;
+        windowEvent.queueMessage(
+          text: holder.name + '\'s embarrassment caused the attack to miss!'
+        );
+
+        damage.amount *= 0;
+      }
+    }
+  }
+)  
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Enraged',
+    id : 'base:enraged',
+    description: 'When the holder attacks the original caster, 33% of damage is inflicted to the holder as well.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        when(from != to) empty;
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Enraged caused recoil damage!'
+        );
+
+        holder.damage(attacker:holder, damage:Damage.new(
+          amount : (damage.amount * 0.33)->ceil,
+          damageType:damage.damageType,
+          damageClass:damage.damageClass
+        ),dodgeable: false, exact:true);          
+
+
+      }
+    }
+  }
+)    
+
+
+Effect.newEntry(
+  data : {
+    name : 'Self-Illusion',
+    id : 'base:self-illusion',
+    description: 'When the holder attacks the original caster, it is inflicted on their self instead.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        when(from != to) empty;
+        when(holder.isIncapacitated()) empty;
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Self-Illusion made the attack directed back!'
+        );
+        
+        holder.attack(
+          target:holder,
+          damage: Damage.new(
+            amount: damage.amount,
+            damageType : damage.damageType,
+            damageClass: damage.damageClass
+          )
+        );
+        
+        damage.amount = 0;              
+      }
+    }
+  }
+)    
+
+
 
 
 

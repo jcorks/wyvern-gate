@@ -621,7 +621,7 @@ ItemEnchant.database.newEntry(
     ],
     
     equipEffects : [
-      "base:frozen"
+      "base:seeping"
     ],
     
     useEffects : [],

@@ -134,15 +134,33 @@ return {
       name : 'Wait',
       filter::(user, battle) <- true,
       onSelect::(user, battle, commitAction) {
-        commitAction(action:
-          BattleAction.new(
-            card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
-            targets: [],
-            extraData: {},
-            turnIndex : 0,
-            targetParts : []
-          )        
-        );
+
+        windowEvent.queueAskBoolean(
+          prompt: 'Discard hand as well?',
+          onChoice::(which) {
+
+            if (which == true) ::<= {
+              windowEvent.queueMessage(
+                text: user.name + ' discards their hand.'
+              );
+              foreach(user.deck.hand) ::(k, v) {
+                user.deck.discardFromHand(:v);              
+              }
+            }
+
+
+            commitAction(action:
+              BattleAction.new(
+                card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
+                targets: [],
+                extraData: {},
+                turnIndex : 0,
+                targetParts : []
+              )        
+            );
+            
+          }
+        );      
       }
     ),
     
@@ -451,7 +469,7 @@ return {
     wait : InteractionMenuEntry.new(
       name : 'Wait',
       keepInteractionMenu : false,
-      filter::(island, landmark) <- true,
+      filter::(island, landmark) <- landmark != empty,
       onSelect::(island, landmark) {
         @:Landmark = import(module:'game_mutator.landmark.mt');
         @:world = import(module:'game_singleton.world.mt');

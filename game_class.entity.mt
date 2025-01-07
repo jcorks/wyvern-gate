@@ -45,6 +45,7 @@
 @:MIN_SUPPORT_COUNT = 5;
 @:DAMAGE_RNG_SPREAD = 0.3;
 @:PROF_EXP_PER_KNOCKOUT = 35;
+@:DECK_MIN_ART_COUNT = 25;
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -78,12 +79,17 @@
     when (alreadyPosted[id] == true) empty;
     alreadyPosted[id] = true;
     @:effect = Effect.find(id:id);
+    when(effect.hasTraits(:Effect.TRAIT.INSTANTANEOUS)) empty;
     @:counts = this.effectStack.getAllByFilter(::(value) <- value.id == id)->size;
     
     @:base = effect.name + (if (counts > 1) "(x"+counts+")" else "");
     when(effectIDs->findIndex(:id) == -1) "   " + base;
 
-    return (if (isAdding)"++ " else "-- ") + base + ": " + effect.description;
+    when (effectIDs->size == 1)
+      (if (isAdding)"++ " else "-- ") + base + ": " + effect.description;
+
+
+    return (if (isAdding)"++ " else "-- ") + base;
   }
   
   
@@ -94,6 +100,9 @@
     lines->push(:line);
   }
   
+  when(lines->size == 0) empty;
+  
+  breakpoint();
   windowEvent.queueDisplay(
     prompt: this.name + ' - Effects Changed!',
     lines: canvas.refitLines(input:lines)
@@ -120,12 +129,16 @@
   return temp->keys;
 }
 
+@:newDeckTemplate ::<- {
+  supportArts : [],
+  professionArts : []
+}
 
 
 
 @:assembleDeck ::(this, state) {
   @:deck = ArtsDeck.new(profession: this.profession.id);
-  
+  @:set = state.deckTemplates[state.equippedDeck];
   
   deck.subscribe(::(event, card) {
     match(event) {
@@ -159,22 +172,17 @@
   }  
   
   // profession boosts
-  foreach(state.equippedProfessionArts) ::(k, v) {
+  foreach(set.professionArts) ::(k, v) {
     deck.addArt(id:v);
   }
   
   
   @:world = import(module:'game_singleton.world.mt');
-  if (this.supportArts) ::<= {
-    foreach(this.supportArts)::(k, v) {
+  if (set.supportArts) ::<= {
+    foreach(set.supportArts)::(k, v) {
       deck.addArt(id:v);
     }
   }
-    
- 
-  
-
-  
   
   return deck;
 }
@@ -433,18 +441,21 @@
 
 @initializeEffectStackProper ::(this, state) {
   
-  
+  @:items = [];
   if (state.innateEffects != empty) ::<= {
     foreach(state.innateEffects) ::(i, v) {
       this.effectStack.addInnate(id:v);
+      items->push(:v);
     }
   }
   
   foreach(this.profession.passives)::(index, passiveName) {
+    items->push(:passiveName);
     this.effectStack.add(
       id:passiveName,
       from:this,
-      duration:999999999999
+      duration:999999999999,
+      noNotify : true
     );
   }
 
@@ -452,14 +463,23 @@
   foreach(state.equips) ::(i, item) {
     when(item == empty) empty;
     foreach(item.equipEffects)::(index, effect) {
+      items->push(:effect);
       this.effectStack.add(
         id:effect,
         item,
         from:this,
-        duration:999999999999
+        duration:999999999999,
+        noNotify : true
       );
     }
   }
+  
+  if (items->size > 0)
+    this.notifyEffect(
+      isAdding: true,
+      effectIDs : items
+    );
+  
   
   this.effectStack.subscribe(
     ::(*args) {
@@ -562,8 +582,8 @@
     level : 0,
     data : empty,
     deck : empty,
-    supportArts : empty,
-    equippedProfessionArts : empty,
+    deckTemplates : empty,
+    equippedDeck : 'MAIN',
     professionArts : empty,
     innateEffects : empty,
     professionProgress : empty
@@ -598,11 +618,11 @@
       state.innateEffects = innateEffects;
       
       state.worldID = world.getNextID();
+      state.deckTemplates = {
+        MAIN : newDeckTemplate()
+      };
 
       // starting supports
-      state.supportArts = [
-        
-      ];
       state.stats = StatSet.new(
         HP:1,
         AP:random.integer(from:8, to:14),
@@ -662,7 +682,6 @@
 
       state.professionProgress = [];
       state.professionArts = [];
-      state.equippedProfessionArts = [];
 
       if (state.profession.traits & Profession.TRAITS.NON_COMBAT) ::<= {
         for(0, 21) ::(i) {
@@ -704,6 +723,45 @@
           )
         );
 
+
+        if (random.try(percentSuccess:7)) ::<= {
+          @itemMaterials = [
+            'base:gold',
+            'base:crystal',
+            'base:mythril',
+            'base:quicksilver',
+            'base:dragonglass',
+            'base:sunstone',
+            'base:moonstone',
+            'base:adamantine',
+            'base:ray',
+            'base:ethereal',
+          ]
+          
+          @itemQualities = [
+            'base:kings',
+            'base:queens',
+            'base:masterwork',
+            'base:legendary',
+            'base:divine',
+          ]
+          
+          @item = Item.new(
+            base: Item.database.getRandomFiltered(
+              filter::(value) <- (
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                value.hasTraits(:Item.TRAIT.METAL | Item.TRAIT.HAS_QUALITY)
+              )
+            ),
+            rngEnchantHint:true,     
+            qualityHint : random.pickArrayItem(list:itemQualities),
+            materialHint : random.pickArrayItem(list:itemMaterials)
+          )  
+
+          state.inventory.add(item);
+            
+        }
+      
         if (state.faveWeapon == empty)
           state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- 
             value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
@@ -803,12 +861,16 @@
     
     
     supportArts : {
-      get ::<- _.state.supportArts,
-      set ::(value) <- _.state.supportArts = value
+      get ::<- _.state.deckTemplates[_.state.equippedDeck].supportArts,
+      set ::(value) <- _.state.deckTemplates[_.state.equippedDeck].supportArts = value
     },
     
     professionArts : {
       get ::<- [..._.state.professionArts]
+    },
+    
+    deckTemplateNames : {
+      get ::<- _.state.deckTemplates->keys
     },
       
     blockPoints : {
@@ -832,29 +894,85 @@
       }
     },
     
-    editDeck ::{
+    addDeck ::(name) {
+      @:state = _.state;
+      @:this = _.this;
+      
+      state.deckTemplates[name] = newDeckTemplate();
+    },
+    
+    getEquippedDeckName ::<- _.state.equippedDeck,
+    
+    equipDeck ::(name, silent) {
+      @:state = _.state;
+      @:this = _.this;
+
+      when (state.deckTemplates->keys->findIndex(:name) == -1) 
+        error(:"No such deck is equippable. Check your code!");
+
+      @:set = state.deckTemplates[name];
+      when(this.calculateDeckSize(:set) < DECK_MIN_ART_COUNT)
+        windowEvent.queueMessage(
+          text: "Deck "+name+' has too few cards to be equipped. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize(:set) + ' out of the minimum of ' + DECK_MIN_ART_COUNT + '.'
+        );
+      
+      if (silent != true)
+        windowEvent.queueMessage(
+          text: this.name + ' is now using the deck ' + name + '.'
+        );
+
+      _.state.equippedDeck = name;
+    },
+    
+    removeDeck ::(which) {
+      @:state = _.state;
+      @:this = _.this;
+
+      when(which == state.equippedDeck) empty;
+      @:world = import(module:'game_singleton.world.mt');
+      
+      foreach(state.deckTemplates[which].supportArts) ::(k, v) {
+        world.party.addSupportArt(id:v);
+      }
+      state.deckTemplates->remove(:which);
+    },
+    
+    editDeck ::(which) {
       @:state = _.state;
       @:this = _.this;
       @:pickArt = import(:'game_function.pickart.mt');
       
+      @:set = state.deckTemplates[which];
+      if (set == empty)
+        error(:'Incorrect deck name');
+      
+      
       
       @:equipped::{
-        when(this.supportArts->size == 0)
+        when(set.supportArts->size == 0)
           windowEvent.queueMessage(
             text: this.name + ' currently has no Support Arts. View the Trunk to add some.'
           );
       
         @:pickArt = import(:'game_function.pickart.mt');
         pickArt( 
-          prompt : 'Equipped:', 
+          onGetPrompt :: {
+            @:size = this.calculateDeckSize(:set);
+            return which + ': ' + (if(size <= DECK_MIN_ART_COUNT) 
+                ''+size + ' / ' + DECK_MIN_ART_COUNT + ' cards'
+              else
+                ''+size + ' cards'
+            )
+          },
+           
           onGetList :: {
-            return this.supportArts;
+            return set.supportArts;
           },
           canCancel:true,
           keep: true,
           onChoice::(choice) {
             @:which = choice;
-            @:id = this.supportArts[which];
+            @:id = set.supportArts[which];
             
             when(id == empty) empty;
             
@@ -869,12 +987,12 @@
               onChoice::(choice) {
                 @:world = import(module:'game_singleton.world.mt');
                 
-                when (state.supportArts->size == MIN_SUPPORT_COUNT) ::<= {
+                when (set.supportArts->size == MIN_SUPPORT_COUNT) ::<= {
                   windowEvent.queueMessage(text: 'Each person must have at least 5 supports in their deck. Please try adding a different Support to this person\'s deck before removing this Art.');
                 }
                 
                 world.party.addSupportArt(id:art.id);
-                state.supportArts->remove(:state.supportArts->findIndex(:art.id));
+                set.supportArts->remove(:set.supportArts->findIndex(:art.id));
               }
             );
 
@@ -918,13 +1036,13 @@
               canCancel: true,
               onChoice::(choice) {
                 @:world = import(module:'game_singleton.world.mt');
-                when(state.supportArts->findIndex(:id) != -1)
+                when(set.supportArts->findIndex(:id) != -1)
                   windowEvent.queueMessage(
                     text: 'Only one of each kind of Support Art can be equipped at a time.'
                   );
                 
                 world.party.takeSupportArt(id:art.id);
-                state.supportArts->push(:art.id);
+                set.supportArts->push(:art.id);
               }
             );
           }
@@ -945,7 +1063,7 @@
           onGetList ::<- this.getUnequippedProfessionArts(),
           canCancel: true,
           onChoice ::(art, category) {
-            state.equippedProfessionArts->push(:art);
+            set.professionArts->push(:art);
           }
         );
       }
@@ -955,12 +1073,23 @@
       @:start ::{
         pickArt(
           keep:true,
-          prompt: this.name + ' Arts:', 
+          onGetPrompt :: {
+            @:size = this.calculateDeckSize(:set);
+            return which + ': ' + (if(size <= DECK_MIN_ART_COUNT) 
+                ''+size + ' / ' + DECK_MIN_ART_COUNT + ' cards'
+              else
+                ''+size + ' cards'
+            )
+          },
+
+
+
           onCancel ::{
-            when(this.calculateDeckSize() < 25) ::<= {
+            when(this.calculateDeckSize(:set) < DECK_MIN_ART_COUNT && state.equippedDeck == which) ::<= {
               windowEvent.queueMessage(
-                text: this.name + '\'s deck has too few cards. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize() + ' out of the minimum of 25.'
+                text: this.name + '\'s deck has too few cards to keep equipped. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize(:set) + ' out of the minimum of ' + DECK_MIN_ART_COUNT + '.'
               );
+              breakpoint();
               
               start();
             }
@@ -974,14 +1103,14 @@
             ] else [empty, empty]]);
 
             categories->push(:['Profession:',::<= {
-              @:profArts = [...state.equippedProfessionArts];
+              @:profArts = [...set.professionArts];
               for(profArts->size, 5) ::(i) {
                 profArts->push(:empty);
               }
               return profArts;
             }]);
 
-            categories->push(:['Support:', [...this.supportArts]]);
+            categories->push(:['Support:', [...set.supportArts]]);
             categories->push(:[' Add support...', []]);
             return categories;
           },
@@ -1003,7 +1132,7 @@
                 onChoice::(choice) {
                   @:world = import(module:'game_singleton.world.mt');
                   world.party.addSupportArt(id:art);
-                  state.supportArts->remove(:state.supportArts->findIndex(:art));
+                  set.supportArts->remove(:set.supportArts->findIndex(:art));
                 
                 }
               )
@@ -1029,8 +1158,8 @@
                 onChoice::(choice) {
                   when(choice == 0) empty;
                   
-                  state.equippedProfessionArts->remove(:
-                    state.equippedProfessionArts->findIndex(:art)
+                  set.professionArts->remove(:
+                    set.professionArts->findIndex(:art)
                   );
                 }
               );
@@ -1042,7 +1171,7 @@
       start();
     },
 
-    viewDeckArts ::(prompt) {
+    viewDeckArts ::(prompt, which) {
       @:this = _.this;
       @:state = _.state;
       // add weapon
@@ -1055,12 +1184,13 @@
           hand.arts[1]
         ]])
       }  
+      @:set = state.deckTemplates[state.equippedDeck];
 
       // profession boosts
-      categories->push(:['Profession:', [...state.equippedProfessionArts]]);
+      categories->push(:['Profession:', [...set.professionArts]]);
 
-      if (this.supportArts) ::<= {
-        categories->push(:['Support:', [...this.supportArts]]);;
+      if (set.supportArts) ::<= {
+        categories->push(:['Support:', [...set.supportArts]]);;
       }
 
       
@@ -1083,23 +1213,29 @@
       _.state.shield = 0;
     },
     
-    calculateDeckSize ::{
+    calculateDeckSize ::(set){
       @:state = _.state;
       @:this = _.this;
       @:pickArt = import(:'game_function.pickart.mt');
       
-      return [
-          ...this.supportArts, 
-          ...state.equippedProfessionArts,
-          ...(if (state.equips[EQUIP_SLOTS.HAND_LR]) 
-            [
-              state.equips[EQUIP_SLOTS.HAND_LR].arts[0],        
-              state.equips[EQUIP_SLOTS.HAND_LR].arts[1]
-            ]
-          else 
-            []
-          )
-        ]->reduce(::(previous, value) <-
+      if (set == empty)
+        set = state.deckTemplates[state.equippedDeck];
+      
+      @:cards = [
+        ...set.supportArts, 
+        ...set.professionArts,
+        ...(if (state.equips[EQUIP_SLOTS.HAND_LR]) 
+          [
+            state.equips[EQUIP_SLOTS.HAND_LR].arts[0],        
+            state.equips[EQUIP_SLOTS.HAND_LR].arts[1]
+          ]
+        else 
+          []
+        )
+      ]      
+      
+      when(cards->size == 0) 0;
+      return cards->reduce(::(previous, value) <-
           (if (previous == empty) 0 else previous) + 
           ArtsDeck.artIDtoCount(:value)
         );    
@@ -1351,6 +1487,20 @@
         // TODO: add weapon affinities if phys and equip weapon
         // phys is always assumed to be with equipped weapon
 
+
+        @critChance = (this.stats.LUK - target.stats.LUK) / 100;
+        if (critChance < 0.001) critChance = 0.001;
+        critChance *= 100;
+        if (critChance > 25) critChance = 25;
+        if (random.try(percentSuccess:critChance) || ((dmg.traits & Damage.TRAITS.FORCE_CRIT) != 0)) ::<={
+          if (dmg.amount < 5) dmg.amount = 5;
+          dmg.amount *= 2.5;
+          dmg.traits |= Damage.TRAITS.IS_CRIT;
+          isCrit = true;
+        }
+
+
+
         effectStack.emitEvent(
           name: 'onPreAttackOther',
           to : target, 
@@ -1372,9 +1522,7 @@
         when(dmg.amount <= 0) empty;
 
 
-        @critChance = (this.stats.LUK - target.stats.LUK) / 100;
-        if (critChance < 0.001) critChance = 0.001;
-        critChance *= 100;
+
         @isCrit = false;
         @isHitHead = false;
         @isLimbHit = false;
@@ -1383,12 +1531,6 @@
         @missHead = false;
         @missBody = false;
         @missLimb = false;
-        if (critChance > 25) critChance = 25;
-        if (random.try(percentSuccess:critChance) || dmg.forceCrit) ::<={
-          if (dmg.amount < 5) dmg.amount = 5;
-          dmg.amount *= 2.5;
-          isCrit = true;
-        }
 
 
         @backupStats;
@@ -1509,7 +1651,7 @@
 
         @isDexed = false;
         @isDefed = false;
-        if (!target.isIncapacitated() && random.try(percentSuccess:33) && dmg.forceDEFbypass != true) ::<= {
+        if (!target.isIncapacitated() && random.try(percentSuccess:33) && ((dmg.traits & Damage.TRAITS.FORCE_DEF_BYPASS) == 0)) ::<= {
           if (this.stats.DEX > target.stats.DEF) ::<= {       
             windowEvent.queueMessage(
               text: target.name + ' tried to completely nullify the damage, but ' + this.name + ' went through ' + target.name + '\'s defenses thanks to their high DEX!'
@@ -1605,9 +1747,7 @@
         when(target.isDead == false && hpWas0 && target.hp == 0) ::<= {
           this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
           target.flags.add(flag:StateFlags.DIED);
-          target.kill(from:this);        
-          
-          animateDeath(:target);
+          target.kill(from:this);                  
         }
 
         return true;
@@ -1793,6 +1933,11 @@
               name: 'onKnockout',
               to: this
             );
+            
+          this.effectStack.emitEvent(
+            name: 'onKnockedOut',
+            from: attacker
+          );
         }
 
         return true;
@@ -1875,7 +2020,7 @@
       state.canMake = [];
       foreach(Item.database.getRandomSet(
           count:if (this.profession.id == 'base:blacksmith') 10 else 2,
-          filter::(value) <- value.hasTraits(:Item.TRAIT.METAL)
+          filter::(value) <- value.hasTraits(:Item.TRAIT.METAL | Item.TRAIT.HAS_QUALITY) && value.hasNoTrait(:Item.TRAIT.UNIQUE)
       )) ::(k, val) {
         state.canMake->push(value:val.id);
       }
@@ -2042,26 +2187,22 @@
       );
     },
     
-    equipProfessionArt::(id) {
-      @:state = _.state;
-      state.equippedProfessionArts->push(:id);
-    },
     
     removeAllProfessionArts ::{
       @:state = _.state;
-      state.professionArts = [];
+      state.deckTemplates[state.equippedDeck].professionArts = [];
     },
     
     equipAllProfessionArts:: {
       @:state = _.state;
-      state.equippedProfessionArts = [...state.professionArts];
+      state.deckTemplates[state.equippedDeck].professionArts = [...state.professionArts];
     },
     
     getUnequippedProfessionArts:: {
       @:state = _.state;
 
       return state.professionArts->filter(::(value) <-
-        (state.equippedProfessionArts->findIndex(:value) == -1)
+        (state.deckTemplates[state.equippedDeck].professionArts->findIndex(:value) == -1)
       )
     },
       
@@ -2121,6 +2262,9 @@
 
       state.flags.add(flag:StateFlags.DIED);
       state.isDead = true;        
+      
+      if (silent != true)
+        animateDeath(:this);
     },
     
     addEffect::(from => Object, id => String, durationTurns => Number, item, innate) {
@@ -2392,9 +2536,9 @@
 
       if (_.effectStack) ::<= {
         foreach(current.equipEffects) ::(i, id) {
-          this.effectStack.removeInnate(
-            item: current,
-            id
+          this.effectStack.removeByFilter(::(value) <-
+            value.id == id &&
+            value.item == current
           );
         }
       }
@@ -2436,7 +2580,7 @@
       @:this = _.this;
       @:abilitiesUsedBattle = _.abilitiesUsedBattle;
       
-      when (abilitiesUsedBattle != empty && art.oncePerBattle && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
+      when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAITS.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
         text: this.name + " tried to use " + art.name + ", but already was used and could not be used!"
       );
       if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
@@ -2721,7 +2865,7 @@
         @:card = action.card;
 
         @:art = Arts.find(:card.id);
-        when (abilitiesUsedBattle != empty && art.oncePerBattle && abilitiesUsedBattle[card.id] == true) ::<= {
+        when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAITS.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[card.id] == true) ::<= {
           windowEvent.queueMessage(
             text: this.name + " tried to use " + card.name + ", but already was used and could not be used again!"
           ) 
@@ -2853,14 +2997,14 @@
       // inefficient, but idc        
       @:describeDual::(qual0, qual1, index) {
         return random.pickArrayItem(list:[
-          'They have ' + qual0.name + 
+          'They have ' + (if (qual0.plural == true || qual0.countable == false) qual0.name else correctA(:qual0.name)) + 
               (if (qual0.plural) ' that are ' else ' that is ') 
             + qual0.description + ', and their '
             + qual1.name + 
               (if (qual1.plural) ' are ' else ' is ') 
             + qual1.description + '. ',
 
-          'They have ' + qual0.name + 
+          'They have ' + (if (qual0.plural == true || qual0.countable == false) qual0.name else correctA(:qual0.name)) + 
               (if (qual0.plural) ' that are ' else ' that is ') 
             + qual0.description + ', and their '
             + qual1.name + 
@@ -2871,8 +3015,8 @@
           this.name + '\'s ' + qual0.name + 
               (if (qual0.plural) ' are ' else ' is ') 
             + qual0.description + ', and they have '
-            + (if (qual1.plural == false) correctA(word:qual1.name) else qual1.name) + 
-              (if (qual1.plural) ' which are ' else ' which is ') 
+            + (if (qual1.plural == true || qual1.countable == false) qual1.name else correctA(word:qual1.name)) + 
+              (if (qual1.plural && qual1.countable) ' which are ' else ' which is ') 
             + qual1.description + '. ',
         ]);
       }
@@ -2880,15 +3024,15 @@
       @:describeSingle::(qual, index) {
         return random.pickArrayItem(list:[
           this.name + '\'s ' + qual.name + 
-              (if (qual.plural) ' are ' else ' is ') 
+              (if (qual.plural && qual.countable) ' are ' else ' is ') 
             + qual.description + '. ',
 
           'Their ' + qual.name + 
-              (if (qual.plural) ' are ' else ' is ') 
+              (if (qual.plural && qual.countable) ' are ' else ' is ') 
             + qual.description + '. ',              
 
           'Their ' + qual.name + 
-              (if (qual.plural) ' are ' else ' is ') 
+              (if (qual.plural && qual.countable) ' are ' else ' is ') 
             + qual.description + '. '   
         ]);
       }
