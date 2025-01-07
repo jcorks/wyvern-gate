@@ -421,7 +421,7 @@ Effect.newEntry(
     stats: StatSet.new(
     ),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
         when (!holder.isIncapacitated() && random.try(percentSuccess:60)) ::<= {
           windowEvent.queueMessage(text:
             random.pickArrayItem(list: [
