@@ -493,6 +493,7 @@
 }
 
 
+
 @:EQUIP_SLOTS = {
   HAND_LR : 0,
   ARMOR : 1,
@@ -2234,13 +2235,22 @@
     data : {
       get ::<- _.state.data
     },
-      
-    kill ::(silent, from) {
+
+    // happens once the dying effect is removed
+    killFinalize::(from) {
       @:world = import(module:'game_singleton.world.mt');
       @:state = _.state;
       @:this = _.this;
-      state.hp = 0;
+    
+      if (from != empty) ::<= {
+        from.effectStack.emitEvent(
+          name : 'onKill',
+          to: this
+        );
+      }
 
+      state.flags.add(flag:StateFlags.DIED);
+      state.isDead = true;        
 
       // basically if anyone dies its a bad time
       if (world.party.isMember(entity:this))
@@ -2252,19 +2262,18 @@
         }
       }
 
-
-      if (from != empty) ::<= {
-        from.effectStack.emitEvent(
-          name : 'onKill',
-          to: this
-        );
-      }
-
-      state.flags.add(flag:StateFlags.DIED);
-      state.isDead = true;        
       
-      if (silent != true)
-        animateDeath(:this);
+      animateDeath(:this);
+    },
+
+      
+    kill ::(silent, from) {
+      @:state = _.state;
+      @:this = _.this;
+      state.hp = 0;
+
+      if (this.effectStack.getAllByFilter(::(value) <- value.id == 'base:dying')->size == 0)
+        this.addEffect(from, id:'base:dying', durationTurns:2);
     },
     
     addEffect::(from => Object, id => String, durationTurns => Number, item, innate) {

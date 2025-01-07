@@ -982,7 +982,7 @@ return empty;
           );
         }      
       },      
-      x:{ set ::(value) <- save+=1},
+      x:{ set ::(value) <- save},//+=1},
       visitCurrentIsland ::(restorePos, atGate, onReady) {  
         @:island = world.island;
         

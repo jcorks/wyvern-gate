@@ -54,6 +54,24 @@
   
   //////////////////////
 
+Effect.newEntry(
+  data : {
+    name : 'Dying',
+    id: 'base:dying',
+    description: 'The holder is dying. When this effect\'s duration is reached and HP of the holder is 0, the combatant will die.',
+    stackable: false,
+    blockPoints : 1,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onDurationEnd::(from, item, holder) {
+        when(holder.hp != 0) empty;
+        holder.killFinalize(:from);
+      }
+    }
+  }
+)
+
 
 
 Effect.newEntry(
@@ -5313,7 +5331,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
     
-      onPostAddEffect(holder, from, item, effectData) {
+      onPostAddEffect::(holder, from, item, effectData) {
         when(effectData.id != 'base:burning') empty;
         explode(holder);
       },
@@ -5366,7 +5384,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
     
-      onPostAddEffect(holder, from, item, effectData) {
+      onPostAddEffect::(holder, from, item, effectData) {
         when(effectData.id != 'base:shock') empty;
         explode(holder);
       },
@@ -5416,7 +5434,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
     
-      onPostAddEffect(holder, from, item, effectData) {
+      onPostAddEffect::(holder, from, item, effectData) {
         when(effectData.id != 'base:shock') empty;
         explode(holder);
       },
@@ -5465,7 +5483,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
     
-      onPostAddEffect(holder, from, item, effectData) {
+      onPostAddEffect::(holder, from, item, effectData) {
         when(effectData.id != 'base:icy') empty;
         explode(holder);
       },

@@ -10500,7 +10500,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
     kind : KIND.EFFECT,
-    traits : ,
+    traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -10699,7 +10699,6 @@ Arts.newEntry(
           text: 'An elemental imp was summoned!'
         );
         
-        if (user
         
         windowEvent.queueMessage(
           speaker: 'Elemental Imp',
@@ -10711,9 +10710,9 @@ Arts.newEntry(
           canCancel: false,
           keep: false,
           prompt: 'Grant which?',
-          choices : which->map(::(value) <- Effect.find(:value).name);
+          choices : which->map(::(value) <- Effect.find(:value).name),
           onChoice::(choice) {
-            done(which[choice-1]);
+            done(:which[choice-1]);
             windowEvent.queueMessage(
               speaker: 'Elemental Imp',
               text: '"Pleasure doin\' business with ya!"'

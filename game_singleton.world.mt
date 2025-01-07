@@ -869,7 +869,6 @@
           island = alreadyLoaded 
         else ::<= {
           island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
-          State.weightCheck(:which);
           island.load(serialized:which);
         }
         
@@ -902,6 +901,7 @@
           if (!State.weightCheck(:serialized)) ::<= {
             @:instance = import(:'game_singleton.instance.mt');
             instance.x = true;
+            breakpoint();
           }
         
           if (serialized.rng != empty)
