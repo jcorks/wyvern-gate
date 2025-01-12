@@ -32,6 +32,7 @@ import(module:'game_database.material.mt');
 import(module:'game_database.personality.mt');
 import(module:'game_database.scene.mt');
 import(module:'game_database.species.mt');
+import(module:'game_database.book.mt');
 
 import(module:'game_mutator.entityquality.mt');
 import(module:'game_mutator.event.mt');
@@ -461,8 +462,6 @@ return class(
           settings = JSON.decode(string:settings);
           this.updateSettings();
         }
-        
-
 
 
 /*
@@ -493,6 +492,17 @@ return class(
 }
 
 @:doMain :: {
+  windowEvent.queueCustom(onEnter::{
+    windowEvent.queueInputEvents(:[
+      {input:windowEvent.CURSOR_ACTIONS.UP, waitFrames:20},
+      {input:windowEvent.CURSOR_ACTIONS.DOWN, waitFrames:5},
+      {input:windowEvent.CURSOR_ACTIONS.DOWN, waitFrames:5},
+      {input:windowEvent.CURSOR_ACTIONS.DOWN, waitFrames:5},
+      {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:30}
+    ])
+  });
+
+
   windowEvent.queueChoices(
     choices: [
       "1",
@@ -509,6 +519,7 @@ return class(
       otherChoices();
     }
   );
+  
 }
 
 windowEvent.queueCustom(

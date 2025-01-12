@@ -117,13 +117,13 @@
         return state.members->any(condition:::(value) <- value.worldID == id);
       },
             
-      remove::(member => Entity.type) {
+      remove::(member => Entity.type, silent) {
         {:::}{
           foreach(state.members)::(index, m) {
             if (m == member)::<={
-              breakpoint();
               state.members->remove(key:index);
-              windowEvent.queueMessage(text:m.name + ' has been removed from the party.');
+              if (silent != true)
+                windowEvent.queueMessage(text:m.name + ' has been removed from the party.');
               if (state.leader == index) ::<= {
                 state.leader = (index+1)%state.members->size;
               } 

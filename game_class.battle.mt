@@ -386,6 +386,7 @@
           // normal turn: request action from the act function
           // given by the caller
           @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
+          if (onTurn_) onTurn_(battle:this, entity:ent, landmark:landmark_);
           act(
             battle:this,
             user:ent,
@@ -602,6 +603,7 @@
         renderable,
         
         onStart,
+        skipResults,
         onEnd => Function
       ) {
         actions = {} 
@@ -627,7 +629,6 @@
           group2party[groups[0]] = true;
 
         
-        canvas.pushState();
         turn = [];
         turnIndex = 0;
         active = true;
@@ -717,7 +718,7 @@
           
           
           
-          when (npcBattle != empty) ::<= {
+          when (npcBattle != empty || skipResults == true) ::<= {
             startEnd(message:'The battle is over.');
             finishEnd();
           } 

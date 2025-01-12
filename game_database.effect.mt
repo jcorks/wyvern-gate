@@ -54,6 +54,33 @@
   
   //////////////////////
 
+
+Effect.newEntry(
+  data : {
+    name : 'Reading',
+    id : 'base:read',
+    description: 'The user is in the middle of reading a book.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.INSTANTANEOUS,
+    stats: StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        when(item == empty)
+          windowEvent.queueMessage(speaker: holder.name, text: "\"Why am I reading right now??\"");
+
+        if (item.data.book) ::<= {
+          @:w = item.data.book.onGetContents();
+          windowEvent.queueMessage(text:w);
+        }
+
+      }
+    }
+  }
+)    
+
+
+
 Effect.newEntry(
   data : {
     name : 'Dying',
@@ -5588,7 +5615,118 @@ Effect.newEntry(
 )    
 
 
+Effect.newEntry(
+  data : {
+    name : '@b305',
+    id : 'base:b305',
+    description: 'Adds one additional block point. Any damage taken is increased by 1.',
+    stackable: true,
+    blockPoints : 1,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when(damage.amount == 0) empty;
+        damage.amount += 1;
+        windowEvent.queueMessage(
+          text: holder.name + '\'s b305 increased the damage received!'
+        );
+        
+      }
+    }
+  }
+)  
 
+Effect.newEntry(
+  data : {
+    name : '@b307',
+    id : 'base:b307',
+    description: 'Successful blocks add a stack of Empowered to the holder for 3 turns.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onSuccessfulBlock ::(from, item, holder, attacker, damage) {
+        holder.addEffect(from:holder, id:'base:empowered', durationTurns:3);
+      }
+    }
+  }
+)    
+  
+Effect.newEntry(
+  data : {
+    name : 'Empowered',
+    id : 'base:empowered',
+    description: 'Next attack from the holder is 1.5x more damaging. This effect is removed after.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage) {
+        windowEvent.queueMessage(text: holder.name + '\'s Empowered increased damage by 1.5 times!');
+        damage.amount = (damage.amount*1.5)->ceil;
+        holder.removeEffectInstance(:
+          holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:empowered')[0]
+        )
+      }
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : '@b308',
+    id : 'base:b308',
+    description: 'Successful blocks inflicts the Stunned effect on the attacker for 1 turn.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onSuccessfulBlock ::(from, item, holder, attacker, damage) {
+        windowEvent.queueMessage(text: holder.name + '\'s successful block stunned the attacker!');
+        holder.addEffect(from:holder, id:'base:stunned', durationTurns:1);
+      }
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : '@b309',
+    id : 'base:b309',
+    description: 'Successful blocks have a 10% chance of unequipping a the weapon of the attacker. Else, add a stack of Bleeding to the attacker for 3 turns.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onSuccessfulBlock ::(from, item, holder, attacker, damage) {
+        windowEvent.queueMessage(text: holder.name + '\'s successful block activated b309!');
+        @:world = import(module:'game_singleton.world.mt');
+        @:Entity = import(module:'game_class.entity.mt');           
+
+        @:equipped = attacker.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR); 
+        
+        if (random.try(percentSuccess:10) && equipped.name != 'None') ::<= {
+          windowEvent.queueCustom(
+            onEnter :: {
+              attacker.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+              if (world.party.isMember(entity:attacker))
+                world.party.inventory.add(item:equipped);
+            }
+          )
+          windowEvent.queueMessage(text:attacker.name + ' lost grip of their ' + equipped.name + '!');
+        } else ::<= {
+          attacker.addEffect(from:holder, id:'base:bleeding', durationTurns:3);        
+        }
+
+      }
+    }
+  }
+)    
 
 
 }

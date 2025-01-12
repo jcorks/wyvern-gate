@@ -869,6 +869,7 @@
           island = alreadyLoaded 
         else ::<= {
           island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
+          State.weightCheck(:which);
           island.load(serialized:which);
         }
         
@@ -895,7 +896,6 @@
      
       
       load ::(serialized) {
-        breakpoint();
         State.startRootSerializeGuard();
         ::<= {
           if (!State.weightCheck(:serialized)) ::<= {
@@ -912,7 +912,6 @@
           island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
           island.load(:serialized.islands[state.currentIslandID]);
           landmark = {:::} {  
-            breakpoint();    
             foreach(island.landmarks) ::(k, v) {
               if (v.worldID == state.currentLandmarkID)
                 send(:v);

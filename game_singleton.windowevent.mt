@@ -133,6 +133,7 @@
     @resolveQueues = {};
     @requestAutoSkip = false;
     @autoSkipIndex = empty;
+    @queuedInputs = [];
     
     resolveQueues->push(:{
       onResolveAll : {},
@@ -254,8 +255,23 @@
       }
     }
     
-    @:commitInput ::(input, level) {
+    @:queuedInputFetch::(input) {
+      when(queuedInputs->size == 0) input;
+      @:next = queuedInputs[0];
+      when(next.waitFrames > 0) ::<= {
+        next.waitFrames-=1;
+        return empty;
+      }
+      queuedInputs->remove(key:0);
+      @:out = next.input;
+      if (next.callback)
+        next.callback();
+        
+      return out;
+    }
     
+    @:commitInput ::(input, level) {
+      input = queuedInputFetch(input);
       @continue; 
       @val;
       if (choiceStack->keycount > 0) ::<= {
@@ -745,6 +761,12 @@
       
       if (data.onInput != empty && input != empty)
         data.onInput(input);
+
+      when(data.waitFrames != empty && data.waitFrames > 0) ::<= {
+        data.waitFrames -= 1;
+        return false;
+      }
+
         
       when(data.resolveStack == true) ::<= {
         when(canResolveNext()) ::<= {
@@ -755,6 +777,7 @@
       }
       
       when(data.busy) false;
+      
       return true;  
     }
     
@@ -1274,6 +1297,7 @@
         jumpTag, 
         onLeave, 
         isAnimation, 
+        waitFrames,
         animationFrame
       ) {
         when(requestAutoSkip) ::<= {
@@ -1292,10 +1316,20 @@
             onLeave: onLeave,
             isAnimation : isAnimation,
             animationFrame : animationFrame,
+            waitFrames : waitFrames,
             onInput : onInput
           });
         }]);        
         return getResolveQueue()->size-1;
+      },
+
+      // forcibly resolves the next queued item.
+      // This is used for cases where normal 
+      // user input is not sufficient for the desired 
+      // effect.       
+      forceResolveNext::{
+        when(canResolveNext())
+          resolveNext();
       },
 
 
@@ -1658,6 +1692,22 @@
       // returns any resolvable items are left queued.
       hasAnyQueued:: {
         return getResolveQueue()->size != 0;
+      },
+      
+      // queues a set of input events to be played
+      // list should be an array of objects, each object 
+      //
+      // should contain:
+      //  input : windowEvent.INPUT.*
+      //  waitFrames : Number
+      //  callback : Function
+      // 
+      // while inputs are queued, external inputs are ignored
+      // until all queuedInputs are processed
+      queueInputEvents ::(list) {
+        foreach(list) ::(k, v) {
+          queuedInputs->push(:{...v});        
+        }
       }
     }  
   }

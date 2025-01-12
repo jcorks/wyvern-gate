@@ -1021,7 +1021,6 @@ Landmark.database.newEntry(
         return state.save();
       },
       load ::(serialized) { 
-        breakpoint();
         if (serialized.isSparse) ::<= {
           @:sparse = StateType.new();
           sparse.load(parent:this, serialized);

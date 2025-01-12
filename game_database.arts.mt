@@ -5053,7 +5053,7 @@ Arts.newEntry(
     keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
-    traits : TRAITS.SUPPORT | TRAITS.PHYSICAL,
+    traits : TRAITS.SUPPORT | TRAITS.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5973,7 +5973,7 @@ Arts.newEntry(
 Arts.newEntry(
   data: {
     name: 'Bound Banish',
-    id : 'base:banish',
+    id : 'base:bound-banish',
     notifCommit : '$1 casts Bound Banish on $2!',
     notifFail : Arts.NO_NOTIF,    
     targetMode : TARGET_MODE.ONE,
@@ -10625,7 +10625,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      user.addEffect(from:user, id:'base:burned', durationTurns:1);
+      user.addEffect(from:user, id:'base:burned', durationTurns:3);
       user.addEffect(from:user, id:'base:burning', durationTurns:999999999999);
     }
   }
@@ -10773,6 +10773,105 @@ Arts.newEntry(
 
 
 
+Arts.newEntry(
+  data: {
+    name: '@b305',
+    id : 'base:b305',
+    notifCommit : "",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:b305'],
+    description: "Grants the b305 effect for 5 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:b305', durationTurns:5);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: '@b307',
+    id : 'base:b307',
+    notifCommit : "",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:b307', 'base:empowered'],
+    description: "Grants the b307 effect for 5 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:b307', durationTurns:5);
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: '@b308',
+    id : 'base:b308',
+    notifCommit : "",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:b308', 'base:stunned'],
+    description: "Grants the b308 effect for 5 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:b308', durationTurns:5);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: '@b309',
+    id : 'base:b309',
+    notifCommit : "",
+    notifFail : "...But nothing happened!",
+    targetMode : TARGET_MODE.NONE,
+    keywords : ['base:b309', 'base:bleeding'],
+    description: "Grants the b309 effect for 5 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:b308', durationTurns:5);
+    }
+  }
+)
+
+
+
+
+
 };
 
 Arts = class(
@@ -10796,17 +10895,21 @@ Arts = class(
           (8): 'Fire',
           (16): 'Ice',
           (32): 'Thunder',
-          (64): 'Status',
-          (128): 'Support',
-          (256): 'Light',
-          (512): 'Dark',
-          (1024): 'Poison',
-          (2048): 'Special',
-          (4096): 'Costless'
+          (64): 'Support',
+          (128): 'Light',
+          (256): 'Dark',
+          (512): 'Poison',
+          (1024): 'Special',
+          (2048): 'Costless',
+          (4096): 'Multi-hit',
+          (4096*2): 'Blockable',
+          (4096*4): 'Once Per Battle',
+          default: ''
         }
         return '';
       }
     }
+
   }  
 ).new(
   name : 'Wyvern.Arts',

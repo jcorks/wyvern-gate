@@ -3054,6 +3054,46 @@ Item.database.newEntry(data : {
 }) 
 
 
+Item.database.newEntry(data : {
+  name : "Book",
+  id : 'base:book',
+  description: "A book containing writing. It can be read it to see its contents.",
+  examine : 'Common ingredients used by alchemists.',
+  equipType: TYPE.TWOHANDED,
+  rarity : 39,
+  weight : 2,
+  tier: 0,
+  enchantLimit : 40,
+  levelMinimum : 1,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  basePrice: 10,
+  possibleArts : [],
+
+  blockPoints : 0,
+  equipMod : StatSet.new(
+    ATK: 0,
+    DEF: 2, 
+    SPD: -1,
+    DEX: -2
+  ),
+  useEffects : [
+    'base:read'
+  ],
+  equipEffects : [],
+  traits :     
+    TRAIT.MEANT_TO_BE_USED
+  ,
+  onCreate ::(item, creationHint) {
+    @:Book = import(:'game_database.book.mt');
+    item.data.book = if (creationHint == empty) Book.getRandom() else Book.find(:creationHint);
+    item.name = 'Book: ' + item.data.book.name;
+  }
+
+}) 
+
+
+
+
   
 ::<= {
 
@@ -3394,7 +3434,6 @@ none.name = 'None';
       state.data = {};
       state.needsAppraisal = if (forceNeedsAppraisal != empty) forceNeedsAppraisal
         else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess:4)) true else false;
-      breakpoint();
       
       if (base.hasTraits(:TRAIT.HAS_SIZE))   
         assignSize(*_);

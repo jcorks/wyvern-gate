@@ -230,12 +230,16 @@
     EVENTS : {
       get ::<- EVENTS
     },
+    
+    ENERGY : {
+      get ::<- ENERGY
+    },
   
-    synthesizeHandCard ::(id, level) {
+    synthesizeHandCard ::(id, level, energy) {
       @c = Object.instantiate(type:HandCard);
       c.level = if (level == empty) 1 else level;
       c.id = id;
-      c.energy = random.pickArrayItem(:ENERGY->values);
+      c.energy = if (energy==empty) random.pickArrayItem(:ENERGY->values) else energy;
       return c;
     },
     

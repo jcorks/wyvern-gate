@@ -1934,6 +1934,17 @@
               name: 'onKnockout',
               to: this
             );
+
+          if (world.party.leader == this) ::<= {
+            windowEvent.queueMessage(text: this.name + ' is no longer able to act as the leader.');
+            
+            @:nextLead = world.party.members->filter(::(value) <- !value.isIncapacitated() && value != this)[0];
+            if (nextLead != empty) ::<= {
+              world.party.leader = nextLead;
+              windowEvent.queueMessage(text: nextLead.name + ' is now the leader.');
+            }
+          }
+
             
           this.effectStack.emitEvent(
             name: 'onKnockedOut',

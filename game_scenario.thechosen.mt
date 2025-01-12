@@ -4344,6 +4344,7 @@ return {
           },
           ['', 'Opening the box reveals items inside!'],
           ['', 'The party receives 125G.'],
+          ['', 'The party receives a book on how to fight.'],
           ['', 'The party receives 3 Potions.'],
           ['', 'The party receives a Life Crystal.'],
           ['', 'The party receives an Arts Crystal.'],
@@ -4379,6 +4380,11 @@ return {
             }
 
             //party.inventory.add(item:keyhome);
+
+            world.party.inventory.add(item:Item.new(
+              base:Item.database.find(id:'base:book'),
+              creationHint:'base:how-to-fight'
+            ));
 
 
             world.party.inventory.add(item:Item.new(
