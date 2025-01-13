@@ -813,19 +813,16 @@
         windowEvent.queueCustom(
           keep: true,
           jumpTag: 'Battle',
+          alwaysRender : true,
           onEnter :: {
-            backgroundID = canvas.addBackground(render::{
-              this.render();
-            });
           },
           onLeave ::{
-            canvas.removeBackground(
-              id:backgroundID
-            );
           },
+          
           renderable : {
             render ::{
               canvas.blackout();
+              this.render()
             }
           },
           onUpdate::{

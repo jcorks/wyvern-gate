@@ -122,7 +122,7 @@
 // In the future, exceeding this may throw an error just to let 
 // the programmer know whats up.
 //
-@:KEEP_STACK_INPUT_SAFETY_LIMIT = 20;
+@:KEEP_STACK_INPUT_SAFETY_LIMIT = 100;
 
 @:WindowEvent = class(
   name: 'Wyvern.WindowEvent',
@@ -189,42 +189,79 @@
       if (choiceStack->size) ::<= {
         @:val = choiceStack[choiceStack->size-1];
         if (val.stateID == empty) ::<= {
-          val.stateID = canvas.pushState();    
+          if ({:::} {
+            foreach(choiceStack) ::(k, v) {
+              if (v.alwaysRender)
+                send(:false);
+            }
+            return true;
+          })
+            val.stateID = canvas.pushState();    
         }
       }
       choiceStack->push(value);
     }
   
-    @:renderThis ::(data => Object, thisRender) {
+    @:renderThis ::(data => Object, renderOnly, rerender) {
       when (requestAutoSkip) empty; 
-      canvas.clear();
-
-      @renderAgain = false;
-      if (data.renderable) ::<= {
-        renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;    
+      if (renderOnly == empty && rerender != true)
+        canvas.clear();
+        
+      if (rerender == empty) ::<= {
+        @rerender = false;
+        
+        foreach(choiceStack) ::(k, v) {
+          when(v == data) empty;
+          if (v.alwaysRender) ::<= {
+            breakpoint();
+            rerender = true;
+          }
+          if (rerender)
+            renderThis(data:v, rerender:true);
+        }
       }
-      if (thisRender)
-        thisRender();
-      canvas.commit();
 
-      
-      if (renderAgain == false)
-        data.rendered = true;
+      if (data.isAnimation == true) ::<= {
+        data.busy = true;
+        
+        when (requestAutoSkip) empty; 
+        
+        @:frame ::{
+          @:output = data.animationFrame();
+          when(output != canvas.ANIMATION_FINISHED) empty;
+          data.busy = false;
+          return canvas.ANIMATION_FINISHED;
+        }
+        
+        canvas.queueAnimation(onRenderFrame::{
+          if (data.renderable)
+            data.renderable.render()
+
+          return frame();
+        });
+        
+        data.rendered = true;      
+        
+      } else ::<= {        
+
+        @renderAgain = false;
+        if (data.renderable) ::<= {
+          renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;    
+        }
+        if (data.thisRender)
+          data.thisRender();
+
+          
+        if (renderOnly == empty && rerender != true)
+          canvas.commit();
+
+        
+        if (renderAgain == false)
+          data.rendered = true;
+
+      }
     }
     
-    @:renderThisAnimation ::(data => Object, frame) {
-      when (requestAutoSkip) empty; 
-
-      canvas.queueAnimation(onRenderFrame::{
-        canvas.clear();
-        if (data.renderable)
-          data.renderable.render()
-
-        return frame();
-      });
-      
-      data.rendered = true;      
-    }    
     
     
     @next ::(toRemove, dontResolveNext, level) {
@@ -240,8 +277,9 @@
             choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
 
           if (!requestAutoSkip) ::<= {
-            if (data.stateID != empty)
-              canvas.removeState(id:data.stateID);
+            if (data.stateID != empty) ::<= {
+              //canvas.removeState(id:data.stateID);
+            }
           }
           
           if (data.onLeave)
@@ -352,6 +390,7 @@
       @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
 
       when (requestAutoSkip) false;
+      
 
       //if (canCancel) ::<= {
       //  choicesModified->push(value:'(Cancel)');
@@ -499,33 +538,31 @@
         
         if (onHover != empty)
           onHover(choice:cursorPos+1);
-        renderThis(
-          data,
-          thisRender::{
-            when(data.hideWindow) empty;
-            if (data.renderedAlready == empty) ::<= {
-              renderText(
-                lines: choicesModified,
-                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-                leftWeight,
-                topWeight,
-                maxWidth,
-                maxHeight
-              )
-              data.renderedAlready = true;
-            } else ::<= {
-              renderTextSingle(
-                lines: choicesModified,
-                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-                leftWeight,
-                topWeight,
-                maxWidth,
-                maxHeight
-              )
-            }
-
+          
+        data.thisRender = ::{
+          when(data.hideWindow) empty;
+          if (data.renderedAlready == empty) ::<= {
+            renderText(
+              lines: choicesModified,
+              speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+              leftWeight,
+              topWeight,
+              maxWidth,
+              maxHeight
+            )
+            data.renderedAlready = true;
+          } else ::<= {
+            renderTextSingle(
+              lines: choicesModified,
+              speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+              leftWeight,
+              topWeight,
+              maxWidth,
+              maxHeight
+            )
           }
-        );
+        }          
+        renderThis(data);
       }
       when(exitEmpty) ::<= {
         data.keep = empty;
@@ -596,9 +633,8 @@
         if (onHover != empty)
           onHover(fraction:cursorPos);
         
-        renderThis(
-          data,
-          thisRender::{
+        if (data.thisRender == empty)
+          data.thisRender = ::{
             @line = '[';
             for(0, 50) ::(i) {
               if ((cursorPos * 50)->floor == i)
@@ -638,6 +674,10 @@
 
             }
           }
+        
+        renderThis(
+          data
+          
         );
       }
       when(exitEmpty) ::<= {
@@ -712,15 +752,7 @@
           onChoice(choice);
         }
         
-        renderThis(data, thisRender::{
-          /*renderText(
-            lines: ['[Cancel to return]'],
-            speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-            leftWeight,
-            topWeight,
-            limitLines:13
-          );*/       
-        });
+        renderThis(data);
 
         if (choice != empty)
           resolveNext();
@@ -738,17 +770,7 @@
       //}
       
       if (data.rendered == empty) ::<= {
-        if (data.isAnimation == true) ::<= {
-          data.busy = true;
-          renderThisAnimation(data, frame ::{
-            @:output = data.animationFrame();
-            when(output != canvas.ANIMATION_FINISHED) empty;
-            data.busy = false;
-            return canvas.ANIMATION_FINISHED;
-          });
-        } else ::<= {
-          renderThis(data);
-        }
+        renderThis(data);
       }
       if (data.entered == empty) ::<= {
         if (data.onEnter)
@@ -789,17 +811,7 @@
       //}
       
       if (data.rendered == empty) ::<= {
-        if (data.isAnimation == true) ::<= {
-          data.busy = true;
-          renderThisAnimation(data, frame ::{
-            @:output = data.animationFrame();
-            when(output != canvas.ANIMATION_FINISHED) empty;
-            data.busy = false;
-            return canvas.ANIMATION_FINISHED;
-          });
-        } else ::<= {
-          renderThis(data);
-        }
+        renderThis(data);
       }
       if (data.entered == empty) ::<= {
         data.entered = true;
@@ -941,7 +953,7 @@
       if (onHover != empty)
         onHover(choice:which+1);
 
-      renderThis(data, thisRender::{
+      data.thisRender = ::{
         if (data.renderedAlready == empty) ::<= {
           data.renderedAlready = true;
           renderText(
@@ -962,7 +974,9 @@
             maxHeight
           );         
         }
-      });      
+      }
+
+      renderThis(data);      
         
         
       when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
@@ -993,18 +1007,20 @@
       if (data.rendered == empty) ::<= {
         when(data.skipAnimation) ::<= {
           data.busy = false;
-          renderThis(data, thisRender::{
-            renderTextSingle(
-              leftWeight: data.leftWeight, 
-              topWeight: data.topWeight, 
-              maxWidth : data.maxWidth,
-              maxHeight : data.maxHeight,
-              lines: data.lines,
-              speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
-              //limitLines : data.pageAfter,
-              hasNotch: true
-            );     
-          })       
+          if (data.thisRender == empty)
+            data.thisRender = ::{
+              renderTextSingle(
+                leftWeight: data.leftWeight, 
+                topWeight: data.topWeight, 
+                maxWidth : data.maxWidth,
+                maxHeight : data.maxHeight,
+                lines: data.lines,
+                speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+                //limitLines : data.pageAfter,
+                hasNotch: true
+              );     
+            }
+          renderThis(data);
         }
       
         data.busy = true;
@@ -1072,10 +1088,9 @@
               return canvas.ANIMATION_FINISHED;
             }
           }
-                  
-          renderThisAnimation(data, 
-            frame:nextFrame
-          );
+          data.animationFrame = nextFrame;
+          data.isAnimation = true;
+          renderThis(data);
         }
       }
       return match(input) {
@@ -1298,7 +1313,18 @@
         onLeave, 
         isAnimation, 
         waitFrames,
-        animationFrame
+        animationFrame,
+        // Watch out! alwaysRender is a very special attribute. If active, every draw 
+        // of the topmost widget will trigger a redraw of this leading up to every 
+        // item in the menu stack up to the current one.
+        //
+        // This is useful for menu items that update outside of them being
+        // the top widget. Use this sparingly! Usually, visuals of menu items are 
+        // cached so that drawing is cheap. This mechanism is shut off if 
+        // alwaysRender is true
+        //
+        // This should only be used if youre doing something special
+        alwaysRender
       ) {
         when(requestAutoSkip) ::<= {
           if (onEnter) onEnter();
@@ -1317,7 +1343,8 @@
             isAnimation : isAnimation,
             animationFrame : animationFrame,
             waitFrames : waitFrames,
-            onInput : onInput
+            onInput : onInput,
+            alwaysRender : alwaysRender
           });
         }]);        
         return getResolveQueue()->size-1;

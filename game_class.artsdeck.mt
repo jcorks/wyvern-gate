@@ -249,14 +249,6 @@
           text: user.name + ' has no Arts in their hand.'
         );
     
-      @bg;
-      windowEvent.queueCustom(
-        onEnter::{
-          bg = canvas.addBackground(::{
-            renderCards(user, cards, showEnergy:true);
-          });
-        }
-      );
 
       windowEvent.queueChoices(
         hideWindow : true,
@@ -265,8 +257,10 @@
         onHover::(choice) {
           selected = choice-1;
         },
-        onLeave ::{       
-          canvas.removeBackground(:bg);
+        renderable : {
+          render ::{
+            renderCards(user, cards, showEnergy:true);          
+          }
         },
         canCancel:if (canCancel == empty) true else canCancel,
         
@@ -603,9 +597,6 @@
 
         windowEvent.queueNestedResolve(
           onEnter ::{
-            bg = canvas.addBackground(::{
-              renderCards(user, cards:state.hand, enabled, showEnergy:true);
-            });
         
             windowEvent.queueChoices(
               hideWindow : true,
@@ -625,8 +616,12 @@
               onHover::(choice) {
                 selected = choice-1;
               },
-              onLeave ::{       
-                canvas.removeBackground(:bg);
+              
+              
+              renderable : {
+                render :: {
+                  renderCards(user, cards:state.hand, enabled, showEnergy:true);                
+                }
               },
               canCancel,
               

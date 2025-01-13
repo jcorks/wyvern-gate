@@ -122,7 +122,6 @@ return class(
     @savestates = [];
     @idStatePool = 0;
     @idStatePool_dead = [];
-    @backgrounds = {};
     
     
     @:animateNext::{
@@ -146,7 +145,6 @@ return class(
         savestates = [];
         idStatePool = 0;
         idStatePool_dead = [];
-        backgrounds = {};
       },
     
       resize ::(width, height) {
@@ -388,16 +386,7 @@ return class(
           this.drawText(text:notchText);
         }        
       },
-      
-      addBackground::(render) {
-        @:key = {};
-        backgrounds->push(:{key:key, render:render});
-        return key;
-      },
-      
-      removeBackground::(id) {
-        backgrounds->remove(:backgrounds->findIndexCondition(::(value) <- value.key == id));
-      },
+
       
       pushState ::{
         @:canvasCopy = [...canvas];
@@ -494,9 +483,6 @@ return class(
         when (savestates->keycount) ::<= {
           @prevCanvas = savestates[savestates->keycount-1].text;
           canvas = [...prevCanvas];
-          foreach(backgrounds) ::(k, v) {
-            v.render();
-          }
         }
         this.blackout();
       },
@@ -510,10 +496,6 @@ return class(
             iter += 1;
           }
         }  
-        when(backgrounds->size == 0) empty;
-        foreach(backgrounds) ::(k, v) {
-          v.render();
-        }
 
       },
       
