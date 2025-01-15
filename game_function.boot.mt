@@ -165,7 +165,7 @@ return ::(onBooted) {
     windowEvent.queueCustom(
       isAnimation : true,
       animationFrame ::{
-        when((anim->size == 0 && currentIter == empty) || requestTerm) canvas.ANIMATION_FINISHED;
+        when((anim->size == 0 && currentIter == empty) || requestTerm) windowEvent.ANIMATION_FINISHED;
         
         if (currentIter == empty) ::<= {
           currentIter = anim[0];

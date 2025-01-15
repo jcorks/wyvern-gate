@@ -288,7 +288,7 @@
               else
                 this.inventory.subtractGold(amount:-gained);
 
-              return canvas.ANIMATION_FINISHED
+              return windowEvent.ANIMATION_FINISHED
             }
             
             @newPrice = if (price < 0) (price * 0.9)->ceil else (price*0.9)->floor;
@@ -400,7 +400,7 @@
 
 
                 level();
-                return canvas.ANIMATION_FINISHED;
+                return windowEvent.ANIMATION_FINISHED;
               }
 
               when(exp->abs <= 0) ::<= {
@@ -421,7 +421,7 @@
                     onDone();
                   }
                 );
-                return canvas.ANIMATION_FINISHED
+                return windowEvent.ANIMATION_FINISHED
               }
             }
           );

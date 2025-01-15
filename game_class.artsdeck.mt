@@ -592,7 +592,6 @@
           ) enabled->push(:i);
         }
         
-        @bg;
         @chosenCard;
 
         windowEvent.queueNestedResolve(
@@ -708,8 +707,6 @@
               onChoice(:chosenCard)
             else if (canCancel && onCancel != empty)
               onCancel()
-              
-            canvas.removeBackground(:bg);
           }
         )
       }

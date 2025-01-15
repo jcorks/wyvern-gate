@@ -100,11 +100,11 @@
 ///
 /// Canvas is the main class that handles rendering operations 
 /// to the text buffer. While [#Wyvern.WindowEvent] handles 
-/// higher-level output and management, Wyvern.Canvas can be used 
+/// higher-level output and management, Wyvern.WindowEvent can be used 
 /// to create custom effects and animations.
 ///
 /// The typical use-case is to provide Wyvern.WindowEvent with 
-/// custom rendering operations, which typically require working
+/// custom rendering operations, which typically require working with
 /// Wyvern.Canvas
 ///
 return class(
@@ -117,27 +117,13 @@ return class(
     @onCommit;
     @debugLines = [];
     @:lines_output = [];
-    @animations = [];
     
     @savestates = [];
     @idStatePool = 0;
     @idStatePool_dead = [];
     
     
-    @:animateNext::{
-      foreach(animations) ::(index, queuedFrame) {
-        if (queuedFrame() == this.ANIMATION_FINISHED) ::<= {
-          animations->remove(key:index);
-        }
-      }
-
-      this.commit();
-    }
     
-    @onFrameComplete::{
-      when(animations->size == 0) empty;
-      animateNext();
-    }
 
     
     this.interface = {
@@ -171,9 +157,7 @@ return class(
         get ::<- penx
       },
       
-      ANIMATION_FINISHED : {
-        get ::<- -1
-      },
+
 
       penY : {
         set ::(value) <- peny = value,
@@ -185,9 +169,6 @@ return class(
         set ::(value)<- onCommit = value
       },
       
-      onFrameComplete : {
-        get ::<- onFrameComplete
-      },
       
       width : {
         get ::<- CANVAS_WIDTH
@@ -563,17 +544,6 @@ return class(
         return lines;      
       },
       
-      // Queues a set of frames to render and then play.
-      // These happen as the external environment confirms that a frame has been posted
-      // If multiple animations are queued, their frames will be interleaved.
-      // The function passed is expected to control the canvas. Committing is handled
-      // by the canvas and should not be called unless advanced effects are being used.
-      //
-      // The onRenderFrame function will run until it returns canvas.ANIMATION_FINISHED
-      queueAnimation::(onRenderFrame => Function) {
-        animations->push(value:onRenderFrame);
-        animateNext();
-      },
       
       
       commit ::(renderNow) {

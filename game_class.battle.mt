@@ -813,7 +813,7 @@
         windowEvent.queueCustom(
           keep: true,
           jumpTag: 'Battle',
-          alwaysRender : true,
+          disableCache : true,
           onEnter :: {
           },
           onLeave ::{
