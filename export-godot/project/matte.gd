@@ -54,13 +54,15 @@ func _ready() -> void:
         
     
     connect("on_play_bgm", func(name, loop):
+        print(str("Request to play BGM", name));
         if (name == 'title'): playBGM(BGM_Title);
         if (name == 'boot'): playBGM(BGM_Boot);
         if (name == 'boot-post'): playBGM(BGM_Bootpost);
+
+        return
         if (name == 'world'): playBGM(BGM_World);
         if (name == 'town-2'): playBGM(BGM_Town2);
     
-        print(str("Request to play BGM", name));
     )    
     
     connect("on_send_line", func(index, str): 

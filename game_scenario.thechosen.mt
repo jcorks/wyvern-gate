@@ -375,6 +375,7 @@ return {
         @:stats = p0.stats.save();
         stats.HP = 6;
         p0.stats.load(:stats);
+        p0.heal(amount:999999, silent:true);
       }
       choices->push(value:p0);
     }
