@@ -26,6 +26,12 @@
 @:MAX_COLUMNS = canvas.width - 4;
 @:FRAME_COUNT_RENDER_TEXT = 3;
 @:CALLBACK_DONE = {};
+@:ANIMATION_FINISHED = -1;
+
+@:RENDER_STATE = {
+  ANIMATING : 2,
+  DONE : 3
+};
 
 @:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch) {
     canvas.renderTextFrameGeneral(
@@ -39,7 +45,7 @@
 }
 
 // Renders a text box using an animation
-@:renderText ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch) {
+@:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch) {
   @width = 0;
   @height = lines->size;
   @frames = 0;  
@@ -67,8 +73,7 @@
   }
   
   
-  @:renderFrame ::{
-    
+  return ::{    
     canvas.renderTextFrameGeneral(
       leftWeight, 
       topWeight, 
@@ -77,12 +82,11 @@
       lines:animateLines(), 
       title:speaker, 
       notchText:if(hasNotch != empty) "(next)" else empty)
+      
     when(frames == FRAME_COUNT_RENDER_TEXT)
-      canvas.ANIMATION_FINISHED;
+      ANIMATION_FINISHED;
     frames += 1;
-  }
-  
-  canvas.queueAnimation(onRenderFrame:renderFrame);
+  }  
 }
 
 @:createBlankLine::(width, header) {
@@ -122,7 +126,7 @@
 // In the future, exceeding this may throw an error just to let 
 // the programmer know whats up.
 //
-@:KEEP_STACK_INPUT_SAFETY_LIMIT = 20;
+@:KEEP_STACK_INPUT_SAFETY_LIMIT = 100;
 
 @:WindowEvent = class(
   name: 'Wyvern.WindowEvent',
@@ -189,42 +193,90 @@
       if (choiceStack->size) ::<= {
         @:val = choiceStack[choiceStack->size-1];
         if (val.stateID == empty) ::<= {
-          val.stateID = canvas.pushState();    
+          if ({:::} {
+            foreach(choiceStack) ::(k, v) {
+              if (v.disableCache)
+                send(:false);
+            }
+            return true;
+          })
+            val.stateID = canvas.pushState();    
         }
       }
       choiceStack->push(value);
     }
   
-    @:renderThis ::(data => Object, thisRender) {
-      when (requestAutoSkip) empty; 
-      canvas.clear();
-
-      @renderAgain = false;
-      if (data.renderable) ::<= {
-        renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;    
-      }
-      if (thisRender)
-        thisRender();
-      canvas.commit();
-
-      
-      if (renderAgain == false)
-        data.rendered = true;
-    }
+  
+    /*
+      Main rendering path.
+      Handles:
+        - animations 
+        - requestAutoSkip
+        - cache disabling
     
-    @:renderThisAnimation ::(data => Object, frame) {
+      For animations: isAnim
+    
+    */
+    @:renderThis ::(data => Object, renderOnly, rerender) {
       when (requestAutoSkip) empty; 
+      when (data.rendered != empty && rerender == empty) empty;
 
-      canvas.queueAnimation(onRenderFrame::{
+      if (renderOnly == empty && rerender != true)
         canvas.clear();
+        
+      if (rerender == empty) ::<= {
+        @dorender = false;
+        
+        foreach(choiceStack) ::(k, v) {
+          when(v == data) empty;
+          if (v.disableCache) ::<= {
+            breakpoint();
+            dorender = true;
+          }
+          if (dorender)
+            renderThis(data:v, rerender:true);
+        }
+      }
+
+
+
+
+      // animations prevent continuing by using the renderState flag
+      // Once an animation is complete, it defaults to 
+      // thisRender once skipped or complete
+      if (data.renderState == RENDER_STATE.ANIMATING) ::<= {        
+
         if (data.renderable)
           data.renderable.render()
 
-        return frame();
-      });
-      
-      data.rendered = true;      
-    }    
+        @:output = data.animationFrame();
+        if (output == ANIMATION_FINISHED) ::<= {
+          data.renderState = RENDER_STATE.DONE;
+        }
+
+        canvas.commit();
+        
+      } else ::<= {        
+
+        @renderAgain = false;
+        if (data.renderable) ::<= {
+          renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;    
+        }
+        
+        if (data.thisRender) ::<= {
+          renderAgain = (data.thisRender()) == this.RENDER_AGAIN;    
+        }
+          
+        if (renderOnly == empty && rerender != true)
+          canvas.commit();
+
+        
+        if (renderAgain == false)
+          data.rendered = true;
+
+      }
+    }
+    
     
     
     @next ::(toRemove, dontResolveNext, level) {
@@ -240,8 +292,9 @@
             choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
 
           if (!requestAutoSkip) ::<= {
-            if (data.stateID != empty)
-              canvas.removeState(id:data.stateID);
+            if (data.stateID != empty) ::<= {
+              //canvas.removeState(id:data.stateID);
+            }
           }
           
           if (data.onLeave)
@@ -352,6 +405,7 @@
       @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
 
       when (requestAutoSkip) false;
+      
 
       //if (canCancel) ::<= {
       //  choicesModified->push(value:'(Cancel)');
@@ -360,7 +414,7 @@
 
       
       
-      if (data.rendered == empty || choice != empty) ::<= {
+      if (choice != empty || data.rendered == empty) ::<= {
         @:choices = if (data.onGetChoices) data.onGetChoices() else data.choices;
         // no choices
         when(choices == empty || choices->keycount == 0) exitEmpty = true;
@@ -499,34 +553,38 @@
         
         if (onHover != empty)
           onHover(choice:cursorPos+1);
-        renderThis(
-          data,
-          thisRender::{
-            when(data.hideWindow) empty;
-            if (data.renderedAlready == empty) ::<= {
-              renderText(
-                lines: choicesModified,
-                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-                leftWeight,
-                topWeight,
-                maxWidth,
-                maxHeight
-              )
-              data.renderedAlready = true;
-            } else ::<= {
-              renderTextSingle(
-                lines: choicesModified,
-                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-                leftWeight,
-                topWeight,
-                maxWidth,
-                maxHeight
-              )
-            }
+        
+        
+        if (data.hideWindow != true) ::<= {
+          if (data.animationFrame == empty) ::<= {
+            data.renderState = RENDER_STATE.ANIMATING;
+            data.animationFrame = renderTextAnimation(
+              lines: choicesModified,
+              speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+              leftWeight,
+              topWeight,
+              maxWidth,
+              maxHeight
+            )
+          }      
 
+          // TODO better efficiency
+          data.thisRender = ::{
+            renderTextSingle(
+              lines: choicesModified,
+              speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+              leftWeight,
+              topWeight,
+              maxWidth,
+              maxHeight
+            )
           }
-        );
+        }
+        data.rendered = empty;
+        renderThis(data);
       }
+
+
       when(exitEmpty) ::<= {
         data.keep = empty;
         return true;      
@@ -595,49 +653,56 @@
         
         if (onHover != empty)
           onHover(fraction:cursorPos);
-        
-        renderThis(
-          data,
-          thisRender::{
-            @line = '[';
-            for(0, 50) ::(i) {
-              if ((cursorPos * 50)->floor == i)
-                line = line + '|'
-              else
-                line = line + ' '
-              ;
-            }
-            line = line + ']'
-            if (data.renderedAlready == empty) ::<= {
-              data.renderedAlready = true;
-              renderText(
-                lines: [
-                  '',
-                  line,
-                  ''
-                ],
-                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-                leftWeight,
-                topWeight,
-                maxWidth,
-                maxHeight
-              );             
-            } else ::<= {
-              renderTextSingle(
-                lines: [
-                  '',
-                  line,
-                  ''
-                ],
-                speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-                leftWeight,
-                topWeight,
-                maxWidth,
-                maxHeight
-              ); 
 
-            }
+        @line = '[';
+        for(0, 50) ::(i) {
+          if ((cursorPos * 50)->floor == i)
+            line = line + '|'
+          else
+            line = line + ' '
+          ;
+        }
+        line = line + ']'
+
+        
+        if (data.animationFrame == empty) ::<= {
+          data.renderState = RENDER_STATE.ANIMATING
+          data.animationFrame = ::<={
+            return renderTextAnimation(
+              lines: [
+                '',
+                line,
+                ''
+              ],
+              speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+              leftWeight,
+              topWeight,
+              maxWidth,
+              maxHeight
+            );             
           }
+        }
+
+          
+        data.thisRender = ::{
+          renderTextSingle(
+            lines: [
+              '',
+              line,
+              ''
+            ],
+            speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+            leftWeight,
+            topWeight,
+            maxWidth,
+            maxHeight
+          );             
+        }
+        data.rendered = empty;
+
+        renderThis(
+          data
+          
         );
       }
       when(exitEmpty) ::<= {
@@ -708,24 +773,16 @@
           choice == CURSOR_ACTIONS.LEFT ||
           choice == CURSOR_ACTIONS.RIGHT ||
           data.rendered == empty) ::<= {
+        data.rendered = empty;
         if (choice != empty) ::<= {
           onChoice(choice);
         }
         
-        renderThis(data, thisRender::{
-          /*renderText(
-            lines: ['[Cancel to return]'],
-            speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-            leftWeight,
-            topWeight,
-            limitLines:13
-          );*/       
-        });
 
         if (choice != empty)
           resolveNext();
-
       }
+      renderThis(data);
       
       
       return false;  
@@ -736,19 +793,11 @@
       //if (canCancel) ::<= {
       //  choicesModified->push(value:'(Cancel)');
       //}
+      if (data.isAnimation && data.renderState == empty)
+        data.renderState = RENDER_STATE.ANIMATING;
       
       if (data.rendered == empty) ::<= {
-        if (data.isAnimation == true) ::<= {
-          data.busy = true;
-          renderThisAnimation(data, frame ::{
-            @:output = data.animationFrame();
-            when(output != canvas.ANIMATION_FINISHED) empty;
-            data.busy = false;
-            return canvas.ANIMATION_FINISHED;
-          });
-        } else ::<= {
-          renderThis(data);
-        }
+        renderThis(data);
       }
       if (data.entered == empty) ::<= {
         if (data.onEnter)
@@ -776,7 +825,7 @@
         return true;
       }
       
-      when(data.busy) false;
+      when(data.renderState == RENDER_STATE.ANIMATING) false;
       
       return true;  
     }
@@ -789,17 +838,7 @@
       //}
       
       if (data.rendered == empty) ::<= {
-        if (data.isAnimation == true) ::<= {
-          data.busy = true;
-          renderThisAnimation(data, frame ::{
-            @:output = data.animationFrame();
-            when(output != canvas.ANIMATION_FINISHED) empty;
-            data.busy = false;
-            return canvas.ANIMATION_FINISHED;
-          });
-        } else ::<= {
-          renderThis(data);
-        }
+        renderThis(data);
       }
       if (data.entered == empty) ::<= {
         data.entered = true;
@@ -822,7 +861,7 @@
       @choice = input;           
 
       when (requestAutoSkip) false;
-      
+      data.rendered = empty;
       
       @:prompt = data.prompt;
       @:itemsPerColumn = data.itemsPerColumn;
@@ -941,28 +980,33 @@
       if (onHover != empty)
         onHover(choice:which+1);
 
-      renderThis(data, thisRender::{
-        if (data.renderedAlready == empty) ::<= {
-          data.renderedAlready = true;
-          renderText(
-            lines: choicesModified,
-            speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-            leftWeight,
-            topWeight,
-            maxWidth,
-            maxHeight
-          ); 
-        } else ::<= {
-          renderTextSingle(
-            lines: choicesModified,
-            speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
-            leftWeight,
-            topWeight,
-            maxWidth,
-            maxHeight
-          );         
-        }
-      });      
+
+      if (data.animationFrame == empty) ::<= {
+        data.renderState = RENDER_STATE.ANIMATING;
+        data.animationFrame = renderTextAnimation(
+          lines: choicesModified,
+          speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+          leftWeight,
+          topWeight,
+          maxWidth,
+          maxHeight
+        ); 
+
+
+      }
+
+      data.thisRender = ::{
+        renderTextSingle(
+          lines: choicesModified,
+          speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+          leftWeight,
+          topWeight,
+          maxWidth,
+          maxHeight
+        );         
+      }
+
+      renderThis(data);      
         
         
       when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
@@ -989,100 +1033,95 @@
       when (requestAutoSkip) true;
 
     
-    
-      if (data.rendered == empty) ::<= {
-        when(data.skipAnimation) ::<= {
-          data.busy = false;
-          renderThis(data, thisRender::{
-            renderTextSingle(
-              leftWeight: data.leftWeight, 
-              topWeight: data.topWeight, 
-              maxWidth : data.maxWidth,
-              maxHeight : data.maxHeight,
-              lines: data.lines,
-              speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
-              //limitLines : data.pageAfter,
-              hasNotch: true
-            );     
-          })       
-        }
+
+      if (data.animationFrame == empty) ::<= {
       
-        data.busy = true;
-        ::<= {
+        @progressCh = 0;
+        @progressL = 0;
+        @maxlen = 0;
+        foreach(data.lines) ::(i, line) {
+          if (line->length > maxlen)
+            maxlen = line->length;
+        }
+  
+        @:fillLine ::(line, from, to) {
+          @:bases = [
+            if (to >= line->length-1)
+              line 
+            else line->substr(from, to)
+          ];
+          for(bases[0]->length, maxlen) ::(i) {
+            bases->push(value:' ');
+          }
+          return String.combine(strings:bases);
+        }
+
+        @:progressLines ::{
+          when(progressL >= data.lines->size) ::<= {
+            return data.lines;
+          }
+          @:out = [];
+          for(0, progressL) ::(i) {
+            out->push(value:data.lines[i]);
+          }
+          @:line = data.lines[progressL];
+          out->push(value:fillLine(line, from:0, to:progressCh))
+          for(progressL+1, data.lines->size) ::(i) {
+            out->push(value:'');
+          }
+
+          
+          if (progressCh > line->length) ::<= {
+            progressCh = 0;
+            progressL += 1;
+          }
+          progressCh+=4;
+
+          return out;
+        }        
+      
+        data.animationFrame = ::{
+
+          renderTextSingle(
+            leftWeight: data.leftWeight, 
+            topWeight: data.topWeight, 
+            maxWidth : data.maxWidth,
+            maxHeight : data.maxHeight,
+            lines: progressLines(),
+            speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+            //limitLines : data.pageAfter,
+            hasNotch: true
+          );
+          when(progressL >= data.lines->size)
+            ANIMATION_FINISHED;
+
+        }
         
-          @progressCh = 0;
-          @progressL = 0;
-          @maxlen = 0;
-          foreach(data.lines) ::(i, line) {
-            if (line->length > maxlen)
-              maxlen = line->length;
-          }
-    
-          @:fillLine ::(line, from, to) {
-            @:bases = [
-              if (to >= line->length-1)
-                line 
-              else line->substr(from, to)
-            ];
-            for(bases[0]->length, maxlen) ::(i) {
-              bases->push(value:' ');
-            }
-            return String.combine(strings:bases);
-          }
+        
+        data.thisRender = ::{
 
-          @:progressLines ::{
-            when(progressL >= data.lines->size || data.busy == false) ::<= {
-              data.busy = false;
-              return data.lines;
-            }
-            @:out = [];
-            for(0, progressL) ::(i) {
-              out->push(value:data.lines[i]);
-            }
-            @:line = data.lines[progressL];
-            out->push(value:fillLine(line, from:0, to:progressCh))
-            for(progressL+1, data.lines->size) ::(i) {
-              out->push(value:'');
-            }
-
-            
-            if (progressCh > line->length) ::<= {
-              progressCh = 0;
-              progressL += 1;
-            }
-            progressCh+=4;
-
-            return out;
-          }
-
-
-          @:nextFrame = ::{
-            //canvas.clear();
-            renderTextSingle(
-              leftWeight: data.leftWeight, 
-              topWeight: data.topWeight, 
-              maxWidth : data.maxWidth,
-              maxHeight : data.maxHeight,
-              lines: progressLines(),
-              speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
-              //limitLines : data.pageAfter,
-              hasNotch: true
-            );
-            when(data.busy == false) ::<= {
-              return canvas.ANIMATION_FINISHED;
-            }
-          }
-                  
-          renderThisAnimation(data, 
-            frame:nextFrame
+          renderTextSingle(
+            leftWeight: data.leftWeight, 
+            topWeight: data.topWeight, 
+            maxWidth : data.maxWidth,
+            maxHeight : data.maxHeight,
+            lines: data.lines,
+            speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+            //limitLines : data.pageAfter,
+            hasNotch: true
           );
         }
+        if (data.skipAnimation != true)
+          data.renderState = RENDER_STATE.ANIMATING;
       }
+
+      renderThis(data);
+      
       return match(input) {
         (CURSOR_ACTIONS.CONFIRM, 
          CURSOR_ACTIONS.CANCEL): ::<= {
-          when (data.busy) ::<= {
-            data.busy = false;
+          when (data.renderState == RENDER_STATE.ANIMATING) ::<= {
+            data.renderState = RENDER_STATE.DONE;
             return false;
           } 
 
@@ -1115,6 +1154,10 @@
     
     this.interface = {
       commitInput : commitInput,
+      
+      ANIMATION_FINISHED : {
+        get ::<- ANIMATION_FINISHED
+      },
       
       RENDER_AGAIN : {
         get ::<- 1
@@ -1298,7 +1341,18 @@
         onLeave, 
         isAnimation, 
         waitFrames,
-        animationFrame
+        animationFrame,
+        // Watch out! disableCache is a very special attribute. If active, every draw 
+        // of the topmost widget will trigger a redraw of this leading up to every 
+        // item in the menu stack up to the current one.
+        //
+        // This is useful for menu items that update outside of them being
+        // the top widget. Use this sparingly! Usually, visuals of menu items are 
+        // cached so that drawing is cheap. This mechanism is shut off if 
+        // disableCache is true
+        //
+        // This should only be used if youre doing something special
+        disableCache
       ) {
         when(requestAutoSkip) ::<= {
           if (onEnter) onEnter();
@@ -1317,7 +1371,8 @@
             isAnimation : isAnimation,
             animationFrame : animationFrame,
             waitFrames : waitFrames,
-            onInput : onInput
+            onInput : onInput,
+            disableCache : disableCache
           });
         }]);        
         return getResolveQueue()->size-1;

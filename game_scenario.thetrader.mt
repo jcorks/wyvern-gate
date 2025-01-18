@@ -1192,7 +1192,7 @@
 
 
                 level();
-                return canvas.ANIMATION_FINISHED;
+                return windowEvent.ANIMATION_FINISHED;
               }
 
               when(exp->abs <= 0) ::<= {
@@ -1213,7 +1213,7 @@
                     onDone();
                   }
                 );
-                return canvas.ANIMATION_FINISHED
+                return windowEvent.ANIMATION_FINISHED
               }
             }
           );

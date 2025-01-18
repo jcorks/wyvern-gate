@@ -990,7 +990,7 @@ Interaction.newEntry(
             @:cost = 75 + item.appraisalCount*50;
             
             when (cost > party.inventory.gold) ::<= {
-              windowEvent.queueMessage(:"The party cannot afford the cost of the appraisal");
+              windowEvent.queueMessage(text:"The party cannot afford the cost of the appraisal");
               appraisePick();
             }
             

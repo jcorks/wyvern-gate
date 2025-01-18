@@ -3943,7 +3943,7 @@ Arts.newEntry(
     durationTurns: 0,
     hpCost : 0,
     apCost : 0,
-    kind : KIND.ABILITY,
+    kind : KIND.EFFECT,
     traits : TRAITS.SPECIAL | TRAITS.COSTLESS,
     rarity : RARITY.RARE,
     usageHintAI: USAGE_HINT.DONTUSE,

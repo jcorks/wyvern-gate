@@ -24,7 +24,7 @@ return ::(do, message) {
       frames += 1;
       do();
     }
-    return canvas.ANIMATION_FINISHED;
+    return windowEvent.ANIMATION_FINISHED;
   };
   
   

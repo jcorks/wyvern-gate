@@ -229,7 +229,7 @@
       hp = hp * 0.9;
 
       when(hp->abs <= 0.15)
-        canvas.ANIMATION_FINISHED;
+        windowEvent.ANIMATION_FINISHED;
     }
   );
     
@@ -280,7 +280,7 @@
       frame += 1;
 
       when(frame > 20)
-        canvas.ANIMATION_FINISHED;
+        windowEvent.ANIMATION_FINISHED;
     }
   );
     

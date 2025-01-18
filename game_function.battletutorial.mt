@@ -99,7 +99,7 @@ return ::{
 
 
   @turn1 = [
-    {resolve:true, text:"Welcome to the battle tutorial. This will explain the basics of how to engage enemies."},
+    {text:"Welcome to the battle tutorial. This will explain the basics of how to engage enemies."},
     {text:"This is the screen that you will see when fighting enemies."},
     {wait:true},
     {text:"Fighting is done in turns. The top right box shows the order determined for each combatant to take a turn. "},

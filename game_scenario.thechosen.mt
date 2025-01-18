@@ -317,6 +317,7 @@ return {
 
 
 
+
     /*
     for(0, 4) ::(i) {
       @:key = Item.new(
@@ -338,7 +339,16 @@ return {
 
     
     // debug
-      //party.inventory.addGold(amount:100000);
+/*
+@:test = Item.new(
+  base: Item.database.find(id:'base:shortsword'),
+  forceNeedsAppraisal : true
+);
+party.inventory.add(:test);
+party.inventory.addGold(amount:100000);
+*/
+
+
 
     
     // since both the party members are from this island, 

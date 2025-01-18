@@ -1746,17 +1746,6 @@ Location.database.newEntry(data:{
     
 
     @:story = import(module:'game_singleton.story.mt');
-    for(0, 3)::(i) {
-      location.inventory.add(item:
-        Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) 
-                      && value.tier <= location.landmark.island.tier
-          ),
-          rngEnchantHint:true
-        )
-      );
-    }
     
     location.inventory.add(item:
       Item.new(
@@ -1784,6 +1773,12 @@ Location.database.newEntry(data:{
     location.inventory.add(item:
       Item.new(
         base:Item.database.find(id:'base:perfect-arts-crystal')
+      )
+    );    
+
+    location.inventory.add(item:
+      Item.new(
+        base:Item.database.find(id:'base:seed')
       )
     );    
 

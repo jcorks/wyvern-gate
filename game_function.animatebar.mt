@@ -111,7 +111,7 @@ return ::(
           );
 
       
-        return canvas.ANIMATION_FINISHED;
+        return windowEvent.ANIMATION_FINISHED;
       }
     }
   );
