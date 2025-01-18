@@ -830,6 +830,38 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Seed Stat Increase',
+    id : 'base:seed',
+    description: 'Casts an Art from an item.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.SPECIAL ,
+    stats: StatSet.new(
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(text: 'The ' + item.name + ' glows with power!');
+
+        @:oldStats = StatSet.new();
+        oldStats.load(serialized:holder.stats.save());
+        @:newState = holder.stats.save();
+        newState[item.data.statIncreaseType] += item.data.statIncrease;
+        holder.stats.load(serialized:newState);
+        
+        oldStats.printDiff(
+          other:holder.stats,
+          prompt: 'New stats: ' + holder.name
+        );
+
+
+      }
+    }
+  }
+) 
+
+
+Effect.newEntry(
+  data : {
     name : 'Trigger Item Art',
     id : 'base:trigger-itemart',
     description: 'Casts an Art from an item.',

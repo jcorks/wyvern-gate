@@ -339,10 +339,10 @@ return {
 
     
     // debug
+
 /*
 @:test = Item.new(
-  base: Item.database.find(id:'base:shortsword'),
-  forceNeedsAppraisal : true
+  base: Item.database.find(id:'base:seed')
 );
 party.inventory.add(:test);
 party.inventory.addGold(amount:100000);

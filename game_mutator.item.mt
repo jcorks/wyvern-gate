@@ -3111,7 +3111,8 @@ Item.database.newEntry(data : {
   equipMod : StatSet.new(
   ),
   useEffects : [
-    'base:seed'
+    'base:seed',
+    'base:consume-item'     
   ],
   equipEffects : [],
   traits :     
