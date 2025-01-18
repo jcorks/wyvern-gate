@@ -3066,7 +3066,7 @@ Item.database.newEntry(data : {
   enchantLimit : 40,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
-  basePrice: 10,
+  basePrice: 30,
   possibleArts : [],
 
   blockPoints : 0,
@@ -3092,6 +3092,50 @@ Item.database.newEntry(data : {
 }) 
 
 
+Item.database.newEntry(data : {
+  name : "Seed",
+  id : 'base:seed',
+  description: "Permanently increases a base stat.",
+  examine : 'Its abilities are unknown.',
+  equipType: TYPE.TWOHANDED,
+  rarity : 500,
+  weight : 1,
+  tier: 4,
+  enchantLimit : 40,
+  levelMinimum : 1,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  basePrice: 10,
+  possibleArts : [],
+
+  blockPoints : 0,
+  equipMod : StatSet.new(
+  ),
+  useEffects : [
+    'base:seed'
+  ],
+  equipEffects : [],
+  traits :     
+    TRAIT.MEANT_TO_BE_USED |
+    TRAIT.UNIQUE
+  ,
+  onCreate ::(item, creationHint) {
+    @:stats = {
+      "HP" : 2,
+      "AP" : 2,
+      "ATK" : 3,
+      "DEF" : 3,
+      "SPD" : 3,
+      "INT" : 3,
+      "LUK" : 3,
+      "DEX" : 3
+    }
+    
+    item.data.statIncreaseType = random.pickArrayItem(:stats->keys);
+    item.data.statIncrease = stats[item.data.statIncreaseType];
+    item.name = item.data.statIncreaseType + ' Seed';
+  }
+}) 
+
 
 
   
@@ -3108,7 +3152,7 @@ Item.database.newEntry(data : {
     basePrice: 1000,
     tier: 0,
     levelMinimum : 1000000000,
-    enchantLimit : 0,
+    enchantLimit : 20,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleArts : [
     ],
@@ -3435,6 +3479,9 @@ none.name = 'None';
       state.needsAppraisal = if (forceNeedsAppraisal != empty) forceNeedsAppraisal
         else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess:4)) true else false;
       
+      if (state.needsAppraisal)
+        state.price = 999;
+      
       if (base.hasTraits(:TRAIT.HAS_SIZE))   
         assignSize(*_);
       foreach(base.equipEffects)::(i, effect) {
@@ -3525,7 +3572,7 @@ none.name = 'None';
             @mod = ItemEnchant.new(
               base:
               if (random.try(percentSuccess:25)) 
-                ItemEnchant.database.find(id:'base:art')
+                ItemEnchant.database.find(id:'base:soul')
               else
                 ItemEnchant.database.getRandomFiltered(
                   filter::(value) <- 
@@ -3723,7 +3770,7 @@ none.name = 'None';
       @:state = _.state;
       when (state.enchants->keycount >= state.base.enchantLimit) empty;
       state.enchants->push(value:mod);
-      foreach(mod.base.equipEffects)::(i, effect) {
+      foreach(mod.equipEffects)::(i, effect) {
         state.equipEffects->push(value:effect);
       }
       state.stats.add(stats:mod.base.equipMod);

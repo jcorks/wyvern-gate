@@ -835,7 +835,7 @@ Effect.newEntry(
     description: 'Casts an Art from an item.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -853,7 +853,7 @@ Effect.newEntry(
     description: 'Casts Protect',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -875,7 +875,7 @@ Effect.newEntry(
     description: 'Allows the user to evade all attacks for the next turn.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -948,10 +948,10 @@ Effect.newEntry(
   data : {
     name : 'Trigger Regen',
     id : 'base:trigger-regen',
-    description: 'Heals 2 HP.',
+    description: 'Heals 1 HP.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -959,7 +959,7 @@ Effect.newEntry(
         when(holder.hp == 0) empty;
         windowEvent.queueMessage(text:holder.name + '\'s ' + item.name + ' glows with power!');
         holder.heal(
-          amount: 2
+          amount: 1
         );            
       }
     }
@@ -973,7 +973,7 @@ Effect.newEntry(
     description: '10% chance to hurt for 1HP.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1002,7 +1002,7 @@ Effect.newEntry(
     description: '50% chance to give a random status ailment to the holder for 2 turns.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1037,7 +1037,7 @@ Effect.newEntry(
     description: '10% chance to hurt for 1AP.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1066,7 +1066,7 @@ Effect.newEntry(
     description: '5% chance to break item.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1088,7 +1088,7 @@ Effect.newEntry(
     description: 'Casts Spikes',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1143,7 +1143,7 @@ Effect.newEntry(
     description: 'Slightly recovers AP.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1164,7 +1164,7 @@ Effect.newEntry(
     description: 'Casts Shield',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1187,7 +1187,7 @@ Effect.newEntry(
     description: 'Triggers a boost in strength.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1253,7 +1253,7 @@ Effect.newEntry(
     description: 'Triggers a boost in defense.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1319,7 +1319,7 @@ Effect.newEntry(
     description: 'Triggers a boost in mental acuity.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1384,7 +1384,7 @@ Effect.newEntry(
     description: 'Triggers a boost in dexterity.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -1448,7 +1448,7 @@ Effect.newEntry(
     description: 'Triggers a boost in speed.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
     events : {
@@ -4672,7 +4672,7 @@ Effect.newEntry(
   data : {
     name : 'Premonition',
     id : 'base:premonition',
-    description: 'All critical hits are reduced to 1 damage.',
+    description: 'All incoming critical hits are reduced to 1 damage.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
@@ -4693,7 +4693,7 @@ Effect.newEntry(
   data : {
     name : 'Crustacean Maneuver',
     id : 'base:crustacean-maneuver',
-    description: 'All attacks are nullified. Holder cannot move while this effect is active.',
+    description: 'All incoming attacks are nullified. Holder cannot move while this effect is active.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,

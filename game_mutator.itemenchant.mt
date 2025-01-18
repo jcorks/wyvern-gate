@@ -96,6 +96,7 @@ ItemEnchant.database.newEntry(
     useEffects : []
   }
 )
+*/
 
 
 
@@ -109,6 +110,7 @@ ItemEnchant.database.newEntry(
     levelMinimum : 1,
     priceMod: 350,
     tier : 0,
+    traits: 0,
     
     triggerConditionEffects : [
       'base:trigger-regen'
@@ -119,7 +121,7 @@ ItemEnchant.database.newEntry(
     
     useEffects : []
   }
-)*/
+)
 
 ItemEnchant.database.newEntry(
   data : {
@@ -130,7 +132,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: -1000,
-    tier : 1,
+    tier : 4,
     
     triggerConditionEffects : [
       'base:trigger-break-chance'
@@ -153,7 +155,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: -1000,
-    tier : 1,
+    tier : 0,
     
     triggerConditionEffects : [
       'base:trigger-random-ailment'
@@ -178,7 +180,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: -200,
-    tier : 0,
+    tier : 1,
     
     triggerConditionEffects : [
       'base:trigger-hurt-chance'
@@ -201,7 +203,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: -200,
-    tier : 0,
+    tier : 1,
     
     triggerConditionEffects : [
       'base:trigger-fatigue-chance'
@@ -215,7 +217,7 @@ ItemEnchant.database.newEntry(
   }
 )
 
-/*
+
 ItemEnchant.database.newEntry(
   data : {
     name : 'Spikes',
@@ -234,11 +236,12 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    traits : 0
   }
 )
 
-
+/*
 ItemEnchant.database.newEntry(
   data : {
     name : 'Ensnare',
@@ -261,7 +264,7 @@ ItemEnchant.database.newEntry(
 )
 */
 
-/*
+
 ItemEnchant.database.newEntry(
   data : {
     name : 'Ease',
@@ -271,7 +274,8 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 350,
-    tier : 1,
+    tier : 0,
+    traits: 0,
     
     triggerConditionEffects : [
       'base:trigger-ap-regen'
@@ -294,6 +298,7 @@ ItemEnchant.database.newEntry(
     levelMinimum : 1,
     priceMod: 250,
     tier : 0,
+    traits : 0,
     
     triggerConditionEffects : [
       'base:trigger-shield' 
@@ -306,6 +311,7 @@ ItemEnchant.database.newEntry(
   }
 )
 
+/*
 ItemEnchant.database.newEntry(
   data : {
     name : 'Boost Strength',
@@ -426,7 +432,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 0,
     
     triggerConditionEffects : [
     ],
@@ -451,7 +457,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 0,
     
     triggerConditionEffects : [
     ],
@@ -474,7 +480,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 0,
     
     triggerConditionEffects : [
     ],
@@ -498,7 +504,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 0,
     
     triggerConditionEffects : [
     ],
@@ -521,7 +527,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 0,
     
     triggerConditionEffects : [
     ],
@@ -545,7 +551,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 0,
     
     triggerConditionEffects : [
     ],
@@ -569,7 +575,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 3,
     
     triggerConditionEffects : [
     ],
@@ -592,7 +598,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 0,
     
     triggerConditionEffects : [
     ],
@@ -639,7 +645,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 2,
     
     triggerConditionEffects : [
     ],
@@ -662,7 +668,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 4,
     
     triggerConditionEffects : [
     ],
@@ -708,7 +714,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 200,
-    tier : 1,
+    tier : 3,
     
     triggerConditionEffects : [
     ],
@@ -1717,6 +1723,28 @@ ItemEnchant.database.newEntry(
     traits : 0
   }
 )
+
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Soul',
+    id : 'base:soul',
+    description : '',
+    equipMod : StatSet.new(
+    ),
+    priceMod: 500,
+    tier : 0,
+    levelMinimum : 1,
+    
+    triggerConditionEffects : [
+    ],
+    equipEffects : [
+    ],
+    
+    useEffects : [],
+    traits : 0
+  }
+)
+
 }
 
 
@@ -1726,7 +1754,9 @@ ItemEnchant.database.newEntry(
     condition : empty,
     conditionChance : 0,
     conditionChanceName  : '',
-    artID : ''
+    artID : '',
+    equipEffects : empty,
+    useEffects : empty
   },
 
   database: Database.new(
@@ -1752,8 +1782,18 @@ ItemEnchant.database.newEntry(
 
     this.interface = {
       initialize::{},
-      defaultLoad ::(base, conditionHint) {
+      defaultLoad ::(base, conditionHint) {      
         state.base = base;
+        state.equipEffects = [];
+        state.useEffects = [];
+        @:Effect = import(module:'game_database.effect.mt');
+        
+        if (base.id == 'base:soul') ::<= {
+          @:effectID = Effect.getRandomFiltered(::(value) <- 
+            value.hasNoTrait(:Effect.TRAIT.SPECIAL | Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.REVIVAL)
+          ).id;
+          state.equipEffects->push(:effectID);
+        }
         
         if (base.id == 'base:art') ::<= {
           state.artID = Arts.getRandomFiltered(::(value) <- 
@@ -1773,6 +1813,10 @@ ItemEnchant.database.newEntry(
           state.conditionChance = CONDITION_CHANCES[conditionIndex];
           state.conditionChanceName = CONDITION_CHANCE_NAMES[conditionIndex];
         }
+        
+        foreach(base.equipEffects) ::(k, v) <- state.equipEffects->push(:v);
+        foreach(base.useEffects) ::(k, v) <- state.useEffects->push(:v);
+        
         return this;
       },
       
@@ -1780,9 +1824,17 @@ ItemEnchant.database.newEntry(
         get ::<- state.artID
       },
       
+      equipEffects : {get::<- state.equipEffects},
+
+      useEffects : {get::<- state.useEffects},
+
 
       description : {
         get ::{
+          @:Effect = import(module:'game_database.effect.mt');
+          when(state.base.id == 'base:soul') 
+            "Grants the effect " + Effect.find(:state.equipEffects[0]).name + '.';
+            
           when(state.condition == empty) state.base.description;
           @out = state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
           when (state.artID == '') out;
@@ -1793,6 +1845,10 @@ ItemEnchant.database.newEntry(
       
       name : {
         get ::{
+          @:Effect = import(module:'game_database.effect.mt');
+          when (state.base.id == 'base:soul')
+            'Soul of ' + Effect.find(:state.equipEffects[0]).name;
+            
           when(state.condition == empty) state.base.name;
           breakpoint();
           return state.condition.name + ': ' + state.base.name;
