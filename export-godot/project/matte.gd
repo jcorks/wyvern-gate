@@ -19,7 +19,7 @@ extends Matte
 @onready var BGM_Town2: AudioStreamPlayer = %BGM_Town2;
 
 
-
+var lastSettings;
     
 func rangeToDB(val: float):
     if (val < 0.0001): val = 0.0001;
@@ -79,11 +79,19 @@ func _ready() -> void:
     )
 
     connect("on_send_settings", func(str): 
+        print("Settings sent");
         var settings = JSON.parse_string(str);    
+        lastSettings = settings;
         if (settings.debugMode == true):
             debug = true;
             print("Enabled debug mode.");
             enable_debugging();
+
+        if (settings.has("volume")):
+            print(str("set master volume", settings.volumeSFX, " ", rangeToDB(settings.volumeSFX), "db"))
+            var sfxBus = AudioServer.get_bus_index("Master");
+            AudioServer.set_bus_volume_db(sfxBus, rangeToDB(settings.volume));
+
             
         if (settings.has("volumeSFX")):
             print(str("set volume sfx", settings.volumeSFX, " ", rangeToDB(settings.volumeSFX), "db"))
@@ -132,7 +140,21 @@ var inputs = [
     "cancel"
 ]
 
+
+func toggle_fullscreen():
+    if (lastSettings == null):
+        return;
+    print("Fullscreen toggle")
+    lastSettings['fullscreen'] = !lastSettings['fullscreen'];
+    var str = JSON.stringify(lastSettings);
+    canvas.apply_settings(lastSettings)
+    save_settings(str);
+
+
 func _process(delta):
+    if (Input.is_action_just_pressed("fullscreen")):
+        toggle_fullscreen();
+
     for k in inputs:        
         if (Input.is_action_pressed(k, true) && held[k] == 0):
             print(str(k, held[k]));

@@ -69,6 +69,20 @@ static matteValue_t on_play_sfx(
 }
 
 
+static matteValue_t get_save_settings(
+	matteVM_t * vm, 
+	matteValue_t fn, 
+	const matteValue_t * args, 
+	void * userData
+) {
+
+	Matte * m = (Matte*)userData;
+	matteStore_t * store = matte_vm_get_store(vm);
+	m->saveSettingsCall = args[0];
+	return matte_store_new_value(store);
+}
+
+
 
 static matteValue_t on_play_bgm(
 	matteVM_t * vm, 
@@ -124,6 +138,7 @@ void Matte::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("initialize_vm"), &Matte::initializeVM);
 	ClassDB::bind_method(D_METHOD("send_input"), &Matte::sendInput);
 	ClassDB::bind_method(D_METHOD("enable_debugging"), &Matte::enableDebugging);
+	ClassDB::bind_method(D_METHOD("save_settings", "settings"), &Matte::saveSettings);
 	ADD_SIGNAL(
 		MethodInfo("on_send_line", PropertyInfo(Variant::INT, "index"), PropertyInfo(Variant::STRING, "data"))
 	);
@@ -244,6 +259,21 @@ void Matte::initializeVM() {
         // argument names
         NULL
     );	
+
+
+    matte_add_external_function(
+        ctx,
+        "wyvern_gate__native__godot_get_save_settings",
+        get_save_settings,
+        this,
+        
+        "a",
+        // argument names
+        NULL
+    );	
+
+
+
     matte_vm_import(
         vm,
         MATTE_VM_STR_CAST(vm, "bridge.mt"),
@@ -309,6 +339,25 @@ void Matte::enableDebugging() {
 	if (ctx == NULL) return;
 	matte_debugging_enable(ctx);
 }
+
+void Matte::saveSettings(const godot::String & str) {
+	if (ctx == NULL) return;
+    matteVM_t * vm = matte_get_vm(ctx);
+	matteStore_t * store = matte_vm_get_store(vm);
+
+    matteValue_t arg0 = matte_store_new_value(store);
+	matteString_t * str0 = matte_string_create_from_c_str(str.utf8());
+    matte_value_into_string(store, &arg0, str0);
+	matte_string_destroy(str0);
+
+	matteValue_t o = matte_call(
+		ctx,
+		saveSettingsCall,
+		"data", arg0,
+		NULL
+	);
+}
+
 
 void Matte::requestExit() {
 	emit_signal("on_request_exit");

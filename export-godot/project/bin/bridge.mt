@@ -29,6 +29,7 @@
 
 @:godot_requestExit = getExternalFunction(:"wyvern_gate__native__godot_request_exit");
 @:godot_updateSettings = getExternalFunction(:"wyvern_gate__native__godot_update_settings");
+@:godot_getSaveSettings = getExternalFunction(:"wyvern_gate__native__godot_get_save_settings");
 
 @:godot_onPlaySFX = getExternalFunction(:"wyvern_gate__native__godot_on_play_sfx");
 @:godot_onPlayBGM = getExternalFunction(:"wyvern_gate__native__godot_on_play_bgm");
@@ -62,7 +63,19 @@
   return output;
 }
 
+@:storeSettings = ::(data){
+  enterNewLocation(
+    path: './',
+    action::(filesystem) {
+      filesystem.writeString(
+        path: 'settings',
+        string: data
+      );
+    }
+  ); 
+}
 
+godot_getSaveSettings(:storeSettings);
 
 instance.mainMenu(
   canvasWidth: 80,
@@ -150,15 +163,7 @@ instance.mainMenu(
   
   onSaveSettings ::(data){
     godot_updateSettings(:data);
-    enterNewLocation(
-      path: './',
-      action::(filesystem) {
-        filesystem.writeString(
-          path: 'settings',
-          string: data
-        );
-      }
-    );  
+    storeSettings(:data);
   },
   
   preloadMods :: {

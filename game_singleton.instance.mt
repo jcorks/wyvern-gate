@@ -237,6 +237,7 @@ return class(
       DEBUGGING : 64
     };
     @features_ = 0;
+    @onLoadSettings_;
     
     @:colorMenu::(onChange, prompt, value)  {
       windowEvent.queueChoices(
@@ -282,7 +283,7 @@ return class(
       defaultSettings ::{
         settings.fullscreen = true;
         settings.crtShader = true;
-        settings.volume = 1;
+        settings.volume = 0.7;
         settings.volumeBGM = 0.3;
         settings.volumeSFX = 0.5;
         settings.bgColor = [33, 33, 58];
@@ -292,6 +293,9 @@ return class(
       },
       
       optionsMenu:: {
+        settings = JSON.decode(string:onLoadSettings_());
+
+
         @:opts = ['Reset to default'];
         @:optActs = [::{
           windowEvent.queueAskBoolean(
@@ -447,7 +451,7 @@ return class(
           nativeSFX: onPlaySFX,
           nativeBGM: onPlayBGM
         )
-
+        onLoadSettings_ = onLoadSettings;
         features_ = features;
         canvas.resize(width:canvasWidth, height:canvasHeight);
         this.onSaveState = onSaveState;

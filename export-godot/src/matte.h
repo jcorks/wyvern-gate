@@ -21,6 +21,7 @@ public:
 	Matte();
 	~Matte();
 
+	matteValue_t saveSettingsCall;
 
 	void initializeVM();
 	void sendInput(int input);
@@ -30,6 +31,7 @@ public:
 	void playSFX(const std::string & name);
 	void playBGM(const std::string & name, bool loop);
 	void enableDebugging();
+	void saveSettings(const godot::String & );
 	void requestExit();
 
 	void _process(double delta) override;

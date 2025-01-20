@@ -99,9 +99,9 @@ func apply_settings(settings):
             DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 
     if (settings.has('crtShader')):
-        if (settings.crtShader == false):
+        if (settings.crtShader == false && crt.get_parent() != null):
             self.remove_child(crt)
-        else:
+        elif (crt.get_parent() == null):
             self.add_child(crt)
 
     if (settings.has("fgColor")):
@@ -121,15 +121,4 @@ func apply_settings(settings):
 
 
 
-func toggle_fullscreen():
-    if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
-        DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-    else:
-        DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-    if (Input.is_action_just_pressed("fullscreen")):
-        toggle_fullscreen();
-
-    pass
