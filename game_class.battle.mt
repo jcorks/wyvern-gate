@@ -611,7 +611,7 @@
           if (world.party.isMember(:v)) ::<= {
             v.addOpinion(
               fullName : 'the battle with ' + enemies[0].name,
-              shortName : 'the battle'
+              shortName : 'the battle',
               pastTense : true
             );
           }
