@@ -203,13 +203,13 @@
       statement + '\n' +
       '\n' +
       this.name + ' feels ' + emotion + '.\n' +
-      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.plural == true) 'were ' else 'are ') + judgement + '.\n'
+      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.plural == true) ' were ' else ' are ') + judgement + '.\n'
     
      else 
       statement + '\n' +
       '\n' +
       this.name + ' feels ' + emotion + '.\n' +
-      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.plural == true) 'was ' else 'is ') + judgement + '.\n'
+      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.plural == true) ' was ' else ' is ') + judgement + '.\n'
 
   }
 }
@@ -1015,26 +1015,29 @@
     addOpinion ::(fullName, shortName, plural, pastTense) {
       @:state = _.state;
       @:this = _.this;
-      if (state.opinions == empty) ::<= {
-        state.opinions = [];
-        state.recentOpinions = [];
-      }
-      when(state.opinions[fullName] != empty) empty;
-        
-      if (shortName == empty)
-        shortName = fullName;      
-        
-      state.opinions[fullName] = {
-        affect : random.integer(from:0, to:2),
-        shortName : shortName,
-        statement : random.float(),
-        emotion : random.float(),
-        judgement : random.float(),
-        plural : plural,
-        pastTense : partTense
-      } 
       
-      if (state.recentOpinions->size > 10)
+      ::<= {
+        if (state.opinions == empty) ::<= {
+          state.opinions = [];
+          state.recentOpinions = [];
+        }
+        when(state.opinions[fullName] != empty) empty;
+          
+        if (shortName == empty)
+          shortName = fullName;      
+          
+        state.opinions[fullName] = {
+          affect : random.integer(from:0, to:2),
+          shortName : shortName,
+          statement : random.float(),
+          emotion : random.float(),
+          judgement : random.float(),
+          plural : plural,
+          pastTense : pastTense
+        } 
+      }
+      
+      if (state.recentOpinions->size > 3)
         state.recentOpinions->remove(key:0);
       state.recentOpinions->push(:fullName);
     },
