@@ -370,13 +370,17 @@ return class(
               (FEATURES.AUDIO): ::<={
                 opts->push(:'Volume: Game');
                 optActs->push(::{
+                  @frac = 0;
                   windowEvent.queueSlider(
-                    onGetPrompt ::<- 'Volume :' + (settings.volume * 100)->floor,
+                    onGetPrompt ::<- 'Game Volume :' + (settings.volume * 100)->floor,
                     defaultValue : settings.volume,
                     onChoice::(value){},
                     increments : 100,
                     onHover ::(fraction) {
-                      settings.volume = fraction;
+                      frac = fraction;
+                    },
+                    onLeave :: {
+                      settings.volume = frac;
                       this.updateSettings();
                     },
                     canCancel : true
@@ -385,13 +389,17 @@ return class(
 
                 opts->push(:'Volume: SFX');
                 optActs->push(::{
+                  @frac = 0;
                   windowEvent.queueSlider(
                     onGetPrompt ::<- 'SFX Volume :' + (settings.volumeSFX * 100)->floor,
                     defaultValue : settings.volumeSFX,
                     onChoice::(value){},
                     increments : 100,
                     onHover ::(fraction) {
-                      settings.volumeSFX = fraction;
+                      frac = fraction;
+                    },
+                    onLeave :: {
+                      settings.volumeSFX = frac;
                       this.updateSettings();
                     },
                     canCancel : true
@@ -400,13 +408,17 @@ return class(
 
                 opts->push(:'Volume: BGM');
                 optActs->push(::{
+                  @frac = 0;
                   windowEvent.queueSlider(
                     onGetPrompt ::<- 'BGM Volume :' + (settings.volumeBGM * 100)->floor,
                     defaultValue : settings.volumeBGM,
                     onChoice::(value){},
                     increments : 100,
                     onHover ::(fraction) {
-                      settings.volumeBGM = fraction;
+                      frac = fraction;
+                    },
+                    onLeave :: {
+                      settings.volumeBGM = frac;
                       this.updateSettings();
                     },
                     canCancel : true
