@@ -1298,7 +1298,7 @@
           onGetCategories ::{
             @:categories = [];
             @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
-            categories->push(:['Weapon:', if (hand != empty && hand.arts->size >= 2) [
+            categories->push(:['Weapon:', if (hand != empty && hand.arts != empty && hand.arts->size >= 2) [
               hand.arts[0],        
               hand.arts[1]
             ] else [empty, empty]]);
@@ -1379,7 +1379,7 @@
       @:categories = {}
 
       @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
-      if (hand != empty && hand.arts->size >= 2) ::<= {
+      if (hand != empty && hand.arts != empty && hand.arts->size >= 2) ::<= {
         categories->push(:['Weapon:',[
           hand.arts[0],        
           hand.arts[1]
@@ -1425,7 +1425,7 @@
       @:cards = [
         ...set.supportArts, 
         ...set.professionArts,
-        ...(if (state.equips[EQUIP_SLOTS.HAND_LR]) 
+        ...(if (state.equips[EQUIP_SLOTS.HAND_LR] != empty && state.equips[EQUIP_SLOTS.HAND_LR].arts != empty) 
           [
             state.equips[EQUIP_SLOTS.HAND_LR].arts[0],        
             state.equips[EQUIP_SLOTS.HAND_LR].arts[1]
