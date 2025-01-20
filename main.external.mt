@@ -114,7 +114,6 @@
   }
   external_onEndCommit();
   canvasChanged = false;  
-  canvas.onFrameComplete();
 }
 
 canvas.onCommit = ::(lines, renderNow){

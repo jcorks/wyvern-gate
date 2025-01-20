@@ -14,7 +14,6 @@
     godot_sendLine(index, line);
   }
   canvasChanged = false;   
-  canvas.onFrameComplete();
 }
 canvas.onCommit = ::(lines, renderNow){
   currentCanvas = lines;
