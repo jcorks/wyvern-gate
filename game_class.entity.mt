@@ -46,6 +46,173 @@
 @:DAMAGE_RNG_SPREAD = 0.3;
 @:PROF_EXP_PER_KNOCKOUT = 35;
 @:DECK_MIN_ART_COUNT = 25;
+@:FEELING_TYPE = {
+  PERSON : 1,
+  ITEM : 2,
+  PLACE : 3
+}
+
+
+
+@:Entity = import(module:'game_class.entity.mt');
+
+
+@:getFeelings = ::<= {
+
+  @:feelings = [
+    // negative
+    [
+      // statements
+      [
+        '"I\'m not sure about this..."',
+        '"I don\'t feel very good."',
+        '"What was that?""',
+        '"Ugh."',
+      ],      
+
+
+      // emotions
+      [
+        'awful',
+        'afraid',
+        'uneasy',
+        'nauseous',
+        'moody',
+        'bewildered',
+        'nervous',
+        'depressed',
+        'scared',
+        'grouchy',
+        'unsure',
+        'remorseful',
+        'disgusted',
+        'filled with disdain',
+        'defeated'
+      ],
+      
+      // judgements
+      [
+        'the worst',
+        'scary',
+        'unsafe',
+        'gross',
+        'weird',
+        'strange',
+        'puzzling',
+        'disgusting',
+        'stressful',
+        'frustrating',
+      ]      
+    ],
+    
+    // neutral
+    [
+      // statements
+      [
+        '"I feel fine."',
+        '"Not much going on."',
+        '"This is fine."',
+        '"Not much to write home about."',
+        '"Alright."'
+      ],
+      
+      
+      // emotions 
+      [
+        'neutral',
+        'okay',
+        'indifferent',
+      ],
+      
+      
+      // judgements
+      [
+        "okay",
+        'not very interesting',
+        'boring',
+      ]      
+    ],
+    
+    
+    // positive
+    [
+      // statements
+      [
+        '"This is great!"',
+        '"I really like this."',
+        '"I feel at peace."',
+        '"This gives me strength"',
+        '"This is the best!"'
+      ],
+      
+      
+      // emotions 
+      [
+        "good",
+        "great",
+        "fantastic",
+        "elated",
+        "amused",
+        "confident",
+        "empowered",
+        "excited",
+        "inspired",
+        "curious",
+        "relieved",
+        "thankful",
+      ],
+      
+      // judgements
+      [
+        "interesting",
+        "fascinating",
+        "excellent",
+        "quite good",
+        "wonderous",
+        "really nice"
+      ]      
+    ]
+  ]
+
+
+  return ::(this, state) {
+    if (this.opinions == empty) ::<= {
+      for(0, 2) ::(i) {
+        this.addOpinion(
+          fullName : Item.database.getRandomFiltered(::(value) <- (value.traits & Item.TRAIT.UNIQUE) == 0).name + 's',
+          plural : true
+        )
+      }
+    }    
+    @:which = random.pickArrayItem(:state.recentOpinions);
+    @:set = state.opinions[which];
+    
+    @:statements = feelings[set.affect][0];
+    @:emotions   = feelings[set.affect][1];
+    @:judgements = feelings[set.affect][2];
+    
+    @:plural = if (set.plural == empty) false else true;
+    
+    @:statement = statements[((statements->size-1) * set.statement)->round]
+    @:emotion   = emotions  [((emotions->size-1)   * set.emotion)->round]
+    @:judgement = judgements[((judgements->size-1) * set.judgement)->round]
+    
+    
+    
+    return if (plural) 
+      statement + '\n' +
+      '\n' +
+      this.name + ' feels ' + emotion + '.\n' +
+      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.plural == true) 'were ' else 'are ') + judgement + '.\n'
+    
+     else 
+      statement + '\n' +
+      '\n' +
+      this.name + ' feels ' + emotion + '.\n' +
+      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.plural == true) 'was ' else 'is ') + judgement + '.\n'
+
+  }
+}
 
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
@@ -587,7 +754,9 @@
     equippedDeck : 'MAIN',
     professionArts : empty,
     innateEffects : empty,
-    professionProgress : empty
+    professionProgress : empty,
+    opinions : empty,
+    recentOpinions : empty
   },
   
   private : {
@@ -840,6 +1009,34 @@
       state.ap = (state.stats.AP / 2)->floor
 
       //resetEffects(priv:_, this:_.this, state:_.state);        
+    },
+    
+    
+    addOpinion ::(fullName, shortName, plural, pastTense) {
+      @:state = _.state;
+      @:this = _.this;
+      if (state.opinions == empty) ::<= {
+        state.opinions = [];
+        state.recentOpinions = [];
+      }
+      when(state.opinions[fullName] != empty) empty;
+        
+      if (shortName == empty)
+        shortName = fullName;      
+        
+      state.opinions[fullName] = {
+        affect : random.integer(from:0, to:2),
+        shortName : shortName,
+        statement : random.float(),
+        emotion : random.float(),
+        judgement : random.float(),
+        plural : plural,
+        pastTense : partTense
+      } 
+      
+      if (state.recentOpinions->size > 10)
+        state.recentOpinions->remove(key:0);
+      state.recentOpinions->push(:fullName);
     },
     
     battle : {
@@ -1433,6 +1630,8 @@
         _.state.nickname = value;
       }
     },
+    
+    opinions : {get ::<- _.state.opinions},
       
     renderHP ::(length, x) {
       @:state = _.state;
@@ -2458,7 +2657,9 @@
 
 
       @:old = this.unequip(slot, silent:true);        
-
+      this.addOpinion(
+        fullName : 'the ' + item.name
+      );
 
 
       if (item.base.equipType == Item.TYPE.TWOHANDED) ::<={
@@ -3092,7 +3293,7 @@
     },
    
       
-    describe::(excludeStats)  {
+    describe::(excludeStats, showFeelings)  {
       @:state = _.state;
       @:this = _.this;
       @:plainStatsState = this.stats.save();
@@ -3118,6 +3319,7 @@
           this.name + ': Summary',
           this.name + ': ' + if (excludeStats != true) '(Base -> w/Mods.)' else '',
           this.name + ': Description',
+          this.name + ': Thinking about...?',
           this.name + ': Equipment',
           this.name + ': Effects'
         ],
@@ -3132,6 +3334,7 @@
           ' Fave. wep.: ' + state.faveWeapon.name + '\n' +
           'Personality: ' + state.personality.name + '\n\n'
           ,
+          
           if (excludeStats != true)
             StatSet.diffToLines(
               stats:plainStats, 
@@ -3145,7 +3348,12 @@
             )
           else
             '', 
-          this.describeQualities()
+          this.describeQualities(),
+          
+          if (showFeelings)
+            getFeelings(this, state)
+          else 
+            ''
           ,
            
               'hand(l): ' + this.getEquipped(slot:EQUIP_SLOTS.HAND_LR).name + '\n'

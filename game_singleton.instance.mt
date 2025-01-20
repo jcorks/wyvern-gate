@@ -1224,6 +1224,13 @@ return empty;
               y:where.y
             ); 
         }
+
+        foreach(world.party.members) ::(k, v) {
+          v.addOpinion(
+            fullName : 'the ' + landmark.name
+          );
+        }
+
         
         this.landmarkTravel();
       },

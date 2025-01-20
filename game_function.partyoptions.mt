@@ -324,7 +324,7 @@ return ::{
             },
 
             // describe
-            (2): member.describe(excludeStats:true),
+            (2): member.describe(excludeStats:true, showFeelings:true),
 
 
 

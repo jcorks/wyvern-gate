@@ -76,6 +76,18 @@
 
         state.members->push(value:member);
         
+        foreach(state.members) ::(k, v) {
+          v.addOpinion(
+            fullName : v.name + '\'s teammate ' + member.name,
+            shortName : member.name
+          );
+
+          member.addOpinion(
+            fullName : member.name + '\'s teammate ' + v.name,
+            shortName : v.name
+          );
+        }
+        
       },
       
       getItem ::(condition, remove) {      
@@ -256,6 +268,14 @@
       },
       
       addGoldAnimated ::(amount, onDone) {
+        foreach(state.members) ::(k, v) {
+          v.addOpinion(
+            fullName : 'money',
+            shortName : 'gold'
+          );
+        }
+      
+      
         @gained = amount;
         @oldG = this.inventory.gold;
         @price = gained;

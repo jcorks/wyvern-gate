@@ -606,6 +606,18 @@
         skipResults,
         onEnd => Function
       ) {
+        @:world = import(module:'game_singleton.world.mt')
+        foreach(allies) ::(k, v) {
+          if (world.party.isMember(:v)) ::<= {
+            v.addOpinion(
+              fullName : 'the battle with ' + enemies[0].name,
+              shortName : 'the battle'
+              pastTense : true
+            );
+          }
+        }
+      
+      
         actions = {} 
         defeated = {};
         onTurn_ = onTurn;

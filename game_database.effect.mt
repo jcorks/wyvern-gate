@@ -5081,7 +5081,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage) {
-        if (damage.damageType != Damage.TYPE.PHYS) ::<= { 
+        if (damage.damageType == Damage.TYPE.PHYS) ::<= { 
           windowEvent.queueMessage(text:holder.name + "'s Body Buffer negates the damage!");
           damage.amount = 0;
         }

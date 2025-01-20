@@ -2236,6 +2236,14 @@ Location.database.newEntry(data:{
               location: this,
               party
             );          
+
+            foreach(party.members) ::(k, v) {
+              v.addOpinion(
+                fullName : if (this.ownedBy) this.name else 'the ' + this.name
+              );
+            }
+
+
             // the action CAN unload ephemeral landmarks, so check if its valid. 
             if (this.landmark.map != empty)   
               this.landmark.step();
