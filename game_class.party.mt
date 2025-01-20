@@ -74,7 +74,6 @@
         member.inventory.clear();
         */
 
-        state.members->push(value:member);
         
         foreach(state.members) ::(k, v) {
           v.addOpinion(
@@ -87,6 +86,9 @@
             shortName : v.name
           );
         }
+
+
+        state.members->push(value:member);
         
       },
       

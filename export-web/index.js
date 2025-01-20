@@ -307,12 +307,14 @@ var startGame = function(touch) {
             case 'sfx' : {
               // play a sound
               data.name
+              break;
             }
 
             case 'bgm' : {
               // play a sound
               data.name
               data.loop
+              break;
             }
 
             

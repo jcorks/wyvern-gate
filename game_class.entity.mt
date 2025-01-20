@@ -54,8 +54,6 @@
 
 
 
-@:Entity = import(module:'game_class.entity.mt');
-
 
 @:getFeelings = ::<= {
 
