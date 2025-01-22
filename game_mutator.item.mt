@@ -3174,13 +3174,19 @@ Item.database.newEntry(data : {
       TRAIT.HAS_COLOR
     ,
     onCreate ::(item, user, creationHint) {
-      @:capitalize = import(:'game_function.capitalize.mt');
-      item.name = random.pickArrayItem(:keyQualifiers) + ' Key (' + capitalize(:item.color.name) + ')';
       @:world = import(module:'game_singleton.world.mt');
       @:Island = import(:'game_mutator.island.mt');
+
+      @tier = if (world != empty && world.island != empty) world.island.tier + random.integer(from:1, to:4) else 0;
+      breakpoint();
+
+      @:story = import(:'game_singleton.story.mt');
+      @:capitalize = import(:'game_function.capitalize.mt');
+      item.name = random.pickArrayItem(:keyQualifiers) + ' Key (Tier '+ tier + ')';
+      item.price += 4420 * tier;
       item.setIslandGenTraits(
-        levelHint : if (world != empty && world.island != empty) (world.island.levelMax + 1)*1.2 else 1,
-        tierHint : if (world != empty && world.island != empty) world.island.tier + 1 else 0,
+        levelHint : story.levelHint + (tier * 1.4),
+        tierHint : tier,
         idHint : Island.database.getRandomFiltered(::(value) <- (value.traits & Island.TRAITS.SPECIAL) == 0).id
       );
     }
@@ -3453,6 +3459,7 @@ none.name = 'None';
       @:this = _.this;
       @:state = _.state;
       @:world = import(module:'game_singleton.world.mt');
+      @:tier = if (world.island) world.island.tier else 1;
 
       state.worldID = world.getNextID();
       state.enchants = []; // ItemMod
@@ -3478,7 +3485,7 @@ none.name = 'None';
       state.improvementEXP = 0;
       state.data = {};
       state.needsAppraisal = if (forceNeedsAppraisal != empty) forceNeedsAppraisal
-        else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess:4)) true else false;
+        else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess:1 + tier*3)) true else false;
       
       if (state.needsAppraisal)
         state.price = 999;

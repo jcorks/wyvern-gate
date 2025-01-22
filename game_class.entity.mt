@@ -899,10 +899,8 @@
         );
 
 
-        if (random.try(percentSuccess:7)) ::<= {
+        if (random.try(percentSuccess:0.2 + island.tier*2)) ::<= {
           @itemMaterials = [
-            'base:gold',
-            'base:crystal',
             'base:mythril',
             'base:quicksilver',
             'base:dragonglass',

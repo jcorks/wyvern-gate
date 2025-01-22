@@ -395,7 +395,8 @@ Island.database.newEntry(
           entity.equip(
             slot:Entity.EQUIP_SLOTS.HAND_LR, 
             item:Item.new(
-              base:wep
+              base:wep,
+              materialHint : 'base:iron'
             ), 
             inventory:entity.inventory, 
             silent:true
@@ -431,7 +432,8 @@ Island.database.newEntry(
           entity.equip(
             slot:Entity.EQUIP_SLOTS.HAND_LR, 
             item:Item.new(
-              base: wep
+              base: wep,
+              materialHint : 'base:iron'
             ), 
             inventory:entity.inventory, 
             silent:true
@@ -464,7 +466,8 @@ Island.database.newEntry(
           entity.equip(
             slot:Entity.EQUIP_SLOTS.HAND_LR, 
             item:Item.new(
-              base:wep
+              base:wep,
+              rngEnchantHint : true
             ), 
             inventory:entity.inventory, 
             silent:true
@@ -481,7 +484,8 @@ Island.database.newEntry(
           entity.equip(
             slot:Entity.EQUIP_SLOTS.ARMOR, 
             item:Item.new(
-              base: wep
+              base: wep,
+              rngEnchantHint : true
             ), 
             inventory:entity.inventory, 
             silent:true
