@@ -106,7 +106,6 @@ Island.database.newEntry(
   data : {
     id : 'base:starting-island',
     requiredLandmarks : [
-      'base:city',
       'base:town',
       'base:wyvern-gate',
     ],
@@ -140,16 +139,16 @@ Island.database.newEntry(
   data : {
     id : 'base:normal-island',
     requiredLandmarks : [
-      'base:wyvern-gate'
+      'base:wyvern-gate',
+      'base:lost-shrine',
+      'base:town'
     ],
     possibleLandmarks : [
       'base:city',
-      'base:town',
       'base:forest',
       'base:villa',
       'base:mine',
       'base:village',
-      'base:lost-shrine'
     ],
     minAdditionalLandmarkCount : 1,
     maxAdditionalLandmarkCount : 3,
@@ -160,7 +159,6 @@ Island.database.newEntry(
       'base:weather:1',
       'base:camp-out',
       'base:encounter:normal'
-      
     ],
     possibleSceneryCharacters : [
       '╿', '.', '`', '^', '▒',
@@ -331,11 +329,11 @@ Island.database.newEntry(
         }
         
 
-        // finally collect unique random support arts until 25 is reached
+        // finally collect unique random support arts until 35 is reached
         @:addCondition ::(value) <- entity.supportArts->findIndex(:value.id) == -1
         {:::} {
           forever ::{
-            if (entity.calculateDeckSize() >= 25) send();
+            if (entity.calculateDeckSize() >= 35) send();
 
             entity.supportArts->push(:
               Arts.getRandomFiltered(::(value) <- 
@@ -367,9 +365,6 @@ Island.database.newEntry(
 
         // tier 1: learn 1 to 2 skills
         (1):::<= {
-          for(0, 1) ::(i) {
-            entity.autoLevel();
-          }
           assignSupportArts(
             entity,
             professionLevel : 1,
@@ -380,9 +375,6 @@ Island.database.newEntry(
 
         // tier 2: learn 1 to 2 skills and get equips
         (2):::<= {
-          for(0, 2) ::(i) {
-            entity.autoLevel();
-          }
           
           @:Item = import(module:'game_mutator.item.mt');
           // add a weapon
@@ -416,10 +408,6 @@ Island.database.newEntry(
 
         // tier 3: learn 1 to 2 skills and get equips
         (3):::<= {
-          for(0, 4) ::(i) {
-            entity.autoLevel();
-          }
-
           
           @:Item = import(module:'game_mutator.item.mt');
           // add a weapon
@@ -450,9 +438,6 @@ Island.database.newEntry(
         
         // tier 2: learn 1 to 2 skills and get equips
         default: ::<= {
-          for(0, 8+(instance.y-1)*2) ::(i) {
-            entity.autoLevel();
-          }
 
           
           @:Item = import(module:'game_mutator.item.mt');
