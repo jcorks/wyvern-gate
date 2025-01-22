@@ -568,8 +568,8 @@ Island.database.newEntry(
       
         state.tier = tierHint;
 
-        state.levelMin = (levelHint - random.number() * (levelHint * 0.4))->ceil;
-        state.levelMax = (levelHint + random.number() * (levelHint * 0.4))->floor;
+        state.levelMin = (levelHint - random.number() * (levelHint * 0.2))->round;
+        state.levelMax = (levelHint + random.number() * (levelHint * 0.2))->round;
         if (state.levelMin < 1) state.levelMin = 1;
         if (nameHint != empty || nameHint == '')
           state.name = (nameHint) => String;
@@ -749,6 +749,7 @@ Island.database.newEntry(
       },
                   
       newInhabitant ::(professionHint, levelHint, speciesHint) {
+        breakpoint();
         @species = 
           if (((state.base.traits & TRAITS.DIVERSE) == 0) && random.try(percentSuccess:95))
             random.pickArrayItemWeighted(list:state.species).species

@@ -78,12 +78,14 @@
         foreach(state.members) ::(k, v) {
           v.addOpinion(
             fullName : v.name + '\'s teammate ' + member.name,
-            shortName : member.name
+            shortName : member.name,
+            core : true
           );
 
           member.addOpinion(
             fullName : member.name + '\'s teammate ' + v.name,
-            shortName : v.name
+            shortName : v.name,
+            core : true
           );
         }
 
@@ -141,6 +143,14 @@
               if (state.leader == index) ::<= {
                 state.leader = (index+1)%state.members->size;
               } 
+              
+              foreach(state.members) ::(index, other) {
+                other.addOpinion(
+                  fullName : 'losing ' + other.name + '\'s teammate ' + m.name,
+                  pastTense : true,
+                  core:true
+                )
+              }
                 
               send();
             }            

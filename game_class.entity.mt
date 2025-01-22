@@ -182,7 +182,14 @@
         )
       }
     }    
-    @:which = random.pickArrayItem(:state.recentOpinions);
+    @:cores = state.opinions->filter(::(value) <- value.core == true);
+
+    @:which = if (cores->size > 0 && random.try(percentSuccess:10)) 
+      (random.pickArrayItem(:cores)).fullName
+    else 
+      random.pickArrayItem(:[...state.recentOpinions]);
+      
+    
     @:set = state.opinions[which];
     
     @:statements = feelings[set.affect][0];
@@ -1010,7 +1017,7 @@
     },
     
     
-    addOpinion ::(fullName, shortName, plural, pastTense) {
+    addOpinion ::(fullName, shortName, plural, pastTense, core) {
       @:state = _.state;
       @:this = _.this;
       
@@ -1031,7 +1038,8 @@
           emotion : random.float(),
           judgement : random.float(),
           plural : plural,
-          pastTense : pastTense
+          pastTense : pastTense,
+          core : core
         } 
       }
       
@@ -2482,6 +2490,9 @@
       @:state = _.state;
       @:this = _.this;
       state.hp = 0;
+      
+     when (this.effectStack == empty)
+        this.killFinalize(from);
 
       if (this.effectStack.getAllByFilter(::(value) <- value.id == 'base:dying')->size == 0)
         this.addEffect(from, id:'base:dying', durationTurns:2);
