@@ -1087,12 +1087,15 @@
                   targets : action.targets,
                   targetDefendParts: [0],
                   targetParts : action.targetParts,
-                  turnIndex: 0
+                  turnIndex: 0,
+                  extraData : {
+                    action: action
+                  }
                 );
                 
-
                 
-                when(cancel) ::<= {
+                
+                when(cancel->type == Boolean && cancel) ::<= {
                   windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' cancelled ' + entAct.name + '\'s Art!');
                   windowEvent.queueCustom(
                     onEnter :: {
@@ -1100,6 +1103,13 @@
                     }
                   )
                 }
+                
+                if (cancel->type == Object) ::<= {
+                  windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' transformed ' + entAct.name + '\'s Art!');
+                  action = cancel;                
+                }
+                  
+                
                   
                 windowEvent.queueCustom(
                   onEnter :: {

@@ -10869,7 +10869,44 @@ Arts.newEntry(
 )
 
 
-
+Arts.newEntry(
+  data: {
+    name: 'Sudden Provocation',
+    id : 'base:b311',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'The incoming Art being reacted to is changed to the Attack Art targetting the user.',
+    keywords: [],
+    durationTurns: 0,
+    kind : KIND.REACTION,
+    traits : TRAITS.SUPPORT,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.DONTUSE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return false;
+    },
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:BattleAction = import(:'game_struct.battleaction.mt');
+      @:ArtsDeck = import(:'game_class.artsdeck.mt');
+      
+      return BattleAction.new(
+        card : ArtsDeck.synthesizeHandCard(
+          id: 'base:attack',
+          level: 1,
+          energy: ArtsDeck.ENERGY.A
+        ),
+        targets : [
+          user
+        ],
+        targetParts : targetParts,
+        turnIndex: 0,
+        extraData : extraData
+      )
+    }
+  }
+)
 
 
 };
