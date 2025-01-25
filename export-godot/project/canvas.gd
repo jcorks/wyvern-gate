@@ -101,8 +101,10 @@ func apply_settings(settings):
     if (settings.has('crtShader')):
         if (settings.crtShader == false && crt.get_parent() != null):
             self.remove_child(crt)
-        elif (crt.get_parent() == null):
+            print("DISABLING CRT")
+        elif (settings.crtShader == true && crt.get_parent() == null):
             self.add_child(crt)
+            print("ENABLING CRT")
 
     if (settings.has("fgColor")):
 
