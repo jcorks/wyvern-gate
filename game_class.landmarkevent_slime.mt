@@ -13,10 +13,11 @@
 
 
 @:TheBeast = LoadableClass.create(
-  name: 'Wyvern.LandmarkEvent.TreasureGolem',
+  name: 'Wyvern.LandmarkEvent.Slime',
   items : {
     encountersOnFloor : 0,
-    hasBeast : false
+    hasBeast : false,
+    steps : 0
   },
   
   define:::(this, state) {
@@ -27,6 +28,53 @@
     @:Entity = import(module:'game_class.entity.mt');
     @:Location = import(module:'game_mutator.location.mt');
 
+  
+    @:addSlimeling ::(mapEntity) {
+      @:pos = mapEntity.position;
+
+      @:windowEvent = import(module:'game_singleton.windowevent.mt');
+
+
+      @:beast = island_.newInhabitant(
+        professionHint : 'base:slimeling',
+        speciesHint : 'base:slimeling'
+      );
+      beast.name = 'the Slimeling';
+      beast.supportArts = [];      
+
+      beast.stats.load(serialized:StatSet.new(
+        HP:   1,
+        AP:   1,
+        ATK:  1,
+        INT:  1,
+        DEF:  1,
+        LUK:  1,
+        SPD:  1,
+        DEX:  1
+      ).save());
+      
+      beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+      beast.heal(amount:9999, silent:true); 
+      beast.healAP(amount:9999, silent:true);   
+
+      @ents = [beast]
+   
+
+      @:ref = landmark_.mapEntityController.add(
+        x:pos.x, 
+        y:pos.y, 
+        symbol:'o',
+        entities : ents,
+        tag : 'slimeling'
+      );
+      ref.addUpkeepTask(id:'base:thebeast-roam');
+      ref.addUpkeepTask(id:'base:aggressive');
+      ref.addDeathTask(id:'base:to-poison');
+      
+      ref.addFriendSpecies(:'base:slimeling')
+      ref.addFriendSpecies(:'base:slimequeen')
+      
+    }
   
   
     @:addEntity ::{
@@ -44,10 +92,10 @@
 
 
       @:beast = island_.newInhabitant(
-        professionHint : 'base:treasure-golem',
-        speciesHint : 'base:treasure-golem'
+        professionHint : 'base:slimequeen',
+        speciesHint : 'base:slimequeen'
       );
-      beast.name = 'the Treasure Golem';
+      beast.name = 'the Slime Queen';
       beast.supportArts = [];      
       for(0, 20) ::(i) {
         beast.autoLevelProfession(:beast.profession);
@@ -56,16 +104,13 @@
 
 
 
-      @:inv = Inventory.new();
-      inv.addGold(amount:900 + (random.number()*200)->floor);
-      beast.forceDrop = inv;
 
       beast.stats.load(serialized:StatSet.new(
-        HP:   60,
-        AP:   20,
-        ATK:  24,
+        HP:   100,
+        AP:   2,
+        ATK:  4,
         INT:  5,
-        DEF:  20,
+        DEF:  2,
         LUK:  6,
         SPD:  1,
         DEX:  1
@@ -85,13 +130,16 @@
       @:ref = landmark_.mapEntityController.add(
         x:tileX, 
         y:tileY, 
-        symbol:'$',
+        symbol:'O',
         entities : ents,
-        tag : 'treasuregolem'
+        tag : 'slimequeen'
       );
-      ref.addUpkeepTask(id:'base:aggressive-slow');
-      ref.addDeathTask(id:'base:to-body');
-      
+      ref.addUpkeepTask(id:'base:thebeast-roam');
+      ref.addUpkeepTask(id:'base:aggressive');
+      ref.addFriendSpecies(:'base:slimeling')
+      ref.addFriendSpecies(:'base:slimequeen')
+      ref.addDeathTask(id:'base:to-poison');
+
     }
     
 
@@ -105,20 +153,27 @@
       },
       
       defaultLoad::{
+        state.hasBeast = true;
+        /*
         state.hasBeast = if (landmark_.floor > 1 && random.try(percentSuccess:15))
           true
         else 
           false
-        ;
+        ;*/
       },
       
       step::{
-        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'treasuregolem');
+        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'slimequeen');
       
         // add additional entities out of spawn points (stairs)
         //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
         if (entities->keycount < 1 && state.hasBeast) ::<= {
           addEntity();
+        } else ::<= {
+          state.steps += 1;
+          if ((state.steps % 20) == 0) 
+            addSlimeling(:entities[0]);
+          
         }
       }
     }

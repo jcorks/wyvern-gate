@@ -1393,6 +1393,7 @@ party.inventory.addGold(amount:100000);
           'base:cave-bat',
           'base:funny-tiles',
           'base:mimic',
+          'base:slimequeen'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1464,6 +1465,7 @@ party.inventory.addGold(amount:100000);
           'base:cave-bat',
           'base:funny-tiles',
           'base:mimic',
+          'base:slimequeen'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1534,6 +1536,7 @@ party.inventory.addGold(amount:100000);
           'base:cave-bat',
           'base:funny-tiles',
           'base:mimic',
+          'base:slimequeen'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1610,6 +1613,7 @@ party.inventory.addGold(amount:100000);
           'base:cave-bat',
           'base:funny-tiles',
           'base:mimic',
+          'base:slimequeen'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},

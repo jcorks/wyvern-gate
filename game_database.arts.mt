@@ -2087,6 +2087,70 @@ Arts.newEntry(
 )
 
 
+
+Arts.newEntry(
+  data: {
+    name: 'Summon: Slimeling',
+    id : 'base:summon-slimeling',
+    notifCommit : '$1 summons a Slimeling!',
+    notifFail : '...but the summoning fizzled!',
+    targetMode : TARGET_MODE.NONE,
+    description: 'Summons a slimeling to fight by your side.',
+    keywords : [],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAITS.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:world = import(module:'game_singleton.world.mt');
+      @:Species = import(module:'game_database.species.mt');
+
+      // limit 2 summons at a time.
+      when ([...user.battle.getAllies(:user)]->filter(
+        ::(value) <- (value.species.traits & Species.TRAITS.SUMMON) != 0)->size >= 2
+      ) Arts.FAIL
+
+
+      @:Entity = import(module:'game_class.entity.mt');
+      @:sprite = Entity.new(
+        island : world.island,
+        speciesHint: 'base:slimeling',
+        professionHint: 'base:slimeling',
+        levelHint:1
+      );
+      sprite.stats.load(serialized:StatSet.new(
+        HP:   1,
+        AP:   1,
+        ATK:  1,
+        INT:  1,
+        DEF:  1,
+        LUK:  1,
+        SPD:  1,
+        DEX:  1
+      ).save());
+      sprite.supportArts = [];      
+
+      sprite.name = 'the Slimeling';
+            
+      @:battle = user.battle;
+
+      windowEvent.queueCustom(
+        onEnter :: {
+
+          battle.join(
+            group: [sprite],
+            sameGroupAs:user
+          );
+        }
+      )
+    }
+  }
+)
+
+
 Arts.newEntry(
   data: {
     name: 'Summon: Fire Sprite',

@@ -60,6 +60,56 @@ MapEntity.Task.database.newEntry(
 
 MapEntity.Task.database.newEntry(
   data : {
+    id: 'base:to-body',
+    startup :: {
+    
+    },
+    
+    do ::(data, mapEntity) {
+      @:Location = import(module:'game_mutator.location.mt');
+      foreach(mapEntity.entities) ::(k, ent) {
+        mapEntity.controller.landmark.addLocation(
+          location : Location.new(
+            landmark: mapEntity.controller.landmark,
+            x:mapEntity.position.x,
+            y:mapEntity.position.y,
+            ownedByHint: ent,
+            base: Location.database.find(:'base:body')
+          )
+        );    
+      }
+    }
+  }
+);
+
+MapEntity.Task.database.newEntry(
+  data : {
+    id: 'base:to-poison',
+    startup :: {
+    
+    },
+    
+    do ::(data, mapEntity) {
+      @:Location = import(module:'game_mutator.location.mt');
+      foreach(mapEntity.entities) ::(k, ent) {
+        mapEntity.controller.landmark.addLocation(
+          location : Location.new(
+            landmark: mapEntity.controller.landmark,
+            x:mapEntity.position.x,
+            y:mapEntity.position.y,
+            ownedByHint: ent,
+            base: Location.database.find(:'base:poison-tile')
+          )
+        );    
+      }
+    }
+  }
+);
+
+
+
+MapEntity.Task.database.newEntry(
+  data : {
     id: 'base:thebeast-roam',
     startup ::{
       
@@ -137,28 +187,30 @@ MapEntity.Task.database.newEntry(
     return nearby;
   }
 
-  @:aggressive = ::(speed, data, mapEntity) {
+  @:aggressive = ::(speed, data, mapEntity, onDeath) {
     @:map = mapEntity.controller.map;
     when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE) ::<= {
       @:pos = mapEntity.position;
-      mapEntity.remove();
       @:landmark = mapEntity.controller.landmark;
 
       when (world.battle.isActive) ::<= {
-        if (mapEntity.entities[0].species.swarms) ::<= {
-          // swarming will group them in the same 
-          // team as the currently swarmed enemy
-          @:all = world.battle.getMembers();
-          {:::} {
-            foreach(all) ::(k, member) {
-              if (member.species.id == mapEntity.entities[0].species.id) ::<= {
-                world.battle.join(group: mapEntity.entities, sameGroupAs:member);            
-                send();
-              }
-            }   
-            world.battle.join(group: mapEntity.entities);            
-          }
-        } else ::<= {
+        when (world.battle.isMember(:mapEntity.entities[0])) empty;
+        when (mapEntity.entities[0].isIncapacitated()) empty;
+
+        // swarming will group them in the same 
+        // team as the currently swarmed enemy
+        @:all = world.battle.getMembers();
+        {:::} {
+          foreach(all) ::(k, member) {
+            if (
+              (mapEntity.entities[0].species.swarms &&member.species.id == mapEntity.entities[0].species.id)
+              ||
+              (mapEntity.isFriend(:member.species.id))        
+            ) ::<= {
+              world.battle.join(group: mapEntity.entities, sameGroupAs:member);            
+              send();
+            }
+          }   
           world.battle.join(group: mapEntity.entities);            
         }
       }
@@ -183,22 +235,9 @@ MapEntity.Task.database.newEntry(
             @:instance = import(module:'game_singleton.instance.mt');
             instance.gameOver(reason: 'The party has been wiped out.');
           }
-          foreach(mapEntity.entities) ::(i, entity) {
-            when(entity.species.traits & Species.TRAITS.ETHEREAL) empty;
-            mapEntity.controller.landmark.addLocation(
-              location : Location.new(
-                landmark: mapEntity.controller.landmark,
-                x:pos.x,
-                y:pos.y,
-                ownedByHint: entity,
-                base: Location.database.find(:'base:body')
-              )
-            );
-          }
-
-
           
-          
+          mapEntity.kill();
+          mapEntity.remove();
         }
       ); 
 
@@ -216,8 +255,10 @@ MapEntity.Task.database.newEntry(
 
       // swarming enemies dont attack each other
       when (itemOther.data != empty && // filter out pointer
-          mapEntity.entities[0].species.swarms && 
-          mapEntity.entities[0].species.id == itemOther.data.entities[0].species.id)
+          (((mapEntity.entities[0].species.swarms && 
+           mapEntity.entities[0].species.id == itemOther.data.entities[0].species.id))
+         ||
+           mapEntity.isFriend(:mapEntity.entities[0].species.id)))
         empty;
       
       @dist = distance(
@@ -642,6 +683,27 @@ MapEntity.Task.database.newEntry(
   }
 );
 
+
+MapEntity.Task.database.newEntry(
+  data : {
+    id: 'base:thesnakesiren-roam',
+    startup ::{
+      
+    },
+    
+    do ::(data, mapEntity) {
+      @:map = mapEntity.controller.map;    
+      mapEntity.newPathTo(
+        x:map.pointerX,
+        y:map.pointerY,
+        speed: 2/3
+      );
+    }
+  }
+);
+
+
+
 }
 
 @:MapEntity = LoadableClass.create(
@@ -669,13 +731,15 @@ MapEntity.Task.database.newEntry(
     targetX : -1,
     targetY : -1,
     path : empty,
-    onArrive : empty, // MapEntity.Task to do when arriving 
-    onCancel : empty, // MapEntity.Task to do when cancelling.
-    onStepSet: empty, // MapEntity.Task array to do each step
+    onArrive  : empty, // MapEntity.Task to do when arriving 
+    onCancel  : empty, // MapEntity.Task to do when cancelling.
+    onStepSet : empty, // MapEntity.Task array to do each step
+    onDeathSet: empty, // MapEntity.Task array to do on death
     steps : 0,
     speedSteps : 0,
     speed : 1,
-    locationID : -1
+    locationID : -1,
+    friends : empty // array of species ids to
   },
   define:::(this, state) {
     @:Item = import(module:'game_mutator.item.mt');
@@ -689,6 +753,7 @@ MapEntity.Task.database.newEntry(
     @map_;
     @isRemoved = false;
     @location_;
+    @lastPosition;
     
     
     this.interface = {
@@ -712,6 +777,7 @@ MapEntity.Task.database.newEntry(
         state.entities = entities;
         state.tag = tag;
         state.onStepSet = [];
+        state.onDeathSet = [];
         map_.setItem(data:this, x, y, discovered:true, symbol); 
         if (location != empty) ::<= {
           state.locationID = location.worldID;
@@ -722,6 +788,16 @@ MapEntity.Task.database.newEntry(
         }
       },
       
+      isFriend::(id) <- state.friends->findIndex(:id) != -1,
+      
+      addFriendSpecies ::(id)  {
+        if (state.friends == empty)
+          state.friends = [];
+          
+        state.friends->push(:id)
+      },
+      
+      
       steps : {
         get ::<- state.steps
       },
@@ -731,7 +807,7 @@ MapEntity.Task.database.newEntry(
       },
       
       position : {
-        get ::<- map_.getItem(data:this)
+        get ::<- if (lastPosition != empty) lastPosition else map_.getItem(data:this)
       },
     
       step :: {
@@ -809,6 +885,20 @@ MapEntity.Task.database.newEntry(
         );
       },
       
+      addDeathTask ::(id) {
+        state.onDeathSet->push(
+          value: MapEntity.Task.new(
+            base:MapEntity.Task.database.find(id)
+          )
+        );
+      },   
+      
+      kill :: {
+        foreach(state.onDeathSet) ::(k, task) {
+          task.do(mapEntity:this);
+        }
+      },   
+      
       removeUpkeepTask ::(id) {
         @:index = state.onStepSet->findIndex(query::(value) <- value.base.id == id);
         when(index == -1) empty;
@@ -822,7 +912,7 @@ MapEntity.Task.database.newEntry(
       // for non-battle fighting between NPCs.
       // each member does a blow to a random other member who is 
       // not incapacitated. Simplified attacks.
-      squabble ::(other => MapEntity.type) {
+      squabble ::(other => MapEntity.type, onDeath) {
 
         windowEvent.autoSkip = true;
         
@@ -893,23 +983,14 @@ MapEntity.Task.database.newEntry(
           }
           
           if (!coversEntranceExit) ::<= {
-            foreach(other.entities) ::(i, entity) {
-              this.controller.landmark.addLocation(
-                location : Location.new(
-                  landmark: this.controller.landmark,
-                  x:otherItem.x,
-                  y:otherItem.y,
-                  ownedByHint: entity,
-                  base: Location.database.find(:'base:body')
-                )
-              );
-            }
+            other.kill();
           }
         }
       },
       
       remove :: {
         when(isRemoved) empty;
+        lastPosition = this.position;
         isRemoved = true;
         this.controller.remove(entity:this);
       },

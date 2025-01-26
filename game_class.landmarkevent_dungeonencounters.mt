@@ -88,7 +88,7 @@
       ref.addUpkeepTask(id:'base:dungeonencounters-roam');
       ref.addUpkeepTask(id:'base:aggressive');
       ref.addUpkeepTask(id:'base:exit');
-
+      ref.addDeathTask(id:'base:to-body');
       if (state.encountersOnFloor == 1) ::<= {
         windowEvent.queueMessage(
           text:random.pickArrayItem(list:[

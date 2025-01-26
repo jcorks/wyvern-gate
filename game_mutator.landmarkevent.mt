@@ -159,6 +159,32 @@ LandmarkEvent.database.newEntry(
 
 
 
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:slimequeen',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_slime.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+
+    onIncrementTime ::(data, landmark) {
+    
+    },
+
+    
+    onStep ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
+
+
 
 LandmarkEvent.database.newEntry(
   data : {

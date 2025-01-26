@@ -94,6 +94,7 @@
       ref.addUpkeepTask(id:'base:thesnakesiren-roam');
       ref.addUpkeepTask(id:'base:thesnakesiren-song');
       ref.addUpkeepTask(id:'base:aggressive');
+      ref.addDeathTask(id:'base:to-body');
       
 
     }

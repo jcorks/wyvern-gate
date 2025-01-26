@@ -2025,6 +2025,11 @@ Location.database.newEntry(data:{
     @:Damage = import(:'game_class.damage.mt');
     foreach(entities) ::(k, v) {
       when (v.hp <= 1) empty;
+      @world = import(module:'game_singleton.world.mt');  
+      
+      if (!world.party.isMember(:v))
+        windowEvent.autoSkip = true;
+
       v.damage(
         attacker: v,
         damage : Damage.new(
@@ -2035,6 +2040,9 @@ Location.database.newEntry(data:{
         dodgeable: false,
         exact:true
       )
+
+      if (!world.party.isMember(:v))
+        windowEvent.autoSkip = false;
     }
   }
 })

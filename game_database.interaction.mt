@@ -1626,7 +1626,7 @@ Interaction.newEntry(
 
 Interaction.newEntry(
   data : {
-    name : 'Next Floor.',
+    name : 'Next Floor?',
     id :  'base:next-floor-fake',
     keepInteractionMenu : false,
     onInteract ::(location, party) {

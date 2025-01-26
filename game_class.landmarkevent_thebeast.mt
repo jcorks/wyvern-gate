@@ -92,6 +92,7 @@
       );
       ref.addUpkeepTask(id:'base:thebeast-roam');
       ref.addUpkeepTask(id:'base:aggressive');
+      ref.addDeathTask(id:'base:to-body');
 
       if (state.encountersOnFloor == 1)
         windowEvent.queueMessage(

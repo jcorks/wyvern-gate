@@ -881,6 +881,15 @@
         }   
         return out;
       },
+      
+      isMember ::(entity) <- {:::} {
+        foreach(groups) ::(k, group) {
+          foreach(group) ::(i, ent) {
+            if (ent == entity) send(:true);
+          }
+        }
+        return false;       
+      },
 
       
       isActive : {

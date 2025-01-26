@@ -3877,6 +3877,7 @@ return {
           'base:cave-bat',
           'base:funny-tiles',
           'base:mimic',
+          'base:slimequeen'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},

@@ -13,7 +13,7 @@
 
 
 @:TheBeast = LoadableClass.create(
-  name: 'Wyvern.LandmarkEvent.TreasureGolem',
+  name: 'Wyvern.LandmarkEvent.Mimic',
   items : {
     encountersOnFloor : 0,
     hasBeast : false
@@ -44,28 +44,25 @@
 
 
       @:beast = island_.newInhabitant(
-        professionHint : 'base:treasure-golem',
-        speciesHint : 'base:treasure-golem'
+        professionHint : 'base:mimic',
+        speciesHint : 'base:mimic'
       );
-      beast.name = 'the Treasure Golem';
+      beast.name = 'the Mimic';
       beast.supportArts = [];      
       for(0, 20) ::(i) {
         beast.autoLevelProfession(:beast.profession);
       }
       beast.equipAllProfessionArts();  
+      
 
 
-
-      @:inv = Inventory.new();
-      inv.addGold(amount:900 + (random.number()*200)->floor);
-      beast.forceDrop = inv;
 
       beast.stats.load(serialized:StatSet.new(
-        HP:   60,
+        HP:   80,
         AP:   20,
-        ATK:  24,
+        ATK:  60,
         INT:  5,
-        DEF:  20,
+        DEF:  2,
         LUK:  6,
         SPD:  1,
         DEX:  1
@@ -85,13 +82,16 @@
       @:ref = landmark_.mapEntityController.add(
         x:tileX, 
         y:tileY, 
-        symbol:'$',
+        symbol:'\\',
         entities : ents,
-        tag : 'treasuregolem'
+        tag : 'mimic',
+        location : Location.new(
+          landmark: landmark_,
+          base : Location.database.find(:'base:stairs-down-fake')
+        )
       );
-      ref.addUpkeepTask(id:'base:aggressive-slow');
       ref.addDeathTask(id:'base:to-body');
-      
+
     }
     
 
@@ -113,7 +113,7 @@
       },
       
       step::{
-        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'treasuregolem');
+        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'mimic');
       
         // add additional entities out of spawn points (stairs)
         //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
