@@ -420,7 +420,7 @@ Effect.newEntry(
     stats: StatSet.new(
     ),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
         when (!holder.isIncapacitated() && random.try(percentSuccess:35)) ::<= {
           windowEvent.queueMessage(text:holder.name + " ferociously repels the attack!");
           damage.amount = 0;

@@ -3,6 +3,7 @@
 @:State = import(module:'game_class.state.mt');
 @:class = import(module:'Matte.Core.Class');
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
+@:random = import(module:'game_singleton.random.mt');
 
 
 
@@ -132,6 +133,32 @@ LandmarkEvent.database.newEntry(
   }
 );
 
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:mimic',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_mimic.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+
+    onIncrementTime ::(data, landmark) {
+    
+    },
+
+    
+    onStep ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
+
+
 
 LandmarkEvent.database.newEntry(
   data : {
@@ -181,6 +208,62 @@ LandmarkEvent.database.newEntry(
     }
   }
 );
+
+
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:funny-tiles',
+    startup ::(parent) {
+      when(random.try(percentSuccess:85)) empty;
+    
+      @:landmark = parent.landmark;
+      @:map = parent.landmark.map;
+      @:area = map.getRandomArea();
+      @:blastRadius = random.integer(from:3, to:6);
+      @:isBenign = random.flipCoin();
+      
+      @:distance = import(:'game_function.distance.mt');
+      @:Location = import(module:'game_mutator.location.mt');
+      
+      
+      for(area.x + area.width/2 - blastRadius/2, area.x + area.width/2 + blastRadius/2) ::(x) {
+        for(area.y + area.height/2 - blastRadius/2, area.y + area.height/2 + blastRadius/2) ::(y) {
+          if (distance(x0:x, y0:y, x1:area.x + area.width/2, y1:area.y + area.height/2) < blastRadius) ::<= {
+            @:items = map.itemsAt(x:x, y:y) 
+            if (items == empty) 
+              landmark.addLocation(
+                location : Location.new(
+                  landmark: landmark,
+                  base: Location.database.find(id:
+                    if (isBenign)
+                      'base:water-tile'
+                    else 
+                      'base:poison-tile'
+                  ),
+                  x,
+                  y
+                )
+              )
+          }
+        }
+      }
+      
+    },
+
+
+    onIncrementTime ::(data, landmark) {
+    
+    },
+    
+    onStep ::(data, landmark) {
+    },
+    
+    isActive ::(data) {
+      return false;
+    }
+  }
+);
+
 
 
 }

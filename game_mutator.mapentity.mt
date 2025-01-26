@@ -674,7 +674,8 @@ MapEntity.Task.database.newEntry(
     onStepSet: empty, // MapEntity.Task array to do each step
     steps : 0,
     speedSteps : 0,
-    speed : 1
+    speed : 1,
+    locationID : -1
   },
   define:::(this, state) {
     @:Item = import(module:'game_mutator.item.mt');
@@ -687,20 +688,38 @@ MapEntity.Task.database.newEntry(
 
     @map_;
     @isRemoved = false;
-
+    @location_;
     
     
     this.interface = {
       initialize ::(parent) {
         parent => Map.type
         map_ = parent;
+
+        if (state.locationID != -1) ::<= {        
+          {:::} {
+            foreach(map_.parent.locations) ::(k, v) {
+              if (v.worldID == state.locationID) ::<= {
+                location_ = v;
+                send();
+              }
+            }
+          }
+        }
       },
       
-      defaultLoad::(x, y, symbol, entities => Object, tag) {
+      defaultLoad::(x, y, symbol, entities => Object, tag, location) {
         state.entities = entities;
         state.tag = tag;
         state.onStepSet = [];
-        map_.setItem(data:this, x, y, discovered:true, symbol);      
+        map_.setItem(data:this, x, y, discovered:true, symbol); 
+        if (location != empty) ::<= {
+          state.locationID = location.worldID;
+          location_ = location;
+          location_.x = x;
+          location_.y = y;
+          map_.parent.addLocation(location);
+        }
       },
       
       steps : {
@@ -766,7 +785,20 @@ MapEntity.Task.database.newEntry(
           );
         
         map_.moveItem(data:this, x:next.x, y:next.y);
-        
+        if (location_ != empty) ::<= {
+          map_.moveItem(data:location_, x:next.x, y:next.y);        
+        }
+        @:Location = import(module:'game_mutator.location.mt');
+
+        @:items = map_.itemsAt(x:next.x, y:next.y);
+        if (items != empty) ::<= {
+          foreach(items) ::(k, v) {
+            if (v.data->type == Location.type) ::<= {
+              when (v.data == location_) empty;
+              v.data.base.onStep(entities:state.entities, location:v.data);
+            }
+          }
+        }
       },
       
       addUpkeepTask ::(id) {
@@ -955,8 +987,8 @@ MapEntity.Controller = LoadableClass.create(
         get ::<- landmark_
       },
       
-      add::(x, y, symbol, entities => Object, tag) {
-        return MapEntity.new(parent:map_, x, y, symbol, entities, tag); // automatically gets added to mapEntities
+      add::(x, y, symbol, entities => Object, tag, interactions, location) {
+        return MapEntity.new(parent:map_, x, y, symbol, entities, tag, interactions, location); // automatically gets added to mapEntities
       },
       
       mapEntities : {
@@ -1016,6 +1048,7 @@ import(module:'game_class.landmarkevent_itemspecter.mt');
 import(module:'game_class.landmarkevent_themirror.mt');
 import(module:'game_class.landmarkevent_treasuregolem.mt');
 import(module:'game_class.landmarkevent_thesnakesiren.mt');
+import(module:'game_class.landmarkevent_mimic.mt');
 
 
 

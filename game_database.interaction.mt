@@ -1626,6 +1626,46 @@ Interaction.newEntry(
 
 Interaction.newEntry(
   data : {
+    name : 'Next Floor.',
+    id :  'base:next-floor-fake',
+    keepInteractionMenu : false,
+    onInteract ::(location, party) {
+      @:MapEntity = import(module:'game_mutator.mapentity.mt');
+      @:world = import(module:'game_singleton.world.mt');
+      windowEvent.queueMessage(text: 'The stairs lead nowhere.');
+
+      @:items = location.landmark.map.itemsAt(x:location.x, y:location.y)->filter(::(value) <- value.data != location);
+      when(items->size == 0) 
+        empty;
+
+      {:::} {
+        foreach(items) ::(k, v) {
+          if (v.data->type == MapEntity.type) ::<= {
+            world.battle.start(
+              party,              
+              allies: party.members,
+              enemies: v.data.entities,
+              landmark: {},
+              onEnd::(result) {
+                @:instance = import(module:'game_singleton.instance.mt');
+                if (!world.battle.partyWon()) 
+                  instance.gameOver(reason:'The party was wiped out.');
+
+              }
+            );        
+            send();
+          }
+        }
+      }
+    }
+  }
+)  
+
+
+
+
+Interaction.newEntry(
+  data : {
     name : 'Climb Up',
     id :  'base:climb-up',
     keepInteractionMenu : false,

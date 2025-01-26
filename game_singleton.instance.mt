@@ -1285,11 +1285,13 @@ return empty;
               @locationAt = landmark.map.getNamedItemsUnderPointerRadius(:3);
               if (locationAt != empty) ::<= {
                 foreach(locationAt)::(i, loc) {
-                  choices->push(value:'Check ' + loc.name);
-                  choiceActions->push(::{
-                    locationAt = loc.data;
-                    locationAt.interact();                  
-                  });
+                  if (loc.data.canInteract()) ::<= {
+                    choices->push(value:'Check ' + loc.name);
+                    choiceActions->push(::{
+                      locationAt = loc.data;
+                      locationAt.interact();                  
+                    });
+                  }
                 }
               }              
               

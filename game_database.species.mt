@@ -1080,6 +1080,33 @@ Species.newEntry(data:{
 
 
 Species.newEntry(data:{
+  name : 'Mimic',
+  id : 'base:mimic',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 60,
+    AP : 10,
+    ATK: 10,
+    DEF: 10,
+    INT: 10,
+    LUK: 10,
+    SPD: 10,
+    DEX: 10
+  ),
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  
+  traits : TRAITS.SPECIAL,
+  passives : [
+    'base:the-beast'
+  ]
+})
+
+
+Species.newEntry(data:{
   name : 'Treasure Golem',
   id : 'base:treasure-golem',
   rarity : 2000000000000,

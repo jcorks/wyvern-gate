@@ -3874,7 +3874,9 @@ return {
           'base:the-beast',
           'base:the-mirror',
           'base:treasure-golem',
-          'base:cave-bat'
+          'base:cave-bat',
+          'base:funny-tiles',
+          'base:mimic',
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},

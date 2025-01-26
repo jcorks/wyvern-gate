@@ -80,6 +80,10 @@ Location.database.newEntry(data:{
   
   },
   
+  onStep ::(location, entities) {
+  
+  },
+  
         
   onIncrementTime ::(location, time) {
     // make everyone come home
@@ -154,6 +158,9 @@ Location.database.newEntry(data:{
     //} else ::<={
     
     //}
+  },
+  onStep ::(location, entities) {
+  
   }
   
 
@@ -217,6 +224,11 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
   
   },
+
+  onStep ::(location, entities) {
+  
+  },
+
         
   onIncrementTime ::(location, time) {
     // make everyone come home
@@ -265,6 +277,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
   
   },
+  onStep ::(location, entities) {
+  
+  },
         
   onIncrementTime ::(location, time) {
 
@@ -309,6 +324,9 @@ Location.database.newEntry(data:{
   },      
   
   onCreate ::(location) {
+  
+  },
+  onStep ::(location, entities) {
   
   },
         
@@ -416,6 +434,9 @@ Location.database.newEntry(data:{
     onCreate ::(location) {
 
     },
+    onStep ::(location, entities) {
+    
+    },
     
     onIncrementTime::(location) {
       @:world = import(module:'game_singleton.world.mt');
@@ -492,6 +513,9 @@ Location.database.newEntry(data:{
   
   onCreate ::(location) {
 
+  },
+  onStep ::(location, entities) {
+  
   },
     
   onIncrementTime::(location) {
@@ -579,6 +603,9 @@ Location.database.newEntry(data:{
 
 
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -649,6 +676,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
 
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -695,6 +725,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
 
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -740,6 +773,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
 
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -782,6 +818,9 @@ Location.database.newEntry(data:{
   onInteract ::(location) {
 
   },      
+  onStep ::(location, entities) {
+  
+  },
   onCreate ::(location) {
 
   },
@@ -823,6 +862,9 @@ Location.database.newEntry(data:{
   onInteract ::(location) {
     
   },      
+  onStep ::(location, entities) {
+  
+  },
   onCreate ::(location) {
     location.ownedBy = location.landmark.island.newInhabitant();
     location.name = location.ownedBy.profession.name + ' school';
@@ -868,6 +910,9 @@ Location.database.newEntry(data:{
   },      
   onCreate ::(location) {
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -907,6 +952,9 @@ Location.database.newEntry(data:{
   
   onCreate ::(location) {
     location.contested = true;
+  },
+  onStep ::(location, entities) {
+  
   },
   
   onIncrementTime::(location, time) {
@@ -958,11 +1006,64 @@ Location.database.newEntry(data:{
       }
     */
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
   }
 })
+
+
+
+Location.database.newEntry(data:{
+  name: 'Stairs Down',
+  id: 'base:stairs-down-fake',
+  rarity: 1000000000000,
+  ownVerb : '',
+  symbol: '\\',
+  category : CATEGORY.EXIT,
+  onePerLandmark : false,
+  minStructureSize : 1,
+
+  descriptions: [
+    "Decrepit stairs?",
+  ],
+  interactions : [
+    'base:next-floor-fake',
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  
+  onFirstInteract ::(location) {},
+  onInteract ::(location) {
+    return true;
+  },
+  
+  onCreate ::(location) {
+    /*
+    if (location.landmark.island.tier > 1) 
+      if (random.flipCoin()) ::<= {
+        location.lockWithPressurePlate();
+      }
+    */
+  },
+  onStep ::(location, entities) {
+  
+  },
+  
+  onIncrementTime::(location, time) {
+  
+  }
+})
+
 
 Location.database.newEntry(data:{
   name: 'Warp Point',
@@ -1009,6 +1110,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
   },
   
+  onStep ::(location, entities) {
+  
+  },
   onIncrementTime::(location, time) {
   
   }
@@ -1045,6 +1149,9 @@ Location.database.newEntry(data:{
   },
   
   onCreate ::(location) {
+  },
+  onStep ::(location, entities) {
+  
   },
   
   onIncrementTime::(location, time) {
@@ -1086,6 +1193,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
     location.contested = true;
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -1121,6 +1231,9 @@ Location.database.newEntry(data:{
   onFirstInteract ::(location) {},
   
   onInteract ::(location) {
+  },
+  onStep ::(location, entities) {
+  
   },
   
   onCreate ::(location) {
@@ -1175,6 +1288,9 @@ Location.database.newEntry(data:{
   
   onCreate ::(location) {
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -1212,6 +1328,9 @@ Location.database.newEntry(data:{
     if (!open)  
       windowEvent.queueMessage(text: 'The chest is locked. Perhaps some lever or plate nearby can unlock it.');
     return open;      
+  },
+  onStep ::(location, entities) {
+  
   },
   
   onCreate ::(location) {
@@ -1268,6 +1387,9 @@ Location.database.newEntry(data:{
   
   onInteract ::(location) {
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onCreate ::(location) {
     location.data.pressed = false;
@@ -1314,6 +1436,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
 
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -1355,6 +1480,9 @@ Location.database.newEntry(data:{
     location.data.used = false;
   },
   
+  onStep ::(location, entities) {
+  
+  },
   onIncrementTime::(location, time) {
   
   }
@@ -1396,6 +1524,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
     location.data.hasPrayer = true;
 
+  },
+  onStep ::(location, entities) {
+  
   },
   
   onIncrementTime::(location, time) {
@@ -1440,6 +1571,9 @@ Location.database.newEntry(data:{
     location.data.enchant = ItemEnchant.new(
       base:ItemEnchant.database.getRandom()
     )
+  },
+  onStep ::(location, entities) {
+  
   },
   
   onIncrementTime::(location, time) {
@@ -1528,6 +1662,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) { 
     location.data.peaceful = true;
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -1610,6 +1747,9 @@ Location.database.newEntry(data:{
   
   onCreate ::(location) { 
     location.data.peaceful = true;
+  },
+  onStep ::(location, entities) {
+  
   },
   
   onIncrementTime::(location, time) {
@@ -1707,6 +1847,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) { 
     location.data.peaceful = true;
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -1790,6 +1933,9 @@ Location.database.newEntry(data:{
   onCreate ::(location) {
 
   },
+  onStep ::(location, entities) {
+  
+  },
   
   onIncrementTime::(location, time) {
   
@@ -1824,6 +1970,9 @@ Location.database.newEntry(data:{
   onInteract ::(location) {
   },
   
+  onStep ::(location, entities) {
+  
+  },
   onCreate ::(location) {
     foreach(location.ownedBy.inventory.items)::(i, item) {
       location.inventory.add(item);
@@ -1835,6 +1984,105 @@ Location.database.newEntry(data:{
   
   }
 })    
+
+
+
+Location.database.newEntry(data:{
+  name: 'Poisonous Goop',
+  id: 'base:poison-tile',
+  symbol: '~',
+  category : CATEGORY.DUNGEON_SPECIAL,
+  minStructureSize : 1,
+  onePerLandmark : false,
+
+  descriptions: [
+    'This area seems to be covered in an acidic poison. Best not to stay on it for too long.'
+  ],
+  interactions : [
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  rarity: 1000000000000,
+  ownVerb : '',
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  onFirstInteract::(location){},      
+  onInteract ::(location) {
+  },
+  
+  onCreate ::(location) {
+  },
+  onIncrementTime::(location, time) {
+  
+  },
+  
+  onStep::(location, entities) {
+    breakpoint();
+    @:Damage = import(:'game_class.damage.mt');
+    foreach(entities) ::(k, v) {
+      when (v.hp <= 1) empty;
+      v.damage(
+        attacker: v,
+        damage : Damage.new(
+          amount: 1,
+          damageType: Damage.TYPE.POISON,
+          damageClass: Damage.CLASS.HP
+        ),
+        dodgeable: false,
+        exact:true
+      )
+    }
+  }
+})
+
+
+
+
+Location.database.newEntry(data:{
+  name: 'Puddle',
+  id: 'base:water-tile',
+  rarity: 1000000000000,
+  ownVerb : '',
+  symbol: '~',
+  category : CATEGORY.DUNGEON_SPECIAL,
+  minStructureSize : 1,
+  onePerLandmark : false,
+
+  descriptions: [
+    'This area seems to be wet. Careful not to slip!'
+  ],
+  interactions : [
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  onFirstInteract::(location){},      
+  onInteract ::(location) {
+  },
+  
+  onCreate ::(location) {
+  },
+  onStep ::(location, entities) {
+  
+  },
+  
+  onIncrementTime::(location, time) {
+  
+  }
+})
+
+
+
+
 
 Location.database.newEntry(data:{
   name: 'Lost Item',
@@ -1863,7 +2111,9 @@ Location.database.newEntry(data:{
   onFirstInteract::(location){},      
   onInteract ::(location) {
   },
+  onStep ::(location, entities) {
   
+  },  
   onCreate ::(location) {
   },
   
@@ -1943,7 +2193,11 @@ Location.database.newEntry(data:{
       
       // in structural maps, this determines the structure 
       // size in min units.
-      minStructureSize : Number
+      minStructureSize : Number,
+      
+      // Called when entities step on the tile.
+      // argument: entities, location
+      onStep : Function
     },
     reset
   ),
@@ -2081,6 +2335,8 @@ Location.database.newEntry(data:{
           return landmark_.peaceful;
         }
       },
+      
+      canInteract ::<- state.base.interactions->size > 0,
       
       // per location mod data.
       data : {

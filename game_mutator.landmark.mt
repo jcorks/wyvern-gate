@@ -259,7 +259,9 @@ Landmark.database.newEntry(
       'base:the-beast',
       'base:the-mirror',
       'base:treasure-golem',
-      'base:cave-bat'
+      'base:cave-bat',
+      'base:funny-tiles',
+      'base:mimic',
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
@@ -332,7 +334,9 @@ Landmark.database.newEntry(
       'base:the-beast',
       'base:the-mirror',
       'base:treasure-golem',
-      'base:cave-bat'
+      'base:cave-bat',
+      'base:funny-tiles',
+      'base:mimic',
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
@@ -1176,6 +1180,17 @@ Landmark.database.newEntry(
         foreach(state.events) ::(k, event) {
           event.step();
         }
+
+        @:locations = state.map.getItemsUnderPointer();
+        breakpoint();
+        if (locations->type == Object) ::<= {
+          foreach(locations) ::(k, v) {
+            if (v.data->type == Location.type) ::<= {
+              v.data.base.onStep(entities: world.party.members, location:v.data);
+            }
+          }
+        }
+
         state.stepsSinceLast += 1;                
         
       },
@@ -1287,6 +1302,10 @@ Landmark.database.newEntry(
 
         return loc;      
  
+      },
+      
+      moveLocation ::(location) {
+        
       },
       
       island : {

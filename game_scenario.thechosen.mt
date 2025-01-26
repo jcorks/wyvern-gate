@@ -1390,7 +1390,9 @@ party.inventory.addGold(amount:100000);
           'base:item-specter',
           'base:the-beast',
           'base:treasure-golem',
-          'base:cave-bat'
+          'base:cave-bat',
+          'base:funny-tiles',
+          'base:mimic',
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1459,7 +1461,9 @@ party.inventory.addGold(amount:100000);
           'base:the-beast',
           'base:the-mirror',
           'base:treasure-golem',
-          'base:cave-bat'
+          'base:cave-bat',
+          'base:funny-tiles',
+          'base:mimic',
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1527,7 +1531,9 @@ party.inventory.addGold(amount:100000);
           'base:the-beast',
           'base:the-mirror',
           'base:treasure-golem',
-          'base:cave-bat'
+          'base:cave-bat',
+          'base:funny-tiles',
+          'base:mimic',
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1601,7 +1607,9 @@ party.inventory.addGold(amount:100000);
           'base:the-beast',
           'base:the-mirror',
           'base:treasure-golem',
-          'base:cave-bat'
+          'base:cave-bat',
+          'base:funny-tiles',
+          'base:mimic',
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1882,7 +1890,7 @@ party.inventory.addGold(amount:100000);
       onCreate ::(location) {
         location.contested = true;
       },
-      
+      onStep ::(entities, location){},
       onIncrementTime::(location, time) {
       
       }
@@ -1909,6 +1917,7 @@ party.inventory.addGold(amount:100000);
       
       aggressiveInteractions : [
       ],
+      onStep ::(entities, location){},
 
 
       
@@ -1999,6 +2008,7 @@ party.inventory.addGold(amount:100000);
       
       aggressiveInteractions : [
       ],
+      onStep ::(entities, location){},
 
 
       
@@ -2049,6 +2059,7 @@ party.inventory.addGold(amount:100000);
       aggressiveInteractions : [
       ],
 
+      onStep ::(entities, location){},
 
       
       minOccupants : 0,
@@ -2146,6 +2157,7 @@ party.inventory.addGold(amount:100000);
       aggressiveInteractions : [
       ],
 
+      onStep ::(entities, location){},
 
       
       minOccupants : 0,
@@ -2232,6 +2244,7 @@ party.inventory.addGold(amount:100000);
       symbol: 'W',
       onePerLandmark : true,
       minStructureSize : 1,
+      onStep ::(entities, location){},
 
       descriptions: [
         "What seems to be a stone throne",
@@ -2341,6 +2354,7 @@ party.inventory.addGold(amount:100000);
       aggressiveInteractions : [
       ],
 
+      onStep ::(entities, location){},
 
       
       minOccupants : 0,
@@ -2389,6 +2403,7 @@ party.inventory.addGold(amount:100000);
       aggressiveInteractions : [
       ],
 
+      onStep ::(entities, location){},
 
       
       minOccupants : 0,
