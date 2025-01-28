@@ -3485,7 +3485,11 @@ none.name = 'None';
       state.improvementEXP = 0;
       state.data = {};
       state.needsAppraisal = if (forceNeedsAppraisal != empty) forceNeedsAppraisal
-        else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess:1 + tier*3)) true else false;
+        else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess::<= {
+          @chance = 0.2 + tier*1.5;
+          when (chance > 5) 5;
+          return chance;
+        })) true else false;
       
       if (state.needsAppraisal)
         state.price = 999;

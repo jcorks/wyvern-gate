@@ -225,6 +225,7 @@
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
       
   @:stat = ::(name) {
+    when (random.flipCoin()) 0;
     @:base = growthPotential[name];
     @val =  (0.5 * (random.number()/2) * (base / 3))->floor
     when (val < 1)
@@ -2289,6 +2290,7 @@
             growthPotential : state.growth
           );
           
+          /*
           if (chooseStat == empty) ::<={ 
             @choice = random.integer(from:2, to:7);
             state.stats.add(stats: StatSet.new(
@@ -2330,6 +2332,7 @@
             
           
           }
+          */
           if (afterLevel != empty) afterLevel();
           state.hp = state.stats.HP;
           state.ap = state.stats.AP;
