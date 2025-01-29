@@ -1272,9 +1272,12 @@ Landmark.database.newEntry(
         state.map.removeItem(data:location);
       },
 
-      addLocation ::(location, width, height) {
+      addLocation ::(location, width, height, noHalo, discovered) {
         location.landmark = this;
         @:loc = location;
+        if (discovered == empty) 
+          discovered = false 
+                  
         
         @:defaultAdd ::(discovered){
           when (width == empty && height == empty)

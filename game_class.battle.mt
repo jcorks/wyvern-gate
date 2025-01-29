@@ -203,6 +203,7 @@
     @onAct_;
     @defeated;
     @backgroundID;
+    @onFinish = [];
     
   
     // some actions last multiple turns.
@@ -723,7 +724,10 @@
         
           @:finishEnd :: {
             groups = [];
-            onEnd(result);                    
+            onEnd(result);      
+            foreach(onFinish) ::(k, v) {
+              v(:result);
+            }              
           }
           result = winningGroup;
           
@@ -870,6 +874,10 @@
 
       getEnemies ::(entity) {
         return getEnemies(ent:entity)
+      },
+      
+      addOnFinishCallback ::(cb) {
+        onFinish->push(:cb);
       },
       
       getMembers :: {

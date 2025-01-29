@@ -724,7 +724,7 @@
           when(items != empty && items->keycount > 0) ::<= {
             @:discovered = items[items->keycount-1].discovered;
             
-            if (discovered == true)
+            if (discovered == true && (items[items->keycount-1].noHalo == empty))
               targets->push(:{x:x, y:y, itemX:itemX, itemY:itemY});
               
             importantItems->push(:{
@@ -989,7 +989,8 @@
         y,
         symbol,
         discovered,
-        name
+        name,
+        noHalo
       ) {
         x = x->floor;
         y = y->floor;
@@ -1008,7 +1009,8 @@
           symbol : symbol,
           discovered : discovered,
           data: data,
-          name: name
+          name: name,
+          noHalo : noHalo
         }
         loc->push(value:val);
         items->push(value:val);

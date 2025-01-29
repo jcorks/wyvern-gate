@@ -153,13 +153,11 @@
       },
       
       defaultLoad::{
-        state.hasBeast = true;
-        /*
         state.hasBeast = if (landmark_.floor > 1 && random.try(percentSuccess:15))
           true
         else 
           false
-        ;*/
+        ;
       },
       
       step::{
@@ -167,11 +165,11 @@
       
         // add additional entities out of spawn points (stairs)
         //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
-        if (entities->keycount < 1 && state.hasBeast) ::<= {
+        if (entities->keycount < 1 && state.hasBeast && state.encountersOnFloor == 0) ::<= {
           addEntity();
-        } else ::<= {
+        } else if (entities->keycount > 0) ::<= {
           state.steps += 1;
-          if ((state.steps % 20) == 0) 
+          if ((state.steps % 40) == 0) 
             addSlimeling(:entities[0]);
           
         }

@@ -98,7 +98,9 @@ MapEntity.Task.database.newEntry(
             x:mapEntity.position.x,
             y:mapEntity.position.y,
             ownedByHint: ent,
-            base: Location.database.find(:'base:poison-tile')
+            base: Location.database.find(:'base:poison-tile'),
+            noHalo : true,
+            discovered : true
           )
         );    
       }
@@ -208,10 +210,18 @@ MapEntity.Task.database.newEntry(
               (mapEntity.isFriend(:member.species.id))        
             ) ::<= {
               world.battle.join(group: mapEntity.entities, sameGroupAs:member);            
+              world.battle.addOnFinishCallback(::(result) {
+                mapEntity.kill();
+                mapEntity.remove();          
+              });            
               send();
             }
           }   
-          world.battle.join(group: mapEntity.entities);            
+          world.battle.join(group: mapEntity.entities);
+          world.battle.addOnFinishCallback(::(result) {
+            mapEntity.kill();
+            mapEntity.remove();          
+          });            
         }
       }
 
