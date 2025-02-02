@@ -752,6 +752,405 @@ Interaction.newEntry(
   }
 )    
 
+::<= {
+
+  @:auction ::(playerEnabled, item, onDone) {
+    @:onDoneReal = ::(entity, item, price) {
+      windowEvent.jumpToTag(
+        name: 'AUCTION',
+        goBeforeTag: true
+      );
+      onDone(entity, item, price);
+    }
+    @:world = import(module:'game_singleton.world.mt');
+
+    windowEvent.queueCustom(
+      jumpTag : 'AUCTION',
+      keep : true,
+      renderable : {
+        render ::{
+          canvas.blackout();
+        } 
+      }
+    );
+
+    windowEvent.queueMessage(
+      speaker : 'Auctioneer',
+      text: '"Step right up, folks! Todays auction is about to start!"'
+    );
+
+    windowEvent.queueMessage(
+      speaker : 'Auctioneer',
+      text: '"Gaze upon this beautiful ' + item.name + '!"'
+    );
+
+    item.describe();
+
+    @price = random.integer(from:4000, to:9000);
+    price = ((price / 100)->ceil) * 100
+    
+    @auctioners = [];
+    for(0, 6) ::(i) {
+      @whom = world.island.newInhabitant();
+      whom.anonymize();
+
+      auctioners->push(:{
+        entity : whom,
+
+        // what the auctioner thinks the item is worth
+        guessWorth : (item.price * Item.SELL_PRICE_MULTIPLIER * (random.float() * 0.6 + 0.7))->ceil,
+
+        // how motivated the person is to go above the perceived worth
+        motivation : random.integer(from:0, to:10),
+        
+        sittingLeft : random.float(),
+        sittingTop : random.float(),
+      });
+    }
+    
+
+    windowEvent.queueMessage(
+      speaker : 'Auctioneer',
+      text: '"The ' + item.name + ' will start at a bid.... of ' + g(:price) + '!"'
+    );
+    
+    // current highest bidder
+    @highestBidder;
+    
+    // going once, twice, three times
+    @going = 0;
+    
+    @:auctionApply = ::(bidders) {
+      
+      when (going == 3) ::<= {
+        windowEvent.queueMessage(
+          speaker : 'Auctioneer',
+          text: '"Sold! To ' + highestBidder.bidder.entity.name + ' for ' + g(:price) +'!!"'
+        );
+        onDoneReal(
+          item,
+          entity:highestBidder.bidder.entity,
+          price
+        );      
+      }
+
+      if (going == 0) ::<= {
+        windowEvent.queueMessage(
+          speaker : 'Auctioneer',
+          text: '"Going for ' + g(:price) + '! ' + 
+            if (highestBidder == empty) 
+              'Any offers?"'
+            else 
+              random.pickArrayItem(:[
+                'Do I hear anyone for ' + g(:price+100) + '?"',
+                'Anyone, anyone? ' + g(:price+100) + '?"',
+              ])
+        );      
+      } else ::<= {
+        windowEvent.queueMessage(
+          speaker : 'Auctioneer',
+          text: '"' + g(:price) + ' for the ' + item.name + '! Going ' + 
+            (match(going) {
+             (1): 'once',
+             (2): 'twice',
+             default : '???'
+            }) + '..."'
+          )
+      }
+
+
+      if (bidders->size == 0) ::<= {
+        going += 1;
+      } else ::<= {
+        going = 0;
+        // next sort lowest bid to highest
+        bidders->sort(
+          ::(a, b) <- a.amount > b.amount
+        )
+        foreach(bidders) ::(k, v) {
+          // has to be higher
+          when (price == v.amount) empty;
+
+          price = v.amount;
+          windowEvent.queueMessage(
+            speaker : v.bidder.entity.name,
+            text : '"' + g(:v.amount) + '!"',
+            leftWeight : v.bidder.sittingLeft,
+            topWeight : v.bidder.sittingTop
+          );
+        }
+        
+        highestBidder = bidders[bidders->size-1];
+      }
+      
+      windowEvent.queueCustom(
+        onEnter :: {
+          auctionStep()
+        }
+      );    
+    }
+    
+
+    @:auctionStep = ::{
+      @bidders = [];
+      foreach(random.scrambled(:auctioners->filter(::(value) <- highestBidder == empty || value != highestBidder.bidder))) ::(k, auc) {
+        @diff = (auc.guessWorth - price) / auc.guessWorth;
+        
+        // uh oh, current price is greater than they think its worth 
+        // lets check their motivation
+        @:doIt = if (diff < 0) ::<= {
+          breakpoint();
+          // more outside of the range, the less motivation will work
+          @chanceToBid = (auc.motivation * 10)+(diff*2) * 100;
+          when(chanceToBid < 0) false;
+          return random.try(percentSuccess:chanceToBid);
+          
+        // else they will probably bid
+        } else ::<= {
+          return random.try(percentSuccess:95);
+        }
+        
+        
+        // okay! theyre going to bid, but how much?
+        if (doIt) ::<= {
+          @bid = (if (diff < 0)
+            price + random.integer(from:1, to:9) * 900
+          else 
+            price + (((auc.guessWorth - price) / (1 + random.float()*1.5)) / 100)->ceil * 100
+          )
+          bidders->push(:{
+            bidder : auc,
+            amount : bid
+          })
+        }
+      }
+      
+      if (playerEnabled) ::<= {
+        when (highestBidder != empty && (
+          world.party.isMember(:highestBidder.bidder.entity) ||
+          world.party.inventory.gold < price
+        ))
+          auctionApply(:bidders);
+  
+        @:playerBid = ::{          
+          windowEvent.queueChoices(
+            prompt: 'Bid at : ' + g(:price),
+            choices : [
+              "Examine item",
+              "Bid"
+            ],
+            canCancel : true,
+            onCancel ::{
+              auctionApply(:bidders);
+            },
+            
+            onChoice::(choice) {
+              match(choice) {
+                (1)::<= { 
+                  item.describe();
+                  playerBid();
+                },
+                (3)::<= {
+                  playerEnabled = false;
+                },
+                (2)::<= {
+                  @val = 0.0;
+                  
+                  @:currentBid ::<- ((price + val * price) / 100)->ceil * 100
+                  
+                  windowEvent.queueSlider(
+                    defaultValue: 0.5,
+                    increments : 100,
+                    
+                    onHover ::(fraction) {
+                      val = fraction;
+                    },
+                    
+                    onChoice ::(fraction) {
+                      @bid = currentBid();
+                      
+                      when(bid > world.party.inventory.gold) ::<= {
+                        windowEvent.queueMessage(
+                          text: 'The party cannot afford this bid.'
+                        );
+                        playerBid();
+                      }
+                      
+                      bidders->push(:{
+                        bidder : {
+                          entity : world.party.members[0]
+                        },
+                        amount : bid
+                      })  
+                      auctionApply(:bidders)                  
+                    },
+                    
+                    renderable : {
+                      render ::{
+                        canvas.renderTextFrameGeneral(
+                          topWeight : 0,
+                          leftWeight : 0.5,
+                          lines : [
+                            'Current bid :  ' + g(:price),
+                            'Your bid    :  ' + g(:currentBid())
+                          ]
+                        );
+                      } 
+                    }
+                  );
+                }
+              }
+            }
+          );
+        }
+        playerBid();
+      } else ::<= {
+        auctionApply(:bidders);
+      }
+
+    }
+    
+    if (playerEnabled) ::<= {
+      @:tooPoor = world.party.inventory.gold < price;
+      if (tooPoor) ::<= {
+        windowEvent.queueMessage(
+          text: 'The party could not afford the starting bid.'
+        );
+      }
+      
+      windowEvent.queueAskBoolean(
+        prompt: if (tooPoor) 'Watch the auction anyway?'
+                  else 
+                'Join the auction?',
+        onChoice::(which) {
+          when(which == false) 
+            onDoneReal();
+          
+          auctionStep();
+        }
+      )  
+      
+    } else
+      auctionStep();
+
+
+
+  }
+
+
+  Interaction.newEntry(
+    data : {
+      name : 'Place Auction',
+      id :  'base:place-auction',
+      keepInteractionMenu : true,
+      onInteract ::(location, party) {
+        @:world = import(module:'game_singleton.world.mt');
+
+        when (location.inventory.isEmpty) ::<= {
+          windowEvent.queueMessage(
+            text: "It looks like auction house is closed for the rest of the day."
+          );
+        }
+
+        windowEvent.queueMessage(
+          text: "The auction house requires a fee of " + g(:3000) + " to put something up for auction."
+        );
+
+        when(world.party.inventory.gold < 3000)
+          windowEvent.queueMessage(
+            text: "The party can\'t afford the fee."
+          );
+
+
+
+        windowEvent.queueAskBoolean(
+          prompt: 'Put something up for auction?',
+          onChoice::(which) {
+            when(which == false) empty;
+            
+            
+            @:bougieFilter = ::(value) <- (value.price * Item.SELL_PRICE_MULTIPLIER) > 9999
+            when(world.party.inventory.items->filter(:bougieFilter)->size == 0) ::<= {
+              windowEvent.queueMessage(
+                text: "The party has no auctionable items: the party\'s items are too cheap to sell at an auction."
+              );
+            }
+
+            import(:'game_function.pickitem.mt')(
+              topWeight: 0.5,
+              leftWeight : 0.5,
+              filter : bougieFilter,
+              inventory: world.party.inventory,
+              canCancel : true,
+              keep: false,
+              onPick::(item) {
+                windowEvent.queueAskBoolean(
+                  prompt: 'Put up ' + item.name + ' for auction?',
+                  onChoice::(which) {
+                    when(which == false) empty;
+
+                    party.inventory.subtractGold(amount:3000);
+
+                    auction(
+                      playerEnabled : false,
+                      item,
+                      onDone ::(item, price, entity) {
+                        world.party.inventory.remove(:item);
+                        entity.inventory.add(:item);
+                        location.inventory.clear();
+                                              
+                        world.party.addGoldAnimated(amount:price);
+                      }
+                    )  
+                  }
+                );
+              }
+            );
+          }
+        );
+
+       
+
+      }
+    }
+  )
+
+  Interaction.newEntry(
+    data : {
+      name : 'Join Auction',
+      id :  'base:join-auction',
+      keepInteractionMenu : true,
+      onInteract ::(location, party) {
+        when (location.inventory.isEmpty) ::<= {
+          windowEvent.queueMessage(
+            text: "It looks like auction house is closed for the rest of the day."
+          );
+        }
+
+        auction(
+          playerEnabled : true,
+          item: location.inventory.items[0],
+          onDone ::(item, price, entity) {
+            @:world = import(module:'game_singleton.world.mt');
+            if (entity != empty && world.party.isMember(:entity)) ::<= {
+              windowEvent.queueMessage(
+                text: "The party won the " + item.name + '.'
+              );
+              world.party.addGoldAnimated(amount:-price);
+              world.party.inventory.add(:item);            
+            }
+            location.inventory.clear();
+          }
+        )          
+      }
+    }
+  )
+
+
+
+}
+
+
 
 Interaction.newEntry(
   data : {
@@ -802,7 +1201,7 @@ Interaction.newEntry(
         topWeight: 0.5,
         showPrices : true,
         onGetPrompt:: <-  'Sell which? (current: ' + g(g:party.inventory.gold) + ')',
-        goldMultiplier: (0.5 / 5)*0.5,
+        goldMultiplier: Item.SELL_PRICE_MULTIPLIER,
         header : ['Item', 'Price', ''],
         onPick::(item) {
           when(item == empty) empty;
@@ -813,7 +1212,7 @@ Interaction.newEntry(
               text:'You feel unable to give this away.'
             )
 
-          @price = (item.price * ((0.5 / 5)*0.5))->ceil;
+          @price = (item.price * (Item.SELL_PRICE_MULTIPLIER))->ceil;
           if (price < 1) ::<= {
             windowEvent.queueMessage(
               speaker: location.ownedBy.name,
@@ -822,6 +1221,26 @@ Interaction.newEntry(
             world.accoladeEnable(name:'soldWorthlessItem');
             price = 1;
           }
+          if (price > 9999) ::<= {
+            windowEvent.queueMessage(
+              speaker: location.ownedBy.name,
+              text:'"This item is too expensive to sell to me. I can\'t even tell how much it\'s worth!"'
+            )
+            windowEvent.queueMessage(
+              speaker: location.ownedBy.name,
+              text:'"I\'d recommend trying to sell it at an Auction House. Most cities should have one."'
+            )
+
+            windowEvent.queueMessage(
+              speaker: location.ownedBy.name,
+              text:'"Alternatively, I can take it off your hands for 9,999G. Just be aware it is likely worth much more than that."'
+            )
+
+
+            price = 9999;
+          }
+
+
           windowEvent.queueAskBoolean(
             prompt:'Sell the ' + item.name + ' for ' + g(g:price) + '?',
             onChoice::(which) {
@@ -1428,7 +1847,6 @@ Interaction.newEntry(
         windowEvent.queueAskBoolean(
           prompt: 'Have a party member work the forge?',
           onChoice::(which) {
-            breakpoint();
             when(which == false) empty;
 
             when(hasHammer->size == 0)

@@ -341,10 +341,14 @@ return {
     // debug
 
 /*
-@:test = Item.new(
-  base: Item.database.find(id:'base:seed')
-);
-party.inventory.add(:test);
+island.tier = 10;
+for(0, 20) ::(i) {
+  @:test = Item.new(
+    base: Item.database.getRandomFiltered(::(value) <- value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED))
+  );
+
+  party.inventory.add(:test.appraise());
+}
 party.inventory.addGold(amount:100000);
 */
 

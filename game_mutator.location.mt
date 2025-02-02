@@ -381,6 +381,7 @@ Location.database.newEntry(data:{
       );
     }  
   }
+
   Location.database.newEntry(data:{
     name: 'Shop',
     id: 'base:shop',
@@ -454,7 +455,105 @@ Location.database.newEntry(data:{
       }
     }
   })
+
+  
 }
+
+
+// can either bid or place on auction. Once per day!
+::<= {
+  @:PRICE_THRESHOLD = 12000;
+
+  @:restock ::(location) {
+    @:world = import(module:'game_singleton.world.mt');
+
+    location.inventory.clear();
+    @:origTier = world.island.tier;
+    world.island.tier = 10;
+    {:::} {
+      forever ::{
+        @item = Item.new(
+          base : Item.database.getRandomFiltered(::(value) <- 
+            value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)
+          ),
+          forceNeedsAppraisal : true 
+        );
+        
+        item = item.appraise();
+        breakpoint();
+        if (item.price * Item.SELL_PRICE_MULTIPLIER > PRICE_THRESHOLD) ::<= {
+          location.inventory.add(:item)
+          send();
+        }
+      }
+    }
+    world.island.tier = origTier;
+    
+  }
+
+  Location.database.newEntry(data:{
+    name: 'Auction House',
+    id: 'base:auction-house',
+    rarity: 300,
+    ownVerb : 'run',
+    category : CATEGORY.BUSINESS,
+    symbol: '%',
+    onePerLandmark : true,
+    minStructureSize : 1,
+
+    descriptions: [
+      "A trading location often perused by the wealthy.",
+    ],
+    interactions : [
+      'base:place-auction',
+      'base:join-auction',
+      'base:talk',
+      'base:examine'
+    ],
+    
+    aggressiveInteractions : [
+      'base:steal',
+      'base:vandalize',      
+    ],
+
+
+    
+    minOccupants : 0,
+    maxOccupants : 0,
+    onFirstInteract ::(location) {
+      @:Profession = import(module:'game_database.profession.mt');
+      location.ownedBy = location.landmark.island.newInhabitant();      
+      location.ownedBy.profession = Profession.find(id:'base:trader');
+      location.name = 'Auction House';
+      location.inventory.maxItems = 1;
+
+      @:nameGen = import(module:'game_singleton.namegen.mt');
+      @:story = import(module:'game_singleton.story.mt');
+
+    },
+    onInteract ::(location) {
+      return true;
+
+    },      
+    
+    onCreate ::(location) {
+      restock(location);
+
+    },
+    onStep ::(location, entities) {
+    
+    },
+    
+    onIncrementTime::(location) {
+      @:world = import(module:'game_singleton.world.mt');
+      if (world.time == world.TIME.MIDNIGHT) ::<= {
+        restock(location);
+      }
+    }
+  })
+}
+
+
 Location.database.newEntry(data:{
   name: 'Arts Tecker',
   id: 'base:arts-tecker',

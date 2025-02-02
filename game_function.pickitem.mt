@@ -52,6 +52,8 @@ return ::(
     go = go->ceil;
     return if (go < 1)
       '?G' /// ooooh mysterious!
+    else if (go > 9999)
+      '!!G'
     else
       g(g:go);
   }

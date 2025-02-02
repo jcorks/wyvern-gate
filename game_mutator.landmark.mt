@@ -74,7 +74,7 @@ Landmark.database.newEntry(
       'base:school',
       'base:tavern',
       'base:blacksmith',
-      'base:inn',
+      'base:inn'      
     ],
     mapHint : {
       roomSize: 30,
@@ -124,6 +124,7 @@ Landmark.database.newEntry(
       'base:shop',
       'base:shop',
       'base:shop',
+      'base:auction-house',
       'base:arts-tecker',
       'base:tavern',
       'base:arena',

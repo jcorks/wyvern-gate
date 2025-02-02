@@ -1092,6 +1092,7 @@
             //limitLines : data.pageAfter,
             hasNotch: true
           );
+
           when(progressL >= data.lines->size)
             ANIMATION_FINISHED;
 
@@ -1116,6 +1117,14 @@
       }
 
       renderThis(data);
+      
+      if (data.autoSkipAfterFrames->type == Number) ::<= {
+        data.autoSkipAfterFrames -= 1;
+      }
+      
+      when(data.autoSkipAfterFrames->type == Number && data.autoSkipAfterFrames <= 0) ::<= {
+        return true;
+      }      
       
       return match(input) {
         (CURSOR_ACTIONS.CONFIRM, 
@@ -1190,7 +1199,8 @@
           maxWidth,
           maxHeight,
           pageAfter, 
-          onLeave
+          onLeave,
+          autoSkipAfterFrames
         ) {
         @:setID = {};
         foreach(set)::(i, text) {
@@ -1204,7 +1214,8 @@
             maxHeight,
             pageAfter,
             onLeave,
-            setID
+            setID,
+            autoSkipAfterFrames
           )
         }
         
@@ -1225,7 +1236,8 @@
           pageAfter, 
           renderable, 
           onLeave,
-          setID
+          setID,
+          autoSkipAfterFrames
       ) {
         if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
         // first: split the text.
@@ -1244,7 +1256,8 @@
           lines : canvas.refitLines(input:[text]),
           pageAfter,
           onLeave,
-          setID
+          setID,
+          autoSkipAfterFrames
         );        
       },
       
@@ -1263,7 +1276,8 @@
         renderable, 
         onLeave, 
         skipAnimation,
-        setID
+        setID,
+        autoSkipAfterFrames
       ) {
         when(requestAutoSkip) ::<= {
           if (onLeave) onLeave();
@@ -1296,7 +1310,8 @@
               mode: CHOICE_MODE.DISPLAY,
               renderable: renderable,
               skipAnimation : skipAnimation,
-              setID : setID
+              setID : setID,
+              autoSkipAfterFrames : autoSkipAfterFrames
             });
           }], setID);
         }

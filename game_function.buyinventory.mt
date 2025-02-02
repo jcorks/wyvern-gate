@@ -3,6 +3,8 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:correctA = import(module:'game_function.correcta.mt');
+@:Item = import(module:'game_mutator.item.mt');
+
 
 
 return ::(inventory, shopkeep, onDone) {
@@ -16,7 +18,7 @@ return ::(inventory, shopkeep, onDone) {
     topWeight: 0.5,
     showPrices : true,
     onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',
-    goldMultiplier: (0.5 / 5),
+    goldMultiplier: Item.BUY_PRICE_MULTIPLIER,
     onHover ::(item) {
       hoveredItem = item;
     },
@@ -38,7 +40,7 @@ return ::(inventory, shopkeep, onDone) {
     
     onPick::(item) {
       when(item == empty) empty;
-      @price = (item.price * (0.5 / 5))->ceil;
+      @price = (item.price * Item.BUY_PRICE_MULTIPLIER)->ceil;
       
       windowEvent.queueChoices(
         prompt: item.name,

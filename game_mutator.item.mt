@@ -3377,7 +3377,9 @@ none.name = 'None';
     TYPE : {get::<-TYPE},
     TRAIT : {get::<-TRAIT},
     USE_TARGET_HINT : {get::<-USE_TARGET_HINT},
-    NONE : {get ::<- none}
+    NONE : {get ::<- none},
+    BUY_PRICE_MULTIPLIER : {get ::<- 0.1},
+    SELL_PRICE_MULTIPLIER : {get ::<- 0.05},
   },
 
 
@@ -3773,6 +3775,7 @@ none.name = 'None';
       get ::<-_.state.price,
       set ::(value) <- _.state.price = value
     },
+    
       
     material : {
       get ::<- _.state.material
