@@ -184,10 +184,10 @@
     }    
     
     
-    @:cores = state.opinions->values->filter(::(value) <- value.core == true);
+    @:cores = state.opinions->keys->filter(::(value) <- state.opinions[value].core == true);
 
     @:which = if (cores->size > 0 && random.try(percentSuccess:10)) 
-      state.opinions[state.opinions->findIndex(:random.pickArrayItem(:cores))]
+      random.pickArrayItem(:cores)
     else 
       random.pickArrayItem(:[...state.recentOpinions]);
       
