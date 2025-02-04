@@ -47,6 +47,7 @@
 @:random = import(module:'game_singleton.random.mt');
 @:g = import(module:'game_function.g.mt');
 @:EffectStack = import(:'game_class.effectstack.mt');
+@:canvas = import(module:'game_singleton.canvas.mt');
 
 
   
@@ -62,16 +63,24 @@ Effect.newEntry(
     description: 'The user is in the middle of reading a book.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.INSTANTANEOUS,
+    traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
         when(item == empty)
           windowEvent.queueMessage(speaker: holder.name, text: "\"Why am I reading right now??\"");
 
+
+        windowEvent.queueMessage(
+          text: item.data.book.name + ', by ' + item.data.book.author
+        );
+
         if (item.data.book) ::<= {
           @:w = item.data.book.onGetContents();
-          windowEvent.queueMessage(text:w);
+          if (w->type == String)
+            windowEvent.queueMessage(text:w)
+          else 
+            windowEvent.queueDisplay(lines:canvas.refitLines(input:w));
         }
 
       }

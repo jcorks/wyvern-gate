@@ -137,6 +137,7 @@
     @resolveQueues = {};
     @requestAutoSkip = false;
     @autoSkipIndex = empty;
+    @autoSkipAnimations = false;
     @queuedInputs = [];
     
     resolveQueues->push(:{
@@ -238,7 +239,8 @@
         }
       }
 
-
+      if (autoSkipAnimations)
+        data.renderState = RENDER_STATE.DONE;
 
 
       // animations prevent continuing by using the renderState flag
@@ -1762,6 +1764,13 @@
       // returns any resolvable items are left queued.
       hasAnyQueued:: {
         return getResolveQueue()->size != 0;
+      },
+      
+      // universally skips animations that come through 
+      // normal paths.
+      autoSkipAnimations : {
+        get ::<- autoSkipAnimations,
+        set ::(value) <- autoSkipAnimations = value
       },
       
       // queues a set of input events to be played

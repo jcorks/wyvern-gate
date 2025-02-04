@@ -350,7 +350,15 @@ for(0, 20) ::(i) {
   party.inventory.add(:test.appraise());
 }
 party.inventory.addGold(amount:100000);
+for(0, 20) ::(i) {
+  @:test = Item.new(
+    base: Item.database.find(:'base:book')
+  );
+  party.inventory.add(:test);
+}
 */
+
+
 
 
 

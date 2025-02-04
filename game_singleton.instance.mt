@@ -289,6 +289,7 @@ return class(
         settings.bgColor = [33, 33, 58];
         settings.fgColor = [186, 240, 228];
         settings.debugMode = false;
+        settings.animations = true;
         this.updateSettings();
       },
       
@@ -307,9 +308,27 @@ return class(
           );
         }];
         breakpoint();
+
+
+
+        opts->push(:'Animations');
+        optActs->push(::{
+          windowEvent.queueAskBoolean(
+            onGetPrompt::<- 'Toggle Animations? (currently: ' + (if(settings.animations) 'Enabled' else 'Disabled') + ')',
+            onChoice::(which) {
+              when(which == false) empty;
+              settings.animations = !settings.animations;
+              windowEvent.autoSkipAnimations = !settings.animations;
+              this.updateSettings();
+            }
+          );
+        });
+
+
         foreach(FEATURES) ::(k, i) <-
           if ((features_ & i) != 0)
             match(i) {
+
               (FEATURES.DEBUGGING): ::<={
                 opts->push(:'Debug Mode');
                 optActs->push(::{
@@ -442,6 +461,9 @@ return class(
       },
       
       updateSettings::{
+        if (settings.animations == empty)
+          settings.animations = true;
+        windowEvent.autoSkipAnimations = !settings.animations;
         onSaveSettings_(data:JSON.encode(object:settings));      
       },
 
@@ -813,12 +835,10 @@ return empty;
             });
           }
 
-          if (this.hasFeatures()) ::<= {
-            choiceNames->push(value: 'Settings');
-            choiceActions->push(value ::{
-              this.optionsMenu();
-            });
-          }
+          choiceNames->push(value: 'Settings');
+          choiceActions->push(value ::{
+            this.optionsMenu();
+          });
 
           
           choiceNames->push(value: 'Credits');

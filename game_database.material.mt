@@ -241,6 +241,23 @@ Material.newEntry(
   }
 )  
 
+Material.newEntry(
+  data : {
+    name : 'Skystone',
+    id : 'base:skystone',
+    rarity : 220,
+    description : 'The rare skystone material makes it feel very light.',
+    tier : 5,
+    statMod : StatSet.new(
+      DEF: 20,
+      ATK: 200,
+      SPD: 100,
+      DEX: 150
+    ),
+    pricePercentMod: 7500
+  }
+)  
+
 
 
 Material.newEntry(
