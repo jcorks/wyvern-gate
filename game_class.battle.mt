@@ -723,6 +723,7 @@
           }
         
           @:finishEnd :: {
+          
             groups = [];
             onEnd(result);      
             foreach(onFinish) ::(k, v) {
@@ -1013,7 +1014,7 @@
           }
 
 
-          if (art.kind == Arts.KIND.ABILITY) ::<= {
+          if (art.kind == Arts.KIND.ABILITY || art.kind == Arts.KIND.SPECIAL) ::<= {
             entAct.flags.add(flag:StateFlags.WENT);
             if (art.name != 'Wait' &&
               art.name != 'Use Item')
@@ -1060,7 +1061,7 @@
       
         // react andy time
         @checkReactions ::(onPass, onReject) {
-          @toReact = getAll()->filter(::(value) <- value.canActThisTurn() && value.deck.containsReaction());
+          @toReact = getAll()->filter(::(value) <- value.canUseReactions() && value.deck.containsReaction());
           toReact->sort(:::(a, b) <- a.stats.SPD > b.stats.SPD);
           when(toReact->size == 0)
             onPass();
@@ -1079,7 +1080,7 @@
                 when(action == empty)
                   tryNext();
                   
-                when(!reactor.canActThisTurn())
+                when(!reactor.canUseReactions())
                   windowEvent.queueCustom(
                     onEnter ::{
                       tryNext();

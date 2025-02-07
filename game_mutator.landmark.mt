@@ -1068,14 +1068,12 @@ Landmark.database.newEntry(
       },
       
       loadContent ::{
-        breakpoint();
         @:base = state.base;        
         if (state.map == empty)
           loadContent(base);              
       },
       
       unloadContent ::{
-        breakpoint();
         state.map = empty;
       },
       
@@ -1185,7 +1183,6 @@ Landmark.database.newEntry(
         }
 
         @:locations = state.map.getItemsUnderPointer();
-        breakpoint();
         if (locations->type == Object) ::<= {
           foreach(locations) ::(k, v) {
             if (v.data->type == Location.type) ::<= {

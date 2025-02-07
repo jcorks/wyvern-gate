@@ -70,114 +70,55 @@
 
 @:addExpAnimated::(item, user, other, exp, onDone) {
   @remainingForLevel = item.improvementEXPtoNext - item.improvementEXP;
-  windowEvent.queueDisplay(
-    leftWeight: 0.5,
-    topWeight : 0.5,
-    lines : [
-      item.name,
-      '',
-      'Item level: ' + item.improvements,
-      canvas.renderBarAsString(width:40, fillFraction: item.improvementEXP / item.improvementEXPtoNext),
-      'Exp to next level: ' + remainingForLevel,
-      '                  +' + exp
-    ]
-  );
-
-  windowEvent.queueCustom(
-    onEnter ::{},
-    isAnimation: true,
-    /*onInput ::(input) {
-      match(input) {
-        (windowEvent.CURSOR_ACTIONS.CONFIRM,
-         windowEvent.CURSOR_ACTIONS.CANCEL):
-        exp = 0
-      }
-    },*/
-    animationFrame ::{
-      @remainingForLevel = item.improvementEXPtoNext - item.improvementEXP;
-      canvas.renderTextFrameGeneral(
-        leftWeight: 0.5,
-        topWeight : 0.5,
-        lines : [
-          item.name,
-          '',
-          'Item level: ' + item.improvements,
-          canvas.renderBarAsString(width:40, fillFraction: item.improvementEXP / item.improvementEXPtoNext),
-          'Exp to next level: ' + remainingForLevel,
-          if (exp >= 0)
-          '                  +' + exp
-          else
-          '                   ' + exp
-        ]
-      );
-      
-
-      
-      @newExp = if (exp < 0) (exp * 0.9)->ceil else (exp*0.9)->floor;
-      @add = exp - newExp;
-      
+  
+  
+  @:animateBar = import(:'game_function.animatebar.mt');
+  @current = 0;
+  animateBar(
+    from: item.improvementEXP,
+    to:   item.improvementEXP + exp,
+    max:  item.improvementEXPtoNext,
+    
+    onGetPauseFinish:: <- true,
+    onFinish ::{  
+      @:remaining = exp - (item.improvementEXPtoNext - item.improvementEXP);
       @:oldLevel = item.improvements;
-      exp = newExp + item.improve(:add);      
+      item.improve(:exp);      
       when (oldLevel != item.improvements) ::<= {
-        windowEvent.queueDisplay(
-          leftWeight: 0.5,
-          topWeight : 0.5,
-          lines : [
-            item.name + ' - LEVEL UP!',
-            '',
-            'Item level: ' + item.improvements,
-            canvas.renderBarAsString(width:40, fillFraction: 1),
-            'Exp to next level: ' + remainingForLevel,
-            if (exp >= 0)
-            '                  +' + exp
-            else
-            '                   ' + exp
-          ],
-          skipAnimation: true
-        )
-        
+        windowEvent.queueMessage(
+          text: 'Item: Level up!'
+        );
         windowEvent.queueCustom(
           onEnter :: {      
             levelUp(
               item : item,
               user : user,
               onDone :: {
-                addExpAnimated(item, other, exp, onDone);
+                addExpAnimated(item, other, exp:remaining, onDone);
               }
             );
           }
         );
-        return windowEvent.ANIMATION_FINISHED;
       }
-
-      when(exp->abs <= 0) ::<= {
-        windowEvent.queueDisplay(
-          leftWeight: 0.5,
-          topWeight : 0.5,
-          lines : [
-            item.name,
-            '',
-            'Item level: ' + item.improvements,
-            canvas.renderBarAsString(width:40, fillFraction: item.improvementEXP / item.improvementEXPtoNext),
-            'Exp to next level: ' + remainingForLevel,
-            if (exp >= 0)
-            '                  +' + exp
-            else
-            '                  ' + exp
-          ],
-          skipAnimation: true
-        )
-        
-        windowEvent.queueCustom(
-          onEnter :: {
-            onDone();
-          }
-        );
-        return windowEvent.ANIMATION_FINISHED
-      }
+      windowEvent.queueCustom(
+        onEnter :: {
+          onDone();
+        }
+      );
+         
+    },
+    
+    onGetCaption      ::<- 'Item level: ' + item.improvements,
+    onGetSubcaption   ::<- 'Exp to next level: ' + (remainingForLevel - (current - item.improvementEXP)),
+    onGetSubsubcaption::<- '                  +' + (exp - (current - item.improvementEXP)),
+    
+    onGetLeftWeight::<- 0.5,
+    onGetTopWeight::<- 0.5,
+    
+    onNewValue ::(value) {
+      current = value->ceil;
     }
   );
-  
 }
 
 

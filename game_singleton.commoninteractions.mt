@@ -27,6 +27,11 @@ return {
       onSelect::(user, battle, commitAction) {
         @:card = ArtsDeck.synthesizeHandCard(id:'base:attack');
 
+        when(user.canUseAbilities() == false) 
+          windowEvent.queueMessage(
+            text: 'This cannot be used right now.'
+          );    
+
         windowEvent.queueChoices(
           choices : [
             'Use',
@@ -63,6 +68,17 @@ return {
               windowEvent.queueMessage(
                 text: 'Reaction Arts can only be used in response to other Arts. They cannot be played right now.'
               );
+              
+            @:canUse = match(Arts.find(:card.id).kind) {
+              (Arts.KIND.ABILITY): user.canUseAbilities(),
+              (Arts.KIND.EFFECT): user.canUseEffects(),
+              default: true
+            }
+            when(canUse == false) 
+              windowEvent.queueMessage(
+                text: 'This cannot be played right now.'
+              );
+            
             user.playerUseArt(
               card,
               commitAction::(action){
@@ -174,6 +190,10 @@ return {
         @:enemies = battle.getEnemies(entity:user);
 
         itemmenu(inBattle:true, user, party:world.party, enemies, onAct::(action){
+          when(user.canUseEffects() == false) 
+            windowEvent.queueMessage(
+              text: 'This cannot be used right now.'
+            );
           commitAction(action);
         });
       }
@@ -245,8 +265,11 @@ return {
     system : InteractionMenuEntry.new(
       name: 'Settings',
       keepInteractionMenu : true,
-      filter ::(island, landmark) <- import(:'game_singleton.instance.mt').hasFeatures(),
+      filter ::(island, landmark) <- true,
       onSelect::(island, landmark) {
+        @:world = import(module:'game_singleton.world.mt');
+        world.party.animateGainGuildEXP(exp:400);
+      
         @:instance = import(:'game_singleton.instance.mt')
         instance.optionsMenu();
       }

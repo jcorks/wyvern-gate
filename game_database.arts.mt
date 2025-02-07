@@ -40,7 +40,8 @@
   ABILITY : 0,
   REACTION : 1,
   EFFECT : 2,
-  FIELD : 3
+  SPECIAL : 3,
+  FIELD : 4
 }
 
 @RARITY = {
@@ -3632,7 +3633,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     traits : TRAITS.SPECIAL | TRAITS.COSTLESS,
-    kind : KIND.ABILITY,
+    kind : KIND.SPECIAL,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {

@@ -356,8 +356,14 @@ for(0, 20) ::(i) {
   );
   party.inventory.add(:test);
 }
-*/
+for(0, 20) ::(i) {
+  @:test = Item.new(
+    base: Item.database.getRandomFiltered(::(value) <- value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED))
+  );
 
+  party.inventory.add(:test);
+}
+*/
 
 
 

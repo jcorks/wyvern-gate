@@ -245,7 +245,7 @@ MapEntity.Task.database.newEntry(
             @:instance = import(module:'game_singleton.instance.mt');
             instance.gameOver(reason: 'The party has been wiped out.');
           }
-          
+          breakpoint();
           mapEntity.kill();
           mapEntity.remove();
         }
@@ -788,6 +788,7 @@ MapEntity.Task.database.newEntry(
         state.tag = tag;
         state.onStepSet = [];
         state.onDeathSet = [];
+        state.friends = [];
         map_.setItem(data:this, x, y, discovered:true, symbol); 
         if (location != empty) ::<= {
           state.locationID = location.worldID;

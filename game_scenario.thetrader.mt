@@ -317,7 +317,8 @@
                       value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
                       && value.tier <= world.island.tier
                   ),
-                  rngEnchantHint:true
+                  rngEnchantHint:true,
+                  forceNeedsAppraisal: false
                 )
               );                    
             }          
@@ -339,7 +340,8 @@
                           value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
                           && value.tier <= world.island.tier
                       ),
-                      rngEnchantHint:true
+                      rngEnchantHint:true,
+                      forceNeedsAppraisal: false
                     )
                   );                    
                 }
@@ -359,7 +361,8 @@
                             && value.tier <= world.island.tier + 1
                         ),
                         rngEnchantHint:true, 
-                        forceEnchant:true
+                        forceEnchant:true,
+                        forceNeedsAppraisal: false
                       )
                     );       
                   }               
@@ -429,7 +432,8 @@
                             value.hasNoTrait(:Item.TRAIT.UNIQUE)
                             && value.tier <= world.island.tier
                         ),
-                        rngEnchantHint:true
+                        rngEnchantHint:true,
+                        forceNeedsAppraisal: false
                       )
                     );                      
                   } else
@@ -455,7 +459,8 @@
                   value.hasNoTrait(:Item.TRAIT.UNIQUE)         
               ),
               qualityHint : 'base:masterwork',
-              rngEnchantHint:true
+              rngEnchantHint:true,
+              forceNeedsAppraisal: false
             )
           ); 
           world.scenario.data.trader.state.accolade_employeeCompletedDungeon = true;  
@@ -1104,20 +1109,82 @@
         };
 
 
-        @remainingForLevel = state.sellingEXPtoNext - state.sellingEXP;
-        windowEvent.queueDisplay(
-          lines : [
-            'Sale rating: ' + rating,
-            '',
-            'Selling level: ' + state.sellingLevel,
-            canvas.renderBarAsString(width:40, fillFraction: state.sellingEXP / state.sellingEXPtoNext),
-            'Exp to next level: ' + remainingForLevel,
-            '                  +' + exp
-          ]
-        )
         
         
+        @:animate = import(:'game_function.animatebar.mt');
         @:level = ::{
+          @remainingForLevel = state.sellingEXPtoNext - state.sellingEXP;
+          @val = state.settingEXP;
+          animate(
+            from: state.sellingEXP,
+            to:   state.sellingEXP + exp,
+            max:  state.sellingEXPtoNext,
+            
+            onGetPauseFinish::<- true,
+            pauseStart: true,
+            
+            onFinish :: {
+              when (state.sellingEXP + exp >= state.sellingEXPtoNext) ::<= {
+                exp -= (state.sellingEXPtoNext - state.sellingEXP);
+                state.sellingLevel += 1;
+                state.sellingEXP = 0;
+                state.sellingEXPtoNext = 100 + (state.sellingEXPtoNext ** 1.010)->floor;
+
+                windowEvent.queueDisplay(
+                  lines : [
+                    'Level up!',
+                    'Selling level: ' + state.sellingLevel,
+                    'People will now be willing to pay more for your items being sold.'
+                  ]
+                );
+
+
+
+                if (state.sellingLevel == LEVEL_HIRE_EMPLOYEES) 
+                  windowEvent.queueMessage(
+                    text: 'You are now a high enough level to hire employees. Employees can be hired to explore dungeons for you, join your party, and more.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP0 + ': Shop upgrades: stock size.'
+                  );
+
+                if (state.sellingLevel == LEVEL_UPGRADE_SHOP0) 
+                  windowEvent.queueMessage(
+                    text: 'You are now a high enough level to expand your shop, allowing you to spend G to hold more items in your shop\'s stock. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP1 + ' : Shop upgrades: additional store fronts.'
+                  );
+                
+                if (state.sellingLevel == LEVEL_UPGRADE_SHOP1) 
+                  windowEvent.queueMessage(
+                    text: 'You are now a high enough level to add additional store fronts, allowing you to upgrade your shop to have your employees sell you items on your behalf. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_BUY_PROPERTY + ' : Buying/selling property.'
+                  );
+
+                if (state.sellingLevel == LEVEL_BUY_PROPERTY) 
+                  windowEvent.queueMessage(
+                    text: 'You are now a high enough level to buy and sell property. Properties are any homes and businesses in towns and cities.'
+                  );
+
+
+
+                level();
+              }
+              windowEvent.queueCustom(
+                onEnter :: {
+                  onDone();
+                }
+              );          
+            },
+            
+            onGetCaption      ::<- 'Sale rating: ' + rating,
+            onGetCoCaption    ::<- 'Selling level: ' + state.sellingLevel,
+            onGetSubcaption   ::<- 'Exp to next level: ' + remainingForLevel - (val - ,
+            onGetSubsubcaption::<-  if (exp >= 0)
+                                    '                  +' + exp
+                                    else
+                                    '                   ' + exp,
+            onGetLeftWeight::<- 0.5,
+            onGetTopWeight::<- 0.5,
+            onNewValue::(value) <- val = value
+
+          )        
+        
+        
           windowEvent.queueCustom(
             onEnter ::{},
             isAnimation: true,
@@ -1154,47 +1221,7 @@
               state.sellingEXP += add;
               exp = newExp;
               
-              when (state.sellingEXP >= state.sellingEXPtoNext) ::<= {
-                state.sellingLevel += 1;
-                state.sellingEXP = state.sellingEXP - state.sellingEXPtoNext;
-                state.sellingEXPtoNext = 100 + (state.sellingEXPtoNext ** 1.010)->floor;
-
-                windowEvent.queueDisplay(
-                  lines : [
-                    'Level up!',
-                    'Selling level: ' + state.sellingLevel,
-                    'People will now be willing to pay more for your items being sold.'
-                  ]
-                );
-
-
-
-                if (state.sellingLevel == LEVEL_HIRE_EMPLOYEES) 
-                  windowEvent.queueMessage(
-                    text: 'You are now a high enough level to hire employees. Employees can be hired to explore dungeons for you, join your party, and more.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP0 + ': Shop upgrades: stock size.'
-                  );
-
-                if (state.sellingLevel == LEVEL_UPGRADE_SHOP0) 
-                  windowEvent.queueMessage(
-                    text: 'You are now a high enough level to expand your shop, allowing you to spend G to hold more items in your shop\'s stock. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_UPGRADE_SHOP1 + ' : Shop upgrades: additional store fronts.'
-                  );
-                
-                if (state.sellingLevel == LEVEL_UPGRADE_SHOP1) 
-                  windowEvent.queueMessage(
-                    text: 'You are now a high enough level to add additional store fronts, allowing you to upgrade your shop to have your employees sell you items on your behalf. Tomorrow, check the "Upgrade shop" in the Shop options at the start of the day.\n\nNext unlock at level ' + LEVEL_BUY_PROPERTY + ' : Buying/selling property.'
-                  );
-
-                if (state.sellingLevel == LEVEL_BUY_PROPERTY) 
-                  windowEvent.queueMessage(
-                    text: 'You are now a high enough level to buy and sell property. Properties are any homes and businesses in towns and cities.'
-                  );
-
-
-
-                level();
-                return windowEvent.ANIMATION_FINISHED;
-              }
-
+              
               when(exp->abs <= 0) ::<= {
                 windowEvent.queueDisplay(
                   lines : [
@@ -1208,11 +1235,7 @@
                   skipAnimation: true
                 )
                 
-                windowEvent.queueCustom(
-                  onEnter :: {
-                    onDone();
-                  }
-                );
+
                 return windowEvent.ANIMATION_FINISHED
               }
             }
@@ -3224,7 +3247,8 @@ return {
                       && value.tier <= world.island.tier
           ),
           from:p0, 
-          rngEnchantHint:true
+          rngEnchantHint:true,
+          forceNeedsAppraisal: false
         )
       );
     }

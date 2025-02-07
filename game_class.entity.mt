@@ -583,7 +583,11 @@
 
         },
         onGetCaption       ::<- this.name + ', ' + profession.name + ': Level ' + if (set.level >= profession.arts->size) 'MAX' else set.level,
-        onGetSubcaption    ::<- if (set.level >= profession.arts->size) '' else 'Exp to next: ' + (originalExpToNext-(curVal-originalSetExp)) + ' EXP',
+        onGetSubcaption    ::{
+          @amount = (originalExpToNext-(curVal-originalSetExp));
+          if (amount < 0) amount = 0; 
+          return if (set.level >= profession.arts->size) '' else 'Exp to next: ' + amount + ' EXP'
+        },
         onGetSubsubcaption ::<- if (set.level >= profession.arts->size) '' else '            +' + (originalExp - (curVal-originalSetExp)),
         onGetLeftWeight:: <- 0.5,
         onGetTopWeight:: <- 0.5,
@@ -1511,11 +1515,36 @@
       this.effectStack.endTurn();
     },
     
-    canActThisTurn :: {
+    canUseAbilities :: {
       when(_.this.isIncapacitated()) false;
       when(_.canActThisTurn == false) false;
-      return true;
+      return _.this.effectStack.getAllByFilter( 
+        ::(value) <- Effect.find(:value.id).hasTraits(:Effect.TRAIT.CANT_USE_ABILITIES)
+      )->size == 0
     },
+
+    canUseReactions :: {
+      when(_.this.isIncapacitated()) false;
+      when(_.canActThisTurn == false) false;
+      return _.this.effectStack.getAllByFilter( 
+        ::(value) <- Effect.find(:value.id).hasTraits(:Effect.TRAIT.CANT_USE_REACTIONS)
+      )->size == 0
+    },
+
+    canUseEffects :: {
+      when(_.this.isIncapacitated()) false;
+      when(_.canActThisTurn == false) false;
+      return _.this.effectStack.getAllByFilter( 
+        ::(value) <- Effect.find(:value.id).hasTraits(:Effect.TRAIT.CAN_USE_EFFECTS)
+      )->size == 0
+    },
+
+    canActThisTurn ::{
+      when(_.this.isIncapacitated()) false;
+      when(_.canActThisTurn == false) false;
+      return true;    
+    },
+
 
     // lets the entity know that their turn has come.      
     actTurn ::() => Boolean {
@@ -1539,6 +1568,7 @@
         return false;
       }
       
+                  
       if (this.stats.SPD < 0) ::<= {
         windowEvent.queueMessage(text:this.name + ' cannot move! (negative speed)');
         act = false;
@@ -3094,10 +3124,15 @@
       @:abilitiesUsedBattle = _.abilitiesUsedBattle;
       @:deck = state.deck;
       @:world = import(module:'game_singleton.world.mt');
+
+      when (this.canUseReactions() == false)
+        onReact();
       
       @:chooseReact::(action) {
         when(action == empty)
           onReact();
+
+
         @:card = action.card;
 
         @:art = Arts.find(:card.id);

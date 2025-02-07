@@ -66,7 +66,7 @@
           @:enemies = battle.getEnemies(:user_);
           @:allies = battle.getAllies(:user_);
 
-
+          when(user_.canUseReactions() == false) empty;
         
           @hand = [...user_.deck.hand]->map(to::(value) <- {
               card:value, 
@@ -235,7 +235,7 @@
               full.overrideTargets = empty;
             }
             
-            if (art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
+            if (user_.canUseEffects() && art.kind == Arts.KIND.EFFECT && random.flipCoin()) ::<= {
               when (projectedAP < 2) empty;
               this.commitTargettedAction(
                 battle,
@@ -251,7 +251,7 @@
           }        
 
 
-          when(hand->keycount == 0)
+          when(hand->keycount == 0 && user_.canUseAbilities())
             defaultAttack(
               battle,
               onCommit ::(action) {
@@ -260,8 +260,9 @@
             ); 
            
         
-            
+          when (user_.canUseAbilities() == false) empty;
           @c = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.find(id:value.card.id).kind == Arts.KIND.ABILITY));
+
           when (c == empty)
             defaultAttack(
               battle,
@@ -316,6 +317,15 @@
           );
         }
         
+        if (acts->size == 0) 
+          acts->push(:BattleAction.new(
+            card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
+            targets: [],
+            turnIndex : 0,
+            targetParts : [],
+            extraData: {}
+          ))
+              
         windowEvent.queueCallback(
           callback ::{
 

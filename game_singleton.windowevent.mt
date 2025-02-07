@@ -231,7 +231,6 @@
         foreach(choiceStack) ::(k, v) {
           when(v == data) empty;
           if (v.disableCache) ::<= {
-            breakpoint();
             dorender = true;
           }
           if (dorender)
@@ -766,7 +765,7 @@
          choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         sound.playSFX(:"confirm");
         onMenu();
-        resolveNext();
+        //resolveNext();
         return false;
       }       
 
@@ -781,8 +780,8 @@
         }
         
 
-        if (choice != empty)
-          resolveNext();
+        //if (choice != empty)
+          //resolveNext();
       }
       renderThis(data);
       
@@ -1102,7 +1101,6 @@
         
         
         data.thisRender = ::{
-
           renderTextSingle(
             leftWeight: data.leftWeight, 
             topWeight: data.topWeight, 

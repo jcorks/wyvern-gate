@@ -27,6 +27,9 @@ return ::(
   // whether the bar should pause once done or complete.
   onGetPauseFinish,
   
+  // whether to pause at the start before showing the animation
+  pauseStart,
+  
   // to be called RIGHT when the last frame is reached.
   // if onGetPauseFinish() returns true, the paused frame is queued 
   // AFTER this is called.
@@ -34,6 +37,9 @@ return ::(
 
   // Gets the string to display above the bar
   onGetCaption,
+  
+  // 
+  onGetCoCaption,
   
   // Gets the caption to show below the bar
   onGetSubcaption,
@@ -56,6 +62,22 @@ return ::(
   @destination = if (to < max) to else max;
 
 
+  if (pauseStart) 
+    windowEvent.queueDisplay(
+      leftWeight: onGetLeftWeight(),
+      topWeight : onGetTopWeight(),
+      skipAnimation: true,
+      lines : [
+        if (onGetCaption) onGetCaption() else '',
+        '',
+        if (onGetCoCaption) onGetCoCaption() else '',
+        canvas.renderBarAsString(width:40, fillFraction: (current) / max),
+        if (onGetSubcaption) onGetSubcaption() else '',
+        if (onGetSubsubcaption) onGetSubsubcaption() else ''
+      ]
+    );
+  
+
   windowEvent.queueCustom(
     onEnter ::{},
     isAnimation: true,
@@ -66,6 +88,36 @@ return ::(
         current = destination
       }
     },
+
+    onLeave ::{
+      if (onNewValue)
+        onNewValue(:destination);
+    
+      if (onGetPauseFinish != empty && onGetPauseFinish())
+        windowEvent.queueDisplay(
+          leftWeight: onGetLeftWeight(),
+          topWeight : onGetTopWeight(),
+          skipAnimation: true,
+          lines : [
+            if (onGetCaption) onGetCaption() else '',
+            '',
+            if (onGetCoCaption) onGetCoCaption() else '',
+            canvas.renderBarAsString(width:40, fillFraction: (destination) / max),
+            if (onGetSubcaption) onGetSubcaption() else '',
+            if (onGetSubsubcaption) onGetSubsubcaption() else ''
+          ]        
+        );           
+
+      if (onFinish) 
+        windowEvent.queueCustom(
+          onLeave::{
+            onFinish()
+          }
+        );    
+
+
+    },
+    
     animationFrame ::{  
       current = (0.9) * current + (0.1) * destination
       if (current > destination)
@@ -89,28 +141,6 @@ return ::(
 
       
       when((current - destination)->abs < 0.1) ::<= {
-        if (onGetPauseFinish != empty && onGetPauseFinish())
-          windowEvent.queueDisplay(
-            leftWeight: onGetLeftWeight(),
-            topWeight : onGetTopWeight(),
-            skipAnimation: true,
-            lines : [
-              if (onGetCaption) onGetCaption() else '',
-              '',
-              canvas.renderBarAsString(width:40, fillFraction: (current) / max),
-              if (onGetSubcaption) onGetSubcaption() else '',
-              if (onGetSubsubcaption) onGetSubsubcaption() else ''
-            ]        
-          );           
-
-        if (onFinish) 
-          windowEvent.queueCustom(
-            onLeave::{
-              onFinish()
-            }
-          );
-
-      
         return windowEvent.ANIMATION_FINISHED;
       }
     }

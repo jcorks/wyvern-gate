@@ -32,9 +32,11 @@
   
   // Overrides duration to always be 0. effect stack will not report these if alone 
   // in a change.
-  INSTANTANEOUS : 64
+  INSTANTANEOUS : 64,
   
-  
+  CANT_USE_ABILITIES : 128,
+  CANT_USE_EFFECTS   : 256,
+  CANT_USE_REACTIONS : 512,
 };
 
 
@@ -660,15 +662,13 @@ Effect.newEntry(
   data : {
     name : 'Counter',
     id : 'base:counter',
-    description: 'Negates incoming attacks and redirects a portion of the would-be damage back at the attacker. The holder is unable to act while this is active.',
+    description: 'Negates incoming attacks and redirects a portion of the would-be damage back at the attacker. Unable to use Ability or Reaction Arts.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.BUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is busy concentrating on countering enemy attacks!');
-        return false;
       },
 
       onAffliction ::(from, item, holder) {
@@ -2464,7 +2464,7 @@ Effect.newEntry(
     stackable: false,
     stats: StatSet.new(),
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS | TRAIT.CANT_USE_EFFECTS,
     events : {
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' realizes ' + from.name + "'s argument was complete junk!")
@@ -2604,18 +2604,16 @@ Effect.newEntry(
   data : {
     name : 'Grappled',
     id : 'base:grappled',
-    description: 'Unable to act. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
     stackable: false,
     blockPoints : -3,
     stats: StatSet.new(),
-    traits : TRAIT.DEBUFF,
+    traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     events : {
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' broke free from the grapple!')
       },
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is being grappled and is unable to move!');
-        return false;
       }
     }
   }
@@ -2625,15 +2623,13 @@ Effect.newEntry(
   data : {
     name : 'Ensnared',
     id : 'base:ensnared',
-    description: 'Unable to act. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
     stackable: false,
     blockPoints : -3,
-    traits : TRAIT.DEBUFF,
+    traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is ensnared and is unable to move!');
-        return false;
       }
     }
   }
@@ -2643,15 +2639,13 @@ Effect.newEntry(
   data : {
     name : 'Grappling',
     id : 'base:grappling',
-    description: 'Unable to act. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
     stackable: false,
     blockPoints : -3,
-    traits : 0,
+    traits : TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is in the middle of grappling and cannot move!');
-        return false;
       }
     }
   }
@@ -2661,15 +2655,13 @@ Effect.newEntry(
   data : {
     name : 'Ensnaring',
     id : 'base:ensnaring',
-    description: 'Unable to act. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
     stackable: false,
     blockPoints : -3,
-    traits : 0,
+    traits : TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is busy keeping someone ensared and cannot move!');
-        return false;
       }
     }
   }
@@ -2684,7 +2676,7 @@ Effect.newEntry(
     description: 'Unable to act.',
     stackable: false,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
@@ -2698,15 +2690,13 @@ Effect.newEntry(
   data : {
     name : 'Stunned',
     id : 'base:stunned',
-    description: 'Unable to act. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
     stackable: false,
     blockPoints : -3,
-    traits : TRAIT.DEBUFF,
+    traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is still stunned!');
-        return false;
       },
 
       onAffliction ::(from, item, holder) {
@@ -3407,15 +3397,13 @@ Effect.newEntry(
   data : {
     name : 'Frozen',
     id : 'base:frozen',
-    description: 'Unable to act. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
     stackable: false,
     blockPoints : -3,
-    traits : TRAIT.AILMENT,
+    traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is still frozen and unable to act!');
-        return false;
       },
       
     
@@ -3435,18 +3423,16 @@ Effect.newEntry(
   data : {
     name : 'Paralyzed',
     id : 'base:paralyzed',
-    description: 'SPD,ATK -100%. The holder is unable to act or block.',
+    description: 'ATK -100%. Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : -3,
-    traits : TRAIT.AILMENT,
+    blockPoints : 0,
+    traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
       SPD: -100,
       ATK: -100
     ),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is still paralyzed and unable to act!');
-        return false;
       },
 
       onAffliction ::(from, item, holder) {
@@ -3466,7 +3452,7 @@ Effect.newEntry(
   data : {
     name : 'Mesmerized',
     id : 'base:mesmerized',
-    description: 'SPD,DEF -100%. Unable to act, unable to block.',
+    description: 'SPD,DEF -100%. Unable to use Ability or Reaction Arts, unable to block.',
     stackable: false,
     blockPoints : -3,
     traits : TRAIT.DEBUFF,
@@ -3476,8 +3462,6 @@ Effect.newEntry(
     ),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is still mesmerized and unable to act!');
-        return false;
       },
 
       onAffliction ::(from, item, holder) {
@@ -3526,17 +3510,15 @@ Effect.newEntry(
   data : {
     name : 'Petrified',
     id : 'base:petrified',
-    description: 'Unable to act. DEF -50%',
+    description: 'Unable to use Ability or Reaction Arts. DEF -50%',
     stackable: false,
     blockPoints : -3,
-    traits : TRAIT.AILMENT,
+    traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
       DEF: -50
     ),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is still petrified and unable to act!');
-        return false;
       },
 
       onAffliction ::(from, item, holder) {
@@ -4734,10 +4716,10 @@ Effect.newEntry(
   data : {
     name : 'Crustacean Maneuver',
     id : 'base:crustacean-maneuver',
-    description: 'All incoming attacks are nullified. Holder cannot move while this effect is active.',
+    description: 'All incoming attacks are nullified. Unable to use Ability or Reaction Arts.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.BUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {      
       onPreAttack ::(from, item, holder, attacker, damage) {
@@ -4748,8 +4730,6 @@ Effect.newEntry(
       },
 
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is preparing for incoming damage!');
-        return false;
       },
     }
   }
@@ -5223,15 +5203,13 @@ Effect.newEntry(
   data : {
     name : 'Concentrating',
     id : 'base:concentrating',
-    description: 'Unable to act. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
     stackable: false,
     blockPoints : -3,
-    traits : TRAIT.DEBUFF,
+    traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is concentrating and unable to act!');
-        return false;
       }
     }
   }
