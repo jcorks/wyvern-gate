@@ -250,6 +250,7 @@
 
 @:notifyEffect ::(this, state, isAdding, effectIDs) {
   @:alreadyPosted = {};
+  @needsUpdate = false;
   @:getSummary ::(id) {
     when (alreadyPosted[id] == true) empty;
     alreadyPosted[id] = true;
@@ -259,7 +260,8 @@
     
     @:base = effect.name + (if (counts > 1) "(x"+counts+")" else "");
     when(effectIDs->findIndex(:id) == -1) "   " + base;
-
+    
+    needsUpdate = true;
     when (effectIDs->size == 1)
       (if (isAdding)"++ " else "-- ") + base + ": " + effect.description;
 
@@ -276,6 +278,7 @@
   }
   
   when(lines->size == 0) empty;
+  when(needsUpdate == false) empty;
   
   breakpoint();
   windowEvent.queueDisplay(
@@ -1535,7 +1538,7 @@
       when(_.this.isIncapacitated()) false;
       when(_.canActThisTurn == false) false;
       return _.this.effectStack.getAllByFilter( 
-        ::(value) <- Effect.find(:value.id).hasTraits(:Effect.TRAIT.CAN_USE_EFFECTS)
+        ::(value) <- Effect.find(:value.id).hasTraits(:Effect.TRAIT.CANT_USE_EFFECTS)
       )->size == 0
     },
 
@@ -2489,7 +2492,7 @@
     },
 
     // happens once the dying effect is removed
-    killFinalize::(from) {
+    killFinalize::(from, silent) {
       @:world = import(module:'game_singleton.world.mt');
       @:state = _.state;
       @:this = _.this;
@@ -2514,8 +2517,8 @@
         }
       }
 
-      
-      animateDeath(:this);
+      if (silent != true)
+        animateDeath(:this);
     },
 
       
@@ -2525,7 +2528,7 @@
       state.hp = 0;
       
      when (this.effectStack == empty)
-        this.killFinalize(from);
+        this.killFinalize(from, silent:true);
 
       if (this.effectStack.getAllByFilter(::(value) <- value.id == 'base:dying')->size == 0)
         this.addEffect(from, id:'base:dying', durationTurns:2);

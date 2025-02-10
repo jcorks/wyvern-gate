@@ -491,6 +491,46 @@ Item.database.newEntry(data : {
 
 
 
+Item.database.newEntry(data : {
+  name : "Scroll",
+  id : 'base:scroll',
+  description: 'An enchanted parchment that casts an offensive, basic spell upon use. Only usable in battle.',
+  examine : '',
+  equipType: TYPE.HAND,
+  weight : 1,
+  rarity : 100,
+  basePrice: 1050,
+  tier: 0,
+  levelMinimum : 1,
+  enchantLimit : 0,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  blockPoints : 0,
+  equipMod : StatSet.new(
+  ),
+  useEffects : [
+    'base:cast-spell',
+    'base:consume-item'     
+  ],
+  possibleArts : [],
+  equipEffects : [
+  ],
+  traits : 
+    TRAIT.FRAGILE |
+    TRAIT.MEANT_TO_BE_USED
+  ,
+  onCreate ::(item, creationHint) {
+    @:Arts = import(module:'game_database.arts.mt');
+    @:art = Arts.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAITS.COMMON_ATTACK_SPELL));
+    item.data.spell = art.id;
+    item.name = 'Scroll of ' + art.name;
+  }
+
+})
+
+
+
+
+
 
 
 

@@ -141,10 +141,10 @@ Island.database.newEntry(
     requiredLandmarks : [
       'base:wyvern-gate',
       'base:lost-shrine',
-      'base:town'
+      'base:city'
     ],
     possibleLandmarks : [
-      'base:city',
+      'base:town',
       'base:forest',
       'base:villa',
       'base:mine',
@@ -697,7 +697,6 @@ Island.database.newEntry(
         //if (stepsSinceLastEvent > 200000) ::<= {
         if (state.stepsSinceLastEvent > 20) ::<= {
           if (random.number() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
-            breakpoint();
             this.addEvent(
               event:Event.new(
                 base:random.pickArrayItemWeighted(list:state.possibleEvents->map(
@@ -738,7 +737,6 @@ Island.database.newEntry(
       },
                   
       newInhabitant ::(professionHint, levelHint, speciesHint) {
-        breakpoint();
         @species = 
           if (((state.base.traits & TRAITS.DIVERSE) == 0) && random.try(percentSuccess:95))
             random.pickArrayItemWeighted(list:state.species).species

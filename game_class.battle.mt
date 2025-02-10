@@ -618,7 +618,7 @@
           }
         }
       
-      
+        onFinish = [];
         actions = {} 
         defeated = {};
         onTurn_ = onTurn;
@@ -728,7 +728,8 @@
             onEnd(result);      
             foreach(onFinish) ::(k, v) {
               v(:result);
-            }              
+            }      
+            onFinish = [];        
           }
           result = winningGroup;
           
@@ -967,7 +968,7 @@
       
       entityCommitAction::(action, from) {
         @:entAct = if (from != empty) from else entityTurn;
-      
+        @originalAction = action;
         // failsafe. not normally needed.
         when (!entAct.canActThisTurn())
           endTurn();
@@ -1076,8 +1077,8 @@
 
             reactor.react(
               source: entAct,
-              onReact::(action) {
-                when(action == empty)
+              onReact::(reaction) {
+                when(reaction == empty)
                   tryNext();
                   
                 when(!reactor.canUseReactions())
@@ -1088,8 +1089,8 @@
                   );
 
                   
-                reactor.deck.discardFromHand(:action.card);
-                @art = Arts.find(:action.card.id);
+                reactor.deck.discardFromHand(:reaction.card);
+                @art = Arts.find(:reaction.card.id);
                 
                 
                 windowEvent.queueMessage(
@@ -1102,9 +1103,9 @@
                 @cancel = art.onAction(
                   level: 1,
                   user: reactor,
-                  targets : action.targets,
+                  targets : reaction.targets,
                   targetDefendParts: [0],
-                  targetParts : action.targetParts,
+                  targetParts : reaction.targetParts,
                   turnIndex: 0,
                   extraData : {
                     action: action
@@ -1122,7 +1123,7 @@
                   )
                 }
                 
-                if (cancel->type == Object) ::<= {
+                if (cancel->isa(:Object)) ::<= {
                   windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' transformed ' + entAct.name + '\'s Art!');
                   action = cancel;                
                 }

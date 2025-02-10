@@ -1141,6 +1141,7 @@ import(module:'game_class.landmarkevent_themirror.mt');
 import(module:'game_class.landmarkevent_treasuregolem.mt');
 import(module:'game_class.landmarkevent_thesnakesiren.mt');
 import(module:'game_class.landmarkevent_mimic.mt');
+import(module:'game_class.landmarkevent_slime.mt');
 
 
 

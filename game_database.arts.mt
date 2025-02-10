@@ -68,7 +68,9 @@
   MULTIHIT : 2**12,
   
   CAN_BLOCK : 2**13,
-  ONCE_PER_BATTLE : 2**14
+  ONCE_PER_BATTLE : 2**14,
+  
+  COMMON_ATTACK_SPELL : 2**15
 }
 
 
@@ -2397,12 +2399,12 @@ Arts.newEntry(
     id : 'base:fire',
     notifCommit : '$1 casts Fire on $2!',
     notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.ONEPART,
+    targetMode : TARGET_MODE.ONE,
     description: 'Magick that damages a target with fire based on INT. Additional levels increase its potency.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.FIRE,
+    traits : TRAITS.MAGIC | TRAITS.FIRE | TRAITS.COMMON_ATTACK_SPELL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2476,7 +2478,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.FIRE,
+    traits : TRAITS.MAGIC | TRAITS.FIRE| TRAITS.COMMON_ATTACK_SPELL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2569,7 +2571,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.ICE | TRAITS.MULTIHIT,
+    traits : TRAITS.MAGIC | TRAITS.ICE | TRAITS.MULTIHIT | TRAITS.COMMON_ATTACK_SPELL,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2675,7 +2677,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.FIRE | TRAITS.MULTIHIT,
+    traits : TRAITS.MAGIC | TRAITS.FIRE | TRAITS.MULTIHIT | TRAITS.COMMON_ATTACK_SPELL,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2711,7 +2713,7 @@ Arts.newEntry(
     keywords : ['base:blind'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC,
+    traits : TRAITS.MAGIC | TRAITS.COMMON_ATTACK_SPELL,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2748,7 +2750,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAITS.MAGIC | TRAITS.THUNDER | TRAITS.MULTIHIT,
+    traits : TRAITS.MAGIC | TRAITS.THUNDER | TRAITS.MULTIHIT | TRAITS.COMMON_ATTACK_SPELL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2864,8 +2866,8 @@ Arts.newEntry(
         onEnter :: {
           targets[0].removeEffectsByFilter(
             ::(value) <- 
-              ((Arts.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
-              ((Arts.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
+              ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+              ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
           );
         }
       );
@@ -5029,7 +5031,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickitem = import(:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
-      if (world.party.isMember(:user)) ::<= {
+      if (world.party.leader == user) ::<= {
         pickitem(
           canCancel: false,
           inventory : world.party.inventory,
@@ -5090,7 +5092,7 @@ Arts.newEntry(
 
 
       @:pickitem = import(:'game_function.pickitem.mt');
-      if (world.party.isMember(:user)) ::<= {
+      if (world.party.leader == user) ::<= {
         pickitem(
           canCancel: false,
           keep: false,
@@ -5126,7 +5128,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:pickitem = import(:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
-      if (world.party.isMember(:user)) ::<= {
+      if (world.party.leader == user) ::<= {
         pickitem(
           canCancel: false,
           inventory : world.party.inventory,
@@ -8010,7 +8012,7 @@ Arts.newEntry(
         ("base:paralyzed"): "base:shock",
         ("base:poisoned"): "base:toxic"
       }
-      @:effects = targets[0].getAllByFilter(::(value) <- 
+      @:effects = targets[0].effectStack.getAllByFilter(::(value) <- 
         convert->keys->findIndex(:value.id) != -1
       )->size;
       foreach(effects) ::(k, value) {
@@ -9707,8 +9709,8 @@ Arts.newEntry(
         onEnter :: {
           targets[0].removeEffectsByFilter(
             ::(value) <- 
-              ((Arts.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
-              ((Arts.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
+              ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+              ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
           );
         }
       );

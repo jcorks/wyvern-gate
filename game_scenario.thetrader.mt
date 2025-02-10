@@ -1114,7 +1114,7 @@
         @:animate = import(:'game_function.animatebar.mt');
         @:level = ::{
           @remainingForLevel = state.sellingEXPtoNext - state.sellingEXP;
-          @val = state.settingEXP;
+          @val = state.sellingEXP;
           animate(
             from: state.sellingEXP,
             to:   state.sellingEXP + exp,
@@ -1164,6 +1164,9 @@
 
                 level();
               }
+              
+              state.sellingEXP += exp;
+              
               windowEvent.queueCustom(
                 onEnter :: {
                   onDone();
@@ -1173,76 +1176,16 @@
             
             onGetCaption      ::<- 'Sale rating: ' + rating,
             onGetCoCaption    ::<- 'Selling level: ' + state.sellingLevel,
-            onGetSubcaption   ::<- 'Exp to next level: ' + remainingForLevel - (val - ,
-            onGetSubsubcaption::<-  if (exp >= 0)
-                                    '                  +' + exp
-                                    else
-                                    '                   ' + exp,
+            onGetSubcaption   ::<- 'Exp to next level: ' + (remainingForLevel - (val - state.sellingEXP)),
+            onGetSubsubcaption::<- 
+                                    '                  +' + (exp - (val - state.sellingEXP)),
             onGetLeftWeight::<- 0.5,
             onGetTopWeight::<- 0.5,
-            onNewValue::(value) <- val = value
+            onNewValue::(value) <- val = value->ceil
 
-          )        
-        
-        
-          windowEvent.queueCustom(
-            onEnter ::{},
-            isAnimation: true,
-            /*onInput ::(input) {
-              match(input) {
-                (windowEvent.CURSOR_ACTIONS.CONFIRM,
-                 windowEvent.CURSOR_ACTIONS.CANCEL):
-                exp = 0
-              }
-            },*/
-            animationFrame ::{
-              @remainingForLevel = state.sellingEXPtoNext - state.sellingEXP;
-              canvas.renderTextFrameGeneral(
-                leftWeight: 0.5,
-                topWeight : 0.5,
-                lines : [
-                  'Sale rating: ' + rating,
-                  '',
-                  'Selling level: ' + state.sellingLevel,
-                  canvas.renderBarAsString(width:40, fillFraction: state.sellingEXP / state.sellingEXPtoNext),
-                  'Exp to next level: ' + remainingForLevel,
-                  if (exp >= 0)
-                  '                  +' + exp
-                  else
-                  '                   ' + exp
-                ]
-              );
-              
-
-              
-              @newExp = if (exp < 0) (exp * 0.9)->ceil else (exp*0.9)->floor;
-              @add = exp - newExp;
-              
-              state.sellingEXP += add;
-              exp = newExp;
-              
-              
-              when(exp->abs <= 0) ::<= {
-                windowEvent.queueDisplay(
-                  lines : [
-                    'Sale rating: ' + rating,
-                    '',
-                    'Selling level: ' + state.sellingLevel,
-                    canvas.renderBarAsString(width:40, fillFraction: state.sellingEXP / state.sellingEXPtoNext),
-                    'Exp to next level: ' + remainingForLevel,
-                    ''
-                  ],
-                  skipAnimation: true
-                )
-                
-
-                return windowEvent.ANIMATION_FINISHED
-              }
-            }
-          );
+          )                
         }
         level();
-        
 
       },      
       
@@ -3856,7 +3799,8 @@ return {
           'base:inn',
           'base:school',
           'base:school',
-          'base:blacksmith'      
+          'base:blacksmith'  ,
+          'base:auction-house'    
         ],
         mapHint : {
           roomSize: 30,
@@ -4080,6 +4024,10 @@ return {
       
       onIncrementTime::(location, time) {
       
+      },
+      
+      onStep ::(location, entities) {
+      
       }
     })
   
@@ -4121,7 +4069,11 @@ return {
       
       onIncrementTime::(location) {
 
-      }
+      },
+      onStep ::(location, entities) {
+      
+      },
+
     })
   
   

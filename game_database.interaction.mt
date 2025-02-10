@@ -51,7 +51,7 @@ Interaction.newEntry(
         );
         @:world = import(module:'game_singleton.world.mt');
 
-        match(world.battle.start(
+        world.battle.start(
           party,              
           allies: party.members,
           enemies: [
@@ -59,17 +59,21 @@ Interaction.newEntry(
             location.landmark.island.newInhabitant(professionHint:'base:guard'),
             location.landmark.island.newInhabitant(professionHint:'base:guard'),            
           ]->map(to:::(value){ value.anonymize(); return value;}),
-          landmark: {}
-        ).result) {
-          (Battle.RESULTS.ALLIES_WIN,
-           Battle.RESULTS.NOONE_WIN): ::<= {
-          },
-          
-          (Battle.RESULTS.ENEMIES_WIN): ::<= {
-            @:instance = import(module:'game_singleton.instance.mt');
-            instance.gameOver(reason:'The party was wiped out.');
+          landmark: {},
+          onEnd::(result) {
+            match(result) {
+              (Battle.RESULTS.ALLIES_WIN,
+               Battle.RESULTS.NOONE_WIN): ::<= {
+              },
+              
+              (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                @:instance = import(module:'game_singleton.instance.mt');
+                instance.gameOver(reason:'The party was wiped out.');
+              }
+            }
           }
-        } 
+        )
+         
       }
 
       // jumps to the prev menu lock
@@ -899,7 +903,6 @@ Interaction.newEntry(
         // uh oh, current price is greater than they think its worth 
         // lets check their motivation
         @:doIt = if (diff < 0) ::<= {
-          breakpoint();
           // more outside of the range, the less motivation will work
           @chanceToBid = (auc.motivation * 10)+(diff*2) * 100;
           when(chanceToBid < 0) false;

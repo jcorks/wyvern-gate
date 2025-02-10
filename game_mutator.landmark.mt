@@ -1275,7 +1275,8 @@ Landmark.database.newEntry(
         @:loc = location;
         if (discovered == empty) 
           discovered = false 
-                  
+
+        when (state.map == empty) empty;
         
         @:defaultAdd ::(discovered){
           when (width == empty && height == empty)

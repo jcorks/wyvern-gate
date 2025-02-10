@@ -132,6 +132,7 @@ return ::(
         lines : [
           if (onGetCaption) onGetCaption() else '',
           '',
+          if (onGetCoCaption) onGetCoCaption() else '',
           canvas.renderBarAsString(width:40, fillFraction: (current) / max),
           if (onGetSubcaption) onGetSubcaption() else '',
           if (onGetSubsubcaption) onGetSubsubcaption() else ''

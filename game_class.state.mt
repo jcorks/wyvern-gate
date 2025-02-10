@@ -218,7 +218,8 @@ isTag[TAG__SPARSE_ARRAY] = true;
       }
       {:::} {
         if ((output[key]->keys->filter(::(value) <- value->type == String)->findIndex(:'worldID')) != -1)
-          ALREADY_SERIALIZED[output[key].worldID] = output[key]
+          if (ALREADY_SERIALIZED != empty)
+            ALREADY_SERIALIZED[output[key].worldID] = output[key]
       } : {
         onError::(message) {
           // nuthin
@@ -270,7 +271,7 @@ isTag[TAG__SPARSE_ARRAY] = true;
       if (serialized->size == 0) ::<= {
         if (realWeight != weight0) ::<= {
           h = false;
-          breakpoint();
+          //breakpoint();
         }
       }
       return h;

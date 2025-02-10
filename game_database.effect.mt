@@ -104,7 +104,7 @@ Effect.newEntry(
     events : {
       onDurationEnd::(from, item, holder) {
         when(holder.hp != 0) empty;
-        holder.killFinalize(:from);
+        holder.killFinalize(from);
       }
     }
   }
@@ -876,7 +876,7 @@ Effect.newEntry(
     description: 'Casts an Art from an item.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
     events : {
@@ -894,7 +894,7 @@ Effect.newEntry(
     description: 'Casts Protect',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -916,7 +916,7 @@ Effect.newEntry(
     description: 'Allows the user to evade all attacks for the next turn.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
     events : {
@@ -992,7 +992,7 @@ Effect.newEntry(
     description: 'Heals 1 HP.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
     events : {
@@ -1014,7 +1014,7 @@ Effect.newEntry(
     description: '10% chance to hurt for 1HP.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -1043,7 +1043,7 @@ Effect.newEntry(
     description: '50% chance to give a random status ailment to the holder for 2 turns.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -1078,7 +1078,7 @@ Effect.newEntry(
     description: '10% chance to hurt for 1AP.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
     events : {
@@ -1107,7 +1107,7 @@ Effect.newEntry(
     description: '5% chance to break item.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
     events : {
@@ -1129,7 +1129,7 @@ Effect.newEntry(
     description: 'Casts Spikes',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -1184,7 +1184,7 @@ Effect.newEntry(
     description: 'Slightly recovers AP.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
     events : {
@@ -1205,7 +1205,7 @@ Effect.newEntry(
     description: 'Casts Shield',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -1228,7 +1228,7 @@ Effect.newEntry(
     description: 'Triggers a boost in strength.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -1294,7 +1294,7 @@ Effect.newEntry(
     description: 'Triggers a boost in defense.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -1360,7 +1360,7 @@ Effect.newEntry(
     description: 'Triggers a boost in mental acuity.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -1425,7 +1425,7 @@ Effect.newEntry(
     description: 'Triggers a boost in dexterity.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -1489,7 +1489,7 @@ Effect.newEntry(
     description: 'Triggers a boost in speed.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL ,
+    traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
     events : {
@@ -1837,7 +1837,7 @@ Effect.newEntry(
     description: 'The item is destroyed in the process of its effects',
     stackable: true,
     blockPoints : 0,
-    traits : TRAIT.INSTANTANEOUS,
+    traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1849,6 +1849,90 @@ Effect.newEntry(
     }
   }
 )
+
+
+Effect.newEntry(
+  data : {
+    name : 'Cast Spell',
+    id : 'base:cast-spell',
+    description: 'The item casts a spell when used.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
+    stats: StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        @:Arts = import(:'game_database.arts.mt');
+        @:ArtsDeck = import(:'game_class.artsdeck.mt');
+        @:world = import(module:'game_singleton.world.mt');
+
+        when(item == empty || world.battle == empty) 
+          windowEvent.queueMessage(:'The casting fizzled!');
+
+        if (item.data.spell == empty) ::<= {
+          @:art = Arts.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAITS.COMMON_ATTACK_SPELL));
+          item.data.spell = art.id;        
+        }
+        
+        @:art = Arts.find(:item.data.spell);
+        @:card = ArtsDeck.synthesizeHandCard(id:item.data.spell);
+        
+        
+        @:enemies = random.scrambled(:world.battle.getEnemies(:from))
+        @:commitRandom ::{
+          from.useArt(
+            level: 1,
+            art,
+            targets : 
+              enemies,
+            turnIndex: 0,
+            targetDefendParts :
+              enemies->map(::(value) <- random.integer(from:0, to:2)),
+              
+            targetParts :
+              enemies->map(::(value) <- random.integer(from:0, to:2))
+          );
+        }
+        
+
+        
+        windowEvent.queueNestedResolve(
+          onEnter :: {
+            from.deck.revealArt(
+              user:from,
+              handCard:card,
+              prompt: 'From the power of the ' + item.name + ', ' + from.name + ' casted the spell: ' + art.name + '!'
+            );
+
+            when(world.party.leader == from) ::<= {
+              from.playerUseArt(
+                commitAction::(action) {
+                  from.useArt(
+                    art,
+                    level: 1,
+                    targets: action.targets,
+                    turnIndex: 0,
+                    targetDefendParts :
+                      enemies->map(::(value) <- random.integer(from:0, to:2)),
+                      
+                    targetParts :
+                      action.targets
+                  );
+                },
+                card,
+                canCancel : false
+              );
+            }
+            commitRandom();
+          }
+        );
+
+      }
+    }
+  }
+)
+
+
 
 Effect.newEntry(
   data : {
@@ -3068,7 +3152,7 @@ Effect.newEntry(
     description: 'The item has a chance of being used up',
     stackable: true,
     blockPoints : 0,
-    traits : 0,
+    traits : TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3091,7 +3175,7 @@ Effect.newEntry(
   data : {
     name : 'Bleeding',
     id : 'base:bleeding',
-    description: '-5% total HP every on holder. ATK,DEF,SPD -20%.',
+    description: '-5% total HP every turn on holder. ATK,DEF,SPD -20%.',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.AILMENT,
@@ -4499,7 +4583,7 @@ Effect.newEntry(
         when (random.try(percentSuccess:70)) empty;
 
         when (
-          Arts.find(:holder.deck.deckPile[holder.deck.deckPile->size-1].id).kind == Arts.KIND.REACTION
+          Arts.find(:holder.deck.deckPile[holder.deck.deckPile->size-1]).kind == Arts.KIND.REACTION
         ) empty;
 
         @:card = holder.deck.draw();

@@ -107,7 +107,7 @@
       },
 
       commitTargettedAction::(battle, onCommit, card, condition, overrideTargets) {
-        @:enemies = battle.getEnemies(:user_);
+        @enemies = battle.getEnemies(:user_);
         @:allies = battle.getAllies(:user_);
         @:art = Arts.find(id:card.id);
         @atEnemy = (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE) ||
@@ -119,9 +119,11 @@
           match(art.targetMode) {
             (Arts.TARGET_MODE.ONE,
              Arts.TARGET_MODE.ONEPART) :::<= {
-              if (atEnemy) 
+              if (atEnemy) ::<= {
+                if (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE)
+                  enemies = enemies->filter(::(value) <- value.hp != 0);
                 targets->push(value:Random.pickArrayItem(list:enemies))
-              else 
+              } else 
                 targets->push(value:Random.pickArrayItem(list:allies))
               ;
             },

@@ -365,6 +365,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:wyvern-key');
     addMissing(id:'base:life-crystal');
     addMissing(id:'base:potion', minCount:5);
+    addMissing(id:'base:scroll', minCount:3);
     
     for(location.inventory.items->size, 30 + (location.ownedBy.level / 4)->ceil)::(i) {
       // no weight, as the value scales
