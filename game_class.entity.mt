@@ -2585,7 +2585,8 @@
         name: 'onPostAddEffect',
         from,
         id: id,
-        duration: durationTurns        
+        duration: durationTurns, 
+        effectData : effectData
       );
       
       

@@ -32,6 +32,14 @@ return {
           base: Item.database.find(id:'base:wyvern-key')
         );
 
+        keyhome.setIslandGenTraits(
+          nameHint:'Test Island', 
+          levelHint:6,
+          idHint: 'base:starting-island',
+          tierHint: 0  
+        )
+        
+
         world.loadIsland(key:keyhome, skipSave:true); 
         @:island = world.island;   
     

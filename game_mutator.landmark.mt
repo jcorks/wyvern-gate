@@ -915,7 +915,7 @@ Landmark.database.newEntry(
 
       
 
-
+      breakpoint();
       foreach(base.requiredLocations)::(i, loc) {
         this.addLocation(
           location:Location.new(landmark:this, base:Location.database.find(:loc))
@@ -1274,10 +1274,7 @@ Landmark.database.newEntry(
         location.landmark = this;
         @:loc = location;
         if (discovered == empty) 
-          discovered = false 
-
-        when (state.map == empty) empty;
-        
+          discovered = false         
         @:defaultAdd ::(discovered){
           when (width == empty && height == empty)
             state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered, name:loc.name);

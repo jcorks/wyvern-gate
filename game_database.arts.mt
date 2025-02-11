@@ -1782,7 +1782,7 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user)<- user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
+    baseDamage ::(level, user)<- user.stats.ATK * (0.3) * (1 + (level-1)*0.05) + (level-1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {

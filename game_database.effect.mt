@@ -2544,11 +2544,11 @@ Effect.newEntry(
   data : {
     name : 'Convinced',
     id : 'base:convinced',
-    description: 'The holder is unable to act.',
+    description: 'Convinced by someone or something: the holder is unable to use Abilities.',
     stackable: false,
     stats: StatSet.new(),
     blockPoints : 0,
-    traits : TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS | TRAIT.CANT_USE_EFFECTS,
+    traits : TRAIT.CANT_USE_ABILITIES,
     events : {
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' realizes ' + from.name + "'s argument was complete junk!")
@@ -2757,14 +2757,14 @@ Effect.newEntry(
   data : {
     name : 'Bribed',
     id : 'base:bribed',
-    description: 'Unable to act.',
+    description: 'Unable to use abilities.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.SPECIAL,
+    traits : TRAIT.SPECIAL | TRAIT.CANT_USE_ABILITIES,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' was bribed and can no longer act!');
+        windowEvent.queueMessage(text:holder.name + ' was bribed and can no longer use abilities!');
         return false;
       }
     }
@@ -2993,40 +2993,7 @@ Effect.newEntry(
 )   
 
 
-Effect.newEntry(
-  data : {
-    name : 'Auto-Life',
-    id : 'base:auto-life',
-    description: '50% chance to fully revive if damaged while at 0 HP. This breaks the item.',
-    stackable: true,
-    blockPoints : 0,
-    traits : TRAIT.BUFF | TRAIT.REVIVAL,
-    stats: StatSet.new(),
-    events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
-        if (holder.hp == 0) ::<= {
-          windowEvent.queueMessage(text:holder.name + " glows!");
-          holder.unequipItem(item, silent:true);
-          item.throwOut();            
 
-
-          if (random.try(percentSuccess:50)) ::<= {
-
-            @:Entity = import(module:'game_class.entity.mt');
-          
-            damage.amount = 0;
-            holder.heal(amount:holder.stats.HP);
-
-            windowEvent.queueMessage(text:'The ' + item.name + " shatters after reviving " + holder.name + "!");
-          } else ::<= {
-            windowEvent.queueMessage(text:'The ' + item.name + " failed to revive " + holder.name + "!");
-            
-          }
-        }
-      }
-    }
-  }
-)   
 
 Effect.newEntry(
   data : {
@@ -3046,7 +3013,6 @@ Effect.newEntry(
 
 
           if (random.try(percentSuccess:50)) ::<= {
-
             @:Entity = import(module:'game_class.entity.mt');
           
             damage.amount = 0;
@@ -3565,16 +3531,14 @@ Effect.newEntry(
   data : {
     name : 'Wrapped',
     id : 'base:wrapped',
-    description: 'Can\'t act. Unable to block.',
+    description: 'Unable to use Abilities. Unable to block.',
     stackable: false,
     blockPoints : -3,
-    traits : TRAIT.SPECIAL,
+    traits : TRAIT.SPECIAL | TRAIT.CANT_USE_ABILITIES,
     stats: StatSet.new(
     ),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
-        windowEvent.queueMessage(text:holder.name + ' is still wrapped and unable to act!');
-        return false;
       },
 
       onAffliction ::(from, item, holder) {
@@ -5207,30 +5171,6 @@ Effect.newEntry(
   }
 )
 
-Effect.newEntry(
-  data : {
-    name : 'Soul Split',
-    id : 'base:soul-split',
-    description: 'Splits incoming damage between the holder and caster.',
-    stackable: true,
-    blockPoints : 0,
-    traits : TRAIT.BUFF,
-    stats: StatSet.new(),
-    events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
-        when (from.isIncapacitated()) empty;
-        when (attacker == empty) empty;
-    
-        when(random.try(percentSuccess:75)) empty;
-        damage.amount = 0;
-        windowEvent.queueMessage(text:holder.name + "'s Soul Guard negates the damage!");
-
-        when(random.try(percentSuccess:75)) empty;
-        attacker.addEffect(from, id:'base:paralyzed',durationTurns:999999999);
-      }
-    }
-  }
-)
 
 Effect.newEntry(
   data : {
@@ -5263,13 +5203,15 @@ Effect.newEntry(
   data : {
     name : 'Soul Projection',
     id : 'base:soul-projection',
-    description: 'Original caster receives damage instead of the holder.',
+    description: 'Original caster receives damage instead of the holder. If the holder is the caster, nothing happens.',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage) {
+        when(holder == from) empty;
+
         windowEvent.queueMessage(text:holder.name + "'s Soul Projection redirects damage!");
         from.damage(attacker:attacker, damage:Damage.new(
           amount : damage.amount,
@@ -5683,6 +5625,22 @@ Effect.newEntry(
     }
   }
 )    
+
+
+Effect.newEntry(
+  data : {
+    name : 'Berserk',
+    id : 'base:berserk',
+    description: 'Unable to use Effect and Reaction Arts.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF | TRAIT.CANT_USE_EFFECTS | TRAIT.CANT_USE_REACTIONS,
+    stats: StatSet.new(),
+    events : {
+    }
+  }
+) 
+
 
 
 Effect.newEntry(
