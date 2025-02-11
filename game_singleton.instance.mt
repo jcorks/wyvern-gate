@@ -99,7 +99,7 @@ import(module:'game_mutator.island.mt');
 }
 @:JSON = import(module:'Matte.Core.JSON');
 @:GIT_COMMIT = import(module:'GIT_COMMIT');
-@:VERSION = '0.2.3 - ' + GIT_COMMIT;
+@:VERSION = '0.2.4 - ' + GIT_COMMIT;
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
 

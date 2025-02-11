@@ -1959,7 +1959,7 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.07),
+    baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.07) + (level-1),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -6643,7 +6643,7 @@ Arts.newEntry(
         )
       when(which->size == 0) false;
       
-      return [random.pickArrayItem(:which)];
+      return [random.pickArrayItem(:enemies)];
     },
     kind : KIND.EFFECT,
     traits : TRAITS.SUPPORT | TRAITS.MAGIC,

@@ -85,8 +85,7 @@ instance.mainMenu(
     instance.FEATURES.CRT_SHADER |
     instance.FEATURES.INPUT_MAPPING |
     instance.FEATURES.AUDIO |
-    instance.FEATURES.BGFG |
-    instance.FEATURES.DEBUGGING,
+    instance.FEATURES.BGFG,
 
   onSaveState :::(
     slot,
