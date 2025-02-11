@@ -268,7 +268,6 @@ return {
       filter ::(island, landmark) <- true,
       onSelect::(island, landmark) {
         @:world = import(module:'game_singleton.world.mt');
-        world.party.animateGainGuildEXP(exp:400);
       
         @:instance = import(:'game_singleton.instance.mt')
         instance.optionsMenu();
