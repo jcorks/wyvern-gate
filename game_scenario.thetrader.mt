@@ -3125,7 +3125,9 @@ return {
   name : 'The Trader',
   id : 'rasa:thetrader',
   onBegin ::(data) {
-  
+    windowEvent.queueMessage(
+      text: 'This scenario autosaves on the end of each day. Manual saves will not be possible.'
+    );
   
     @:instance = import(module:'game_singleton.instance.mt');
     @:story = import(module:'game_singleton.story.mt');

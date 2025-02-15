@@ -33,7 +33,7 @@
   DONE : 3
 };
 
-@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch) {
+@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch) <- 
     canvas.renderTextFrameGeneral(
       leftWeight, 
       topWeight, 
@@ -42,7 +42,7 @@
       lines:lines, 
       title:speaker, 
       notchText:if(hasNotch != empty) "(next)" else empty)
-}
+
 
 // Renders a text box using an animation
 @:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch) {
@@ -413,6 +413,8 @@
       //}
       @exitEmpty = false;
 
+      if (data.onInput != empty && input != empty) 
+        data.onInput(:input);
       
       
       if (choice != empty || data.rendered == empty) ::<= {
@@ -422,7 +424,7 @@
         
 
 
-        @:PAGE_SIZE = if (pageAfter == empty) 7 else pageAfter;   
+        @:PAGE_SIZE = if (pageAfter == empty) 7 else pageAfter;
         @:WIDTH = ::<= {
           @max = 0;
           foreach(choices)::(i, text) {
@@ -432,12 +434,17 @@
           if (header != empty)
             if (header->length > max)
               max = header->length;
-              
+
+          if (data.onGetMinWidth != empty) ::<= {
+            @min = data.onGetMinWidth();
+            if (max < min) max = min;
+          }
           return max;
         }
 
         @padCombine = [];
         @:pad::(text) {
+          if (text == empty) text = "";
           padCombine->setSize(size:0);
           padCombine->push(value:text);
           for(text->length, WIDTH) ::(i) {
@@ -527,7 +534,16 @@
             choicesModified->push(value:'   '+header);
             choicesModified->push(value:'');
           }
-          for(0, choices->keycount)::(index) {
+
+          @count = choices->size;
+          if (data.onGetMinHeight != empty) ::<= {
+            @:out = data.onGetMinHeight();
+            if (count < out)
+              count = out;
+          }
+
+
+          for(0, count)::(index) {
             choicesModified->push(value: 
               (if (cursorPos == index) '-{ ' else '   ') + 
               pad(text:choices[index]) + 
@@ -1501,7 +1517,9 @@
         leftWeight, 
         topWeight, 
         maxWidth,
-        maxHeight,        
+        maxHeight, 
+        onGetMinWidth,
+        onGetMinHeight,       
         canCancel, 
         defaultChoice, 
         onChoice => Function, 
@@ -1517,7 +1535,8 @@
         onCancel, 
         pageAfter, 
         hideWindow,
-        horizontalFlow
+        horizontalFlow,
+        onInput
       ) {
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
@@ -1543,7 +1562,10 @@
             jumpTag : jumpTag,
             header : header,
             onGetHeader : onGetHeader,
-            horizontalFlow : horizontalFlow
+            horizontalFlow : horizontalFlow,
+            onInput : onInput,
+            onGetMinHeight : onGetMinHeight,
+            onGetMinWidth : onGetMinWidth
           });
         }]);
         return getResolveQueue()->size-1;

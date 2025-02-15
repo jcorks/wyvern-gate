@@ -2899,13 +2899,6 @@
           match(art.targetMode) {
             (Arts.TARGET_MODE.ONE,
              Arts.TARGET_MODE.ONEPART): ::<={
-              @:all = [
-                ...enemies,
-                ...allies
-              ];
-              
-              
-              @:allNames = [...all]->map(to:::(value)<- value.name);
               
               @:chooseOnePart ::(onDone) {
                 @:text = 
@@ -2962,21 +2955,36 @@
                 );
               }
               
-              windowEvent.queueChoices(
+              @:tabbedChoices = import(:'game_function.tabbedchoices.mt');
+              @:choices = [
+                [...enemies],
+                [...allies]
+              ];
+
+              @:choiceNames = [
+                 [...(enemies->map(to:::(value)<- value.name))],
+                 [...(allies-> map(to:::(value)<- value.name))]
+              ]              
+              
+
+              
+              tabbedChoices(
                 leftWeight: 1,
                 topWeight: 1,
-                prompt: 'Against whom?',
-                choices: allNames,
+                onGetTabs ::<- ['Enemies', 'Allies'],
+                onGetChoices::<- choiceNames,
                 canCancel: if (canCancel == empty) true else canCancel,
-                onChoice::(choice) {
+                onChoice::(choice, tab) {
                   when(choice == 0) empty;
+                  
+                  
                   
                   if (art.targetMode == Arts.TARGET_MODE.ONEPART) ::<= {
                     chooseOnePart(onDone::(which){
                       battleAction = BattleAction.new(
                         card,
                         turnIndex : 0,
-                        targets: [all[choice-1]],
+                        targets: [choices[tab][choice-1]],
                         targetParts: [which],
                         extraData: {}
                       )
@@ -2985,7 +2993,7 @@
                     battleAction = BattleAction.new(
                       card,
                       turnIndex : 0,
-                      targets: [all[choice-1]],
+                      targets: [choices[tab][choice-1]],
                       targetParts: [Entity.normalizedDamageTarget()],
                       extraData: {}
                     )

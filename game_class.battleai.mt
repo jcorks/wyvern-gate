@@ -32,7 +32,9 @@
     @:Entity = import(module:'game_class.entity.mt');        
 
     @:defaultAttack = ::(onCommit, battle){
-      @:enemies = battle.getEnemies(:user_);
+      @enemies = battle.getEnemies(:user_)->filter(::(value) <- value.isIncapacitated() == false);
+      if (enemies->len == 0)
+        enemies = battle.getEnemies(:user_);
 
       onCommit(:BattleAction.new(
         card: ArtsDeck.synthesizeHandCard(id:'base:attack'),

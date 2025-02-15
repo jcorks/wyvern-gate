@@ -501,6 +501,43 @@ return class(
           this.updateSettings();
         }
 
+/*
+import(:'game_function.tabbedchoices.mt')(
+  onGetTabs ::<- [
+    'Enemies',
+    'Allies',
+    'other',
+    "otherot"
+  ],
+  keep : true,
+  canCancel : false,
+  onGetChoices::(tab) <-
+    [
+      [
+        'the Rat Alchemist',
+        'the Hyena Ranger'
+      ],
+
+      [
+        'Baphy',
+        'Herald',
+        'Rasa'
+      ]
+    ]
+    
+  ,
+
+  onChoice::(tab, choice) {
+    windowEvent.queueMessage(
+      text: 'Chosen was ' + choice + ' from tab ' + tab
+    )
+  }
+);
+
+windowEvent.queueMessage(
+  text: 'hi'
+);
+*/
 
 /*
 @:otherChoices ::{
@@ -576,7 +613,6 @@ windowEvent.queueCustom(
 
 return empty;
 */
-
 
 
 

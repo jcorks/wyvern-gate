@@ -73,16 +73,16 @@ return ::(
           keep: true,
           onChoice ::(choice) {
           when(choice == 0) empty;            
-          commitAction(action:BattleAction.new(
-              card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
-              targets: [all[choice-1]],
-              extraData : [choiceItem],
-              turnIndex : 0,
-              targetParts : []
-            ) 
-          );              
-          if (windowEvent.canJumpToTag(name:'Item'))
-            windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+            commitAction(action:BattleAction.new(
+                card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
+                targets: [all[choice-1]],
+                extraData : [choiceItem],
+                turnIndex : 0,
+                targetParts : []
+              ) 
+            );              
+            if (windowEvent.canJumpToTag(name:'Item'))
+              windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
 
           }
         );
