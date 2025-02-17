@@ -27,7 +27,6 @@
 return ::(
   user,
   party,
-  enemies,
   renderable,
   onAct => Function,
   inBattle => Boolean,
@@ -44,69 +43,118 @@ return ::(
   @:choiceNames = [];
   @:choices = [];
   @choiceItem;
+  @:world = import(:'game_singleton.world.mt');
   
   choiceNames->push(value:'Use');
   choices->push(value::{
     match(choiceItem.base.useTargetHint) {
       (Item.USE_TARGET_HINT.ONE): ::<={
-        @:all = [];
-        foreach(party.members)::(index, ally) {
-          all->push(value:ally);
+        @:commit ::(who) {
+          commitAction(action:BattleAction.new(
+              card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
+              targets: [who],
+              extraData : [choiceItem],
+              turnIndex : 0,
+              targetParts : []
+            ) 
+          );              
+          if (windowEvent.canJumpToTag(name:'Item'))
+            windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+        
         }
-        foreach(enemies)::(index, enemy) {
-          all->push(value:enemy);
+      
+      
+        when (inBattle == false) ::<= {
+      
+          @:all = [];
+          foreach(party.members)::(index, ally) {
+            all->push(value:ally);
+          }
+          
+          
+          @:allNames = [];
+          foreach(all)::(index, person) {
+            allNames->push(value:person.name);
+          }
+          
+          
+          @choice = windowEvent.queueChoices(
+            leftWeight: if (leftWeight == empty) 1 else leftWeight,
+            topWeight: if (topWeight == empty) 1 else topWeight,
+            prompt: 'On whom?',
+            choices: allNames,
+            canCancel: true,
+            keep: true,
+            onChoice ::(choice) {
+              when(choice == 0) empty;            
+              commit(:all[choice-1]);
+            }
+          );        
         }
         
+        // in battle variant
+        @:all = [
+          [...world.battle.getEnemies(:user)],
+          [...world.battle.getAllies(:user)]
+        ]
         
-        @:allNames = [];
-        foreach(all)::(index, person) {
-          allNames->push(value:person.name);
-        }
-        
-        
-        @choice = windowEvent.queueChoices(
+        @:allNames = [
+          [...(world.battle.getEnemies(:user)->map(::(value) <- value.name))],
+          [...(world.battle.getAllies (:user)->map(::(value) <- value.name))]        
+        ]
+
+
+
+        @:tabbedChoices = import(:'game_function.tabbedchoices.mt');
+        @choice = tabbedChoices(
           leftWeight: if (leftWeight == empty) 1 else leftWeight,
           topWeight: if (topWeight == empty) 1 else topWeight,
-          prompt: 'On whom?',
-          choices: allNames,
+          onGetTabs::<- [
+            'Enemies',
+            'Allies'
+          ],
+          onGetChoices::<- allNames,
           canCancel: true,
           keep: true,
-          onChoice ::(choice) {
-          when(choice == 0) empty;            
-            commitAction(action:BattleAction.new(
-                card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
-                targets: [all[choice-1]],
-                extraData : [choiceItem],
-                turnIndex : 0,
-                targetParts : []
-              ) 
-            );              
-            if (windowEvent.canJumpToTag(name:'Item'))
-              windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
-
+          onChoice ::(choice, tab) {
+            when(choice == 0) empty;            
+            commit(:all[tab][choice-1]);
           }
         );
-        
+            
   
       },
       
       (Item.USE_TARGET_HINT.GROUP): ::<={
+      
+        @enemies
+        @choices    
+        @allies;    
+        if (inBattle) ::<= {
+          choices = [
+            'Allies',
+            'Enemies'
+          ]
+          enemies = world.battle.getEnemies(:user);
+          allies  = world.battle.getAllies(:user)
+        } else ::<= {
+          choices = ['Allies'];
+          allies = party.members;
+        }
+      
         @choice = windowEvent.queueChoices(
           leftWeight: if (leftWeight == empty) 1 else leftWeight,
           topWeight: if (topWeight == empty) 1 else topWeight,
           prompt: 'On whom?',
-          choices: [
-          'Allies',
-          'Enemies'
-          ],
+          choices,
           canCancel: true,
           keep : true,
           onChoice ::(choice) {
          
           when(choice == 0) empty;                          
-          commitAction(action:BattleAction.new(
+            commitAction(action:BattleAction.new(
               card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
-              targets: if (choice == 1) party.members else enemies,
+              targets: if (choice == 1) allies else enemies,
               extraData : [choiceItem],
               turnIndex : 0,
               targetParts : []
@@ -120,6 +168,10 @@ return ::(
       },
 
       (Item.USE_TARGET_HINT.ALL): ::<= {
+        @enemies = [];
+        if (inBattle) ::<= {
+          enemies = world.battle.getEnemies(:user)
+        }
         commitAction(action:BattleAction.new(
             card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
             targets: [...party.members, ...enemies],

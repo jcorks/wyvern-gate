@@ -1263,7 +1263,7 @@
         //@:words = text->split(token:' ');
         
 
-        return this.queueDisplay(
+        this.queueDisplay(
           leftWeight, topWeight,
           maxWidth,
           maxHeight,

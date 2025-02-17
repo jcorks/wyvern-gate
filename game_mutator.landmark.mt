@@ -268,6 +268,7 @@ Landmark.database.newEntry(
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
       {id: 'base:fountain', rarity:18},
+      {id: 'base:escape', rarity:18},
       {id: 'base:potion-shop', rarity: 25},
       {id: 'base:wyvern-statue', rarity: 20},
       {id: 'base:small-chest', rarity: 16},
@@ -344,6 +345,7 @@ Landmark.database.newEntry(
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
       {id: 'base:fountain', rarity:18},
+      {id: 'base:escape', rarity:18},
       {id: 'base:potion-shop', rarity: 25},
       {id: 'base:wyvern-statue', rarity: 20},
       {id: 'base:small-chest', rarity: 16},

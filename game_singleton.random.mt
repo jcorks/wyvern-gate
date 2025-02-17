@@ -74,6 +74,7 @@ return class(
         
         // Returns the next rng number 0 through 1
         next::{
+          breakpoint();
           if (index == SEED_COUNT) ::<= {
             interface.twist();
           }

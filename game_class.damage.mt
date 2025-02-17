@@ -18,14 +18,14 @@
 @:class = import(module:'Matte.Core.Class');
 
 @:TYPE = {
-  NEUTRAL  : 0,
-   FIRE     : 1,
-   THUNDER  : 2,
-   ICE      : 3,
-  LIGHT    : 4,
-  DARK     : 5,
-  PHYS     : 6,
-  POISON   : 7
+  NEUTRAL  : 0, //<- The Guide 
+   FIRE     : 1,//<- The Flame
+   THUNDER  : 2,//<- The Column
+   ICE      : 3,//<- The Crystal
+  LIGHT    : 4, //<- The Soul
+  DARK     : 5, //<- The Vessel
+  PHYS     : 6, //<- The Obelisk
+  POISON   : 7  //<- The Sigil
 }
 
 @:CLASS = {

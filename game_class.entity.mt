@@ -51,6 +51,16 @@
   ITEM : 2,
   PLACE : 3
 }
+@:STARSIGN_NAMES = [
+  "The Guide",
+  "The Flame",
+  "The Column",
+  "The Crystal",
+  "The Soul",
+  "The Vessel",
+  "The Obelisk",
+  "The Omen"
+]
 
 
 
@@ -771,7 +781,8 @@
     innateEffects : empty,
     professionProgress : empty,
     opinions : empty,
-    recentOpinions : empty
+    recentOpinions : empty,
+    affinity : -1
   },
   
   private : {
@@ -790,7 +801,8 @@
     initialize ::{
       if (none == empty) none = Item.NONE;
       @:this = _.this;
-      _.state.battleAI = BattleAI.new(user:this);        
+      _.state.battleAI = BattleAI.new(user:this); 
+      @:state = _.state;
     },
       
     
@@ -801,6 +813,7 @@
       @:this = _.this;
 
       state.innateEffects = innateEffects;
+      state.affinity = random.pickArrayItem(:Damage.TYPE->values);
       
       state.worldID = world.getNextID();
       state.deckTemplates = {
@@ -970,6 +983,9 @@
       @:state = _.state;
       @:this = _.this;
       state.battleAI.setUser(user:this);
+      if (state.affinity == -1)
+        state.affinity = random.pickArrayItem(:Damage.TYPE->values)       
+
     },
 
     worldID : {
@@ -3388,13 +3404,14 @@
           
         pageAfter:canvas.height-4,
         set: [ 
-          '     Name:   ' + this.name + '\n\n' +
-          '     HP:     ' + this.hp + ' / ' + this.stats.HP + '\n' + 
-          '     AP:     ' + this.stats.AP + '\n\n' + 
-          '  Species:   ' + state.species.name + '\n' +
+          '       Name: ' + this.name + '\n\n' +
+          '         HP: ' + this.hp + ' / ' + this.stats.HP + '\n' + 
+          '         AP: ' + this.stats.AP + '\n\n' + 
+          '    Species: ' + state.species.name + '\n' +
           ' Profession: ' + this.profession.name + '\n' +
           ' Fave. wep.: ' + state.faveWeapon.name + '\n' +
-          'Personality: ' + state.personality.name + '\n\n'
+          'Personality: ' + state.personality.name + '\n' +
+          '   Starsign: ' + '"' + STARSIGN_NAMES[state.affinity] + '"\n\n' 
           ,
           
           if (excludeStats != true)

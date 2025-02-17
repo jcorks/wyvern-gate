@@ -2045,6 +2045,40 @@ Interaction.newEntry(
 )  
 
 
+
+
+
+Interaction.newEntry(
+  data : {
+    name : 'Esccape',
+    id :  'base:escape',
+    keepInteractionMenu : false,
+    onInteract ::(location, party) {
+      windowEvent.queueMessage(
+        text: 'This looks like it leads back to the entrance.'
+      );
+      windowEvent.queueAskBoolean(
+        prompt: 'Leave the area?',
+        canCancel: true,
+        onChoice::(which) {
+          when (which == false) empty;
+          
+          windowEvent.queueCustom(
+            onEnter::{
+              @:instance = import(module:'game_singleton.instance.mt');
+              instance.visitCurrentIsland();             
+            }
+          )        
+        }
+      )
+    },
+  }
+)  
+
+
+
+
+
 Interaction.newEntry(
   data : {
     name : 'Next Floor?',
@@ -2551,7 +2585,7 @@ Interaction.newEntry(
               }
                           
               
-              @choice = windowEvent.queueChoices(
+              windowEvent.queueChoices(
                 prompt: 'Bet how much?',
                 choices: [...bets]->map(to:::(value) <- g(g:value)),
                 canCancel: true,
@@ -2562,7 +2596,7 @@ Interaction.newEntry(
                   when(party.inventory.gold < bet)
                     windowEvent.queueMessage(text:'The party cannot afford this bet.');
                     
-                  choice = windowEvent.queueChoices(
+                  windowEvent.queueChoices(
                     prompt: 'Bet on which team?',
                     choices: [
                       teamA.name + '(payout: +' + (payout(isTeamA:true)) + ')',

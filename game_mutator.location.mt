@@ -1115,6 +1115,52 @@ Location.database.newEntry(data:{
   }
 })
 
+Location.database.newEntry(data:{
+  name: 'Escape Duct',
+  id: 'base:escape',
+  rarity: 1000000000000,
+  ownVerb : '',
+  symbol: '|',
+  category : CATEGORY.EXIT,
+  onePerLandmark : false,
+  minStructureSize : 1,
+
+  descriptions: [
+    "A tunnel leading back to the entrance.",
+  ],
+  interactions : [
+    'base:escape',
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  
+  onFirstInteract ::(location) {},
+  onInteract ::(location) {
+    return true;
+  },
+  
+  onCreate ::(location) {
+    /*
+    if (location.landmark.island.tier > 1) 
+      if (random.flipCoin()) ::<= {
+        location.lockWithPressurePlate();
+      }
+    */
+  },
+  onStep ::(location, entities) {
+  
+  },
+  
+  onIncrementTime::(location, time) {
+  
+  }
+})
 
 
 Location.database.newEntry(data:{
@@ -2016,6 +2062,12 @@ Location.database.newEntry(data:{
     location.inventory.add(item:
       Item.new(
         base:Item.database.find(id:'base:perfect-arts-crystal')
+      )
+    );    
+
+    location.inventory.add(item:
+      Item.new(
+        base:Item.database.find(id:'base:wyvern-key')
       )
     );    
 

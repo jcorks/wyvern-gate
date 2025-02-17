@@ -189,7 +189,7 @@ return {
         @:itemmenu = import(module:'game_function.itemmenu.mt');
         @:enemies = battle.getEnemies(entity:user);
 
-        itemmenu(inBattle:true, user, party:world.party, enemies, onAct::(action){
+        itemmenu(inBattle:true, user, party:world.party, onAct::(action){
           when(user.canUseEffects() == false) 
             windowEvent.queueMessage(
               text: 'This cannot be used right now.'
@@ -470,7 +470,6 @@ return {
           inBattle: false,
           user:firstAwake, 
           party:world.party, 
-          enemies:[],
           limitedMenu:true,
           topWeight:0.5,
           leftWeight:0.5,

@@ -33,7 +33,7 @@
 
     @:defaultAttack = ::(onCommit, battle){
       @enemies = battle.getEnemies(:user_)->filter(::(value) <- value.isIncapacitated() == false);
-      if (enemies->len == 0)
+      if (enemies->size == 0)
         enemies = battle.getEnemies(:user_);
 
       onCommit(:BattleAction.new(

@@ -3216,8 +3216,12 @@ Item.database.newEntry(data : {
     onCreate ::(item, user, creationHint) {
       @:world = import(module:'game_singleton.world.mt');
       @:Island = import(:'game_mutator.island.mt');
-
       @tier = if (world != empty && world.island != empty) world.island.tier + random.integer(from:1, to:4) else 0;
+
+      if (creationHint->type == Object) ::<= {
+        if (creationHint.tier->type == Number) 
+          tier = creationHint.tier
+      }
       breakpoint();
 
       @:story = import(:'game_singleton.story.mt');
@@ -3233,7 +3237,7 @@ Item.database.newEntry(data : {
   })  
 }
 
-none = Item.new(base:Item.database.find(id:'base:none'))
+none = Item.new(base:Item.database.find(id:'base:none'), artsHint : [])
 none.name = 'None';
 }
 
@@ -3502,7 +3506,7 @@ none.name = 'None';
       @:state = _.state;
       @:world = import(module:'game_singleton.world.mt');
       @:tier = if (world.island) world.island.tier else 1;
-
+      state.base = base;      
       state.worldID = world.getNextID();
       state.enchants = []; // ItemMod
       state.equipEffects = [];
@@ -3522,7 +3526,7 @@ none.name = 'None';
       state.stats.add(stats:base.equipMod);
       state.price = base.basePrice;
       state.price *= 1.05 * state.base.weight;
-      state.improvementsLeft = random.integer(from:10, to:25);
+      state.improvementsLeft = if (base.id == 'base:none') 0 else random.integer(from:10, to:25);
       state.improvements = 0;
       state.improvementEXP = 0;
       state.data = {};

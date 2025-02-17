@@ -1418,6 +1418,7 @@ for(0, 20) ::(i) {
 
           // the standard set
           {id: 'base:fountain', rarity:18},
+          {id: 'base:escape', rarity:18},
           {id: 'base:potion-shop', rarity: 20},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
@@ -1488,6 +1489,7 @@ for(0, 20) ::(i) {
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
+          {id: 'base:escape', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
@@ -1559,6 +1561,7 @@ for(0, 20) ::(i) {
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
+          {id: 'base:escape', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
@@ -1636,6 +1639,7 @@ for(0, 20) ::(i) {
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
+          {id: 'base:escape', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
@@ -3243,6 +3247,9 @@ for(0, 20) ::(i) {
           ['Kaedjaal', 'There are many with their own goals and ambitions, and some will be more skilled than you currently are.'],
           ['Kaedjaal', 'The special Key which you have received... I will give you another where you may find the next shrine.'],
           ['', 'The party received The Wyvern Key of Ice.'],     
+          ['Kaedjaal', 'Oh! Actually, I\'d like you to have this other key as well, as a thanks for agreeing to start this journey.'],
+          ['', 'The party received a normal key.'],     
+          ['Kaedjaal', 'Visiting other mortal islands can help you find more to help you along your journey... But, it may be treacherous. Be prepared.'],
           ['Kaedjaal', 'Ah, one more thing. Let me impart some knowledge to you, as a prize for getting this far'],
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
@@ -3265,10 +3272,20 @@ for(0, 20) ::(i) {
             location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
             @:world = import(module:'game_singleton.world.mt');
             world.scenario.data.fireWyvernDefeated = true;
-            @:keyother = Item.new(
+            @keyother = Item.new(
               base: Item.database.find(id:'thechosen:wyvern-key-of-ice')
             );
             world.party.inventory.add(:keyother);
+
+            keyother = Item.new(
+              base: Item.database.find(id:'thechosen:wyvern-key'),
+              creationHint : {
+                tier : 1
+              }
+            );
+            world.party.inventory.add(:keyother);
+
+
             windowEvent.queueMessage(
               renderable:{render::{canvas.blackout();}},
               text: 'You are teleported away...'

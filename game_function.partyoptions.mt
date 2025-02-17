@@ -319,7 +319,7 @@ return ::{
                 windowEvent.queueMessage(text: member.name + ' is already the leader.');
               } else ::<= {
                 party.leader = member;
-                windowEvent.queueMessage(text: member.name + ' is now the leader. If they die, all will be lost.');
+                windowEvent.queueMessage(text: member.name + ' is now the leader.');
               }
             },
 

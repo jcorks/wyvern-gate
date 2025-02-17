@@ -1866,8 +1866,8 @@ Effect.newEntry(
         @:ArtsDeck = import(:'game_class.artsdeck.mt');
         @:world = import(module:'game_singleton.world.mt');
 
-        when(item == empty || world.battle == empty) 
-          windowEvent.queueMessage(:'The casting fizzled!');
+        when(item == empty || holder.battle == empty) 
+          windowEvent.queueMessage(text:'The casting fizzled!');
 
         if (item.data.spell == empty) ::<= {
           @:art = Arts.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAITS.COMMON_ATTACK_SPELL));
