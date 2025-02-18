@@ -2822,18 +2822,80 @@ Interaction.newEntry(
             
             windowEvent.queueMessage(text:'After the 3rd item, the chest shines brightly.');
             windowEvent.queueMessage(text:'Something is rising out...');
+
+            // spin the wheel for a prize! Possibilities:
+            // Tablet (10%)
+            // Weapon with x3 nice enchants (42%)
+            // Armor/clothing with x3 nice enchants (42%)
+            // Ring with x3 nice enchantments(5%)
+            // Life Crystal with x3 nice enchantments(1%)
+          @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+
+            @:get3positiveEffects ::{
+              @:out = [];
+              for(0, 3) ::(i) {
+                out->push(:ItemEnchant.getRandomFiltered(::(value) <-
+                  value.hasNoTraits(:ItemEnchant.TRAIT.SPECIAL) &&
+                  value.priceMod > 0
+                ).id);
+              }
+              return out;
+            }
             
-            @:item = Item.new(
-              base:Item.database.getRandomFiltered(
-                filter:::(value) <- 
-                  value.hasTraits(:
-                    Item.TRAIT.CAN_HAVE_ENCHANTMENTS
-                  ) && value.hasNoTrait(:
-                    Item.TRAIT.UNIQUE
-                  ) && value.tier <= world.island.tier+2
-              ),
-              rngEnchantHint:true
-            );
+            @:item = random.pickArrayItemWeighted(:[
+              {
+                rarity: 10,
+                item : Item.new(
+                  base:Item.database.find(:'base:tablet')                
+                )
+              },
+              
+              {
+                rarity: 42,
+                item : Item.new(
+                  base:Item.database.getRandomFiltered(::(value) <- 
+                    value.equipType == Item.TYPE.HAND &&
+                    value.hasTraits(:
+                      Item.TRAIT.METAL |
+                      Item.TRAIT.CAN_HAVE_ENCHANTMENTS
+                    ) && value.hasNoTrait(:Item.TRAIT.FRAGILE)             
+                  ),
+                  
+                  enchantHint : get3positiveEffects()
+                )
+              },
+                        
+              {
+                rarity: 42,
+                item : Item.new(
+                  base:Item.database.getRandomFiltered(::(value) <- 
+                    value.equipType == Item.TYPE.ARMOR &&
+                    value.hasTraits(:
+                      Item.TRAIT.CAN_HAVE_ENCHANTMENTS
+                    ) && value.hasNoTrait(:Item.TRAIT.FRAGILE)             
+                  ),
+                  
+                  enchantHint : get3positiveEffects()
+                )
+              },
+
+              {
+                rarity: 5,
+                item : Item.new(
+                  base:Item.database.find(:'base:ring'),
+                  enchantHint : get3positiveEffects()
+                )
+              },
+
+              {
+                rarity: 1,
+                item : Item.new(
+                  base:Item.database.find(:'base:life-crystal'),
+                  enchantHint : get3positiveEffects()
+                )
+              },
+            
+            ]);
             @message = 'The party received ' + correctA(word:item.name);
             windowEvent.queueMessage(text: message);
 

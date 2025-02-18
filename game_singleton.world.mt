@@ -58,7 +58,7 @@
 @:STEPS_PER_TURN = 60;
 @:TURNS_PER_HOUR = 20;
 @:HOURS_PER_DAY  = 14;
-@:DAYS_PER_YEAR  = 100;
+@:DAYS_PER_YEAR  = 80; // match starsign, one for each 10 days
 
 
 @:ACCOLADE_LIST = {
@@ -232,7 +232,7 @@
             qualityHint: 'base:masterwork',
             materialHint: 'base:mythril',
             colorHint: 'base:gold',
-            enchantHint: 'base:aura-gold',
+            enchantHint: ['base:aura-gold'],
             forceEnchant: true
           );
           fausWeapon.maxOut();
@@ -244,7 +244,7 @@
             colorHint: 'base:black',
             apparelHint: 'base:mythril',
             forceEnchant: true,
-            enchantHint: 'base:inlet-opal'      
+            enchantHint: ['base:inlet-opal']
           );
           fausRobe.maxOut();
 

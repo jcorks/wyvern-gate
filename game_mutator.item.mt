@@ -3608,10 +3608,12 @@ none.name = 'None';
 
       
       if (base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)) ::<= {
-        if (enchantHint != empty) ::<= {
-          this.addEnchant(mod:ItemEnchant.new(
-            base:ItemEnchant.database.find(id:enchantHint)
-          ));
+        when (enchantHint != empty) ::<= {
+          foreach(enchantHint) ::(k, v) {
+            this.addEnchant(mod:ItemEnchant.new(
+              base:ItemEnchant.database.find(id:enchantHint)
+            ));
+          }
         }
 
         
