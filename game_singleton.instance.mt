@@ -92,6 +92,7 @@ import(module:'game_mutator.island.mt');
 
 
 
+
 @:distance::(x0, y0, x1, y1) {
   @xd = x1 - x0;
   @yd = y1 - y0;
@@ -489,8 +490,8 @@ return class(
         features_ = features;
         canvas.resize(width:canvasWidth, height:canvasHeight);
         this.onSaveState = onSaveState;
-        this.onLoadState = onLoadState;        
-
+        this.onLoadState = onLoadState;    
+        
         onSaveSettings_ = onSaveSettings;
         settings = onLoadSettings();
         if (settings == empty) ::<= {
@@ -884,7 +885,9 @@ return empty;
           
           
           choiceNames->push(value: 'Exit');
-          choiceActions->push(value ::<- onQuit());  
+          choiceActions->push(value ::{
+            onQuit()
+          });  
           return choiceNames;      
         }
 

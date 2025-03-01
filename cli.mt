@@ -91,12 +91,41 @@ canvas.onCommit = ::(lines, renderNow){
   return val;   
 }
 
+@:printMacro ::{
+  @:macro = windowEvent.getMacro();
+  when(macro == empty) empty;
+  breakpoint();
+  print(:'\n\n[');
+  foreach(macro) ::(k, v) {
+    print(:'  {input: windowEvent.CURSOR_ACTIONS.' + 
+      (
+        match(v.input) {
+          (windowEvent.CURSOR_ACTIONS.LEFT): 'LEFT',
+          (windowEvent.CURSOR_ACTIONS.UP): 'UP',
+          (windowEvent.CURSOR_ACTIONS.RIGHT): 'RIGHT',
+          (windowEvent.CURSOR_ACTIONS.DOWN): 'DOWN',
+          (windowEvent.CURSOR_ACTIONS.CONFIRM): 'CONFIRM',
+          (windowEvent.CURSOR_ACTIONS.CANCEL): 'CANCEL',
+          default: '???'
+        }
+      ) + ', waitFrames: ' +
+      (
+        v.waitFrames
+      ) + '},'
+    );
+  }
+  print(:']');
+}
+
 @LOOP_DONE = false;
 @:mainLoop = ::{
   // standard event loop
   {:::} {
     forever ::{
-      when(LOOP_DONE) send();
+      when(LOOP_DONE) ::<= {
+        printMacro();
+        send();
+      }
       
       @val = pollInput();
       windowEvent.commitInput(input:val);

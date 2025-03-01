@@ -118,6 +118,7 @@ ItemQuality.newEntry(
 )
 
 
+
 ItemQuality.newEntry(
   data : {
     name : 'Quality',
@@ -263,6 +264,30 @@ ItemQuality.newEntry(
     useEffects : []
   }
 )
+
+
+ItemQuality.newEntry(
+  data : {
+    name : 'Heavy',
+    id : 'base:heavy',
+    description : 'It\'s quite heavy compared to what you would expect.',
+    equipMod : StatSet.new(
+      DEF: 50,
+      ATK: 60,
+      SPD:-30,
+      DEX:-30
+    ),
+    pricePercentMod: 50,
+    levelMinimum : 1,
+    equipEffects : [
+    ],
+    
+    rarity: 20,
+    
+    useEffects : []
+  }
+)
+
 
 ItemQuality.newEntry(
   data : {

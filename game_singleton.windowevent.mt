@@ -139,6 +139,8 @@
     @autoSkipIndex = empty;
     @autoSkipAnimations = false;
     @queuedInputs = [];
+    @record;
+    @lastRecordFrames;
     
     resolveQueues->push(:{
       onResolveAll : {},
@@ -325,6 +327,18 @@
     }
     
     @:commitInput ::(input, level) {
+      if (record != empty) ::<= {
+        if (input != empty) ::<= {
+          record->push(:{
+            input : input,
+            waitFrames : lastRecordFrames
+          });
+          lastRecordFrames = 0;
+        } else ::<= {
+          lastRecordFrames += 1;
+        }
+      }
+    
       input = queuedInputFetch(input);
       @continue; 
       @val;
@@ -1785,6 +1799,16 @@
       hasAnyQueued:: {
         return getResolveQueue()->size != 0;
       },
+      
+      // records inputs.
+      // Use getMacro() to fetch the recorded inputs.
+      // The inputs are in the style of queueInputEvents() arguments.
+      recordMacro ::{
+        record = [];
+        lastRecordFrames = 0;
+      },
+      
+      getMacro ::<- record,
       
       // universally skips animations that come through 
       // normal paths.
