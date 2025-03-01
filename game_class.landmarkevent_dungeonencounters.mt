@@ -149,8 +149,7 @@
   
         if (!world.battle.isActive &&
           entities->keycount < recCount && 
-          state.encountersOnFloor < state.maxEncounters && 
-          landmark_.base.peaceful == false && 
+          state.encountersOnFloor < state.maxEncounters &&
             (   
               state.isBusy 
                 || 

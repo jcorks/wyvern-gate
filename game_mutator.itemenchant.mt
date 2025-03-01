@@ -39,7 +39,7 @@
   'almost always'
 ];
 
-@:TRAITS = {
+@:TRAIT = {
     SPECIAL : 1
 }
 
@@ -71,7 +71,7 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : TRAITS.SPECIAL
+    traits : TRAIT.SPECIAL
   }
 )
 /*
@@ -1750,6 +1750,9 @@ ItemEnchant.database.newEntry(
 
 @:ItemEnchant = databaseItemMutatorClass.create(
   name : 'Wyvern.ItemEnchant',
+  statics : {
+    TRAIT : {get::<- TRAIT}
+  },
   items : {
     condition : empty,
     conditionChance : 0,
@@ -1797,9 +1800,9 @@ ItemEnchant.database.newEntry(
         
         if (base.id == 'base:art') ::<= {
           state.artID = Arts.getRandomFiltered(::(value) <- 
-            (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
+            (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
             (value.kind != Arts.KIND.REACTION) &&
-            (value.traits & Arts.TRAITS.SPECIAL) == 0
+            (value.traits & Arts.TRAIT.SPECIAL) == 0
           ).id;   
         }
         

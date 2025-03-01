@@ -384,7 +384,7 @@ for(0, 20) ::(i) {
     
     for(0, 5) ::(i) {
       @:prof = Profession.getRandomFiltered(::(value) <- 
-        ((value.traits & Profession.TRAITS.NON_COMBAT) == 0) && 
+        ((value.traits & Profession.TRAIT.NON_COMBAT) == 0) && 
         value.learnable &&
         chosenProfs[value.id] != true
       ).id;
@@ -915,8 +915,8 @@ for(0, 20) ::(i) {
       );
     }
     
-    dump(filename: 'arts_core.csv', filter::(value) <- (value.traits & Arts.TRAITS.SUPPORT) == 0)
-    dump(filename: 'arts_supports.csv', filter::(value) <- (value.traits & Arts.TRAITS.SUPPORT) > 0)
+    dump(filename: 'arts_core.csv', filter::(value) <- (value.traits & Arts.TRAIT.SUPPORT) == 0)
+    dump(filename: 'arts_supports.csv', filter::(value) <- (value.traits & Arts.TRAIT.SUPPORT) > 0)
     */
     ///////////////////
     
@@ -1340,6 +1340,7 @@ for(0, 20) ::(i) {
     
     @:Landmark = import(module:'game_mutator.landmark.mt');
     @:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
+    @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 
 
     Landmark.database.newEntry(
@@ -1348,18 +1349,20 @@ for(0, 20) ::(i) {
         id: 'thechosen:shrine-lost-floor',
         symbol : 'M',
         legendName: 'Shrine',
-        rarity : 100000,    
-        isUnique : true,
+        rarity : 100000,  
+        traits : 
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.PEACEFUL |
+          Landmark.TRAIT.EPHEMERAL |
+          Landmark.TRAIT.POINT_OF_NO_RETURN,
+        minEvents : 0,
+        maxEvents : 0,
+        eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
         minLocations : 2,
         maxLocations : 2,
-        peaceful: true,
-        guarded : false,
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : false,
-        pointOfNoReturn : true,
-        ephemeral : true,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        requiredEvents : [
         ],
         possibleLocations : [
           {id: 'base:small-chest', rarity:3},
@@ -1393,25 +1396,21 @@ for(0, 20) ::(i) {
         legendName: 'Shrine',
         symbol : 'M',
         rarity : 100000,    
-        isUnique : true,
         minLocations : 1,
         maxLocations : 3,
-        peaceful: false,
-        guarded : false,
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : false,
-        pointOfNoReturn : true,
-        ephemeral : true,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        traits : 
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.POINT_OF_NO_RETURN |
+          Landmark.TRAIT.EPHEMERAL,
+
+        minEvents : 0,
+        maxEvents : 2,
+        eventPreference : LandmarkEvent.KIND.HOSTILE,
+
+        requiredEvents : [
           'base:dungeon-encounters',
-          'base:item-specter',
-          'base:the-beast',
-          'base:treasure-golem',
-          'base:cave-bat',
-          'base:funny-tiles',
-          'base:mimic',
-          'base:slimequeen'
+          'base:item-specter'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1465,26 +1464,22 @@ for(0, 20) ::(i) {
         legendName: 'Shrine',
         symbol : 'M',
         rarity : 100000,    
-        isUnique : true,
         minLocations : 1,
         maxLocations : 4,
-        peaceful: false,
-        guarded : false,
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : false,
-        pointOfNoReturn : true,
-        ephemeral : true,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        traits : 
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.POINT_OF_NO_RETURN |
+          Landmark.TRAIT.EPHEMERAL,
+
+        minEvents : 1,
+        maxEvents : 3,
+        eventPreference : LandmarkEvent.KIND.HOSTILE,
+
+
+        requiredEvents : [
           'base:dungeon-encounters',
           'base:item-specter',
-          'base:the-beast',
-          'base:the-mirror',
-          'base:treasure-golem',
-          'base:cave-bat',
-          'base:funny-tiles',
-          'base:mimic',
-          'base:slimequeen'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1537,26 +1532,21 @@ for(0, 20) ::(i) {
         symbol : 'M',
         legendName: 'Shrine',
         rarity : 100000,    
-        isUnique : true,
         minLocations : 2,
         maxLocations : 4,
-        peaceful: false,
-        guarded : false,
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : false,
-        pointOfNoReturn : true,
-        ephemeral : true,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        traits : 
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.POINT_OF_NO_RETURN |
+          Landmark.TRAIT.EPHEMERAL,
+
+        minEvents : 1,
+        maxEvents : 3,
+        eventPreference : LandmarkEvent.KIND.HOSTILE,
+
+        requiredEvents : [
           'base:dungeon-encounters',
           'base:item-specter',
-          'base:the-beast',
-          'base:the-mirror',
-          'base:treasure-golem',
-          'base:cave-bat',
-          'base:funny-tiles',
-          'base:mimic',
-          'base:slimequeen'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1615,26 +1605,23 @@ for(0, 20) ::(i) {
         symbol : 'M',
         legendName: 'Shrine',
         rarity : 100000,    
-        isUnique : true,
         minLocations : 2,
         maxLocations : 4,
-        peaceful: false,
-        guarded : false,
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : false,
-        pointOfNoReturn : true,
-        ephemeral : true,
-        dungeonForceEntrance: false,
-        startingEvents : [
+
+        traits : 
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.POINT_OF_NO_RETURN |
+          Landmark.TRAIT.EPHEMERAL,
+
+        minEvents : 1,
+        maxEvents : 5,
+        eventPreference : LandmarkEvent.KIND.HOSTILE,
+
+
+        requiredEvents : [
           'base:dungeon-encounters',
-          'base:item-specter',
-          'base:the-beast',
-          'base:the-mirror',
-          'base:treasure-golem',
-          'base:cave-bat',
-          'base:funny-tiles',
-          'base:mimic',
-          'base:slimequeen'
+          'base:item-specter'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -1694,17 +1681,20 @@ for(0, 20) ::(i) {
         legendName: '???',
         symbol : 'M',
         rarity : 1,    
-        isUnique : true,
         minLocations : 2,
         maxLocations : 2,
-        guarded : false,
-        peaceful: true,
+        traits : 
+          Landmark.TRAIT.UNIQUE   |
+          Landmark.TRAIT.PEACEFUL |
+          Landmark.TRAIT.EPHEMERAL,
+
+        minEvents : 0,
+        maxEvents : 0,
+        eventPreference : LandmarkEvent.KIND.PEACEFUL,
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : true,
-        pointOfNoReturn : false,
-        ephemeral : false,
-        dungeonForceEntrance: false,
-        startingEvents : [
+
+        
+        requiredEvents : [
         ],
         possibleLocations : [
         ],
@@ -1742,17 +1732,20 @@ for(0, 20) ::(i) {
         legendName: '???',
         symbol : 'M',
         rarity : 1,    
-        isUnique : true,
         minLocations : 2,
         maxLocations : 2,
-        guarded : false,
-        peaceful: true,
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : true,
-        pointOfNoReturn : false,
-        ephemeral : false,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        traits : 
+          Landmark.TRAIT.UNIQUE   |
+          Landmark.TRAIT.PEACEFUL |
+          Landmark.TRAIT.EPHEMERAL,
+
+        minEvents : 0,
+        maxEvents : 0,
+        eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+
+        requiredEvents : [
         ],
         possibleLocations : [
         ],
@@ -1788,18 +1781,19 @@ for(0, 20) ::(i) {
         legendName: '???',
         symbol : 'M',
         rarity : 1,    
-        isUnique : true,
         minLocations : 2,
         maxLocations : 2,
-        guarded : false,
-        peaceful: true,
-        
-        canSave : true,
         landmarkType : Landmark.TYPE.DUNGEON,
-        pointOfNoReturn : false,
-        ephemeral : false,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        traits : 
+          Landmark.TRAIT.UNIQUE   |
+          Landmark.TRAIT.PEACEFUL |
+          Landmark.TRAIT.EPHEMERAL,
+
+        minEvents : 0,
+        maxEvents : 0,
+        eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+        requiredEvents : [
         ],
         possibleLocations : [
         ],
@@ -1836,18 +1830,19 @@ for(0, 20) ::(i) {
         legendName: '???',
         symbol : 'M',
         rarity : 1,    
-        isUnique : true,
         minLocations : 2,
         maxLocations : 2,
-        guarded : false,
-        peaceful: true,
-        
-        canSave : true,
         landmarkType : Landmark.TYPE.DUNGEON,
-        pointOfNoReturn : false,
-        ephemeral : false,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        traits : 
+          Landmark.TRAIT.UNIQUE   |
+          Landmark.TRAIT.PEACEFUL |
+          Landmark.TRAIT.EPHEMERAL,
+
+        minEvents : 0,
+        maxEvents : 0,
+        eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+        requiredEvents : [
         ],
         possibleLocations : [
         ],
@@ -2466,17 +2461,21 @@ for(0, 20) ::(i) {
         symbol : 'M',
         legendName: 'Shrine',
         rarity : 100000,    
-        isUnique : true,
         minLocations : 0,
         maxLocations : 4,
-        peaceful: false,
-        guarded : false,
+
+        traits : 
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.POINT_OF_NO_RETURN |
+          Landmark.TRAIT.EPHEMERAL,
+
+        minEvents : 1,
+        maxEvents : 6,
+        eventPreference : LandmarkEvent.KIND.HOSTILE,
+
+
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : false,
-        pointOfNoReturn : true,
-        ephemeral : true,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        requiredEvents : [
           'base:damned-souls',
         ],
         possibleLocations : [
@@ -2528,15 +2527,19 @@ for(0, 20) ::(i) {
         rarity : 100000,
         minLocations : 0,
         maxLocations : 0,
-        isUnique : true,
-        peaceful : true,
+        traits : 
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.POINT_OF_NO_RETURN |
+          Landmark.TRAIT.PEACEFUL,
+
+        minEvents : 0,
+        maxEvents : 0,
+        eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+
+
         landmarkType : Landmark.TYPE.CUSTOM,
-        dungeonForceEntrance: false,
-        guarded : false,
-        canSave : false,
-        pointOfNoReturn : true,
-        ephemeral : false,
-        startingEvents : [],
+        requiredEvents : [],
         possibleLocations : [
         ],
         requiredLocations : [
@@ -3096,8 +3099,8 @@ for(0, 20) ::(i) {
       @:arts = [];
       for(0, ARTS_COUNT) ::(i) {
         @:art = Arts.getRandomFiltered(::(value) <- 
-          (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
-          ((value.traits & Arts.TRAITS.SPECIAL) == 0) &&
+          (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
+          ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
           (value.rarity >= Arts.RARITY.RARE)
         );
         arts->push(:art.id);
@@ -4524,7 +4527,7 @@ for(0, 20) ::(i) {
           '▒', '▒', '▒', '▒', '▒'
         ],
         
-        traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,
+        traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,
         
         overrideSpecies : empty,
         overrideNativeCreatures : empty,
@@ -4555,7 +4558,7 @@ for(0, 20) ::(i) {
           '_', '-', '~', '-', '-'
         ],
         
-        traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,
+        traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,
         
         overrideSpecies : empty,
         overrideNativeCreatures : empty,
@@ -4587,7 +4590,7 @@ for(0, 20) ::(i) {
           '▒', '▒', '▒', '▒', '▒'
         ],
         
-        traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,
+        traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,
         
         overrideSpecies : empty,
         overrideNativeCreatures : empty,
@@ -4618,7 +4621,7 @@ for(0, 20) ::(i) {
           '^', '^', '^', '^', '^'
         ],
         
-        traits : Island.TRAITS.DIVERSE | Island.TRAITS.SPECIAL,
+        traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,
         
         overrideSpecies : empty,
         overrideNativeCreatures : empty,
@@ -4650,7 +4653,7 @@ for(0, 20) ::(i) {
       swarms : false,
       canBlock : true,
       
-      traits : Species.TRAITS.SPECIAL,
+      traits : Species.TRAIT.SPECIAL,
       passives : [
         'base:the-wyvern'
       ]
@@ -4676,7 +4679,7 @@ for(0, 20) ::(i) {
       swarms : false,
       canBlock : true,
       
-      traits : Species.TRAITS.SPECIAL,
+      traits : Species.TRAIT.SPECIAL,
       passives : [
         'base:icy',
         'base:the-wyvern'
@@ -4704,7 +4707,7 @@ for(0, 20) ::(i) {
       swarms : false,
       canBlock : true,
       
-      traits : Species.TRAITS.SPECIAL,
+      traits : Species.TRAIT.SPECIAL,
       passives : [
         'base:shock',
         'base:the-wyvern'
@@ -4732,7 +4735,7 @@ for(0, 20) ::(i) {
       swarms : false,
       canBlock : true,
       
-      traits : Species.TRAITS.SPECIAL,
+      traits : Species.TRAIT.SPECIAL,
       passives : [
         'base:shimmering',
         'base:the-wyvern'
@@ -4743,7 +4746,7 @@ for(0, 20) ::(i) {
 
     Profession.newEntry(data:{
       name: 'Wyvern of Fire',
-      traits: Profession.TRAITS.NON_COMBAT,
+      traits: Profession.TRAIT.NON_COMBAT,
       id:'thechosen:wyvern-of-fire',
       weaponAffinity: 'base:none',
       description : "", 
@@ -4779,7 +4782,7 @@ for(0, 20) ::(i) {
     Profession.newEntry(data:{
       name: 'Wyvern of Ice',
       id : 'thechosen:wyvern-of-ice',
-      traits: Profession.TRAITS.NON_COMBAT,
+      traits: Profession.TRAIT.NON_COMBAT,
       weaponAffinity: 'base:none',
       description : "", 
       levelMinimum : 100,
@@ -4814,7 +4817,7 @@ for(0, 20) ::(i) {
     Profession.newEntry(data:{
       name: 'Wyvern of Thunder',
       id : 'thechosen:wyvern-of-thunder',
-      traits: Profession.TRAITS.NON_COMBAT,
+      traits: Profession.TRAIT.NON_COMBAT,
       weaponAffinity: 'base:none',
       description : "", 
       levelMinimum : 100,
@@ -4852,7 +4855,7 @@ for(0, 20) ::(i) {
       name: 'Wyvern of Light',
       id : 'thechosen:wyvern-of-light',
       weaponAffinity: 'base:none',
-      traits: Profession.TRAITS.NON_COMBAT,
+      traits: Profession.TRAIT.NON_COMBAT,
       description : "", 
       levelMinimum : 100,
 

@@ -35,6 +35,7 @@ return ::{
   stats.ATK = 10;
   stats.HP = 6;
   self.stats.load(:stats);
+  self.heal(amount:99999, silent:true);
   
   
   @:target = world.island.newInhabitant(

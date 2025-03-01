@@ -37,7 +37,7 @@
 
 */
 
-@:TRAITS = {
+@:TRAIT = {
   NON_COMBAT : 1,
   PACIFIST : 2, // only waits.
 }
@@ -258,7 +258,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Blacksmith',
   id : 'base:blacksmith',
-  traits : TRAITS.NON_COMBAT,
+  traits : TRAIT.NON_COMBAT,
   weaponAffinity: 'base:smithing-hammer',
   description : 'Skilled with metalworking, their skills are revered.', 
   growth: StatSet.new(
@@ -289,7 +289,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Trader',
   id : 'base:trader',
-  traits : TRAITS.NON_COMBAT,
+  traits : TRAIT.NON_COMBAT,
   weaponAffinity: 'base:dagger',
   description : 'A silver tongue and a quick hand make this profession both lauded and loathed.', 
   growth: StatSet.new(
@@ -531,7 +531,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Farmer',
   id : 'base:farmer',
-  traits : TRAITS.NON_COMBAT,
+  traits : TRAIT.NON_COMBAT,
   weaponAffinity: 'base:shovel',
   description : "Skilled individual who knows their way around the fields.", 
   growth: StatSet.new(
@@ -562,7 +562,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Alchemist',
   id : 'base:alchemist',
-  traits : TRAITS.NON_COMBAT,
+  traits : TRAIT.NON_COMBAT,
   weaponAffinity: 'base:dagger',
   description : "Skilled at brewing potions for all sorts of purposes.", 
   growth: StatSet.new(
@@ -1061,7 +1061,7 @@ Profession.newEntry(data:{
 Profession.newEntry(data:{
   name: 'Defensive Pylon',
   id : 'base:defensive-pylon',
-  traits : TRAITS.PACIFIST,
+  traits : TRAIT.PACIFIST,
   weaponAffinity: 'base:knuckle',
   description : "", 
   levelMinimum : 100,
@@ -1465,7 +1465,7 @@ Profession.newEntry(data:{
 @:Profession = Database.new(
   name : 'Wyvern.Profession.Base',  
   statics : {
-    TRAITS : {get ::<- TRAITS}
+    TRAIT : {get ::<- TRAIT}
   }, 
   attributes : {
     name : String,

@@ -7,7 +7,11 @@
 
 
 
-
+@:KIND = {
+  HOSTILE : 1,
+  PEACEFUL : 2,
+  NEUTRAL : 3
+}
 
 
 
@@ -16,6 +20,8 @@
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:item-specter',
+    kind : KIND.HOSTILE,
+    tier : 0,
     startup ::(parent) {
       @:ItemSpecter = import(module:'game_class.landmarkevent_itemspecter.mt');
       @:a = ItemSpecter.new(parent);
@@ -39,6 +45,8 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:dungeon-encounters',
+    kind : KIND.HOSTILE,
+    tier : 0,
     startup ::(parent) {
       @:DungeonEncounters = import(module:'game_class.landmarkevent_dungeonencounters.mt');
       // TODO: make dungeon encounters loadable
@@ -64,6 +72,8 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:the-beast',
+    kind : KIND.HOSTILE,
+    tier : 1,
     startup ::(parent) {
       @:b = import(module:'game_class.landmarkevent_thebeast.mt');
       @:a = b.new(parent);
@@ -88,6 +98,8 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:the-mirror',
+    kind : KIND.HOSTILE,
+    tier : 3,
     startup ::(parent) {
       @:b = import(module:'game_class.landmarkevent_themirror.mt');
       @:a = b.new(parent);
@@ -112,6 +124,8 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:treasure-golem',
+    tier : 1,
+    kind : KIND.HOSTILE,
     startup ::(parent) {
       @:b = import(module:'game_class.landmarkevent_treasuregolem.mt');
       @:a = b.new(parent);
@@ -136,6 +150,8 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:mimic',
+    kind : KIND.HOSTILE,
+    tier : 1,
     startup ::(parent) {
       @:b = import(module:'game_class.landmarkevent_mimic.mt');
       @:a = b.new(parent);
@@ -167,6 +183,8 @@ LandmarkEvent.database.newEntry(
       @:a = b.new(parent);
       return a;
     },
+    kind : KIND.HOSTILE,
+    tier : 1,
 
     onIncrementTime ::(data, landmark) {
     
@@ -194,6 +212,8 @@ LandmarkEvent.database.newEntry(
       @:a = b.new(parent);
       return a;
     },
+    kind : KIND.HOSTILE,
+    tier : 0,
 
 
     onIncrementTime ::(data, landmark) {
@@ -219,6 +239,8 @@ LandmarkEvent.database.newEntry(
       @:a = b.new(parent);
       return a;
     },
+    kind : KIND.HOSTILE,
+    tier : 2,
 
     onIncrementTime ::(data, landmark) {
     
@@ -239,6 +261,8 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:funny-tiles',
+    kind : KIND.HOSTILE ,
+    tier : 0,
     startup ::(parent) {
       when(random.try(percentSuccess:85)) empty;
     
@@ -298,6 +322,10 @@ LandmarkEvent.database.newEntry(
 // controllers of landmarks.
 @:LandmarkEvent = databaseItemMutatorClass.create(
   name : 'Wyvern.LandmarkEvent',
+  
+  statics : {
+    KIND : {get ::<- KIND}
+  },
   items : {
     data : empty // maintained  
   },
@@ -308,6 +336,8 @@ LandmarkEvent.database.newEntry(
       id : String,
       startup : Function,
       onStep : Function,
+      tier : Number,
+      kind : Number,
       onIncrementTime : Function,
       isActive : Function
     },

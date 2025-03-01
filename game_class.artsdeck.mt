@@ -101,7 +101,7 @@
   @out = '';
   @val = art.traits;
   
-  foreach(Arts.TRAITS) ::(k, val) {
+  foreach(Arts.TRAIT) ::(k, val) {
     if (art.traits & val)
       out = out + (if (out == '') 
         Arts.traitToString(:val)

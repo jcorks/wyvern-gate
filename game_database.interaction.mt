@@ -1526,8 +1526,8 @@ Interaction.newEntry(
         
         for(0, 15)::(i) {
           location.data.arts->push(:Arts.getRandomFiltered(::(value) <-
-            value.hasNoTrait(:Arts.TRAITS.SPECIAL) &&
-            value.hasTraits(:Arts.TRAITS.SUPPORT)
+            value.hasNoTrait(:Arts.TRAIT.SPECIAL) &&
+            value.hasTraits(:Arts.TRAIT.SUPPORT)
           ).id);
         }
       }
@@ -2353,7 +2353,7 @@ Interaction.newEntry(
           
           @:whom = party.members[choice-1];
           @cost = 
-            if ((whom.profession.traits & Profession.TRAITS.NON_COMBAT) != 0)
+            if ((whom.profession.traits & Profession.TRAIT.NON_COMBAT) != 0)
               5*((whom.level + whom.stats.sum/30)*10)->ceil //<- real skills take a bit to teach
             else
               ((whom.level + whom.stats.sum/30)*10)->ceil
@@ -2372,7 +2372,7 @@ Interaction.newEntry(
           );
 
 
-          if ((location.ownedBy.profession.traits & Profession.TRAITS.NON_COMBAT) != 0)
+          if ((location.ownedBy.profession.traits & Profession.TRAIT.NON_COMBAT) != 0)
             windowEvent.queueMessage(
               text: 'Since ' + location.ownedBy.profession.name + ' is a non-combat profession, this school will teach ' + whom.name + ' all the profession Arts immediately. However, this will cost more to teach than other professions.'
             );
@@ -2408,7 +2408,7 @@ Interaction.newEntry(
                   );                
 
                   
-                  if ((location.ownedBy.profession.traits & Profession.TRAITS.NON_COMBAT) != 0) ::<= {
+                  if ((location.ownedBy.profession.traits & Profession.TRAIT.NON_COMBAT) != 0) ::<= {
                     for(0, profession.arts->size) ::(i) {
                       whom.autoLevelProfession(:profession);                      
                     }

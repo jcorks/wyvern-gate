@@ -367,7 +367,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:potion', minCount:5);
     addMissing(id:'base:scroll', minCount:3);
     
-    for(location.inventory.items->size, 30 + (location.ownedBy.level / 4)->ceil)::(i) {
+    for(location.inventory.items->size, 40 + (location.ownedBy.level / 4)->ceil)::(i) {
       // no weight, as the value scales
       location.inventory.add(item:
         Item.new(
@@ -629,8 +629,8 @@ Location.database.newEntry(data:{
         
       for(items->size, 15)::(i) {
         location.data.arts->push(:Arts.getRandomFiltered(::(value) <-
-          value.hasNoTrait(:Arts.TRAITS.SPECIAL) &&
-          value.hasTraits(:Arts.TRAITS.SUPPORT)
+          value.hasNoTrait(:Arts.TRAIT.SPECIAL) &&
+          value.hasTraits(:Arts.TRAIT.SUPPORT)
 
         ).id);
       }          

@@ -39,12 +39,22 @@
   CUSTOM : 2
 };
 
+@:TRAIT = {
+  UNIQUE : 1,
+  PEACEFUL : 2,
+  DUNGEON_FORCE_ENTRANCE: 4,
+  EPHEMERAL: 8,
+  CAN_SAVE : 16,
+  POINT_OF_NO_RETURN : 32,
+  GUARDED : 64
+}
+
 
 @:reset ::{
 
 @:DungeonMap = import(module:'game_singleton.dungeonmap.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
-
+@:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 
 Landmark.database.newEntry(
   data: {
@@ -55,15 +65,16 @@ Landmark.database.newEntry(
     rarity : 100000,
     minLocations : 7,
     maxLocations : 15,
-    isUnique : false,
-    peaceful : true,
+    minEvents : 0,
+    maxEvents : 3,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
     landmarkType : TYPE.STRUCTURE,
-    dungeonForceEntrance: false,
-    guarded : true,
-    canSave : true,
-    pointOfNoReturn : false,
-    ephemeral : false,
-    startingEvents : [],
+    traits : 
+      TRAIT.GUARDED |
+      TRAIT.CAN_SAVE |
+      TRAIT.PEACEFUL,
+
+    requiredEvents : [],
     possibleLocations : [
       {id:'base:home', rarity: 1},
       //{id:'guild', rarity: 25}
@@ -103,16 +114,17 @@ Landmark.database.newEntry(
     symbol : '|',
     rarity : 5,
     minLocations : 12,
-    isUnique : false,
     maxLocations : 17,
-    peaceful : true,
-    guarded : true,
+    traits : 
+      TRAIT.PEACEFUL |
+      TRAIT.GUARDED |
+      TRAIT.CAN_SAVE,
+    minEvents : 2,
+    maxEvents : 6,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
     landmarkType : TYPE.STRUCTURE,
-    canSave : true,
-    pointOfNoReturn : false,
-    ephemeral : false,
-    dungeonForceEntrance: false,
-    startingEvents : [],
+    requiredEvents : [],
     possibleLocations : [
       {id:'base:home', rarity: 1},
       //{id:'inn', rarity: 3},
@@ -159,16 +171,18 @@ Landmark.database.newEntry(
     symbol : 'O',
     rarity : 5,
     minLocations : 10,
-    isUnique : false,
     maxLocations : 15,
-    peaceful : true,
-    guarded : false,
+    minEvents : 0,
+    maxEvents : 0,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+    traits : 
+      TRAIT.PEACEFUL |
+      TRAIT.CAN_SAVE |
+      TRAIT.DUNGEON_FORCE_ENTRANCE,
+
     landmarkType : TYPE.DUNGEON,
-    canSave : true,
-    pointOfNoReturn : false,
-    ephemeral : false,
-    dungeonForceEntrance: true,
-    startingEvents : [],
+    requiredEvents : [],
     possibleLocations : [
       {id:'base:ore-vein', rarity: 1},
       //{id:'inn', rarity: 3},
@@ -202,17 +216,20 @@ Landmark.database.newEntry(
     legendName: 'Gate',
     symbol : '@',
     rarity : 10,
-    isUnique : true,
     minLocations : 4,
     maxLocations : 10,
-    peaceful : true,
-    guarded : false,
+    minEvents : 0,
+    maxEvents : 0,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+    traits : 
+      TRAIT.UNIQUE |
+      TRAIT.PEACEFUL |
+      TRAIT.CAN_SAVE |
+      TRAIT.DUNGEON_FORCE_ENTRANCE,
+
     landmarkType : TYPE.DUNGEON,
-    canSave : true,
-    pointOfNoReturn : false,
-    ephemeral : false,
-    dungeonForceEntrance: true,
-    startingEvents : [],
+    requiredEvents : [],
     possibleLocations : [
 
     ],
@@ -244,26 +261,19 @@ Landmark.database.newEntry(
     symbol : 'M',
     legendName: 'Shrine',
     rarity : 100000,    
-    isUnique : true,
     minLocations : 0,
     maxLocations : 4,
-    peaceful: false,
-    guarded : false,
+    traits : 
+      TRAIT.UNIQUE |
+      TRAIT.POINT_OF_NO_RETURN |
+      TRAIT.EPHEMERAL,
+    minEvents : 1,
+    maxEvents : 7,
+    eventPreference : LandmarkEvent.KIND.HOSTILE,
+
     landmarkType : TYPE.DUNGEON,
-    canSave : false,
-    pointOfNoReturn : true,
-    ephemeral : true,
-    dungeonForceEntrance: false,
-    startingEvents : [
+    requiredEvents : [
       'base:dungeon-encounters',
-      'base:item-specter',
-      'base:the-beast',
-      'base:the-mirror',
-      'base:treasure-golem',
-      'base:cave-bat',
-      'base:funny-tiles',
-      'base:mimic',
-      'base:slimequeen'
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
@@ -321,26 +331,19 @@ Landmark.database.newEntry(
     symbol : 'M',
     legendName: 'Shrine',
     rarity : 100000,    
-    isUnique : true,
     minLocations : 2,
     maxLocations : 4,
-    peaceful: false,
-    guarded : false,
+    traits :
+      TRAIT.UNIQUE |
+      TRAIT.POINT_OF_NO_RETURN |
+      TRAIT.EPHEMERAL,
+    minEvents : 1,
+    maxEvents : 7,
+    eventPreference : LandmarkEvent.KIND.HOSTILE,
+
     landmarkType : TYPE.DUNGEON,
-    canSave : false,
-    pointOfNoReturn : true,
-    ephemeral : true,
-    dungeonForceEntrance: false,
-    startingEvents : [
-      'base:dungeon-encounters',
-      'base:item-specter',
-      'base:the-beast',
-      'base:the-mirror',
-      'base:treasure-golem',
-      'base:cave-bat',
-      'base:funny-tiles',
-      'base:mimic',
-      'base:slimequeen'
+    requiredEvents : [
+      'base:dungeon-encounters'
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
@@ -391,17 +394,20 @@ Landmark.database.newEntry(
     symbol : 'M',
     legendName: 'Shrine',
     rarity : 100000,    
-    isUnique : true,
     minLocations : 2,
     maxLocations : 2,
-    peaceful: true,
-    guarded : false,
+    minEvents : 0,
+    maxEvents : 0,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+    traits : 
+      TRAIT.UNIQUE |
+      TRAIT.PEACEFUL |
+      TRAIT.POINT_OF_NO_RETURN |
+      TRAIT.EPHEMERAL,
+
     landmarkType : TYPE.DUNGEON,
-    canSave : false,
-    pointOfNoReturn : true,
-    ephemeral : true,
-    dungeonForceEntrance: false,
-    startingEvents : [
+    requiredEvents : [
     ],
     possibleLocations : [
       {id: 'base:small-chest', rarity:3},
@@ -435,17 +441,17 @@ Landmark.database.newEntry(
     legendName: 'T. Room',
     symbol : 'O',
     rarity : 5,    
-    isUnique : true,
     minLocations : 1,
     maxLocations : 5,
-    guarded : false,
-    peaceful: true,
+    traits : 
+      TRAIT.UNIQUE |
+      TRAIT.PEACEFUL,
+    minEvents : 0,
+    maxEvents : 0,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
     landmarkType : TYPE.DUNGEON,
-    canSave : false,
-    pointOfNoReturn : false,
-    ephemeral : false,
-    dungeonForceEntrance: false,
-    startingEvents : [
+    requiredEvents : [
     ],
     possibleLocations : [
       {id: 'base:small-chest', rarity:5},
@@ -488,15 +494,17 @@ Landmark.database.newEntry(
     symbol : '~',
     minLocations : 3,
     maxLocations : 10,
-    peaceful: true,
-    isUnique : false,
     landmarkType : TYPE.STRUCTURE,
-    guarded : true,
-    canSave : true,
-    pointOfNoReturn : false,
-    ephemeral : false,
-    dungeonForceEntrance: true,
-    startingEvents : [
+    traits : 
+      TRAIT.PEACEFUL |
+      TRAIT.GUARDED |
+      TRAIT.CAN_SAVE |
+      TRAIT.DUNGEON_FORCE_ENTRANCE,
+    minEvents : 0,
+    maxEvents : 3,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+    requiredEvents : [
     ],
     possibleLocations : [
       {id:'base:home', rarity:5},
@@ -529,16 +537,16 @@ Landmark.database.newEntry(
     legendName: 'Village',
     rarity : 5,        
     symbol : '*',
-    peaceful: true,
     minLocations : 3,
     maxLocations : 7,
-    isUnique : false,
     landmarkType : TYPE.STRUCTURE,
-    canSave : true,
-    pointOfNoReturn : false,
-    ephemeral : false,
-    dungeonForceEntrance: false,
-    guarded : false,
+    traits :
+      TRAIT.PEACEFUL |
+      TRAIT.CAN_SAVE,
+    minEvents : 0,
+    maxEvents : 3,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+      
     possibleLocations : [
       {id:'base:home', rarity:1},
       {id:'base:tavern', rarity:7},
@@ -551,7 +559,7 @@ Landmark.database.newEntry(
       'base:home',
       'base:school'    
     ],
-    startingEvents : [
+    requiredEvents : [
     ],
     mapHint : {
       roomSize: 25,
@@ -573,22 +581,22 @@ Landmark.database.newEntry(
     legendName: 'Villa',
     symbol : '=',
     rarity : 20,
-    peaceful: true,        
-    isUnique : false,
     landmarkType : TYPE.STRUCTURE,
-    canSave : true,
-    pointOfNoReturn : false,
-    ephemeral : false,
-    dungeonForceEntrance: false,
+    traits :
+      TRAIT.PEACEFUL |
+      TRAIT.CAN_SAVE,
+    minEvents : 0,
+    maxEvents : 3,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+      
     minLocations : 5,
     maxLocations : 10,
-    guarded : false,
     possibleLocations : [
       {id:'base:home', rarity:1},
       {id:'base:tavern', rarity:7},
       {id:'base:farm', rarity:4}
     ],
-    startingEvents : [
+    requiredEvents : [
     ],
     requiredLocations : [
       'base:farm',
@@ -631,22 +639,24 @@ Landmark.database.newEntry(
     symbol : 'T',
     rarity : 40,        
     peaceful: true,
-    isUnique : false,
     landmarkType : TYPE.DUNGEON,
-    pointOfNoReturn : false,
-    ephemeral : true,
-    dungeonForceEntrance: true,
+
+    traits :
+      TRAIT.EPHEMERAL |
+      TRAIT.DUNGEON_FORCE_ENTRANCE,
+    minEvents : 0,
+    maxEvents : 1,
+    eventPreference : LandmarkEvent.KIND.HOSTILE,
+
     minLocations : 3,
     maxLocations : 5,
-    guarded : false,
-    canSave : true,
     possibleLocations : [
       {id: 'base:small-chest', rarity:1},
     ],
     requiredLocations : [
       'base:small-chest'
     ],
-    startingEvents : [
+    requiredEvents : [
       'base:the-snakesiren'
     ],
     mapHint: {
@@ -677,21 +687,24 @@ Landmark.database.newEntry(
     legendName: 'Forest',
     symbol : 'T',
     rarity : 40,        
-    peaceful: true,
-    isUnique : true,
     landmarkType : TYPE.DUNGEON,
-    pointOfNoReturn : false,
-    ephemeral : false,
-    dungeonForceEntrance: true,
+
+    traits :
+      TRAIT.PEACEFUL |
+      TRAIT.UNIQUE |
+      TRAIT.DUNGEON_FORCE_ENTRANCE |
+      TRAIT.CAN_SAVE,
+    minEvents : 0,
+    maxEvents : 0,
+    eventPreference : LandmarkEvent.KIND.HOSTILE,
+
     minLocations : 3,
     maxLocations : 5,
-    guarded : false,
-    canSave : true,
     possibleLocations : [
     ],
     requiredLocations : [
     ],
-    startingEvents : [
+    requiredEvents : [
     ],
     mapHint: {
       roomSize: 30,
@@ -726,7 +739,7 @@ Landmark.database.newEntry(
     maxLocations : 0,
     guarded : false,
     canSave : true,
-    startingEvents : [
+    requiredEvents : [
     ],
     possibleLocations : [],
     requiredLocations : [],
@@ -754,7 +767,7 @@ Landmark.database.newEntry(
     canSave : true,
     pointOfNoReturn : false,
     ephemeral : false,
-    startingEvents : [
+    requiredEvents : [
     ],
     possibleLocations : [],
     requiredLocations : [],
@@ -780,7 +793,7 @@ Landmark.database.newEntry(
     maxLocations : 0,
     pointOfNoReturn : false,
     ephemeral : false,
-    startingEvents : [
+    requiredEvents : [
     ],
     possibleLocations : [],
     requiredLocations : [],
@@ -795,7 +808,8 @@ Landmark.database.newEntry(
 @:Landmark = databaseItemMutatorClass.create(  
   name : 'Wyvern.Landmark',
   statics : {
-    TYPE : {get ::<- TYPE}
+    TYPE : {get ::<- TYPE},
+    TRAIT : {get ::<- TRAIT}
   },
   items : {
     worldID : 0,
@@ -823,24 +837,21 @@ Landmark.database.newEntry(
       legendName : String,
       symbol : String,
       rarity: Number,
-      isUnique : Boolean,
+      minEvents : Number,
+      maxEvents : Number,
+      eventPreference : Number,
       minLocations : Number,
       maxLocations : Number,
       possibleLocations : Object,
       requiredLocations : Object,
-      startingEvents : Object,
-      canSave : Boolean,
-      peaceful: Boolean,
+      requiredEvents : Object,
       landmarkType: Number,
-      dungeonForceEntrance : Boolean,
       mapHint : Object,
       onCreate : Function,
       onVisit : Function,
       onIncrementTime : Function,
       onStep : Function,
-      guarded : Boolean,
-      pointOfNoReturn : Boolean,
-      ephemeral : Boolean
+      traits : Number
     },
     reset
   ),
@@ -857,9 +868,9 @@ Landmark.database.newEntry(
     @:Map = import(module:'game_class.map.mt');
     @:windowEvent = import(module:'game_singleton.windowevent.mt');
     @:canvas = import(module:'game_singleton.canvas.mt');
-    @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
     @:Event = import(module:'game_mutator.event.mt');    
     @:Location = import(module:'game_mutator.location.mt');
+    @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 
     @island_;
     @structureMapBuilder; // only used in initialization
@@ -881,7 +892,7 @@ Landmark.database.newEntry(
 
       if (base.landmarkType == TYPE.DUNGEON) ::<= {
         state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
-        if (base.dungeonForceEntrance) ::<= {
+        if (base.hasTraits(:Landmark.TRAIT.DUNGEON_FORCE_ENTRANCE)) ::<= {
           this.addLocation(location:Location.new(landmark: this, base:Location.database.find(:'base:entrance')));
         }
       } else if (base.landmarkType == TYPE.STRUCTURE) ::<= {
@@ -966,11 +977,28 @@ Landmark.database.newEntry(
       state.map.title = state.name;
 
       
-      foreach(base.startingEvents) ::(k, evt) {
+      @:alreadyEvents = [];
+      foreach(base.requiredEvents) ::(k, evt) {
+        alreadyEvents->push(:evt);
         state.events->push(value:
           LandmarkEvent.new(
             parent: this,
             base: LandmarkEvent.database.find(id:evt)
+          )
+        );
+      }
+      
+      // TODO: repeats? make this unique?
+      for(0, random.integer(from:base.minEvents, to:base.maxEvents)) ::(i) {
+        @which = LandmarkEvent.database.getRandomFiltered(
+          ::(value) <- value.kind == base.eventPreference &&
+                       alreadyEvents->findIndex(:value.id) == -1
+        )
+        when(which == empty) empty;
+        state.events->push(value:
+          LandmarkEvent.new(
+            parent: this,
+            base: which
           )
         );
       }
@@ -1007,20 +1035,20 @@ Landmark.database.newEntry(
         state.base = base;
         state.x = if (x != empty) x else 0;
         state.y = if (y != empty) y else 0;
-        state.peaceful = base.peaceful;
+        state.peaceful = base.hasTraits(:TRAIT.PEACEFUL)
 
         if (floorHint != empty) ::<= {
           state.floor = floorHint;
           state.floor => Number;
         }
 
-        if (base.isUnique)
+        if (base.hasTraits(:TRAIT.UNIQUE))
           state.name = base.name
         else
           state.name = base.name + ' of ' + NameGen.place();
 
 
-        if (!base.ephemeral)
+        if (!base.hasTraits(:TRAIT.EPHEMERAL))
           loadContent(base);
         this.base.onCreate(landmark:this, island:island_);    
         

@@ -97,7 +97,7 @@
       },
       
       defaultLoad :: {
-        state.hasBeast = if (landmark_.floor > 1 && random.try(percentSuccess:15))
+        state.hasBeast = if (landmark_.floor > 1)
           true
         else 
           false
@@ -108,7 +108,6 @@
         @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'cavebat');
       
         // add additional entities out of spawn points (stairs)
-        //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
         if (state.hasBeast && entities->keycount < 3 && state.encountersOnFloor < ROOM_MAX_ENTITY) ::<= {
           addEntity();
         }

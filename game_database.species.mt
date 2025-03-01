@@ -21,7 +21,7 @@
 
 
 
-@:TRAITS = {
+@:TRAIT = {
   SPECIAL : 1,
   SUMMON : 2,
   ETHEREAL : 4
@@ -858,7 +858,7 @@ Species.newEntry(data:{
   swarms : true,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL,
+  traits : TRAIT.SPECIAL,
   passives : [
   ]
 })
@@ -886,7 +886,7 @@ Species.newEntry(data:{
   swarms : false,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL  | TRAITS.SUMMON,
+  traits : TRAIT.SPECIAL  | TRAIT.SUMMON,
   passives : [
   ]
 })
@@ -912,7 +912,7 @@ Species.newEntry(data:{
   swarms : false,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL  | TRAITS.SUMMON,
+  traits : TRAIT.SPECIAL  | TRAIT.SUMMON,
   passives : [
   ]
 })
@@ -938,7 +938,7 @@ Species.newEntry(data:{
   swarms : false,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL | TRAITS.SUMMON,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
   passives : [
   ]
 })
@@ -964,7 +964,7 @@ Species.newEntry(data:{
   swarms : false,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL | TRAITS.SUMMON,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
   passives : [
   ]
 })  
@@ -991,7 +991,7 @@ Species.newEntry(data:{
   swarms : false,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL | TRAITS.SUMMON,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
   passives : [
   ]
 })  
@@ -1018,7 +1018,7 @@ Species.newEntry(data:{
   swarms : false,
   canBlock : true,
   
-  traits : TRAITS.SPECIAL,
+  traits : TRAIT.SPECIAL,
   passives : [
     'base:the-wyvern'
   ]
@@ -1044,7 +1044,7 @@ Species.newEntry(data:{
   qualities : [
   ],
   swarms: true,
-  traits : TRAITS.SPECIAL | TRAITS.ETHEREAL,
+  traits : TRAIT.SPECIAL | TRAIT.ETHEREAL,
   canBlock : false,
   passives : [
     'base:apparition'
@@ -1072,7 +1072,7 @@ Species.newEntry(data:{
   swarms : true,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL,
+  traits : TRAIT.SPECIAL,
   passives : [
     'base:the-beast'
   ]
@@ -1099,7 +1099,7 @@ Species.newEntry(data:{
   swarms : true,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL,
+  traits : TRAIT.SPECIAL,
   passives : [
     'base:the-beast'
   ]
@@ -1125,7 +1125,7 @@ Species.newEntry(data:{
   swarms : true,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL,
+  traits : TRAIT.SPECIAL,
   passives : [
   ]
 })
@@ -1150,7 +1150,7 @@ Species.newEntry(data:{
   swarms : true,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL,
+  traits : TRAIT.SPECIAL,
   passives : [
   ]
 })
@@ -1177,7 +1177,7 @@ Species.newEntry(data:{
   swarms : true,
   canBlock : false,
   
-  traits : TRAITS.SPECIAL,
+  traits : TRAIT.SPECIAL,
   passives : [
   ]
 })
@@ -1202,7 +1202,7 @@ Species.newEntry(data:{
   ],
   swarms : true,
   
-  traits : TRAITS.SPECIAL,
+  traits : TRAIT.SPECIAL,
   canBlock : false,
   passives : [
   ]
@@ -1228,7 +1228,7 @@ Species.newEntry(data:{
   ],
   swarms : true,
   
-  traits : TRAITS.SPECIAL | TRAITS.SUMMON,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
   canBlock : false,
   passives : [
   ]
@@ -1240,7 +1240,7 @@ Species.newEntry(data:{
   inherits: [Database],
   define::(this) {
     this.interface = {    
-      TRAITS : {get::<- TRAITS},
+      TRAIT : {get::<- TRAIT},
     }
   }
 ).new(

@@ -33,7 +33,7 @@
   AP : 1
 }
 
-@:TRAITS = {
+@:TRAIT = {
   MULTIHIT : 1,
   FORCE_CRIT : 2,
   FORCE_DEF_BYPASS : 4,
@@ -52,7 +52,7 @@
 
 @:Damage = {
   TYPE : TYPE,
-  TRAITS : TRAITS,
+  TRAIT : TRAIT,
   CLASS : CLASS,
   type : type,
   new ::(amount, damageType, damageClass, traits) {

@@ -36,7 +36,7 @@
   'X'
 ]
 
-@:TRAITS = {
+@:TRAIT = {
   // if present, the quest has its reward replaced with ???
   HIDDEN_REWARD : 1,
   SPECIAL : 2,
@@ -46,8 +46,8 @@
 Quest.database.newEntry(
   data : {
     id : 'base:fetch-quest-personal',
-    traits : TRAITS.HIDDEN_REWARD |
-             TRAITS.SPECIAL,
+    traits : TRAIT.HIDDEN_REWARD |
+             TRAIT.SPECIAL,
     descriptions : [
       'I was in the forest and I lost my %1! Please help!',
       'I was scared by some creatures in the forest and dropped my %1! Please retrieve it.',
@@ -654,8 +654,8 @@ Quest.database.newEntry(
     RANK : {
       get ::<- RANK
     },
-    TRAITS : {
-      get ::<- TRAITS
+    TRAIT : {
+      get ::<- TRAIT
     },
     RANK2NAME : {
       get ::<- RANK2NAME
@@ -710,7 +710,7 @@ Quest.database.newEntry(
       // All possible description bases
       descriptions : Object,
       
-      // Special traits that the quest has. Check the TRAITS enum
+      // Special traits that the quest has. Check the TRAIT enum
       traits : Number,
       
       // Called on the first time the quest is created.
@@ -871,7 +871,7 @@ Quest.database.newEntry(
               state.description, 
               '',
               'Reward(s):',
-              ...(if (state.base.traits & TRAITS.HIDDEN_REWARD != 0) 
+              ...(if (state.base.traits & TRAIT.HIDDEN_REWARD != 0) 
                 [' - ???']
               else
                 state.rewardItems->map(::(value) <- ' - ' + value.name)

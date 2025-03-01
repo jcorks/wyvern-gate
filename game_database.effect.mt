@@ -209,7 +209,7 @@ Effect.newEntry(
           text: holder.name + '\'s attack bypassed ' + to.name +'\'s DEF!'
         );
 
-        damage.traits |= Damage.TRAITS.FORCE_DEF_BYPASS;
+        damage.traits |= Damage.TRAIT.FORCE_DEF_BYPASS;
         holder.removeEffectInstance(:
           holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:take-aim')[0]
         )
@@ -1870,7 +1870,7 @@ Effect.newEntry(
           windowEvent.queueMessage(text:'The casting fizzled!');
 
         if (item.data.spell == empty) ::<= {
-          @:art = Arts.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAITS.COMMON_ATTACK_SPELL));
+          @:art = Arts.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAIT.COMMON_ATTACK_SPELL));
           item.data.spell = art.id;        
         }
         
@@ -2408,8 +2408,8 @@ Effect.newEntry(
         @:arts = [];
         for(0, ARTS_COUNT) ::(i) {
           @:art = Arts.getRandomFiltered(::(value) <- 
-            (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
-            ((value.traits & Arts.TRAITS.SPECIAL) == 0) &&
+            (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
+            ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
             (value.rarity >= Arts.RARITY.RARE)
           );
           arts->push(:art.id);
@@ -2454,8 +2454,8 @@ Effect.newEntry(
         @:arts = [];
         for(0, ARTS_COUNT) ::(i) {
           @:art = Arts.getRandomFiltered(::(value) <- 
-            (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
-            ((value.traits & Arts.TRAITS.SPECIAL) == 0) &&
+            (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
+            ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
             (value.rarity < Arts.RARITY.EPIC)
           );
           arts->push(:art.id);
@@ -2599,7 +2599,7 @@ Effect.newEntry(
     traits : Effect.TRAIT.DEBUFF,
     events : {
       onPreAttackOther ::(from, item, holder, to, damage) {
-        if ((damage.traits & Damage.TRAITS.MULTIHIT) != 0) ::<= {
+        if ((damage.traits & Damage.TRAIT.MULTIHIT) != 0) ::<= {
           windowEvent.queueMessage(text: holder.name + '\'s Dampen Multi-hit nullified the attack!');
           damage.amount = 0;
         }
@@ -4729,7 +4729,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage) {
-        if (attacker != holder && ((damage.traits & Damage.TRAITS.MULTIHIT) != 0)) ::<= {
+        if (attacker != holder && ((damage.traits & Damage.TRAIT.MULTIHIT) != 0)) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from the damage thanks to Light Guard!');
           damage.amount = 1;            
         }
@@ -4750,7 +4750,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage) {
-        if (attacker != holder && ((damage.traits & Damage.TRAITS.IS_CRIT) != 0)) ::<= {
+        if (attacker != holder && ((damage.traits & Damage.TRAIT.IS_CRIT) != 0)) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from critical hit damage thanks to Premonition!');
           damage.amount = 1;            
         }

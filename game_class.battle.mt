@@ -975,11 +975,11 @@
         
         @:passesCheck ::{
           @:art = Arts.find(:action.card.id);
-          when(art.traits & Arts.TRAITS.SUPPORT == 0) true;
+          when(art.traits & Arts.TRAIT.SUPPORT == 0) true;
           return false;
         }
           
-        @:requiresAP = ((Arts.find(:action.card.id).traits & Arts.TRAITS.COSTLESS) == 0);
+        @:requiresAP = ((Arts.find(:action.card.id).traits & Arts.TRAIT.COSTLESS) == 0);
           
         when (requiresAP && entAct.ap < AP_COST) ::<= {
           @:art = Arts.find(:action.card.id);
@@ -1001,7 +1001,7 @@
         
         @pendingChoices = [];
         @:art = Arts.find(id:action.card.id);
-        if (world.party != empty && ((art.traits & Arts.TRAITS.CAN_BLOCK) != 0) && action.targets->size > 0) ::<= {
+        if (world.party != empty && ((art.traits & Arts.TRAIT.CAN_BLOCK) != 0) && action.targets->size > 0) ::<= {
           pendingChoices = [...action.targets]->filter(by::(value) <- world.party.leader == value);
         }
       

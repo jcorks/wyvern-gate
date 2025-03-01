@@ -1224,7 +1224,7 @@ return empty;
 
                     @where = ::(landmark) <- landmark.gate;
 
-                    when (landmark.base.pointOfNoReturn == true) ::<= {
+                    when (landmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN)) ::<= {
                       windowEvent.queueMessage(
                         text: "It may be difficult to return... "
                       );

@@ -62,7 +62,7 @@
   'f'
 ];
 
-@:TRAITS = {
+@:TRAIT = {
   // Diverse islands ignore the species predisposition.
   // An inhabitant can be any non-special species.
   DIVERSE : 1,
@@ -92,7 +92,7 @@ Island.database.newEntry(
     possibleSceneryCharacters : [
       '╿', '.', '`', '^', '▒'
     ],
-    traits : TRAITS.SPECIAL,
+    traits : TRAIT.SPECIAL,
     
     overrideSpecies : empty,
     overrideNativeCreatures : empty,
@@ -125,7 +125,7 @@ Island.database.newEntry(
     possibleSceneryCharacters : [
       '╿', '.', '`', '^', '▒'
     ],
-    traits : TRAITS.SPECIAL,
+    traits : TRAIT.SPECIAL,
     
     overrideSpecies : empty,
     overrideNativeCreatures : empty,
@@ -182,7 +182,7 @@ Island.database.newEntry(
   name : 'Wyvern.Island',
   statics : {
     CLIMATE : {get::<-CLIMATE},
-    TRAITS : {get::<-TRAITS},
+    TRAIT : {get::<-TRAIT},
     
     climateToString::(climate) {
       return match(climate) {
@@ -337,9 +337,9 @@ Island.database.newEntry(
 
             entity.supportArts->push(:
               Arts.getRandomFiltered(::(value) <- 
-                ((value.traits & Arts.TRAITS.SPECIAL) == 0)
+                ((value.traits & Arts.TRAIT.SPECIAL) == 0)
                 &&
-                ((value.traits & Arts.TRAITS.SUPPORT) != 0)
+                ((value.traits & Arts.TRAIT.SUPPORT) != 0)
                 &&
                 addCondition(:value)
               ).id
@@ -542,7 +542,7 @@ Island.database.newEntry(
             return [
               ... Species.getRandomSet(
                   count : 2,
-                  filter:::(value) <- (value.traits & Species.TRAITS.SPECIAL) == 0
+                  filter:::(value) <- (value.traits & Species.TRAIT.SPECIAL) == 0
                 )
             ]->map(
               to :::(value) <- {
@@ -622,7 +622,7 @@ Island.database.newEntry(
         get :: {
           @:climate = Island.climateToString(climate:state.climate);
           @out = state.name + ' is '+ correctA(:climate) + ' ' + climate + ' island.';
-          if ((state.base.traits & Island.TRAITS.DIVERSE) != 0) ::<= {
+          if ((state.base.traits & Island.TRAIT.DIVERSE) != 0) ::<= {
             out = out + 'The island is mostly populated by people of ' + Species.find(:state.species[0].species).name + ' and ' + Species.find(:state.species[1].species).name + ' descent. ';          
           }
           
@@ -738,11 +738,11 @@ Island.database.newEntry(
                   
       newInhabitant ::(professionHint, levelHint, speciesHint) {
         @species = 
-          if (((state.base.traits & TRAITS.DIVERSE) == 0) && random.try(percentSuccess:95))
+          if (((state.base.traits & TRAIT.DIVERSE) == 0) && random.try(percentSuccess:95))
             random.pickArrayItemWeighted(list:state.species).species
           else
             Species.getRandomFiltered(
-              filter:::(value) <- (value.traits & Species.TRAITS.SPECIAL) == 0
+              filter:::(value) <- (value.traits & Species.TRAIT.SPECIAL) == 0
             ).id
         ;
           

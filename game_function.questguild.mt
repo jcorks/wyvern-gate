@@ -44,7 +44,7 @@
         landmark : location.landmark,
         issuer : location.data.guildmaster,
         rank : random.integer(from:0, to:Quest.RANK.X),
-        base : Quest.database.getRandomFiltered(filter::(value) <- (value.traits & Quest.TRAITS.SPECIAL) == 0)
+        base : Quest.database.getRandomFiltered(filter::(value) <- (value.traits & Quest.TRAIT.SPECIAL) == 0)
       )
     );
   }
@@ -55,7 +55,7 @@
         landmark : location.landmark,
         issuer : location.data.guildmaster,
         rank : 0,
-        base : Quest.database.getRandomFiltered(filter::(value) <- (value.traits & Quest.TRAITS.SPECIAL) == 0)
+        base : Quest.database.getRandomFiltered(filter::(value) <- (value.traits & Quest.TRAIT.SPECIAL) == 0)
       )
     );
   }

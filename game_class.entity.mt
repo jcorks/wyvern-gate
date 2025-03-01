@@ -881,7 +881,7 @@
       state.professionProgress = [];
       state.professionArts = [];
 
-      if (state.profession.traits & Profession.TRAITS.NON_COMBAT) ::<= {
+      if (state.profession.traits & Profession.TRAIT.NON_COMBAT) ::<= {
         for(0, 21) ::(i) {
           this.autoLevelProfession();
         }
@@ -1751,10 +1751,10 @@
         if (critChance < 0.001) critChance = 0.001;
         critChance *= 100;
         if (critChance > 25) critChance = 25;
-        if (random.try(percentSuccess:critChance) || ((dmg.traits & Damage.TRAITS.FORCE_CRIT) != 0)) ::<={
+        if (random.try(percentSuccess:critChance) || ((dmg.traits & Damage.TRAIT.FORCE_CRIT) != 0)) ::<={
           if (dmg.amount < 5) dmg.amount = 5;
           dmg.amount *= 2.5;
-          dmg.traits |= Damage.TRAITS.IS_CRIT;
+          dmg.traits |= Damage.TRAIT.IS_CRIT;
           isCrit = true;
         }
 
@@ -1910,7 +1910,7 @@
 
         @isDexed = false;
         @isDefed = false;
-        if (!target.isIncapacitated() && random.try(percentSuccess:33) && ((dmg.traits & Damage.TRAITS.FORCE_DEF_BYPASS) == 0)) ::<= {
+        if (!target.isIncapacitated() && random.try(percentSuccess:33) && ((dmg.traits & Damage.TRAIT.FORCE_DEF_BYPASS) == 0)) ::<= {
           if (this.stats.DEX > target.stats.DEF) ::<= {       
             windowEvent.queueMessage(
               text: target.name + ' tried to completely nullify the damage, but ' + this.name + ' went through ' + target.name + '\'s defenses thanks to their high DEX!'
@@ -2866,7 +2866,7 @@
       @:this = _.this;
       @:abilitiesUsedBattle = _.abilitiesUsedBattle;
       
-      when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAITS.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
+      when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAIT.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
         text: this.name + " tried to use " + art.name + ", but already was used and could not be used!"
       );
       if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
@@ -3164,7 +3164,7 @@
         @:card = action.card;
 
         @:art = Arts.find(:card.id);
-        when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAITS.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[card.id] == true) ::<= {
+        when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAIT.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[card.id] == true) ::<= {
           windowEvent.queueMessage(
             text: this.name + " tried to use " + card.name + ", but already was used and could not be used again!"
           ) 

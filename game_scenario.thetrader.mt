@@ -687,7 +687,8 @@
             @:instance = import(module:'game_singleton.instance.mt');
             @world = import(module:'game_singleton.world.mt');
             @:currentLandmark = world.landmark;
-            if (currentLandmark != empty && currentLandmark.base.pointOfNoReturn == true) ::<= {
+            @:Landmark = import(module:'game_mutator.landmark.mt');
+            if (currentLandmark != empty && currentLandmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN) == true) ::<= {
               windowEvent.queueMessage(
                 text: '"Oh huh. The courier is here... somehow."'
               );
@@ -1020,8 +1021,9 @@
         }
 
 
+        @:Landmark = import(module:'game_mutator.landmark.mt');
         @:currentLandmark = world.landmark;
-        when (currentLandmark != empty && currentLandmark.base.pointOfNoReturn == true) ::<= {
+        when (currentLandmark != empty && currentLandmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN) == true) ::<= {
           windowEvent.queueMessage(
             speaker: party.members[0].name,
             text: '"What a terrible day to be stuck here. Guess I won\'t open shop today."'
@@ -3431,11 +3433,14 @@ return {
     InteractionMenuEntry.new(
       name: 'Finish Day',
       keepInteractionMenu: true,
-      filter::(island, landmark) <- 
-        if (landmark != empty && landmark.base.id == 'thetrader:fortune-wyvern-dimension')
+      filter::(island, landmark) { 
+        @:Landmark = import(module:'game_mutator.landmark.mt');
+
+        return if (landmark != empty && landmark.base.id == 'thetrader:fortune-wyvern-dimension')
           false
         else
-          landmark == empty || landmark.base.pointOfNoReturn == false,
+          landmark == empty || landmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN) == false
+      },
       onSelect::(island, landmark) {
         windowEvent.queueAskBoolean(
           prompt: 'Wait until next day to open shop / explore?',
@@ -3725,7 +3730,7 @@ return {
   
   
     @:Island = import(module:'game_mutator.island.mt');
-  
+    @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 
     Island.database.newEntry(
       data : {
@@ -3752,7 +3757,7 @@ return {
         possibleSceneryCharacters : [
           '╿', '.', '`', '^', '░'
         ],
-        traits : Island.TRAITS.SPECIAL,
+        traits : Island.TRAIT.SPECIAL,
         
         overrideSpecies : empty,
         overrideNativeCreatures : empty,
@@ -3774,16 +3779,17 @@ return {
         symbol : '|',
         rarity : 5,
         minLocations : 12,
-        isUnique : false,
         maxLocations : 17,
-        peaceful : true,
-        guarded : true,
+        traits :
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.GUARDED |
+          Landmark.TRAIT.PEACEFUL | 
+          Landmark.TRAIT.CAN_SAVE,
+        minEvents : 0,
+        maxEvents : 0,
+        eventPreference : LandmarkEvent.KIND.PEACEFUL,
         landmarkType : Landmark.TYPE.STRUCTURE,
-        canSave : true,
-        pointOfNoReturn : false,
-        ephemeral : false,
-        dungeonForceEntrance: false,
-        startingEvents : [],
+        requiredEvents : [],
         possibleLocations : [
           {id:'base:home', rarity: 1},
           //{id:'inn', rarity: 3},
@@ -3827,27 +3833,20 @@ return {
         id: 'thetrader:eternal-shrine',
         symbol : 'M',
         legendName: 'Shrine',
-        rarity : 100000,    
-        isUnique : true,
+        rarity : 100000,
+        traits : 
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.POINT_OF_NO_RETURN |
+          Landmark.TRAIT.EPHEMERAL,
+        minEvents: 1,
+        maxEvents: 4,
+        eventPreference : LandmarkEvent.KIND.HOSTILE,
+            
         minLocations : 2,
         maxLocations : 4,
-        peaceful: false,
-        guarded : false,
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : false,
-        pointOfNoReturn : true,
-        ephemeral : true,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        requiredEvents : [
           'base:dungeon-encounters',
-          'base:item-specter',
-          'base:the-beast',
-          'base:the-mirror',
-          'base:treasure-golem',
-          'base:cave-bat',
-          'base:funny-tiles',
-          'base:mimic',
-          'base:slimequeen'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
@@ -3895,17 +3894,17 @@ return {
         legendName: '???',
         symbol : 'M',
         rarity : 1,    
-        isUnique : true,
+        traits : 
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.PEACEFUL,
+        minEvents : 0,
+        maxEvents : 0,
+        eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
         minLocations : 2,
         maxLocations : 2,
-        guarded : false,
-        peaceful: true,
         landmarkType : Landmark.TYPE.DUNGEON,
-        canSave : true,
-        pointOfNoReturn : false,
-        ephemeral : false,
-        dungeonForceEntrance: false,
-        startingEvents : [
+        requiredEvents : [
         ],
         possibleLocations : [
         ],

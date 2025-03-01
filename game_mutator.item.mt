@@ -520,7 +520,7 @@ Item.database.newEntry(data : {
   ,
   onCreate ::(item, creationHint) {
     @:Arts = import(module:'game_database.arts.mt');
-    @:art = Arts.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAITS.COMMON_ATTACK_SPELL));
+    @:art = Arts.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAIT.COMMON_ATTACK_SPELL));
     item.data.spell = art.id;
     item.name = 'Scroll of ' + art.name;
   }
@@ -3231,7 +3231,7 @@ Item.database.newEntry(data : {
       item.setIslandGenTraits(
         levelHint : story.levelHint + (tier * 1.4),
         tierHint : tier,
-        idHint : Island.database.getRandomFiltered(::(value) <- (value.traits & Island.TRAITS.SPECIAL) == 0).id
+        idHint : Island.database.getRandomFiltered(::(value) <- (value.traits & Island.TRAIT.SPECIAL) == 0).id
       );
     }
   })  
@@ -3611,7 +3611,7 @@ none.name = 'None';
         when (enchantHint != empty) ::<= {
           foreach(enchantHint) ::(k, v) {
             this.addEnchant(mod:ItemEnchant.new(
-              base:ItemEnchant.database.find(id:enchantHint)
+              base:ItemEnchant.database.find(id:v)
             ));
           }
         }
@@ -3718,9 +3718,9 @@ none.name = 'None';
         rngEnchantHint : true,
         forceNeedsAppraisal : false,
         artsHint : [
-          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAITS.SPECIAL) == 0)).id,
-          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAITS.SPECIAL) == 0)).id,
-          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAITS.SPECIAL) == 0)).id
+          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAIT.SPECIAL) == 0)).id,
+          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAIT.SPECIAL) == 0)).id,
+          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAIT.SPECIAL) == 0)).id
         ],
         qualityHint : if ((base.traits & TRAIT.HAS_QUALITY) != 0) ItemQuality.getRandom().id,
         materialHint : if ((base.traits & TRAIT.METAL) != 0) Material.getRandom().id,

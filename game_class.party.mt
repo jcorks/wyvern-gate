@@ -220,12 +220,12 @@
         if (arts == empty)
           arts = [
             Arts.getRandomFiltered(::(value) <- 
-              (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)         
+              (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
+              ((value.traits & Arts.TRAIT.SPECIAL) == 0)         
             ),        
             Arts.getRandomFiltered(::(value) <- 
-              (value.traits & Arts.TRAITS.SUPPORT) != 0 &&
-              ((value.traits & Arts.TRAITS.SPECIAL) == 0)         
+              (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
+              ((value.traits & Arts.TRAIT.SPECIAL) == 0)         
             )
           ]        
           

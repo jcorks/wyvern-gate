@@ -622,7 +622,9 @@
       landmark : {
         get ::<- landmark,
         set ::(value) {
-          if (landmark != empty && landmark.base.ephemeral) 
+          @:Landmark = import(module:'game_mutator.landmark.mt');
+
+          if (landmark != empty && landmark.base.hasTraits(:Landmark.TRAIT.EPHEMERAL))
             landmark.unloadContent();
             
           landmark = value
