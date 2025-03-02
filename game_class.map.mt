@@ -1039,13 +1039,25 @@
       },
       
       obscure::{
-      
         for(0, width)::(x) {
           for(0, height)::(y) {
             scenery[x+y*width] |= IS_OBSCURED_MASK;
           }
         }
-              
+      },
+      
+      obscureAt::(x, y) {
+        scenery[x+y*width] |= IS_OBSCURED_MASK
+      },
+      
+      obscureRadius::(x, y, radius) {        
+        for(y - radius-1, y + radius+1) ::(yIter) {
+          for(x - radius-1, x + radius+1) ::(xIter) {
+            if (distance(x0:x, y0:y, x1:xIter, y1:yIter) <= radius) ::<= {
+              scenery[xIter+yIter*width] |= IS_OBSCURED_MASK              
+            }
+          }
+        }
       },
       
       clearItems::(x, y) {

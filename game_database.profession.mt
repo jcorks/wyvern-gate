@@ -965,6 +965,38 @@ Profession.newEntry(data:{
   ]
 })
 
+
+Profession.newEntry(data:{
+  name: 'Shadowling',
+  id : 'base:shadowling',
+  traits : 0,
+  weaponAffinity: 'base:bludgeon',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 2,
+    INT: 7,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 7
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:flash',
+    'base:thunder'
+  ],
+  passives : [
+    'base:dark'
+  ]
+})
+
 Profession.newEntry(data:{
   name: 'Fire Sprite',
   id : 'base:fire-sprite',

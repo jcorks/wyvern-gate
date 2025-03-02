@@ -863,7 +863,31 @@ Species.newEntry(data:{
   ]
 })
 
+Species.newEntry(data:{
+  name : 'Shadowling',
+  id : 'base:shadowling',
+  rarity : 2000000000000,
+  description: 'A moving shadow.',
+  growth : StatSet.new(
+    HP : 5,
+    AP : 1,
+    ATK: 2,
+    DEF: 4,
+    INT: 7,
+    LUK: 1,
+    SPD: 2,
+    DEX: 4
+  ),
+  qualities : [
 
+  ],
+  swarms : false,
+  canBlock : false,
+  
+  traits : TRAIT.SPECIAL,
+  passives : [
+  ]
+})
 
 Species.newEntry(data:{
   name : 'Fire Sprite',

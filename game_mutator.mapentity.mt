@@ -696,6 +696,26 @@ MapEntity.Task.database.newEntry(
 
 MapEntity.Task.database.newEntry(
   data : {
+    id: 'base:shadow',
+    startup ::{
+      
+    },
+    
+    do ::(data, mapEntity) {
+      @:map = mapEntity.controller.map;    
+      map.obscureRadius(
+        x: mapEntity.position.x,
+        y: mapEntity.position.y,
+        radius:6
+      );
+    }
+  }
+);
+
+
+
+MapEntity.Task.database.newEntry(
+  data : {
     id: 'base:thesnakesiren-roam',
     startup ::{
       

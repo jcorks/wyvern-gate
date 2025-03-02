@@ -995,6 +995,7 @@ Landmark.database.newEntry(
                        alreadyEvents->findIndex(:value.id) == -1
         )
         when(which == empty) empty;
+        alreadyEvents->push(:which.id);
         state.events->push(value:
           LandmarkEvent.new(
             parent: this,
