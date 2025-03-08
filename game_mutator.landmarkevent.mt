@@ -285,6 +285,32 @@ LandmarkEvent.database.newEntry(
 );
 
 
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:chair',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_chair.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+    kind : KIND.HOSTILE,
+    tier : 0,
+
+
+    onIncrementTime ::(data, landmark) {
+    
+    },
+    
+    onStep ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
 
 LandmarkEvent.database.newEntry(
   data : {

@@ -1410,7 +1410,8 @@ for(0, 20) ::(i) {
 
         requiredEvents : [
           'base:dungeon-encounters',
-          'base:item-specter'
+          'base:item-specter',
+          'base:chair'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},

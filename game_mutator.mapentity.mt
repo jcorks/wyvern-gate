@@ -189,9 +189,11 @@ MapEntity.Task.database.newEntry(
     return nearby;
   }
 
-  @:aggressive = ::(speed, data, mapEntity, onDeath) {
+  @:aggressive = ::(speed, data, mapEntity, noAttackParty, onDeath, interestDistance) {
     @:map = mapEntity.controller.map;
-    when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE) ::<= {
+    if (interestDistance == empty)
+      interestDistance = INTEREST_DISTANCE;
+    when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE && (noAttackParty == empty)) ::<= {
       @:pos = mapEntity.position;
       @:landmark = mapEntity.controller.landmark;
 
@@ -329,6 +331,18 @@ MapEntity.Task.database.newEntry(
       }
     }
   );  
+  
+  MapEntity.Task.database.newEntry(
+    data : {
+      id: 'base:aggressive-no-party',
+      startup ::{
+      },
+      
+      do ::(data, mapEntity) {
+        aggressive(speed:0.5, data, noAttackParty:true, mapEntity);    
+      }
+    }
+  );    
 }
 
 
@@ -716,18 +730,31 @@ MapEntity.Task.database.newEntry(
 
 MapEntity.Task.database.newEntry(
   data : {
-    id: 'base:thesnakesiren-roam',
+    id: 'base:teleport-offscreen',
     startup ::{
       
     },
     
     do ::(data, mapEntity) {
       @:map = mapEntity.controller.map;    
-      mapEntity.newPathTo(
-        x:map.pointerX,
-        y:map.pointerY,
-        speed: 2/3
-      );
+      when(map.isLocationVisible(
+        x:mapEntity.position.x,
+        y:mapEntity.position.y
+      )) empty;
+      
+      if (random.try(percentSuccess:15)) ::<= { 
+        @:newLoc = map.getRandomArea();
+        when(map.isLocationVisible(
+          x:newLoc.x,
+          y:newLoc.y
+        )) empty;
+
+        mapEntity.move(
+          x:newLoc.x,
+          y:newLoc.y
+        );
+
+      }
     }
   }
 );
@@ -839,6 +866,15 @@ MapEntity.Task.database.newEntry(
       
       position : {
         get ::<- if (lastPosition != empty) lastPosition else map_.getItem(data:this)
+      },
+      
+      move ::(x, y) {
+        @:item = map_.getItem(data:this);
+        when(item == empty) empty;
+        map_.moveItem(data:this, x, y);
+        if (location_ != empty) ::<= {
+          map_.moveItem(data:location_, x, y);        
+        }
       },
     
       step :: {

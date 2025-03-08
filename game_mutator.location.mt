@@ -787,6 +787,50 @@ Location.database.newEntry(data:{
 
 
 Location.database.newEntry(data:{
+  name: 'Chair',
+  id: 'base:chair',
+  rarity: 100,
+  ownVerb : 'run',
+  category : CATEGORY.DUNGEON_SPECIAL,
+  symbol: 'n',
+  onePerLandmark : false,
+  minStructureSize : 2,
+
+  descriptions: [
+    "A wooden chair.",
+  ],
+  interactions : [
+    'base:sit:chair-cursed',
+  ],
+  
+  aggressiveInteractions : [
+    // add a poke option
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  onFirstInteract ::(location) {
+
+  },
+  
+  onInteract ::(location) {
+
+  },      
+  onCreate ::(location) {
+
+  },
+  onStep ::(location, entities) {
+  
+  },
+  
+  onIncrementTime::(location, time) {
+  
+  }
+})
+
+Location.database.newEntry(data:{
   name: 'Tavern',
   id: 'base:tavern',
   rarity: 100,

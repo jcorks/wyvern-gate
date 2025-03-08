@@ -126,6 +126,94 @@ Interaction.newEntry(
   }
 )
 
+// D-tier horror. Still love it
+Interaction.newEntry(
+  data : {
+    id :  'base:sit:chair-cursed',
+    name : 'Sit Down',
+    keepInteractionMenu : false,
+    onInteract ::(location, party) {
+      when(location.data.eeper) ::<= {
+        windowEvent.queueMessage(
+          text: location.data.eeper + ' is still in the chair. They seem to be no longer alive.'
+        );      
+      }
+      
+      windowEvent.queueChoices(
+        prompt: 'Who will sit?',
+        canCancel: true,
+        choices: [...party.members]->map(to:::(value) <- value.name),
+        onChoice::(choice) {
+          when(choice == 0) empty;
+          @whom = party.members[choice-1];
+          
+          location.name = whom.name + '\'s Chair';
+          location.data.eeper = whom.name;
+          
+          windowEvent.queueMessage(
+            text: whom.name + ' sits in the chair.'
+          );
+
+          windowEvent.queueMessage(
+            speaker: whom.name,
+            text: '"It feels kinda comfy. I don\'t know what I expected."'
+          );
+          
+          windowEvent.queueMessage(
+            text: whom.name + ' starts to yawn.'
+          );          
+
+          windowEvent.queueMessage(
+            speaker: whom.name,
+            text: '"Honestly it\'s very comfortable. Would you mind if we took a break?"'
+          );          
+
+          windowEvent.queueMessage(
+            speaker: whom.name,
+            text: '"I can\'t remember the last time sitting felt so... good..."'
+          );          
+  
+          windowEvent.queueInputEvents(
+            :[
+              {input: 0, waitFrames:40}
+            ]
+          );
+
+          windowEvent.queueMessage(
+            text: whom.name + ' fell asleep.'
+          );          
+
+          windowEvent.queueInputEvents(
+            :[
+              {input: 0, waitFrames:40}
+            ]
+          );
+
+          @:instance = import(module:'game_singleton.instance.mt');
+
+          if (party.members->size == 1) ::<= {
+            windowEvent.queueMessage(
+              text: whom.name + ' stops breathing, as they take an eternal slumber in the chair.'
+            );          
+            instance.gameOver(reason: 'The chair claims ' + whom.name + '.');
+          } else ::<= {
+            windowEvent.queueMessage(
+              text: 'The rest of the party tries to awaken them, but they\'re still asleep.'
+            );          
+
+            windowEvent.queueMessage(
+              text: whom.name + ' stops breathing.'
+            );          
+            party.remove(member:whom);
+          }
+
+        }
+      )
+    }
+  }
+)
+
+
 Interaction.newEntry(
   data : {
     id :  'base:press-pressure-plate',
