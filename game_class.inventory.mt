@@ -24,6 +24,7 @@
   name: 'Wyvern.Inventory',
   items : {
     items : empty,
+    loot : empty,
     gold : 0,
     maxItems : 0
   },
@@ -43,6 +44,13 @@
       
       add::(item) {
         when (item.base.id == 'base:none') false; // never accept None as a real item
+        when (item.base.id == 'base:item-box') ::<= {
+          if (state.loot == empty)
+            state.loot = [];
+          state.loot->push(:item);
+          return true;
+        }
+        
         when (state.items->keycount == state.maxItems) false;
         state.items->push(value:item);
         return true;
@@ -51,16 +59,25 @@
       clone:: {
         @:out = Inventory.new();
         out.maxItems = state.maxItems;
-        foreach(state.items) ::(k, item) {
+        foreach([...state.items, ...(if(state.loot)state.loot  else [])]) ::(k, item) {
           out.add(item);
         }
+
         out.addGold(amount:state.gold);
         return out;
       },
       
       remove::(item) {
         @:index = state.items->findIndex(value:item);
-        when(index == -1) empty;
+        when(index == -1) ::<= {
+          when(state.loot == empty) empty;
+          
+          @:index = state.loot->findIndex(value:item);
+          when(index == -1) empty;
+
+          state.loot->remove(key:index);
+          return item;
+        }
         
         state.items->remove(key:index);
         return item;
@@ -100,6 +117,8 @@
       },
       clear :: {
         state.items = [];
+        state.loot = empty;
+        state.gold = 0;
       },
       
       items : {
@@ -108,6 +127,18 @@
           return [...state.items];
         }
       },
+      
+      loot : {
+        get :: {
+          when(state.loot == empty) [];
+          return [...state.loot]
+        }
+      },
+      
+      clearLoot :: {
+        state.loot = empty;
+      },
+      
       
       isEmpty : {
         get ::<- this.items->keycount == 0

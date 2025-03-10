@@ -331,6 +331,7 @@ return ::(
     topWeight: if (topWeight == empty) 1 else topWeight,
     canCancel:true, 
     pageAfter:12,
+    showRarity:true,
     prompt: if (limitedMenu) 'Inventory...' else (user.name + ' - Choosing...'),
     onPick::(item) {
       choiceItem = item;

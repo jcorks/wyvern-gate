@@ -1070,6 +1070,7 @@ return empty;
       },      
       x:{ set ::(value) <- save},//+=1},
       visitCurrentIsland ::(restorePos, atGate, onReady) {  
+        breakpoint();
         @:island = world.island;
         
 
@@ -1083,9 +1084,9 @@ return empty;
         }
 
         @hasVisitIsland;
-        this.islandTravel();
         if (windowEvent.canJumpToTag(name:'VisitIsland'))
           windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:if(atGate == empty)true else false);
+        this.islandTravel();
         hasVisitIsland = true;
         when (restorePos == empty && atGate != empty) ::<= {
           @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
@@ -1289,7 +1290,6 @@ return empty;
         @:world = import(module:'game_singleton.world.mt');
         when (landmark.base.onVisit(landmark, island:landmark.island) == false) empty;
 
-        
         world.landmark = landmark;        
         if (where != empty) ::<= {
           where = where(landmark);
@@ -1305,7 +1305,7 @@ return empty;
             fullName : 'the ' + landmark.name
           );
         }
-
+                    
         
         this.landmarkTravel();
       },

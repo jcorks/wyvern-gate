@@ -110,7 +110,7 @@
       },
       
       defaultLoad ::{
-        state.hasBeast = true;      
+        state.hasBeast = if (landmark_.floor > 0) true else false;      
       },
       
       step::{

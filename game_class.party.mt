@@ -30,11 +30,13 @@
 @:Party = LoadableClass.create(
   name: 'Wyvern.Party',
   items : {
-    inventory : Inventory.new(size:40),
+    inventory : {},
+    loot : {}, 
     members : empty,
     karma : 5500,
     arts : [],
     leader : 0,
+    inDungeon : false,
     guildRank : -1,
     guildEXP : 0,
     guildEXPtoNext : 100,
@@ -53,6 +55,7 @@
       reset ::{
         state.members = [];
         state.inventory = Inventory.new(size:40);
+        state.haul = Inventory.new(size:9999);
       },
       
       leader : {
@@ -62,6 +65,11 @@
           if (state.leader < 0)
             state.leader = 0
         }
+      },
+      
+      inDungeon : {
+        get ::<- state.inDungeon,
+        set ::(value) <- state.inDungeon = value
       },
     
       add::(member => Entity.type) {
@@ -365,6 +373,86 @@
       guildEXP : {
         get ::<- state.guildEXP
       },
+      
+      enterDungeon ::(landmark) {
+        state.inDungeon = true;
+        windowEvent.queueMessage(
+          text:"The party ventures into " + landmark.name + "..."
+        );
+      },
+      
+      leaveDungeon ::(landmark) {
+        state.inDungeon = false;
+        when(state.inventory.loot->size == 0) empty;
+        
+        windowEvent.queueNestedResolve(
+          renderable : {
+            render ::{
+              canvas.blackout();
+            }
+          },
+          
+          onEnter ::{
+            windowEvent.queueMessage(
+              text: 'The party returns from ' + landmark.name
+            );  
+
+            @:loot = state.inventory.loot;
+            if (loot) ::<= {
+              windowEvent.queueMessage(
+                text: 'The party looks at what they acquired in ' + landmark.name + '.'
+              );  
+            
+              @:items = loot->map(::(value) <-
+                value.unbox()
+              );
+              state.inventory.clearLoot();
+              items->sort(::(a, b) {
+                when(a.stars < b.stars) -1;
+                when(a.stars > b.stars)  1;
+                return 0;
+              });
+              @:inv = Inventory.new();
+              foreach(items) :: (k, v) {
+                inv.add(:v);
+              }
+              
+              @:pickItem = import(:'game_function.pickitem.mt');
+              windowEvent.queueChoices(
+                prompt: "Loot...", // 985's mark
+                topWeight: 0.5,
+                leftWeight: 0.5,
+                choices : loot->map(::(value) <- value.name),
+                onChoice::(choice) {
+                },
+                canCancel : true,
+                onCancel ::{
+                }
+              );
+
+              pickItem(
+                prompt: "Loot: Get!", // 985's mark
+                topWeight: 0.5,
+                leftWeight: 0.5,
+                inventory : inv,
+                onPick ::(item) {
+                  item.describe();
+                },
+                canCancel : true,
+                showRarity : true,
+                onCancel ::{
+                  // FOR NOW dump to inventory, but we need selection in case too many items!!!!
+                  foreach(items) ::(k, v) {
+                    this.inventory.add(:v);
+                  }
+                }
+              );
+
+            }
+          }
+        );
+      },
+      
       
       animateGainGuildEXP ::(exp, onDone) {
         @:animateBar = import(:'game_function.animatebar.mt');

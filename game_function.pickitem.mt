@@ -39,6 +39,7 @@ return ::(
   pageAfter, 
   onCancel, 
   showPrices, 
+  showRarity,
   goldMultiplier, 
   header
 ) {
@@ -73,7 +74,7 @@ return ::(
         canCancel: canCancel,
         jumpTag: 'pickItem',
         separator: '|',
-        leftJustified : [true, false, true],
+        leftJustified : [true, if(showRarity)true else false, true],
         pageAfter: pageAfter,
         header : header,
         onCancel::{cancelled = true;},
@@ -119,7 +120,14 @@ return ::(
             else
               ''
           );
+          when(showRarity) ::<={
+            @:rarities = items->map(::(value) <-
+              value.starsString
+            );
+
+            return [names, rarities, amounts];
           
+          }
           @:prices = items->map(to:::(value) <- 
             if (showPrices != true) 
               ''

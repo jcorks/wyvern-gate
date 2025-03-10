@@ -1410,15 +1410,13 @@ for(0, 20) ::(i) {
 
         requiredEvents : [
           'base:dungeon-encounters',
-          'base:item-specter',
-          'base:chair'
+          'base:item-specter'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
 
           // the standard set
           {id: 'base:fountain', rarity:18},
-          {id: 'base:escape', rarity:18},
           {id: 'base:potion-shop', rarity: 20},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
@@ -1435,7 +1433,8 @@ for(0, 20) ::(i) {
         requiredLocations : [
           'thechosen:stairs-down',
           'thechosen:stairs-down',
-          'base:enchantment-stand'
+          'base:enchantment-stand',
+          'base:small-chest'
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_ALPHA
@@ -1485,7 +1484,6 @@ for(0, 20) ::(i) {
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
-          {id: 'base:escape', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
@@ -1499,7 +1497,7 @@ for(0, 20) ::(i) {
         ],
         requiredLocations : [
           'thechosen:stairs-down',
-          'base:locked-chest',
+          'base:small-chest',
           'base:enchantment-stand'
           
         ],
@@ -1552,7 +1550,6 @@ for(0, 20) ::(i) {
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
-          {id: 'base:escape', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
@@ -1627,7 +1624,6 @@ for(0, 20) ::(i) {
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
-          {id: 'base:escape', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},

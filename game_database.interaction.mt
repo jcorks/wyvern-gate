@@ -2819,22 +2819,23 @@ Interaction.newEntry(
     keepInteractionMenu : false,
     onInteract ::(location, party) {
       @:world = import(module:'game_singleton.world.mt');
-      when(location.inventory.items->keycount == 0)
+      @:items = [...location.inventory.items, ...location.inventory.loot];
+      when(items->keycount == 0)
         windowEvent.queueMessage(text:'The chest was empty.');
       
       
       world.accoladeIncrement(name:'chestsOpened');      
       windowEvent.queueMessage(text:'The party opened the chest...');
       
-      when(location.inventory.items->keycount > world.party.inventory.slotsLeft) ::<= {
+      when(items->size > world.party.inventory.slotsLeft) ::<= {
         windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
       }
       
-      foreach(location.inventory.items)::(i, item) {
+      foreach(items)::(i, item) {
         windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
       }
       
-      foreach(location.inventory.items)::(i, item) {
+      foreach(items)::(i, item) {
         world.party.inventory.add(item);
       }
       location.inventory.clear();
@@ -3272,7 +3273,8 @@ Interaction.newEntry(
     keepInteractionMenu : false,
     onInteract ::(location, party) {
       @:world = import(module:'game_singleton.world.mt');
-      when(location.inventory.items->keycount == 0)
+      @:items = [...location.inventory.items, ...location.inventory.loot];
+      when(items->size == 0)
         windowEvent.queueMessage(text:location.ownedBy.name + '\'s body contained no items');
       
       windowEvent.queueMessage(text:'The party looted the body...');
@@ -3281,11 +3283,11 @@ Interaction.newEntry(
         windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
       }
       
-      foreach(location.inventory.items)::(i, item) {
+      foreach(items)::(i, item) {
         windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
       }
       
-      foreach(location.inventory.items)::(i, item) {
+      foreach(items)::(i, item) {
         world.party.inventory.add(item);
       }
       location.inventory.clear();

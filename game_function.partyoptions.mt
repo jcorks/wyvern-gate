@@ -393,10 +393,11 @@ return ::{
                     inv.add(:ph);
                     @hovered
                     pickItem(
-                      leftWeight: 0.8,
+                      leftWeight: 1,
                       topWeight: 0.5,
                       filter: ::(value) <- value.base.id == 'base:placeholder' || member.getSlotsForItem(item:value)->findIndex(value:slot) != -1,
                       inventory : inv,
+                      showRarity: true,
                       prompt: member.name + ': ' + slotToName(slot),
                       canCancel: true,
                       keep:true,

@@ -363,6 +363,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:pickaxe');
     addMissing(id:'base:smithing-hammer');
     addMissing(id:'base:wyvern-key');
+    addMissing(id:'base:escape-stone');
     addMissing(id:'base:life-crystal');
     addMissing(id:'base:potion', minCount:5);
     addMissing(id:'base:scroll', minCount:3);
@@ -1159,52 +1160,7 @@ Location.database.newEntry(data:{
   }
 })
 
-Location.database.newEntry(data:{
-  name: 'Escape Duct',
-  id: 'base:escape',
-  rarity: 1000000000000,
-  ownVerb : '',
-  symbol: '|',
-  category : CATEGORY.EXIT,
-  onePerLandmark : false,
-  minStructureSize : 1,
 
-  descriptions: [
-    "A tunnel leading back to the entrance.",
-  ],
-  interactions : [
-    'base:escape',
-  ],
-  
-  aggressiveInteractions : [
-  ],
-
-
-  
-  minOccupants : 0,
-  maxOccupants : 0,
-  
-  onFirstInteract ::(location) {},
-  onInteract ::(location) {
-    return true;
-  },
-  
-  onCreate ::(location) {
-    /*
-    if (location.landmark.island.tier > 1) 
-      if (random.flipCoin()) ::<= {
-        location.lockWithPressurePlate();
-      }
-    */
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onIncrementTime::(location, time) {
-  
-  }
-})
 
 
 Location.database.newEntry(data:{
@@ -1438,7 +1394,7 @@ Location.database.newEntry(data:{
         ),
         rngEnchantHint:true, 
         forceEnchant:true
-      )
+      ).boxUp()
     );
   },
   
@@ -1538,7 +1494,7 @@ Location.database.newEntry(data:{
           ),
           rngEnchantHint:true, 
           forceEnchant:true
-        )
+        ).boxUp()
       );
     }
   },
@@ -2089,7 +2045,7 @@ Location.database.newEntry(data:{
         ),
         qualityHint : 'base:masterwork',
         rngEnchantHint:true
-      )
+      ).boxUp()
     );    
 
     location.inventory.add(item:
@@ -2100,7 +2056,7 @@ Location.database.newEntry(data:{
             value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)          
         ),
         forceNeedsAppraisal : true
-      )
+      ).boxUp()
     );   
 
     location.inventory.add(item:
@@ -2170,9 +2126,17 @@ Location.database.newEntry(data:{
   
   },
   onCreate ::(location) {
-    foreach(location.ownedBy.inventory.items)::(i, item) {
-      location.inventory.add(item);
+    @world = import(module:'game_singleton.world.mt');  
+    if (world.party.inDungeon) ::<= {
+      foreach(location.ownedBy.inventory.items)::(i, item) {
+        location.inventory.add(:item.boxUp());
+      }
+    } else ::<= {
+      foreach(location.ownedBy.inventory.items)::(i, item) {
+        location.inventory.add(:item);
+      }    
     }
+
     location.ownedBy.inventory.clear();
   },
   

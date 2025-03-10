@@ -2533,6 +2533,42 @@ Item.database.newEntry(data : {
 })    
 
 
+Item.database.newEntry(data : {
+  name : "Escape Stone",
+  id : 'base:escape-stone',
+  description: 'A small magic stone that, when used, allows escaping from dungeons. The process will drop 50% of any Item Boxes found.',
+  examine : '',
+  equipType: TYPE.HAND,
+  rarity : 200,
+  weight : 2,
+  tier: 0,
+  basePrice: 400,
+  enchantLimit : 0,
+  levelMinimum : 1,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  possibleArts : [],
+  blockPoints : 1,
+
+  equipMod : StatSet.new(
+    ATK: 2, // well. its hard!
+    DEF: 2, // well. its hard!
+    SPD: -10,
+    DEX: -20
+  ),
+  useEffects : [
+    'base:escape-dungeon',
+    'base:consume-item'
+  ],
+  equipEffects : [],
+  traits : 
+    TRAIT.STACKABLE
+  ,
+  onCreate ::(item, creationHint) {
+    item.data.RAW_MATERIAL = 'base:iron';
+  }
+
+})   
+
 
 Item.database.newEntry(data : {
   name : "Iron Ingot",
@@ -3177,7 +3213,33 @@ Item.database.newEntry(data : {
   }
 }) 
 
+Item.database.newEntry(data : {
+  name : "Item Box",
+  id : 'base:item-box',
+  description: "What\'s inside is not known. The stars indicate its rarity.",
+  examine : 'Its abilities are unknown.',
+  equipType: TYPE.TWOHANDED,
+  rarity : 500,
+  weight : 0,
+  tier: 999,
+  enchantLimit : 40,
+  levelMinimum : 1,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  basePrice: 10,
+  possibleArts : [],
 
+  blockPoints : 0,
+  equipMod : StatSet.new(
+  ),
+  useEffects : [
+  ],
+  equipEffects : [],
+  traits :     
+    TRAIT.UNIQUE
+  ,
+  onCreate ::(item, creationHint) {
+  }
+}) 
 
   
 ::<= {
@@ -3277,7 +3339,7 @@ none.name = 'None';
   return 100 ** (1 + 0.104*level);
 }
 
-@:recalculateName = ::(state) {
+@:recalculateName = ::(state) {  
   when(state.needsAppraisal) 
     state.customName = '???? ' + state.base.name;
 
@@ -3410,6 +3472,33 @@ none.name = 'None';
   return out;
 }
 
+@:getStars::(item) {
+  @:price = Item.BUY_PRICE_MULTIPLIER * item.price;
+  when(item.base.id == 'base:none') 0;
+  when(price < 40)     1;
+  when(price < 90)     2;
+  when(price < 150)    3;
+  when(price < 300)    4;
+  when(price < 700)    5;
+  when(price < 1200)   6;
+  when(price < 2400)   7;
+  when(price < 5000)   8;
+  when(price < 8000)   9;
+  when(price < 10000)  10;
+  when(price < 100000) 11;
+  return 12;
+}
+
+@:starsToString::(item) {
+  when (item.needsAppraisal) '???';
+  @out = ''
+  for(0, item.stars) ::(i) {
+    if (i%5 == 0 && i > 0)
+      out = out + '/'  
+    out = out + '*';
+  }
+  return out;
+}
 
 
 
@@ -3460,7 +3549,7 @@ none.name = 'None';
     worldID : -1,
     faveMark : '',
     needsAppraisal : false,
-    appraisalCount : 0
+    appraisalCount : 0,
 
   },
   
@@ -3667,11 +3756,31 @@ none.name = 'None';
       
       base.onCreate(item:this, creationHint);
       recalculateName(*_);
+
       
       return this;
       
     },
-     
+    boxUp ::{
+      when(_.this.base.id == 'base:item-box') 
+        _.this;
+      @:box = Item.new(
+        base: Item.database.find(:'base:item-box')
+      );
+      box.data.boxed = _.this.save();
+      box.data.stars = starsToString(:_.this);
+      box.name = 'Item box: ' + starsToString(:_.this);
+      return box;
+    },
+    
+    unbox :: {
+      if (_.state.base.id != 'base:item-box')
+        error(:'Tried to unbox something that isnt a box. Not good!!!');
+        
+      @:a = Item.new(base:Item.database.find(id:'base:none'));
+      a.load(:_.state.data.boxed);
+      return a;
+    },
 
     base : {
       get :: {
@@ -3873,6 +3982,14 @@ none.name = 'None';
     improvementEXPtoNext : {
       get ::<- _.state.improvementEXPtoNext
     },
+    
+    stars : {
+      get ::<- getStars(:_.this)
+    },
+    
+    starsString : {
+      get ::<- starsToString(:_.this)
+    },
 
     improve ::(exp) {
       @:state = _.state;
@@ -3917,7 +4034,7 @@ none.name = 'None';
           this.name + ': Use Effects'
         ],
         set : [
-          this.description,
+          this.description + '\n\nRarity: ' + (if (this.data.stars == empty) starsToString(:this) else this.data.stars),
           
           if (state.enchants->keycount != 0) ::<= {
             @out = '';

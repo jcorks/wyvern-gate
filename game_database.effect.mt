@@ -5145,6 +5145,41 @@ Effect.newEntry(
   }
 )
 
+Effect.newEntry(
+  data : {
+    name : 'Escape Dungeon',
+    id : 'base:escape-dungeon',
+    description : 'Escape from a dungeon. Loses half of collected loot.',
+    stackable : false,
+    blockPoints :0,
+    traits : TRAIT.SPECIAL,
+    stats : StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        @:world = import(module:'game_singleton.world.mt');
+        when (world.battle.isActive)
+          windowEvent.queueMessage(:"The presence of combatants causes the escape attempt to fail!");
+
+        when(world.party.isMember(:holder) == false)
+          empty;
+
+        @loot = random.scrambled(:world.party.inventory.loot);
+        if (loot->size > 2) ::<= {
+          loot = loot->subset(from:0, to:(loot->size/2)->floor);
+          foreach(loot) ::(k, v) {
+            world.party.inventory.remove(:v);
+          }
+        }
+          
+        @:instance = import(:'game_singleton.instance.mt');
+        instance.visitCurrentIsland();
+        windowEvent.queueMessage(text:'The party escaped the dungeon.');
+      }
+    }
+  }
+);
+
+
 
 Effect.newEntry(
   data : {

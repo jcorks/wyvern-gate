@@ -189,10 +189,8 @@ MapEntity.Task.database.newEntry(
     return nearby;
   }
 
-  @:aggressive = ::(speed, data, mapEntity, noAttackParty, onDeath, interestDistance) {
+  @:aggressive = ::(speed, data, mapEntity, noAttackParty, onDeath) {
     @:map = mapEntity.controller.map;
-    if (interestDistance == empty)
-      interestDistance = INTEREST_DISTANCE;
     when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE && (noAttackParty == empty)) ::<= {
       @:pos = mapEntity.position;
       @:landmark = mapEntity.controller.landmark;
@@ -264,6 +262,9 @@ MapEntity.Task.database.newEntry(
     @closest = empty;
     @squabbled = false;
     foreach(nearby) ::(i, itemOther) {
+      when (itemOther.data->type != mapEntity->type) empty;
+
+    
 
       // swarming enemies dont attack each other
       when (itemOther.data != empty && // filter out pointer
@@ -287,7 +288,6 @@ MapEntity.Task.database.newEntry(
       }
                 
       if (dist < CONTACT_DISTANCE) ::<= {
-
         mapEntity.squabble(other:itemOther.data);
         squabbled = true;
       }

@@ -623,9 +623,15 @@
         get ::<- landmark,
         set ::(value) {
           @:Landmark = import(module:'game_mutator.landmark.mt');
-
+          @:oldLandmark = landmark;
           if (landmark != empty && landmark.base.hasTraits(:Landmark.TRAIT.EPHEMERAL))
             landmark.unloadContent();
+            
+          @:isMean::(landmark) <- landmark != empty &&
+                                  landmark.base.landmarkType == Landmark.TYPE.DUNGEON &&
+                                  landmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN)
+
+          @:isNotMean::(landmark) <- !isMean(landmark);
             
           landmark = value
           state.currentLandmarkID = -1;
@@ -636,7 +642,11 @@
               quest.enterLandmark(:landmark);
             }
           }
-
+          if (isMean(:oldLandmark) && isNotMean(:landmark))
+            this.party.leaveDungeon(:oldLandmark);
+          
+          if (isNotMean(:oldLandmark) && isMean(:landmark))
+            this.party.enterDungeon(landmark);
         }
       },
       
