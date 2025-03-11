@@ -3286,7 +3286,6 @@ Effect.newEntry(
       },        
       
       onNextTurn ::(from, item, holder, duration) {
-        when(holder.hp == 0) empty;
         windowEvent.queueMessage(text:holder.name + " was healed by the regeneration rune.");
         holder.heal(amount:1);
       }

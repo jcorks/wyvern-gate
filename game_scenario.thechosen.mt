@@ -4413,6 +4413,7 @@ for(0, 20) ::(i) {
           ['', 'The party receives 3 Potions.'],
           ['', 'The party receives a Life Crystal.'],
           ['', 'The party receives an Arts Crystal.'],
+          ['', 'The party receives an Escape Stone.'],
           ['', 'The party also receives an equippable Tome.'],
           ['', 'There\'s also a note here...'],
           ::(location, landmark, doNext) {
@@ -4451,6 +4452,10 @@ for(0, 20) ::(i) {
               creationHint:'base:how-to-fight'
             ));
 
+            world.party.inventory.add(item:Item.new(
+              base:Item.database.find(id:'base:escape-stone'),
+              creationHint:0
+            ));
 
             world.party.inventory.add(item:Item.new(
               base:Item.database.find(id:'base:potion'),

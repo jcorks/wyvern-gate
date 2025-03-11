@@ -110,7 +110,7 @@
       },
       
       defaultLoad ::{
-        state.hasBeast = if (landmark_.floor > 0) true else false;      
+        state.hasBeast = if (landmark_.floor > 0 && random.try(percentSuccess:10)) true else false;      
       },
       
       step::{

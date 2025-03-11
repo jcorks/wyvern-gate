@@ -2696,7 +2696,8 @@ Interaction.newEntry(
                       @betOnA = choice == 1;
                       
                       @:world = import(module:'game_singleton.world.mt');
-                      
+                      // Sorry, cheaters!
+                      random.freeze();
                       world.battle.start(
                         party,              
                         allies: teamA.members,
@@ -2707,7 +2708,7 @@ Interaction.newEntry(
                             canvas.blackout();                          
                           }
                         },
-                        onTurn ::{
+                        onTurn ::(landmark, entity, battle) {
                           if (random.number() < 0.7) ::<= {
                             windowEvent.queueMessage(text:random.pickArrayItem(list:[
                               '"YEAH, tear them limb from limb!"',
@@ -2721,6 +2722,7 @@ Interaction.newEntry(
                         },
                         npcBattle: true,
                         onEnd::(result) {
+                          random.thaw();
                           @aWon = {:::} {
                             foreach(result) ::(k ,entity) {
                               foreach(teamA.members) ::(i, member) {
@@ -2831,8 +2833,17 @@ Interaction.newEntry(
         windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
       }
       
-      foreach(items)::(i, item) {
-        windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
+      if (items->size == 1) ::<= {      
+        windowEvent.queueMessage(text:'The party found ' + correctA(word:items[0].name) + '.');
+      } else ::<= {
+        @note = [];
+        foreach(items)::(i, item) {
+          note->push(:' - ' + correctA(word:item.name) + '\n');
+        }
+        
+        windowEvent.queueMessage(text:'The party found...\n\n' + 
+          String.combine(:note)
+        );      
       }
       
       foreach(items)::(i, item) {
@@ -2841,7 +2852,7 @@ Interaction.newEntry(
       location.inventory.clear();
 
     
-      @:amount = (20 + random.number()*75)->floor;
+      @:amount = (20 + random.number()*20)->floor;
       windowEvent.queueMessage(text:'The party found ' + g(g:amount) + '.');
       world.party.addGoldAnimated(amount, onDone::{});  
 

@@ -35,6 +35,7 @@
     members : empty,
     karma : 5500,
     arts : [],
+    queuedArts : [],
     leader : 0,
     inDungeon : false,
     guildRank : -1,
@@ -55,7 +56,6 @@
       reset ::{
         state.members = [];
         state.inventory = Inventory.new(size:40);
-        state.haul = Inventory.new(size:9999);
       },
       
       leader : {
@@ -237,30 +237,61 @@
             )
           ]        
           
-        @:ArtsDeck = import(:'game_class.artsdeck.mt');
-      
-        @:newArtRender ::(art){
-          ArtsDeck.renderArt(
-            handCard:ArtsDeck.synthesizeHandCard(id:art.id),
-            topWeight: 0
-          );
+        when (state.inDungeon) ::<= {
+          state.queuedArts = [...state.queuedArts, ...(arts->map(::(value) <- value.id))];
         }
+      
+      
+        if (arts->size <= 2) ::<= {    
+          @:ArtsDeck = import(:'game_class.artsdeck.mt');
+        
+          @:newArtRender ::(art){
+            ArtsDeck.renderArt(
+              handCard:ArtsDeck.synthesizeHandCard(id:art.id),
+              topWeight: 0
+            );
+          }
 
-        foreach(arts) ::(k, v) {      
-          this.addSupportArt(id:v.id);
+          foreach(arts) ::(k, v) {      
+            this.addSupportArt(id:v.id);
+            windowEvent.queueMessage(
+              topWeight: 1,
+              text: 'A new Art has been revealed!',
+              renderable : {
+                render :: {newArtRender(:v);}
+              }
+            );
+          }
+
+
+        } else ::<= {
           windowEvent.queueMessage(
             topWeight: 1,
-            text: 'A new Art has been revealed!',
-            renderable : {
-              render :: {newArtRender(:v);}
-            }
+            text: 'New Arts have been revealed!'
           );
-        }
 
+
+          @:pickArt = import(:'game_function.pickart.mt');
+          @:artIDs = arts->map(::(value) <- value.id);
+          pickArt(
+            onGetList::<- artIDs,
+            keep: true,
+            canCancel: true,
+            prompt: 'New Arts!',
+            onChoice ::(art, category) {
+            },
+            onCancel ::{
+              foreach(arts) ::(k, v) {      
+                this.addSupportArt(id:v.id);
+              }
+            }
+          );        
+        }
 
         windowEvent.queueMessage(
           text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'
         );      
+
       },
       
       addSupportArt ::(id => String) {
@@ -412,7 +443,7 @@
                 when(a.stars > b.stars)  1;
                 return 0;
               });
-              @:inv = Inventory.new();
+              @:inv = Inventory.new(size:99999);
               foreach(items) :: (k, v) {
                 inv.add(:v);
               }
@@ -447,7 +478,13 @@
                   }
                 }
               );
-
+              
+              if (state.queuedArts->size) ::<= {
+                this.queueCollectSupportArt(
+                  :(state.queuedArts->map(::(value) <- Arts.find(:value)))
+                );              
+                state.queuedArts = [];
+              }              
             }
           }
         );

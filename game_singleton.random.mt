@@ -22,6 +22,7 @@ return class(
   name : 'Wyvern.random',
   
   define:::(this) {
+    @frozen = false;
     // This example implements a version of the TT800 Random Number Generator 
     // published by Makoto Matsumoto in 1996.
     @:tt800 = ::<= {
@@ -74,6 +75,9 @@ return class(
         
         // Returns the next rng number 0 through 1
         next::{
+          when (frozen)
+            Number.random()
+            
           if (index == SEED_COUNT) ::<= {
             interface.twist();
           }
@@ -209,6 +213,9 @@ return class(
         }
         return output;
       },
+      
+      freeze ::<- frozen = true,
+      thaw ::<- frozen = false,
       
       flipCoin:: <- tt800.next() < 0.5,
       

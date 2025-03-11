@@ -2547,7 +2547,7 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
-  blockPoints : 1,
+  blockPoints : 0,
 
   equipMod : StatSet.new(
     ATK: 2, // well. its hard!
@@ -3494,7 +3494,7 @@ none.name = 'None';
   @out = ''
   for(0, item.stars) ::(i) {
     if (i%5 == 0 && i > 0)
-      out = out + '/'  
+      out = out + ' '  
     out = out + '*';
   }
   return out;
@@ -4034,7 +4034,7 @@ none.name = 'None';
           this.name + ': Use Effects'
         ],
         set : [
-          this.description + '\n\nRarity: ' + (if (this.data.stars == empty) starsToString(:this) else this.data.stars),
+          this.description + '\n\nValue: ' + (if (this.data.stars == empty) starsToString(:this) else this.data.stars),
           
           if (state.enchants->keycount != 0) ::<= {
             @out = '';

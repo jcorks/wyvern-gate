@@ -583,9 +583,7 @@ MapEntity.Task.database.newEntry(
         @closestDist = 1000000;
         @closest;
         @squabbled = false;
-        foreach(nearby) ::(i, itemOther) {
-          when(itemOther.data->type != MapEntity.type) empty;
-          
+        foreach(nearby) ::(i, itemOther) {          
           @dist = distance(
             x0: item.x,
             y0: item.y,
@@ -1198,6 +1196,8 @@ import(module:'game_class.landmarkevent_treasuregolem.mt');
 import(module:'game_class.landmarkevent_thesnakesiren.mt');
 import(module:'game_class.landmarkevent_mimic.mt');
 import(module:'game_class.landmarkevent_slime.mt');
+import(module:'game_class.landmarkevent_chair.mt');
+import(module:'game_class.landmarkevent_shadowling.mt');
 
 
 

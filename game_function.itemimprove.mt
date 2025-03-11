@@ -135,7 +135,7 @@
 
   
   windowEvent.queueChoices(
-    prompt: 'Choose an item to use.',
+    prompt: 'Choose an item to use as material.',
     choices:[...others]->map(to:::(value) <- value.name),
     canCancel:true,
     onChoice::(choice) {

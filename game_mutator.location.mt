@@ -1384,18 +1384,20 @@ Location.database.newEntry(data:{
   
   onCreate ::(location) {
     @:story = import(module:'game_singleton.story.mt');
-    location.inventory.add(item:
-      Item.new(
-        base:Item.database.getRandomFiltered(
-          filter:::(value) <- 
-            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-            value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
-            value.tier <= location.landmark.island.tier
-        ),
-        rngEnchantHint:true, 
-        forceEnchant:true
-      ).boxUp()
-    );
+    for(0, 2) ::(i) {
+      location.inventory.add(item:
+        Item.new(
+          base:Item.database.getRandomFiltered(
+            filter:::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
+              value.tier <= location.landmark.island.tier
+          ),
+          rngEnchantHint:true, 
+          forceEnchant:true
+        ).boxUp()
+      );
+    }
   },
   
   onIncrementTime::(location, time) {
@@ -1483,7 +1485,7 @@ Location.database.newEntry(data:{
     location.lockWithPressurePlate();  
   
     @:story = import(module:'game_singleton.story.mt');
-    for(0, 3) ::{
+    for(0, 4) ::{
       location.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
