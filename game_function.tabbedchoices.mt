@@ -29,7 +29,7 @@
     if (k == selected) ::<= {
       if (k != 0)
         line = line + '['
-      line = line + (tabs[selected])
+      line = line + '  ' + (tabs[selected]) + '  '
       if (k != tabs->size-1)
         line = line + ']'
       found = true;
@@ -49,15 +49,21 @@ return ::(*args) {
   when (args.prompt != empty || args.onGetPrompt != empty)
     error(detail:"Prompt is overridden by tabbed choices!");
 
+  @widget = if (args.columns)
+    import(:'game_function.choicescolumns.mt')
+  else 
+    windowEvent.queueChoices
 
   @inputNext = windowEvent.CURSOR_ACTIONS.RIGHT;
   @inputPrev = windowEvent.CURSOR_ACTIONS.LEFT;
-
+  @lastInput = inputNext;
 
 
   @:onInput::(input) {
     when(input != inputNext &&
          input != inputPrev) empty;
+  
+    lastInput = input;
 
     @offset = if (input == inputNext) 1 else -1;
 
@@ -78,43 +84,70 @@ return ::(*args) {
 
   @:realOnGetChoices = args.onGetChoices;
 
-  args.onGetChoices = ::<-
-    realOnGetChoices(
-    )[tabIndex]
+  args.onGetChoices = :: {
+    @origTab = tabIndex;
+    @out;
+    {:::} {
+      forever ::{
+        out = realOnGetChoices(
+          :tabIndex
+        )
+
+        when(out != empty) 
+          send();
+        
+        onInput(:lastInput);
+        if (tabIndex == origTab)  
+          error(:"No items available for this tabbed choice widget!");
+      }
+    }
+    return out;
+  }
 
   @:realOnChoice = args.onChoice;
   args.onChoice = ::(choice) {
     realOnChoice(choice, tab:tabIndex);
   }
 
-  args.onGetMinWidth = ::() {
-    @:all = realOnGetChoices()
-    @min = 0;
-    foreach(all) ::(k, cat) {
-      foreach(cat) ::(k, name) {
-        if (min < name->length)
-          min = name->length
-      }
+  if (args.onHover) ::<= {
+    @:realOnHover = args.onHover;
+    args.onHover = ::(choice) {
+      realOnHover(choice, tab:tabIndex);
     }
-    return min
   }
 
-  args.onGetMinHeight = ::() {
-    @:all = realOnGetChoices()
-    @min = 0;
-    foreach(all) ::(k, cat) {
-      if (min < cat->size)
-        min = cat->size
+
+  if (args.onGetMinWidth == empty)
+    args.onGetMinWidth = ::() {
+      @min = 0;
+      foreach(tabs) ::(k, v) {
+        @:all = realOnGetChoices(:k)
+        foreach(all) ::(k, name) {
+          if (min < name->length)
+            min = name->length
+        } 
+      }
+      return min
     }
-    return min;
-  }
+
+  if (args.onGetMinHeight == empty)
+    args.onGetMinHeight = ::() {
+      @min = 0;
+      foreach(tabs) ::(k, v) {
+        @:all = realOnGetChoices(:k)
+        if (min < all->size)
+            min = all->size
+        
+      }
+      return min;
+    }
 
   args.onGetPrompt = ::<-
     renderPrompt(tabs, selected:tabIndex);
   
   args.onInput = onInput;
 
-  windowEvent.queueChoices(
+  widget(
     *args    
   );
 }

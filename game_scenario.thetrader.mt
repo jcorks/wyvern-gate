@@ -4083,6 +4083,7 @@ return {
     Item.database.newEntry(data : {
       name : "Wyvern Key",
       id : 'thetrader:wyvern-key',
+      sortType : Item.SORT_TYPE.KEYS,
       description: 'A key to your home where your shop is. The key is huge, dense, and requires 2 hands to wield. In fact, it is so large and sturdy that it could even be wielded as a weapon in dire circumstances.',
       examine : '',
       equipType: Item.TYPE.TWOHANDED,
@@ -4121,6 +4122,7 @@ return {
     Item.database.newEntry(data : {
       name : "Crate",
       id : 'thetrader:crate',
+      sortType : Item.SORT_TYPE.MISC,
       description: 'A sizeable container full of raw material. Can be quite expensive.',
       examine : '',
       equipType: Item.TYPE.HAND,
@@ -4156,6 +4158,7 @@ return {
     Item.database.newEntry(data : {
       name : "Shipment",
       id : 'thetrader:shipment',
+      sortType : Item.SORT_TYPE.MISC,
       description: 'A large container full of raw material. One person can barely lift it alone. Can be quite expensive.',
       examine : '',
       equipType: Item.TYPE.HAND,

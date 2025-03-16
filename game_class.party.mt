@@ -43,13 +43,15 @@
     guildEXPtoNext : 100,
     guildTeamName : '',
     activeQuests : [],
-    completedQuests : []
+    completedQuests : [],
+    bank : empty
   },
 
   define:::(this, state) {   
         
     this.interface = {  
-      initialize :: {},
+      initialize :: {
+      },
       defaultLoad ::{      
         state.members = [];
       },
@@ -132,6 +134,15 @@
       inventory : {
         get :: <- state.inventory
       },
+
+      bank : {
+        get :: {
+          if (state.bank == empty)
+            state.bank = Inventory.new(size:999999);                        
+          return state.bank
+        }
+      },
+
       
       isMember::(entity => Entity.type) {
         return state.members->any(condition:::(value) <- value == entity);

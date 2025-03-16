@@ -1287,11 +1287,12 @@ Interaction.newEntry(
       @:pickItem = import(module:'game_function.pickitem.mt');
       pickItem(
         inventory:party.inventory,
+        tabbed: true,
         canCancel: true,
         leftWeight: 0.5,
         topWeight: 0.5,
         showPrices : true,
-        onGetPrompt:: <-  'Sell which? (current: ' + g(g:party.inventory.gold) + ')',
+        //onGetPrompt:: <-  'Sell which? (current: ' + g(g:party.inventory.gold) + ')',
         goldMultiplier: Item.SELL_PRICE_MULTIPLIER,
         header : ['Item', 'Price', ''],
         onPick::(item) {

@@ -244,10 +244,16 @@
     },
     
     viewCards ::(user, cards, onChoice, canCancel) {
-      when(cards->size == 0)
-        windowEvent.queueMessage(
-          text: user.name + ' has no Arts in their hand.'
-        );
+      when(cards->size == 0) ::<= {
+        if (user == empty) 
+          windowEvent.queueMessage(
+            text: 'There were no Arts in hand.'
+          )
+        else 
+          windowEvent.queueMessage(
+            text: user.name + ' has no Arts in their hand.'
+          );
+      }
     
 
       windowEvent.queueChoices(

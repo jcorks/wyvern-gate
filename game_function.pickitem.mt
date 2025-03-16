@@ -19,6 +19,33 @@
 @:Inventory = import(module:'game_class.inventory.mt');
 @:choicesColumns = import(module:'game_function.choicescolumns.mt');
 @:g = import(module:'game_function.g.mt');
+@:Item = import(:'game_mutator.item.mt');
+
+// needed to preserve order
+@:tabbedReqKeys = [
+  'Usables',
+  'Weapons',
+  'Armor / Clothes',
+  'Accessories',
+  'Keys',
+  'Misc',
+  'Loot',
+  'All',
+]
+@:tabbedReqs = [
+  Item.SORT_TYPE.USABLES,
+  Item.SORT_TYPE.WEAPON,
+  Item.SORT_TYPE.ARMOR_CLOTHES,
+  Item.SORT_TYPE.ACCESSORIES,
+  Item.SORT_TYPE.KEYS,
+  Item.SORT_TYPE.MISC,
+  Item.SORT_TYPE.LOOT,
+  empty
+]
+
+
+
+@:STATIC_HEIGHT = 10;
 
 
 
@@ -41,12 +68,72 @@ return ::(
   showPrices, 
   showRarity,
   goldMultiplier, 
-  header
+  header,
+  tabbed,
+  includeLoot
 ) {
   @names = []
   @items = []
   @picked;
   @cancelled = false;
+    
+
+  @:prepTabbedChoices ::(args) {
+    if (filter != empty) 
+      error(:"Sorry, buddy: The pickitem interface only supports tabs when a filter isnt set!");
+
+    args->remove(:'prompt');
+    args.columns = true;
+
+    args.onGetTabs = ::{
+      return tabbedReqKeys
+    }
+    
+    @:preTag = args.onGetChoices;
+    args.onGetChoices = ::(tab) {
+      filter = ::(value) <- tabbedReqs[tab] == empty || value.base.sortType == tabbedReqs[tab];
+      return preTag();
+    }
+    
+    args.onGetMinHeight = ::<- STATIC_HEIGHT + 3;
+    args.onGetMinWidth = ::{
+      @:oldFilter = filter;
+      filter = empty;
+      @min = 0;
+      @:lists = listGenerator();
+      foreach(lists[0]) ::(n, v) {
+        @len = 4;
+        for(0, 3) ::(i) {
+          len += lists[i][n]->length + 2;
+        }
+        if (len > min)
+          min = len
+      }
+      filter = oldFilter
+      return min;
+    }
+    
+    
+    args.onChoice = ::(choice, tab) {
+      when(choice == 0) empty;
+      listGenerator(); // refresh items list
+      picked = items[choice-1];
+      when(picked == empty) empty;
+      onPick(item:picked)    
+    }
+
+    if (args.onHover) ::<= {
+      args.onHover = ::(choice, tab) {
+        breakpoint();
+        when(choice == 0) empty;
+        listGenerator(); // refresh items list
+        picked = items[choice-1];
+        when(picked == empty) empty;
+        onHover(item:picked)    
+      }
+    }
+    
+  }  
 
   @:gold = ::(value) {
     @go = value.price * goldMultiplier;
@@ -59,14 +146,77 @@ return ::(
       g(g:go);
   }
 
+  @:listGenerator = ::{
+    @:Item = import(:'game_mutator.item.mt'); 
+  
+    items = if (includeLoot)
+      [...inventory.items, ...inventory.loot]
+    else 
+      [...inventory.items]
+    
+    
+    if (filter != empty)
+      items = items->filter(by:filter)
+      
+    when(items->size == 0)
+      empty;
+
+    @:alreadyCounted = [];
+
+    items = items->filter(::(value) {
+      when(value.base.hasNoTrait(:Item.TRAIT.STACKABLE)) true;
+      if (alreadyCounted[value.base.id] == empty) 
+        alreadyCounted[value.base.id] = 0;
+      alreadyCounted[value.base.id] += 1;
+      when(alreadyCounted[value.base.id] == 1) true;
+      return false;
+    });
+
+    names = [...items]->map(to:::(value) <- 
+      if ((alternateNames != empty) && alternateNames[value])
+        alternateNames[value]
+      else 
+        value.name
+    );
+    
+    @:amounts = items->map(to:::(value) <-
+      if (alreadyCounted[value.base.id]->type == Number && alreadyCounted[value.base.id] > 1)
+        '(x'+alreadyCounted[value.base.id]+')' 
+      else if (value.faveMark != '')
+        ' ' + value.faveMark
+      else
+        ''
+    );
+    
+    when(names->size == 0)
+      [[''], [''], ['']]
+    
+    when(showRarity) ::<={
+      @:rarities = items->map(::(value) <-
+        value.starsString
+      );
+
+      return [names, rarities, amounts];
+    
+    }
+    @:prices = items->map(to:::(value) <- 
+      if (showPrices != true) 
+        ''
+      else
+        gold(:value)
+    )
+    
+
+    return [names, prices, amounts];
+  }
+
   windowEvent.queueNestedResolve(
     onEnter :: {
       when(inventory.items->size == 0) ::<={
         windowEvent.queueMessage(text: "The inventory is empty.");
       }
     
-    
-      choicesColumns(
+      @:args = {
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
         prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
@@ -75,7 +225,7 @@ return ::(
         jumpTag: 'pickItem',
         separator: '|',
         leftJustified : [true, if(showRarity)true else false, true],
-        pageAfter: pageAfter,
+        pageAfter: STATIC_HEIGHT+2,
         header : header,
         onCancel::{cancelled = true;},
         onHover : if (onHover)
@@ -86,64 +236,21 @@ return ::(
         else 
           empty,
         renderable : renderable,
-        onGetChoices ::{
-          @:Item = import(:'game_mutator.item.mt'); 
-        
-          items = if (filter != empty)
-            inventory.items->filter(by:filter)
-          else  
-            [...inventory.items]
-          ;
-          @:alreadyCounted = [];
-
-          items = items->filter(::(value) {
-            when(value.base.hasNoTrait(:Item.TRAIT.STACKABLE)) true;
-            if (alreadyCounted[value.base.id] == empty) 
-              alreadyCounted[value.base.id] = 0;
-            alreadyCounted[value.base.id] += 1;
-            when(alreadyCounted[value.base.id] == 1) true;
-            return false;
-          });
-
-          names = [...items]->map(to:::(value) <- 
-            if ((alternateNames != empty) && alternateNames[value])
-              alternateNames[value]
-            else 
-              value.name
-          );
-          
-          @:amounts = items->map(to:::(value) <-
-            if (alreadyCounted[value.base.id]->type == Number && alreadyCounted[value.base.id] > 1)
-              '(x'+alreadyCounted[value.base.id]+')' 
-            else if (value.faveMark != '')
-              ' ' + value.faveMark
-            else
-              ''
-          );
-          when(showRarity) ::<={
-            @:rarities = items->map(::(value) <-
-              value.starsString
-            );
-
-            return [names, rarities, amounts];
-          
-          }
-          @:prices = items->map(to:::(value) <- 
-            if (showPrices != true) 
-              ''
-            else
-              gold(:value)
-          )
-
-          return [names, prices, amounts];
-        },
+        onGetChoices ::<- listGenerator(),
         keep: if (keep == empty) true else keep,
-        onChoice ::(choice) {
+        onChoice ::(choice, tab) {
           when(choice == 0) empty;
           picked = items[choice-1];
-          onPick(item:picked)
+          onPick(item:picked);
         }
-      );
+      }
+      
+      if (tabbed) ::<= {
+        prepTabbedChoices(:args);
+        (import(:'game_function.tabbedchoices.mt'))(*args);
+      } else 
+        choicesColumns(*args);
+
     },
     
     onLeave ::{

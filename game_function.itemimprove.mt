@@ -7,8 +7,6 @@
 
 @:levelUp::(item, user, onDone) {
   @:statChoices = [
-    'HP',
-    'AP',
     'ATK',
     'INT',
     'DEF',

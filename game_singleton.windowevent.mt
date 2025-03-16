@@ -416,7 +416,7 @@
       @:onChoice = data.onChoice;
       @:onHover = data.onHover;
       @:pageAfter = data.pageAfter;
-      @:header = if (data.onGetHeader) data.onGetHeader() else data.header;
+      @header = data.header;
       @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
 
       when (requestAutoSkip) false;
@@ -433,6 +433,9 @@
       
       if (choice != empty || data.rendered == empty) ::<= {
         @:choices = if (data.onGetChoices) data.onGetChoices() else data.choices;
+        if (data.onGetHeader) 
+          header = data.onGetHeader();
+          
         // no choices
         when(choices == empty || choices->keycount == 0) exitEmpty = true;
         

@@ -364,6 +364,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:smithing-hammer');
     addMissing(id:'base:wyvern-key');
     addMissing(id:'base:escape-stone');
+    addMissing(id:'base:storage-stone', minCount:3);
     addMissing(id:'base:life-crystal');
     addMissing(id:'base:potion', minCount:5);
     addMissing(id:'base:scroll', minCount:3);

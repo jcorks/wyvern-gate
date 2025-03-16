@@ -114,7 +114,6 @@
   
     this.interface = {
       initialize::(parent) {
-        breakpoint();
         @landmark = parent.landmark;
         map_ = landmark.map;
         island_ = landmark.island;

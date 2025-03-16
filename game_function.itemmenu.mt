@@ -325,6 +325,8 @@ return ::(
   
 
   pickItem(
+    tabbed: true,
+    includeLoot : true,
     inventory:party.inventory,
     renderable, 
     leftWeight: if (leftWeight == empty) 1 else leftWeight,
@@ -332,6 +334,7 @@ return ::(
     canCancel:true, 
     pageAfter:12,
     showRarity:true,
+    header : ['Item', 'Value', ''],
     prompt: if (limitedMenu) 'Inventory...' else (user.name + ' - Choosing...'),
     onPick::(item) {
       choiceItem = item;

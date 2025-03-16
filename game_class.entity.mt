@@ -587,6 +587,21 @@
               text: 'To view this new art, visit the Arts menu for ' + this.name + ' in the party menu.'
             );
             
+            windowEvent.queueMessage(
+              text: this.name + '\'s fortitude increased.'
+            );
+            
+            @:oldStats = StatSet.new();
+            oldStats.load(serialized:this.stats.save());
+            @:newState = this.stats.save();
+            newState['HP'] += 1;
+            this.stats.load(serialized:newState);
+            
+            oldStats.printDiff(
+              other:this.stats,
+              prompt: 'New stats: ' + this.name
+            );            
+            
             when (set.level >= profession.arts->size) 
               if (onDone) onDone();
             
@@ -2988,7 +3003,7 @@
                 leftWeight: 1,
                 topWeight: 1,
                 onGetTabs ::<- ['Enemies', 'Allies'],
-                onGetChoices::<- choiceNames,
+                onGetChoices::(tab) <- choiceNames[tab],
                 canCancel: if (canCancel == empty) true else canCancel,
                 onChoice::(choice, tab) {
                   when(choice == 0) empty;

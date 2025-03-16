@@ -1,3 +1,20 @@
+/*
+  Wyvern Gate, a procedural, console-based RPG
+  Copyright (C) 2025, Johnathan Corkery (jcorkery@umich.edu)
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 @:pickItem = import(module:'game_function.pickitem.mt');
 @:g = import(module:'game_function.g.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
@@ -12,12 +29,13 @@ return ::(inventory, shopkeep, onDone) {
   @:party = world.party;
   @hoveredItem;
   pickItem(
+    tabbed: true,
     inventory,
     canCancel: true,
     leftWeight: 1,
     topWeight: 0.5,
     showPrices : true,
-    onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',
+    //onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',
     goldMultiplier: Item.BUY_PRICE_MULTIPLIER,
     onHover ::(item) {
       hoveredItem = item;

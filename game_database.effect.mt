@@ -5163,20 +5163,263 @@ Effect.newEntry(
           empty;
 
         @loot = random.scrambled(:world.party.inventory.loot);
+        @erased = false;
         if (loot->size > 2) ::<= {
           loot = loot->subset(from:0, to:(loot->size/2)->floor);
           foreach(loot) ::(k, v) {
             world.party.inventory.remove(:v);
           }
+          erased = true;
         }
           
         @:instance = import(:'game_singleton.instance.mt');
         instance.visitCurrentIsland();
-        windowEvent.queueMessage(text:'The party escaped the dungeon.');
+        windowEvent.queueMessage(text:'The party teleported out of the dungeon.');
+        if (erased)
+          windowEvent.queueMessage(text:'The party loses half their loot during the teleportation process');
       }
     }
   }
 );
+
+
+Effect.newEntry(
+  data : {
+    name : 'Access Bank',
+    id : 'base:access-bank',
+    description : 'Access an pocket dimension to transfer inventory to and from.',
+    stackable : false,
+    blockPoints :0,
+    traits : TRAIT.SPECIAL,
+    stats : StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        @:world = import(module:'game_singleton.world.mt');
+
+        when(world.party.isMember(:holder) == false)
+          empty;
+          
+
+        @:pickItem = import(:'game_function.pickitem.mt');
+      
+        @:xferItems = ::(from, to, moveToName) {
+          pickItem(
+            tabbed: true,
+            inventory:from,
+            leftWeight: 0.5,
+            topWeight: 0.5,
+            canCancel:true, 
+            pageAfter:12,
+            showRarity:true,
+            header : ['Item', 'Value', ''],
+            onPick::(item) {
+              @:choiceItem = item;
+              when(choiceItem == empty) empty;
+              windowEvent.queueChoices(
+                leftWeight: 0.5,
+                topWeight: 0.5,
+                prompt: choiceItem.name,
+                canCancel : true,
+                keep:true,
+                jumpTag : 'BANKING-ITEM',
+                choices: [
+                  'Check',
+                  'Move to ' + moveToName
+                ],
+                onChoice::(choice) {
+                  when (choice == 0) empty;        
+                  when (choice == 1) choiceItem.describe();
+                  when (choice == 2) ::<= {
+                    from.remove(:choiceItem);
+                    to.add(:choiceItem);
+                    windowEvent.jumpToTag(name: 'BANKING-ITEM', goBeforeTag: true);
+                  }
+                }
+              );
+            }
+          );         
+        }
+      
+        @:bankedItems = ::{
+          @:inv = world.party.bank;
+          when(inv.isEmpty) ::<= {
+            windowEvent.queueMessage(
+              speaker: 'The banker?',
+              text: '"What\'s the big idea? You don\'t got anything in storage right now!"'
+            );
+          }
+
+          windowEvent.queueMessage(
+            speaker: 'The banker?',
+            text: '"Here\'s what you got in storage. Ahem..."'
+          );
+          
+          xferItems(
+            from:world.party.bank,
+            to:  world.party.inventory,
+            moveToName : 'Inventory'
+          );
+  
+        }
+
+        @:inventoryItems = ::{
+          @:inv = world.party.inventory;
+          when(inv.isEmpty) ::<= {
+            windowEvent.queueMessage(
+              speaker: 'The banker?',
+              text: '"This a joke? You don\'t got anything on you right now!"'
+            );
+          }
+          
+          xferItems(
+            from:world.party.inventory,
+            to:  world.party.bank,
+            moveToName : 'Bank Storage'
+          )
+        }
+
+          
+        @:bankedGold ::{
+          @:inv = world.party.bank;
+          when(inv.gold == 0) 
+            windowEvent.queueMessage(
+              speaker: 'The banker?',
+              text: '"This a joke? You don\'t got any money in the Bank!"'
+            );
+
+          @:num = import(:'game_function.number.mt');
+          num(
+            canCancel : true,
+            onDone::(value) {
+              when (value > inv.gold)
+                windowEvent.queueMessage(
+                  speaker: 'The banker?',
+                  text: '"Huh? Real funny... But we know you don\'t have that much in the Bank."'
+                );
+
+              @amount = value;
+              inv.subtractGold(:amount);
+              world.party.inventory.addGold(:amount);
+            },
+            prompt: 'Take how much? Current: ' + g(:inv.gold)
+          );
+        }
+
+        @:inventoryGold ::{
+          @:inv = world.party.inventory;
+          when(inv.gold == 0) 
+            windowEvent.queueMessage(
+              speaker: 'The banker?',
+              text: '"This a joke? You don\'t got any gold on you!"'
+            );
+
+          @:num = import(:'game_function.number.mt');
+          num(
+            canCancel : true,
+            onDone::(value) {
+              when (value > inv.gold)
+                windowEvent.queueMessage(
+                  speaker: 'The banker?',
+                  text: '"Huh? Real funny... But we both know you don\'t have that on you."'
+                );
+
+              @amount = value;
+              inv.subtractGold(:amount);
+              world.party.bank.addGold(:amount);
+            },
+            prompt: 'Put in how much? Current: ' + g(:inv.gold)
+          );
+        }
+
+
+      
+        windowEvent.queueNestedResolve(
+          onEnter ::{
+            windowEvent.queueMessage(
+              text: 'The stone raises up in the air before flashing in a bright light.'
+            );
+
+            windowEvent.queueMessage(
+              text: 'What seems to be a particularly short Kobold appears from the flash.'
+            );
+
+            // their name is Vasho. Not sure if there's gonna be a chance to learn their name 
+            // yet. maybe in a future side-story quest?
+            windowEvent.queueMessage(
+              speaker: 'The banker?',
+              text: '"Yeah, hey, how you doin\'. Whaddya want?"'
+            );
+
+            windowEvent.queueChoices(
+              prompt: 'Banking...',
+              jumpTag : 'BANKING',
+              keep : true,
+              choices : [
+                'Take from Bank...',
+                'Put in Bank...',
+                'Done'
+              ],
+              canCancel : false,
+              
+              onChoice::(choice) {
+                when(choice == 3)
+                  windowEvent.queueAskBoolean(
+                    prompt: 'Done banking?',
+                    onChoice::(which) {
+                      when(which == true) ::<= {
+                        windowEvent.queueMessage(
+                          prompt: 'Banker?',
+                          text: '"Yeah, yeah. Pleasure doin\' business with ya. Later."'
+                        );
+
+                        windowEvent.queueMessage(
+                          text: 'The Kobold disappears in a flash.'
+                        );
+
+                        windowEvent.goBeforeTag(name: 'BANKING', goBeforeTag:true);
+                      }
+                    }
+                  );              
+              
+                @takeFromBank = choice == 1;
+                windowEvent.queueChoices(
+                  prompt : if (takeFromBank)
+                    'Take from Bank...'
+                   else 
+                    'Put in Bank...',
+                  choices : [
+                    'Items',
+                    'Gold'
+                  ],
+                  canCancel: true,
+                  keep : true,
+                  onChoice::(choice) {
+                    when(choice == 1)
+                      if (takeFromBank)
+                        bankedItems()
+                      else 
+                        inventoryItems()
+                        
+                      if (takeFromBank)
+                        bankedGold()
+                      else 
+                        inventoryGold()
+                    
+                    
+                  }
+                );
+              }
+            );
+          }
+        );
+      }
+    }
+  }
+);
+
+
+
+
 
 
 
