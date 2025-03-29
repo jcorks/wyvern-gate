@@ -243,8 +243,7 @@
             qualityHint: 'base:masterwork',
             colorHint: 'base:black',
             apparelHint: 'base:mythril',
-            forceEnchant: true,
-            enchantHint: ['base:inlet-opal']
+            forceEnchant: true
           );
           fausRobe.maxOut();
 
@@ -575,7 +574,7 @@
       },
       
       MAX_NORMAL_TIER : {
-        get ::<- 3
+        get ::<- 4
       },
       
       day : {

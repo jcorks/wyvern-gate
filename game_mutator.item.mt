@@ -47,9 +47,12 @@
   ACCESSORIES   : 2, // includes rings and amulets and trinkets
   USABLES       : 3,
   KEYS          : 4,
-  MISC          : 5,
-  LOOT          : 6
+  INLET         : 5,
+  MISC          : 6,
+  LOOT          : 7
 }
+
+
 
 @:TYPE = {
   HAND     : 0,   
@@ -79,7 +82,8 @@
   HAS_SIZE      : 2 << 15,
   UNIQUE        : 2 << 16,
   MEANT_TO_BE_USED : 2 << 17,
-  CAN_BE_APPRAISED : 2 << 18
+  CAN_BE_APPRAISED : 2 << 18,
+  HAS_INLET_SLOTS : 2 << 19
 }
 
 
@@ -811,7 +815,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
   ,
   onCreate ::(item, creationHint) {}
@@ -860,7 +865,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
 
   ,
@@ -909,7 +915,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
 
   ,
@@ -961,7 +968,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
     
   ,
@@ -1013,7 +1021,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
     
   ,
@@ -1062,7 +1071,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
 
   ,
@@ -1111,7 +1121,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
 
   ,
@@ -1161,7 +1172,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
 
   ,
@@ -1211,7 +1223,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
 
   ,
@@ -1261,7 +1274,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1309,7 +1323,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1357,7 +1372,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1404,7 +1420,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1451,7 +1468,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1496,7 +1514,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1541,7 +1560,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
 
   ,
   onCreate ::(item, creationHint) {}
@@ -1631,7 +1651,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1677,7 +1698,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1723,7 +1745,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1769,7 +1792,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1824,7 +1848,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR    
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1876,7 +1901,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1924,7 +1950,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -1971,7 +1998,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
 
@@ -2019,7 +2047,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS
   ,
   onCreate ::(item, creationHint) {}
   
@@ -3354,6 +3383,215 @@ Item.database.newEntry(data : {
   }
 }) 
 
+
+::<= {
+@:crystals = {
+  'Teal'     : ['SPD', 'DEX'],
+  'Lavender' : ['DEX', 'ATK'],
+  'Orange'   : ['ATK', 'DEF'],
+  'Indigo'   : ['INT', 'DEF'],
+  'Rose'     : ['INT', 'SPD'],
+  'Cyan'     : ['ATK', 'SPD'],
+  'White'    : ['DEF', 'SPD'],
+  'Violet'   : ['DEX', 'DEF'],
+  'Scarlet'  : ['DEX', 'INT'],
+  'Maroon'   : ['SPD', 'ATK'],
+  'Crimson'  : ['ATK', 'INT'],
+}
+Item.database.newEntry(data : {
+  name : "Crystal",
+  id : 'base:inlet-crystal',
+  description: "An enchanted alchemical crystal. When set in slots on equipment, it can rebalance stats.",
+  examine : 'Its abilities are unknown.',
+  sortType : SORT_TYPE.INLET,
+  equipType: TYPE.HAND,
+  rarity : 500,
+  weight : 0.1,
+  tier: 0,
+  enchantLimit : 40,
+  levelMinimum : 1,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  basePrice: 10000,
+  possibleArts : [],
+
+  blockPoints : 0,
+  equipMod : StatSet.new(
+  ),
+  useEffects : [
+  ],
+  equipEffects : [],
+  traits : 0
+  ,
+  onCreate ::(item, creationHint) {
+    @:kind = random.pickArrayItem(:crystals->keys);
+    
+    @:statsA = {
+      ATK: -1,
+      DEX: -1,
+      SPD: -1,
+      DEF: -1,
+      INT: -1      
+    }
+    foreach(crystals[kind]) ::(k, v) {
+      statsA[v] = 2;
+    }
+    @desc = item.base.description + ": ";
+    foreach(statsA) ::(k, v) {
+      when (k == crystals[kind][0]) empty;
+      when (k == crystals[kind][1]) empty;
+      desc = desc + k + ',';
+    }      
+    desc = desc + ' base -1, ' + crystals[kind][0] + ',' + crystals[kind][1] + ' base +2';
+    //item.description = desc;
+    breakpoint();
+    item.setUpInlet(
+      stats : StatSet.new(*statsA)
+    );
+    @:InletSet = import(:'game_class.inletset.mt');  
+    item.name = kind + ' Crystal (' +
+      (match(item.inletShape) {
+        (InletSet.SLOTS.ROUND) : 'round',
+        (InletSet.SLOTS.TRIANGLE) : 'triangular',
+        (InletSet.SLOTS.SQUARE) : 'square'
+      }) + ')'
+    
+  }
+})   
+}
+
+
+
+
+
+::<= {
+
+@:gems = {
+  'Morion'     : ['SPD', 'DEX'],
+  'Amethyst'   : ['DEX', 'ATK'],
+  'Citrine'    : ['ATK', 'DEF'],
+  'Garnet'     : ['INT', 'DEF'],
+  'Praesolite' : ['INT', 'SPD'],
+  'Aquamarine' : ['ATK', 'SPD'],
+  'Diamond'    : ['DEF', 'SPD'],
+  'Pearl'      : ['DEX', 'DEF'],
+  'Ruby'       : ['DEX', 'INT'],
+  'Sapphire'   : ['SPD', 'ATK'],
+  'Opal'       : ['ATK', 'INT']
+  
+}
+
+Item.database.newEntry(
+  data : {
+    name : '',
+    id : 'base:inlet-gem',
+    description: "An enchanted gemstone. When set in slots on equipment, it can rebalance stats.",
+    examine : 'Its abilities are unknown.',
+    sortType : SORT_TYPE.INLET,
+    equipType: TYPE.HAND,
+    rarity : 500,
+    weight : 0.1,
+    tier: 0,
+    enchantLimit : 40,
+    levelMinimum : 1,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    basePrice: 30000,
+    possibleArts : [],
+
+    blockPoints : 0,
+    equipMod : StatSet.new(
+    ),
+    useEffects : [
+    ],
+    equipEffects : [],
+    traits : 0  
+    ,
+    onCreate ::(item, creationHint) {
+      @:kind = random.pickArrayItem(:gems->keys);
+      
+      @:statsA = {
+        ATK: -1,
+        DEX: -1,
+        SPD: -1,
+        DEF: -1,
+        INT: -1      
+      }
+      foreach(gems[kind]) ::(k, v) {
+        statsA[v] = 2;
+      }
+      @desc = item.base.description + ": ";
+      foreach(statsA) ::(k, v) {
+        when (k == gems[kind][0]) empty;
+        when (k == gems[kind][1]) empty;
+        desc = desc + k + ',';
+      }      
+      desc = desc + ' base -1, ' + gems[kind][0] + ',' + gems[kind][1] + ' base +2';
+      //item.description = desc;
+      
+      item.setUpInlet(
+        stats : StatSet.new(*statsA)
+      );
+
+      @:InletSet = import(:'game_class.inletset.mt');
+      item.name = kind + ' (' +
+        (match(item.inletShape) {
+          (InletSet.SLOTS.ROUND) : 'round',
+          (InletSet.SLOTS.TRIANGLE) : 'triangular',
+          (InletSet.SLOTS.SQUARE) : 'square'
+        }) + ')';
+      item.setUpInlet(
+        stats : StatSet.new(*statsA)
+      );
+    }
+  }
+)
+}
+
+
+Item.database.newEntry(
+  data : {
+    name : '',
+    id : 'base:inlet-soulgem',
+    description: "A soul gem which grants an effect when equipped.",
+    examine : 'Its abilities are unknown.',
+    sortType : SORT_TYPE.INLET,
+    equipType: TYPE.HAND,
+    rarity : 500,
+    weight : 0.1,
+    tier: 4,
+    enchantLimit : 40,
+    levelMinimum : 1,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    basePrice: 70000,
+    possibleArts : [],
+
+    blockPoints : 0,
+    equipMod : StatSet.new(
+    ),
+    useEffects : [
+    ],
+    equipEffects : [],
+    traits : 0  
+    ,
+    onCreate ::(item, creationHint) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:effect = Effect.getRandomFiltered(::(value) <- value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL));
+      item.setUpInlet(
+        effect : effect.id
+      );
+
+      @:InletSet = import(:'game_class.inletset.mt');
+      item.name = effect.name + ' Soul Gem (' +
+        (match(item.inletShape) {
+          (InletSet.SLOTS.ROUND) : 'round',
+          (InletSet.SLOTS.TRIANGLE) : 'triangular',
+          (InletSet.SLOTS.SQUARE) : 'square'
+        }) + ')';
+    }
+  }
+)
+
+
+  
   
 ::<= {
 
@@ -3665,7 +3903,8 @@ none.name = 'None';
     faveMark : '',
     needsAppraisal : false,
     appraisalCount : 0,
-
+    inletData : empty,
+    inletSlotData : empty
   },
   
   database : Database.new(
@@ -3691,7 +3930,7 @@ none.name = 'None';
       tier : Number,
       blockPoints : Number,
       possibleArts : Object,
-      sortType : Number
+      sortType : Number,
     },
     reset     
   ),
@@ -3741,6 +3980,8 @@ none.name = 'None';
           when (chance > 5) 5;
           return chance;
         })) true else false;
+        
+
       
       if (state.needsAppraisal)
         state.price = 999;
@@ -3870,6 +4111,22 @@ none.name = 'None';
       }      
       
       
+      if (base.hasTraits(:TRAIT.HAS_INLET_SLOTS)) ::<= {
+        @:slotCount = match(tier) {
+          (0, 1): 
+            //0,
+            random.integer(from:0, to:7),
+            
+          (2): random.integer(from:0, to:3),
+          (3): random.integer(from:0, to:5),
+          default: random.integer(from:0, to:7)
+        }
+        
+        if (slotCount > 0) ::<= {
+          state.inletSlotData = import(:'game_class.inletset.mt').new(size:slotCount);          
+        }
+      }
+      
       base.onCreate(item:this, creationHint);
       recalculateName(*_);
 
@@ -3981,7 +4238,13 @@ none.name = 'None';
     },
     
     equipModBase : {
-      get ::<- _.state.statsBase
+      get ::{ 
+        when(_.state.inletSlotData == empty)_.state.statsBase
+        @:out = StatSet.new();
+        out.add(:_.state.statsBase);
+        out.add(:_.state.inletSlotData.stats);
+        return out;
+      }
     },
 
     arts : {
@@ -4059,7 +4322,7 @@ none.name = 'None';
       foreach(mod.equipEffects)::(i, effect) {
         state.equipEffects->push(value:effect);
       }
-      state.stats.add(stats:mod.base.equipMod);
+      state.statsBase.add(stats:mod.equipModBase);
       //if (description->contains(key:mod.description) == false)
       //  description = description + mod.description + ' ';
       recalculateName(*_);
@@ -4161,7 +4424,9 @@ none.name = 'None';
             return out;
           } else '',
           
-          String.combine(:state.stats.descriptionRateLinesBase(:state.statsBase)->map(::(value) <- value + '\n')),          
+          
+          
+          String.combine(:state.stats.descriptionRateLinesBase(:this.equipModBase)->map(::(value) <- value + '\n')),          
 
           if (state.equipEffects->keycount != 0) ::<= {
             @out = '';
@@ -4185,6 +4450,10 @@ none.name = 'None';
         ],
         pageAfter:canvas.height-4
       )
+      
+      if (state.inletSlotData)
+        state.inletSlotData.queueShowBasic();
+      
       if (by != empty) ::<= {
         when(by.profession.weaponAffinity != state.base.name) empty;
         windowEvent.queueMessage(
@@ -4196,8 +4465,8 @@ none.name = 'None';
     },
     
     stats : {
-      get ::<- _.state.stats
-    },
+      get ::<-_.state.stats
+    },    
     
     addIntuition :: {
       _.state.intuition += 1;
@@ -4214,6 +4483,59 @@ none.name = 'None';
     faveMark : {
       get ::<- _.state.faveMark,
       set ::(value) <- _.state.faveMark = value
+    },
+    
+    setUpInlet ::(stats, effect) {
+      @:InletSet = import(:'game_class.inletset.mt');
+      _.state.inletData = {
+        stats : if (stats == empty) StatSet.new() else stats,
+        slot  : random.pickArrayItem(:InletSet.SLOTS->values),
+        effect : effect
+      }
+    },
+    
+    inletStats : {
+      get ::{ 
+        when (_.state.inletData == empty) StatSet.new();
+        return _.state.inletData.stats;
+      }
+    },
+
+    inletShape : {
+      get ::{ 
+        when (_.state.inletData == empty) -1;
+        return _.state.inletData.slot;
+      }
+    },
+
+    inletEffect : {
+      get ::{ 
+        when (_.state.inletData == empty) empty;
+        return _.state.inletData.effect;
+      }
+    },
+
+    
+    inletGetDescriptionLines :: {
+      @:Effect = import(module:'game_database.effect.mt');
+      when(_.state.inletData == empty) [];
+      when(_.state.inletData.effect != empty) [
+        'Grants the effect "' + Effect.find(:_.state.inletData.effect) + '":',
+        '',
+        Effect.find(:_.state.inletData.effect).description
+      ]
+      
+      
+      
+      return [
+        'Grants base stats: ',
+        ...(_.state.inletData.stats.description->split(:'\n'))
+      ]
+    },
+    
+    
+    inletSlotSet : {
+      get ::<- _.state.inletSlotData
     },
       
     maxOut ::{

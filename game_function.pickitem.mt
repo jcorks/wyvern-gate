@@ -28,6 +28,7 @@
   'Armor / Clothes',
   'Accessories',
   'Keys',
+  'Inlet Gems',
   'Misc',
   'Loot',
   'All',
@@ -38,6 +39,7 @@
   Item.SORT_TYPE.ARMOR_CLOTHES,
   Item.SORT_TYPE.ACCESSORIES,
   Item.SORT_TYPE.KEYS,
+  Item.SORT_TYPE.INLET,
   Item.SORT_TYPE.MISC,
   Item.SORT_TYPE.LOOT,
   empty
@@ -124,7 +126,6 @@ return ::(
 
     if (args.onHover) ::<= {
       args.onHover = ::(choice, tab) {
-        breakpoint();
         when(choice == 0) empty;
         listGenerator(); // refresh items list
         picked = items[choice-1];

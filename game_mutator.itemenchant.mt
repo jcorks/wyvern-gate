@@ -57,7 +57,7 @@ ItemEnchant.database.newEntry(
     name : 'Art',
     id : 'base:art',
     description : ', will $1 add the Art "$2" to the wielder\'s hand: $3',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 1000,
@@ -71,7 +71,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : TRAIT.SPECIAL
+    traits : TRAIT.SPECIAL,
+    onCreate ::(this){}
   }
 )
 /*
@@ -80,7 +81,7 @@ ItemEnchant.database.newEntry(
     name : 'Evade',
     id : 'base:evade',
     description : ', will $1 allow the wielder to evade attacks the next turn.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 350,
@@ -105,7 +106,7 @@ ItemEnchant.database.newEntry(
     name : 'Regen',
     id : 'base:regen',
     description : ', will $1 slightly recover the users wounds.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 350,
@@ -119,7 +120,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    onCreate ::(this){}
   }
 )
 
@@ -128,7 +130,7 @@ ItemEnchant.database.newEntry(
     name : 'Chance to Break',
     id : 'base:chance-to-break',
     description : ', will $1 break.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: -1000,
@@ -142,7 +144,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -151,7 +154,7 @@ ItemEnchant.database.newEntry(
     name : 'Chance to Inflict Ailment',
     id : 'base:chance-to-inflict-ailment',
     description : ', will $1 give the holder a random status ailment.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: -1000,
@@ -165,7 +168,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -176,7 +180,7 @@ ItemEnchant.database.newEntry(
     name : 'Chance to Hurt',
     id : 'base:chance-to-hurt',
     description : ', will $1 hurt the wielder.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: -200,
@@ -190,7 +194,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -199,7 +204,7 @@ ItemEnchant.database.newEntry(
     name : 'Chance to Fatigue',
     id : 'base:chance-to-fatigue',
     description : ', will $1 fatigue the wielder.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: -200,
@@ -213,7 +218,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 1,
+    onCreate ::(this){}
   }
 )
 
@@ -223,7 +229,7 @@ ItemEnchant.database.newEntry(
     name : 'Spikes',
     id : 'base:spikes',
     description : ', will $1 cast a spell that damages an enemy when attacked for a few turns.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 350,
@@ -237,7 +243,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -246,7 +253,7 @@ ItemEnchant.database.newEntry(
   data : {
     name : 'Ensnare',
     description : ', will $1 cast a spell to cause the wielder and the attacker to get ensnared.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 350,
@@ -270,7 +277,7 @@ ItemEnchant.database.newEntry(
     name : 'Ease',
     id : 'base:ease',
     description : ', will $1 recover from mental fatigue.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 350,
@@ -284,7 +291,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    onCreate ::(this){}
   }
 )
 
@@ -293,7 +301,7 @@ ItemEnchant.database.newEntry(
     name : 'Shield',
     id : 'base:shield',
     description : ', will $1 cast Shield for a while, which may block attacks.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 250,
@@ -307,7 +315,8 @@ ItemEnchant.database.newEntry(
     equipEffects : [
     ],
     
-    useEffects : []
+    useEffects : [],
+    onCreate ::(this){}
   }
 )
 
@@ -317,7 +326,7 @@ ItemEnchant.database.newEntry(
     name : 'Boost Strength',
     id : 'base:boost-strength',
     description : ', will $1 boost the wielder\'s power for a while.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 250,
@@ -339,7 +348,7 @@ ItemEnchant.database.newEntry(
     name : 'Boost Defense',
     id : 'base:boost-defense',
     description : ', will $1 boost the wielder\'s defense for a while.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 250,
@@ -361,7 +370,7 @@ ItemEnchant.database.newEntry(
     name : 'Boost Mind',
     id : 'base:boost-mind',
     description : ', will $1 boost the wielder\'s mental acquity for a while.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 250,
@@ -383,7 +392,7 @@ ItemEnchant.database.newEntry(
     name : 'Boost Dex',
     id : 'base:boost-dex',
     description : ', will $1 boost the wielder\'s dexterity for a while.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 250,
@@ -405,7 +414,7 @@ ItemEnchant.database.newEntry(
     name : 'Boost Speed',
     id : 'base:boost-speed',
     description : ', will $1 boost the wielder\'s speed for a while.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 250,
@@ -428,7 +437,7 @@ ItemEnchant.database.newEntry(
     name : 'Sharp',
     id : 'base:sharp',
     description : 'Has a chance of causing bleed on a target when attacking.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -442,7 +451,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -453,7 +463,7 @@ ItemEnchant.database.newEntry(
     name : 'Burning',
     id : 'base:burning',
     description : 'The material its made of is warm to the touch. Grants a fire aspect to attacks and gives ice resistance when used as armor.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -467,7 +477,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -476,7 +487,7 @@ ItemEnchant.database.newEntry(
     name : 'Scorching',
     id : 'base:scorching',
     description : 'Has a chance of causing burns on a target when attacking.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -490,7 +501,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -500,7 +512,7 @@ ItemEnchant.database.newEntry(
     name : 'Icy',
     id : 'base:icy',
     description : 'The material its made of is cold to the touch. Grants an ice aspect to attacks and gives fire resistance when used as armor.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -514,7 +526,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -523,7 +536,7 @@ ItemEnchant.database.newEntry(
     name : 'Freezing',
     id : 'base:freezing',
     description : 'Has a chance of freezing targets when attacking.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -537,7 +550,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -547,7 +561,7 @@ ItemEnchant.database.newEntry(
     name : 'Shock',
     id : 'base:shock',
     description : 'The material its made of gently hums. Grants a thunder aspect to attacks and gives thunder resistance when used as armor.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -561,7 +575,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -571,7 +586,7 @@ ItemEnchant.database.newEntry(
     name : 'Paralyzing',
     id : 'base:paralyzing',
     description : 'Has a chance of causing paralysis to targets when attacking.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -585,7 +600,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -594,7 +610,7 @@ ItemEnchant.database.newEntry(
     name : 'Toxic',
     id : 'base:toxic',
     description : 'The material its made has been made poisonous. Grants a poison aspect to attacks and gives poison resistance when used as armor.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -608,7 +624,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -617,7 +634,7 @@ ItemEnchant.database.newEntry(
     name : 'Seeping',
     id : 'base:seeping',
     description : 'Has a chance of poisoning targets when attacking.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -631,7 +648,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -641,7 +659,7 @@ ItemEnchant.database.newEntry(
     name : 'Shimmering',
     id : 'base:shimmering',
     description : 'The material its made of glows softly. Grants a light aspect to attacks and gives dark resistance when used as armor.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -655,7 +673,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -664,7 +683,7 @@ ItemEnchant.database.newEntry(
     name : 'Petrifying',
     id : 'base:petrifying',
     description : 'Has a chance of causing petrification to targets when attacking.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -678,7 +697,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -687,7 +707,7 @@ ItemEnchant.database.newEntry(
     name : 'Dark',
     id : 'base:dark',
     description : 'The material its made of is very dark. Grants a dark aspect to attacks and gives light resistance when used as armor.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -701,7 +721,8 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
@@ -710,7 +731,7 @@ ItemEnchant.database.newEntry(
     name : 'Blinding',
     id : 'base:blinding',
     description : 'Has a chance of causing blindness to targets when attacking.',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
     priceMod: 200,
@@ -724,21 +745,29 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){}
   }
 )
 
+
+@:stats = {
+  'Power' : 'ATK',
+  'Shield' : 'DEF',
+  'Reflex' : 'DEX',
+  'Speed' : 'SPD',
+  'Mind' : 'INT',
+  
+}
+
+
 ItemEnchant.database.newEntry(
   data : {
-    name : 'Rune: Power',
-    id : 'base:rune-power',
-    description : 'Imbued with a potent rune of power.',
-    equipMod : StatSet.new(
-      ATK: 150,
-      DEX: -10,
-      SPD: -10,
-      DEF: -10,
-      INT: -10          
+    name : 'Rune',
+    id : 'base:rune',
+    description : '',
+    equipModBase : StatSet.new(
+    
     ),
     levelMinimum : 1,
     priceMod: 20000,
@@ -751,131 +780,45 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+      @:kind = random.pickArrayItem(:stats);
+      
+      @:statsA = {
+        ATK: -1,
+        DEX: -1,
+        SPD: -1,
+        DEF: -1,
+        INT: -1      
+      }
+      statsA[kind] = 7;
+      @desc = 'Powerful rune. ';
+      foreach(statsA) ::(k, v) {
+        when (k == kind) empty;
+        desc = desc + k + ',';
+      }      
+      desc = desc + ' base -1, ' + kind + ' base +7';
+      
+      this.name = 'Rune of ' + kind;
+      this.equipModBase.add(:StatSet.new(*statsA));
+    }
   }
 )
 
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Rune: Shield',
-    id : 'base:rune-shield',
-    description : 'Imbued with a potent rune of shielding.',
-    equipMod : StatSet.new(
-      DEF: 150,
-      DEX: -10,
-      ATK: -10,
-      SPD: -10,
-      INT: -10          
-    ),
-    levelMinimum : 1,
-    priceMod: 20000,
-    tier : 3,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)    
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Rune: Reflex',
-    id : 'base:rune-reflex',
-    description : 'Imbued with a potent rune of reflex.',
-    equipMod : StatSet.new(
-      DEX: 150,
-      DEF: -10,
-      ATK: -10,
-      SPD: -10,
-      INT: -10          
-    ),
-    levelMinimum : 1,
-    priceMod: 20000,
-    tier : 3,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-) 
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Rune: Speed',
-    id : 'base:rune-speed',
-    description : 'Imbued with a potent rune of speed.',
-    equipMod : StatSet.new(
-      SPD: 150,
-      DEF: -10,
-      ATK: -10,
-      DEX: -10,
-      INT: -10          
-    ),
-    levelMinimum : 1,
-    priceMod: 20000,
-    tier : 3,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Rune: Mind',
-    id : 'base:rune-mind',
-    description : 'Imbued with a potent rune of mind.',
-    equipMod : StatSet.new(
-      INT: 150,
-      DEF: -10,
-      ATK: -10,
-      DEX: -10,
-      SPD: -10          
-    ),
-    levelMinimum : 1,
-    priceMod: 20000,
-    tier : 3,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
 
 ItemEnchant.database.newEntry(
   data : {
     name : 'Minor Aura',
     id : 'base:minor-aura',
     description : 'Enchanted with a simple aura that boosts all traits slightly.',
-    equipMod : StatSet.new(
-      HP : 10,
-      AP : 10,
-      SPD: 10,
-      DEX: 10,
-      ATK: 10,
-      DEF: 10,
-      INT: 10
+    equipModBase : StatSet.new(
+      HP : 1,
+      AP : 1,
+      SPD: 1,
+      DEX: 1,
+      ATK: 1,
+      DEF: 1,
+      INT: 1
     ),
     priceMod: 140,
     tier : 0,
@@ -887,298 +830,13 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
-  }
-)
-
-/*
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Teal Crystal',
-    id : 'base:inlet-teal-crystal',
-    description : 'Set with a simple, enchanted teal crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 15,
-      DEX: 15,
-      ATK: -5,
-      DEF: -5,
-      INT: -5
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Lavender Crystal',
-    id : 'base:inlet-lavender-crystal',
-    description : 'Set with a simple, enchanted lavender crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -5,
-      DEX: 15,
-      ATK: 15,
-      DEF: -5,
-      INT: -5
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Orange Crystal',
-    id : 'base:inlet-orange-crystal',
-    description : 'Set with a simple, enchanted orange crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -5,
-      DEX: -5,
-      ATK: 15,
-      DEF: 15,
-      INT: -5
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Indigo Crystal',
-    id : 'base:inlet-indigo-crystal',
-    description : 'Set with a simple, enchanted indigo crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -5,
-      DEX: -5,
-      ATK: -5,
-      DEF: 15,
-      INT: 15
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
 
 
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Rose Crystal',
-    id : 'base:inlet-rose-crystal',
-    description : 'Set with a simple, enchanted rose crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 15,
-      DEX: -5,
-      ATK: -5,
-      DEF: -5,
-      INT: 15
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Cyan Crystal',
-    id : 'base:inlet-cyan-crystal',
-    description : 'Set with a simple, enchanted cyan crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 15,
-      DEX: -5,
-      ATK: 15,
-      DEF: -5,
-      INT: -5
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: White Crystal',
-    id : 'base:inlet-white-crystal',
-    description : 'Set with a simple, enchanted white crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 15,
-      DEX: -5,
-      ATK: -5,
-      DEF: 15,
-      INT: -5
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Violet Crystal',
-    id : 'base:inlet-violet-crystal',
-    description : 'Set with a simple, enchanted violet crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -5,
-      DEX: 15,
-      ATK: -5,
-      DEF: 15,
-      INT: -5
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Scarlet Crystal',
-    id : 'base:inlet-scarlet-crystal',
-    description : 'Set with a simple, enchanted scarlet crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -5,
-      DEX: 15,
-      ATK: -5,
-      DEF: -5,
-      INT: 15
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Maroon Crystal',
-    id : 'base:inlet-maroon-crystal',
-    description : 'Set with a simple, enchanted maroon crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 15,
-      DEX: -5,
-      ATK: 15,
-      DEF: -5,
-      INT: -5
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Crimson Crystal',
-    id : 'base:inlet-crimson-crystal',
-    description : 'Set with a simple, enchanted crimson crystal of alchemical origin, which alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -5,
-      DEX: -5,
-      ATK: 15,
-      DEF: -5,
-      INT: 15
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-*/
 
 
 
@@ -1187,308 +845,18 @@ ItemEnchant.database.newEntry(
 
 
 
-
-
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Morion',
-    id : 'base:inlet-morion',
-    description : 'Set with an enchanted morion stone, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 50,
-      DEX: 50,
-      ATK: -25,
-      DEF: -25,
-      INT: -25
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Amethyst',
-    id : 'base:inlet-amethyst',
-    description : 'Set with an enchanted amethyst, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -25,
-      DEX: 50,
-      ATK: 50,
-      DEF: -25,
-      INT: -25
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Citrine',
-    id : 'base:inlet-citrine',
-    description : 'Set with an enchanted citrine stone, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -25,
-      DEX: -25,
-      ATK: 50,
-      DEF: 50,
-      INT: -25
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Garnet',
-    id : 'base:inlet-garnet',
-    description : 'Set with an enchanted garnet stone, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -25,
-      DEX: -25,
-      ATK: -25,
-      DEF: 50,
-      INT: 50
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Praesolite',
-    id : 'base:inlet-praesolite',
-    description : 'Set with an enchanted praesolite stone, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 50,
-      DEX: -25,
-      ATK: -25,
-      DEF: -25,
-      INT: 50
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Aquamarine',
-    id : 'base:inlet-aquamarine',
-    description : 'Set with an enchanted aquamarine stone, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 50,
-      DEX: -25,
-      ATK: 50,
-      DEF: -25,
-      INT: -25
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Diamond',
-    id : 'base:inlet-diamond',
-    description : 'Set with an enchanted diamond stone, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 50,
-      DEX: -25,
-      ATK: -25,
-      DEF: 50,
-      INT: -25
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Pearl',
-    id : 'base:inlet-pearl',
-    description : 'Set with an enchanted pearl, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -25,
-      DEX: 50,
-      ATK: -25,
-      DEF: 50,
-      INT: -25
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Ruby',
-    id : 'base:inlet-ruby',
-    description : 'Set with an enchanted ruby, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -25,
-      DEX: 50,
-      ATK: -25,
-      DEF: -25,
-      INT: 50
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Sapphire',
-    id : 'base:inlet-sapphire',
-    description : 'Set with an enchanted sapphire, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 50,
-      DEX: -25,
-      ATK: 50,
-      DEF: -25,
-      INT: -25
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Opal',
-    id : 'base:inlet-opal',
-    description : 'Set with an enchanted opal stone, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: -25,
-      DEX: -25,
-      ATK: 50,
-      DEF: -25,
-      INT: 50
-    ),
-    priceMod: 1200,
-    tier : 2,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
 
 
 ItemEnchant.database.newEntry(
   data : {
     name : 'Cursed',
     id : 'base:cursed',
-    description : 'Somehow, cursed magicks have seeped into this, which greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      DEF: -70,
-      ATK: -70,
-      INT: 150,
-      DEX: 80
+    description : 'Cursed with dark magic. DEF, ATK base -3, INT, DEX base +6',
+    equipModBase : StatSet.new(
+      DEF: -3,
+      ATK: -3,
+      INT: 6,
+      DEX: 6
     ),
     levelMinimum : 5,
     priceMod: 300,
@@ -1501,23 +869,25 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
 
-
+/*
 ItemEnchant.database.newEntry(
   data : {
     name : 'Inlet: Bloodstone',
     id : 'base:inlet-bloodstone',
-    description : 'Set with a large bloodstone, shining sinisterly. This greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 30,
-      DEX: 30,
-      ATK: 30,
-      DEF: 30,
-      INT: 30,
-      HP: -5
+    description : 'Set with a large bloodstone, shining sinisterly. HP base -1, SPD, DEX, ATK, DEF, INT +2',
+    equipModBase : StatSet.new(
+      SPD: 2,
+      DEX: 2,
+      ATK: 2,
+      DEF: 2,
+      INT: 2,
+      HP: -1
     ),
     priceMod: 2000,
     tier : 3,
@@ -1537,14 +907,14 @@ ItemEnchant.database.newEntry(
   data : {
     name : 'Inlet: Soulstone',
     id : 'base:inlet-soulstone',
-    description : 'Set with a large soulstone, shining sinisterly. This greatly alters the stats of the item.',
-    equipMod : StatSet.new(
-      SPD: 30,
-      DEX: 30,
-      ATK: 30,
-      DEF: 30,
-      INT: 30,
-      AP: -10
+    description : 'Set with a large soulstone, shining sinisterly. AP base -1, SPD, DEX, ATK, DEF, INT +2',
+    equipModBase : StatSet.new(
+      SPD: 2,
+      DEX: 2,
+      ATK: 2,
+      DEF: 2,
+      INT: 2,
+      AP: -1
     ),
     priceMod: 2000,
     tier : 3,
@@ -1559,16 +929,18 @@ ItemEnchant.database.newEntry(
     traits : 0
   }
 )
+*/
 
 
+::<= {
 ItemEnchant.database.newEntry(
   data : {
     name : 'Aura: Green',
     id : 'base:aura-green',
     description : 'Imbued with a stamina aura; it softly glows green.',
-    equipMod : StatSet.new(
-      SPD: -15,
-      HP:  20
+    equipModBase : StatSet.new(
+      SPD: -1,
+      HP:  2
     ),
     priceMod: 200,
     tier : 4,
@@ -1580,18 +952,21 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
+}
 
 ItemEnchant.database.newEntry(
   data : {
     name : 'Aura: Red',
     id : 'base:aura-red',
     description : 'Imbued with a stamina aura; it softly glows red.',
-    equipMod : StatSet.new(
-      ATK: -15,
-      HP:  20
+    equipModBase : StatSet.new(
+      ATK: -1,
+      HP:  2
     ),
     priceMod: 200,
     tier : 4,
@@ -1603,7 +978,9 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
 
@@ -1612,9 +989,9 @@ ItemEnchant.database.newEntry(
     name : 'Aura: Blue',
     id : 'base:aura-blue',
     description : 'Imbued with a stamina aura; it softly glows blue with a glimmer.',
-    equipMod : StatSet.new(
-      DEF: -15,
-      HP:  20
+    equipModBase : StatSet.new(
+      DEF: -1,
+      HP:  2
     ),
     priceMod: 400,
     tier : 4,
@@ -1626,7 +1003,9 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
 
@@ -1636,9 +1015,9 @@ ItemEnchant.database.newEntry(
     name : 'Aura: Yellow',
     id : 'base:aura-yellow',
     description : 'Imbued with a stamina aura; it softly glows yellow.',
-    equipMod : StatSet.new(
-      INT: -15,
-      HP:  20
+    equipModBase : StatSet.new(
+      INT: -1,
+      HP:  2
     ),
     priceMod: 200,
     tier : 4,
@@ -1650,7 +1029,9 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
 
@@ -1659,9 +1040,9 @@ ItemEnchant.database.newEntry(
     name : 'Aura: Orange',
     id : 'base:aura-orange',
     description : 'Imbued with a stamina aura; it softly glows orange.',
-    equipMod : StatSet.new(
-      DEX: -15,
-      HP:  20
+    equipModBase : StatSet.new(
+      DEX: -1,
+      HP:  2
     ),
     priceMod: 200,
     tier : 4,
@@ -1673,7 +1054,9 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
 
@@ -1682,9 +1065,9 @@ ItemEnchant.database.newEntry(
     name : 'Aura: Silver',
     id : 'base:aura-silver',
     description : 'Imbued with a stamina aura; it softly glows silver.',
-    equipMod : StatSet.new(
-      AP: -15,
-      HP:  20
+    equipModBase : StatSet.new(
+      AP: -1,
+      HP:  2
     ),
     priceMod: 200,
     tier : 4,
@@ -1696,7 +1079,9 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
 
@@ -1706,9 +1091,9 @@ ItemEnchant.database.newEntry(
     name : 'Aura: Gold',
     id : 'base:aura-gold',
     description : 'Imbued with a stamina aura; it softly glows gold.',
-    equipMod : StatSet.new(
-      AP:  35,
-      HP:  35
+    equipModBase : StatSet.new(
+      AP:  2,
+      HP:  2
     ),
     priceMod: 1000,
     tier : 4,
@@ -1720,7 +1105,9 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
 
@@ -1729,7 +1116,7 @@ ItemEnchant.database.newEntry(
     name : 'Soul',
     id : 'base:soul',
     description : '',
-    equipMod : StatSet.new(
+    equipModBase : StatSet.new(
     ),
     priceMod: 500,
     tier : 0,
@@ -1741,7 +1128,9 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0
+    traits : 0,
+    onCreate ::(this){
+    }
   }
 )
 
@@ -1754,12 +1143,15 @@ ItemEnchant.database.newEntry(
     TRAIT : {get::<- TRAIT}
   },
   items : {
+    name : '',
+    description : '',
     condition : empty,
     conditionChance : 0,
     conditionChanceName  : '',
     artID : '',
     equipEffects : empty,
-    useEffects : empty
+    useEffects : empty,
+    equipModBase : empty,
   },
 
   database: Database.new(
@@ -1769,13 +1161,14 @@ ItemEnchant.database.newEntry(
       id : String,
       description : String,
       levelMinimum : Number,
-      equipMod : StatSet.type, // percentages
+      equipModBase : StatSet.type, // base stats
       useEffects : Object,
       equipEffects : Object,
       triggerConditionEffects : Object,
       priceMod : Number,
       tier : Number,
-      traits : Number
+      traits : Number,
+      onCreate : Function
     },
     reset
   ),
@@ -1789,6 +1182,8 @@ ItemEnchant.database.newEntry(
         state.base = base;
         state.equipEffects = [];
         state.useEffects = [];
+        state.name = base.name;
+        state.description = base.description;
         @:Effect = import(module:'game_database.effect.mt');
         
         if (base.id == 'base:soul') ::<= {
@@ -1819,9 +1214,15 @@ ItemEnchant.database.newEntry(
         
         foreach(base.equipEffects) ::(k, v) <- state.equipEffects->push(:v);
         foreach(base.useEffects) ::(k, v) <- state.useEffects->push(:v);
-        
+        state.equipModBase = base.equipModBase.clone();
+        base.onCreate(this);
         return this;
       },
+      
+      equipModBase : {
+        get ::<- state.equipModBase
+      },
+      
       
       art : {
         get ::<- state.artID
@@ -1838,11 +1239,15 @@ ItemEnchant.database.newEntry(
           when(state.base.id == 'base:soul') 
             "Grants the effect " + Effect.find(:state.equipEffects[0]).name + '.';
             
-          when(state.condition == empty) state.base.description;
+          when(state.condition == empty) state.description;
           @out = state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
           when (state.artID == '') out;
           out = out->replace(key:'$2', with: Arts.find(id:state.artID).name);
           return out->replace(key:'$3', with: Arts.find(id:state.artID).description);          
+        },
+        
+        set ::(value) {
+          state.description = value;
         }
       },
       
@@ -1852,9 +1257,13 @@ ItemEnchant.database.newEntry(
           when (state.base.id == 'base:soul')
             'Soul of ' + Effect.find(:state.equipEffects[0]).name;
             
-          when(state.condition == empty) state.base.name;
+          when(state.condition == empty) state.name;
           breakpoint();
           return state.condition.name + ': ' + state.base.name;
+        },
+        
+        set ::(value) {
+          state.name = value;
         }
       },
       

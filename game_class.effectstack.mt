@@ -511,7 +511,7 @@
       modStats::(stats) {
         foreach(getAll())::(index, effectSet) {
           @:effect = Effect.find(id:effectSet.id);
-          stats.modRate(stats:effect.stats);
+          stats.mod(stats:effect.stats);
         }
         return this.emitEvent(
           name: 'onStatRecalculate',

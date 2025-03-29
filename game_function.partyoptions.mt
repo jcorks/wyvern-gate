@@ -504,16 +504,41 @@ return ::{
                   // slightly less confusing
                   when(member.getEquipped(slot).base.id == 'base:none')
                     equip();
+                    
+                  @:item = member.getEquipped(slot);
+                  @choices = ['Equip'];
+                  @choiceActions = [::<- equip()];
+
+
 
                   windowEvent.queueChoices(
                     leftWeight: 1,
                     topWeight: 1,
                     onGetChoices:: {
-                      @choices = ['Equip'];
+                      choices = ['Equip'];
+                      choiceActions = [::<- equip()];
                       return if (member.getEquipped(slot).base.id != 'base:none') ::<= {
-                        choices->push(value:'Check');
-                        choices->push(value:'Improve');
-                        choices->push(value:'Rename');
+                        choices->push(:'Check');
+                        choiceActions->push(::<- item.describe());
+                        choices->push(:'Improve');
+                        choiceActions->push(::<- (import(module:'game_function.itemimprove.mt'))(inBattle: false, user:member, item));
+
+                        if (member.getEquipped(slot).inletSlotSet != empty) ::<= {
+                          choices->push(:'Gems...');                        
+                          choiceActions->push(::<- item.inletSlotSet.equip(user:member, item));
+                        }
+                        choices->push(:'Rename');
+                        choiceActions->push(::{
+                          when (!member.getEquipped(slot).base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
+                            windowEvent.queueMessage(text:member.getEquipped(slot).name + ' cannot be renamed.');
+                          @:name = import(module:"game_function.name.mt");
+                          name(
+                            prompt: 'New item name:',
+                            onDone::(name) {
+                              member.getEquipped(slot).name = name;
+                            }
+                          );                        
+                        });
                         return choices;
                       } else empty;
                     },
@@ -525,32 +550,7 @@ return ::{
                     keep: true,
                     onChoice:::(choice) {
                       when (choice == 0) empty;
-                      match(choice) {
-                        // Equip
-                        (1):::<= {
-                          equip();
-                        },
-                        // Check
-                        (2):::<= {
-                          member.getEquipped(slot).describe();                             
-                        },
-                        // improve
-                        (3):::<= {
-                          (import(module:'game_function.itemimprove.mt'))(inBattle: false, user:member, item:member.getEquipped(slot));
-                        },
-                        // Rename 
-                        (4):::<= {
-                          when (!member.getEquipped(slot).base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
-                            windowEvent.queueMessage(text:member.getEquipped(slot).name + ' cannot be renamed.');
-                          @:name = import(module:"game_function.name.mt");
-                          name(
-                            prompt: 'New item name:',
-                            onDone::(name) {
-                              member.getEquipped(slot).name = name;
-                            }
-                          );                            
-                        }
-                      }
+                      choiceActions[choice-1]();
                     }                              
                   );
                 }

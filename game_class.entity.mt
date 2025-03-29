@@ -2717,6 +2717,17 @@
     battleAI : {
       get ::<- _.state.battleAI
     },
+    
+    hasEquipped::(item) {
+      @:this = _.this;
+      {:::} {
+        foreach(this.getSlotsForItem(item)) ::(k, v) {
+          if (this.getEquipped(:v) == this)
+            send(:true);
+        }
+        return false;
+      }
+    },
       
     equip ::(item => Item.type, slot, silent, inventory) {
       @:state = _.state;

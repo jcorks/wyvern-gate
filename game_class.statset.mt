@@ -134,6 +134,12 @@
         }
       }
     },
+    
+    clone ::{
+      @n = StatSet.new();
+      n.load(:_.this.save());
+      return n;
+    },
 
 
   

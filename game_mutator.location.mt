@@ -347,9 +347,13 @@ Location.database.newEntry(data:{
 ::<= {
   @:restockShop::(location) {
     when(location.ownedBy == empty) empty;
+    @:world = import(module:'game_singleton.world.mt');
 
     @:addMissing ::(id, minCount) {
-      @:found = location.inventory.items->filter(::(value) <- value.base.id == id)->size;
+      @:found = location.inventory.items->filter(::(value) <- 
+        value.base.id == id &&
+        world.island.tier >= value.base.tier
+      )->size;
 
       for(found, if (minCount == empty) 1 else minCount) ::(i) {
         location.inventory.add(item:Item.new(base:Item.database.find(
@@ -368,6 +372,9 @@ Location.database.newEntry(data:{
     addMissing(id:'base:life-crystal');
     addMissing(id:'base:potion', minCount:5);
     addMissing(id:'base:scroll', minCount:3);
+    addMissing(id:'base:inlet-crystal', minCount:2);
+    addMissing(id:'base:inlet-gem', minCount:2);
+    addMissing(id:'base:inlet-soulgem', minCount:2);
     
     for(location.inventory.items->size, 40 + (location.ownedBy.level / 4)->ceil)::(i) {
       // no weight, as the value scales

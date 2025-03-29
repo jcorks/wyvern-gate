@@ -147,12 +147,12 @@ Effect.newEntry(
   data : {
     name : 'Brace',
     id: 'base:brace',
-    description: '+50% DEF and grants an additional block point.',
+    description: '+3 base DEF and grants an additional block point.',
     stackable: false,
     blockPoints : 1,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 50
+      DEF: 3
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -321,12 +321,12 @@ Effect.newEntry(
   data : {
     name : 'Agile',
     id: 'base:agile',
-    description: '+20% DEX. The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
+    description: '+2 base DEX. The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
     stackable: true,
     blockPoints : 1,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEX: 20
+      DEX: 2
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -504,11 +504,11 @@ Effect.newEntry(
   data : {
     name : 'Defensive Stance',
     id : 'base:defensive-stance',
-    description: 'ATK -50%, DEF +200%, gains an additional block point.',
+    description: 'ATK base -5, DEF base +10, gains an additional block point.',
     stackable: false,
     blockPoints : 1,
     traits : 0,
-    stats: StatSet.new(ATK:-50, DEF:200),
+    stats: StatSet.new(ATK:-5, DEF:10),
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(
@@ -524,11 +524,11 @@ Effect.newEntry(
   data : {
     name : 'Offsensive Stance',
     id : 'base:offensive-stance',
-    description: 'DEF -50%, ATK +200%',
+    description: 'DEF base -5, ATK base +10',
     stackable: false,
     blockPoints : 0,
     traits : 0,
-    stats: StatSet.new(DEF:-50, ATK:200),
+    stats: StatSet.new(DEF:-5, ATK:10),
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(
@@ -545,11 +545,11 @@ Effect.newEntry(
   data : {
     name : 'Light Stance',
     id : 'base:light-stance',    
-    description: 'ATK -50%, SPD +100%, DEX +100%',
+    description: 'ATK base -5; SPD, DEX base +5',
     stackable: false,
     blockPoints : 0,
     traits : 0,
-    stats: StatSet.new(ATK:-50, SPD:100, DEX:100),
+    stats: StatSet.new(ATK:-5, SPD:5, DEX:5),
     events : { 
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(
@@ -564,11 +564,11 @@ Effect.newEntry(
   data : {
     name : 'Heavy Stance',
     id : 'base:heavy-stance',
-    description: 'SPD -50%, DEF +200%, additional block point.',
+    description: 'SPD base -5, DEF base +10, additional block point.',
     stackable: false,
     blockPoints : 1,
     traits : 0,
-    stats: StatSet.new(SPD:-50, DEF:200),
+    stats: StatSet.new(SPD:-5, DEF:10),
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(
@@ -584,11 +584,11 @@ Effect.newEntry(
   data : {
     name : 'Meditative Stance',
     id : 'base:meditative-stance',
-    description: 'ATK -50%, INT +200%',
+    description: 'ATK base -5, INT base +10',
     stackable: false,
     blockPoints : 0,
     traits : 0,
-    stats: StatSet.new(ATK:-50, INT:200),
+    stats: StatSet.new(ATK:-5, INT:10),
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(
@@ -604,11 +604,11 @@ Effect.newEntry(
   data : {
     name : 'Striking Stance',
     id : 'base:striking-stance',
-    description: 'SPD -30%, DEF -30%, ATK +200%, DEX +100%',
+    description: 'Base stats: SPD -2, DEF -2, ATK +10, DEX + 5',
     stackable: false,
     blockPoints : 0,
     traits : 0,
-    stats: StatSet.new(SPD:-30, DEF:-30, ATK:200, DEX:100),
+    stats: StatSet.new(SPD:-2, DEF:-2, ATK:10, DEX:5),
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(
@@ -764,12 +764,12 @@ Effect.newEntry(
   data : {
     name : 'Mind Focused',
     id : 'base:mind-focused',
-    description: 'INT +100%',
+    description: 'INT base +5',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      INT: 100
+      INT: 5
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -788,12 +788,12 @@ Effect.newEntry(
   data : {
     name : 'Protect',
     id : 'base:protect',
-    description: 'DEF +100%',
+    description: 'DEF base +10',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 100
+      DEF: 10
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -811,12 +811,12 @@ Effect.newEntry(
   data : {
     name : 'Shield',
     id : 'base:shield',
-    description: 'DEF +10%, 30% chance to block',
+    description: 'DEF base +2, 30% chance to block',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 10
+      DEF: 2
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1148,12 +1148,12 @@ Effect.newEntry(
   data : {
     name : 'Spikes',
     id : 'base:spikes',
-    description: 'DEF +10%, light damage when attacked.',
+    description: 'DEF base +2, causes 1-4 light damage when attacked.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 10
+      DEF: 2
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1246,12 +1246,12 @@ Effect.newEntry(
   data : {
     name : 'Strength Boost',
     id : 'base:strength-boost',
-    description: 'ATK +70%',
+    description: 'ATK base +4',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      ATK:70
+      ATK:4
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1269,12 +1269,12 @@ Effect.newEntry(
   data : {
     name : 'Minor Strength Boost',
     id : 'base:minor-strength-boost',
-    description: 'ATK +70%',
+    description: 'ATK base +2',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      ATK:25
+      ATK:2
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1312,12 +1312,12 @@ Effect.newEntry(
   data : {
     name : 'Defense Boost',
     id : 'base:defense-boost',
-    description: 'DEF +70%',
+    description: 'DEF base +4',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF:70
+      DEF:4
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1334,12 +1334,12 @@ Effect.newEntry(
   data : {
     name : 'Minor Defense Boost',
     id : 'base:minor-defense-boost',
-    description: 'DEF +25%',
+    description: 'DEF base +2',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF:25
+      DEF:2
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1378,12 +1378,12 @@ Effect.newEntry(
   data : {
     name : 'Mind Boost',
     id : 'base:mind-boost',
-    description: 'INT +70%',
+    description: 'INT base +4',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      INT:70
+      INT:4
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1400,12 +1400,12 @@ Effect.newEntry(
   data : {
     name : 'Mind Boost',
     id : 'base:minor-mind-boost',
-    description: 'INT +25%',
+    description: 'INT base +2',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      INT:70
+      INT:2
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1443,12 +1443,12 @@ Effect.newEntry(
   data : {
     name : 'Dex Boost',
     id : 'base:dex-boost',
-    description: 'DEX +70%',
+    description: 'DEX base +4',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEX:70
+      DEX:4
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1466,11 +1466,11 @@ Effect.newEntry(
   data : {
     name : 'Minor Dex Boost',
     id : 'base:minor-dex-boost',    
-    description: 'DEX +25%',
+    description: 'DEX base +2',
     stackable: false,
     blockPoints : 0,
     traits : 0,
-    stats: StatSet.new(DEX:25),
+    stats: StatSet.new(DEX:2),
     events : { 
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + '\'s dexterity is increased!');
@@ -1507,12 +1507,12 @@ Effect.newEntry(
   data : {
     name : 'Speed Boost',
     id : 'base:speed-boost',
-    description: 'SPD +70%',
+    description: 'SPD base +4',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      SPD:70
+      SPD:4
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1529,12 +1529,12 @@ Effect.newEntry(
   data : {
     name : 'Minor Speed Boost',
     id : 'base:minor-speed-boost',
-    description: 'SPD +70%',
+    description: 'SPD base +2',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      SPD:25
+      SPD:2
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -1554,12 +1554,12 @@ Effect.newEntry(
   data : {
     name : 'Night Veil',
     id : 'base:night-veil',
-    description: 'DEF +50%.',
+    description: 'DEF base +3',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 50
+      DEF: 3
     ),
     events : {
       onRemoveEffect ::(from, item, holder) {
@@ -1573,12 +1573,12 @@ Effect.newEntry(
   data : {
     name : 'Dayshroud',
     id : 'base:dayshroud',
-    description: 'DEF +50%',
+    description: 'DEF base +3',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 50
+      DEF: 3
     ),
     events : {
       onRemoveEffect ::(from, item, holder) {
@@ -1592,12 +1592,12 @@ Effect.newEntry(
   data : {
     name : 'Call of the Night',
     id : 'base:call-of-the-night',
-    description: 'ATK +40%',
+    description: 'ATK base +3',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      ATK: 40
+      ATK: 3
     ),
     events : {
       onRemoveEffect ::(from, item, holder) {
@@ -1612,13 +1612,13 @@ Effect.newEntry(
   data : {
     name : 'Lunacy',
     id : 'base:lunacy',
-    description: 'Skips turn and, instead, attacks a random enemy. ATK,DEF +70%.',
+    description: 'Skips turn and, instead, attacks a random enemy. ATK,DEF base +3.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 70,
-      ATK: 70
+      DEF: 3,
+      ATK: 3
     ),
     events : {
       onRemoveEffect ::(from, item, holder) {
@@ -1646,12 +1646,12 @@ Effect.newEntry(
   data : {
     name : 'Greater Call of the Night',
     id : 'base:greater-call-of-the-night',
-    description: 'ATK +100%',
+    description: 'ATK base +5',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      ATK: 100
+      ATK: 5
     ),
     events : {
       onRemoveEffect ::(from, item, holder) {
@@ -1665,12 +1665,12 @@ Effect.newEntry(
   data : {
     name : 'Greater Night Veil',
     id : 'base:greater-night-veil',
-    description: 'DEF +100%',
+    description: 'DEF base +5',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 100
+      DEF: 5
     ),
     events : {
       onRemoveEffect ::(from, item, holder) {
@@ -1685,12 +1685,12 @@ Effect.newEntry(
   data : {
     name : 'Greater Dayshroud',
     id : 'base:greater-dayshroud',
-    description: 'DEF +100%',
+    description: 'DEF base +5',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 100
+      DEF: 5
     ),
 
     events : {
@@ -2199,11 +2199,11 @@ Effect.newEntry(
   data : {
     name : 'Trained Hand',
     id : 'base:trained-hand',
-    description: 'ATK +30%',
+    description: 'ATK base +3',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
-    stats: StatSet.new(ATK:30),
+    stats: StatSet.new(ATK:3),
     events : {
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(
@@ -2220,11 +2220,11 @@ Effect.newEntry(
   data : {
     name : 'Focus Perception',
     id : 'base:focus-perception',
-    description: 'ATK +30%',
+    description: 'ATK base +3',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
-    stats: StatSet.new(ATK:30),
+    stats: StatSet.new(ATK:3),
     events : {
     
     }
@@ -2235,11 +2235,11 @@ Effect.newEntry(
   data : {
     name : 'Cheered',
     id : 'base:cheered',
-    description: 'ATK +70%',
+    description: 'ATK base +4',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
-    stats: StatSet.new(ATK:70),
+    stats: StatSet.new(ATK:4),
     events : {}
   }
 )       
@@ -2248,9 +2248,9 @@ Effect.newEntry(
   data : {
     name : 'Poisonroot Growing',
     id : 'base:poisonroot-growing',
-    description: 'Vines grow on holder. SPD -10%.',
+    description: 'Vines grow on holder. SPD base -2.',
     stackable: true,        
-    stats: StatSet.new(SPD:-10),
+    stats: StatSet.new(SPD:-2),
     blockPoints : 0,
     traits : TRAIT.DEBUFF,
     events : {
@@ -2271,9 +2271,9 @@ Effect.newEntry(
   data : {
     name : 'Poisonroot',
     id : 'base:poisonroot',
-    description: 'Every turn, holder takes 1 to 4 poison damage. SPD -10%',
+    description: 'Every turn, holder takes 1 to 4 poison damage. SPD base -2',
     stackable: true,
-    stats: StatSet.new(SPD:-10),
+    stats: StatSet.new(SPD:-2),
     blockPoints : 0,
     traits : TRAIT.DEBUFF,
 
@@ -2298,11 +2298,11 @@ Effect.newEntry(
   data : {
     name : 'Triproot Growing',
     id : 'base:triproot-growing',
-    description: 'Vines grow on holder. SPD -10%',
+    description: 'Vines grow on holder. SPD base -2',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.DEBUFF,
-    stats: StatSet.new(SPD:-10),
+    stats: StatSet.new(SPD:-2),
     events : {
       onRemoveEffect ::(from, item, holder) {          
         holder.addEffect(from:holder, id:'base:triproot', durationTurns:30);              
@@ -2321,11 +2321,11 @@ Effect.newEntry(
   data : {
     name : 'Triproot',
     id : 'base:triproot',
-    description: 'Every turn 40% chance to trip the holder, cancelling their turn. SPD -10%',
+    description: 'Every turn 40% chance to trip the holder, cancelling their turn. SPD base -2',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.DEBUFF,
-    stats: StatSet.new(SPD:-10),
+    stats: StatSet.new(SPD:-2),
     events : {    
       onRemoveEffect ::(from, item, holder) {          
         windowEvent.queueMessage(text:'The triproot vines dissipate from ' + holder.name + '.'); 
@@ -2346,11 +2346,11 @@ Effect.newEntry(
   data : {
     name : 'Healroot Growing',
     id : 'base:healroot-growing',
-    description: 'Vines grow on holder. SPD -10%',
+    description: 'Vines grow on holder. SPD base -2',
     stackable: true,
     blockPoints : 0,
     traits : 0,
-    stats: StatSet.new(SPD:-10),
+    stats: StatSet.new(SPD:-2),
     events : {    
       onRemoveEffect ::(from, item, holder) {          
         holder.addEffect(from:holder, id:'base:healroot', durationTurns:30);              
@@ -2369,11 +2369,11 @@ Effect.newEntry(
   data : {
     name : 'Healroot',
     id : 'base:healroot',
-    description: 'Every turn heals the holder by 2 HP. SPD -10%',
+    description: 'Every turn heals the holder by 2 HP. SPD base -2',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
-    stats: StatSet.new(SPD:-10),
+    stats: StatSet.new(SPD:-2),
     events : {    
       onRemoveEffect ::(from, item, holder) {          
         windowEvent.queueMessage(text:'The healroot vines dissipate from ' + holder.name + '.'); 
@@ -2395,7 +2395,7 @@ Effect.newEntry(
     description: 'Grants the learning of support Arts for use later.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
     stats: StatSet.new(
     ),
     events : {
@@ -2441,7 +2441,7 @@ Effect.newEntry(
     description: 'Grants the learning of support Arts for use later.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
     stats: StatSet.new(
     ),
     events : {
@@ -2485,7 +2485,7 @@ Effect.newEntry(
     description: 'The original caster receives damage instead of the holder.',
     stackable: false,
     blockPoints : 0,
-    traits : TRAIT.BUFF,
+    traits : TRAIT.BUFF | TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
       onRemoveEffect ::(from, item, holder) {
@@ -2567,10 +2567,10 @@ Effect.newEntry(
   data : {
     name : 'Unbalanced',
     id : 'base:unbalanced',
-    description: 'The holder is not properly balanced. ATK -90%.',
+    description: 'The holder is not properly balanced. ATK base -6',
     stackable: false,
     stats: StatSet.new(
-      ATK: -90
+      ATK: -6
     ),
     blockPoints : 0,
     traits : 0,
@@ -2635,11 +2635,11 @@ Effect.newEntry(
   data : {
     name : 'Desparate',
     id : 'base:desparate',
-    description: 'The holder is is desparate. HP -50%, DEF -100%. Attacks to others are 2.5 times more damaging.',
+    description: 'The holder is is desparate. HP base -4, DEF base -5. Attacks to others are 2.5 times more damaging.',
     stackable: false,
     stats: StatSet.new(
-      DEF: -100,
-      HP: -50
+      DEF: -5,
+      HP: -5
     ),
     blockPoints : 0,
     traits : 0,
@@ -2664,11 +2664,11 @@ Effect.newEntry(
   data : {
     name : 'Enlarged',
     id : 'base:enlarged',
-    description: 'The holder is is magically enlarged. HP +50%, DEF +50%',
+    description: 'The holder is is magically enlarged. HP base +3, DEF base +3',
     stackable: false,
     stats: StatSet.new(
-      DEF: 50,
-      HP: 50
+      DEF: 3,
+      HP: 3
     ),
     blockPoints : 0,
     traits : 0,
@@ -2798,12 +2798,12 @@ Effect.newEntry(
   data : {
     name : 'Sharpen',
     id : 'base:sharpen',
-    description: 'ATK +20%',
+    description: 'ATK base +1',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      ATK: 20
+      ATK: 1
     ),
     events : {
     }
@@ -2814,12 +2814,12 @@ Effect.newEntry(
   data : {
     name : 'Weaken Armor',
     id : 'base:weaken-armor',
-    description: 'DEF -20%',
+    description: 'DEF base -1',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
-      DEF: -20
+      DEF: -1
     ),
     events : {}
   }
@@ -2829,12 +2829,12 @@ Effect.newEntry(
   data : {
     name : 'Dull Weapon',
     id : 'base:dull-weapon',
-    description: 'ATK -20%',
+    description: 'ATK base -1',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
-      ATK: -20
+      ATK: -1
     ),
     events : {}
   }
@@ -2844,12 +2844,12 @@ Effect.newEntry(
   data : {
     name : 'Strengthen Armor',
     id : 'base:strengthen-armor',
-    description: 'DEF +20%',
+    description: 'DEF base +1',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 20
+      DEF: 1
     ),
     events : {}
   }
@@ -2860,7 +2860,7 @@ Effect.newEntry(
   data : {
     name : 'Lunar Affinity',
     id : 'base:lunar-affinity',
-    description: 'INT,DEF,ATK +40% if night time.',
+    description: 'INT,DEF,ATK base + 3 if night time.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
@@ -2879,7 +2879,7 @@ Effect.newEntry(
         @:world = import(module:'game_singleton.world.mt');
 
         if (world.time > world.TIME.EVENING) ::<= {
-          stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
+          stats.mod(stats:StatSet.new(INT:3, DEF:3, ATK:3));
         }          
       }
     }
@@ -2890,14 +2890,14 @@ Effect.newEntry(
   data : {
     name : 'Coordinated',
     id : 'base:coordinated',
-    description: 'SPD,DEF,ATK +35%',
+    description: 'SPD,DEF,ATK base +2',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      ATK:35,
-      DEF:35,
-      SPD:35
+      ATK:2,
+      DEF:2,
+      SPD:2
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -2910,7 +2910,7 @@ Effect.newEntry(
   data : {
     name : 'Cautious',
     id : 'base:cautious',
-    description: 'DEF + 50%',
+    description: 'DEF base +2',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
@@ -2927,7 +2927,7 @@ Effect.newEntry(
       },        
 
       onStatRecalculate ::(from, item, holder, stats) {
-        stats.modRate(stats:StatSet.new(DEF:50));
+        stats.mod(stats:StatSet.new(DEF:2));
       }
     }
   }
@@ -2938,7 +2938,7 @@ Effect.newEntry(
   data : {
     name : 'Solar Affinity',
     id : 'base:solar-affinity',
-    description: 'INT,DEF,ATK +40% if day time.',
+    description: 'INT,DEF,ATK base +3 if day time.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
@@ -2958,7 +2958,7 @@ Effect.newEntry(
         @:world = import(module:'game_singleton.world.mt');
 
         if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
-          stats.modRate(stats:StatSet.new(INT:40, DEF:40, ATK:40));
+          stats.mod(stats:StatSet.new(INT:3, DEF:3, ATK:3));
         }          
       }
     }
@@ -3057,7 +3057,7 @@ Effect.newEntry(
   data : {
     name : 'Assassin\'s Pride',
     id : 'base:assassins-pride',
-    description: 'SPD, ATK +25% for each slain.',
+    description: 'Add a stack of Pride for each person defeated.',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
@@ -3076,13 +3076,13 @@ Effect.newEntry(
   data : {
     name : 'Pride',
     id : 'base:pride',
-    description: 'SPD, ATK +25%',
+    description: 'SPD, ATK base +1',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      ATK:25,
-      SPD:25
+      ATK:1,
+      SPD:1
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3141,14 +3141,14 @@ Effect.newEntry(
   data : {
     name : 'Bleeding',
     id : 'base:bleeding',
-    description: '-5% total HP every turn on holder. ATK,DEF,SPD -20%.',
+    description: '-5% total HP every turn on holder. ATK,DEF,SPD -1 base.',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.AILMENT,
     stats: StatSet.new(
-      ATK: -20,
-      DEF: -20,
-      SPD: -20
+      ATK: -1,
+      DEF: -1,
+      SPD: -1
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3296,12 +3296,12 @@ Effect.newEntry(
   data : {
     name : 'Shield Rune',
     id : 'base:shield-rune',
-    description: '+100% DEF',
+    description: 'DEF base +5',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 100
+      DEF: 5
     ),
     events : {
       onAffliction ::(from, item, holder) {
@@ -3472,13 +3472,12 @@ Effect.newEntry(
   data : {
     name : 'Paralyzed',
     id : 'base:paralyzed',
-    description: 'ATK -100%. Unable to use Ability or Reaction Arts.',
+    description: 'SPD base -10. Unable to use Ability or Reaction Arts.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
-      SPD: -100,
-      ATK: -100
+      SPD: -10
     ),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
@@ -3501,13 +3500,13 @@ Effect.newEntry(
   data : {
     name : 'Mesmerized',
     id : 'base:mesmerized',
-    description: 'SPD,DEF -100%. Unable to use Ability or Reaction Arts, unable to block.',
+    description: 'SPD,DEF base -4. Unable to use Ability or Reaction Arts, unable to block.',
     stackable: false,
     blockPoints : -3,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
-      SPD: -100,
-      DEF: -100
+      SPD: -4,
+      DEF: -4
     ),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
@@ -3557,12 +3556,12 @@ Effect.newEntry(
   data : {
     name : 'Petrified',
     id : 'base:petrified',
-    description: 'Unable to use Ability or Reaction Arts. DEF -50%',
+    description: 'Unable to use Ability or Reaction Arts. DEF base -4',
     stackable: false,
     blockPoints : -3,
     traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
-      DEF: -50
+      DEF: -4
     ),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
@@ -4291,13 +4290,13 @@ Effect.newEntry(
   data : {
     name : 'Banish',
     id : 'base:banish',
-    description: '-15% ATK, -15% SPD. At 10 stacks, the holder is removed from battle.',
+    description: 'ATK, SPD base -1. At 10 stacks, the holder is removed from battle.',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
-      ATK: -15,
-      SPD: -15
+      ATK: -1,
+      SPD: -1
     ),
     events : {
       onAffliction ::(from, item, holder, to) {
@@ -5011,16 +5010,16 @@ Effect.newEntry(
   data : {
     name : 'Aura',
     id : 'base:aura',
-    description: 'ATK,DEF,INT,SPD,DEX +70%, gains an additional block point.',
+    description: 'ATK,DEF,INT,SPD,DEX base +4, gains an additional block point.',
     stackable: true,
     blockPoints : 1,
     traits : 0,
     stats: StatSet.new(
-      ATK:70, 
-      DEF:70,
-      INT:70,
-      SPD:70,
-      DEX:70
+      ATK:4, 
+      DEF:4,
+      INT:4,
+      SPD:4,
+      DEX:4
     ),
     events : {
     }
@@ -5031,12 +5030,12 @@ Effect.newEntry(
   data : {
     name : 'Shield Aura',
     id : 'base:shield-aura',
-    description: 'DEF +70%, gains an additional block point, and reduces both incoming and outgoing damage by 1.',
+    description: 'DEF base +4, gains an additional block point, and reduces both incoming and outgoing damage by 1.',
     stackable: true,
     blockPoints : 1,
     traits : 0,
     stats: StatSet.new(
-      DEF:70
+      DEF:4
     ),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage) {

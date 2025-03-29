@@ -48,6 +48,7 @@ import(module:'game_mutator.scenario.mt');
 import(module:'game_function.trap.mt');
 import(module:'game_singleton.commoninteractions.mt');
 import(module:'game_function.questguild.mt');
+import(:'game_class.inletset.mt');
 
 
 
