@@ -4626,7 +4626,7 @@ Effect.newEntry(
             );
           
             ArtsDeck.viewCards(
-              holder,
+              uter:holder,
               cards
             );
           }
@@ -5156,7 +5156,7 @@ Effect.newEntry(
       onAffliction ::(from, item, holder) {
         @:world = import(module:'game_singleton.world.mt');
         when (world.battle.isActive)
-          windowEvent.queueMessage(:"The presence of combatants causes the escape attempt to fail!");
+          windowEvent.queueMessage(text:"The presence of combatants causes the escape attempt to fail!");
 
         when(world.party.isMember(:holder) == false)
           empty;

@@ -355,7 +355,7 @@ Island.database.newEntry(
         instance.x = true;
       match(tier) {
         (0):::<= {
-          entity.capHP(max:9);
+          entity.capHP(max:random.integer(from:7, to:9));
           assignSupportArts(
             entity,
             professionLevel : 1,

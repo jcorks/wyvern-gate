@@ -49,7 +49,7 @@ return {
             
             speciesHint:  if (data.species == empty)
                   Species.getRandomFiltered(
-                  filter:::(value) <- (value.traits & Species.TRAITS.SPECIAL) == 0
+                  filter:::(value) <- (value.traits & Species.TRAIT.SPECIAL) == 0
                 ).id 
               else 
                 data.species,
@@ -120,8 +120,8 @@ return {
             for(0, data.randomAdditionalArtsCount) ::(i) {
               ent.supportArts->push(:
                 Arts.getRandomFiltered(::(value) <- 
-                  ((value.traits & Arts.TRAITS.SPECIAL) == 0) &&
-                  ((value.traits & Arts.TRAITS.SUPPORT) != 0) 
+                  ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
+                  ((value.traits & Arts.TRAIT.SUPPORT) != 0) 
                 ).id
               );
             }

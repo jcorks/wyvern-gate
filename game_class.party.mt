@@ -54,6 +54,7 @@
       },
       defaultLoad ::{      
         state.members = [];
+        state.inventory = Inventory.new(size:40);
       },
       reset ::{
         state.members = [];

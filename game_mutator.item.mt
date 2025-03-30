@@ -26,6 +26,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:romanNum = import(module:'game_function.romannumerals.mt');
+@:InletSet = import(:'game_class.inletset.mt');
 
 /*
   Items. 
@@ -2084,8 +2085,8 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
-    TRAIT.HAS_COLOR  
-  
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS  
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2122,7 +2123,8 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
-    TRAIT.HAS_COLOR  
+    TRAIT.HAS_COLOR  |
+    TRAIT.HAS_INLET_SLOTS  
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2414,7 +2416,8 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
-    TRAIT.HAS_COLOR    
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS  
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2451,7 +2454,8 @@ Item.database.newEntry(data : {
     TRAIT.METAL |
     TRAIT.HAS_QUALITY |
     TRAIT.CAN_BE_APPRAISED |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS  
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2490,7 +2494,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR|
+    TRAIT.HAS_INLET_SLOTS  
   ,
   onCreate ::(item, creationHint) {}
   
@@ -2529,7 +2534,8 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_ENCHANTMENTS |
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
-    TRAIT.HAS_COLOR
+    TRAIT.HAS_COLOR |
+    TRAIT.HAS_INLET_SLOTS  
   ,
   onCreate ::(item, creationHint) {}
   
@@ -3395,7 +3401,6 @@ Item.database.newEntry(data : {
   'White'    : ['DEF', 'SPD'],
   'Violet'   : ['DEX', 'DEF'],
   'Scarlet'  : ['DEX', 'INT'],
-  'Maroon'   : ['SPD', 'ATK'],
   'Crimson'  : ['ATK', 'INT'],
 }
 Item.database.newEntry(data : {
@@ -3442,18 +3447,18 @@ Item.database.newEntry(data : {
       desc = desc + k + ',';
     }      
     desc = desc + ' base -1, ' + crystals[kind][0] + ',' + crystals[kind][1] + ' base +2';
-    //item.description = desc;
+    //item.setOverrideDescription(:desc);
     breakpoint();
     item.setUpInlet(
       stats : StatSet.new(*statsA)
     );
     @:InletSet = import(:'game_class.inletset.mt');  
-    item.name = kind + ' Crystal (' +
+    item.name = kind + ' Crystal '/*(' +
       (match(item.inletShape) {
         (InletSet.SLOTS.ROUND) : 'round',
         (InletSet.SLOTS.TRIANGLE) : 'triangular',
         (InletSet.SLOTS.SQUARE) : 'square'
-      }) + ')'
+      }) + ')'*/
     
   }
 })   
@@ -3490,7 +3495,7 @@ Item.database.newEntry(
     equipType: TYPE.HAND,
     rarity : 500,
     weight : 0.1,
-    tier: 0,
+    tier: 2,
     enchantLimit : 40,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
@@ -3509,14 +3514,14 @@ Item.database.newEntry(
       @:kind = random.pickArrayItem(:gems->keys);
       
       @:statsA = {
-        ATK: -1,
-        DEX: -1,
-        SPD: -1,
-        DEF: -1,
-        INT: -1      
+        ATK: -2,
+        DEX: -2,
+        SPD: -2,
+        DEF: -2,
+        INT: -2      
       }
       foreach(gems[kind]) ::(k, v) {
-        statsA[v] = 2;
+        statsA[v] = 5;
       }
       @desc = item.base.description + ": ";
       foreach(statsA) ::(k, v) {
@@ -3524,20 +3529,20 @@ Item.database.newEntry(
         when (k == gems[kind][1]) empty;
         desc = desc + k + ',';
       }      
-      desc = desc + ' base -1, ' + gems[kind][0] + ',' + gems[kind][1] + ' base +2';
-      //item.description = desc;
+      desc = desc + ' base -2, ' + gems[kind][0] + ',' + gems[kind][1] + ' base +5';
+      //item.setOverrideDescription(:desc);
       
       item.setUpInlet(
         stats : StatSet.new(*statsA)
       );
 
       @:InletSet = import(:'game_class.inletset.mt');
-      item.name = kind + ' (' +
+      item.name = kind /*+ ' (' +
         (match(item.inletShape) {
           (InletSet.SLOTS.ROUND) : 'round',
           (InletSet.SLOTS.TRIANGLE) : 'triangular',
           (InletSet.SLOTS.SQUARE) : 'square'
-        }) + ')';
+        }) + ')';*/
       item.setUpInlet(
         stats : StatSet.new(*statsA)
       );
@@ -3551,7 +3556,7 @@ Item.database.newEntry(
   data : {
     name : '',
     id : 'base:inlet-soulgem',
-    description: "A soul gem which grants an effect when equipped.",
+    description: "",
     examine : 'Its abilities are unknown.',
     sortType : SORT_TYPE.INLET,
     equipType: TYPE.HAND,
@@ -3578,14 +3583,18 @@ Item.database.newEntry(
       item.setUpInlet(
         effect : effect.id
       );
+      
+      item.setOverrideDescription(
+        : "A soul gem which grants the effect " + effect.name + ":" + effect.description
+      )
 
       @:InletSet = import(:'game_class.inletset.mt');
-      item.name = effect.name + ' Soul Gem (' +
+      item.name = effect.name + ' Soul Gem ' /*(' +
         (match(item.inletShape) {
           (InletSet.SLOTS.ROUND) : 'round',
           (InletSet.SLOTS.TRIANGLE) : 'triangular',
           (InletSet.SLOTS.SQUARE) : 'square'
-        }) + ')';
+        }) + ')';*/
     }
   }
 )
@@ -3794,7 +3803,7 @@ none.name = 'None';
     'It is clearly ' + correctA(:base.name) + '... Though, it\'s hard to discern anything else from this mysterious item. It should be appraised by someone.'
   
   @out = String.combine(strings:[
-    base.description,
+    if (state.coreDescription != '') state.coreDescription else base.description,
     ' ',
     (if (state.arts == empty) '' else 'If equipped, ' + 
       (if (state.arts[0] == state.arts[1])
@@ -3904,7 +3913,8 @@ none.name = 'None';
     needsAppraisal : false,
     appraisalCount : 0,
     inletData : empty,
-    inletSlotData : empty
+    inletSlotData : empty,
+    coreDescription : ''
   },
   
   database : Database.new(
@@ -4077,7 +4087,7 @@ none.name = 'None';
           for(0, enchantCount)::(i) {
             @mod = ItemEnchant.new(
               base:
-              if (random.try(percentSuccess:25)) 
+              if (world.island.tier > 1 && random.try(percentSuccess:25)) 
                 ItemEnchant.database.find(id:'base:soul')
               else
                 ItemEnchant.database.getRandomFiltered(
@@ -4113,16 +4123,22 @@ none.name = 'None';
       
       if (base.hasTraits(:TRAIT.HAS_INLET_SLOTS)) ::<= {
         @:slotCount = match(tier) {
-          (0, 1): 
-            //0,
-            random.integer(from:0, to:7),
+          (0):
+            random.pickArrayItem(:[
+              0, 0, 0, 0, 1
+            ]),
+          (1): 
+            random.pickArrayItem(:[
+              0, 0, 1, 1, 1, 2, 3
+            ]),
             
-          (2): random.integer(from:0, to:3),
-          (3): random.integer(from:0, to:5),
-          default: random.integer(from:0, to:7)
+          (2): random.integer(from:0, to:4),
+          (3): random.integer(from:1, to:5),
+          default: random.integer(from:2, to:7)
         }
         
         if (slotCount > 0) ::<= {
+          state.price += 400**(1+0.1*slotCount);
           state.inletSlotData = import(:'game_class.inletset.mt').new(size:slotCount);          
         }
       }
@@ -4336,6 +4352,10 @@ none.name = 'None';
         return calculateDescription(*_);
       }
     },
+    
+    setOverrideDescription ::(text) {
+      _.state.coreDescription = text;
+    },
       
     commitEffectEvent ::(*args) {
       @:state = _.state;
@@ -4408,7 +4428,7 @@ none.name = 'None';
         speakers : [
           this.name + ': Description',
           this.name + ': Enchantments',
-          this.name + ': Equip Stats',
+          this.name + if (this.inletStats != empty) ': Gem stats' else ': Equip Stats',
           this.name + ': Equip Effects',
           this.name + ': Use Effects'
         ],
@@ -4426,8 +4446,17 @@ none.name = 'None';
           
           
           
-          String.combine(:state.stats.descriptionRateLinesBase(:this.equipModBase)->map(::(value) <- value + '\n')),          
-
+          String.combine(:
+            if (this.inletStats != empty)
+              [
+                'Gem shape: ' + InletSet.SLOT_NAMES[this.inletShape] + '\n', 
+                ...this.inletStats.descriptionAugmentLines->map(::(value) <- value + '\n')
+              ]
+            else
+              state.stats.descriptionRateLinesBase(:this.equipModBase)->map(::(value) <- value + '\n')
+          ),
+          
+          
           if (state.equipEffects->keycount != 0) ::<= {
             @out = '';
             when (state.equipEffects->keycount == 0) 'None.';
@@ -4496,7 +4525,7 @@ none.name = 'None';
     
     inletStats : {
       get ::{ 
-        when (_.state.inletData == empty) StatSet.new();
+        when (_.state.inletData == empty) empty;
         return _.state.inletData.stats;
       }
     },
@@ -4529,7 +4558,7 @@ none.name = 'None';
       
       return [
         'Grants base stats: ',
-        ...(_.state.inletData.stats.description->split(:'\n'))
+        ...(_.state.inletData.stats.descriptionAugmentLines)
       ]
     },
     

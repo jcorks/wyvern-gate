@@ -72,12 +72,15 @@ return ::(
   goldMultiplier, 
   header,
   tabbed,
+  onGetHeader,
+  onGetFooter,
   includeLoot
 ) {
   @names = []
   @items = []
   @picked;
   @cancelled = false;
+  breakpoint();
     
 
   @:prepTabbedChoices ::(args) {
@@ -216,7 +219,7 @@ return ::(
       when(inventory.items->size == 0) ::<={
         windowEvent.queueMessage(text: "The inventory is empty.");
       }
-    
+      breakpoint();
       @:args = {
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
@@ -225,6 +228,7 @@ return ::(
         canCancel: canCancel,
         jumpTag: 'pickItem',
         separator: '|',
+        onGetFooter : onGetFooter,
         leftJustified : [true, if(showRarity)true else false, true],
         pageAfter: STATIC_HEIGHT+2,
         header : header,

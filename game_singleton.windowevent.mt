@@ -33,7 +33,7 @@
   DONE : 3
 };
 
-@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch) <- 
+@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText) <- 
     canvas.renderTextFrameGeneral(
       leftWeight, 
       topWeight, 
@@ -41,11 +41,11 @@
       maxWidth,
       lines:lines, 
       title:speaker, 
-      notchText:if(hasNotch != empty) "(next)" else empty)
+      notchText:if(hasNotch != empty) (if (notchText == empty) "(next)" else notchText) else empty)
 
 
 // Renders a text box using an animation
-@:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch) {
+@:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText) {
   @width = 0;
   @height = lines->size;
   @frames = 0;  
@@ -81,7 +81,7 @@
       maxHeight,
       lines:animateLines(), 
       title:speaker, 
-      notchText:if(hasNotch != empty) "(next)" else empty)
+      notchText:if(hasNotch != empty) (if (notchText == empty) "(next)" else notchText) else empty)
       
     when(frames == FRAME_COUNT_RENDER_TEXT)
       ANIMATION_FINISHED;
@@ -416,6 +416,7 @@
       @:onChoice = data.onChoice;
       @:onHover = data.onHover;
       @:pageAfter = data.pageAfter;
+      @:onGetFooter = data.onGetFooter;
       @header = data.header;
       @cursorPos = if (defaultChoice == empty) 0 else defaultChoice-1;
 
@@ -588,6 +589,8 @@
         if (onHover != empty)
           onHover(choice:cursorPos+1);
         
+        if (onGetFooter != empty)
+          breakpoint();
         
         if (data.hideWindow != true) ::<= {
           if (data.animationFrame == empty) ::<= {
@@ -598,7 +601,9 @@
               leftWeight,
               topWeight,
               maxWidth,
-              maxHeight
+              maxHeight,
+              hasNotch : if (onGetFooter == empty) empty else true,
+              notchText : if (onGetFooter == empty) empty else onGetFooter() 
             )
           }      
 
@@ -610,7 +615,9 @@
               leftWeight,
               topWeight,
               maxWidth,
-              maxHeight
+              maxHeight,
+              hasNotch : if (onGetFooter == empty) empty else true,
+              notchText : if (onGetFooter == empty) empty else onGetFooter() 
             )
           }
         }
@@ -1553,7 +1560,8 @@
         pageAfter, 
         hideWindow,
         horizontalFlow,
-        onInput
+        onInput,
+        onGetFooter
       ) {
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
@@ -1582,7 +1590,8 @@
             horizontalFlow : horizontalFlow,
             onInput : onInput,
             onGetMinHeight : onGetMinHeight,
-            onGetMinWidth : onGetMinWidth
+            onGetMinWidth : onGetMinWidth,
+            onGetFooter : onGetFooter
           });
         }]);
         return getResolveQueue()->size-1;

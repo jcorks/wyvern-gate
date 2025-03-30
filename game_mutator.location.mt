@@ -350,6 +350,8 @@ Location.database.newEntry(data:{
     @:world = import(module:'game_singleton.world.mt');
 
     @:addMissing ::(id, minCount) {
+      when (Item.database.find(:id).tier > world.island.tier) empty;
+
       @:found = location.inventory.items->filter(::(value) <- 
         value.base.id == id &&
         world.island.tier >= value.base.tier
@@ -1013,15 +1015,21 @@ Location.database.newEntry(data:{
   onFirstInteract ::(location) {},
   
   onInteract ::(location) {
-    
+    @:Profession = import(:'game_database.profession');
+    // not needed, just dont want my old saves to freak out
+    if (location.data.professionSet == empty)
+      location.data.professionSet = Profession.getRandomSet(count:3)->map(::(value) <- value.id);
   },      
   onStep ::(location, entities) {
   
   },
   onCreate ::(location) {
+    @:Profession = import(:'game_database.profession');
     location.ownedBy = location.landmark.island.newInhabitant();
-    location.name = location.ownedBy.profession.name + ' school';
+    location.name = 'Profession school';
     location.ownedBy.normalizeStats();        
+    location.data.professionSet = Profession.getRandomSet(count:3)->map(::(value) <- value.id);
+
   },
   
   onIncrementTime::(location, time) {

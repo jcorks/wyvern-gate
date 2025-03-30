@@ -21,7 +21,8 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:Item = import(module:'game_mutator.item.mt');
-
+@:StatSet = import(module:'game_class.statset.mt');
+@:InletSet = import(:'game_class.inletset.mt');
 
 
 return ::(inventory, shopkeep, onDone) {
@@ -41,13 +42,36 @@ return ::(inventory, shopkeep, onDone) {
       hoveredItem = item;
     },
     header : ['Item', 'Price', ''],
+    onGetFooter ::<- '(Party has: ' + g(:party.inventory.gold)+')',
     
     renderable : {
       render ::{
         when(hoveredItem == empty) empty;
+        
+        when (hoveredItem.inletStats != empty) ::<= {
+          when(hoveredItem.inletEffect != empty) empty;
+        
+          canvas.renderTextFrameGeneral(
+            title: 'Gem base stats:',
+            lines: [
+              'Shape: ' + InletSet.SLOT_NAMES[hoveredItem.inletShape],
+              ...hoveredItem.inletStats.descriptionAugmentLines
+            ],
+            leftWeight: 0,
+            topWeight: 0.5
+          )
+        }
+        
         canvas.renderTextFrameGeneral(
-          title: 'Equip stats:',
-          lines: hoveredItem.stats.descriptionRateLines,
+          title: 'Summary:',
+          lines: [
+            'Stat boosts:',
+            ...hoveredItem.stats.descriptionRateLines,
+            ...([if (hoveredItem.inletSlotSet != empty)
+              '' + hoveredItem.inletSlotSet.size + ' gem slot' + if (hoveredItem.inletSlotSet.size == 1) '.' else 's.'
+            else 
+              ''])
+          ],
           leftWeight: 0,
           topWeight: 0.5
         )
@@ -117,12 +141,16 @@ return ::(inventory, shopkeep, onDone) {
                 onChoice::(choice) {
                   @:user = party.members[choice-1];
                   @slot = user.getSlotsForItem(item)[0];
-                  @currentEquip = user.getEquipped(slot);
-                  
-                  currentEquip.equipMod.printDiffRate(
-                    prompt: '(Equip) ' + currentEquip.name + ' -> ' + item.name,
-                    other:item.equipMod
-                  );                                         
+
+                  @:currentStats = user.stats.clone();
+                  @:withEquip = user.statsIfEquippedInstead(item, slot);
+                  @:lines = StatSet.diffToLines(stats:currentStats, other:withEquip);
+
+                  windowEvent.queueDisplay(
+                    prompt:user.name + ': If equipped...',
+                    lines
+                  );                        
+
                 }
               );
             }  

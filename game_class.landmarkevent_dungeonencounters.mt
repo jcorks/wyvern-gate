@@ -55,10 +55,7 @@
 
         @:i = random.integer(from:0, to:2);
 
-        if (island_.tier > 0 && i > 0)
-          ents->push(value:landmark_.island.newInhabitant());
-
-        if (island_.tier > 2 && i > 1)
+        if (island_.tier > 2 && i > 0)
           ents->push(value:landmark_.island.newInhabitant());
 
 

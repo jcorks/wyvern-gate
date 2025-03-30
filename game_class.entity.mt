@@ -244,7 +244,7 @@
   }
       
   stats.add(stats:StatSet.new(
-    HP  : (if(random.flipCoin()) 1 else 0) + (stat(name:'HP')),
+    HP  : (if(random.flipCoin()) 3 else 1) + (stat(name:'HP')),
     AP  : 0,
     ATK : stat(name:'ATK'),
     INT : stat(name:'INT'),
@@ -507,7 +507,7 @@
     // x1 - x0 / y1 - y0 = 1 / m
     // y1 - y0 / x1 - x0 = m
     
-    @:m = (MAX_DEFEATS - 3) / (ct - 0);
+    @:m = (MAX_DEFEATS - 2) / (ct - 0);
     @:b = MAX_DEFEATS - m*ct;
     
     return ((m*level + b)*PROF_EXP_PER_KNOCKOUT)->floor;
@@ -594,7 +594,7 @@
             @:oldStats = StatSet.new();
             oldStats.load(serialized:this.stats.save());
             @:newState = this.stats.save();
-            newState['HP'] += 1;
+            newState['HP'] += if (random.try(percentSuccess:20)) 3 else 2;
             this.stats.load(serialized:newState);
             
             oldStats.printDiff(
@@ -1604,13 +1604,13 @@
       
                   
       if (this.stats.SPD < 0) ::<= {
-        windowEvent.queueMessage(text:this.name + ' cannot move! (negative speed)');
-        act = false;
+        //windowEvent.queueMessage(text:this.name + ' cannot move! (negative speed)');
+        //act = false;
       }
 
       if (this.stats.DEX < 0) ::<= {
-        windowEvent.queueMessage(text:this.name + ' fumbles about! (negative dexterity)');
-        act = false;
+        //windowEvent.queueMessage(text:this.name + ' fumbles about! (negative dexterity)');
+        //act = false;
       }
 
       if (act == false)
@@ -2411,6 +2411,26 @@
         return _.state.stats;
       }
     },
+    
+    // returns the stats as if the given item were equipped
+    statsIfEquippedInstead ::(slot, item) {
+      @:state = _.state;
+      @:this = _.this;
+  
+      @:olditem = this.unequip(slot, silent:true);
+      this.equip(item, slot, silent:true);
+      this.recalculateStats();
+      @:newStats = this.stats.clone();
+
+      this.unequip(slot);      
+      if (olditem) ::<= {
+        this.equip(item:olditem, slot, silent:true);
+      }
+      this.recalculateStats();
+            
+      return newStats;
+    },
+    
 
     capHP ::(max) {
       @:state = _.state;

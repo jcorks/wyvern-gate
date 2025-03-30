@@ -782,7 +782,7 @@ ItemEnchant.database.newEntry(
     useEffects : [],
     traits : 0,
     onCreate ::(this){
-      @:kind = random.pickArrayItem(:stats);
+      @:kind = random.pickArrayItem(:stats->values);
       
       @:statsA = {
         ATK: -1,
@@ -798,7 +798,7 @@ ItemEnchant.database.newEntry(
         desc = desc + k + ',';
       }      
       desc = desc + ' base -1, ' + kind + ' base +7';
-      
+      this.description = desc;
       this.name = 'Rune of ' + kind;
       this.equipModBase.add(:StatSet.new(*statsA));
     }

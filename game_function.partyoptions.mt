@@ -404,16 +404,11 @@ return ::{
                       renderable : {
                         render ::{
                           menuRenderable.render();
-                          
-                          
                           when(hovered == empty) empty;
-                          
-                          
-                          @other = hovered;
-                          @:lines = StatSet.diffRateToLines(
-                            stats:member.getEquipped(slot).equipMod, 
-                            other:other.equipMod
-                          );
+
+                          @:currentStats = member.stats.clone();
+                          @:withEquip = member.statsIfEquippedInstead(item:hovered, slot);
+                          @:lines = StatSet.diffToLines(stats:currentStats, other:withEquip);
 
                           canvas.renderTextFrameGeneral(
                             title:'If equipped...',

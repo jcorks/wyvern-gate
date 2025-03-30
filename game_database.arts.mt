@@ -6769,7 +6769,7 @@ Arts.newEntry(
       
       // technically removes ALL instances, but the others 
       // wouldnt be usable anyway
-      user.artsDeck.purge(:'base:b178');
+      user.deck.purge(:'base:b178');
       
       // just remove ONE
       @index = user.supportArts->findIndex(:'base:b178');

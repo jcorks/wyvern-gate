@@ -2927,7 +2927,7 @@ for(0, 20) ::(i) {
         }
 
         item.setIslandGenTraits(
-          levelHint:  story.levelHint+1,
+          levelHint:  story.levelHint+2,
           nameHint:   'Island of Ice',
           tierHint : 1,
           idHint : 'thechosen:island-of-ice'
@@ -2985,7 +2985,7 @@ for(0, 20) ::(i) {
         }
 
         item.setIslandGenTraits(
-          levelHint:  story.levelHint+2,
+          levelHint:  story.levelHint+4,
           nameHint:   'Island of Thunder',
           tierHint : 2,
           idHint : 'thechosen:island-of-thunder'
@@ -3042,7 +3042,7 @@ for(0, 20) ::(i) {
         }
 
         item.setIslandGenTraits(
-          levelHint:  story.levelHint+3,
+          levelHint:  story.levelHint+7,
           nameHint:   'Island of Light',
           tierHint : 3,
           idHint : 'thechosen:island-of-light'

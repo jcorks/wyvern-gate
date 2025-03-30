@@ -261,6 +261,27 @@
       }
     },
 
+    descriptionAugmentLines : {
+      get :: {
+        @:state = _.state;
+        return canvas.columnsToLines(
+          columns : [
+            NAMES->map(::(value) <- value + ': '),
+            NAMES->map(::(value) <- 
+              if (state[value] == 0) 
+                ' ' 
+              else if (state[value] > 0) 
+                '+'+state[value]
+              else
+                ''+state[value]
+            )
+            
+          ]
+        )
+      }
+    },
+
+
     descriptionRateLines : {
       get :: {
         @:state = _.state;
