@@ -872,7 +872,7 @@ Effect.newEntry(
   data : {
     name : 'Wyvern Flower',
     id : 'base:wyvern-flower',
-    description: 'Increases a base stat permanently.',
+    description: 'Increases base stats permanently.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.SPECIAL ,
