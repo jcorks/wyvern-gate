@@ -237,7 +237,7 @@
   @:stat = ::(name) {
     when (random.flipCoin()) 0;
     @:base = growthPotential[name];
-    @val =  (0.5 * (random.number()/2) * (base / 3))->floor
+    @val =  (0.5 * (random.number()/2) * (base / 4) + base/5)->floor
     when (val < 1)
       random.number() * 2;
     return val;
@@ -2708,12 +2708,14 @@
       this.effectStack.removeByFilter(::(value) <- value == instance);
     },
     
-    checkStatChanged::(instance) {
+    checkStatChanged::(oldStats) {
       @:state = _.state;
       @:this = _.this;
 
-      @:oldStats = StatSet.new();
-      oldStats.load(serialized:this.stats.save());
+      if (oldStats == empty) ::<= {
+          oldStats = StatSet.new();
+          oldStats.load(serialized:this.stats.save());
+      }
       this.recalculateStats();
       if (StatSet.isDifferent(stats:oldStats, other:this.stats)) ::<= {
         windowEvent.queueDisplay(

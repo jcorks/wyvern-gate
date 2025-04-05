@@ -54,11 +54,11 @@
       },
       defaultLoad ::{      
         state.members = [];
-        state.inventory = Inventory.new(size:40);
+        state.inventory = Inventory.new(size:4);
       },
       reset ::{
         state.members = [];
-        state.inventory = Inventory.new(size:40);
+        state.inventory = Inventory.new(size:4);
       },
       
       leader : {

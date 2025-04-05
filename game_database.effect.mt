@@ -868,6 +868,27 @@ Effect.newEntry(
   }
 ) 
 
+Effect.newEntry(
+  data : {
+    name : 'Wyvern Flower',
+    id : 'base:wyvern-flower',
+    description: 'Increases a base stat permanently.',
+    stackable: false,
+    blockPoints : 0,
+    traits : TRAIT.SPECIAL ,
+    stats: StatSet.new(
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(text: 'The ' + item.name + ' glows with power!');
+        @:oldStats = holder.stats.clone();
+        holder.autoLevel();
+        holder.checkStatChanged(:oldStats);
+      }
+    }
+  }
+) 
+
 
 Effect.newEntry(
   data : {

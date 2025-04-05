@@ -377,7 +377,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:inlet-crystal', minCount:2);
     addMissing(id:'base:inlet-gem', minCount:2);
     addMissing(id:'base:inlet-soulgem', minCount:2);
-    addMissing(id:'base:seed', minCount:1);
+    addMissing(id:'base:wyvern-flower', minCount:1);
     
     for(location.inventory.items->size, 60 + (location.ownedBy.level / 4)->ceil)::(i) {
       // no weight, as the value scales

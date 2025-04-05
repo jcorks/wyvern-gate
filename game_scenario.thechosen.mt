@@ -3283,7 +3283,7 @@ for(0, 20) ::(i) {
             world.party.inventory.add(:keyother);
 
             keyother = Item.new(
-              base: Item.database.find(id:'thechosen:wyvern-key'),
+              base: Item.database.find(id:'base:wyvern-key'),
               creationHint : {
                 tier : 1
               }

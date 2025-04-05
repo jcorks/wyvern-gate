@@ -20,6 +20,78 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 
+@:partyDiscardItem ::(this) {
+  @:world = import(module:'game_singleton.world.mt');
+  @:windowEvent = import(module:'game_singleton.windowevent.mt');
+  @:g = import(module:'game_function.g.mt');
+
+  windowEvent.queueNestedResolve(
+    jumpTag : 'DISCARD_ITEM',
+    onEnter ::{
+      when(this.items->keycount <= this.maxItems) empty;
+      @:tooMany = (this.items->keycount - this.maxItems);
+          
+      windowEvent.queueMessage(
+        text: 'The party\'s inventory is full.' 
+      );
+      windowEvent.queueMessage(
+        text: 'Please discard ' + (if (tooMany == 1) 'an item ' else ''+tooMany+ ' items ') + 'to continue.'
+      );
+
+      @:pickItem = import(module:'game_function.pickitem.mt');
+
+      pickItem(
+        tabbed: true,
+        includeLoot : true,
+        inventory:this,
+        leftWeight: 0.5,
+        topWeight: 0.5,
+        canCancel:false, 
+        keep: true,
+        pageAfter:12,
+        showRarity:true,
+        header : ['Item', 'Value', ''],
+        prompt: 'Discard which?',
+        onGetFooter ::<- '(Need to discard :' + (this.items->keycount - this.maxItems) + ' items.)',
+        onPick::(item) {
+          @choiceItem = item;
+          when(choiceItem == empty) empty;
+          
+          windowEvent.queueChoices(
+            leftWeight: 0.5,
+            topWeight: 0.5,
+            prompt: choiceItem.name,
+            canCancel : true,
+            jumpTag : 'DISCARD_ITEM_SUB',
+            keep : true,
+            choices: ['Check', 'Discard'],
+            onChoice::(choice) {
+              when (choice == 0) empty;        
+              when(choice == 1) 
+                item.describe()
+                
+              when(choice == 2)
+                windowEvent.queueAskBoolean(
+                  prompt: 'Are you sure you want to discard the ' + choiceItem.name + '?',
+                  onChoice ::(which) {
+                    when (which == false) empty;
+                    this.remove(:choiceItem);
+
+                    when(this.items->keycount <= this.maxItems)
+                      windowEvent.jumpToTag(name:'DISCARD_ITEM');
+                    windowEvent.jumpToTag(name:'DISCARD_ITEM_SUB', goBeforeTag:true);
+                  }
+                );
+            }
+          );
+        }
+      ); 
+
+
+    }
+  );
+}
+
 @:Inventory = LoadableClass.create(
   name: 'Wyvern.Inventory',
   items : {
@@ -51,8 +123,19 @@
           return true;
         }
         
-        when (state.items->keycount == state.maxItems) false;
         state.items->push(value:item);
+        
+        // special case for party's inventory
+        when (state.items->keycount > state.maxItems) ::<= {
+          @:world = import(module:'game_singleton.world.mt');
+          when(this != world.party.inventory) ::<= {
+            this.remove(:item);
+            return false;
+          }
+          
+          partyDiscardItem(this);
+        }
+        
         return true;
       },
       

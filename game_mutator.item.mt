@@ -3329,7 +3329,7 @@ Item.database.newEntry(data : {
   enchantLimit : 40,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
-  basePrice: 10,
+  basePrice: 10000,
   possibleArts : [],
 
   blockPoints : 0,
@@ -3342,8 +3342,7 @@ Item.database.newEntry(data : {
   equipEffects : [],
   traits :     
     TRAIT.MEANT_TO_BE_USED |
-    TRAIT.UNIQUE |
-    TRAIT.PRICELESS
+    TRAIT.UNIQUE
   ,
   onCreate ::(item, creationHint) {
     @:stats = {
@@ -3362,6 +3361,41 @@ Item.database.newEntry(data : {
     item.name = item.data.statIncreaseType + ' Seed';
   }
 }) 
+
+
+Item.database.newEntry(data : {
+  name : "Wyvern Flower",
+  id : 'base:wyvern-flower',
+  sortType : SORT_TYPE.USABLES,
+  description: "A mysterious and extremely rare plant. It is said that, when used, unlocks the potential of the user.",
+  examine : 'Its abilities are unknown.',
+  equipType: TYPE.TWOHANDED,
+  rarity : 500,
+  weight : 1,
+  tier: 4,
+  enchantLimit : 40,
+  levelMinimum : 1,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  basePrice: 10,
+  possibleArts : [],
+
+  blockPoints : 0,
+  equipMod : StatSet.new(
+  ),
+  useEffects : [
+    'base:wyvern-flower',
+    'base:consume-item'     
+  ],
+  equipEffects : [],
+  traits :     
+    TRAIT.MEANT_TO_BE_USED |
+    TRAIT.UNIQUE |
+    TRAIT.PRICELESS
+  ,
+  onCreate ::(item, creationHint) {
+  }
+}) 
+
 
 Item.database.newEntry(data : {
   name : "Item Box",
