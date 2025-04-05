@@ -1016,6 +1016,23 @@
       _.this.flags.reset();
     },
     
+    getChanceOfAttackSuccessDEXvDEF::(other) {
+      @:state = _.state;
+      @:this = _.this;
+      
+      @ratioDiff = 1 - ((other.stats.DEF - this.stats.DEX) / (other.stats.DEF));
+      ratioDiff += this.stats.LUK / 100.0;
+
+      if (ratioDiff < 0.4)
+        ratioDiff = 0.4;
+
+
+      if (ratioDiff > 0.95)
+        ratioDiff = 0.95;
+
+      return ratioDiff;            
+    },
+    
     getArtMinDamage ::(handCard) {
       @:this = _.this;
       @:art = Arts.find(id:handCard.id);
@@ -1879,8 +1896,6 @@
             }
             
           } else ::<= {
-   
-
 
             backupStats = this.stats.save();
             match(true) {
@@ -1888,13 +1903,13 @@
                 when(isCrit)
                   isHitHead = true;
               
-                if (random.try(percentSuccess:15)) ::<= {
+                if (random.try(percentSuccess:20)) ::<= {
                   isCrit = true;
                   dmg.amount += this.stats.DEX * 1.5;
                   isHitHead = true;
                 } else ::<= {
                   missHead = true;
-                  dmg.amount = 1;
+                  dmg.amount *= 0.9;
                 }
               },
 
@@ -1908,7 +1923,9 @@
               ((targetPart & DAMAGE_TARGET.LIMBS) != 0):::<= {
                 when(isCrit)
                   isLimbHit = true;
-                if (random.try(percentSuccess:45)) ::<= {
+
+                dmg.amount *= 0.4;                
+                if (random.try(percentSuccess:30)) ::<= {
                   isLimbHit = true;
                 } else ::<= {
                   missLimb = true;
@@ -1925,24 +1942,30 @@
 
         @isDexed = false;
         @isDefed = false;
-        if (!target.isIncapacitated() && random.try(percentSuccess:33) && ((dmg.traits & Damage.TRAIT.FORCE_DEF_BYPASS) == 0)) ::<= {
-          if (this.stats.DEX > target.stats.DEF) ::<= {       
+        if (!target.isIncapacitated() && ((dmg.traits & Damage.TRAIT.FORCE_DEF_BYPASS) == 0)) ::<= {
+
+          @:ratioDiff = this.getChanceOfAttackSuccessDEXvDEF(:target);
+          if (random.try(percentSuccess:(1-ratioDiff)*100)) ::<= {       
             windowEvent.queueMessage(
-              text: target.name + ' tried to completely nullify the damage, but ' + this.name + ' went through ' + target.name + '\'s defenses thanks to their high DEX!'
+              text: target.name + ' defended themself from the incoming attack!'
             );
-
-          } else ::<= {
-
-            @ratioDiff = ((target.stats.DEF - this.stats.DEX) / (target.stats.DEF)) * 0.8;
-            if (ratioDiff > 1)
-              ratioDiff = 1;
-              
-            if (random.try(percentSuccess:ratioDiff*100)) ::<= {
-              windowEvent.queueMessage(
-                text: target.name + ' defended themself from the incoming attack due to their high DEF!'
+            dmg.amount = 0;
+            if (target.effectStack)
+              target.effectStack.emitEvent(
+                name : 'onSuccessfulBlock',
+                attacker: this,
+                damage: dmg,
+                blockData : {
+                  targetDefendPart : DAMAGE_TARGET.BODY,
+                  targetPart : DAMAGE_TARGET.BODY,
+                  wasDefbased: true
+                }
               );
-              dmg.amount = 0;
-            }
+            
+            this.effectStack.emitEvent(
+              name: 'onGotBlocked',
+              to: target
+            );
           }
         }
         
@@ -2740,9 +2763,9 @@
     
     hasEquipped::(item) {
       @:this = _.this;
-      {:::} {
+      return {:::} {
         foreach(this.getSlotsForItem(item)) ::(k, v) {
-          if (this.getEquipped(:v) == this)
+          if (this.getEquipped(:v) == item)
             send(:true);
         }
         return false;
@@ -2949,6 +2972,8 @@
       @:battle = _.battle;
       @:allies = battle.getAllies(entity:_.this);
       @:enemies = battle.getEnemies(entity:_.this);
+      @:state = _.state;
+      @:this = _.this;
 
       @battleAction;
       windowEvent.queueNestedResolve(
@@ -2967,18 +2992,17 @@
                 [
                   [
                     'The attack aims for the head.',
-                    'While fairly difficult to hit, when it lands it will',
-                    'critical hit. Otherwise, deals 1 damage.'
+                    'Attack damage is reduced by 90%, but has a ',
+                    '20% chance to do an unreduced critical hit.'
                   ],
                   [
                     'The attack aims for the body.',
-                    'This is the easiest to hit, but provides no additional',
-                    'effect.'
+                    'Does base damage without any additional effect.'
                   ],
                   [
                     'The attack aims for the limbs.',
-                    'While slightly difficult to hit, when it lands it ',
-                    'has a high chance to stun the target for a turn.'
+                    'Attack damage is reduced by 60%, but has a 30%',
+                    'chance to cause Stunned for a turn.'
                   ]
                 ];
                 
@@ -3029,13 +3053,33 @@
               ]              
               
 
-              
+              @hovered;
               tabbedChoices(
                 leftWeight: 1,
                 topWeight: 1,
                 onGetTabs ::<- ['Enemies', 'Allies'],
                 onGetChoices::(tab) <- choiceNames[tab],
                 canCancel: if (canCancel == empty) true else canCancel,
+                renderable : {
+                  render :: {
+                    when (hovered == empty) empty;
+                    canvas.renderTextFrameGeneral(
+                      lines : canvas.columnsToLines(
+                        columns : [
+                          [this.name, "DEX: "+this.stats.DEX, " ", " "],
+                          ["", if (this.stats.DEX > hovered.stats.DEF) '>' else '<', " ", ""+(this.getChanceOfAttackSuccessDEXvDEF(:hovered)*100)->round + "% Hit Chance"],
+                          [hovered.name, "DEF: "+hovered.stats.DEF, " ", " "],
+                        ]
+                      ),
+                      topWeight: 0.5,
+                      leftWeight: 0.5
+                    );
+                  }
+                },
+                onHover::(choice, tab) {
+                  hovered = choices[tab][choice-1];
+                },
+                
                 onChoice::(choice, tab) {
                   when(choice == 0) empty;
                   
@@ -3056,7 +3100,7 @@
                       card,
                       turnIndex : 0,
                       targets: [choices[tab][choice-1]],
-                      targetParts: [Entity.normalizedDamageTarget()],
+                      targetParts: [DAMAGE_TARGET.BODY],
                       extraData: {}
                     )
                   }
@@ -3070,7 +3114,7 @@
                   card,
                   turnIndex : 0,
                   targets: allies,
-                  targetParts: [...allies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
+                  targetParts: [...allies]->map(to:::(value) <- DAMAGE_TARGET.BODY),                  
                   extraData: {}
                 )
                  
@@ -3082,7 +3126,7 @@
                   card,
                   turnIndex : 0,
                   targets: enemies,
-                  targetParts: [...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
+                  targetParts: [...enemies]->map(to:::(value) <- DAMAGE_TARGET.BODY),                  
                   extraData: {}                
                 )
             },
@@ -3093,7 +3137,7 @@
                   card,
                   turnIndex : 0,
                   targets: [...allies, ...enemies],
-                  targetParts: [...allies, ...enemies]->map(to:::(value) <- Entity.normalizedDamageTarget()),                  
+                  targetParts: [...allies, ...enemies]->map(to:::(value) <- DAMAGE_TARGET.BODY),                  
                   extraData: {}                
                 )
             },
@@ -3125,7 +3169,7 @@
                   card,
                   turnIndex : 0,
                   targets: random.pickArrayItem(list:all),
-                  targetParts : [Entity.normalizedDamageTarget()],
+                  targetParts : [DAMAGE_TARGET.BODY],
                   extraData: {}                
                 )
             }

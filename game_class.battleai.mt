@@ -125,6 +125,8 @@
                 if (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE)
                   enemies = enemies->filter(::(value) <- value.hp != 0);
                 targets->push(value:Random.pickArrayItem(list:enemies))
+                if (art.targetMode == Arts.TARGET_MODE.ONEPART)
+                  targetParts = [Entity.normalizedDamageTarget()];
               } else 
                 targets->push(value:Random.pickArrayItem(list:allies))
               ;
@@ -170,8 +172,10 @@
         when (targets->size == 0 && art.targetMode != Arts.TARGET_MODE.NONE)
           defaultAttack(battle, onCommit);
         
-        foreach(targets) ::(index, t) {
-          targetParts[index] = Entity.normalizedDamageTarget();
+        if (targetParts == empty) ::<= {
+          foreach(targets) ::(index, t) {
+            targetParts[index] = Entity.DAMAGE_TARGET.BODY;
+          }
         }
         onCommit(:BattleAction.new(
           card,

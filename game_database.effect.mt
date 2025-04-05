@@ -841,7 +841,7 @@ Effect.newEntry(
   data : {
     name : 'Seed Stat Increase',
     id : 'base:seed',
-    description: 'Casts an Art from an item.',
+    description: 'Increases a base stat permanently.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.SPECIAL ,
@@ -5367,7 +5367,7 @@ Effect.newEntry(
                     onChoice::(which) {
                       when(which == true) ::<= {
                         windowEvent.queueMessage(
-                          prompt: 'Banker?',
+                          speaker: 'Banker?',
                           text: '"Yeah, yeah. Pleasure doin\' business with ya. Later."'
                         );
 
@@ -5375,7 +5375,7 @@ Effect.newEntry(
                           text: 'The Kobold disappears in a flash.'
                         );
 
-                        windowEvent.goBeforeTag(name: 'BANKING', goBeforeTag:true);
+                        windowEvent.jumpToTag(name: 'BANKING', goBeforeTag:true);
                       }
                     }
                   );              

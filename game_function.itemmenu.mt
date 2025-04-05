@@ -117,7 +117,7 @@ return ::(
               'Enemies',
               'Allies'
             ],
-            onGetChoices::<- allNames,
+            onGetChoices::(tabIndex) <- allNames[tabIndex],
             canCancel: true,
             keep: true,
             onChoice ::(choice, tab) {

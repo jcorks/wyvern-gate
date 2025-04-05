@@ -1303,6 +1303,13 @@ Interaction.newEntry(
             windowEvent.queueMessage(
               text:'You feel unable to give this away.'
             )
+          when ((item.base.traits & Item.TRAIT.PRICELESS) != 0)
+            windowEvent.queueMessage(
+              speaker: location.ownedBy.name,
+              text:'"I\'m unable to buy this from you.'
+            )
+
+
 
           @price = (item.price * (Item.SELL_PRICE_MULTIPLIER))->ceil;
           if (price < 1) ::<= {
@@ -2425,90 +2432,110 @@ Interaction.newEntry(
     id :  'base:learn-profession',
     keepInteractionMenu : false,
     onInteract ::(location, party) {
+      when(location.data.professionSet == empty)
+        windowEvent.queueMessage(
+          text: 'This location does not provide any professions to learn.'
+        );
+    
       @:names = [];
       foreach(party.members)::(i, member) {
         names->push(value:member.name);
       }
       
       windowEvent.queueChoices(
-        leftWeight: 0.5,
-        topWeight: 0.5,
-        choices: names,
-        prompt: 'Whom?',
+        prompt: 'Learn which profession?',
+        choices : location.data.professionSet->map(::(value) <- Profession.find(:value).name),
         canCancel: true,
-        onChoice:::(choice) {
-
-          when(choice == 0) empty;
-          
-          @:whom = party.members[choice-1];
-          @cost = 
-            if ((whom.profession.traits & Profession.TRAIT.NON_COMBAT) != 0)
-              5*((whom.level + whom.stats.sum/30)*10)->ceil //<- real skills take a bit to teach
-            else
-              ((whom.level + whom.stats.sum/30)*10)->ceil
-            ;
-
-          when(whom.professions->findIndex(:location.ownedBy.profession) != -1)
-            windowEvent.queueMessage(
-              text: whom.name + ' is already ' + correctA(word:location.ownedBy.profession.name) + '.'
-            );
-          
-          windowEvent.queueMessage(
-            text:
-              'Profession: ' + location.ownedBy.profession.name + '\n\n' +
-              location.ownedBy.profession.description + '\n' +
-              'Weapon affinity: ' + Item.database.find(id:location.ownedBy.profession.weaponAffinity).name
-          );
+        keep : false,
+        onChoice::(choice) {
+          @:profession = Profession.find(:location.data.professionSet[choice-1]);
 
 
-          if ((location.ownedBy.profession.traits & Profession.TRAIT.NON_COMBAT) != 0)
-            windowEvent.queueMessage(
-              text: 'Since ' + location.ownedBy.profession.name + ' is a non-combat profession, this school will teach ' + whom.name + ' all the profession Arts immediately. However, this will cost more to teach than other professions.'
-            );
+          windowEvent.queueChoices(
+            leftWeight: 0.5,
+            topWeight: 0.5,
+            choices: names,
+            prompt: 'Whom?',
+            canCancel: true,
+            onChoice:::(choice) {
+
+              when(choice == 0) empty;
+              
+              @:whom = party.members[choice-1];
+              @cost = 
+                if ((whom.profession.traits & Profession.TRAIT.NON_COMBAT) != 0)
+                  5*((whom.level + whom.stats.sum/30)*10)->ceil //<- real skills take a bit to teach
+                else
+                  ((whom.level + whom.stats.sum/30)*10)->ceil
+                ;
+
+              when(whom.professions->findIndex(:profession) != -1)
+                windowEvent.queueMessage(
+                  text: whom.name + ' is already ' + correctA(word:profession.name) + '.'
+                );
+              
+              windowEvent.queueMessage(
+                text:
+                  'Profession: ' + profession.name + '\n\n' +
+                  profession.description + '\n' +
+                  'Weapon affinity: ' + Item.database.find(id:profession.weaponAffinity).name
+              );
+
+
+              if ((profession.traits & Profession.TRAIT.NON_COMBAT) != 0)
+                windowEvent.queueMessage(
+                  text: 'Since ' + profession.name + ' is a non-combat profession, this school will teach ' + whom.name + ' all the profession Arts immediately. However, this will cost more to teach than other professions.'
+                );
 
 
 
-          windowEvent.queueMessage(
-            text: 'Teaching ' + whom.name + ' to be ' + correctA(:location.ownedBy.profession.name) + ' ' + location.ownedBy.profession.name + ' will cost ' + g(g:cost) + '.'
-          );
+              windowEvent.queueMessage(
+                text: 'Teaching ' + whom.name + ' to be ' + correctA(:profession.name) + ' ' + profession.name + ' will cost ' + g(g:cost) + '.'
+              );
 
-          when(party.inventory.gold < cost)
-            windowEvent.queueMessage(
-              text: 'The party cannot afford this.'
-            );
+              when(party.inventory.gold < cost)
+                windowEvent.queueMessage(
+                  text: 'The party cannot afford this.'
+                );
 
 
-          windowEvent.queueAskBoolean(
-            prompt: 'Continue?',
-            onChoice:::(which) {
-              when(which == false) empty;
-              party.addGoldAnimated(
-                amount:-cost,
-                onDone::{
-                  @:profession = Profession.find(id: location.ownedBy.profession.id);
-                  whom.autoLevelProfession(:profession);
+              windowEvent.queueAskBoolean(
+                prompt: 'Continue?',
+                onChoice:::(which) {
+                  when(which == false) empty;
+                  party.addGoldAnimated(
+                    amount:-cost,
+                    onDone::{
+                      @:profession = Profession.find(id: profession.id);
+                      whom.autoLevelProfession(:profession);
 
-                  windowEvent.queueMessage(
-                    text: '' + whom.name + " has learned how to be " + correctA(word:profession.name) + '.'
-                  );
+                      windowEvent.queueMessage(
+                        text: '' + whom.name + " has learned how to be " + correctA(word:profession.name) + '.'
+                      );
 
-                  windowEvent.queueMessage(
-                    text: 'Their currently active profession can be changed in the Party menu.'
-                  );                
+                      windowEvent.queueMessage(
+                        text: 'Their currently active profession can be changed in the Party menu.'
+                      );                
 
-                  
-                  if ((location.ownedBy.profession.traits & Profession.TRAIT.NON_COMBAT) != 0) ::<= {
-                    for(0, profession.arts->size) ::(i) {
-                      whom.autoLevelProfession(:profession);                      
+                      
+                      if ((profession.traits & Profession.TRAIT.NON_COMBAT) != 0) ::<= {
+                        for(0, profession.arts->size) ::(i) {
+                          whom.autoLevelProfession(:profession);                      
+                        }
+                        windowEvent.queueMessage(
+                          text: 'The school has taught ' + whom.name + ' all available Arts for this profession. They can be equipped at any time.'
+                        );                
+                      }
                     }
-                    windowEvent.queueMessage(
-                      text: 'The school has taught ' + whom.name + ' all available Arts for this profession. They can be equipped at any time.'
-                    );                
-                  }
+                  );     
                 }
-              );     
+              );
             }
           );
+
+
+
+
         }
       );
     },

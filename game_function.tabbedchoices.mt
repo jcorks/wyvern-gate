@@ -97,8 +97,10 @@ return ::(*args) {
           send();
         
         onInput(:lastInput);
-        if (tabIndex == origTab)  
-          error(:"No items available for this tabbed choice widget!");
+        if (tabIndex == origTab)  ::<= {
+          // no items at all
+          send();
+        }
       }
     }
     return out;

@@ -377,8 +377,9 @@ Location.database.newEntry(data:{
     addMissing(id:'base:inlet-crystal', minCount:2);
     addMissing(id:'base:inlet-gem', minCount:2);
     addMissing(id:'base:inlet-soulgem', minCount:2);
+    addMissing(id:'base:seed', minCount:1);
     
-    for(location.inventory.items->size, 40 + (location.ownedBy.level / 4)->ceil)::(i) {
+    for(location.inventory.items->size, 60 + (location.ownedBy.level / 4)->ceil)::(i) {
       // no weight, as the value scales
       location.inventory.add(item:
         Item.new(
@@ -1024,11 +1025,11 @@ Location.database.newEntry(data:{
   
   },
   onCreate ::(location) {
-    @:Profession = import(:'game_database.profession');
+    @:Profession = import(:'game_database.profession.mt');
     location.ownedBy = location.landmark.island.newInhabitant();
     location.name = 'Profession school';
     location.ownedBy.normalizeStats();        
-    location.data.professionSet = Profession.getRandomSet(count:3)->map(::(value) <- value.id);
+    location.data.professionSet = Profession.getRandomSet(count:3, filter::(value) <- value.learnable)->map(::(value) <- value.id);
 
   },
   

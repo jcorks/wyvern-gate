@@ -127,12 +127,12 @@
 
 @:generateStats ::(state) {
   @stats = StatSet.new();
-  
   // first get chains. singles are also in the chains, but will have a size of 1
   @chains = [];
   ::<= {
     @curChain = [];;
     foreach(state.slots) ::(k, v) {
+      breakpoint();
       when (v.inset == empty) ::<= {
         // failed to create chain. Added each as 
         // standalone chains
@@ -141,14 +141,14 @@
         }
         curChain = [];
       }
-      
+
+      curChain->push(:k);
+            
       // chain is done
       when(v.connectNext == false) ::<= {
         chains->push(:curChain);
         curChain = [];
       }
-      
-      curChain->push(:[k]);
     }
     if (curChain->size > 0) ::<= {
       chains->push(:curChain);
@@ -159,8 +159,9 @@
   
   foreach(chains) ::(k, v) {
     when(v->size == 1) ::<= {
-      stats.add(:state.slots[v[0][0]].inset.inletStats);
+      stats.add(:state.slots[v[0]].inset.inletStats);
     }
+    breakpoint();
     
     @:chainStats = StatSet.new();
     foreach(v) ::(k, index) {
@@ -213,6 +214,7 @@
       ,
       
       equip ::(user, item, canCancel) {
+        breakpoint();
         @:onItem = item;
         @:world = import(module:'game_singleton.world.mt')
         @:inv = world.party.inventory;
@@ -258,8 +260,9 @@
                 text:user.name + ' placed the ' + item.name + ' into the ' + onItem.name + '.'
               );
               
-              if (user.hasEquipped(:item))
-                user.checkStatsChanged();
+              breakpoint();
+              if (user.hasEquipped(:onItem))
+                user.recalculateStats();
               
             }
           );
@@ -292,20 +295,34 @@
                   this.renderSlotInfo(:slot);
                 }
               },  
-              choices : if(slot.inset == empty) ['Place'] else ['Swap', 'Check'],
+              choices : if(slot.inset == empty) ['Place'] else ['Swap', 'Remove', 'Check'],
               onChoice ::(choice) {
                 when(choice == 1) equipInlet(slot);
                 
+
+                when (choice == 2) ::<= {
+                  if (slot.inset)
+                    inv.add(:slot.inset);
+                  slot.inset = empty;
+                  if (user.hasEquipped(:item))
+                    user.recalculateStats();
+
+                }
+
                 
                 // check
-                when (choice == 2) ::<= {
+                when (choice == 3) ::<= {
                   when (slot.inset == empty)
                     windowEvent.queueMessage(
                       text: 'This gem slot is currently empty.'
                     );
                     
                   windowEvent.queueMessage(
-                    text : slot.inset.inletGetDescriptionLines()
+                    text : String.combine(:
+                      (slot.inset.inletGetDescriptionLines())->map(::(value) 
+                        <- value + '\n'
+                      )
+                    )
                   );
                 }
                   

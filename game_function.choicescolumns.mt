@@ -108,7 +108,9 @@ return ::(*args) {
     args.choices = convertToChoices(columns:args.columns, header:headerSrc);
   } else ::<= {
     args.onGetChoices = ::{
-      return convertToChoices(columns:originalGetChoices(), header:headerSrc);
+      @c = originalGetChoices();
+      if (c == empty) c = [[]];
+      return convertToChoices(columns:c, header:headerSrc);
     }
   }
   
@@ -116,7 +118,9 @@ return ::(*args) {
     args.header = empty;
     args.onGetHeader = ::{
       // the ONLY time this should happen is if we have a delayed get.
-      convertToChoices(columns:originalGetChoices(), header:headerSrc);
+      @c = originalGetChoices();      
+      if (c == empty) c = [[]];
+      convertToChoices(columns:c, header:headerSrc);
       return headerCompiled;
     }
   }

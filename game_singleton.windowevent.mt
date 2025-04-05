@@ -589,8 +589,6 @@
         if (onHover != empty)
           onHover(choice:cursorPos+1);
         
-        if (onGetFooter != empty)
-          breakpoint();
         
         if (data.hideWindow != true) ::<= {
           if (data.animationFrame == empty) ::<= {

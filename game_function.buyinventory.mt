@@ -36,6 +36,7 @@ return ::(inventory, shopkeep, onDone) {
     leftWeight: 1,
     topWeight: 0.5,
     showPrices : true,
+    ignorePriceCeiling : true,
     //onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',
     goldMultiplier: Item.BUY_PRICE_MULTIPLIER,
     onHover ::(item) {

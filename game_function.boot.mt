@@ -8,7 +8,7 @@ return ::(onBooted) {
       {
         chance : 0.4,
         lines : [
-          'Personal Computer KP-X, Vector Inc. 1993',
+          'Personal Computer KP-X, Vectora Inc. 1993',
           'RAM: 4MB... OK!',
           'CPU Check: X80 - pIII @25 MHz, Compute Systemes LLC.',
           'Checking BIOS integrity...'

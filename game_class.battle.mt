@@ -1147,7 +1147,7 @@
           @:doNext = :: {
             when(pendingChoices->size == 0) onDone();
             @:next = pendingChoices->pop;
-            when(random.try(percentSuccess:35)) ::<= { // todo: luck delta affecting chance
+            when(Arts.find(:action.card.id).targetMode != Arts.TARGET_MODE.ONEPART) ::<= { // todo: luck delta affecting chance
               targetDefendParts[action.targets->findIndex(value:next)] = 0;
               doNext();
             }

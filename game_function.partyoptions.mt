@@ -512,20 +512,21 @@ return ::{
                     onGetChoices:: {
                       choices = ['Equip'];
                       choiceActions = [::<- equip()];
-                      return if (member.getEquipped(slot).base.id != 'base:none') ::<= {
+                      @:in = member.getEquipped(slot);
+                      return if (in.base.id != 'base:none') ::<= {
                         choices->push(:'Check');
-                        choiceActions->push(::<- item.describe());
+                        choiceActions->push(::<- in.describe());
                         choices->push(:'Improve');
-                        choiceActions->push(::<- (import(module:'game_function.itemimprove.mt'))(inBattle: false, user:member, item));
+                        choiceActions->push(::<- (import(module:'game_function.itemimprove.mt'))(inBattle: false, user:member, item:in));
 
-                        if (member.getEquipped(slot).inletSlotSet != empty) ::<= {
+                        if (in.inletSlotSet != empty) ::<= {
                           choices->push(:'Gems...');                        
-                          choiceActions->push(::<- item.inletSlotSet.equip(user:member, item));
+                          choiceActions->push(::<- in.inletSlotSet.equip(user:member, item:in));
                         }
                         choices->push(:'Rename');
                         choiceActions->push(::{
-                          when (!member.getEquipped(slot).base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
-                            windowEvent.queueMessage(text:member.getEquipped(slot).name + ' cannot be renamed.');
+                          when (!in.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
+                            windowEvent.queueMessage(text:member.in.name + ' cannot be renamed.');
                           @:name = import(module:"game_function.name.mt");
                           name(
                             prompt: 'New item name:',

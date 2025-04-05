@@ -27,6 +27,7 @@
 @:correctA = import(module:'game_function.correcta.mt');
 @:romanNum = import(module:'game_function.romannumerals.mt');
 @:InletSet = import(:'game_class.inletset.mt');
+@:InletSet = import(:'game_class.inletset.mt');
 
 /*
   Items. 
@@ -84,7 +85,8 @@
   UNIQUE        : 2 << 16,
   MEANT_TO_BE_USED : 2 << 17,
   CAN_BE_APPRAISED : 2 << 18,
-  HAS_INLET_SLOTS : 2 << 19
+  HAS_INLET_SLOTS : 2 << 19,
+  PRICELESS : 2 << 20,
 }
 
 
@@ -3340,7 +3342,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   traits :     
     TRAIT.MEANT_TO_BE_USED |
-    TRAIT.UNIQUE
+    TRAIT.UNIQUE |
+    TRAIT.PRICELESS
   ,
   onCreate ::(item, creationHint) {
     @:stats = {
@@ -4120,6 +4123,10 @@ none.name = 'None';
         state.price = 1;
       }      
       
+      if (base.hasTraits(:TRAIT.PRICELESS))
+        state.price = 999999 / Item.BUY_PRICE_MULTIPLIER;
+      
+      
       
       if (base.hasTraits(:TRAIT.HAS_INLET_SLOTS)) ::<= {
         @:slotCount = match(tier) {
@@ -4259,6 +4266,7 @@ none.name = 'None';
         @:out = StatSet.new();
         out.add(:_.state.statsBase);
         out.add(:_.state.inletSlotData.stats);
+        breakpoint();
         return out;
       }
     },
@@ -4494,7 +4502,12 @@ none.name = 'None';
     },
     
     stats : {
-      get ::<-_.state.stats
+      get :: {
+        when (_.state.inletData == empty) _.state.stats;
+        @out = _.state.stats.clone();
+        out.add(:_.state.inletData.stats);
+        return out;
+      }
     },    
     
     addIntuition :: {
@@ -4549,7 +4562,7 @@ none.name = 'None';
       @:Effect = import(module:'game_database.effect.mt');
       when(_.state.inletData == empty) [];
       when(_.state.inletData.effect != empty) [
-        'Grants the effect "' + Effect.find(:_.state.inletData.effect) + '":',
+        'Grants the effect "' + Effect.find(:_.state.inletData.effect).name + '": ',
         '',
         Effect.find(:_.state.inletData.effect).description
       ]
