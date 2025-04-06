@@ -882,7 +882,9 @@ Effect.newEntry(
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text: 'The ' + item.name + ' glows with power!');
         @:oldStats = holder.stats.clone();
-        holder.autoLevel();
+        for(0, (holder.level/2)+1) ::(i) {
+          holder.autoLevel();
+        }
         holder.checkStatChanged(:oldStats);
       }
     }
