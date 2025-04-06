@@ -2014,7 +2014,7 @@ Arts.newEntry(
     notifCommit : '$1 mends $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Heals a target by 2 HP.",
+    description: "Heals a target by 20%.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -2026,7 +2026,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].heal(amount:2);
+          targets[0].heal(amount:(0.2 * targets[0].stats.HP)->ceil);
         }
       );
     }
@@ -2066,7 +2066,7 @@ Arts.newEntry(
           windowEvent.queueCustom(
             onEnter :: {
               targets[0].heal(
-                amount:(1)
+                amount:3
               );    
             }
           )          
@@ -2077,7 +2077,7 @@ Arts.newEntry(
           windowEvent.queueCustom(
             onEnter :: {
               targets[0].heal(
-                amount:3 
+                amount:((targets[0].stats.HP*0.25)->ceil)
               );              
             }
           )
@@ -2823,7 +2823,7 @@ Arts.newEntry(
     notifCommit : '$1 casts Cure on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Heals a target by 5 HP. Additional levels increase potency by 2 HP.",
+    description: "Heals a target by 20% HP. Additional levels increase potency by 10%.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2835,7 +2835,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].heal(amount:3 + level*2);
+          targets[0].heal(amount:(targets[0].stats.HP*(0.2 + 0.1*(level-1)))->ceil);
         }
       )
     }
@@ -2911,7 +2911,7 @@ Arts.newEntry(
     notifCommit : '$1 casts Cure All!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLALLY,
-    description: "Heals all party members by a 3HP. Additional levels increase the effect by 2 HP.",
+    description: "Heals all party members by 20%. Additional levels increase the effect by 5%.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2924,7 +2924,7 @@ Arts.newEntry(
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
           onEnter :: {
-            target.heal(amount:1 + level*2);
+            target.heal(amount:((target.stats.HP*(0.2 + 0.05*(level-1))->ceil));
           }
         )
       }
@@ -4990,7 +4990,7 @@ Arts.newEntry(
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Discards entire hand, gain 2 HP.',
+    description: 'Discards entire hand, gain 10% HP.',
     keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -5006,7 +5006,7 @@ Arts.newEntry(
       foreach(user.deck.hand) ::(k, c) {
         user.deck.discardFromHand(:c);
       }
-      user.heal(amount:2);
+      user.heal(amount:(user.stats.HP * 0.1)->ceil);
     }
   }
 )
@@ -5019,7 +5019,7 @@ Arts.newEntry(
     targetMode : TARGET_MODE.NONE,
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
-    description: 'Sacrifice item, gain 2 HP.',
+    description: 'Sacrifice item, heal 15% HP.',
     keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -5037,11 +5037,11 @@ Arts.newEntry(
           inventory : world.party.inventory,
           onPick ::(item){
             world.party.inventory.remove(:item);
-            user.heal(amount:2);        
+            user.heal(amount:(user.stats.HP * 0.15)->ceil);
           }
         );
       } else ::<= {
-        user.heal(amount:2);              
+        user.heal(amount:(user.stats.HP * 0.15)->ceil);
       }
     }
   }
@@ -6836,7 +6836,7 @@ Arts.newEntry(
     notifCommit : 'Everyone is covered in a weird aura!',
     notifFail : '... But nothing happened!',
     targetMode : TARGET_MODE.ALLALLY,
-    description: "Heals the user by 1 HP for each effect that all the user\'s allies have.",
+    description: "Heals the user by 5% HP for each effect that all the user\'s allies have.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -6865,7 +6865,7 @@ Arts.newEntry(
       
       when(tally == 0) Arts.FAIL;
       
-      user.heal(amount:tally);
+      user.heal(amount:(tally * user.stats.HP * 0.05)->ceil);
     }
   }
 )
@@ -7153,7 +7153,7 @@ Arts.newEntry(
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
-    description: "Removes all stacks of the Poisoned effect from target. For each Poisoned stack removed this way, the target gains 2 HP and +25% DEX for 2 turns.",
+    description: "Removes all stacks of the Poisoned effect from target. For each Poisoned stack removed this way, the target heals 20% HP and +25% DEX for 2 turns.",
     keywords: ['base:poisoned'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -7177,7 +7177,7 @@ Arts.newEntry(
       when(oldPoison->size == 0) Arts.FAIL;
       targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:poisoned');
             
-      targets[0].heal(amount:oldPoison->size * 2);
+      targets[0].heal(amount:(oldPoison->size * 2 * targets[0].stats.HP * 0.2)->ceil);
             
       for(0, oldPoison->size) ::(i) {
         targets[0].addEffect(from:user, id:'base:minor-dex-boost', durationTurns:2);              
@@ -7275,7 +7275,7 @@ Arts.newEntry(
     notifCommit : 'A mystical light is cast on $2!',
     notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
-    description: "Removes the Petrified effect from target. The target gains 2 HP and +25% ATK for 3 turns.",
+    description: "Removes the Petrified effect from target. The target heals 20% HP and +25% ATK for 3 turns.",
     keywords: ['base:petrified'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -7299,7 +7299,7 @@ Arts.newEntry(
       when(oldPetr->size == 0) Arts.FAIL;
       targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:petrified');
             
-      targets[0].heal(amount:oldPetr->size * 2);
+      targets[0].heal(amount:(oldPetr->size * 2 * targets[0].stats.HP * 0.2)->ceil);
             
       for(0, oldPetr->size) ::(i) {
         targets[0].addEffect(from:user, id:'base:minor-strength-boost', durationTurns:3);              
