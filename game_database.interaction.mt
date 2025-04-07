@@ -2506,7 +2506,6 @@ Interaction.newEntry(
                   party.addGoldAnimated(
                     amount:-cost,
                     onDone::{
-                      @:profession = Profession.find(id: profession.id);
                       whom.autoLevelProfession(:profession);
 
                       windowEvent.queueMessage(
