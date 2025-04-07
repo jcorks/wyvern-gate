@@ -764,13 +764,16 @@ Island.database.newEntry(
         get :: <- [...state.species]->map(to:::(value) <- value.species)
       },
       
-      newAggressor ::(levelMaxHint) {      
+      newAggressor ::(levelMaxHint, professionHint) {
+        if (professionHint == empty) 
+          professionHint = Profession.getRandomFiltered(filter::(value)<-value.learnable).id
+
         @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
         @:angy =  Entity.new(
           island: this,
           speciesHint: random.pickArrayItemWeighted(list:state.species).species,
           levelHint,
-          professionHint: Profession.getRandomFiltered(filter::(value)<-value.learnable).id
+          professionHint
         );     
         
         augmentTiered(entity:angy);             

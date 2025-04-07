@@ -210,6 +210,7 @@ Effect.newEntry(
         );
 
         damage.traits |= Damage.TRAIT.FORCE_DEF_BYPASS;
+        
         holder.removeEffectInstance(:
           holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:take-aim')[0]
         )
@@ -286,7 +287,7 @@ Effect.newEntry(
   data : {
     name : 'Banishing Light',
     id : 'base:banishing-light',
-    description: 'Next attack received is translated instead to Banish stacks. The count is equivalent to 1/3rd the damage, rounded up. When an attack is translated in this way, the holder loses a stack of Banishing Light.',
+    description: 'Next attack received is translated instead to 4 Banish stacks. When an attack is translated in this way, the holder loses a stack of Banishing Light.',
     stackable : true,
     blockPoints: 0,
     traits : TRAIT.DEBUFF,
@@ -303,7 +304,7 @@ Effect.newEntry(
           text: holder.name + '\'s Banishing Light translated the damage into Banishing!'
         );
 
-        for(0, (damage.amount/3)->ceil) ::(i) {
+        for(0, 4) ::(i) {
           holder.addEffect(from, id:'base:banish', durationTurns:10000);      
         }
         damage.amount = 0;

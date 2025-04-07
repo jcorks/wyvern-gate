@@ -248,8 +248,8 @@ return ::{
     {resolve:true, text:'Here are some extra pointers about attacking.'},
     {text: 'When choosing an Art that attacks someone, the one getting attacked may have a chance to block. If so, they will choose a body part to block. If this matches the attacker\'s aiming part, then the attack is nullified.'},
     {text: 'Note that when the leader is attacked and they\'re able to block, they will have a chance to choose a part to defend.'},
-    {text:'In most cases, aiming for the body is safest, as it has the highest chance for success. However, be aware that most combatants will expect this and will try to defend this more often.'},    
-    {text:'It\'s also notable that some Arts, like offensive magick, are inherently chaotic and will pick a random body part to aim for.'}
+    {text:'In most cases, aiming for the body is safest, as it has unreduced damage. However, be aware that most combatants will expect this and will try to defend this more often.'},    
+    {text:'It\'s also notable that some Arts, like offensive magick, are not able to be aimed to specific parts and will just focus on the body of the target.'}
   ]
   
   

@@ -18,6 +18,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
+@:g = import(module:'game_function.g.mt');
 
 
 
@@ -291,14 +292,18 @@ Event.database.newEntry(
       @:world = import(module:'game_singleton.world.mt');
       // safe time
       when(world.time < world.TIME.LATE_EVENING) 0;
-
+      when(world.party.inventory.gold < 100) 0;
+      
       @chance = random.number(); 
       @:island = event.island;   
       @:party = event.party;
       
       windowEvent.queueMessage(
         text: 'A shadow emerges; the party is caught off-guard!'
-      );          
+      );       
+      
+      
+         
       @enemies = 
           match(true) {
             (chance < 0.8): [
@@ -326,37 +331,61 @@ Event.database.newEntry(
             
             default: [
               island.newAggressor(),
-              island.newAggressor(),
-              island.newAggressor(),       
-              island.newAggressor()             
+              island.newAggressor()
             ]
           }
       ;
 
       foreach(enemies)::(index, e) {
-        e.anonymize();
+        e.name = 'the ' + e.species.name + ' Thief';
       }
       
-      world.battle.start(
-        party,
-        
-        allies: party.members,
-        enemies,
-        landmark: {},
-        loot : true,
-        onEnd::(result){
-          when(world.battle.partyWon()) empty;
-          windowEvent.queueCustom(
-            onEnter::{
-              @:instance = import(module:'game_singleton.instance.mt');
-              instance.gameOver(reason:'The party was wiped out.');
+      @:stealg = (world.party.inventory.gold * 0.9)->ceil;
+      windowEvent.queueMessage(
+        speaker : enemies[0].name,
+        text: '"Listen here: we know you got some G on ya. Give up ' + g(:stealg) + ' and we\'ll let you go. Don\'t be stupid, now."'
+      );
+      
+      windowEvent.queueAskBoolean(
+        prompt: 'Hand over ' + g(:stealg) + '?',
+        onChoice::(which) {
+          when(which == true) ::<= {
+            windowEvent.queueMessage(
+              speaker : enemies[0].name,
+              text: '"Smart choice."'
+            );            
+
+            world.party.addGoldAnimated(amount:-stealg);
+            windowEvent.queueMessage(
+              text: 'The thieves vanish without a trace.'
+            );            
+          }
+          
+          windowEvent.queueMessage(
+            speaker : enemies[0].name,
+            text: '"Get \'em!"'
+          );            
+
+          world.battle.start(
+            party,
+            
+            allies: party.members,
+            enemies,
+            landmark: {},
+            loot : true,
+            onEnd::(result){
+              when(world.battle.partyWon()) empty;
+              windowEvent.queueCustom(
+                onEnter::{
+                  @:instance = import(module:'game_singleton.instance.mt');
+                  instance.gameOver(reason:'The party was wiped out.');
+                }
+              );        
             }
-          );        
+          );          
+        
         }
       );
-    
-      
-      
     
       return 0; // number of timesteps active
     },

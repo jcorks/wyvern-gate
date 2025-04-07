@@ -289,8 +289,8 @@
   );
   
   
-  @:AREA_WIDTH  = random.integer(from:3, to:6);
-  @:AREA_HEIGHT = random.integer(from:3, to:6);
+  @:AREA_WIDTH  = random.integer(from:5, to:6);
+  @:AREA_HEIGHT = random.integer(from:5, to:6);
 
   @gridNodes = [];  
   

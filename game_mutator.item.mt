@@ -2669,7 +2669,7 @@ Item.database.newEntry(data : {
 Item.database.newEntry(data : {
   name : "Escape Stone",
   id : 'base:escape-stone',
-  description: 'A small magic stone that, when used, allows escaping from dungeons. The process will drop 50% of any Item Boxes found.',
+  description: 'A small magic stone that, when used, allows escaping from dungeons. The process will drop 50% of any Ethereal Shards found.',
   examine : '',
   sortType : SORT_TYPE.USABLES,
   equipType: TYPE.HAND,
@@ -3398,9 +3398,9 @@ Item.database.newEntry(data : {
 
 
 Item.database.newEntry(data : {
-  name : "Item Box",
+  name : "Ethereal Shard",
   id : 'base:item-box',
-  description: "What\'s inside is not known. The stars indicate its value.",
+  description: "It seems to be a solid object of light. It's abilities are unknown.",
   examine : 'Its abilities are unknown.',
   sortType : SORT_TYPE.LOOT,
   equipType: TYPE.TWOHANDED,
@@ -3871,6 +3871,9 @@ none.name = 'None';
 }
 
 @:getStars::(item) {
+  when (item.data.stars != empty)
+    item.data.stars;
+  
   @:price = Item.BUY_PRICE_MULTIPLIER * item.price;
   when(item.base.id == 'base:none') 0;
   when(price < 40)     1;
@@ -3890,7 +3893,8 @@ none.name = 'None';
 @:starsToString::(item) {
   when (item.needsAppraisal) '???';
   @out = ''
-  for(0, item.stars) ::(i) {
+  @stars = getStars(item);
+  for(0, stars) ::(i) {
     if (i%5 == 0 && i > 0)
       out = out + ' '  
     out = out + '*';
@@ -4198,8 +4202,8 @@ none.name = 'None';
         base: Item.database.find(:'base:item-box')
       );
       box.data.boxed = _.this.save();
-      box.data.stars = starsToString(:_.this);
-      box.name = 'Item box: ' + starsToString(:_.this);
+      box.data.stars = getStars(:_.this);
+      box.name = 'Ethereal Shard';
       return box;
     },
     
@@ -4475,7 +4479,7 @@ none.name = 'None';
           this.name + ': Use Effects'
         ],
         set : [
-          this.description + '\n\nValue: ' + (if (this.data.stars == empty) starsToString(:this) else this.data.stars),
+          this.description + '\n\nValue: ' + starsToString(:this),
           
           if (state.enchants->keycount != 0) ::<= {
             @out = '';

@@ -2861,18 +2861,20 @@ Interaction.newEntry(
         windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
       }
       
-      if (items->size == 1) ::<= {      
-        windowEvent.queueMessage(text:'The party found ' + correctA(word:items[0].name) + '.');
-      } else ::<= {
-        @note = [];
-        foreach(items)::(i, item) {
-          note->push(:' - ' + correctA(word:item.name) + '\n');
-        }
-        
-        windowEvent.queueMessage(text:'The party found...\n\n' + 
-          String.combine(:note)
-        );      
-      }
+
+      @lines = [
+        'The party found: ',
+        ...(canvas.columnsToLines(
+          columns : [
+            items->map(::(value) <- '- ' + correctA(word:value.name)),
+            items->map(::(value) <- value.starsString)
+          ]
+        ))
+      ]
+
+      windowEvent.queueDisplay(
+        lines
+      );
       
       foreach(items)::(i, item) {
         world.party.inventory.add(item);

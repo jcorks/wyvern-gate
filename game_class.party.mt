@@ -441,9 +441,9 @@
             );  
 
             @:loot = state.inventory.loot;
-            if (loot) ::<= {
+            if (loot != empty && loot->size > 0) ::<= {
               windowEvent.queueMessage(
-                text: 'The party looks at what they acquired in ' + landmark.name + '.'
+                text: 'Leaving the area unlocked the power of the party\'s Ethereal Shards!'
               );  
             
               @:items = loot->map(::(value) <-
@@ -451,8 +451,8 @@
               );
               state.inventory.clearLoot();
               items->sort(::(a, b) {
-                when(a.stars < b.stars) -1;
-                when(a.stars > b.stars)  1;
+                when(a.stars > b.stars) -1;
+                when(a.stars < b.stars)  1;
                 return 0;
               });
               @:inv = Inventory.new(size:99999);
@@ -461,11 +461,16 @@
               }
               
               @:pickItem = import(:'game_function.pickitem.mt');
-              windowEvent.queueChoices(
-                prompt: "Loot...", // 985's mark
+              @:queueChoicesColumn = import(:'game_function.choicescolumns.mt');
+              queueChoicesColumn(
+                prompt: "Loot:", // 985's mark
                 topWeight: 0.5,
                 leftWeight: 0.5,
-                choices : loot->map(::(value) <- value.name),
+                columns : [
+                  loot->map(::(value) <- value.name),
+                  loot->map(::(value) <- value.starsString),
+                ],
+                leftJustified : [true, true],
                 onChoice::(choice) {
                 },
                 canCancel : true,

@@ -1016,8 +1016,7 @@ Location.database.newEntry(data:{
   onFirstInteract ::(location) {},
   
   onInteract ::(location) {
-    @:Profession = import(:'game_database.profession');
-    // not needed, just dont want my old saves to freak out
+    @:Profession = import(:'game_database.profession.mt');
     if (location.data.professionSet == empty)
       location.data.professionSet = Profession.getRandomSet(count:3)->map(::(value) <- value.id);
   },      

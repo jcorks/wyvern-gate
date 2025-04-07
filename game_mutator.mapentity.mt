@@ -184,12 +184,18 @@ MapEntity.Task.database.newEntry(
     POINTER.x = map.pointerX;
     POINTER.y = map.pointerY;
     
-    if (distance(x0:POINTER.x, y0:POINTER.y, x1:item.x, y1:item.y) < INTEREST_DISTANCE)
+    if (distance(
+      x0:POINTER.x, y0:POINTER.y, x1:item.x, y1:item.y) < INTEREST_DISTANCE &&
+      mapEntity.data.caresAboutParty == true
+    )
       nearby->push(value:POINTER);
     return nearby;
   }
 
   @:aggressive = ::(speed, data, mapEntity, noAttackParty, onDeath) {
+    if (mapEntity.data.caresAboutParty == empty) ::<= {
+      mapEntity.data.caresAboutParty = random.try(percentSuccess:80); 
+    }
     @:map = mapEntity.controller.map;
     when (map.getDistanceFromItem(data:mapEntity) < CONTACT_DISTANCE && (noAttackParty == empty)) ::<= {
       @:pos = mapEntity.position;
@@ -225,7 +231,7 @@ MapEntity.Task.database.newEntry(
         }
       }
 
-
+      mapEntity.clearPath();
       world.battle.start(
         party:  landmark.island.world.party,              
         allies: landmark.island.world.party.members,
@@ -262,9 +268,8 @@ MapEntity.Task.database.newEntry(
     @closest = empty;
     @squabbled = false;
     foreach(nearby) ::(i, itemOther) {
-      when (itemOther.data->type != mapEntity->type) empty;
-
-    
+      when (itemOther.data->type != mapEntity->type  &&
+            itemOther != POINTER) empty;
 
       // swarming enemies dont attack each other
       when (itemOther.data != empty && // filter out pointer
@@ -794,6 +799,7 @@ MapEntity.Task.database.newEntry(
     speedSteps : 0,
     speed : 1,
     locationID : -1,
+    data : empty,
     friends : empty // array of species ids to
   },
   define:::(this, state) {
@@ -828,12 +834,17 @@ MapEntity.Task.database.newEntry(
         }
       },
       
+      data : {
+        get ::<- state.data
+      },
+      
       defaultLoad::(x, y, symbol, entities => Object, tag, location) {
         state.entities = entities;
         state.tag = tag;
         state.onStepSet = [];
         state.onDeathSet = [];
         state.friends = [];
+        state.data = {};
         map_.setItem(data:this, x, y, discovered:true, symbol); 
         if (location != empty) ::<= {
           state.locationID = location.worldID;
@@ -978,7 +989,7 @@ MapEntity.Task.database.newEntry(
       // each member does a blow to a random other member who is 
       // not incapacitated. Simplified attacks.
       squabble ::(other => MapEntity.type, onDeath) {
-
+        this.clearPath();
         windowEvent.autoSkip = true;
         
           @:allies = state.entities->filter(by::(value) <- !value.isIncapacitated());

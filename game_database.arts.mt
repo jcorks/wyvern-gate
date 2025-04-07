@@ -167,7 +167,7 @@ Arts.newEntry(
     notifCommit : '$1 attempts to defeat $2 in one attack!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Deals 1 HP. 5% chance to 1hit K.O. Each level increases the chance by 5%.",
+    description: "Deals 1 damage. 5% chance to 1hit K.O. Each level increases the chance by 5%.",
     keywords : [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -2414,6 +2414,8 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
+            targetDefendPart:-1,
+            targetPart: Entity.DAMAGE_TARGET.BODY,
             damage: Damage.new(
               amount:Arts.find(:'base:fire').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
@@ -2488,6 +2490,8 @@ Arts.newEntry(
         onEnter :: {
           user.attack(
             target:targets[0],
+            targetDefendPart:-1,
+            targetPart: Entity.DAMAGE_TARGET.BODY,
             damage: Damage.new(
               amount: Arts.find(:'base:flare').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
@@ -2688,6 +2692,8 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target:enemy,
+              targetPart: Entity.DAMAGE_TARGET.BODY,
+              targetDefendPart: -1,
               damage: Damage.new(
                 amount:Arts.find(:'base:explosion').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
@@ -2924,7 +2930,7 @@ Arts.newEntry(
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
           onEnter :: {
-            target.heal(amount:((target.stats.HP*(0.2 + 0.05*(level-1))->ceil));
+            target.heal(amount:(target.stats.HP*(0.2 + 0.05*(level-1)))->ceil);
           }
         )
       }
@@ -5947,7 +5953,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
+            targetPart: Entity.DAMAGE_TARGET.BODY,
             targetDefendPart:targetDefendParts[0]
           );        
         }
