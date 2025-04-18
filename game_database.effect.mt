@@ -6475,6 +6475,90 @@ Effect.newEntry(
 )    
 
 
+Effect.newEntry(
+  data : {
+    name : 'Corrupted Punishment',
+    id : 'base:corrupted-punishment',
+    description: 'Attacks against a target are 1.3x more effective for each stack of Banish they have.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+        @:banishCount = to.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+        when(banishCount == 0) empty;
+        windowEvent.queueMessage(
+          text: holder.name + '\'s attack interracts with ' + to.name +'\'s Banish stacks!'
+        );
+
+        damage.amount *= 1.3 * banishCount;
+      }
+    }
+  }
+)   
+
+
+Effect.newEntry(
+  data : {
+    name : 'Corrupted Empowerment',
+    id : 'base:corrupted-empowerment',
+    description: 'Attacks against a target are 1.3x more effective for each stack of Banish the holder has.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+        @:banishCount = holder.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+        when(banishCount == 0) empty;
+        windowEvent.queueMessage(
+          text: holder.name + '\'s attack interracts with their Banish stacks!'
+        );
+
+        damage.amount *= 1.3 * banishCount;
+      }
+    }
+  }
+)   
+
+
+Effect.newEntry(
+  data : {
+    name : 'Corrupted Radioactivity',
+    id : 'base:corrupted-empowerment',
+    description: 'At the start of the holder\'s turn, an enemy is struck with an INT-based Fire attack to a random enemy.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onNextTurn ::(from, item, holder, duration) {        
+        @:banishCount = holder.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+        when(banishCount == 0) empty;
+        @:target = holder.battle.getEnemies(:holder);
+        when(target == empty) empty;
+
+
+        windowEvent.queueMessage(
+          text: holder.name + '\'s Banish stacks create an attack!'
+        );
+
+        holder.attack(
+          target,
+          targetDefendPart:-1,
+          targetPart: Entity.DAMAGE_TARGET.BODY,
+          damage: Damage.new(
+            amount:user.stats.INT * (1.2) * (1 + (banishCount-1)*0.15),
+            damageType : Damage.TYPE.FIRE,
+            damageClass: Damage.CLASS.HP
+          )
+        );
+      }
+    }
+  }
+)  
+
 }
 
 @:Effect = Database.new(

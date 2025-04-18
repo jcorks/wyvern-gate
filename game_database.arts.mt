@@ -11305,6 +11305,92 @@ Arts.newEntry(
 )
 
 
+         
+Arts.newEntry(
+  data: {
+    name: 'Corrupted Punishment',
+    id : 'base:corrupted-punishment',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Adds the effect Corrupted Punishment for 3 turns.",
+    keywords : ['base:corrupted-punishment', 'base:banish'],
+    durationTurns: 0,
+    kind : KIND.ABILITY,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:corrupted-punishment', durationTurns: 3);             
+        }
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Corrupted Empowerment',
+    id : 'base:corrupted-empowerment',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Adds the effect Corrupted Empowerment for 3 turns.",
+    keywords : ['base:corrupted-empowerment', 'base:banish'],
+    durationTurns: 0,
+    kind : KIND.ABILITY,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:banishCount = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+      when(banishCount > 0) true;
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:corrupted-empowerment', durationTurns: 3);             
+        }
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Corrupted Radioactivity',
+    id : 'base:corrupted-radioactivity',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Adds the effect Corrupted Radioactivity for 3 turns.",
+    keywords : ['base:corrupted-radioactivity', 'base:banish'],
+    durationTurns: 0,
+    kind : KIND.ABILITY,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:banishCount = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+      when(banishCount > 0) true;
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:corrupted-radioactivity', durationTurns: 3);             
+        }
+      );
+    }
+  }
+)
+
+
 };
 
 Arts = class(
