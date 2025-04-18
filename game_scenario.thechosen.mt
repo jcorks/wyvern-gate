@@ -274,7 +274,8 @@ return {
     @:keyhome = Item.new(
       base: Item.database.find(id:'base:wyvern-key')
     );
-    keyhome.name = 'Key: Home';
+    keyhome.name = 'Key: Home (rusty)';
+    keyhome.price = 30;
     
   
     // Whether the initial box has been opened.
@@ -593,18 +594,28 @@ for(0, 20) ::(i) {
     @p1;
     
     @whatDoStatsMean ::{
-      windowEvent.queueMessage(
-        text: 
-          "Stats are the basic qualities that everyone has. They determine the person's ability to face a variety of challenges.\n\n" +
-          "HP - This stat indicates how much a person can withstand before succumbing to a knockout. The higher this stat, the more damage they can withstand.\n\n"+
-          "AP - This stat indicates how often a person can use special abilities. The higher this stat, the more a person can do outside of normal actions.\n\n"+
-          "ATK - This stat measures the physical strength a person possesses. The higher this stat, the more physical damage this person can do to foes.\n\n"+
-          "DEF - This stat measures how likely a person's will be able to avoid harm. The higher this stat, the more likely a person will be able to shrug off an attack entirely.\n\n"+
-          "INT - This stat measures the intellect and intuition of a person. The higher this stat, the more a user is aware of the world around them. Certain abilities, such as spells, will benefit from this as well.\n\n"+
-          "SPD - This stat measures how fast a person can move. The higher this stat, the more apt they are at acting before others.\n\n"+
-          "LUK - This stat measures how lucky a person is. The higher this stat, the more a person may get out of difficult situations.\n\n"+
-          "DEX - This stat measures the precision and grace with which a person acts. The higher this stat, the more likely an attack will pierce through defenses.\n\n"+
+      windowEvent.queueReader(
+        lines: [
+          "Stats are the basic qualities that everyone has. They determine the person's ability to face a variety of challenges.",
+          "",
+          "HP - This stat indicates how much a person can withstand before succumbing to a knockout. The higher this stat, the more damage they can withstand.",
+          "",
+          "AP - This stat indicates how often a person can use special abilities. The higher this stat, the more a person can do outside of normal actions.",
+          "",
+          "ATK - This stat measures the physical strength a person possesses. The higher this stat, the more physical damage this person can do to foes",
+          "",
+          "DEF - This stat measures how likely a person's will be able to avoid harm. The higher this stat, the more likely a person will be able to shrug off an attack entirely.",
+          "",
+          "INT - This stat measures the intellect and intuition of a person. The higher this stat, the more a user is aware of the world around them. Certain abilities, such as spells, will benefit from this as well.",
+          "",
+          "SPD - This stat measures how fast a person can move. The higher this stat, the more apt they are at acting before others.",
+          "",
+          "LUK - This stat measures how lucky a person is. The higher this stat, the more a person may get out of difficult situations.",
+          "",
+          "DEX - This stat measures the precision and grace with which a person acts. The higher this stat, the more likely an attack will pierce through defenses.",
+          "",
           "All stats are important, but some stats may be more important at times than others."          
+        ]
       );
     };
     
@@ -4441,12 +4452,22 @@ for(0, 20) ::(i) {
 
             world.party.inventory.addGold(amount:125);
 
-            world.party.inventory.add(item:Item.new(base:Item.database.find(id:'base:life-crystal'
-            )));
+            world.party.inventory.add(item: ::<= {
+               @:i = Item.new(
+                  base:Item.database.find(id:'base:life-crystal'),
+                  materialHint : 'base:hardstone',                 
+                  qualityHint : 'base:worn'
+                )
+                i.price = 10;
+                return i;
+              }
+            );
             
             
             for(0, 1)::(i) {
-              @:crystal = Item.new(base:Item.database.find(id:'base:arts-crystal'));
+              @:crystal = Item.new(
+                base:Item.database.find(id:'base:arts-crystal')
+              );
               world.party.inventory.add(item:crystal);
             }
 

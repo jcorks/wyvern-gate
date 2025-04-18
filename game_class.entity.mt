@@ -1779,6 +1779,18 @@
         // phys is always assumed to be with equipped weapon
 
 
+        @:overrideTarget = [];
+        effectStack.emitEvent(
+          name: 'onPreAttackOther',
+          to : target, 
+          damage : dmg,
+          emitCondition ::(effectInstance) <- dmg.amount > 0,
+          overrideTarget
+        );
+        
+        if (overrideTarget->size)
+          target = overrideTarget[0]
+
         @critChance = (this.stats.LUK - target.stats.LUK) / 100;
         if (critChance < 0.001) critChance = 0.001;
         critChance *= 100;
@@ -1792,12 +1804,7 @@
 
 
 
-        effectStack.emitEvent(
-          name: 'onPreAttackOther',
-          to : target, 
-          damage : dmg,
-          emitCondition ::(effectInstance) <- dmg.amount > 0
-        );
+
         
         when(dmg.amount <= 0) empty;
 
@@ -1866,7 +1873,7 @@
             imperfectGuard = (targetDefendPart != Entity.DAMAGE_TARGET.HEAD &&
                       targetDefendPart != Entity.DAMAGE_TARGET.BODY &&
                       targetDefendPart != Entity.DAMAGE_TARGET.LIMBS &&
-                      random.flipCoin());
+                      random.try(percentSuccess:5);
             this.flags.add(flag:StateFlags.BLOCKED_ATTACK);
             
             if (!imperfectGuard) ::<= {
@@ -1889,7 +1896,7 @@
               
               this.effectStack.emitEvent(
                 name: 'onGotBlocked',
-                to: target
+                from: target
               );
             } else ::<= {
               dmg.amount *= .4;
@@ -1964,7 +1971,7 @@
             
             this.effectStack.emitEvent(
               name: 'onGotBlocked',
-              to: target
+              from: target
             );
           }
         }
@@ -2685,8 +2692,22 @@
       @:state = _.state;
       @:this = _.this;
 
-      @:ids = this.effectStack.getAll()->filter(:filter)->map(::(value) <- value.id);
       this.effectStack.removeByFilter(:filter);
+    },
+
+    removeFirstEffectByFilter::(filter => Function) {
+      @:state = _.state;
+      @:this = _.this;
+
+      @removed = false;
+      this.removeEffectsByFilter(::(value) {
+        when(removed) false;
+        when(filter(value)) ::<= {
+          removed = true;
+          return true;
+        }
+        return false;
+      });
     },
 
       
@@ -2932,6 +2953,61 @@
       return slotOut;
     },
       
+    pickTarget::(onPick, canCancel, showHitChance) {
+      @:battle = _.battle;
+      @:allies = battle.getAllies(entity:_.this);
+      @:enemies = battle.getEnemies(entity:_.this);
+      @:state = _.state;
+      @:this = _.this;
+
+    
+      @:tabbedChoices = import(:'game_function.tabbedchoices.mt');
+      @:choices = [
+        [...enemies],
+        [...allies]
+      ];
+
+      @:choiceNames = [
+         [...(enemies->map(to:::(value)<- value.name))],
+         [...(allies-> map(to:::(value)<- value.name))]
+      ]              
+      
+
+      @hovered;
+      tabbedChoices(
+        leftWeight: 1,
+        topWeight: 1,
+        onGetTabs ::<- ['Enemies', 'Allies'],
+        onGetChoices::(tab) <- choiceNames[tab],
+        canCancel: if (canCancel == empty) true else canCancel,
+        renderable : {
+          render :: {
+            when (hovered == empty) empty;
+            when (showHitChance != true) empty;
+            canvas.renderTextFrameGeneral(
+              lines : canvas.columnsToLines(
+                columns : [
+                  [this.name, "DEX: "+this.stats.DEX, " ", " "],
+                  ["", if (this.stats.DEX > hovered.stats.DEF) '>' else '<', " ", ""+(this.getChanceOfAttackSuccessDEXvDEF(:hovered)*100)->round + "% Hit Chance"],
+                  [hovered.name, "DEF: "+hovered.stats.DEF, " ", " "],
+                ]
+              ),
+              topWeight: 0.5,
+              leftWeight: 0.5
+            );
+          }
+        },
+        onHover::(choice, tab) {
+          hovered = choices[tab][choice-1];
+        },
+        
+        onChoice::(choice, tab) {
+          when(choice == 0) empty; 
+          onPick(target:hovered)
+        }
+      }  
+    },
+      
     useArt::(art, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:state = _.state;
       @:this = _.this;
@@ -3043,56 +3119,18 @@
                 );
               }
               
-              @:tabbedChoices = import(:'game_function.tabbedchoices.mt');
-              @:choices = [
-                [...enemies],
-                [...allies]
-              ];
-
-              @:choiceNames = [
-                 [...(enemies->map(to:::(value)<- value.name))],
-                 [...(allies-> map(to:::(value)<- value.name))]
-              ]              
               
-
-              @hovered;
-              tabbedChoices(
-                leftWeight: 1,
-                topWeight: 1,
-                onGetTabs ::<- ['Enemies', 'Allies'],
-                onGetChoices::(tab) <- choiceNames[tab],
-                canCancel: if (canCancel == empty) true else canCancel,
-                renderable : {
-                  render :: {
-                    when (hovered == empty) empty;
-                    canvas.renderTextFrameGeneral(
-                      lines : canvas.columnsToLines(
-                        columns : [
-                          [this.name, "DEX: "+this.stats.DEX, " ", " "],
-                          ["", if (this.stats.DEX > hovered.stats.DEF) '>' else '<', " ", ""+(this.getChanceOfAttackSuccessDEXvDEF(:hovered)*100)->round + "% Hit Chance"],
-                          [hovered.name, "DEF: "+hovered.stats.DEF, " ", " "],
-                        ]
-                      ),
-                      topWeight: 0.5,
-                      leftWeight: 0.5
-                    );
-                  }
-                },
-                onHover::(choice, tab) {
-                  hovered = choices[tab][choice-1];
-                },
-                
-                onChoice::(choice, tab) {
-                  when(choice == 0) empty;
-                  
-                  
+              this.pickTarget(
+                canCancel,
+                showHitChance : true, // needs work since sometimes its not relevant
+                onPick ::(target) {
                   
                   if (art.targetMode == Arts.TARGET_MODE.ONEPART) ::<= {
                     chooseOnePart(onDone::(which){
                       battleAction = BattleAction.new(
                         card,
                         turnIndex : 0,
-                        targets: [choices[tab][choice-1]],
+                        targets: [target],
                         targetParts: [which],
                         extraData: {}
                       )
@@ -3101,14 +3139,13 @@
                     battleAction = BattleAction.new(
                       card,
                       turnIndex : 0,
-                      targets: [choices[tab][choice-1]],
+                      targets: [target],
                       targetParts: [DAMAGE_TARGET.BODY],
                       extraData: {}
                     )
-                  }
+                  }                  
                 }
               );
-              
             },
             (Arts.TARGET_MODE.ALLALLY): ::<={
               battleAction=

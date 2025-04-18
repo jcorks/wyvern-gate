@@ -33,8 +33,9 @@
             Propogation stops if damage.amount <= 0
   returns:  ignored 
   args:
-    - to:     The one being attacked.
-    - damage: the damage information from the attack (Damage.type)
+    - to:      The one being attacked.
+    - damage:  the damage information from the attack (Damage.type)
+    - targets: the intended target
   
 
     
@@ -189,7 +190,23 @@
   About:    Called when the holder's attack got blocked 
   returns:  ignored 
   args:
-    - to: the one being attacked
+    - from: the one being attacked
+
+
+
+  Event:    onPreAction
+  About:    called before committing an action (art)
+  returns:  return false to prevent effect from being added
+  args:
+    - action: The battle action
+
+
+  Event:    onPostAction
+  About:    called after committing an action (art).  
+  args:
+    - action: The battle action
+
+
 
 
   Event:    onPreAddEffect

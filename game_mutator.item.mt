@@ -779,7 +779,7 @@ Item.database.newEntry(data : {
 })
 
 Item.database.newEntry(data : {
-  name : "Bludgeon",
+  name : "Mace",
   id : 'base:bludgeon',
   description: 'A basic blunt weapon. The hilt has a $color$ trim with a $design$ design.',
   examine : 'Clubs and bludgeons seem primitive, but are quite effective.',
@@ -3485,7 +3485,6 @@ Item.database.newEntry(data : {
     }      
     desc = desc + ' base -1, ' + crystals[kind][0] + ',' + crystals[kind][1] + ' base +2';
     //item.setOverrideDescription(:desc);
-    breakpoint();
     item.setUpInlet(
       stats : StatSet.new(*statsA)
     );
@@ -3682,7 +3681,6 @@ Item.database.newEntry(
         if (creationHint.tier->type == Number) 
           tier = creationHint.tier
       }
-      breakpoint();
 
       @:story = import(:'game_singleton.story.mt');
       @:capitalize = import(:'game_function.capitalize.mt');
@@ -4304,7 +4302,6 @@ none.name = 'None';
         @:out = StatSet.new();
         out.add(:_.state.statsBase);
         out.add(:_.state.inletSlotData.stats);
-        breakpoint();
         return out;
       }
     },

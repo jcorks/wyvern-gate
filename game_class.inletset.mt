@@ -132,7 +132,6 @@
   ::<= {
     @curChain = [];;
     foreach(state.slots) ::(k, v) {
-      breakpoint();
       when (v.inset == empty) ::<= {
         // failed to create chain. Added each as 
         // standalone chains
@@ -161,7 +160,6 @@
     when(v->size == 1) ::<= {
       stats.add(:state.slots[v[0]].inset.inletStats);
     }
-    breakpoint();
     
     @:chainStats = StatSet.new();
     foreach(v) ::(k, index) {
@@ -214,7 +212,6 @@
       ,
       
       equip ::(user, item, canCancel) {
-        breakpoint();
         @:onItem = item;
         @:world = import(module:'game_singleton.world.mt')
         @:inv = world.party.inventory;
@@ -260,7 +257,6 @@
                 text:user.name + ' placed the ' + item.name + ' into the ' + onItem.name + '.'
               );
               
-              breakpoint();
               if (user.hasEquipped(:onItem))
                 user.recalculateStats();
               

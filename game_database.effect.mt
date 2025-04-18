@@ -80,9 +80,9 @@ Effect.newEntry(
         if (item.data.book) ::<= {
           @:w = item.data.book.onGetContents();
           if (w->type == String)
-            windowEvent.queueMessage(text:w)
+            windowEvent.queueReader(lines:w->split(token: '\n'))
           else 
-            windowEvent.queueDisplay(lines:canvas.refitLines(input:w));
+            windowEvent.queueReader(lines:canvas.refitLines(input:w));
         }
 
       }
@@ -180,7 +180,7 @@ Effect.newEntry(
         );
       },
 
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         windowEvent.queueMessage(
           text: holder.name + '\'s attack was boosted x2!'
         );
@@ -204,7 +204,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         windowEvent.queueMessage(
           text: holder.name + '\'s attack bypassed ' + to.name +'\'s DEF!'
         );
@@ -230,7 +230,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         when(holder.battle == empty) empty;
         
         @:targets = holder.battle.getEnemies(:holder)->filter(::(value) <- value != to);
@@ -251,6 +251,391 @@ Effect.newEntry(
     }
   }
 );
+
+Effect.newEntry(
+  data : {
+    name : 'Confused',
+    id : 'base:confused',
+    description: '20% chance that attacks to others target their self or their allies.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+        when(holder.battle == empty) empty;
+
+        when(random.try(percentSuccess:80)) empty;
+
+        
+        @:target = random.pickArrayItem(:holder.battle.getAllies(:holder));
+        windowEvent.queueMessage(
+          text: holder.name + '\'s confusion caused them to attack ' + target.name + ' instead!'
+        );
+        
+        overrideTarget->push(:target);
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
+    name : 'Taunted',
+    id : 'base:taunted',
+    description: 'All of the holder\'s attacks can only target the person who inflicted this effect.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+        when(from == empty) empty;
+        windowEvent.queueMessage(
+          text: holder.name + ' fell for ' + from.name + '\'s taunt!'
+        );
+        
+        overrideTarget->push(:from);
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
+    name : 'Terrified',
+    id : 'base:terrified',
+    description: 'The holder\'s attacks that target the person who inflicted this effect cause 0 damage.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+        when(from == empty) empty;
+        
+        windowEvent.queueMessage(
+          text: holder.name + ' is terrified of ' + from.name + '!'
+        );
+
+        damage.amount = 0;
+      }
+    }
+  }
+);
+
+Effect.newEntry(
+  data : {
+    name : 'Field Barrier',
+    id : 'base:field-barrier',
+    description: 'Reduces incoming multi-hit damage by 80%.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        when((damage.traits & Damage.TRAIT.MULTIHIT) == 0) empty;
+        windowEvent.queueMessage(text:holder.name + "'s Field Barrier reduces multi-hit damage!");
+        damage.amount *= 0.2;
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
+    name : 'Suppressor',
+    id : 'base:suppressor',
+    description: 'Reduces incoming attack damage by 50%.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage) {
+        windowEvent.queueMessage(text:holder.name + "'s Suppressor reduces multi-hit damage!");
+        damage.amount *= 0.5;
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
+    name : 'Potentiality Shard',
+    id : 'base:potentiality-shard',
+    description: 'Next played Art has a 25% chance of activating twice. This effect gets removed afterward.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAction ::(from, holder, action) {
+        holder.removeEffectsByFilter(::(value) <- value.id == 'base:potentiality-shard');
+
+        when(random.try(percentSuccess:25)) ::<= {
+          windowEvent.queueMessage(text:holder.name + "'s Potentiality Shard activates!");
+          holder.battle.commitFreeAction(
+            action,
+            from:holder,
+            onDone::{}
+          )
+        }
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
+    name : 'Copy Shard',
+    id : 'base:copy-shard',
+    description: 'Next played Art is duplicated and added to hand. This effect gets removed afterward.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAction ::(from, holder, action) {
+        holder.removeEffectsByFilter(::(value) <- value.id == 'base:copy-shard');
+
+        when(random.try(percentSuccess:50)) ::<= {
+          windowEvent.queueMessage(text:holder.name + "'s Copy Shard activates!");
+          holder.deck.addHandCard(id:action.id);
+        }
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
+    name : 'Conductive Block',
+    id : 'base:conductive-block',
+    description: 'Next incoming attack\'s damage is negated and gives the holder the effect 2x Damage. This counts as blocking. This effect is removed afterward.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
+        holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:block');
+
+        windowEvent.queueMessage(text:holder.name + " is blocking!");
+        damage.amount = 0;
+        
+        holder.effectStack.emitEvent(
+          name : 'onSuccessfulBlock',
+          attacker,
+          // synthetic but eh
+          blockData : {
+            targetDefendPart : Entity.DAMAGE_TARGET.BODY,
+            targetPart : Entity.DAMAGE_TARGET.BODY
+          }
+        );
+
+        attacker.effectStack.emitEvent(
+          name : 'onGotBlocked',
+          from: holder
+        );
+        
+        holder.addEffect(from:user, id: 'base:next-attack-x2', durationTurns: 99999999);
+
+      }
+    }
+  }
+);
+
+Effect.newEntry(
+  data : {
+    name : 'Block',
+    id : 'base:block',
+    description: 'Next incoming attack\'s damage is negated. This counts as blocking. This effect is removed afterward.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
+        holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:block');
+
+        windowEvent.queueMessage(text:holder.name + " is blocking!");
+        damage.amount = 0;
+        
+        holder.effectStack.emitEvent(
+          name : 'onSuccessfulBlock',
+          attacker,
+          // synthetic but eh
+          blockData : {
+            targetDefendPart : Entity.DAMAGE_TARGET.BODY,
+            targetPart : Entity.DAMAGE_TARGET.BODY
+          }
+        );
+
+        attacker.effectStack.emitEvent(
+          name : 'onGotBlocked',
+          from: holder
+        );
+
+      }
+    }
+  }
+);
+
+Effect.newEntry(
+  data : {
+    name : 'Slingshot Block',
+    id : 'base:slingshot-block',
+    description: 'Next incoming attack\'s damage is reduced to 2 damage. The original damage is redirected to a target of the holder\'s choice. This counts as blocking. This effect is removed afterward.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
+        holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:slingshot-block');
+
+        windowEvent.queueMessage(text:holder.name + " is blocking!");
+        @:copy = Damage.new();
+        copy.load(:damage.save());
+        damage.amount = 2;
+        
+        holder.effectStack.emitEvent(
+          name : 'onSuccessfulBlock',
+          attacker,
+          // synthetic but eh
+          blockData : {
+            targetDefendPart : Entity.DAMAGE_TARGET.BODY,
+            targetPart : Entity.DAMAGE_TARGET.BODY
+          }
+        );
+
+        attacker.effectStack.emitEvent(
+          name : 'onGotBlocked',
+          from: holder
+        );
+
+        windowEvent.queueNestedResolve(
+          onEnter :: {
+            entity.pickTarget(
+              onPick ::(target) {
+                attacker.damage(
+                  attacker: holder,
+                  damage: copy,
+                  dodgeable: true,
+                  exact: true
+                );
+              },
+              canCancel: false,
+              showHitChance : false
+            )
+          }
+        );
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
+    name : 'Ricochet Block',
+    id : 'base:ricochet-block',
+    description: 'Next incoming attack\'s is redirected to a random target. This counts as blocking. This effect is removed afterward.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
+        holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:ricochet-block');
+
+        windowEvent.queueMessage(text:holder.name + " is blocking!");
+        @:copy = Damage.new();
+        copy.load(:damage.save());
+        damage.amount = 0;
+        
+        holder.effectStack.emitEvent(
+          name : 'onSuccessfulBlock',
+          attacker,
+          // synthetic but eh
+          blockData : {
+            targetDefendPart : Entity.DAMAGE_TARGET.BODY,
+            targetPart : Entity.DAMAGE_TARGET.BODY
+          }
+        );
+
+        attacker.effectStack.emitEvent(
+          name : 'onGotBlocked',
+          from: holder
+        );
+
+        @target = random.pickArrayItem(:[...holder.battle.getAllies(:holder)->filter(::(value) <- value != holder), ...holder.battle.getEnemies()]);
+
+        target.damage(
+          attacker: holder,
+          damage: copy,
+          dodgeable: true,
+          exact: true
+        );
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
+    name : 'Reflective Block',
+    id : 'base:reflective-block',
+    description: 'Next incoming attack\'s is redirected to the origin attacker. This counts as blocking. This effect is removed afterward.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage) {
+        holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:reflective-block');
+
+        windowEvent.queueMessage(text:holder.name + " is blocking!");
+        @:copy = Damage.new();
+        copy.load(:damage.save());
+        damage.amount = 0;
+        
+        holder.effectStack.emitEvent(
+          name : 'onSuccessfulBlock',
+          attacker,
+          // synthetic but eh
+          blockData : {
+            targetDefendPart : Entity.DAMAGE_TARGET.BODY,
+            targetPart : Entity.DAMAGE_TARGET.BODY
+          }
+        );
+
+        attacker.effectStack.emitEvent(
+          name : 'onGotBlocked',
+          from: holder
+        );
+
+
+        attacker.damage(
+          attacker: holder,
+          damage: copy,
+          dodgeable: true,
+          exact: true
+        );
+      }
+    }
+  }
+);
+
 
 Effect.newEntry(
   data : {
@@ -2622,7 +3007,7 @@ Effect.newEntry(
     blockPoints : 0,
     traits : Effect.TRAIT.DEBUFF,
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         if ((damage.traits & Damage.TRAIT.MULTIHIT) != 0) ::<= {
           windowEvent.queueMessage(text: holder.name + '\'s Dampen Multi-hit nullified the attack!');
           damage.amount = 0;
@@ -2672,7 +3057,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + ' became desparate!');
       },
       
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         windowEvent.queueMessage(text: holder.name + '\'s desparation increased damage by 2.5 times!');
         damage.amount *= 2.5;
       },      
@@ -3422,7 +3807,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + " is no longer blind.");
       },        
 
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         when (random.number() > 0.5) empty;
         windowEvent.queueMessage(text:holder.name + " missed in their blindness!");
         damage.amount = 0;
@@ -4393,7 +4778,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         @:id = match(damage.type) {
           (Damage.TYPE.FIRE) : 'base:burning',
           (Damage.TYPE.ICE) : 'base:icy',
@@ -4721,8 +5106,8 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
-    name : 'Light Guard',
-    id : 'base:light-guard',
+    name : 'Half Guard',
+    id : 'base:half-guard',
     description: '50% of the time, damage from others to the holder is reduced by half.',
     stackable: true,
     blockPoints : 0,
@@ -5069,7 +5454,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + "'s Shield Aura reduced damage!");
       },
 
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         windowEvent.queueMessage(
           text: holder.name + '\'s Shield Aura reduced the moved effectiveness!'
         );
@@ -5171,7 +5556,7 @@ Effect.newEntry(
   data : {
     name : 'Escape Dungeon',
     id : 'base:escape-dungeon',
-    description : 'Escape from a dungeon. Loses half of collected loot.',
+    description : 'Escape from a dungeon. Loses half of collected Ethereal Shards.',
     stackable : false,
     blockPoints :0,
     traits : TRAIT.SPECIAL,
@@ -5179,8 +5564,8 @@ Effect.newEntry(
     events : {
       onAffliction ::(from, item, holder) {
         @:world = import(module:'game_singleton.world.mt');
-        when (world.battle.isActive)
-          windowEvent.queueMessage(text:"The presence of combatants causes the escape attempt to fail!");
+        if (world.battle.isActive)
+          world.battle.cancel();
 
         when(world.party.isMember(:holder) == false)
           empty;
@@ -5551,7 +5936,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         when (to != from) empty;
       
         windowEvent.queueMessage(
@@ -5883,7 +6268,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         when(from != to) empty;
         when(random.coinFlip()) empty;
         windowEvent.queueMessage(
@@ -5908,7 +6293,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         when(from != to) empty;
         windowEvent.queueMessage(
           text: holder.name + '\'s Enraged caused recoil damage!'
@@ -5953,7 +6338,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         when(from != to) empty;
         when(holder.isIncapacitated()) empty;
         windowEvent.queueMessage(
@@ -6025,7 +6410,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage) {
+      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
         windowEvent.queueMessage(text: holder.name + '\'s Empowered increased damage by 1.5 times!');
         damage.amount = (damage.amount*1.5)->ceil;
         holder.removeEffectInstance(:

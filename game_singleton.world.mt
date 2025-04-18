@@ -723,7 +723,6 @@
         if (newHour && state.time == TIME.EVENING) ::<= {
           @:instance = import(:'game_singleton.instance.mt');
           if (instance.y) ::<= {
-            breakpoint();
             windowEvent.queueMessage(
               text: '"What a horrible night to have a curse."'
             );  
@@ -813,7 +812,6 @@
 
         // check to see if the current landmark is part of the current island. 
         // If it isnt, save it separately.
-        breakpoint();
         if (state.currentLandmarkID != -1 && ({:::} {
             foreach(island.landmarks) ::(k, v) {
               if (v.worldID == state.currentLandmarkID)
@@ -912,7 +910,6 @@
           if (!State.weightCheck(:serialized)) ::<= {
             @:instance = import(:'game_singleton.instance.mt');
             instance.x = true;
-            breakpoint();
           }
         
           if (serialized.rng != empty)

@@ -422,6 +422,7 @@ return {
             @:giveUp ::{
               windowEvent.queueAskBoolean(
                 prompt: 'Give up on ' + quest.name + '?',
+                canCancel : true,
                 onChoice::(which) {
                   when(which == false) empty;
                   
@@ -442,6 +443,8 @@ return {
                 'More details...',
                 'Give up'
               ],
+              keep: true,
+              canCancel: true,
               onChoice::(choice) <- choiceActions[choice-1]()
             );
           }

@@ -360,7 +360,8 @@
           (CHOICE_MODE.CURSOR_MOVE):    commitInput_cursorMove(data:val, input),
           (CHOICE_MODE.CUSTOM):         commitInput_custom(data:val, input),
           (CHOICE_MODE.SLIDER):         commitInput_slider(data:val, input),
-          (CHOICE_MODE.CALLBACK):       commitInput_callback(data:val, input)
+          (CHOICE_MODE.CALLBACK):       commitInput_callback(data:val, input),
+          (CHOICE_MODE.READER):         commitInput_reader(data:val, input)
         }    
         
         // event callbacks mightve bonked out 
@@ -1183,6 +1184,98 @@
         default: false
       }
     }
+
+
+    @:commitInput_reader ::(data, input) {
+      when (requestAutoSkip) true;
+
+      if (data.iter == empty)
+        data.iter = 0;
+
+      if(input == CURSOR_ACTIONS.UP||
+         input == CURSOR_ACTIONS.DOWN) ::<= {
+          
+        if (input == CURSOR_ACTIONS.UP)
+          data.iter -= 1;
+
+        if (input == CURSOR_ACTIONS.DOWN)
+          data.iter += 1;
+          
+          
+        if (data.iter < 0) data.iter = 0;
+        if (data.iter > data.lines->size - data.maxHeight - 1) data.iter = data.lines->size - data.maxHeight - 1;
+        data.rendered = empty;
+      }   
+      
+      data.thisRender = ::{
+        renderTextSingle(
+          leftWeight: data.leftWeight, 
+          topWeight: data.topWeight, 
+          maxWidth : data.maxWidth,
+          maxHeight : data.maxHeight,
+          lines: data.lines->subset(from:data.iter, to:data.iter+data.maxHeight),
+          speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt()
+          //limitLines : data.pageAfter,
+        );
+        
+        // render scrollbar
+        @space = data.maxHeight - 5;
+        @scrollHeight = ((data.maxHeight / data.lines->size) * space)->floor;
+        @scrollStart = 
+          (space - scrollHeight) *                     // total space available
+          (data.iter / (data.lines->size - data.maxHeight - 1)) // fraction 
+        ;
+
+        @endX = data.maxWidth+3;
+
+        canvas.movePen(x:endX, y:1);
+        canvas.drawChar(text: '╕');
+
+        canvas.movePen(x:endX, y:2);
+        canvas.drawChar(text: '│');
+        
+        for(0, space) ::(i) {
+          canvas.movePen(x:endX, y:i+3);
+          canvas.drawChar(text: ' ');
+        }
+
+        for(scrollStart, scrollStart + scrollHeight) ::(i) {
+          canvas.movePen(x:endX, y:i+3);
+          canvas.drawChar(text: '▓');
+        }
+
+        canvas.movePen(x:endX, y:space+3);
+        canvas.drawChar(text: '│');
+        canvas.movePen(x:endX, y:space + 4);
+        canvas.drawChar(text: '┘');
+
+
+        breakpoint();
+
+      }
+      
+
+      renderThis(data);
+      
+      return match(input) {
+        (CURSOR_ACTIONS.CONFIRM, 
+         CURSOR_ACTIONS.CANCEL): ::<= {
+          when (data.renderState == RENDER_STATE.ANIMATING) ::<= {
+            data.renderState = RENDER_STATE.DONE;
+            return false;
+          } 
+
+          sound.playSFX(:if (input == CURSOR_ACTIONS.CONFIRM) "confirm" else "cancel");
+
+          // if queued in a set, remove remaining waiting
+          if (input == CURSOR_ACTIONS.CANCEL && data.setID != empty) ::<= {
+            removeSetID(:data.setID)
+          }
+          return true;
+        },
+        default: false
+      }
+    }
     
     
     @:CHOICE_MODE = {
@@ -1297,6 +1390,34 @@
           setID,
           autoSkipAfterFrames
         );        
+      },
+
+      // Lets the user read a long set of text
+      // split into pages
+      queueReader::(
+        prompt, 
+        lines, 
+        // if true, will split text into pages and 
+        // disable normal scrolling.
+        hasPages, 
+
+        maxWidth,
+        maxHeight,
+        onLeave
+      ) {
+      
+      
+        pushResolveQueueTop(fns:[::{
+          choiceStackPush(value:{
+            mode: CHOICE_MODE.READER,
+            prompt: prompt,
+            lines : canvas.refitLines(input: lines, maxWidth),
+            hasPages : hasPages,
+            maxHeight : if (maxHeight == empty) canvas.height-5 else maxHeight,
+            maxWidth : if (maxWidth == empty) canvas.width - 4 else maxWidth,
+            onLeave : onLeave
+          });
+        }]); 
       },
       
       

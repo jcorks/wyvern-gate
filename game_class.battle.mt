@@ -359,15 +359,15 @@
           world.incrementTime(isStep:true);
         }
 
-        windowEvent.queueMessage(
-          text: 'It is now ' + ent.name + '\'s turn.'
-        );
-
         
         // act turn can signal to not act
         when(!ent.actTurn()) ::<={
           endTurn();
         }
+
+        windowEvent.queueMessage(
+          text: 'It is now ' + ent.name + '\'s turn.'
+        );
 
 
         // may have died this turn.
@@ -586,6 +586,13 @@
           }
           return false;
         }  
+      },
+      
+      cancel ::{
+        if (windowEvent.canJumpToTag(name:'Battle'))                      
+          windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);          
+        active = false;
+        ended = true;      
       },
     
       start ::(
@@ -965,6 +972,7 @@
         renderStatusBox();
         renderTurnOrder();
       },
+
       
       entityCommitAction::(action, from) {
         @:entAct = if (from != empty) from else entityTurn;
@@ -972,6 +980,24 @@
         // failsafe. not normally needed.
         when (!entAct.canActThisTurn())
           endTurn();
+          
+        this.commitFreeAction(action, from, onDone::{
+            windowEvent.queueCustom(
+              onEnter ::{
+                endTurn();
+              }
+            );
+        });
+        
+      },
+      
+      commitFreeAction::(action, from, onDone) {
+        @:entAct = if (from != empty) from else entityTurn;
+        when(from.effectStack.emitEvent(
+          name : 'onPreAction',
+          action : action
+        )->filter(::(value) <- value.ret ==false)->size > 0) empty;
+          
         
         @:passesCheck ::{
           @:art = Arts.find(:action.card.id);
@@ -1030,12 +1056,12 @@
               }
             }
 
+            from.effectStack.emitEvent(
+              name : 'onPostAction',
+              action : action
+            )
 
-            windowEvent.queueCustom(
-              onEnter ::{
-                endTurn();
-              }
-            );
+            onDone();
           }        
         }
       
@@ -1167,8 +1193,9 @@
       
       
         entAct.deck.discardFromHand(card:action.card);
-        windowEvent.onResolveAll(
-          onDone :: {
+        //windowEvent.onResolveAll(
+        windowEvent.queueNestedResolve(
+          onEnter :: {
             // entAct.deck was likely BLASTED due to death
             when (active == false || entAct == empty || entAct.deck == empty) 
               empty;

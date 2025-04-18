@@ -3283,6 +3283,329 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
+    name: 'Confusion',
+    id : 'base:confusion',
+    notifCommit : '$1 tries to confuse $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: 'Inflicts the Confused status on a target for 5 turns.',
+    keywords : ['base:confused'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:confused', durationTurns: 5);
+        }
+      )
+    }
+  }
+)   
+
+Arts.newEntry(
+  data: {
+    name: 'Taunt',
+    id : 'base:taunt',
+    notifCommit : '$1 tries to taunt $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: 'Inflicts the Taunted status on a target for 3 turns.',
+    keywords : ['base:taunted'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:taunted', durationTurns: 3);
+        }
+      )
+    }
+  }
+) 
+
+Arts.newEntry(
+  data: {
+    name: 'Terrify',
+    id : 'base:terrify',
+    notifCommit : '$1 tries to terrify $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: 'Inflicts the Terrified status on a target for 3 turns.',
+    keywords : ['base:terrified'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:terrified', durationTurns: 3);
+        }
+      )
+    }
+  }
+) 
+
+
+Arts.newEntry(
+  data: {
+    name: 'Field Barrier',
+    id : 'base:field-barrier',
+    notifCommit : '$1 casts Field Barrier!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: 'Grants the Field Barrier status on a target for 3 turns.',
+    keywords : ['base:field-barrier'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : 0,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:field-barrier', durationTurns: 3);
+        }
+      )
+     }
+  }
+) 
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Potentiality Shard',
+    id : 'base:potentiatily-shard',
+    notifCommit : '$1 uses a Potentiality Shard!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: 'Grants the Potentiality Shard status on a target.',
+    keywords : ['base:potentiality-shard'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:potentiality-shared', durationTurns: 99999999);
+        }
+      )
+     }
+  }
+) 
+
+Arts.newEntry(
+  data: {
+    name: 'Potentiality Shard',
+    id : 'base:potentiatily-shard',
+    notifCommit : '$1 uses a Copy Shard!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: 'Grants the Copy Shard status on a target.',
+    keywords : ['base:copy-shard'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:potentiality-shared', durationTurns: 99999999);
+        }
+      )
+     }
+  }
+) 
+
+
+Arts.newEntry(
+  data: {
+    name: 'Suppressor',
+    id : 'base:field-barrier',
+    notifCommit : '$1 casts Suppressor!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: 'Grants the Suppressor status on a target for 2 turns.',
+    keywords : ['base:suppressor'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.COMMON,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:suppressor', durationTurns: 2);
+        }
+      )
+     }
+  }
+) 
+
+
+Arts.newEntry(
+  data: {
+    name: 'Block',
+    id : 'base:block',
+    notifCommit : '$1 begins to focus!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Grants the Block status to the user.',
+    keywords : ['base:block'],
+    durationTurns: 0,
+    kind : KIND.REACTION,
+    traits : 0,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.addEffect(from:user, id: 'base:block', durationTurns: 99999999);
+        }
+      )
+    }
+  }
+) 
+
+Arts.newEntry(
+  data: {
+    name: 'Slingshot Block',
+    id : 'base:block',
+    notifCommit : '$1 begins to focus!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Grants the Slingshot Block status to the user.',
+    keywords : ['base:slingshot-block'],
+    durationTurns: 0,
+    kind : KIND.REACTION,
+    traits : 0,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.addEffect(from:user, id: 'base:slingshot-block', durationTurns: 99999999);
+        }
+      )
+    }
+  }
+) 
+
+
+Arts.newEntry(
+  data: {
+    name: 'Ricochet Block',
+    id : 'base:ricochet-block',
+    notifCommit : '$1 begins to focus!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Grants the Ricochet Block status to the user.',
+    keywords : ['base:ricochet-block'],
+    durationTurns: 0,
+    kind : KIND.REACTION,
+    traits : 0,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.addEffect(from:user, id: 'base:ricochet-block', durationTurns: 99999999);
+        }
+      )
+    }
+  }
+) 
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Reflective Block',
+    id : 'base:reflective-block',
+    notifCommit : '$1 begins to focus!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Grants the Reflective Block status to the user.',
+    keywords : ['base:reflective-block'],
+    durationTurns: 0,
+    kind : KIND.REACTION,
+    traits : 0,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.addEffect(from:user, id: 'base:reflective-block', durationTurns: 99999999);
+        }
+      )
+    }
+  }
+) 
+
+Arts.newEntry(
+  data: {
+    name: 'Conductive Block',
+    id : 'base:conductive-block',
+    notifCommit : '$1 begins to focus!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Grants the Conductive Block status to the user.',
+    keywords : ['base:conductive-block', 'base:next-attack-x2'],
+    durationTurns: 0,
+    kind : KIND.REACTION,
+    traits : 0,
+    rarity : RARITY.EPIC,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          user.addEffect(from:user, id: 'base:conductive-block', durationTurns: 99999999);
+        }
+      )
+    }
+  }
+) 
+
+
+
+
+Arts.newEntry(
+  data: {
     name: 'Mind Focus',
     id : 'base:mind-focus',
     notifCommit : '$1 begins to focus!',
@@ -9727,9 +10050,9 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: 'Light Guard',
+    name: 'Half Guard',
     id : 'base:b247',
-    notifCommit : "$1 casts Light Guard!",
+    notifCommit : "$1 casts Half Guard!",
     notifFail : "...But nothing happened!",
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:light-guard'],

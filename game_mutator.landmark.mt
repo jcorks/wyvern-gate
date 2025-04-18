@@ -926,7 +926,6 @@ Landmark.database.newEntry(
 
       
 
-      breakpoint();
       foreach(base.requiredLocations)::(i, loc) {
         this.addLocation(
           location:Location.new(landmark:this, base:Location.database.find(:loc))
