@@ -5433,7 +5433,50 @@ Effect.newEntry(
     events : {
     }
   }
+)  
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Minor Aura',
+    id : 'base:minor-aura',
+    description: 'ATK,DEF,INT,SPD,DEX base +1',
+    stackable: true,
+    blockPoints : 0,
+    traits : 0,
+    stats: StatSet.new(
+      ATK:1, 
+      DEF:1,
+      INT:1,
+      SPD:1,
+      DEX:1
+    ),
+    events : {
+    }
+  }
+)  
+
+Effect.newEntry(
+  data : {
+    name : 'Minor Curse',
+    id : 'base:minor-curse',
+    description: 'ATK,DEF,INT,SPD,DEX base -1',
+    stackable: true,
+    blockPoints : 0,
+    traits : 0,
+    stats: StatSet.new(
+      ATK:-1, 
+      DEF:-1,
+      INT:-1,
+      SPD:-1,
+      DEX:-1
+    ),
+    events : {
+    }
+  }
 )    
+  
 
 Effect.newEntry(
   data : {
@@ -6526,8 +6569,8 @@ Effect.newEntry(
 Effect.newEntry(
   data : {
     name : 'Corrupted Radioactivity',
-    id : 'base:corrupted-empowerment',
-    description: 'At the start of the holder\'s turn, an enemy is struck with an INT-based Fire attack to a random enemy.',
+    id : 'base:corrupted-radioactivity',
+    description: 'At the start of the holder\'s turn, an enemy is struck with an INT-based Fire attack to a random enemy based on the number of Banish stacks.',
     stackable: true,
     blockPoints : 0,
     traits : TRAIT.BUFF,
@@ -6558,6 +6601,68 @@ Effect.newEntry(
     }
   }
 )  
+
+Effect.newEntry(
+  data : {
+    name : 'Corrupted Inspiration',
+    id : 'base:corrupted-inspriation',
+    description: 'At the start of the holder\'s turn, if the holder has a Banish stack, remove the Banish stack and grant Minor Aura to all allies for the duration of the battle.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onNextTurn ::(from, item, holder, duration) {        
+        @:banishCount = holder.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+        when(banishCount == 0) empty;
+        @:allies = holder.battle.getAllies(:holder);
+
+        windowEvent.queueMessage(
+          text: holder.name + ' channels a Banish stack into an aura!'
+        );
+
+        holder.effectStack.removeFirstEffectByFilter(::(value) <- value.id == 'base:banish');
+        foreach(allies) ::(k, v) {
+          v.addEffect(from:holder, id: 'base:minor-aura', durationTurns: 99999999);
+        }
+
+      }
+    }
+  }
+)  
+
+
+Effect.newEntry(
+  data : {
+    name : 'Corrupted Corruption',
+    id : 'base:corrupted-corruption',
+    description: 'At the start of the holder\'s turn, if the holder has a Banish stack, remove the Banish stack and grant Minor Curse to all allies for the duration of the battle.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onNextTurn ::(from, item, holder, duration) {        
+        @:banishCount = holder.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+        when(banishCount == 0) empty;
+        @:enemies = holder.battle.getEnemies(:holder);
+        when(enemies->size == 0) empty;
+        
+        windowEvent.queueMessage(
+          text: holder.name + ' channels a Banish stack into a curse!'
+        );
+
+        holder.effectStack.removeFirstEffectByFilter(::(value) <- value.id == 'base:banish');
+        foreach(enemies) ::(k, v) {
+          v.addEffect(from:holder, id: 'base:minor-curse', durationTurns: 99999999);
+        }
+
+      }
+    }
+  }
+)  
+
+
 
 }
 

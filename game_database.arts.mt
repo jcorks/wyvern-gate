@@ -11316,7 +11316,7 @@ Arts.newEntry(
     description: "Adds the effect Corrupted Punishment for 3 turns.",
     keywords : ['base:corrupted-punishment', 'base:banish'],
     durationTurns: 0,
-    kind : KIND.ABILITY,
+    kind : KIND.EFFECT,
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
@@ -11342,7 +11342,7 @@ Arts.newEntry(
     description: "Adds the effect Corrupted Empowerment for 3 turns.",
     keywords : ['base:corrupted-empowerment', 'base:banish'],
     durationTurns: 0,
-    kind : KIND.ABILITY,
+    kind : KIND.EFFECT,
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
@@ -11371,7 +11371,7 @@ Arts.newEntry(
     description: "Adds the effect Corrupted Radioactivity for 3 turns.",
     keywords : ['base:corrupted-radioactivity', 'base:banish'],
     durationTurns: 0,
-    kind : KIND.ABILITY,
+    kind : KIND.EFFECT,
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
@@ -11384,6 +11384,184 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:corrupted-radioactivity', durationTurns: 3);             
+        }
+      );
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Corrupted Inspiration',
+    id : 'base:corrupted-inspiration',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Adds the effect Corrupted Inspiration for 3 turns.",
+    keywords : ['base:corrupted-inspiration', 'base:banish', 'base:minor-aura'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:banishCount = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+      when(banishCount > 0) true;
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:corrupted-inspiration', durationTurns: 3);             
+        }
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Corrupted Corruption',
+    id : 'base:corrupted-corruption',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Adds the effect Corrupted Corruption for 3 turns.",
+    keywords : ['base:corrupted-corruption', 'base:banish', 'base:minor-curse'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      @:banishCount = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+      when(banishCount > 0) true;
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          targets[0].addEffect(from:user, id: 'base:corrupted-corruption', durationTurns: 3);             
+        }
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Banishing Accumulation',
+    id : 'base:banishing-accumulation',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Add one stack of Banish to target. For each copy of Banishing Accumulation in allies hands, add an additional Banish stack.",
+    keywords : ['base:banish'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          @:allies = holder.battle.getAllies(:holder);
+          @:banishCount = 0;
+          foreach(allies) ::(k, v) {
+            foreach(v.artsDeck.hand) ::(k2, card) {
+              if (card.id == 'base:banishing-accumulation')
+                banishCount += 1;
+            }
+          }
+          for(0, banishCount) ::(i) {
+            targets[0].addEffect(from:user, id: 'base:banish', durationTurns: 999999999);             
+          }
+        }
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Banishing Resonance',
+    id : 'base:banishing-resonance',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "Add one stack of Banish to each enemy if they already have a stack of Banish.",
+    keywords : ['base:banish'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          foreach(
+            holder.battle.getEnemies(:holder)->filter(
+              ::(value) <- value.deck.hand->filter(
+                ::(value) <- value.id == 'base:banish'
+              )->size > 0
+            )
+          ) ::(k, v) {
+            v.addEffect(from:user, id: 'base:banish', durationTurns: 999999999);                       
+          }
+        }
+      );
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Corrupted Drain',
+    id : 'base:corrupted-drain',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "'For each stack of Banish on target, deal damage to target equal to 5% of the target's max HP. The user heals that much HP.",
+    keywords : ['base:banish'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      {:::} {
+        foreach(random.scrambled(:enemies)) ::(k, v) {
+          v.effe
+        }
+      }
+      @:banishCount = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
+      when(banishCount > 0) true;
+    
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      windowEvent.queueCustom(
+        onEnter :: {
+          foreach(
+            holder.battle.getEnemies(:holder)->filter(
+              ::(value) <- value.deck.hand->filter(
+                ::(value) <- value.id == 'base:banish'
+              )->size > 0
+            )
+          ) ::(k, v) {
+            v.addEffect(from:user, id: 'base:banish', durationTurns: 999999999);                       
+          }
         }
       );
     }
