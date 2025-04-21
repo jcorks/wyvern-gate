@@ -366,6 +366,13 @@ return class(
           this.movePen(x: left+width-2-(notchText->length), y:top+height-1);
           this.drawText(text:notchText);
         }        
+        
+        return {
+          left : left,
+          top : top,
+          width : width,
+          height: height
+        }
       },
 
       

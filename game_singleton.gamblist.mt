@@ -802,11 +802,9 @@ Playing the Game
       onChoice::(choice) {
         when(choice == 1) doTurn();   
         
-        windowEvent.queueDisplay(
-          prompt: 'Rules',
+        windowEvent.queueReader(
+          prompt: 'Sorcerer - A Duel of Magic',
           lines: [
-            "Sorcerer - A Duel of Magic",
-            "",
             "Overview",
             "- This game is played with 2 players and",
             "  a standard 52-card  playing deck. The ",
@@ -901,8 +899,7 @@ Playing the Game
             "- If no cards remain in the deck, the", 
             "  discard pile is placed facedown and ",
             "  shuffled. This pile becomes the new deck."         
-          ],
-          pageAfter: 16
+          ]
         );
       }
     );

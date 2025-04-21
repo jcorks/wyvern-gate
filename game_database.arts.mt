@@ -6341,6 +6341,30 @@ Arts.newEntry(
   }
 )
 
+Arts.newEntry(
+  data: {
+    name: 'Lesser Banish',
+    id : 'base:banish',
+    notifCommit : '$1 casts Lesser Banish on $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Add 1 Banish stack to target.",
+    keywords: ['base:banish'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      for(0, 1) ::(i) {
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:9999999999);      
+      }
+    }
+  }
+)
+
 
 Arts.newEntry(
   data: {
@@ -6365,6 +6389,31 @@ Arts.newEntry(
     }
   }
 )
+
+Arts.newEntry(
+  data: {
+    name: 'Greater Banish',
+    id : 'base:banish',
+    notifCommit : '$1 casts Greater Banish on $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Add 3 Banish stacks to target.",
+    keywords: ['base:banish'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+      for(0, 3) ::(i) {
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:9999999999);      
+      }
+    }
+  }
+)
+
 
 Arts.newEntry(
   data: {
@@ -11470,8 +11519,8 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          @:allies = holder.battle.getAllies(:holder);
-          @:banishCount = 0;
+          @:allies = user.battle.getAllies(:user);
+          @banishCount = 0;
           foreach(allies) ::(k, v) {
             foreach(v.artsDeck.hand) ::(k2, card) {
               if (card.id == 'base:banishing-accumulation')
@@ -11509,7 +11558,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           foreach(
-            holder.battle.getEnemies(:holder)->filter(
+            user.battle.getEnemies(:user)->filter(
               ::(value) <- value.deck.hand->filter(
                 ::(value) <- value.id == 'base:banish'
               )->size > 0
@@ -11531,39 +11580,41 @@ Arts.newEntry(
     id : 'base:corrupted-drain',
     notifCommit : '$1 starts to glow!',
     notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.ALLENEMY,
+    targetMode : TARGET_MODE.ONE,
     description: "'For each stack of Banish on target, deal damage to target equal to 5% of the target's max HP. The user heals that much HP.",
     keywords : ['base:banish'],
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : TRAIT.MAGIC,
-    rarity : RARITY.UNCOMMON,
-    usageHintAI : USAGE_HINT.DEBUFF,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      {:::} {
+      return {:::} {
         foreach(random.scrambled(:enemies)) ::(k, v) {
-          v.effe
+          if (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size)
+            send(:[v]);
         }
-      }
-      @:banishCount = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
-      when(banishCount > 0) true;
-    
+        return false;
+      } 
+         
     },
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
-      windowEvent.queueCustom(
-        onEnter :: {
-          foreach(
-            holder.battle.getEnemies(:holder)->filter(
-              ::(value) <- value.deck.hand->filter(
-                ::(value) <- value.id == 'base:banish'
-              )->size > 0
-            )
-          ) ::(k, v) {
-            v.addEffect(from:user, id: 'base:banish', durationTurns: 999999999);                       
-          }
-        }
+      @:s = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size
+      @:amount = s*targets[0].stats.HP*0.05;
+      
+      targets[0].damage(
+        attacker: user,
+        damage : Damage.new(
+          amount,
+          damageType: Damage.TYPE.NEUTRAL,
+          damageClass : Damage.CLASS.HP
+        ),
+        exact: true,
+        dodgeable: false
       );
+      
+      user.heal(:amount);
     }
   }
 )

@@ -2641,7 +2641,7 @@ Item.database.newEntry(data : {
   basePrice: 600,
   enchantLimit : 0,
   levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
+  useTargetHint : USE_TARGET_HINT.NONE,
   possibleArts : [],
   blockPoints : 0,
 
@@ -2679,7 +2679,7 @@ Item.database.newEntry(data : {
   basePrice: 400,
   enchantLimit : 0,
   levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
+  useTargetHint : USE_TARGET_HINT.NONE,
   possibleArts : [],
   blockPoints : 0,
 

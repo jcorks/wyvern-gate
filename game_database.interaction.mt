@@ -2146,7 +2146,7 @@ Interaction.newEntry(
 
 Interaction.newEntry(
   data : {
-    name : 'Esccape',
+    name : 'Escape',
     id :  'base:escape',
     keepInteractionMenu : false,
     onInteract ::(location, party) {

@@ -993,7 +993,7 @@
       
       commitFreeAction::(action, from, onDone) {
         @:entAct = if (from != empty) from else entityTurn;
-        when(from.effectStack.emitEvent(
+        when(entAct.effectStack.emitEvent(
           name : 'onPreAction',
           action : action
         )->filter(::(value) <- value.ret ==false)->size > 0) empty;

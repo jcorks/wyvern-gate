@@ -426,6 +426,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
       onPreAttacked ::(from, item, holder, attacker, damage) {
+        @:Entity = import(module:'game_class.entity.mt');
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:block');
 
         windowEvent.queueMessage(text:holder.name + " is blocking!");
@@ -446,7 +447,7 @@ Effect.newEntry(
           from: holder
         );
         
-        holder.addEffect(from:user, id: 'base:next-attack-x2', durationTurns: 99999999);
+        holder.addEffect(from:holder, id: 'base:next-attack-x2', durationTurns: 99999999);
 
       }
     }
@@ -465,6 +466,7 @@ Effect.newEntry(
     events : {
       onPreAttacked ::(from, item, holder, attacker, damage) {
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:block');
+        @:Entity = import(module:'game_class.entity.mt');
 
         windowEvent.queueMessage(text:holder.name + " is blocking!");
         damage.amount = 0;
@@ -506,6 +508,7 @@ Effect.newEntry(
         @:copy = Damage.new();
         copy.load(:damage.save());
         damage.amount = 2;
+        @:Entity = import(module:'game_class.entity.mt');
         
         holder.effectStack.emitEvent(
           name : 'onSuccessfulBlock',
@@ -524,7 +527,7 @@ Effect.newEntry(
 
         windowEvent.queueNestedResolve(
           onEnter :: {
-            entity.pickTarget(
+            holder.pickTarget(
               onPick ::(target) {
                 attacker.damage(
                   attacker: holder,
@@ -556,6 +559,7 @@ Effect.newEntry(
     events : {
       onPreAttacked ::(from, item, holder, attacker, damage) {
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:ricochet-block');
+        @:Entity = import(module:'game_class.entity.mt');
 
         windowEvent.queueMessage(text:holder.name + " is blocking!");
         @:copy = Damage.new();
@@ -603,6 +607,7 @@ Effect.newEntry(
     events : {
       onPreAttacked ::(from, item, holder, attacker, damage) {
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:reflective-block');
+        @:Entity = import(module:'game_class.entity.mt');
 
         windowEvent.queueMessage(text:holder.name + " is blocking!");
         @:copy = Damage.new();
@@ -6581,18 +6586,20 @@ Effect.newEntry(
         when(banishCount == 0) empty;
         @:target = holder.battle.getEnemies(:holder);
         when(target == empty) empty;
+        @:Entity = import(module:'game_class.entity.mt');
 
 
         windowEvent.queueMessage(
           text: holder.name + '\'s Banish stacks create an attack!'
         );
 
+
         holder.attack(
           target,
           targetDefendPart:-1,
           targetPart: Entity.DAMAGE_TARGET.BODY,
           damage: Damage.new(
-            amount:user.stats.INT * (1.2) * (1 + (banishCount-1)*0.15),
+            amount:holder.stats.INT * (1.2) * (1 + (banishCount-1)*0.15),
             damageType : Damage.TYPE.FIRE,
             damageClass: Damage.CLASS.HP
           )

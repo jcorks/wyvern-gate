@@ -1873,7 +1873,7 @@
             imperfectGuard = (targetDefendPart != Entity.DAMAGE_TARGET.HEAD &&
                       targetDefendPart != Entity.DAMAGE_TARGET.BODY &&
                       targetDefendPart != Entity.DAMAGE_TARGET.LIMBS &&
-                      random.try(percentSuccess:5);
+                      random.try(percentSuccess:5));
             this.flags.add(flag:StateFlags.BLOCKED_ATTACK);
             
             if (!imperfectGuard) ::<= {
@@ -3005,7 +3005,7 @@
           when(choice == 0) empty; 
           onPick(target:hovered)
         }
-      }  
+      )
     },
       
     useArt::(art, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {

@@ -595,6 +595,7 @@ for(0, 20) ::(i) {
     
     @whatDoStatsMean ::{
       windowEvent.queueReader(
+        prompt: 'What are stats?',
         lines: [
           "Stats are the basic qualities that everyone has. They determine the person's ability to face a variety of challenges.",
           "",

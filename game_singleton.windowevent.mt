@@ -1208,49 +1208,42 @@
       }   
       
       data.thisRender = ::{
-        renderTextSingle(
+        @:fraction = (data.iter / (data.lines->size - data.maxHeight - 1));
+        @:info = renderTextSingle(
           leftWeight: data.leftWeight, 
           topWeight: data.topWeight, 
           maxWidth : data.maxWidth,
           maxHeight : data.maxHeight,
           lines: data.lines->subset(from:data.iter, to:data.iter+data.maxHeight),
-          speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt()
+          speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+          hasNotch: true,
+          notchText : 'Scroll ' + ((fraction*100)->round) + '%' + 
+            (if (fraction != 1) '[v]' else '   ') + 
+            (if (fraction != 0) '[^]' else '   ')
+          
           //limitLines : data.pageAfter,
         );
         
         // render scrollbar
-        @space = data.maxHeight - 5;
+        @space = info.height - 4;
         @scrollHeight = ((data.maxHeight / data.lines->size) * space)->floor;
         @scrollStart = 
           (space - scrollHeight) *                     // total space available
-          (data.iter / (data.lines->size - data.maxHeight - 1)) // fraction 
+          fraction
         ;
 
-        @endX = data.maxWidth+3;
+        @endX = info.left+info.width-1;
 
-        canvas.movePen(x:endX, y:1);
-        canvas.drawChar(text: '╕');
-
-        canvas.movePen(x:endX, y:2);
-        canvas.drawChar(text: '│');
         
         for(0, space) ::(i) {
-          canvas.movePen(x:endX, y:i+3);
-          canvas.drawChar(text: ' ');
+          canvas.movePen(x:endX, y:i+2);
+          canvas.drawChar(text: '░');
         }
 
         for(scrollStart, scrollStart + scrollHeight) ::(i) {
-          canvas.movePen(x:endX, y:i+3);
+          canvas.movePen(x:endX, y:i+2);
           canvas.drawChar(text: '▓');
         }
-
-        canvas.movePen(x:endX, y:space+3);
-        canvas.drawChar(text: '│');
-        canvas.movePen(x:endX, y:space + 4);
-        canvas.drawChar(text: '┘');
-
-
-        breakpoint();
 
       }
       
