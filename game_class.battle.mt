@@ -204,6 +204,7 @@
     @defeated;
     @backgroundID;
     @onFinish = [];
+    @queuedCallbacks = [];
     
   
     // some actions last multiple turns.
@@ -405,6 +406,14 @@
       foreach(turn)::(index, entity) {
         entity.startTurn();
       }
+
+      // then handle initial callbacks if any 
+      foreach(queuedCallbacks) ::(k, v) {
+        v.nTurns -= 1;
+        when (v.nTurns > 0) empty;
+        v.fn();
+        queuedCallbacks->remove(:v);
+      }
       
       // then resort based on speed
       turn->setSize(size:0);
@@ -587,6 +596,16 @@
           return false;
         }  
       },
+      
+      queueTurnCallback::(
+        callback,
+        nTurns
+      ) {
+        queuedCallbacks->push({
+          fn : callback,
+          nTurns : nTurns
+        });
+      }
       
       cancel ::{
         if (windowEvent.canJumpToTag(name:'Battle'))                      

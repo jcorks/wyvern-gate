@@ -11581,7 +11581,7 @@ Arts.newEntry(
     notifCommit : '$1 starts to glow!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "'For each stack of Banish on target, deal damage to target equal to 5% of the target's max HP. The user heals that much HP.",
+    description: "For each stack of Banish on target, deal damage to target equal to 5% of the target's max HP. The user heals that much HP.",
     keywords : ['base:banish'],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -11615,6 +11615,45 @@ Arts.newEntry(
       );
       
       user.heal(:amount);
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Phasing Banishment',
+    id : 'base:phasing-banishment',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "The target is removed from battle for one turn. Each stack of Banish increases the duration by one turn. All stacks of Banish are removed.",
+    keywords : ['base:banish'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.EPIC,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return {:::} {
+        foreach(random.scrambled(:enemies)) ::(k, v) {
+          if (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size)
+            send(:[v]);
+        }
+        return false;
+      } 
+         
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:s = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size
+      battle.evict(:targets[0]);
+      
+      battle.queueTurnCallback(
+        callback :: {
+          battle.join(:targets[0])
+        },
+        nTurns: 1+s
+      );
     }
   }
 )
