@@ -205,6 +205,7 @@
     @backgroundID;
     @onFinish = [];
     @queuedCallbacks = [];
+    @banished = [];
     
   
     // some actions last multiple turns.
@@ -601,11 +602,11 @@
         callback,
         nTurns
       ) {
-        queuedCallbacks->push({
+        queuedCallbacks->push(:{
           fn : callback,
           nTurns : nTurns
         });
-      }
+      },
       
       cancel ::{
         if (windowEvent.canJumpToTag(name:'Battle'))                      
@@ -649,6 +650,7 @@
         defeated = {};
         onTurn_ = onTurn;
         onAct_ = onAct;
+        banished = [];
         groups = [
           [...allies],
           [...enemies]
@@ -936,6 +938,15 @@
         get ::<- landmark_
       },
       
+      banished : {
+        get ::<- [...banished]
+      },
+      
+      banish ::(entity) {
+        banished->push(:entity);
+        this.evict(:entity);
+      },
+      
       evict ::(entity) {
         
         @:group  = ent2group[entity];
@@ -967,11 +978,16 @@
         else 
           []
           
+          
 
         if (party_.isMember(entity:group[0]))
           group2party[newGroup] = true;
 
         foreach(group) ::(i, entity) {
+          @:banishIndex = banished->findIndex(:entity);
+          if (banishIndex > -1)
+            banished->remove(:banishIndex);
+            
           newGroup->push(value:entity);
           ent2group[entity] = newGroup;
         }

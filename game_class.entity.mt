@@ -661,7 +661,7 @@
     this.effectStack.add(
       id:passiveName,
       from:this,
-      duration:999999999999,
+      duration:Arts.A_LOT,
       noNotify : true
     );
   }
@@ -675,7 +675,7 @@
         id:effect,
         item,
         from:this,
-        duration:999999999999,
+        duration:Arts.A_LOT,
         noNotify : true
       );
     }
@@ -2848,7 +2848,7 @@
         foreach(item.equipEffects)::(index, effect) {
           this.effectStack.add(
             id:effect,
-            duration: 999999999,
+            duration: Arts.A_LOT,
             item
           );
         }
@@ -2885,6 +2885,11 @@
       when(eq == empty) none;
       return eq;
     },
+
+    getEquips:: {
+      return [..._.state.equips];
+    },
+
 
     isEquipped::(item) {
       return _.state.equips->any(func::(value) <- value == item);

@@ -1235,12 +1235,12 @@
         @endX = info.left+info.width-1;
 
         
-        for(0, space) ::(i) {
+        for(0, space->round) ::(i) {
           canvas.movePen(x:endX, y:i+2);
           canvas.drawChar(text: '░');
         }
 
-        for(scrollStart, scrollStart + scrollHeight) ::(i) {
+        for(scrollStart->round, (scrollStart + scrollHeight)->round) ::(i) {
           canvas.movePen(x:endX, y:i+2);
           canvas.drawChar(text: '▓');
         }

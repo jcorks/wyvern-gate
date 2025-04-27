@@ -331,12 +331,13 @@
       addInnate::(id, item, from) {
         @:Item = import(module:'game_mutator.item.mt');
         if (item == empty) item = Item.NONE;
+        @:Arts = import(module:'game_database.arts.mt');
         @:ref = {
           holder : holder,
           from : from,
           id : id,
           item : item,
-          duration : 999999999
+          duration : Arts.A_LOT
         };
         state.innateEffects->push(:ref);
         this.emitEvent(name: 'onAffliction', filter::(value) <- ref == value);
@@ -374,9 +375,11 @@
         
         if (from == empty)
           from = holder;
-        
-        // already added. Ignores innate effects.
-        when (effect.stackable == false && state.effects->findIndexCondition(::(value) <- id == value.id) != -1) empty;
+
+        // already added, remove current effect and replace!
+        if (effect.stackable == false && state.effects->findIndexCondition(::(value) <- id == value.id) != -1) ::<= {
+          this.removeByFilter(::(value) <- value.id == id);                        
+        }
         
       
         @:r = {
@@ -396,6 +399,8 @@
             effectIDs : [id]
           );
         }
+
+
         
         if (duration == 0) ::<= {
           this.removeByFilter(::(value) <- value == r);                

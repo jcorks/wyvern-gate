@@ -18,6 +18,8 @@
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
 
+@:A_LOT = 999999999;
+
 @TARGET_MODE = {
   ONE   : 0,  
   ONEPART : 1,
@@ -197,7 +199,7 @@ Arts.newEntry(
                 text: user.name + ' does a connecting blow, finishing off ' + targets[0].name +'!'
               );              
               targets[0].damage(attacker:user, damage:Damage.new(
-                amount:999999,
+                amount:A_LOT,
                 damageType:Damage.TYPE.PHYS,
                 damageClass:Damage.CLASS.HP
               ),dodgeable: false);                
@@ -3407,7 +3409,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].addEffect(from:user, id: 'base:potentiality-shared', durationTurns: 99999999);
+          targets[0].addEffect(from:user, id: 'base:potentiality-shared', durationTurns: A_LOT);
         }
       )
      }
@@ -3433,7 +3435,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].addEffect(from:user, id: 'base:potentiality-shared', durationTurns: 99999999);
+          targets[0].addEffect(from:user, id: 'base:potentiality-shared', durationTurns: A_LOT);
         }
       )
      }
@@ -3487,7 +3489,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          user.addEffect(from:user, id: 'base:block', durationTurns: 99999999);
+          user.addEffect(from:user, id: 'base:block', durationTurns: A_LOT);
         }
       )
     }
@@ -3513,7 +3515,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          user.addEffect(from:user, id: 'base:slingshot-block', durationTurns: 99999999);
+          user.addEffect(from:user, id: 'base:slingshot-block', durationTurns: A_LOT);
         }
       )
     }
@@ -3540,7 +3542,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          user.addEffect(from:user, id: 'base:ricochet-block', durationTurns: 99999999);
+          user.addEffect(from:user, id: 'base:ricochet-block', durationTurns: A_LOT);
         }
       )
     }
@@ -3568,7 +3570,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          user.addEffect(from:user, id: 'base:reflective-block', durationTurns: 99999999);
+          user.addEffect(from:user, id: 'base:reflective-block', durationTurns: A_LOT);
         }
       )
     }
@@ -3594,7 +3596,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          user.addEffect(from:user, id: 'base:conductive-block', durationTurns: 99999999);
+          user.addEffect(from:user, id: 'base:conductive-block', durationTurns: A_LOT);
         }
       )
     }
@@ -5759,7 +5761,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].addEffect(from:user, id:'base:banishing-light', durationTurns:99999999); 
+          targets[0].addEffect(from:user, id:'base:banishing-light', durationTurns:A_LOT); 
         }
       )
     }
@@ -5887,7 +5889,7 @@ Arts.newEntry(
             exact : true
           );            
 
-          targets[0].addEffect(from:user, id:'base:next-attack-x2', durationTurns:9999);
+          targets[0].addEffect(from:user, id:'base:next-attack-x2', durationTurns:A_LOT);
         }
       )
     }
@@ -6359,7 +6361,7 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       for(0, 1) ::(i) {
-        targets[0].addEffect(from:user, id:'base:banish', durationTurns:9999999999);      
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:A_LOT);      
       }
     }
   }
@@ -6384,7 +6386,7 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       for(0, 2) ::(i) {
-        targets[0].addEffect(from:user, id:'base:banish', durationTurns:9999999999);      
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:A_LOT);      
       }
     }
   }
@@ -6408,7 +6410,7 @@ Arts.newEntry(
     baseDamage::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       for(0, 3) ::(i) {
-        targets[0].addEffect(from:user, id:'base:banish', durationTurns:9999999999);      
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:A_LOT);      
       }
     }
   }
@@ -6646,7 +6648,7 @@ Arts.newEntry(
           windowEvent.queueCustom(
             onEnter :: {
               foreach(targets) ::(k, target) {
-                target.addEffect(from:user, id:'base:greater-sol-attunement', durationTurns:9999);
+                target.addEffect(from:user, id:'base:greater-sol-attunement', durationTurns:A_LOT);
               }
             }
           )
@@ -8814,7 +8816,7 @@ Arts.newEntry(
         );
         
         targets[0].damage(attacker:user, damage:Damage.new(
-          amount:999999,
+          amount:A_LOT,
           damageType,
           damageClass:Damage.CLASS.HP
         ),dodgeable: false);         
@@ -9241,7 +9243,7 @@ Arts.newEntry(
           targets[0].addEffect(
             from:user,
             id: eff,
-            durationTurns : 9999999999,
+            durationTurns : A_LOT,
             item: eq
           );  
         }
@@ -9382,7 +9384,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      user.addEffect(id: 'base:take-aim', durationTurns: 9999999999, from:user);
+      user.addEffect(id: 'base:take-aim', durationTurns: A_LOT, from:user);
     }
   }
 )
@@ -10329,7 +10331,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      targets[0].addEffect(from:user, id:'base:death-reflection', durationTurns:99999999);
+      targets[0].addEffect(from:user, id:'base:death-reflection', durationTurns:A_LOT);
     }
   }
 )
@@ -10375,7 +10377,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      user.addEffect(from:user, id:'base:limit-break', durationTurns:999999999);
+      user.addEffect(from:user, id:'base:limit-break', durationTurns:A_LOT);
     }
   }
 )
@@ -10486,7 +10488,7 @@ Arts.newEntry(
           target.addEffect(
             from: user,
             id: 'base:aura',
-            durationTurns: 99999999
+            durationTurns: A_LOT
           );
         }
         count += 1;
@@ -10527,14 +10529,14 @@ Arts.newEntry(
           target.addEffect(
             from: user,
             id: 'base:shield-aura',
-            durationTurns: 99999999
+            durationTurns: A_LOT
           );
           
           for(0, 4) ::(k, v) {
             target.addEffect(
               from: user,
               id: 'base:banish',
-              durationTurns: 99999999
+              durationTurns: A_LOT
             );          
           }
         }
@@ -10600,7 +10602,7 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      user.addEffect(from:user, id:'base:deathless-overflow', durationTurns:999999999);
+      user.addEffect(from:user, id:'base:deathless-overflow', durationTurns:A_LOT);
     }
   }
 )
@@ -10719,7 +10721,7 @@ Arts.newEntry(
       targets[0].addEffect(
         from: sprite,
         id: 'base:soul-guard',
-        durationTurns: 9999999999
+        durationTurns: A_LOT
       );
       
 
@@ -10902,7 +10904,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      targets[0].addEffect(from:user, id:'base:acid-dust', durationTurns:999999999);
+      targets[0].addEffect(from:user, id:'base:acid-dust', durationTurns:A_LOT);
     }
   }
 )
@@ -10925,7 +10927,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      targets[0].addEffect(from:user, id:'base:conduction-dust', durationTurns:999999999);
+      targets[0].addEffect(from:user, id:'base:conduction-dust', durationTurns:A_LOT);
     }
   }
 )
@@ -10949,7 +10951,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      targets[0].addEffect(from:user, id:'base:crystalized-dust', durationTurns:999999999);
+      targets[0].addEffect(from:user, id:'base:crystalized-dust', durationTurns:A_LOT);
     }
   }
 )
@@ -11046,7 +11048,7 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:paralysis', durationTurns:1);
-      user.addEffect(from:user, id:'base:shock', durationTurns:999999999999);
+      user.addEffect(from:user, id:'base:shock', durationTurns:A_LOT);
     }
   }
 )
@@ -11071,7 +11073,7 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:burned', durationTurns:3);
-      user.addEffect(from:user, id:'base:burning', durationTurns:999999999999);
+      user.addEffect(from:user, id:'base:burning', durationTurns:A_LOT);
     }
   }
 )
@@ -11095,7 +11097,7 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:frozen', durationTurns:1);
-      user.addEffect(from:user, id:'base:icy', durationTurns:999999999999);
+      user.addEffect(from:user, id:'base:icy', durationTurns:A_LOT);
     }
   }
 )
@@ -11136,7 +11138,7 @@ Arts.newEntry(
           value.hasAnyTrait(:Effect.TRAIT.DEBUFF | Effect.TRAIT.AILMENT) &&
           value.hasNoTrait(:Effect.TRAIT.SPECIAL | Effect.TRAIT.INSTANTANEOUS)
         ), durationTurns:3);
-        user.addEffect(from:user, id:which, durationTurns:999999999999);
+        user.addEffect(from:user, id:which, durationTurns:A_LOT);
       }
 
       when(world.party.isMember(:user)) ::<= {
@@ -11528,7 +11530,7 @@ Arts.newEntry(
             }
           }
           for(0, banishCount) ::(i) {
-            targets[0].addEffect(from:user, id: 'base:banish', durationTurns: 999999999);             
+            targets[0].addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);             
           }
         }
       );
@@ -11564,7 +11566,7 @@ Arts.newEntry(
               )->size > 0
             )
           ) ::(k, v) {
-            v.addEffect(from:user, id: 'base:banish', durationTurns: 999999999);                       
+            v.addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);                       
           }
         }
       );
@@ -11646,17 +11648,145 @@ Arts.newEntry(
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:s = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size
-      battle.evict(:targets[0]);
+      user.battle.evict(:targets[0]);
       
-      battle.queueTurnCallback(
+      user.battle.queueTurnCallback(
         callback :: {
-          battle.join(:targets[0])
+          user.battle.join(:targets[0])
         },
         nTurns: 1+s
       );
     }
   }
 )
+
+
+Arts.newEntry(
+  data: {
+    name: 'Banish Shield',
+    id : 'base:banish-shield',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Adds the effect Banish Shield to target for 4 turns.",
+    keywords : ['base:banish', 'base:banish-shield'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      targets[0].addEffect(from:user, id: 'base:banish-shield', durationTurns: 4);
+    }
+  }
+)
+
+
+::<={
+@:getStacks ::(ent) <-
+  ent.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size
+
+Arts.newEntry(
+  data: {
+    name: 'Corrupted Soulbind',
+    id : 'base:corrupted-soulbind',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "User and targets Banish stacks are compared. The one with the lower Banish stack count gains Banish stacks until equal to the other's count.",
+    keywords : ['base:banish'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return {:::} {
+        @:userStacks = getStacks(:user);
+        
+        foreach(random.scrambled(:enemies)) ::(k, v) {
+          if (getStacks(:v) > userStacks)
+            send(:[v]);
+        }
+        return false;
+      }
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @:userStacks = getStacks(:user);
+      @:othrStacks = getStacks(:targets[0]);
+
+      if (userStacks < othrStacks) ::<= {
+        for(userStacks, othrStacks) ::(i) {
+          user.addEffect(from:user, id:'base:banis', durationTurns:A_LOT);
+        }
+      } else ::<= {
+        for(othrStacks, userStacks) ::(i) {
+          targets[0].addEffect(from:user, id:'base:banis', durationTurns:A_LOT);
+        }      
+      }
+    }
+  }
+)
+}
+
+
+Arts.newEntry(
+  data: {
+    name: 'Scavenge the Exiled',
+    id : 'base:scavenge-the-exiled',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Steals one random equipment from a banished fighter. ",
+    keywords : ['base:banish'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) <-
+      if (user.battle.banished->size > 0) ::<= {
+        foreach(user.battle.banished) ::(k, v) {
+          if (v.getEquips()->size > 0) ::<= {
+            send(:true);
+          }
+        }
+      } else false
+    ,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+      @whom;
+      @item;
+      @:world = import(module:'game_singleton.world.mt');
+      
+      {:::} {
+        foreach(random.scrambled(:user.battle.banished)) ::(k, v) {
+          if (v.getEquips()->size > 0) ::<= {
+            item = random.pickArrayItem(:v.getEquips());
+            whom = v;
+            send();
+          }
+        }
+      }
+      
+      if (whom != empty && item != empty) ::<= {
+        whom.unequipItem(item);
+        if (world.party.isMember(:user)) ::<= {
+          world.party.inventory.add(:item);
+        }
+      }
+
+
+      user.addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);
+    }
+  }
+)
+
 
 
 };
@@ -11673,6 +11803,7 @@ Arts = class(
       RARITY : {get::<- RARITY},
       TRAIT : {get::<- TRAIT},
       CANCEL_MULTITURN : {get::<- -1},
+      A_LOT : {get ::<- A_LOT},
       
       traitToString::(trait) {
         return match(trait) {

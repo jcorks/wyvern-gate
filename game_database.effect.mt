@@ -447,7 +447,8 @@ Effect.newEntry(
           from: holder
         );
         
-        holder.addEffect(from:holder, id: 'base:next-attack-x2', durationTurns: 99999999);
+        @:Arts = import(:'game_database.arts.mt');
+        holder.addEffect(from:holder, id: 'base:next-attack-x2', durationTurns: Arts.A_LOT);
 
       }
     }
@@ -4730,6 +4731,30 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Banish Shield',
+    id : 'base:banish-shield',
+    description: 'Prevents all additional Banish stacks.',
+    stackable: true,
+    blockPoints : 0,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAddEffect ::(from, holder, item, effectData) {
+        when(effectData.id == 'base:banish' && from != holder) ::<= {
+          windowEvent.queueMessage(
+            text: holder.name + '\'s Banish Shield prevents the incoming stack of Banish!'
+          );
+          return false;
+        }
+      }
+    }
+  }
+) 
+
+
+
+Effect.newEntry(
+  data : {
     name : 'Redirect Momentum',
     id : 'base:redirect-momentum',
     description: 'If the holder is to be afflicted with Grappled, instead the holder inflicts 1/3 of the source\'s DEF in damage to the source of the Grappled effect and Stuns them for a turn.',
@@ -5389,8 +5414,9 @@ Effect.newEntry(
         holder.effectStack.removeAllByID(:'base:limit-break');
 
         @:Entity = import(module:'game_class.entity.mt');
+        @:Arts = import(:'game_database.arts.mt');
         holder.heal(amount:(holder.stats.HP / 2)->ceil);
-        holder.addEffect(from:holder, id:'base:limit-reached', durationTurns:99999999);
+        holder.addEffect(from:holder, id:'base:limit-reached', durationTurns:Arts.A_LOT);
       }
     }
   }
@@ -5532,9 +5558,10 @@ Effect.newEntry(
         holder.effectStack.removeAllByID(:'base:deathless-overflow');
 
         @:Entity = import(module:'game_class.entity.mt');
+        @:Arts = import(:'game_database.arts.mt');
         holder.heal(amount:(holder.stats.HP / 2)->ceil);
         for(0, 5) ::(i) {
-          holder.addEffect(from:holder, id:'base:banish', durationTurns:99999999);
+          holder.addEffect(from:holder, id:'base:banish', durationTurns:Arts.A_LOT);
         }
       }
     }
@@ -5896,9 +5923,10 @@ Effect.newEntry(
         when(random.try(percentSuccess:75)) empty;
         damage.amount = 0;
         windowEvent.queueMessage(text:holder.name + "'s Soul Guard negates the damage!");
+        @:Arts = import(:'game_database.arts.mt');
 
         when(random.try(percentSuccess:75)) empty;
-        attacker.addEffect(from, id:'base:paralyzed',durationTurns:999999999);
+        attacker.addEffect(from, id:'base:paralyzed',durationTurns:Arts.A_LOT);
       }
     }
   }
@@ -6629,8 +6657,9 @@ Effect.newEntry(
         );
 
         holder.effectStack.removeFirstEffectByFilter(::(value) <- value.id == 'base:banish');
+        @:Arts = import(:'game_database.arts.mt');
         foreach(allies) ::(k, v) {
-          v.addEffect(from:holder, id: 'base:minor-aura', durationTurns: 99999999);
+          v.addEffect(from:holder, id: 'base:minor-aura', durationTurns: Arts.A_LOT);
         }
 
       }
@@ -6660,8 +6689,9 @@ Effect.newEntry(
         );
 
         holder.effectStack.removeFirstEffectByFilter(::(value) <- value.id == 'base:banish');
+        @:Arts = import(:'game_database.arts.mt');
         foreach(enemies) ::(k, v) {
-          v.addEffect(from:holder, id: 'base:minor-curse', durationTurns: 99999999);
+          v.addEffect(from:holder, id: 'base:minor-curse', durationTurns: Arts.A_LOT);
         }
 
       }
