@@ -6640,7 +6640,7 @@ Effect.newEntry(
 Effect.newEntry(
   data : {
     name : 'Corrupted Inspiration',
-    id : 'base:corrupted-inspriation',
+    id : 'base:corrupted-inspiration',
     description: 'At the start of the holder\'s turn, if the holder has a Banish stack, remove the Banish stack and grant Minor Aura to all allies for the duration of the battle.',
     stackable: true,
     blockPoints : 0,

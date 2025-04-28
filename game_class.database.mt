@@ -44,6 +44,7 @@
   },
   define:::(this) {
     @items_ = {}
+    @itemsOrdered = [];
     @name_;
     @attributes_;
     @reset_;
@@ -100,6 +101,7 @@
         item->setIsInterface(enabled:true, private:item);
                 
         items_[item.id] = item;
+        itemsOrdered->push(:item.id);
       },
 
       remove ::(id) {
@@ -169,7 +171,7 @@
       dumpCSV ::(titles, fieldFormatters, filename, sort, filter) {
         @:csv = [titles];
         
-        @items = items_->values;
+        @items = itemsOrdered->values->map(::(value) <- items_[value]);
         
         if (filter)
           items = items->filter(:filter);

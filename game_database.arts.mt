@@ -10075,7 +10075,7 @@ Arts.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Removes all status ailments and most negative effects.",
-    keywords : ['base:ailment'],
+    keywords : ['base:ailments'],
     durationTurns: 0,
     kind : KIND.REACTION,
     traits : TRAIT.MAGIC | TRAIT.HEAL,
@@ -10171,6 +10171,11 @@ Arts.newEntry(
 )
 
 
+/*
+
+
+// I FUCKED UP I DONT REMEMBER WHAT THIS EFFECT WAS SUPPOSED TO BE
+// UUUGHHHHH CRYING AND FARTING
 
 Arts.newEntry(
   data: {
@@ -10194,6 +10199,7 @@ Arts.newEntry(
     }
   }
 )
+*/
 
 Arts.newEntry(
   data: {
@@ -10770,7 +10776,7 @@ Arts.newEntry(
     notifCommit : "$1 casts Soul Projection!",
     notifFail : "...But nothing happened!",
     targetMode : TARGET_MODE.ONE,
-    keywords : ['base:soul-projection, base:concentrating'],
+    keywords : ['base:soul-projection', 'base:concentrating'],
     description: "Grants the Soul Projection effect to a target for 2 turns. Inflicts the Concentrating effect on the user for 1 turn.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -11036,8 +11042,8 @@ Arts.newEntry(
     notifCommit : "$1 casts Static Infusion!",
     notifFail : "...But nothing happened!",
     targetMode : TARGET_MODE.NONE,
-    keywords : ['base:paralysis', 'base:shock'],
-    description: "Grants the Shock effect to the user for a long time, but also inflicts Paralysis for 1 turn.",
+    keywords : ['base:paralyzed', 'base:shock'],
+    description: "Grants the Shock effect to the user for a long time, but also inflicts Paralyzed for 1 turn.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -11047,7 +11053,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
-      user.addEffect(from:user, id:'base:paralysis', durationTurns:1);
+      user.addEffect(from:user, id:'base:paralyzed', durationTurns:1);
       user.addEffect(from:user, id:'base:shock', durationTurns:A_LOT);
     }
   }
@@ -11804,6 +11810,25 @@ Arts = class(
       TRAIT : {get::<- TRAIT},
       CANCEL_MULTITURN : {get::<- -1},
       A_LOT : {get ::<- A_LOT},
+      generateKeywordDefinitionLines ::(art) {
+        @:ArtsTerm = import(:'game_database.artsterm.mt');
+        @:Effect = import(:'game_database.effect.mt');
+        @:lines = [];
+        foreach(art.keywords) ::(k, v)  {
+          // first check if its an effect 
+          @thing = Effect.findSoft(:v);
+          
+          when(thing) ::<= {
+            lines->push(:'[Effect: ' + thing.name + ']: ' + thing.description + (if (thing.stackable == false) ' This is unstackable.' else ''));
+          }
+
+          thing = ArtsTerm.find(id:v);
+          when(thing) ::<= {
+            lines->push(:'[' + thing.name + ']: ' + thing.description);
+          }
+        }  
+        return lines;    
+      },
       
       traitToString::(trait) {
         return match(trait) {

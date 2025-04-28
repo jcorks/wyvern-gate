@@ -828,28 +828,30 @@ for(0, 20) ::(i) {
 
 
 
-    /*
+    
     @:Arts = import(:'game_database.arts.mt');
     @:dump ::(filter, filename) {
       Arts.dumpCSV(
         filter,
         filename,
-        sort::(a, b) {
-          when (a.kind < b.kind) -1
-          when (a.kind > b.kind) 1
-          
-          when(a.name < b.name) -1;
-          when(a.name > b.name) 1;
-        },
-      
+        //sort      
         titles : [
-          'Name', 'ID', 'Kind', 'Traits', 'Rarity',  'Target mode', 'Can Block?', 'AI Usage Hint', 'Once per battle?', 'Description'
+          'Name', 'ID', 'Kind', 'Traits', 'Rarity',  'Target mode', 'AI Usage Hint', 'Description', 'Keywords', 'Keyword Definitions'
         ],
         
         fieldFormatters : {
-          ('Once per battle?') ::(item) <-
-            if (item.oncePerBattle) 'yes' else 'no',
           ('Description') ::(item) <- item.description,
+          ('Keywords') ::(item) <- 
+            if (item->size == 0)
+              ''
+            else
+              item.keywords->map(::(prev, value) <- (if (prev == empty) '' else prev) + value +', '),
+          ('Keyword Definitions') ::(item) {
+            return String.combine(:Arts.generateKeywordDefinitionLines(:item))
+          },
+
+
+
           ('Rarity')::(item) <- 
             match(item.rarity) {
               (Arts.RARITY.COMMON): 'Common',
@@ -857,10 +859,7 @@ for(0, 20) ::(i) {
               (Arts.RARITY.RARE): 'Rare',
               (Arts.RARITY.EPIC): 'Epic'
             },
-            
-          ('Can Block?')::(item) <-
-            if (item.canBlock) 'yes' else 'no',
-          
+                      
           ('AI Usage Hint') ::(item) <- 
             match(item.usageHintAI) {
               (Arts.USAGE_HINT.OFFENSIVE): 'Offensive',
@@ -896,28 +895,22 @@ for(0, 20) ::(i) {
             @:traits = [];
             @trait = item.traits;
             {:::} {
-              @iter = 0;
+              @iter = 1;
               forever ::{
-                when(iter > 12) send();
-                
-                if (trait & (1 << iter)) ::<= {
-                  traits->push(:match(iter) {
-                    (0): 'Physical',
-                    (1): 'Magic',
-                    (2): 'Heal',
-                    (3): 'Fire',
-                    (4): 'Ice',
-                    (5): 'Thunder',
-                    (7): 'Support',
-                    (8): 'Light',
-                    (9): 'Dark',
-                    (10): 'Poison',
-                    (11): 'Special',
-                    (12): 'Costless'
-                  });
-                  traits->push(:',');
+                when(Arts.TRAIT->values->findIndex(:iter) == -1) send();
+                if (trait & iter) ::<= {
+                  @name = {:::} {
+                    foreach(Arts.TRAIT) ::(k, v) {
+                      if (v == iter) ::<= {
+                        send(:k);
+                      }
+                    }
+                  }
+                  
+                  if (name) 
+                    traits->push(:name + ',' ); 
                 }
-                iter += 1;
+                iter = iter << 1;
               }
             }
             
@@ -926,10 +919,12 @@ for(0, 20) ::(i) {
         }
       );
     }
+
+    //dump(filename: 'arts.csv', filter::(value) <- true);
     
-    dump(filename: 'arts_core.csv', filter::(value) <- (value.traits & Arts.TRAIT.SUPPORT) == 0)
-    dump(filename: 'arts_supports.csv', filter::(value) <- (value.traits & Arts.TRAIT.SUPPORT) > 0)
-    */
+    //dump(filename: 'arts_core.csv', filter::(value) <- (value.traits & Arts.TRAIT.SUPPORT) == 0)
+    //dump(filename: 'arts_supports.csv', filter::(value) <- (value.traits & Arts.TRAIT.SUPPORT) > 0)
+    
     ///////////////////
     
     

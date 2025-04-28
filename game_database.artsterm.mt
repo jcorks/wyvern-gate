@@ -42,7 +42,7 @@ ArtsTerm.newEntry(
   data : {
     name : 'Resistance Shifts',
     id : 'base:resistance-shifts',
-    description : 'Resistance shifts, named "[element] Guard" (i.e. Fire Guard) provide 25% resistance to that type of damage.'
+    description : 'Resistance shifts, named \'[element] Guard\' (i.e. Fire Guard) provide 25% resistance to that type of damage.'
   }
 );
 
@@ -50,14 +50,14 @@ ArtsTerm.newEntry(
   data : {
     name : 'Cursed Shifts',
     id : 'base:cursed-shifts',
-    description : 'Cursed shifts, named "[element] Curse" (i.e. Fire Curse) damage the holder every turn. This is removed if the holder gains a respective attack shift.'
+    description : 'Cursed shifts, named \'[element] Curse\' (i.e. Fire Curse) damage the holder every turn. This is removed if the holder gains a respective attack shift.'
   }
 );
 
 ArtsTerm.newEntry(
   data : {
     name : 'Seeds',
-    id : 'base:seeds-effects',
+    id : 'base:seed-effects',
     description : 'Seeds are effects of something growing on the holder. This includes Poisonroot Growing, Triproot Growing, and Healroot Growing.'
   }
 );

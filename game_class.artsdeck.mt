@@ -136,7 +136,7 @@
   
   @:en = 'Energy: ' + (['A', 'B', 'C', 'D'])[handCard.energy];
 
-  @:lines = [
+  @lines = [
     art.name,
     " - Kind: " + match(art.kind) {
       (Arts.KIND.ABILITY): "Ability (//)",
@@ -153,19 +153,7 @@
     if (user != empty && baseDamageMin != empty) 'Around: ' + baseDamageMin + ' - ' + baseDamageMax + " damage" else '',
   ]
   
-  foreach(art.keywords) ::(k, v)  {
-    // first check if its an effect 
-    @thing = Effect.findSoft(:v);
-    
-    when(thing) ::<= {
-      lines->push(:'[Effect: ' + thing.name + ']: ' + thing.description + (if (thing.stackable == false) ' This is unstackable.' else ''));
-    }
-
-    thing = ArtsTerm.find(id:v);
-    when(thing) ::<= {
-      lines->push(:'[' + thing.name + ']: ' + thing.description);
-    }
-  }
+  lines = [...lines, Arts.generateKeywordDefinitionLines(:art)];
   canvas.renderTextFrameGeneral(
     topWeight,
     leftWeight,
