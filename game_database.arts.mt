@@ -3418,7 +3418,7 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: 'Potentiality Shard',
+    name: 'Copy Shard',
     id : 'base:potentiatily-shard',
     notifCommit : '$1 uses a Copy Shard!',
     notifFail : Arts.NO_NOTIF,
@@ -3435,7 +3435,7 @@ Arts.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          targets[0].addEffect(from:user, id: 'base:potentiality-shared', durationTurns: A_LOT);
+          targets[0].addEffect(from:user, id: 'base:copy-shared', durationTurns: A_LOT);
         }
       )
      }
@@ -3499,7 +3499,7 @@ Arts.newEntry(
 Arts.newEntry(
   data: {
     name: 'Slingshot Block',
-    id : 'base:block',
+    id : 'base:slingshot-block',
     notifCommit : '$1 begins to focus!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
@@ -6028,7 +6028,7 @@ Arts.newEntry(
 Arts.newEntry(
   data: {
     name: 'Blood\'s Wind',
-    id : 'base:bloods-sacrifice',
+    id : 'base:bloods-wind',
     notifCommit : '$1 casts Blood\'s Wind on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
@@ -10664,9 +10664,9 @@ Arts.newEntry(
 
 Arts.newEntry(
   data: {
-    name: 'Chaotic Barrier',
+    name: 'Perfect Barrier',
     id : 'base:b273',
-    notifCommit : "$1 casts Chaotic Barrier!",
+    notifCommit : "$1 casts Perfect Barrier!",
     notifFail : "...But nothing happened!",
     targetMode : TARGET_MODE.ALL,
     keywords : ['base:perfect-barrier'],

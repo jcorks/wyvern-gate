@@ -368,8 +368,9 @@ Location.database.newEntry(data:{
     addMissing(id:'base:arts-crystal');
     addMissing(id:'base:pickaxe');
     addMissing(id:'base:smithing-hammer');
+    addMissing(id:'base:ingot', minCount:6);
     addMissing(id:'base:wyvern-key');
-    addMissing(id:'base:escape-stone');
+    addMissing(id:'base:escape-stone', minCount:5);
     addMissing(id:'base:storage-stone', minCount:3);
     addMissing(id:'base:life-crystal');
     addMissing(id:'base:potion', minCount:5);

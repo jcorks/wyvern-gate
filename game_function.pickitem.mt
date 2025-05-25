@@ -23,6 +23,7 @@
 
 // needed to preserve order
 @:tabbedReqKeys = [
+  'All',
   'Usables',
   'Weapons',
   'Armor / Clothes',
@@ -30,10 +31,10 @@
   'Keys',
   'Inlet Gems',
   'Misc',
-  'Loot',
-  'All',
+  'Loot'
 ]
 @:tabbedReqs = [
+  empty,
   Item.SORT_TYPE.USABLES,
   Item.SORT_TYPE.WEAPON,
   Item.SORT_TYPE.ARMOR_CLOTHES,
@@ -41,8 +42,7 @@
   Item.SORT_TYPE.KEYS,
   Item.SORT_TYPE.INLET,
   Item.SORT_TYPE.MISC,
-  Item.SORT_TYPE.LOOT,
-  empty
+  Item.SORT_TYPE.LOOT
 ]
 
 
@@ -81,7 +81,6 @@ return ::(
   @items = []
   @picked;
   @cancelled = false;
-  breakpoint();
     
 
   @:prepTabbedChoices ::(args) {
@@ -170,10 +169,10 @@ return ::(
 
     items = items->filter(::(value) {
       when(value.base.hasNoTrait(:Item.TRAIT.STACKABLE)) true;
-      if (alreadyCounted[value.base.id] == empty) 
-        alreadyCounted[value.base.id] = 0;
-      alreadyCounted[value.base.id] += 1;
-      when(alreadyCounted[value.base.id] == 1) true;
+      if (alreadyCounted[value.name] == empty) 
+        alreadyCounted[value.name] = 0;
+      alreadyCounted[value.name] += 1;
+      when(alreadyCounted[value.name] == 1) true;
       return false;
     });
 
@@ -185,8 +184,8 @@ return ::(
     );
     
     @:amounts = items->map(to:::(value) <-
-      if (alreadyCounted[value.base.id]->type == Number && alreadyCounted[value.base.id] > 1)
-        '(x'+alreadyCounted[value.base.id]+')' 
+      if (alreadyCounted[value.name]->type == Number && alreadyCounted[value.name] > 1)
+        '(x'+alreadyCounted[value.name]+')' 
       else if (value.faveMark != '')
         ' ' + value.faveMark
       else
@@ -220,7 +219,6 @@ return ::(
       when(inventory.items->size == 0) ::<={
         windowEvent.queueMessage(text: "The inventory is empty.");
       }
-      breakpoint();
       @:args = {
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,

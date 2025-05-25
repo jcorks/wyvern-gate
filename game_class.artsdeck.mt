@@ -153,7 +153,7 @@
     if (user != empty && baseDamageMin != empty) 'Around: ' + baseDamageMin + ' - ' + baseDamageMax + " damage" else '',
   ]
   
-  lines = [...lines, Arts.generateKeywordDefinitionLines(:art)];
+  lines = [...lines, ...Arts.generateKeywordDefinitionLines(:art)];
   canvas.renderTextFrameGeneral(
     topWeight,
     leftWeight,

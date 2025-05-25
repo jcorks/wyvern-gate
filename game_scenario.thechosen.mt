@@ -341,31 +341,27 @@ return {
     
     // debug
 
+
 /*
 island.tier = 10;
-for(0, 20) ::(i) {
+party.inventory.maxItems = 300;
+for(0, 10) ::(i) {
   @:test = Item.new(
     base: Item.database.getRandomFiltered(::(value) <- value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED))
   );
 
   party.inventory.add(:test.appraise());
 }
-party.inventory.addGold(amount:100000);
-for(0, 20) ::(i) {
+for(0, 70) ::(i) {
   @:test = Item.new(
-    base: Item.database.find(:'base:book')
-  );
-  party.inventory.add(:test);
-}
-for(0, 20) ::(i) {
-  @:test = Item.new(
-    base: Item.database.getRandomFiltered(::(value) <- value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED))
+    base: Item.database.getRandom()
   );
 
   party.inventory.add(:test);
 }
 */
 
+party.inventory.addGold(amount:100000);
 
 
 
@@ -749,7 +745,10 @@ for(0, 20) ::(i) {
           'base:diversify',
           'base:bloods-summoning',
           'base:shield-amplifier',
-          'base:pebble'
+          'base:pebble',
+          'base:prismatic-wisp',
+          'base:b260',
+          'base:b177'
         ]
         
         @:keyother = Item.new(
@@ -828,7 +827,7 @@ for(0, 20) ::(i) {
 
 
 
-    
+    /*    
     @:Arts = import(:'game_database.arts.mt');
     @:dump ::(filter, filename) {
       Arts.dumpCSV(
@@ -836,20 +835,21 @@ for(0, 20) ::(i) {
         filename,
         //sort      
         titles : [
-          'Name', 'ID', 'Kind', 'Traits', 'Rarity',  'Target mode', 'AI Usage Hint', 'Description', 'Keywords', 'Keyword Definitions'
+          'Name', 'ID', 'Kind', 'Traits', 'Rarity',  'Target mode', 'AI Usage Hint', 'Description', 'Art Specs', 'Deck Role', 'Keywords', 'Keyword Definitions'
         ],
         
         fieldFormatters : {
           ('Description') ::(item) <- item.description,
           ('Keywords') ::(item) <- 
-            if (item->size == 0)
+            if (item.keywords->size == 0)
               ''
             else
-              item.keywords->map(::(prev, value) <- (if (prev == empty) '' else prev) + value +', '),
+              item.keywords->reduce(::(previous, value) <- (if (previous == empty) '' else previous) + value +', '),
+
+
           ('Keyword Definitions') ::(item) {
             return String.combine(:Arts.generateKeywordDefinitionLines(:item))
           },
-
 
 
           ('Rarity')::(item) <- 
@@ -859,6 +859,8 @@ for(0, 20) ::(i) {
               (Arts.RARITY.RARE): 'Rare',
               (Arts.RARITY.EPIC): 'Epic'
             },
+          ('Art Specs')::(item) <- '',
+          ('Deck Role')::(item) <- '',
                       
           ('AI Usage Hint') ::(item) <- 
             match(item.usageHintAI) {
@@ -920,10 +922,10 @@ for(0, 20) ::(i) {
       );
     }
 
-    //dump(filename: 'arts.csv', filter::(value) <- true);
+    dump(filename: 'arts.csv', filter::(value) <- true);
+    */
     
-    //dump(filename: 'arts_core.csv', filter::(value) <- (value.traits & Arts.TRAIT.SUPPORT) == 0)
-    //dump(filename: 'arts_supports.csv', filter::(value) <- (value.traits & Arts.TRAIT.SUPPORT) > 0)
+    
     
     ///////////////////
     
@@ -1300,7 +1302,6 @@ for(0, 20) ::(i) {
         id :  'thechosen:next-floor',
         keepInteractionMenu : false,
         onInteract ::(location, party) {
-          breakpoint();
           if (location.targetLandmark == empty) ::<={
           
             if (location.landmark.floor > 5 && random.number() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
@@ -4425,7 +4426,7 @@ for(0, 20) ::(i) {
           ['', 'The party receives 3 Potions.'],
           ['', 'The party receives a Life Crystal.'],
           ['', 'The party receives an Arts Crystal.'],
-          ['', 'The party receives an Escape Stone.'],
+          ['', 'The party receives 4 Escape Stones.'],
           ['', 'The party also receives an equippable Tome.'],
           ['', 'There\'s also a note here...'],
           ::(location, landmark, doNext) {
@@ -4472,6 +4473,21 @@ for(0, 20) ::(i) {
             world.party.inventory.add(item:Item.new(
               base:Item.database.find(id:'base:book'),
               creationHint:'base:how-to-fight'
+            ));
+
+            world.party.inventory.add(item:Item.new(
+              base:Item.database.find(id:'base:escape-stone'),
+              creationHint:0
+            ));
+
+            world.party.inventory.add(item:Item.new(
+              base:Item.database.find(id:'base:escape-stone'),
+              creationHint:0
+            ));
+
+            world.party.inventory.add(item:Item.new(
+              base:Item.database.find(id:'base:escape-stone'),
+              creationHint:0
             ));
 
             world.party.inventory.add(item:Item.new(

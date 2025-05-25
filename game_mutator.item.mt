@@ -57,12 +57,12 @@
 
 
 @:TYPE = {
-  HAND     : 0,   
-  ARMOR    : 1,  
-  AMULET   : 2,  
-  RING     : 3,  
-  TRINKET  : 4,
-  TWOHANDED  : 5
+  HAND      : 0,   
+  ARMOR     : 1,  
+  AMULET    : 2,  
+  RING      : 3,  
+  TRINKET   : 4,
+  TWOHANDED : 5
 }
   
 @:TRAIT = {
@@ -73,7 +73,7 @@
   METAL         : 2 << 4,
   FRAGILE       : 2 << 5,
   WEAPON        : 2 << 6,
-  RAW_METAL     : 2 << 7,
+  STRANGE_TO_EQUIP     : 2 << 7,
   KEY_ITEM      : 2 << 8,
   STACKABLE     : 2 << 9,
   HAS_QUALITY   : 2 << 10,
@@ -87,6 +87,7 @@
   CAN_BE_APPRAISED : 2 << 18,
   HAS_INLET_SLOTS : 2 << 19,
   PRICELESS : 2 << 20,
+  STRANGE_TO_EQUIP : 2 << 21
 }
 
 
@@ -417,7 +418,8 @@ Item.database.newEntry(data : {
     ],
     traits : 
       TRAIT.FRAGILE |
-      TRAIT.MEANT_TO_BE_USED
+      TRAIT.MEANT_TO_BE_USED |
+      TRAIT.STRANGE_TO_EQUIP
     ,
     onCreate ::(item, creationHint) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -499,7 +501,8 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.MEANT_TO_BE_USED
+    TRAIT.MEANT_TO_BE_USED |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
     @:Effect = import(module:'game_database.effect.mt');
@@ -538,7 +541,8 @@ Item.database.newEntry(data : {
   ],
   traits : 
     TRAIT.FRAGILE |
-    TRAIT.MEANT_TO_BE_USED
+    TRAIT.MEANT_TO_BE_USED |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
     @:Arts = import(module:'game_database.arts.mt');
@@ -2587,20 +2591,19 @@ Item.database.newEntry(data : {
 })*/
 
 
-////// RAW_METALS
 
 
 Item.database.newEntry(data : {
-  name : "Copper Ingot",
-  id : 'base:copper-ingot',
-  description: 'Copper Ingot',
-  examine : 'Pure copper ingot.',
+  name : "Ingot",
+  id : 'base:ingot',
+  description: 'An ingot of pure material.',
+  examine : '',
   sortType : SORT_TYPE.MISC,
   equipType: TYPE.TWOHANDED,
   rarity : 150,
-  weight : 5,
+  weight : 10,
   tier: 0,
-  basePrice: 10,
+  basePrice: 20,
   enchantLimit : 0,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
@@ -2619,11 +2622,18 @@ Item.database.newEntry(data : {
   equipEffects : [],
   traits : 
     TRAIT.SHARP |
-    TRAIT.RAW_METAL |
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
-    item.data.RAW_MATERIAL = 'base:copper';
+    @:Material = import(:'game_database.material.mt');
+    @:world = import(module:'game_singleton.world.mt');
+
+
+    @:mat = Material.getRandomFiltered(::(value) <- value.tier <= world.island.tier);
+    item.name = mat.name + ' Ingot';
+    item.data.RAW_MATERIAL = mat.id;
+    item.price += (((mat.tier)**1.4) * 240)->ceil;
   }
 
 })    
@@ -2657,7 +2667,8 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   traits : 
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
   }
@@ -2676,7 +2687,7 @@ Item.database.newEntry(data : {
   rarity : 200,
   weight : 2,
   tier: 0,
-  basePrice: 400,
+  basePrice: 100,
   enchantLimit : 0,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.NONE,
@@ -2690,12 +2701,13 @@ Item.database.newEntry(data : {
     DEX: -20
   ),
   useEffects : [
-    'base:escape-dungeon',
+    'base:escape',
     'base:consume-item'
   ],
   equipEffects : [],
   traits : 
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
   }
@@ -2703,312 +2715,6 @@ Item.database.newEntry(data : {
 })   
 
 
-Item.database.newEntry(data : {
-  name : "Iron Ingot",
-  id : 'base:iron-ingot',
-  description: 'Iron Ingot',
-  examine : 'Pure iron ingot',
-  sortType : SORT_TYPE.MISC,
-  equipType: TYPE.TWOHANDED,
-  rarity : 200,
-  weight : 5,
-  tier: 0,
-  basePrice: 20,
-  enchantLimit : 0,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-  blockPoints : 1,
-
-  equipMod : StatSet.new(
-    ATK: 2, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:fling'
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.RAW_METAL |
-    TRAIT.STACKABLE
-  ,
-  onCreate ::(item, creationHint) {
-    item.data.RAW_MATERIAL = 'base:iron';
-  }
-
-})   
-
-Item.database.newEntry(data : {
-  name : "Steel Ingot",
-  id : 'base:steel-ingot',
-  description: 'Steel Ingot',
-  examine : 'Pure Steel ingot.',
-  sortType : SORT_TYPE.MISC,
-  equipType: TYPE.TWOHANDED,
-  rarity : 300,
-  tier: 0,
-  weight : 5,
-  basePrice: 30,
-  enchantLimit : 0,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-  blockPoints : 1,
-
-  equipMod : StatSet.new(
-    ATK: 2, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:fling'
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.RAW_METAL |
-    TRAIT.STACKABLE
-  ,
-  onCreate ::(item, creationHint) {
-    item.data.RAW_MATERIAL = 'base:steel';
-  }
-
-})    
-
-
-
-Item.database.newEntry(data : {
-  name : "Mythril Ingot",
-  id : 'base:mythril-ingot',
-  description: 'Mythril Ingot',
-  examine : 'Pure iron ingot',
-  sortType : SORT_TYPE.MISC,
-  equipType: TYPE.TWOHANDED,
-  rarity : 1000,
-  tier: 1,
-  weight : 5,
-  basePrice: 150,
-  enchantLimit : 0,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-
-  blockPoints : 1,
-  equipMod : StatSet.new(
-    ATK: 2, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:fling'
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.RAW_METAL |
-    TRAIT.STACKABLE
-  ,
-  onCreate ::(item, creationHint) {
-    item.data.RAW_MATERIAL = 'base:mythril';
-  }
-
-})   
-
-Item.database.newEntry(data : {
-  name : "Quicksilver Ingot",
-  id : 'base:quicksilver-ingot',
-  description: 'Quicksilver Ingot',
-  examine : 'Pure quicksilver alloy ingot',
-  sortType : SORT_TYPE.MISC,
-  equipType: TYPE.TWOHANDED,
-  rarity : 1550,
-  tier: 1,
-  weight : 5,
-  basePrice: 175,
-  enchantLimit : 0,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-
-  blockPoints : 1,
-  equipMod : StatSet.new(
-    ATK: 2, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:fling'
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.RAW_METAL |
-    TRAIT.STACKABLE
-  ,
-  onCreate ::(item, creationHint) {
-    item.data.RAW_MATERIAL = 'base:quicksilver';
-  }
-
-})   
-
-Item.database.newEntry(data : {
-  name : "Adamantine Ingot",
-  id : 'base:adamantine-ingot',
-  description: 'Adamantine Ingot',
-  examine : 'Pure adamantine ingot',
-  sortType : SORT_TYPE.MISC,
-  equipType: TYPE.TWOHANDED,
-  rarity : 2000,
-  weight : 5,
-  basePrice: 300,
-  tier: 2,
-  enchantLimit : 0,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-
-  blockPoints : 1,
-  equipMod : StatSet.new(
-    ATK: 2, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:fling'
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.RAW_METAL |
-    TRAIT.STACKABLE
-  ,
-  onCreate ::(item, creationHint) {
-    item.data.RAW_MATERIAL = 'base:adamantine';
-  }
-
-}) 
-
-
-Item.database.newEntry(data : {
-  name : "Sunstone Ingot",
-  id : 'base:substone-ingot',
-  description: 'Sunstone alloy ingot',
-  examine : 'An alloy with mostly sunstone, it dully shines with a soft yellow gleam',
-  sortType : SORT_TYPE.MISC,
-  equipType: TYPE.TWOHANDED,
-  rarity : 300,
-  basePrice: 115,
-  weight : 5,
-  tier: 2,
-  enchantLimit : 0,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-
-  blockPoints : 1,
-  equipMod : StatSet.new(
-    ATK: 2, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:fling'
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.RAW_METAL |
-    TRAIT.STACKABLE
-  ,
-  onCreate ::(item, creationHint) {
-    item.data.RAW_MATERIAL = 'base:sunstone';
-  }
-
-}) 
-
-Item.database.newEntry(data : {
-  name : "Moonstone Ingot",
-  id : 'base:moonstone-ingot',
-  description: 'Sunstone alloy ingot',
-  examine : 'An alloy with mostly moonstone, it dully shines with a soft teal',
-  sortType : SORT_TYPE.MISC,
-  equipType: TYPE.TWOHANDED,
-  rarity : 300,
-  weight : 5,
-  tier: 2,
-  basePrice: 115,
-  enchantLimit : 0,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-
-  blockPoints : 1,
-  equipMod : StatSet.new(
-    ATK: 2, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:fling'
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.RAW_METAL |
-    TRAIT.STACKABLE
-  ,
-  onCreate ::(item, creationHint) {
-    item.data.RAW_MATERIAL = 'base:moonstone';
-  }
-
-}) 
-
-Item.database.newEntry(data : {
-  name : "Dragonglass Ingot",
-  id : 'base:dragonglass-ingot',
-  description: 'Dragonglass alloy ingot',
-  examine : 'An alloy with mostly dragonglass, it sharply shines black.',
-  sortType : SORT_TYPE.MISC,
-  equipType: TYPE.TWOHANDED,
-  rarity : 500,
-  weight : 5,
-  enchantLimit : 0,
-  basePrice: 250,
-  tier: 2,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  possibleArts : [],
-
-  blockPoints : 1,
-  equipMod : StatSet.new(
-    ATK: 2, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:fling'
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.RAW_METAL |
-    TRAIT.STACKABLE
-  ,
-  onCreate ::(item, creationHint) {
-    item.data.RAW_MATERIAL = 'base:dragonglass';
-  }
-
-}) 
 Item.database.newEntry(data : {
   name : "Ore",
   id : 'base:ore',
@@ -3039,7 +2745,8 @@ Item.database.newEntry(data : {
   traits : 
     TRAIT.SHARP |
     TRAIT.STACKABLE |
-    TRAIT.UNIQUE
+    TRAIT.UNIQUE |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3076,7 +2783,8 @@ Item.database.newEntry(data : {
   traits : 
     TRAIT.SHARP|
     TRAIT.STACKABLE |
-    TRAIT.MEANT_TO_BE_USED    
+    TRAIT.MEANT_TO_BE_USED |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3114,7 +2822,8 @@ Item.database.newEntry(data : {
     TRAIT.SHARP |
     TRAIT.STACKABLE |
     TRAIT.UNIQUE |
-    TRAIT.MEANT_TO_BE_USED    
+    TRAIT.MEANT_TO_BE_USED |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3153,7 +2862,8 @@ Item.database.newEntry(data : {
     TRAIT.SHARP |
     TRAIT.STACKABLE |
     TRAIT.UNIQUE |
-    TRAIT.MEANT_TO_BE_USED    
+    TRAIT.MEANT_TO_BE_USED |  
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3233,7 +2943,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   traits : 
     TRAIT.SHARP |
-    TRAIT.STACKABLE
+    TRAIT.STACKABLE |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3270,7 +2981,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   traits :     
     TRAIT.STACKABLE |
-    TRAIT.UNIQUE
+    TRAIT.UNIQUE |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {}
 
@@ -3305,7 +3017,8 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   traits :     
-    TRAIT.MEANT_TO_BE_USED
+    TRAIT.MEANT_TO_BE_USED |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
     @:Book = import(:'game_database.book.mt');
@@ -3342,7 +3055,8 @@ Item.database.newEntry(data : {
   equipEffects : [],
   traits :     
     TRAIT.MEANT_TO_BE_USED |
-    TRAIT.UNIQUE
+    TRAIT.UNIQUE |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
     @:stats = {
@@ -3367,7 +3081,7 @@ Item.database.newEntry(data : {
   name : "Wyvern Flower",
   id : 'base:wyvern-flower',
   sortType : SORT_TYPE.USABLES,
-  description: "A mysterious and extremely rare plant. It is said that, when used, unlocks the potential of the user.",
+  description: "A mysterious and extremely rare plant. It is said that, when used, unlocks the potential of the user. Otherwise, its abilities are unknown.",
   examine : 'Its abilities are unknown.',
   equipType: TYPE.TWOHANDED,
   rarity : 500,
@@ -3390,7 +3104,8 @@ Item.database.newEntry(data : {
   traits :     
     TRAIT.MEANT_TO_BE_USED |
     TRAIT.UNIQUE |
-    TRAIT.PRICELESS
+    TRAIT.PRICELESS |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
   }
@@ -3411,7 +3126,7 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 10,
-  possibleArts : [],
+  possibleArts : ['base:prismatic-wisp', 'base:prismatic-wisp'],
 
   blockPoints : 0,
   equipMod : StatSet.new(
@@ -3420,7 +3135,8 @@ Item.database.newEntry(data : {
   ],
   equipEffects : [],
   traits :     
-    TRAIT.UNIQUE
+    TRAIT.UNIQUE |
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
   }
@@ -3462,7 +3178,8 @@ Item.database.newEntry(data : {
   useEffects : [
   ],
   equipEffects : [],
-  traits : 0
+  traits : 
+    TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
     @:kind = random.pickArrayItem(:crystals->keys);
@@ -3544,7 +3261,8 @@ Item.database.newEntry(
     useEffects : [
     ],
     equipEffects : [],
-    traits : 0  
+    traits : 
+      TRAIT.STRANGE_TO_EQUIP
     ,
     onCreate ::(item, creationHint) {
       @:kind = random.pickArrayItem(:gems->keys);
@@ -3611,7 +3329,8 @@ Item.database.newEntry(
     useEffects : [
     ],
     equipEffects : [],
-    traits : 0  
+    traits : 
+      TRAIT.STRANGE_TO_EQUIP
     ,
     onCreate ::(item, creationHint) {
       @:Effect = import(module:'game_database.effect.mt');
@@ -3670,7 +3389,8 @@ Item.database.newEntry(
     traits : 
       TRAIT.SHARP  |
       TRAIT.UNIQUE |
-      TRAIT.HAS_COLOR
+      TRAIT.HAS_COLOR |
+      TRAIT.STRANGE_TO_EQUIP
     ,
     onCreate ::(item, user, creationHint) {
       @:world = import(module:'game_singleton.world.mt');
@@ -4206,8 +3926,17 @@ none.name = 'None';
     },
     
     unbox :: {
+      @:this = _.this;
       if (_.state.base.id != 'base:item-box')
         error(:'Tried to unbox something that isnt a box. Not good!!!');
+
+      // shouldnt happen, but we can cope with it
+      when (_.state.data.boxed == empty) 
+        Item.new(
+          id: Item.database.getRandomFiltered(::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE | Item.TRAIT.KEY_ITEM))
+        );
+      
+        
         
       @:a = Item.new(base:Item.database.find(id:'base:none'));
       a.load(:_.state.data.boxed);

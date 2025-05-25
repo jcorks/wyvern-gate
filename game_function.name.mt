@@ -10,6 +10,91 @@ return ::(
 ) {
   @name = '';
   
+  @:choices = [
+    'A', 'B', 'C', 'D', 'E', 'F', '_',
+    'G', 'H', 'I', 'J', 'L', 'M', 'Del',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'Done',
+    'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+  ]
+
+  
+  windowEvent.queueChoiceColumns(
+    itemsPerRow: 7,
+    renderable :{
+      render :: {
+        if (renderable)
+          renderable.render();
+        @pinch = name->length;
+        if (prompt->length > pinch)
+          pinch = prompt->length;
+          
+        @:centerX = canvas.width / 2;
+        @:centerY = canvas.height / 4;
+        @:height = 5;
+        @:width = 4 + 1 + pinch;
+        
+        @:top = (centerY - height / 2)->floor;
+        @:left = (centerX - width / 2)->floor;
+        canvas.renderFrame(
+          top, left, width, height
+        );
+        
+        canvas.movePen(x:left+2, y:top);
+        canvas.drawText(text:prompt);
+        
+        canvas.movePen(x:left+2, y:(top + height/2)->floor);
+        canvas.drawText(text:name + '_');
+      }
+    },  
+    choices,
+    prompt: "",
+    leftWeight: 0.5,
+    topWeight: 1,
+    canCancel: if (canCancel == empty) false else canCancel,
+    keep: true,
+    jumpTag: 'name',
+    onCancel ::{
+      if (canCancel == true)
+        if (windowEvent.canJumpToTag(name:'name'))
+          windowEvent.jumpToTag(name:'name', doResolveNext:true, goBeforeTag:true);                    
+    },
+    onChoice ::(choice) {
+      @:ch = choices[choice-1];
+      when(ch == '_') ::<= {
+        name = name + ' ';
+      }
+
+      when(ch == 'Del') ::<= {
+        when(name->length <= 1)
+          name = '';
+        name = name->substr(from:0, to:name->length-2);
+      }
+      
+      when(ch == 'Done') ::<= {
+        if (name->length > 0) ::<= {
+          onDone(name);
+          if (windowEvent.canJumpToTag(name:'name'))
+            windowEvent.jumpToTag(name:'name', doResolveNext:true, goBeforeTag:true);            
+          
+        }
+      }
+      
+      name = name + ch;
+    }
+  );
+}
+
+
+
+/*
+return ::(
+  onDone => Function,
+  prompt => String,
+  renderable,
+  canCancel
+) {
+  @name = '';
+  
   @:select = [
     'Space',
     'Delete',
@@ -105,3 +190,5 @@ return ::(
     }
   );
 }
+
+*/

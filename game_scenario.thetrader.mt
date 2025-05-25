@@ -1046,7 +1046,7 @@
             ],
             renderable : {
               render ::{
-                canvas.blackout();
+                canvas.blackout(with:'`');
               }
             },
             keep:true,

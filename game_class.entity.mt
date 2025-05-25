@@ -1528,16 +1528,6 @@
           (state.faveWeapon.id == hand.base.id)
         ;
       
-      // flat bonus
-      if (weaponAffinity) ::<= {
-        state.stats.modRate(stats:StatSet.new(
-          ATK: 60,
-          DEF: 60,
-          SPD: 60,
-          INT: 60,
-          DEX: 60
-        ))
-      }
       
       foreach(state.equips)::(index, equip) {
         when(equip == empty) empty;
@@ -1547,6 +1537,17 @@
       foreach(state.equips)::(index, equip) {
         when(equip == empty) empty;
         state.stats.modRate(stats:equip.equipMod);
+      }
+
+      // flat bonus
+      if (weaponAffinity) ::<= {
+        state.stats.modRate(stats:StatSet.new(
+          ATK: 60,
+          DEF: 60,
+          SPD: 60,
+          INT: 60,
+          DEX: 60
+        ))
       }
 
       
@@ -2242,6 +2243,13 @@
             windowEvent.queueMessage(text: this.name + ' is no longer able to act as the leader.');
             
             @:nextLead = world.party.members->filter(::(value) <- !value.isIncapacitated() && value != this)[0];
+
+            // something got you while in the wild outside of battle, huh?
+            // sorry....
+            when (this.battle == empty && nextLead == empty) ::<= {
+              @:instance = import(module:'game_singleton.instance.mt');
+              instance.gameOver(reason:'No one is able to be leader...');              
+            }
             if (nextLead != empty) ::<= {
               world.party.leader = nextLead;
               windowEvent.queueMessage(text: nextLead.name + ' is now the leader.');

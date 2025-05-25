@@ -33,12 +33,15 @@
   'DEX'
 ]
 
-@:filterStat::(stats, stat) <-
-  if(stat == 'HP' || stat == 'AP') 
-    displayHP(:stats[stat])
+@:filterStat::(stats, stat) {
+  @:s = stats[stat]  
+  return if(stat == 'HP' || stat == 'AP') 
+    displayHP(:s)
   else 
-    ''+stats[stat]
-;
+    ''+s
+}
+
+
 
 @:StatSet = LoadableClass.createLight(
   name : 'Wyvern.Entity.StatSet',
@@ -62,15 +65,20 @@
       return canvas.columnsToLines(columns:[
         NAMES->map(::(value) <- value + ': '),
         NAMES->map(::(value) <- filterStat(stats, stat:value)),
-        NAMES->map(::(value) <- ' -> '),
+        NAMES->map(::(value) <- ' -> '),	
         NAMES->map(::(value) <- filterStat(stats:other, stat:value)),        
-        NAMES->map(::(value) <- (
-          if (other[value] - stats[value]  != 0) 
-            (if (other[value] > stats[value]) 
-              '(+' else '(') + (other[value]  - stats[value])  + ')' 
-            else ''
-          )
-        )
+        NAMES->map(::(value) {
+          @:self = stats[value];
+          @:othr = other[value];
+        
+          return if (othr - self != 0) 
+              (if (othr > self) 
+                '(+' + (othr - self) + ')'
+              else 
+                '(' + (othr  - self)  + ')')
+            else 
+              ''
+        })
       ]);   
     },
     
@@ -104,7 +112,16 @@
     DEFmod : 0,
     SPDmod : 0,
     LUKmod : 0,
-    DEXmod : 0
+    DEXmod : 0,
+    
+    HPrate : 1,
+    APrate : 1,
+    ATKrate : 1,
+    INTrate : 1,
+    DEFrate : 1,
+    SPDrate : 1,
+    LUKrate : 1,
+    DEXrate : 1
   },
   
   private : {},
@@ -125,9 +142,10 @@
     isEmpty : {
       get :: {
         @:state = _.state;
+        @:this = _.this;
         return {:::} {
           foreach(NAMES) ::(k, v) {
-            if (state[v] != 0)
+            if (this[v] != 0)
               send(:false);
           }
           return true;
@@ -153,7 +171,7 @@
     modRate ::(stats) {
       @:state = _.state;
       foreach(NAMES) ::(k, v) {
-        state[v+'mod'] += (state[v] * (stats[v]/100))->ceil;
+        state[v+'rate'] += stats[v]/100;
       }    
     },
       
@@ -161,6 +179,7 @@
       @:state = _.state;
       foreach(NAMES) ::(k, v) {
         state[v+'mod'] = 0;
+        state[v+'rate'] = 1;
       }
     },
       
@@ -181,53 +200,54 @@
     sum : {
       get ::{
         @:state = _.state;
+        @:this = _.this;
         return NAMES->reduce(::(previous, value) <- 
           if (previous == empty) 
-            state[value] 
+            this[value] 
           else 
-            previous + state[value]
+            previous + this[value]
         );
       }
     },
       
     HP : {
       get ::{
-        return (_.state.HP + _.state.HPmod)->floor;
+        return ((_.state.HP + _.state.HPmod) * _.state.HPrate)->floor;
       }
     },
     AP : {
       get ::{
-        return (_.state.AP + _.state.APmod)->floor;
+        return ((_.state.AP + _.state.APmod) * _.state.APrate)->floor;
       }
     },    
     ATK : {
       get ::{
-        return (_.state.ATK + _.state.ATKmod)->floor;
+        return ((_.state.ATK + _.state.ATKmod) * _.state.ATKrate)->floor;
       }
     },
     INT : {
       get ::{
-        return (_.state.INT + _.state.INTmod)->floor;
+        return ((_.state.INT + _.state.INTmod) * _.state.INTrate)->floor;
       }
     },
     DEF : {
       get ::{
-        return (_.state.DEF + _.state.DEFmod)->floor;
+        return ((_.state.DEF + _.state.DEFmod) * _.state.DEFrate)->floor;
       }
     },
     LUK : {
       get ::{
-        return (_.state.LUK + _.state.LUKmod)->floor;
+        return ((_.state.LUK + _.state.LUKmod) * _.state.LUKrate)->floor;
       }
     },
     SPD : {
       get ::{
-        return (_.state.SPD + _.state.SPDmod)->floor;
+        return ((_.state.SPD + _.state.SPDmod) * _.state.SPDrate)->floor;
       }
     },
     DEX : {
       get ::{
-        return (_.state.DEX + _.state.DEXmod)->floor;
+        return ((_.state.DEX + _.state.DEXmod) * _.state.DEXrate)->floor;
       }
     },
     
@@ -251,10 +271,11 @@
     description : {
       get :: {
         @:state = _.state;
+        @:this = _.this;
         return String.combine(:canvas.columnsToLines(
           columns : [
             NAMES->map(::(value) <- value + ': '),
-            NAMES->map(::(value) <- ''+state[value])
+            NAMES->map(::(value) <- ''+this[value])
             
           ]
         )->map(::(value) <- value + '\n'));
@@ -264,18 +285,19 @@
     descriptionAugmentLines : {
       get :: {
         @:state = _.state;
+        @:this = _.this;
         return canvas.columnsToLines(
           columns : [
             NAMES->map(::(value) <- value + ': '),
-            NAMES->map(::(value) <- 
-              if (state[value] == 0) 
+            NAMES->map(::(value) {
+              @:s = this[value];
+              return if (s == 0) 
                 ' ' 
-              else if (state[value] > 0) 
-                '+'+state[value]
+              else if (s > 0) 
+                '+'+s
               else
-                ''+state[value]
-            )
-            
+                ''+s
+            })
           ]
         )
       }
@@ -285,10 +307,11 @@
     descriptionRateLines : {
       get :: {
         @:state = _.state;
+        @:this = _.this;
         @:columns = [
           NAMES->map(::(value) <- value + ': '),
           NAMES->map(::(value) {
-            return (if(state[value] > 0) '+' + state[value] + '%' else if (state[value] == 0) '--' else ''+state[value]+ '%')
+            return (if(this[value] > 0) '+' + this[value] + '%' else if (this[value] == 0) '--' else ''+this[value]+ '%')
           })
         ];
         return canvas.columnsToLines(columns);
@@ -297,10 +320,11 @@
     
     descriptionRateLinesBase ::(baseMod) {
       @:state = _.state;
+      @:this = _.this;
       @:columns = [
         NAMES->map(::(value) <- value + ': '),
         NAMES->map(::(value) {
-          return (if(state[value] > 0) '+' + state[value] + '%' else if (state[value] == 0) '--' else ''+state[value]+ '%')
+          return (if(this[value] > 0) '+' + this[value] + '%' else if (this[value] == 0) '--' else ''+this[value]+ '%')
         }),
         NAMES->map(::(value) <- 
           if (baseMod[value] == 0) 

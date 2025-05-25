@@ -792,6 +792,17 @@ return empty;
                       onDone ::(name){
                         @:currentFiles = onListSlots();
 
+                        when(name->charAt(:0) == ' ' || name == ' ')
+                          windowEvent.queueMessage(
+                            text:'That world name is invalid. It cannot start with spaces.',
+                            renderable : {
+                              render ::{
+                                canvas.blackout();
+                              }
+                            }
+                          );                        
+
+
                         when (currentFiles->findIndex(value:name) != -1) ::<= {
                           windowEvent.queueMessage(
                             text:'There\'s already a file named ' + name,

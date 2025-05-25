@@ -81,11 +81,22 @@ canvas.onCommit = ::(lines, renderNow){
     '77': 2, // right 
     '80': 3, // down
     
-    '122': 4, // confirm,
-    '120': 5, // cancel
+    '122': 4, // confirm (z),
+    '120': 5, // cancel (x)
+    
+    '10': 4, // confirm (enter),
+    '32': 4, // confirm (space)
     
   }
   @val = CURSOR_ACTIONS[command];
+
+  if (command != '' && val == empty) ::<= {
+      //canvas.refitCanvas();
+      //windowEvent.commitInput(forceRedraw:true);    
+  }
+
+
+
   if (val == empty)
     Time.sleep(milliseconds:30);
   return val;   

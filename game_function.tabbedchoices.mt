@@ -18,25 +18,29 @@
 
 @:windowEvent = import(:"game_singleton.windowevent.mt");
 
-@:renderPrompt::(tabs, selected) {
+@:renderPrompt::(tabs, selected, lastTabState) {
   @line = '';
   @found = false;
+  @:hasItems = ::(v) <- lastTabState[v] != empty && lastTabState[v]->size > 0
+
   foreach(tabs) ::(k, v) {
+    when(hasItems(v) == false) empty;
 
     when(found == true) 
-      line = line + (if (k==(tabs->size-1))'[>' else '[>]');
+      line = line + '[>]';
 
     if (k == selected) ::<= {
-      if (k != 0)
-        line = line + '['
-      line = line + '  ' + (tabs[selected]) + '  '
-      if (k != tabs->size-1)
-        line = line + ']'
+      line = line + '[  ' + (tabs[selected]) + '  ]' 
       found = true;
     }
     else
-      line = line + (if (k==0)'<]' else '[<]');
+      line = line + '[<]';
   }
+  
+  
+  line = line->substr(from:1, to:line->length-1);
+  line = line->substr(from:0, to:line->length-2);
+  
   return line;
 }
 
@@ -77,6 +81,7 @@ return ::(*args) {
 
 
   @tabs = args.onGetTabs();
+  @:lastTabState = {};
   @tabIndex = 0;
   if (args.onChangeTabs)
     args.onChangeTabs(:tabIndex);
@@ -85,22 +90,20 @@ return ::(*args) {
   @:realOnGetChoices = args.onGetChoices;
 
   args.onGetChoices = :: {
-    @origTab = tabIndex;
+    foreach(tabs) ::(k, v) {
+      @:all = realOnGetChoices(:k)
+      lastTabState[v] = all;
+    }
+
     @out;
+    @:origTab = tabIndex;
     {:::} {
       forever ::{
-        out = realOnGetChoices(
-          :tabIndex
-        )
-
-        when(out != empty) 
-          send();
-        
-        onInput(:lastInput);
-        if (tabIndex == origTab)  ::<= {
-          // no items at all
-          send();
-        }
+          out = lastTabState[tabs[tabIndex]];
+          realOnGetChoices(:tabIndex)
+          when (out != empty) send();
+          onInput(:lastInput);
+          when(origTab == tabIndex) send();
       }
     }
     return out;
@@ -108,6 +111,7 @@ return ::(*args) {
 
   @:realOnChoice = args.onChoice;
   args.onChoice = ::(choice) {
+    breakpoint();
     realOnChoice(choice, tab:tabIndex);
   }
 
@@ -119,11 +123,12 @@ return ::(*args) {
   }
 
 
+
   if (args.onGetMinWidth == empty)
     args.onGetMinWidth = ::() {
       @min = 0;
       foreach(tabs) ::(k, v) {
-        @:all = realOnGetChoices(:k)
+        @:all = lastTabState[v];
         foreach(all) ::(k, name) {
           if (min < name->length)
             min = name->length
@@ -136,7 +141,7 @@ return ::(*args) {
     args.onGetMinHeight = ::() {
       @min = 0;
       foreach(tabs) ::(k, v) {
-        @:all = realOnGetChoices(:k)
+        @:all = lastTabState[v];
         if (min < all->size)
             min = all->size
         
@@ -145,7 +150,7 @@ return ::(*args) {
     }
 
   args.onGetPrompt = ::<-
-    renderPrompt(tabs, selected:tabIndex);
+    renderPrompt(tabs, selected:tabIndex, lastTabState);
   
   args.onInput = onInput;
 

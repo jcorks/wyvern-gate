@@ -15,7 +15,6 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:itemmenu = import(module:'game_function.itemmenu.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:world = import(module:'game_singleton.world.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
@@ -49,7 +48,7 @@ return ::{
             y: top + height/2
           );
           canvas.drawText(
-            text: '--->'
+            text: '-->'
           );
         }
           

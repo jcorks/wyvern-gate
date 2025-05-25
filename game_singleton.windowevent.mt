@@ -326,54 +326,69 @@
       return out;
     }
     
-    @:commitInput ::(input, level) {
-      if (record != empty) ::<= {
-        if (input != empty) ::<= {
-          record->push(:{
-            input : input,
-            waitFrames : lastRecordFrames
-          });
-          lastRecordFrames = 0;
-        } else ::<= {
-          lastRecordFrames += 1;
+    @:commitInput ::(input, level, forceRedraw) {
+      {:::} {
+        if (record != empty) ::<= {
+          if (input != empty) ::<= {
+            record->push(:{
+              input : input,
+              waitFrames : lastRecordFrames
+            });
+            lastRecordFrames = 0;
+          } else ::<= {
+            lastRecordFrames += 1;
+          }
         }
-      }
-    
-      input = queuedInputFetch(input);
-      @continue; 
-      @val;
-      if (choiceStack->keycount > 0) ::<= {
-        val = choiceStack[choiceStack->keycount-1];
+      
+        input = queuedInputFetch(input);
+        @continue; 
+        @val;
+        if (choiceStack->keycount > 0) ::<= {
+          val = choiceStack[choiceStack->keycount-1];
+            
+          if (val.stateID != empty) ::<= {
+            canvas.removeState(id:val.stateID);
+            val.stateID = empty;
+          }
+            
+          if (forceRedraw == true)
+            val.rendered = empty;
+
+          //if (val.jail == true) ::<= {
+          //  choiceStack->push(value:val);
+          //}
+          continue = match(val.mode) {
+            (CHOICE_MODE.CURSOR):         commitInput_cursor(data:val, input),
+            (CHOICE_MODE.COLUMN_CURSOR):  commitInput_columnCursor(data:val, input),
+            (CHOICE_MODE.DISPLAY):        commitInput_display(data:val, input),
+            (CHOICE_MODE.CURSOR_MOVE):    commitInput_cursorMove(data:val, input),
+            (CHOICE_MODE.CUSTOM):         commitInput_custom(data:val, input),
+            (CHOICE_MODE.SLIDER):         commitInput_slider(data:val, input),
+            (CHOICE_MODE.CALLBACK):       commitInput_callback(data:val, input),
+            (CHOICE_MODE.READER):         commitInput_reader(data:val, input)
+          }    
           
-        if (val.stateID != empty) ::<= {
-          canvas.removeState(id:val.stateID);
-          val.stateID = empty;
+          // event callbacks mightve bonked out 
+          // this current val. Double check 
+          if (choiceStack->findIndex(value:val) == -1) ::<= {
+            continue = false;
+            resolveNext(noCommit:true);
+          }
         }
-          
-        //if (val.jail == true) ::<= {
-        //  choiceStack->push(value:val);
-        //}
-        continue = match(val.mode) {
-          (CHOICE_MODE.CURSOR):         commitInput_cursor(data:val, input),
-          (CHOICE_MODE.COLUMN_CURSOR):  commitInput_columnCursor(data:val, input),
-          (CHOICE_MODE.DISPLAY):        commitInput_display(data:val, input),
-          (CHOICE_MODE.CURSOR_MOVE):    commitInput_cursorMove(data:val, input),
-          (CHOICE_MODE.CUSTOM):         commitInput_custom(data:val, input),
-          (CHOICE_MODE.SLIDER):         commitInput_slider(data:val, input),
-          (CHOICE_MODE.CALLBACK):       commitInput_callback(data:val, input),
-          (CHOICE_MODE.READER):         commitInput_reader(data:val, input)
-        }    
-        
-        // event callbacks mightve bonked out 
-        // this current val. Double check 
-        if (choiceStack->findIndex(value:val) == -1) ::<= {
-          continue = false;
-          resolveNext(noCommit:true);
+        // true means done
+        if (continue == true || choiceStack->keycount == 0) ::<= {
+          next(toRemove:val, level:if (level == empty) 0 else level);
         }
-      }
-      // true means done
-      if (continue == true || choiceStack->keycount == 0) ::<= {
-        next(toRemove:val, level:if (level == empty) 0 else level);
+      } : {
+        donError ::(message) {
+          this.queueReader(
+            lines : [
+              'Unfortunately due to the Unexpected, an Error has Occurred.',
+              '',
+              ...message.summary->split(token:'\n')
+            ]
+          );
+        }
       }
     }
 
@@ -904,7 +919,7 @@
       data.rendered = empty;
       
       @:prompt = data.prompt;
-      @:itemsPerColumn = data.itemsPerColumn;
+      @:itemsPerRow = data.itemsPerRow;
       @:leftWeight = data.leftWeight;
       @:topWeight = data.topWeight;
       @:maxWidth = data.maxWidth;
@@ -926,7 +941,6 @@
 
 
       @:choicesModified = [];
-      @column = 0;
       
       @:columns = [[]];
       @:columnWidth = [0];
@@ -935,7 +949,14 @@
       @width;
       @which;
       foreach(choices)::(index, choice) {
+        @:column = index % itemsPerRow;
+        if (columns[column] == empty) ::<= {
+          columns[column] = [];
+          columnWidth->push(value:0);
+        }
+          
         @entry = ('  ') + choice;
+
         if (columns[column]->keycount == y && column == x) which = index;
         
         columns[column]->push(value:entry);
@@ -943,14 +964,9 @@
         if (entry->length > columnWidth[column])
           columnWidth[column] = entry->length;
         
-        if (columns[column]->keycount >= itemsPerColumn) ::<= {
-          column+=1;
-          columns[column] = [];
-          columnWidth->push(value:0);
-        }
       }
       width = columnWidth->keycount;
-      height = itemsPerColumn;
+      height = columns[0]->size;
       
       
       @oldX = x;
@@ -1001,13 +1017,13 @@
       
       // reformat with spacing
       @:choicesModified = [];
-      for(0, itemsPerColumn)::(i) {
+      for(0, height)::(i) {
         @choice = '';
         foreach(columns)::(index, text) {
           if (text[i] != empty) ::<= {
             choice = choice + text[i];
             
-            for(choice->length, columnWidth[index])::(n) {
+            for(text[i]->length, columnWidth[index])::(n) {
               choice = choice + ' ';
             }
             choice = choice + '   ';
@@ -1045,26 +1061,27 @@
           maxHeight
         );         
       }
-
-      renderThis(data);      
         
         
       when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         sound.playSFX(:"confirm");
         onChoice(choice:which + 1);
+        renderThis(data);      
         return true;
       }
         
-      if (canCancel && choice == CURSOR_ACTIONS.CANCEL) ::<= {
+      when (canCancel && choice == CURSOR_ACTIONS.CANCEL) ::<= {
         sound.playSFX(:"cancel");
         @res;
         if (data.onCancel) 
           res = data.onCancel();
         when (res == this.STOP_CANCEL) false;
         data.keep = empty;
+        renderThis(data);      
         return true;
       }
       
+      renderThis(data);      
 
       return false;
     }
@@ -1806,7 +1823,7 @@
       queueChoiceColumns::(
         choices, 
         prompt, 
-        itemsPerColumn, 
+        itemsPerRow,
         leftWeight, 
         topWeight, 
         maxWidth,
@@ -1826,7 +1843,7 @@
             choices: choices,
             prompt: prompt,
             jumpTag : jumpTag,
-            itemsPerColumn: itemsPerColumn,
+            itemsPerRow: itemsPerRow,
             leftWeight : leftWeight,
             topWeight : topWeight,
             maxWidth : maxWidth,

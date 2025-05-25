@@ -132,18 +132,22 @@ return ::{
     
     {inputs:[
       {input:windowEvent.CURSOR_ACTIONS.RIGHT, waitFrames:20},
+      {input:windowEvent.CURSOR_ACTIONS.DOWN, waitFrames:20},
       {input:empty, waitFrames:10}
     ]},
     {resolve:true, text:"The Item Art command uses an item from the party\'s inventory. Item use does not end the turn."},
     {continue:true},
     {inputs: [
+      {input:windowEvent.CURSOR_ACTIONS.LEFT, waitFrames:20},
       {input:windowEvent.CURSOR_ACTIONS.DOWN, waitFrames:20},
       {input:empty, waitFrames:20}
     ]},
     {resolve:true, text:"The Wait Art command allows the user to rest for the turn, allowing them to gain 3 AP and, optionally, discard their normal Arts."},
     {continue:true},
     {inputs:[
-      {input:windowEvent.CURSOR_ACTIONS.LEFT, waitFrames:20},
+      {input:windowEvent.CURSOR_ACTIONS.UP, waitFrames:20},
+      {input:windowEvent.CURSOR_ACTIONS.UP, waitFrames:20},
+      {input:windowEvent.CURSOR_ACTIONS.RIGHT, waitFrames:20},
       {input:empty, waitFrames:20}
     ]},
     {resolve:true, text:"The Arts command is where all the normal Arts are."},

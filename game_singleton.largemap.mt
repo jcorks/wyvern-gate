@@ -35,61 +35,8 @@
 }
 
 
+@:basic_island ::(map, width, height, symbols, out, symbolList) {
 
-@:generateTerrain::(map, width, height, symbols) {
-  if (symbols->size < 5) 
-    error(:'Symbol list for terrain must have at least 5 characters');
-
-  @:symbolList = [
-    map.addScenerySymbol(character:' '),
-    ...(
-      random.scrambled(:symbols)
-        ->subset(from:0, to:3)
-          ->map(::(value) <- map.addScenerySymbol(character:value))
-    )
-  ];
-  @:out = [];
-  @:seedCount = ((width*height)**0.5) / 2.5
-
-  for(0, seedCount)::(i) {
-    out[
-                    random.integer(from:5, to:width-5) + BUFFER_SPACE + 
-      (width + BUFFER_SPACE*2) * (random.integer(from:5, to:height-5) + BUFFER_SPACE)
-    ] = symbolList[random.integer(from:1, to:symbolList->keycount-1)]
-  }
-
-
-  for(0, height)::(i) {
-    out[
-      0 + BUFFER_SPACE+
-      (width + BUFFER_SPACE*2) * (i + BUFFER_SPACE)
-    ] = symbolList[0];
-  }
-
-  for(0, height)::(i) {
-    out[
-          width + BUFFER_SPACE+
-      (width + BUFFER_SPACE*2) * (i + BUFFER_SPACE)
-    ] = symbolList[0];
-  }
-
-  for(0, width)::(i) {
-    out[
-          i + BUFFER_SPACE+
-      (width + BUFFER_SPACE*2) * (0 + BUFFER_SPACE)
-    ] = symbolList[0];
-  }
-
-  for(0, width)::(i) {
-    out[
-          i + BUFFER_SPACE + 
-      (width + BUFFER_SPACE*2) * (height + BUFFER_SPACE)
-    ] = symbolList[0];
-  }
-
-
-
-  
   @xIncr = 1;
   @yIncr = 1;
   
@@ -159,6 +106,65 @@
       out[v.x + (width + BUFFER_SPACE*2) * v.y] = v.val;    
     }
   }
+  
+}
+
+
+@:generateTerrain::(map, width, height, symbols) {
+  if (symbols->size < 5) 
+    error(:'Symbol list for terrain must have at least 5 characters');
+
+  @:symbolList = [
+    map.addScenerySymbol(character:' '),
+    ...(
+      random.scrambled(:symbols)
+        ->subset(from:0, to:3)
+          ->map(::(value) <- map.addScenerySymbol(character:value))
+    )
+  ];
+  @:out = [];
+  @:seedCount = ((width*height)**0.5) / 2.5
+
+  for(0, seedCount)::(i) {
+    out[
+                    random.integer(from:5, to:width-5) + BUFFER_SPACE + 
+      (width + BUFFER_SPACE*2) * (random.integer(from:5, to:height-5) + BUFFER_SPACE)
+    ] = symbolList[random.integer(from:1, to:symbolList->keycount-1)]
+  }
+
+
+  for(0, height)::(i) {
+    out[
+      0 + BUFFER_SPACE+
+      (width + BUFFER_SPACE*2) * (i + BUFFER_SPACE)
+    ] = symbolList[0];
+  }
+
+  for(0, height)::(i) {
+    out[
+          width + BUFFER_SPACE+
+      (width + BUFFER_SPACE*2) * (i + BUFFER_SPACE)
+    ] = symbolList[0];
+  }
+
+  for(0, width)::(i) {
+    out[
+          i + BUFFER_SPACE+
+      (width + BUFFER_SPACE*2) * (0 + BUFFER_SPACE)
+    ] = symbolList[0];
+  }
+
+  for(0, width)::(i) {
+    out[
+          i + BUFFER_SPACE + 
+      (width + BUFFER_SPACE*2) * (height + BUFFER_SPACE)
+    ] = symbolList[0];
+  }
+
+
+
+  basic_island(map, width, height, symbols, out, symbolList);
+  //cluster_island(map, width, height,
   
   
   

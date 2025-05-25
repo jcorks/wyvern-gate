@@ -292,7 +292,7 @@ MapEntity.Task.database.newEntry(
         closest = itemOther;
       }
                 
-      if (dist < CONTACT_DISTANCE) ::<= {
+      if (dist < CONTACT_DISTANCE && itemOther.data != empty) ::<= {
         mapEntity.squabble(other:itemOther.data);
         squabbled = true;
       }

@@ -552,7 +552,50 @@ return class(
       },
       
       
-      
+
+      refitCanvas ::{
+        @:console = import(:'Matte.System.ConsoleIO');
+        console.put(:"\x1b[999;999H");
+        console.put(:"\x1b[6n");
+        @w;
+        @h;
+
+
+        {:::} {
+          forever ::{
+            @ch = console.getch(unbuffered:true);
+            if (ch != empty) send();
+          }
+        }
+
+        {:::} {
+          @target = '';
+          @ch = console.getch(unbuffered:true);
+
+          forever ::{
+            @ch = console.getch(unbuffered:true);
+            //console.println(:"ch: " + ch);
+            when(ch == empty) send();
+            when (ch == 'R') ::<= {
+              w = target;
+              send();
+            }
+            when (ch == ';') ::<= {
+              h = target;
+              target = '';
+            }
+            target = target + ch;
+          }
+        }
+        
+        console.clear();
+        when(w == empty || h == empty) empty;
+        
+        w = Number.parse(:w);
+        h = ((Number.parse(:h) / 2)->floor)*2 -2;
+
+        this.resize(width:w, height:h);
+      },      
       commit ::(renderNow) {
         // debug lines happen as the LAST possible thing 
         // the canvas does to ensure that its always on top.

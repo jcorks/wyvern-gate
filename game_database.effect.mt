@@ -69,7 +69,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
-        when(item == empty)
+        when(item == empty || from.battle != empty)
           windowEvent.queueMessage(speaker: holder.name, text: "\"Why am I reading right now??\"");
 
 
@@ -5629,9 +5629,9 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
-    name : 'Escape Dungeon',
-    id : 'base:escape-dungeon',
-    description : 'Escape from a dungeon. Loses half of collected Ethereal Shards.',
+    name : 'Escape',
+    id : 'base:escape',
+    description : 'Escape from any area or battle. Loses half of any collected Ethereal Shards.',
     stackable : false,
     blockPoints :0,
     traits : TRAIT.SPECIAL,
@@ -5654,10 +5654,11 @@ Effect.newEntry(
           }
           erased = true;
         }
+        breakpoint();
           
         @:instance = import(:'game_singleton.instance.mt');
         instance.visitCurrentIsland();
-        windowEvent.queueMessage(text:'The party teleported out of the dungeon.');
+        windowEvent.queueMessage(text:'The party teleported out of the area.');
         if (erased)
           windowEvent.queueMessage(text:'The party loses half their loot during the teleportation process');
       }

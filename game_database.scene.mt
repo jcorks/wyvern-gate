@@ -44,6 +44,7 @@ Scene.newEntry(
         @:party = world.party;
         
         @:Entity = import(module:'game_class.entity.mt');
+        @:Landmark = import(module:'game_mutator.landmark.mt');
 
         @enemies = if (landmark == empty) ::<= {
           @:out = [
@@ -53,7 +54,7 @@ Scene.newEntry(
           ];
           foreach(out) ::(i, e) <- e.anonymize();
           return out;
-        } else (if (landmark.base.guarded) ::<= {
+        } else (if (landmark.base.hasTraits(:Landmark.TRAIT.GUARDED)) ::<= {
             
             // not only do these places have guards, but the guards are 
             // equipped with standard gear.

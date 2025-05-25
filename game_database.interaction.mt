@@ -835,7 +835,7 @@ Interaction.newEntry(
       party.inventory.remove(item:ores[0]);
       party.inventory.remove(item:ores[1]);
       
-      @:metal = Item.new(base:Item.database.getRandomWeightedFiltered(filter:::(value) <- value.traits & Item.TRAIT.RAW_METAL));            
+      @:metal = Item.new(base:Item.database.find(:'base-ingot'));            
       windowEvent.queueMessage(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
       party.inventory.add(item:metal);          
         
@@ -1828,7 +1828,7 @@ Interaction.newEntry(
     
       @:Entity = import(module:'game_class.entity.mt');
 
-      @:items = party.inventory.items->filter(by:::(value) <- value.base.traits & Item.TRAIT.RAW_METAL);
+      @:items = party.inventory.items->filter(by:::(value) <- value.base.id == 'base:ingot');
       when(items->keycount == 0)
         windowEvent.queueMessage(text:'No suitable ingots or materials were found in the party inventory.');
 
@@ -1904,7 +1904,7 @@ Interaction.newEntry(
             @:ore = items[choice-1];
 
             windowEvent.queueAskBoolean(
-              prompt:'Smith with ' + ore.base.name + '?',
+              prompt:'Smith with ' + ore.name + '?',
               onChoice::(which) {
                 when(which == false) empty;
 
@@ -2954,16 +2954,16 @@ Interaction.newEntry(
 
             // spin the wheel for a prize! Possibilities:
             // Tablet (10%)
-            // Weapon with x3 nice enchants (42%)
-            // Armor/clothing with x3 nice enchants (42%)
-            // Ring with x3 nice enchantments(5%)
-            // Life Crystal with x3 nice enchantments(1%)
+            // Weapon with x5 nice enchants (42%)
+            // Armor/clothing with x5 nice enchants (42%)
+            // Ring with x5 nice enchantments(5%)
+            // Life Crystal with x5 nice enchantments(1%)
           @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
 
-            @:get3positiveEffects ::{
+            @:get5positiveEffects ::{
               @:out = [];
               for(0, 3) ::(i) {
-                out->push(:ItemEnchant.getRandomFiltered(::(value) <-
+                out->push(:ItemEnchant.database.getRandomFiltered(::(value) <-
                   value.hasNoTraits(:ItemEnchant.TRAIT.SPECIAL) &&
                   value.priceMod > 0
                 ).id);
@@ -2990,7 +2990,7 @@ Interaction.newEntry(
                     ) && value.hasNoTrait(:Item.TRAIT.FRAGILE)             
                   ),
                   
-                  enchantHint : get3positiveEffects()
+                  enchantHint : get5positiveEffects()
                 )
               },
                         
@@ -3004,7 +3004,7 @@ Interaction.newEntry(
                     ) && value.hasNoTrait(:Item.TRAIT.FRAGILE)             
                   ),
                   
-                  enchantHint : get3positiveEffects()
+                  enchantHint : get5positiveEffects()
                 )
               },
 
@@ -3012,7 +3012,7 @@ Interaction.newEntry(
                 rarity: 5,
                 item : Item.new(
                   base:Item.database.find(:'base:ring'),
-                  enchantHint : get3positiveEffects()
+                  enchantHint : get5positiveEffects()
                 )
               },
 
@@ -3020,7 +3020,7 @@ Interaction.newEntry(
                 rarity: 1,
                 item : Item.new(
                   base:Item.database.find(:'base:life-crystal'),
-                  enchantHint : get3positiveEffects()
+                  enchantHint : get5positiveEffects()
                 )
               },
             

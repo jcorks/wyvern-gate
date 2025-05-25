@@ -49,6 +49,8 @@ return ::(inventory, shopkeep, onDone) {
       render ::{
         when(hoveredItem == empty) empty;
         
+        when(hoveredItem.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) empty;
+
         when (hoveredItem.inletStats != empty) ::<= {
           when(hoveredItem.inletEffect != empty) empty;
         

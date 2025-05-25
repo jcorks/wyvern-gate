@@ -468,6 +468,8 @@ return {
             }
           }
         }
+        when(firstAwake == empty)
+          windowEvent.queueMessage(text:'No one is available to look at the inventory.');
         @:itemmenu = import(module:'game_function.itemmenu.mt');
         itemmenu(
           inBattle: false,

@@ -1091,7 +1091,7 @@
               }
             }
 
-            from.effectStack.emitEvent(
+            entAct.effectStack.emitEvent(
               name : 'onPostAction',
               action : action
             )
