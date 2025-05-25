@@ -380,7 +380,7 @@
           next(toRemove:val, level:if (level == empty) 0 else level);
         }
       } : {
-        donError ::(message) {
+        onError ::(message) {
           this.queueReader(
             lines : [
               'Unfortunately due to the Unexpected, an Error has Occurred.',

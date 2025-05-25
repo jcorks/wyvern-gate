@@ -24,7 +24,7 @@
 @:mapSizeW  = 38;
 @:mapSizeH  = 16;
 
-@:BUFFER_SPACE = 60;
+@:BUFFER_SPACE = 80;
 
 @:EPSILON = 0.000001;
 
@@ -34,27 +34,66 @@
   return (xd**2 + yd**2)**0.5;
 }
 
+@:addLandscapeAreas ::(map, width, height, symbols, out, symbolList) {
+  @:SEED_COUNT = ((width*height)**0.5) / 2.5
 
-@:basic_island ::(map, width, height, symbols, out, symbolList) {
+  @emptyAreas = [];
+  @outAreas = [];
+  for(BUFFER_SPACE, height + BUFFER_SPACE) ::(y) {
+    for(BUFFER_SPACE, width + BUFFER_SPACE) ::(x) {
+      @:which = out[x + (width + BUFFER_SPACE*2) * y];
+
+      if (which == symbolList[0] || which == empty) ::<= {
+        if (which == empty)
+          outAreas->push(:{x:x, y:y})
+        else
+          emptyAreas->push(:{x:x, y:y});
+      }
+    }
+  }
+
+
+
+  
+
+  @:selectAreas = 
+    [
+      ...random.scrambled(:emptyAreas)->subset(from:0, to:SEED_COUNT/2-1),
+      ...random.scrambled(:outAreas)->subset(from:0, to:SEED_COUNT/2-1)
+    ];
+  foreach(selectAreas) ::(k, v) {
+    out[v.x + (width + BUFFER_SPACE*2) * v.y] = symbolList[random.integer(from:1, to:symbolList->keycount-1)]
+  }
+  breakpoint();
+
 
   @xIncr = 1;
   @yIncr = 1;
   
-  for(0, 6)::(i) {
+  for(0, 2)::(i) {
     for(0, height + BUFFER_SPACE*2) ::(y) {
       for(0, width + BUFFER_SPACE*2) ::(x) {
+        when(random.flipCoin()) empty;
         //when(random.number() < 0.4) empty;
         @:val = out[x + (width + BUFFER_SPACE*2) * y];
-        when(val == empty || val == symbolList[0]) empty;
+        when(val != symbolList[0] && val != empty) empty;
+
+        @:neighbors = [
+          out[x + 1 + (width + BUFFER_SPACE*2) * y],
+          out[x - 1 + (width + BUFFER_SPACE*2) * y],
+          out[x   + (width + BUFFER_SPACE*2) * (y+1)],
+          out[x   + (width + BUFFER_SPACE*2) * (y-1)]
+        ]->filter(::(value) <- value != empty && value != symbolList[0]);
         
-        @:choice = (random.number() * 4)->floor;
-        @newx = if (choice == 1) x+xIncr else if (choice == 2) x-xIncr else x;
-        @newy = if (choice == 3) y+yIncr else if (choice == 0) y-yIncr else y;
-        out[newx + (width + BUFFER_SPACE*2) * newy] = val;
-        
+        when(neighbors->size == 0) empty;        
+        out[x + (width + BUFFER_SPACE*2) * y] = random.pickArrayItem(:neighbors);
       }
     }
   }
+
+
+
+
 
   // fill gaps
   for(0, 4)::(i) {
@@ -62,7 +101,7 @@
       for(0, width + BUFFER_SPACE*2) ::(x) {
         //when(random.number() < 0.4) empty;
         @:val = out[x + (width + BUFFER_SPACE*2) * y];
-        when(val == empty || val == symbolList[0]) empty;
+        when(val == symbolList[0]) empty;
         
 
         @v;        
@@ -84,53 +123,12 @@
       }
     }
   }
-  
-  // just for border
-  for(0, 4)::(i) {
-    @:toAdd = [];
-    for(0, height + BUFFER_SPACE*2) ::(y) {
-      for(0, width + BUFFER_SPACE*2) ::(x) {
-        //when(random.number() < 0.4) empty;
-        @:val = out[x + (width + BUFFER_SPACE*2) * y];
-        when(val != symbolList[0]) empty;
-        
-        @:choice = random.integer(from:0, to:5);
-        when (choice == 5) empty;
-        @newx = if (choice == 1) x+xIncr else if (choice == 2) x-xIncr else x;
-        @newy = if (choice == 3) y+yIncr else if (choice == 0) y-yIncr else y;
-        toAdd->push(:{x:newx, y:newy, val:val});
-      }
-    }
-    
-    foreach(toAdd) ::(k, v) {
-      out[v.x + (width + BUFFER_SPACE*2) * v.y] = v.val;    
-    }
-  }
-  
+
 }
 
+@:basic_island ::(map, width, height, symbols, out, symbolList) {
 
-@:generateTerrain::(map, width, height, symbols) {
-  if (symbols->size < 5) 
-    error(:'Symbol list for terrain must have at least 5 characters');
 
-  @:symbolList = [
-    map.addScenerySymbol(character:' '),
-    ...(
-      random.scrambled(:symbols)
-        ->subset(from:0, to:3)
-          ->map(::(value) <- map.addScenerySymbol(character:value))
-    )
-  ];
-  @:out = [];
-  @:seedCount = ((width*height)**0.5) / 2.5
-
-  for(0, seedCount)::(i) {
-    out[
-                    random.integer(from:5, to:width-5) + BUFFER_SPACE + 
-      (width + BUFFER_SPACE*2) * (random.integer(from:5, to:height-5) + BUFFER_SPACE)
-    ] = symbolList[random.integer(from:1, to:symbolList->keycount-1)]
-  }
 
 
   for(0, height)::(i) {
@@ -162,9 +160,159 @@
   }
 
 
+  addLandscapeAreas(map, width, height, symbols, out, symbolList);
+  @xIncr = 1;
+  @yIncr = 1;
+  
+  // just for border
+  for(0, 4)::(i) {
+    @:toAdd = [];
+    for(0, height + BUFFER_SPACE*2) ::(y) {
+      for(0, width + BUFFER_SPACE*2) ::(x) {
+        //when(random.number() < 0.4) empty;
+        @:val = out[x + (width + BUFFER_SPACE*2) * y];
+        when(val != symbolList[0]) empty;
+        
+        @:choice = random.integer(from:0, to:5);
+        when (choice == 5) empty;
+        @newx = if (choice == 1) x+xIncr else if (choice == 2) x-xIncr else x;
+        @newy = if (choice == 3) y+yIncr else if (choice == 0) y-yIncr else y;
+        toAdd->push(:{x:newx, y:newy, val:val});
+      }
+    }
+    
+    foreach(toAdd) ::(k, v) {
+      out[v.x + (width + BUFFER_SPACE*2) * v.y] = v.val;    
+    }
+  }
 
-  basic_island(map, width, height, symbols, out, symbolList);
-  //cluster_island(map, width, height,
+
+  // fill gaps
+  for(0, 4)::(i) {
+    for(0, height + BUFFER_SPACE*2) ::(y) {
+      for(0, width + BUFFER_SPACE*2) ::(x) {
+        //when(random.number() < 0.4) empty;
+        @:val = out[x + (width + BUFFER_SPACE*2) * y];
+        when(val == empty || val == symbolList[0]) empty;
+        
+
+        @v;        
+        @:v0 = out[x + 1 + (width + BUFFER_SPACE*2) * y];
+        @:v1 = out[x - 1 + (width + BUFFER_SPACE*2) * y];
+        @:v2 = out[x   + (width + BUFFER_SPACE*2) * (y+1)];
+        @:v3 = out[x   + (width + BUFFER_SPACE*2) * (y-1)];
+        
+        @sides = 
+          (if (v0 != empty) 1 else 0)+
+          (if (v1 != empty) 1 else 0)+
+          (if (v2 != empty) 1 else 0)+
+          (if (v3 != empty) 1 else 0)
+        ;
+        if (sides >= 3)
+          out[x + (width + BUFFER_SPACE*2) * y] = random.pickArrayItem(list:[v0, v1, v2, v3]->filter(by::(value) <- value != empty));
+        
+
+      }
+    }
+  }
+  
+}
+
+
+
+
+@:cluster_island ::(map, width, height, symbols, out, symbolList) {
+
+  @:SEED_COUNT = 10;
+  @:SEED_RADIUS_MIN = 3;
+  @:SEED_RADIUS_MAX = 11;
+  @:GROW_LAYERS_MIN = 5;
+  @:GROW_LAYERS_MAX = 9;
+
+
+  @xIncr = 1;
+  @yIncr = 1;
+  
+  for(0, SEED_COUNT)::(i) {
+    @:xSeed = BUFFER_SPACE + (random.number() * width)->round;
+    @:ySeed = BUFFER_SPACE + (random.number() * height)->round;
+    @:radius = random.integer(from:SEED_RADIUS_MIN, to:SEED_RADIUS_MAX);; 
+    @:distanceFn = import(:'game_function.distance.mt');
+  
+    for(0, height + BUFFER_SPACE*2) ::(y) {
+      for(0, width + BUFFER_SPACE*2) ::(x) {
+      
+        if (distanceFn(x0:x, y0:y, x1:xSeed, y1:ySeed) <= radius) ::<= {
+            out[x + (width + BUFFER_SPACE*2) * y] = symbolList[0];
+        }        
+      }
+    }
+  }
+
+
+
+  for(0, random.integer(from:GROW_LAYERS_MIN, to:GROW_LAYERS_MIN))::(i) {
+    @:xSeed = (random.number() * width)->round;
+    @:ySeed = (random.number() * height)->round;
+    @:radius = 20 + random.number()*50; 
+    @:distanceFn = import(:'game_function.distance.mt');
+    
+    @:added = {};
+  
+    for(0, height + BUFFER_SPACE*2) ::(y) {
+      for(0, width + BUFFER_SPACE*2) ::(x) {
+        when (random.flipCoin()) empty;
+      
+        @:p_now = (x  ) + (width + BUFFER_SPACE*2) * (y  );
+        @:p0    = (x-1) + (width + BUFFER_SPACE*2) * (y  );
+        @:p1    = (x+1) + (width + BUFFER_SPACE*2) * (y  );
+        @:p2    = (x  ) + (width + BUFFER_SPACE*2) * (y-1);
+        @:p3    = (x  ) + (width + BUFFER_SPACE*2) * (y+1);
+      
+        when(out[p_now] == symbolList[0]) empty;
+      
+        if (
+          out[p0] == symbolList[0] ||
+          out[p1] == symbolList[0] ||
+          out[p2] == symbolList[0] ||
+          out[p3] == symbolList[0]
+        ) ::<= {
+          added->push(:p_now);
+        }
+      }
+    }
+    
+    foreach(added) ::(k, v){
+      out[v] = symbolList[0];
+    }
+  }
+  
+  addLandscapeAreas(map, width, height, symbols, out, symbolList);
+  
+}
+
+
+
+
+@:generateTerrain::(map, width, height, symbols) {
+  if (symbols->size < 5) 
+    error(:'Symbol list for terrain must have at least 5 characters');
+
+  @:symbolList = [
+    map.addScenerySymbol(character:' '),
+    ...(
+      random.scrambled(:symbols)
+        ->subset(from:0, to:3)
+          ->map(::(value) <- map.addScenerySymbol(character:value))
+    )
+  ];
+  @:out = [];
+
+
+
+
+  //basic_island(map, width, height, symbols, out, symbolList);
+  cluster_island(map, width, height, symbols, out, symbolList);
   
   
   
@@ -229,9 +377,6 @@
 
         for(0, map.height)::(y) {
           for(0, map.width)::(x) {
-            when(y > BUFFER_SPACE && x > BUFFER_SPACE &&
-               x < sizeW + BUFFER_SPACE && y < sizeH + BUFFER_SPACE) empty;
-            map.enableWall(x, y);
             map.setSceneryIndex(x, y, symbol:index);
           }
         }
@@ -308,7 +453,39 @@
             }
           }
         }        
-        
+        // some places might have "holes" that need work.
+        for(0, 2) ::(i) {
+          for(0, map.height) ::(y) {
+            for(0, map.width) ::(x) {
+              @:val = map.sceneryAt(x, y);
+                   
+              when(val == '▓' || val == ' ') empty;
+              if (
+                (
+                  (if (map.sceneryAt(x:x-1, y) == ' ') 1 else 0) +
+                  (if (map.sceneryAt(x:x+1, y) == ' ') 1 else 0) +
+                  (if (map.sceneryAt(x, y:y-1) == ' ') 1 else 0) +
+                  (if (map.sceneryAt(x, y:y+1) == ' ') 1 else 0)
+                ) >= 3
+              )
+                map.setSceneryIndex(x, y, symbol:land);
+            
+              
+            }
+          }
+        }
+
+        for(0, map.height) ::(y) {
+          for(0, map.width) ::(x) {
+            @:scen = map.sceneryAt(x, y);
+            if (scen == '▓' ||
+                scen == '▒' ||
+                scen == '░') 
+                empty;
+              //map.enableWall(x, y);
+          }
+        }
+
         
         return map;
             
