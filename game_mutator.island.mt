@@ -90,7 +90,7 @@ Island.database.newEntry(
       
     ],
     possibleSceneryCharacters : [
-      '╿', '.', '`', '^', '▒'
+      '╿', '.', '`', '^', ','
     ],
     traits : TRAIT.SPECIAL,
     
@@ -123,9 +123,9 @@ Island.database.newEntry(
       'base:encounter:normal'      
     ],
     possibleSceneryCharacters : [
-      '╿', '.', '`', '^', '▒'
+      '╿', '.', '`', '^', ','
     ],
-    traits : TRAIT.SPECIAL,
+    traits : TRAIT.DIVERSE | TRAIT.SPECIAL,
     
     overrideSpecies : empty,
     overrideNativeCreatures : empty,
@@ -161,7 +161,7 @@ Island.database.newEntry(
       'base:encounter:normal'
     ],
     possibleSceneryCharacters : [
-      '╿', '.', '`', '^', '▒',
+      '╿', '.', '`', '^', ',',
       ')', '(', ']', ']', '/',
       '+', '~', '=', '|', '>',
       '<', '*', '%', '-', '_'
@@ -502,7 +502,7 @@ Island.database.newEntry(
       },
 
       
-      defaultLoad::(base, createEmpty, worldID, levelHint, nameHint, tierHint, possibleEventsHint, extraLandmarks, hasSpeciesBias) {
+      defaultLoad::(base, createEmpty, worldID, levelHint, nameHint, tierHint, possibleEventsHint, hasSpeciesBias) {
         when(createEmpty) empty;
         @:world = import(module:'game_singleton.world.mt');
 
@@ -523,8 +523,6 @@ Island.database.newEntry(
           state.sizeW  = sizeW;
           state.sizeH  = sizeH;
           state.stepsSinceLastEvent = 0;
-          state.map = LargeMap.create(parent:this, sizeW, sizeH, symbols:base.possibleSceneryCharacters);
-          state.map.title = '';
           state.worldID = worldID;
           state.climate = random.integer(
             from:Island.CLIMATE.WARM, 
@@ -569,38 +567,61 @@ Island.database.newEntry(
     
 
 
-        foreach(base.requiredLandmarks) ::(i, landmarkName) {
-          LargeMap.addLandmark(
-            map:state.map,
-            base:Landmark.database.find(id:landmarkName),
-            island:this
-          )          
-        }
-
-        for(0, random.integer(from:base.minAdditionalLandmarkCount, to:base.maxAdditionalLandmarkCount)) ::(i) {
-          @:landmarkName = random.pickArrayItem(:base.possibleLandmarks);
-          LargeMap.addLandmark(
-            map:state.map,
-            base:Landmark.database.find(id:landmarkName),
-            island:this
-          )          
-        }
-
-
-        if (extraLandmarks != empty) ::<= {
-          foreach(extraLandmarks) ::(i, landmarkName) {
-            LargeMap.addLandmark(
-              map:state.map,
-              base:Landmark.database.find(id:landmarkName),
-              island:this
-            )          
-          }
-        
-        }
-
         
         world.island = oldIsland;
         return this;
+      },
+      
+      
+      // Takes a good amount of time and overrides the current 
+      // visual set.
+      // calls end function after
+      loadMap ::(onDone, extraLandmarks) {
+        @:base = state.base;
+        LargeMap.create(
+          parent:this, 
+          sizeW:state.sizeW, 
+          sizeH:state.sizeH, 
+          symbols:base.possibleSceneryCharacters,
+          onDone ::(map) {
+            state.map = map;
+            state.map.title = '';
+
+            foreach(base.requiredLandmarks) ::(i, landmarkName) {
+              LargeMap.addLandmark(
+                map:state.map,
+                base:Landmark.database.find(id:landmarkName),
+                island:this
+              )          
+            }
+
+            for(0, random.integer(from:base.minAdditionalLandmarkCount, to:base.maxAdditionalLandmarkCount)) ::(i) {
+              @:landmarkName = random.pickArrayItem(:base.possibleLandmarks);
+              LargeMap.addLandmark(
+                map:state.map,
+                base:Landmark.database.find(id:landmarkName),
+                island:this
+              )          
+            }
+
+
+            if (extraLandmarks != empty) ::<= {
+              foreach(extraLandmarks) ::(i, landmarkName) {
+                LargeMap.addLandmark(
+                  map:state.map,
+                  base:Landmark.database.find(id:landmarkName),
+                  island:this
+                )          
+              }
+            
+            }
+            
+            
+            onDone(:state.map);
+          
+          }
+        );
+
       },
 
       save ::{

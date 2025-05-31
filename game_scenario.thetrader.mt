@@ -2260,28 +2260,29 @@
                   onDone :: {
                     @world = import(module:'game_singleton.world.mt');
                     @:instance = import(module:'game_singleton.instance.mt');
-                    world.loadIslandID(id:state.islandID);
-                    instance.islandTravel();
+                    world.loadIslandID(id:state.islandID, onDone::(island) {
+                      instance.islandTravel();
 
-                    foreach(state.hirees) ::(k, hiree) {
-                      if (hiree.role == ROLES.IN_PARTY)
-                        hiree.addToParty();
-                    }
+                      foreach(state.hirees) ::(k, hiree) {
+                        if (hiree.role == ROLES.IN_PARTY)
+                          hiree.addToParty();
+                      }
 
-                    
-                    @:landmarks = world.island.landmarks;
-                    @:city = landmarks[landmarks->findIndexCondition(::(value) <- value.worldID == state.cityID)];
-                    
-                    @:locations = city.locations;
-                    @:shop = locations[locations->findIndexCondition(::(value) <- value.worldID == state.shopID)]
+                      
+                      @:landmarks = world.island.landmarks;
+                      @:city = landmarks[landmarks->findIndexCondition(::(value) <- value.worldID == state.cityID)];
+                      
+                      @:locations = city.locations;
+                      @:shop = locations[locations->findIndexCondition(::(value) <- value.worldID == state.shopID)]
 
-                    breakpoint();
-                    instance.visitLandmark(
-                      landmark:city,
-                      where: ::(landmark)<- shop
-                    );        
+                      breakpoint();
+                      instance.visitLandmark(
+                        landmark:city,
+                        where: ::(landmark)<- shop
+                      );        
 
-                    windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
+                      windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
+                    });
                   }
                 )
               }
@@ -3157,136 +3158,135 @@ return {
       idHint: 'thetrader:starting-island',
       tierHint: 0  
     )
-    world.loadIsland(key:keyhome, skipSave:true);
+    world.loadIsland(key:keyhome, skipSave:true, onDone::(island) {
+      party = world.party;
+      party.reset();
+      party.inventory.maxItems = 70;
+      @:island = world.island;
+      party.inventory.add(:keyhome);
 
-    party = world.party;
-    party.reset();
-    party.inventory.maxItems = 70;
-    @:island = world.island;
-    party.inventory.add(:keyhome);
 
+      
+      // debug
+        //party.inventory.addGold(amount:100000);
 
-    
-    // debug
-      //party.inventory.addGold(amount:100000);
+      
+      // since both the party members are from this island, 
+      // they will already know all its locations
+      foreach(world.island.landmarks)::(index, landmark) {
+        landmark.discover(); 
+      }
+      
+      
+      
+      @:Species = import(module:'game_database.species.mt');
+      @:p0 = island.newInhabitant(professionHint: 'base:trader', levelHint:story.levelHint);
+      p0.normalizeStats();
 
-    
-    // since both the party members are from this island, 
-    // they will already know all its locations
-    foreach(world.island.landmarks)::(index, landmark) {
-      landmark.discover(); 
-    }
-    
-    
-    
-    @:Species = import(module:'game_database.species.mt');
-    @:p0 = island.newInhabitant(professionHint: 'base:trader', levelHint:story.levelHint);
-    p0.normalizeStats();
+      
 
-    
+      // Add initial inventory.
+      for(0, 15)::(i) {
+        party.inventory.add(item:
+          Item.new(
+            base:Item.database.getRandomFiltered(
+              filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
+                        && value.tier <= world.island.tier
+            ),
+            from:p0, 
+            rngEnchantHint:true,
+            forceNeedsAppraisal: false
+          )
+        );
+      }
 
-    // Add initial inventory.
-    for(0, 15)::(i) {
+      party.add(member:p0);
+      party.inventory.addGold(amount:250);
+      
+      
+      
+      // setup shop
+      @:city = island.landmarks->filter(by::(value) <- value.base.id == 'thetrader:city')[0];      
+      @:shop = city.locations->filter(by::(value) <- value.base.id == 'thetrader:shop')[0];
+      shop.ownedBy = empty;
+
+      data.trader = TraderState.new(
+        city,
+        shop
+      );
       party.inventory.add(item:
         Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
-                      && value.tier <= world.island.tier
-          ),
-          from:p0, 
-          rngEnchantHint:true,
-          forceNeedsAppraisal: false
-        )
-      );
-    }
-
-    party.add(member:p0);
-    party.inventory.addGold(amount:250);
-    
-    
-    
-    // setup shop
-    @:city = island.landmarks->filter(by::(value) <- value.base.id == 'thetrader:city')[0];      
-    @:shop = city.locations->filter(by::(value) <- value.base.id == 'thetrader:shop')[0];
-    shop.ownedBy = empty;
-
-    data.trader = TraderState.new(
-      city,
-      shop
-    );
-    party.inventory.add(item:
-      Item.new(
-        base:Item.database.find(id:'base:gold-pouch'),
-        from:p0
-      )
-    );
-
-    @:basicArts = [
-      'base:pebble',
-      'base:brace',
-      'base:retaliate',
-      'base:reevaluate',
-      'base:agility',
-      'base:foresight',
-      'base:mind-games',
-      'base:wyvern-prayer'
-    ];
-
-    p0.supportArts = [...basicArts];
-
-
-      
-      /*
-      //party.inventory.addGold(amount:250000);
-      party.inventory.addGold(amount:2500);
-      
-      world.island.tier = 3;
-      
-      
-      
-      data.trader.addHiree(
-        entity: world.island.newInhabitant(),
-        rate:117
-      );
-      data.trader.addHiree(
-        entity: world.island.newInhabitant(),
-        rate:103
-      );
-      data.trader.addHiree(
-        entity: world.island.newInhabitant(),
-        rate:157
-      );
-          
-      party.inventory.add(item:
-        Item.new(
-          base:Item.database.find(id:'Shipment'),
+          base:Item.database.find(id:'base:gold-pouch'),
           from:p0
         )
       );
 
-      party.inventory.add(item:
-        Item.new(
-          base:Item.database.find(id:'Crate'),
-          from:p0
-        )
-      );
-      */
-      
+      @:basicArts = [
+        'base:pebble',
+        'base:brace',
+        'base:retaliate',
+        'base:reevaluate',
+        'base:agility',
+        'base:foresight',
+        'base:mind-games',
+        'base:wyvern-prayer'
+      ];
 
-    @somewhere = LargeMap.getAPosition(map:island.map);
-    island.map.setPointer(
-      x: somewhere.x,
-      y: somewhere.y
-    );         
-    instance.savestate();
-    @:Scene = import(module:'game_database.scene.mt');
-    Scene.start(id:'thetrader:scene_intro', onDone::{          
-      data.trader.dayStart();        
-    });    
+      p0.supportArts = [...basicArts];
+
+
+        
+        /*
+        //party.inventory.addGold(amount:250000);
+        party.inventory.addGold(amount:2500);
+        
+        world.island.tier = 3;
+        
+        
+        
+        data.trader.addHiree(
+          entity: world.island.newInhabitant(),
+          rate:117
+        );
+        data.trader.addHiree(
+          entity: world.island.newInhabitant(),
+          rate:103
+        );
+        data.trader.addHiree(
+          entity: world.island.newInhabitant(),
+          rate:157
+        );
+            
+        party.inventory.add(item:
+          Item.new(
+            base:Item.database.find(id:'Shipment'),
+            from:p0
+          )
+        );
+
+        party.inventory.add(item:
+          Item.new(
+            base:Item.database.find(id:'Crate'),
+            from:p0
+          )
+        );
+        */
+        
+
+      @somewhere = LargeMap.getAPosition(map:island.map);
+      island.map.setPointer(
+        x: somewhere.x,
+        y: somewhere.y
+      );         
+      instance.savestate();
+      @:Scene = import(module:'game_database.scene.mt');
+      Scene.start(id:'thetrader:scene_intro', onDone::{          
+        data.trader.dayStart();        
+      });    
+      
+      
     
-    
-    
-    
+    });
   },
 
   onNewDay ::(data){

@@ -295,431 +295,434 @@ return {
 
 
 
+    @:onMapLoad ::(island) {
+      party = world.party;
+      party.reset();
+      @:island = world.island;
+
+      party.inventory.add(:keyhome);
+
+
+      @:keyother = Item.new(
+        base: Item.database.find(id:'thechosen:wyvern-key-of-fire')
+      );
+      party.inventory.add(:keyother);
+
+
+
+
+      /*
+      for(0, 4) ::(i) {
+        @:key = Item.new(
+          base: Item.database.find(id:'base:wyvern-key')
+        );
+        @:name = namegen.island();
+        key.setIslandGenTraits(
+          nameHint:name, 
+          levelHint:story.levelHint,
+          extraLandmarks : [
+            'thechosen:shrine-of-fire'
+          ],
+          tierHint: 0  
+        )  
+        key.name = 'Key of ' + name;
+        party.inventory.add(:key);  
+      }
+      */
+
+      
+      // debug
+
+
+  /*
+  island.tier = 10;
+  party.inventory.maxItems = 300;
+  for(0, 10) ::(i) {
+    @:test = Item.new(
+      base: Item.database.getRandomFiltered(::(value) <- value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED))
+    );
+
+    party.inventory.add(:test.appraise());
+  }
+  for(0, 70) ::(i) {
+    @:test = Item.new(
+      base: Item.database.getRandom()
+    );
+
+    party.inventory.add(:test);
+  }
+  */
+
+  //party.inventory.addGold(amount:100000);
+
+
+
+      
+      // since both the party members are from this island, 
+      // they will already know all its locations
+      foreach(island.landmarks)::(index, landmark) {
+        landmark.discover(); 
+      }
+      
+      
+      
+      @:Species = import(module:'game_database.species.mt');
+      @:Profession = import(module:'game_database.profession.mt');
+      @:choices = [];
+      @:chosenProfs = []
+      
+      for(0, 5) ::(i) {
+        @:prof = Profession.getRandomFiltered(::(value) <- 
+          ((value.traits & Profession.TRAIT.NON_COMBAT) == 0) && 
+          value.learnable &&
+          chosenProfs[value.id] != true
+        ).id;
+        
+        chosenProfs[prof] = true;
+        @:p0 = island.newInhabitant(
+          levelHint:story.levelHint-1,
+          professionHint: prof
+        );
+
+
+
+        p0.normalizeStats();
+        
+        if (p0.stats.HP < 6) ::<= {
+          @:stats = p0.stats.save();
+          stats.HP = 6;
+          p0.stats.load(:stats);
+          p0.heal(amount:999999, silent:true);
+        }
+        choices->push(value:p0);
+      }
+
+      party.inventory.add(item:Item.new(
+        base:Item.database.find(id:'thechosen:sentimental-box')
+      ));
+
+
+
+      // debug
+        /*
+        //party.inventory.add(item:Item.database.find(id:'Pickaxe'
+        //).new(from:island.newInhabitant(),rngEnchantHint:true));
+        
+        @:story = import(module:'game_singleton.story.mt');
+        
+        party.inventory.addGold(amount:20000);
+        
+
+
+        
+
+        @:story = import(module:'game_singleton.story.mt');
+        
+
+        
+
+        party.inventory.maxItems = 50
+        */
+        
+        
+
+
+        
+        /*
+        @:sword = Item.new(
+          base: Item.database.find(id:'Glaive'),
+          materialHint: 'Ray',
+          qualityHint: '[  ]',
+          rngEnchantHint: false
+        );
+
+        @:tome = Item.new(
+          base:Item.database.find(id:'Tome'),
+          materialHint: 'Ray',
+          qualityHint: '[  ]',
+          rngEnchantHint: false,
+          abilityHint: 'Cure'
+        );
+        party.inventory.add(item:sword);
+        party.inventory.add(item:tome);
+        */
+        
+
+        /*
+        @:pan = Item.new(
+          base:Item.database.find(id:'Frying Pan'),
+          materialHint: 'Crystal',
+          qualityHint: 'Divine',
+          rngEnchantHint: true
+        );
+        party.inventory.add(item:pan);
+        */
+
+
+      
+      
+      /*
+      windowEvent.queueMessage(
+        text: '... As it were, today is the beginning of a new adventure.'
+      );
+
+
+      windowEvent.queueMessage(
+        text: '' + party.members[0].name + ' and their faithful companion ' + party.members[1].name + ' have decided to leave their long-time home of ' + island.name + '. Emboldened by countless tales of long lost eras, these 2 set out to discover the vast, mysterious, and treacherous world before them.'
+      );
+
+      windowEvent.queueMessage(
+        text: 'Their first task is to find a way off their island.\nDue to their distances and dangerous winds, travel between sky islands is only done via the Wyvern Gates, ancient portals of seemingly-eternal magick that connect these islands.'
+      );
+      
+      windowEvent.queueMessage(
+        text: party.members[0].name + ' has done the hard part and acquired a key to the Gate.\nAll thats left is to go to it and find where it leads.'
+      );
+      */
+
+
+      windowEvent.queueMessage(
+        text: 'Before it begins, we must decide who will be venturing on their journey.'
+      )
+
+      windowEvent.queueMessage(
+        text: 'Who will it be? You may pick 2.'
+      );
+      
+
+      
+      @:extendedName::(entity) {
+        return 'the ' + entity.species.name + ' ' + entity.profession.name
+      }
+      
+      @:finish ::{
+        windowEvent.queueMessage(
+          text: 'Upon certain events, the game will save automatically. However, it is encouraged to save often.'
+        );
+      
+      
+        loading(
+          message: 'Saving...',
+          do :: {
+            @:basicArts = [
+              'base:pebble',
+              'base:brace',
+              'base:retaliate',
+              'base:reevaluate',
+              'base:agility',
+              'base:foresight',
+              'base:mind-games'
+              
+              //////////////
+
+              //////////////
+            ];
+
+            party.members->foreach(::(k, v) {
+              v.supportArts = [...basicArts];
+            });
+          
+          
+            @somewhere = LargeMap.getAPosition(map:island.map);
+            island.map.setPointer(
+              x: somewhere.x,
+              y: somewhere.y
+            );         
+            instance.savestate();
+            @:Scene = import(module:'game_database.scene.mt');
+            Scene.start(id:'thechosen:scene_intro', onDone::{          
+            //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
+              instance.visitCurrentIsland();            
+            });    
+          }
+        )
+      }
     
+      @:confirmParty ::{
+        windowEvent.queueAskBoolean(
+          renderable : {
+            render ::{
+              canvas.renderTextFrameGeneral(
+                topWeight: 0.2,
+                leftWeight: 0.5,
+                lines : [
+                  'Current party:',
+                  '',              
+                  extendedName(entity:p0),
+                  if (p1) extendedName(entity:p1) else ''
+                ]
+              )
+            }
+          },
+          topWeight: 0.65,
+          leftWeight: 0.5,
+          prompt: 'Continue with this party?',
+          onChoice::(which) {
+            when(which == false) ::<= {
+              p0 = empty;
+              p1 = empty;
+              chooseMember();
+              windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
+            }
+                      
+            party.add(member:p0);
+            if (p1) party.add(member:p1);
+            finish();
+            windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
+          }
+          
+        );
+      }
+
+
+
+      // choose party members
+      @hovered;
+      @p0;
+      @p1;
+      
+      @whatDoStatsMean ::{
+        windowEvent.queueReader(
+          prompt: 'What are stats?',
+          lines: [
+            "Stats are the basic qualities that everyone has. They determine the person's ability to face a variety of challenges.",
+            "",
+            "HP - This stat indicates how much a person can withstand before succumbing to a knockout. The higher this stat, the more damage they can withstand.",
+            "",
+            "AP - This stat indicates how often a person can use special abilities. The higher this stat, the more a person can do outside of normal actions.",
+            "",
+            "ATK - This stat measures the physical strength a person possesses. The higher this stat, the more physical damage this person can do to foes",
+            "",
+            "DEF - This stat measures how likely a person's will be able to avoid harm. The higher this stat, the more likely a person will be able to shrug off an attack entirely.",
+            "",
+            "INT - This stat measures the intellect and intuition of a person. The higher this stat, the more a user is aware of the world around them. Certain abilities, such as spells, will benefit from this as well.",
+            "",
+            "SPD - This stat measures how fast a person can move. The higher this stat, the more apt they are at acting before others.",
+            "",
+            "LUK - This stat measures how lucky a person is. The higher this stat, the more a person may get out of difficult situations.",
+            "",
+            "DEX - This stat measures the precision and grace with which a person acts. The higher this stat, the more likely an attack will pierce through defenses.",
+            "",
+            "All stats are important, but some stats may be more important at times than others."          
+          ]
+        );
+      };
+      
+
+      @:chooseMember ::{
+        @:choicesMod = [...choices]->filter(by::(value) <- value != p0);
+
+        @:choiceNames = [...choicesMod]->map(to:::(value) {
+          return value.name;
+        });
+
+        @:choiceTitles = [...choicesMod]->map(to:::(value) {
+          return extendedName(entity:value);  
+        });
+
+        if (p0 != empty) ::<= {
+          choiceNames->push(value:'No one.');
+          choiceTitles->push(value:'');
+        }
+        @:choicesColumns = import(module:'game_function.choicescolumns.mt');
+      
+        
+        choicesColumns(
+          canCancel : true,
+          columns : [
+            choiceNames,
+            choiceTitles
+          ],
+          leftJustified: [
+            true,
+            true
+          ],
+          topWeight: 0.5,
+          leftWeight: 0.5,
+          keep:true,
+          jumpTag: 'ChooseMember',        
+          onCancel ::{
+            if (p0 != empty) p0 = empty;
+            chooseMember();
+          },
+          
+          renderable : {
+            render :: {
+              when(hovered == empty) empty;
+              when (hovered == choicesMod->size) empty
+
+              canvas.renderTextFrameGeneral(
+                topWeight: 0.5,
+                leftWeight: 1,
+                title: 'Stats',
+                lines: choicesMod[hovered].stats.description->split(token:'\n')
+              );          
+            }
+          },
+          onHover::(choice) {
+            hovered = choice-1;
+          },
+          onChoice::(choice) {
+            when (choice-1 == choicesMod->size) ::<= {
+              windowEvent.queueMessage(
+                text: 'Continuing with only one party member is a bold move. You may find others to join them later, but the journey may be more difficult.'
+              );
+              
+              windowEvent.queueAskBoolean(
+                prompt: 'Continue with just one party member?',
+                onChoice::(which) {
+                  when(which == false) empty;
+                  confirmParty();
+                }
+              );
+            }
+          
+            @:next = choicesMod[choice-1];
+            windowEvent.queueChoices(
+              prompt: extendedName(entity:next),
+              choices : [
+                'Describe',
+                'What do the stats mean?',
+                'Choose',
+              ],
+              canCancel:true,
+              onChoice::(choice) {
+                when(choice-1 == 0)
+                  next.describe(excludeStats:true);
+                  
+                when(choice-1 == 1)
+                  whatDoStatsMean();
+                // choose
+                windowEvent.queueAskBoolean(
+                  prompt: 'Add ' + next.name + ' to the party?',
+                  onChoice::(which) {
+                    when(which == false) empty;
+                    when (p0 == empty) ::<= {
+                      p0 = next;
+                      chooseMember();
+                      windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
+                    }
+                    p1 = next;
+                    confirmParty();
+                  }
+                );
+              }
+            );
+          }    
+        )
+      }
+      chooseMember();
+    }
+
+
     keyhome.setIslandGenTraits(
       nameHint:namegen.island(), 
       levelHint:story.levelHint,
       idHint: 'base:starting-island',
       tierHint: 0  
     )
-    world.loadIsland(key:keyhome);
+    world.loadIsland(key:keyhome, onDone:onMapLoad);
 
-    party = world.party;
-    party.reset();
-    @:island = world.island;
-
-    party.inventory.add(:keyhome);
-
-
-    @:keyother = Item.new(
-      base: Item.database.find(id:'thechosen:wyvern-key-of-fire')
-    );
-    party.inventory.add(:keyother);
-
-
-
-
-    /*
-    for(0, 4) ::(i) {
-      @:key = Item.new(
-        base: Item.database.find(id:'base:wyvern-key')
-      );
-      @:name = namegen.island();
-      key.setIslandGenTraits(
-        nameHint:name, 
-        levelHint:story.levelHint,
-        extraLandmarks : [
-          'thechosen:shrine-of-fire'
-        ],
-        tierHint: 0  
-      )  
-      key.name = 'Key of ' + name;
-      party.inventory.add(:key);  
-    }
-    */
-
-    
-    // debug
-
-
-/*
-island.tier = 10;
-party.inventory.maxItems = 300;
-for(0, 10) ::(i) {
-  @:test = Item.new(
-    base: Item.database.getRandomFiltered(::(value) <- value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED))
-  );
-
-  party.inventory.add(:test.appraise());
-}
-for(0, 70) ::(i) {
-  @:test = Item.new(
-    base: Item.database.getRandom()
-  );
-
-  party.inventory.add(:test);
-}
-*/
-
-party.inventory.addGold(amount:100000);
-
-
-
-    
-    // since both the party members are from this island, 
-    // they will already know all its locations
-    foreach(island.landmarks)::(index, landmark) {
-      landmark.discover(); 
-    }
-    
-    
-    
-    @:Species = import(module:'game_database.species.mt');
-    @:Profession = import(module:'game_database.profession.mt');
-    @:choices = [];
-    @:chosenProfs = []
-    
-    for(0, 5) ::(i) {
-      @:prof = Profession.getRandomFiltered(::(value) <- 
-        ((value.traits & Profession.TRAIT.NON_COMBAT) == 0) && 
-        value.learnable &&
-        chosenProfs[value.id] != true
-      ).id;
-      
-      chosenProfs[prof] = true;
-      @:p0 = island.newInhabitant(
-        levelHint:story.levelHint-1,
-        professionHint: prof
-      );
-
-
-
-      p0.normalizeStats();
-      
-      if (p0.stats.HP < 6) ::<= {
-        @:stats = p0.stats.save();
-        stats.HP = 6;
-        p0.stats.load(:stats);
-        p0.heal(amount:999999, silent:true);
-      }
-      choices->push(value:p0);
-    }
-
-    party.inventory.add(item:Item.new(
-      base:Item.database.find(id:'thechosen:sentimental-box')
-    ));
-
-
-
-    // debug
-      /*
-      //party.inventory.add(item:Item.database.find(id:'Pickaxe'
-      //).new(from:island.newInhabitant(),rngEnchantHint:true));
-      
-      @:story = import(module:'game_singleton.story.mt');
-      
-      party.inventory.addGold(amount:20000);
-      
-
-
-      
-
-      @:story = import(module:'game_singleton.story.mt');
-      
-
-      
-
-      party.inventory.maxItems = 50
-      */
-      
-      
-
-
-      
-      /*
-      @:sword = Item.new(
-        base: Item.database.find(id:'Glaive'),
-        materialHint: 'Ray',
-        qualityHint: '[  ]',
-        rngEnchantHint: false
-      );
-
-      @:tome = Item.new(
-        base:Item.database.find(id:'Tome'),
-        materialHint: 'Ray',
-        qualityHint: '[  ]',
-        rngEnchantHint: false,
-        abilityHint: 'Cure'
-      );
-      party.inventory.add(item:sword);
-      party.inventory.add(item:tome);
-      */
-      
-
-      /*
-      @:pan = Item.new(
-        base:Item.database.find(id:'Frying Pan'),
-        materialHint: 'Crystal',
-        qualityHint: 'Divine',
-        rngEnchantHint: true
-      );
-      party.inventory.add(item:pan);
-      */
-
-
-    
-    
-    /*
-    windowEvent.queueMessage(
-      text: '... As it were, today is the beginning of a new adventure.'
-    );
-
-
-    windowEvent.queueMessage(
-      text: '' + party.members[0].name + ' and their faithful companion ' + party.members[1].name + ' have decided to leave their long-time home of ' + island.name + '. Emboldened by countless tales of long lost eras, these 2 set out to discover the vast, mysterious, and treacherous world before them.'
-    );
-
-    windowEvent.queueMessage(
-      text: 'Their first task is to find a way off their island.\nDue to their distances and dangerous winds, travel between sky islands is only done via the Wyvern Gates, ancient portals of seemingly-eternal magick that connect these islands.'
-    );
-    
-    windowEvent.queueMessage(
-      text: party.members[0].name + ' has done the hard part and acquired a key to the Gate.\nAll thats left is to go to it and find where it leads.'
-    );
-    */
-
-
-    windowEvent.queueMessage(
-      text: 'Before it begins, we must decide who will be venturing on their journey.'
-    )
-
-    windowEvent.queueMessage(
-      text: 'Who will it be? You may pick 2.'
-    );
-    
-
-    
-    @:extendedName::(entity) {
-      return 'the ' + entity.species.name + ' ' + entity.profession.name
-    }
-    
-    @:finish ::{
-      windowEvent.queueMessage(
-        text: 'Upon certain events, the game will save automatically. However, it is encouraged to save often.'
-      );
-    
-    
-      loading(
-        message: 'Saving...',
-        do :: {
-          @:basicArts = [
-            'base:pebble',
-            'base:brace',
-            'base:retaliate',
-            'base:reevaluate',
-            'base:agility',
-            'base:foresight',
-            'base:mind-games'
-            
-            //////////////
-
-            //////////////
-          ];
-
-          party.members->foreach(::(k, v) {
-            v.supportArts = [...basicArts];
-          });
-        
-        
-          @somewhere = LargeMap.getAPosition(map:island.map);
-          island.map.setPointer(
-            x: somewhere.x,
-            y: somewhere.y
-          );         
-          instance.savestate();
-          @:Scene = import(module:'game_database.scene.mt');
-          Scene.start(id:'thechosen:scene_intro', onDone::{          
-          //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
-            instance.visitCurrentIsland();            
-          });    
-        }
-      )
-    }
-  
-    @:confirmParty ::{
-      windowEvent.queueAskBoolean(
-        renderable : {
-          render ::{
-            canvas.renderTextFrameGeneral(
-              topWeight: 0.2,
-              leftWeight: 0.5,
-              lines : [
-                'Current party:',
-                '',              
-                extendedName(entity:p0),
-                if (p1) extendedName(entity:p1) else ''
-              ]
-            )
-          }
-        },
-        topWeight: 0.65,
-        leftWeight: 0.5,
-        prompt: 'Continue with this party?',
-        onChoice::(which) {
-          when(which == false) ::<= {
-            p0 = empty;
-            p1 = empty;
-            chooseMember();
-            windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
-          }
-                    
-          party.add(member:p0);
-          if (p1) party.add(member:p1);
-          finish();
-          windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
-        }
-        
-      );
-    }
-
-
-
-    // choose party members
-    @hovered;
-    @p0;
-    @p1;
-    
-    @whatDoStatsMean ::{
-      windowEvent.queueReader(
-        prompt: 'What are stats?',
-        lines: [
-          "Stats are the basic qualities that everyone has. They determine the person's ability to face a variety of challenges.",
-          "",
-          "HP - This stat indicates how much a person can withstand before succumbing to a knockout. The higher this stat, the more damage they can withstand.",
-          "",
-          "AP - This stat indicates how often a person can use special abilities. The higher this stat, the more a person can do outside of normal actions.",
-          "",
-          "ATK - This stat measures the physical strength a person possesses. The higher this stat, the more physical damage this person can do to foes",
-          "",
-          "DEF - This stat measures how likely a person's will be able to avoid harm. The higher this stat, the more likely a person will be able to shrug off an attack entirely.",
-          "",
-          "INT - This stat measures the intellect and intuition of a person. The higher this stat, the more a user is aware of the world around them. Certain abilities, such as spells, will benefit from this as well.",
-          "",
-          "SPD - This stat measures how fast a person can move. The higher this stat, the more apt they are at acting before others.",
-          "",
-          "LUK - This stat measures how lucky a person is. The higher this stat, the more a person may get out of difficult situations.",
-          "",
-          "DEX - This stat measures the precision and grace with which a person acts. The higher this stat, the more likely an attack will pierce through defenses.",
-          "",
-          "All stats are important, but some stats may be more important at times than others."          
-        ]
-      );
-    };
-    
-
-    @:chooseMember ::{
-      @:choicesMod = [...choices]->filter(by::(value) <- value != p0);
-
-      @:choiceNames = [...choicesMod]->map(to:::(value) {
-        return value.name;
-      });
-
-      @:choiceTitles = [...choicesMod]->map(to:::(value) {
-        return extendedName(entity:value);  
-      });
-
-      if (p0 != empty) ::<= {
-        choiceNames->push(value:'No one.');
-        choiceTitles->push(value:'');
-      }
-      @:choicesColumns = import(module:'game_function.choicescolumns.mt');
-    
-      
-      choicesColumns(
-        canCancel : true,
-        columns : [
-          choiceNames,
-          choiceTitles
-        ],
-        leftJustified: [
-          true,
-          true
-        ],
-        topWeight: 0.5,
-        leftWeight: 0.5,
-        keep:true,
-        jumpTag: 'ChooseMember',        
-        onCancel ::{
-          if (p0 != empty) p0 = empty;
-          chooseMember();
-        },
-        
-        renderable : {
-          render :: {
-            when(hovered == empty) empty;
-            when (hovered == choicesMod->size) empty
-
-            canvas.renderTextFrameGeneral(
-              topWeight: 0.5,
-              leftWeight: 1,
-              title: 'Stats',
-              lines: choicesMod[hovered].stats.description->split(token:'\n')
-            );          
-          }
-        },
-        onHover::(choice) {
-          hovered = choice-1;
-        },
-        onChoice::(choice) {
-          when (choice-1 == choicesMod->size) ::<= {
-            windowEvent.queueMessage(
-              text: 'Continuing with only one party member is a bold move. You may find others to join them later, but the journey may be more difficult.'
-            );
-            
-            windowEvent.queueAskBoolean(
-              prompt: 'Continue with just one party member?',
-              onChoice::(which) {
-                when(which == false) empty;
-                confirmParty();
-              }
-            );
-          }
-        
-          @:next = choicesMod[choice-1];
-          windowEvent.queueChoices(
-            prompt: extendedName(entity:next),
-            choices : [
-              'Describe',
-              'What do the stats mean?',
-              'Choose',
-            ],
-            canCancel:true,
-            onChoice::(choice) {
-              when(choice-1 == 0)
-                next.describe(excludeStats:true);
-                
-              when(choice-1 == 1)
-                whatDoStatsMean();
-              // choose
-              windowEvent.queueAskBoolean(
-                prompt: 'Add ' + next.name + ' to the party?',
-                onChoice::(which) {
-                  when(which == false) empty;
-                  when (p0 == empty) ::<= {
-                    p0 = next;
-                    chooseMember();
-                    windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
-                  }
-                  p1 = next;
-                  confirmParty();
-                }
-              );
-            }
-          );
-        }    
-      )
-    }
-    chooseMember();
   },
   onNewDay ::(data){},
   
@@ -4302,9 +4305,10 @@ party.inventory.addGold(amount:100000);
             windowEvent.queueCustom(
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(key);
-                instance.visitCurrentIsland(atGate:true);
-                doNext();     
+                world.loadIsland(key, onDone::(island) {
+                  instance.visitCurrentIsland(atGate:true);
+                  doNext();     
+                });
               }
             ); 
 
@@ -4314,8 +4318,9 @@ party.inventory.addGold(amount:100000);
             
             @:instance = import(module:'game_singleton.instance.mt');
 
-            world.loadIsland(key);
-            instance.visitCurrentIsland(atGate:true, onReady:doNext);
+            world.loadIsland(key, onDone::(island) {
+              instance.visitCurrentIsland(atGate:true, onReady:doNext);
+            });
           } 
         ]
       }
@@ -4369,9 +4374,10 @@ party.inventory.addGold(amount:100000);
             windowEvent.queueCustom(
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
-                world.loadIsland(key);
-                instance.visitCurrentIsland(atGate:true, onReady:doNext);
-                doNext();     
+                world.loadIsland(key, onDone::(island) {
+                  instance.visitCurrentIsland(atGate:true, onReady:doNext);
+                  doNext();     
+                });
               }
             ); 
 
@@ -4558,13 +4564,13 @@ party.inventory.addGold(amount:100000);
         ],
         minAdditionalLandmarkCount : 0,
         maxAdditionalLandmarkCount : 0,
-        minSize : 30,//80,
-        maxSize : 40, //130,
+        minSize : 20,//80,
+        maxSize : 20, //130,
         events : [
           
         ],
         possibleSceneryCharacters : [
-          '▒', '▒', '▒', '▒', '▒'
+          '^', '^', '^', '^', '^'
         ],
         
         traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,

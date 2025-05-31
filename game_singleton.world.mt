@@ -831,11 +831,40 @@
         return save;        
       },
 
-      loadIslandID ::(id, islandGenTraits, skipSave) {
+      loadIslandID ::(id, islandGenTraits, skipSave, onDone) {
         // first load existing save. The save has all the current islands 
         @:instance = import(:'game_singleton.instance.mt');
 
         @save = instance.getSaveDataRaw();
+        
+        @:commitLoad ::(skipLoadMap) {
+          state.currentIslandID = id;
+          if (alreadyLoaded != empty)
+            island = alreadyLoaded 
+          else ::<= {
+            island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
+            State.weightCheck(:which);
+            island.load(serialized:which);
+          }
+          
+          save.world = state.save();
+          save.rng = random.save();
+
+          // traveling always triggers a save.
+          if (skipSave == empty || skipSave == false) ::<= {
+            State.weightEmplace(:save);
+            instance.savestate(saveOverride:save);      
+          }
+          
+          when (skipLoadMap)
+            onDone(:this.island);        
+
+          this.island.loadMap(::(map) {
+            onDone(:this.island);        
+          });
+        }
+        
+        
         if (save == empty || save->keycount == 0) ::<= {
           save = this.save();
         }
@@ -854,53 +883,38 @@
           @:newIsland = Island.new(
             *{worldID : id, ...(if (islandGenTraits) islandGenTraits else {})}
           );
-
-          alreadyLoaded = newIsland;
+          island = newIsland;
+          newIsland.loadMap(onDone ::(map) {
+            alreadyLoaded = newIsland;
+            
+            // need a location too if first making.
+            @gate = newIsland.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
+            when(gate->size == 0) empty;
+            
+            gate = gate[0];
+            newIsland.map.setPointer(
+              x: gate.x,
+              y: gate.y
+            );               
           
-          // need a location too if first making.
-          @gate = newIsland.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
-          when(gate->size == 0) empty;
-          
-          gate = gate[0];
-          newIsland.map.setPointer(
-            x: gate.x,
-            y: gate.y
-          );               
-        
-          save.islands[id] = newIsland.save(); 
-          which = save.islands[id];
-        }
-        
+            save.islands[id] = newIsland.save(); 
+            which = save.islands[id];
 
-
-        state.currentIslandID = id;
-        if (alreadyLoaded != empty)
-          island = alreadyLoaded 
-        else ::<= {
-          island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
-          State.weightCheck(:which);
-          island.load(serialized:which);
-        }
-        
-        save.world = state.save();
-        save.rng = random.save();
-
-        // traveling always triggers a save.
-        if (skipSave == empty || skipSave == false) ::<= {
-          State.weightEmplace(:save);
-          instance.savestate(saveOverride:save);      
-        }
+            commitLoad(skipLoadMap:true);          
+          });
+        } else 
+          commitLoad();
       },
 
       // makes the key's island the current island. If the key's island 
       // doesnt exist, it is made, saved, and set to the island
-      loadIsland ::(key, skipSave) {
+      loadIsland ::(key, skipSave, onDone) {
         // get ID if none exists
         if (key.islandID == 0) ::<= {
           key.islandID = this.getNextID();
         }
 
-        this.loadIslandID(id:key.islandID, islandGenTraits:key.islandGenTraits);
+        this.loadIslandID(id:key.islandID, islandGenTraits:key.islandGenTraits, onDone);
       },
      
       

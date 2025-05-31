@@ -2047,11 +2047,12 @@ Interaction.newEntry(
 
 
             @:key = keys[choice-1];
-            world.loadIsland(key);
-            breakpoint();
-            instance.visitCurrentIsland(
-              atGate:true
-            );
+            world.loadIsland(key, onDone::(island) {
+              breakpoint();
+              instance.visitCurrentIsland(
+                atGate:true
+              );
+            });
           });
         }
       );
