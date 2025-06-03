@@ -42,6 +42,9 @@
 
 
 
+/*
+
+// Standard pretty
 
 @:SEED_GROW_ITER = 7;
 @:SEED_FILL_ITER = 4;
@@ -49,25 +52,52 @@
 @:SEED_RADIUS_MAX = 16;
 @:GROW_LAYERS_MIN = 5;
 @:GROW_LAYERS_MAX = 9;
+@:SEED_COUNT ::(width, height) <- 4+(width+height)/25
+*/
+
+// mini
+@:SEED_GROW_ITER = 7;
+@:SEED_FILL_ITER = 4;
+@:SEED_RADIUS_MIN = 5;
+@:SEED_RADIUS_MAX = 9;
+@:GROW_LAYERS_MIN = 5;
+@:GROW_LAYERS_MAX = 9;
+@:SEED_COUNT ::(width, height) <- (4+(width+height)/18.0)->round
 
 
-@:generateTerrain_phase1::(out, map, width, height, symbols, symbolList) {
-  @:SEED_COUNT = 4+(width+height)/25;
+
+
+
+
+
+@:generateTerrain_phase1::(out, map, width, height, symbols, symbolList, areas) {
   
-  for(0, SEED_COUNT)::(i) {
+  for(0, SEED_COUNT(width, height))::(i) {
     @:xSeed = BUFFER_SPACE + (random.number() * width)->round;
     @:ySeed = BUFFER_SPACE + (random.number() * height)->round;
     @:radius = random.integer(from:SEED_RADIUS_MIN, to:SEED_RADIUS_MAX);; 
     @:distanceFn = import(:'game_function.distance.mt');
+    
+    @:info = {
+      x : xSeed,
+      y : ySeed,
+      boxes : []
+    }
   
     for(0, height + BUFFER_SPACE*2) ::(y) {
       for(0, width + BUFFER_SPACE*2) ::(x) {
       
         if (distanceFn(x0:x, y0:y, x1:xSeed, y1:ySeed) <= radius) ::<= {
             out[x + (width + BUFFER_SPACE*2) * y] = symbolList[0];
+            info.boxes->push(:{
+              x: x,
+              y: y
+            });
         }        
       }
     }
+    
+    areas->push(:info);
   }
 }
 
@@ -145,7 +175,6 @@
   foreach(selectAreas) ::(k, v) {
     out[v.x + (width + BUFFER_SPACE*2) * v.y] = symbolList[random.integer(from:1, to:symbolList->keycount-1)]
   }
-  breakpoint();
 
 
   @xIncr = 1;
@@ -287,6 +316,168 @@
   }        
 }
 
+@:generateTerrain_connect::(out, map, width, height, symbols, symbolList, land, areas) {
+
+  
+  
+  // now that we have the list..... form groups
+  foreach(areas) ::(k, v) {
+    v.group = [v];
+  }
+
+  @:groups = areas->map(::(value) <- value.group);
+
+  
+  @:mergeGroups::(a, b) {
+    groups->remove(:groups->findIndex(:a.group));
+    groups->remove(:groups->findIndex(:b.group));
+  
+    @group = {};
+    foreach([...a.group, ...b.group]) ::(k, v) {
+      group[v] = true;
+    }
+    group = group->keys; // removes dupes!
+    
+    foreach(group) ::(k, v) {
+      v.group = group;
+    }
+    groups->push(:group);
+  }
+
+
+  // prevent repeat getPath grinding
+  @:connects = {};
+
+  {:::} {
+    forever :: {
+      @needRemerge = false;
+      {:::} {
+        foreach(groups) ::(k, group) {
+          // already has a group
+          @:rep = group[0];
+
+          foreach(groups) ::(k, v) {
+            @other = v[0];
+            if (other == rep) empty;
+            
+            
+            if ((connects[rep] != empty && connects[rep][other] == true) || map.getPath(
+              useBFS: true,
+              fromX : rep.x,
+              fromY : rep.y,
+              toX : other.x,
+              toY : other.y
+            ) != empty) ::<={
+              if (connects[rep] == empty)
+                connects[rep] = {};
+              connects[rep][other] = true;
+
+              if (connects[other] == empty)
+                connects[other] = {};
+              connects[other][rep] = true;
+
+            
+              mergeGroups(a:rep, b:other);
+              needRemerge = true;
+              send();
+            }
+          }      
+        }
+      }
+      if (needRemerge == false)
+        send();
+    }
+  }
+  breakpoint();
+
+
+  // no additional work needed
+  when(groups->size == 1) empty;
+
+
+  
+  foreach(areas) ::(k, area) {
+    area.others = areas->filter(::(value) <- value != area && value.group != area.group)
+      ->map(::(value) <- {
+        area : value,
+        distance : distance(x0:area.x, y0:area.y, x1:value.x, y1:value.y)
+      });
+      
+    area.others->sort(::(a, b) {
+      when(a.distance < b.distance) -1
+      when(a.distance > b.distance) 0
+      return 1;
+    });
+  }
+
+
+
+
+  // before going on, lets revisit the "others" member 
+  // of each area. Remove
+  
+  @:createBridge = ::(from, to) {
+    @xfrom = from.x;
+    @xto   = to.x;
+
+    @yfrom = from.y;
+    @yto   = to.y;
+
+    @:freeSpace::(x, y, ch) {
+      if (map.isWalled(x, y)) ::<= {
+        map.setSceneryIndex(x, y, symbol:ch);
+        map.disableWall(x, y);
+      }
+    }
+    
+    @:ew = map.addScenerySymbol(:'─');
+    @:ns = map.addScenerySymbol(:'│');
+
+
+    for(xfrom, xto) ::(x) {
+      freeSpace(x, y:yfrom, ch:ew)
+    }
+
+    for(yfrom, yto) ::(y) {
+      freeSpace(x:xto, y, ch:ns)
+    }
+  }
+  
+  {:::} {
+    forever::{
+      // no connecting needed! done :)
+      when(groups->size == 1) send();
+      
+      @closestFrom = groups[0][0];
+      @closestDist = closestFrom.others[0].distance;
+      @closestTo   = groups[1][0];
+      
+      foreach(groups[0]) ::(k, from) {
+        foreach(from.others) ::(k, v) {
+          // can still happen intramerge
+          when (v.area.group == from.group) empty;
+          
+          if (v.distance < closestDist) ::<= {
+            closestDist = v.distance;
+            closestTo = v.area;
+            closestFrom = from;
+          }
+        } 
+      }
+      
+      // create a bridge
+      createBridge(from:closestFrom, to:closestTo);
+      mergeGroups(a:closestFrom, b:closestTo);
+      
+      
+      breakpoint();
+    }
+  }
+
+  
+}
+
+
 @:generateTerrain_cleanup::(out, map, width, height, symbols, symbolList, land) {
 
 
@@ -329,6 +520,8 @@
 @:LargeMap = class(
   name: 'Wyvern.LargeMap',
   define:::(this) {
+    @areas;
+  
     @:clearScenery::(map, x, y) {
       @index = map.addScenerySymbol(character:' ');
 
@@ -379,21 +572,9 @@
           )
         ];
 
-
-        
-        if (symbols->size < 5) 
-          error(:'Symbol list for terrain must have at least 5 characters');
-
-        @:symbolList = [
-          map.addScenerySymbol(character:' '),
-          ...(
-            random.scrambled(:symbols)
-              ->subset(from:0, to:3)
-                ->map(::(value) <- map.addScenerySymbol(character:value))
-          )
-        ];     
         
         @:out = [];
+        areas = [];
         @:args = {
           map : map,
           width:map.width - BUFFER_SPACE*2,
@@ -404,16 +585,18 @@
           land: land,
           border: border,
           spire : spire,
-          spireEnd : spireEnd
+          spireEnd : spireEnd,
+          areas : areas
         }   
         
         @:phases = [
           ['Generating terrain (1/2)...', generateTerrain_phase1],
           ['Generating terrain (2/2)...', generateTerrain_phase2],
-          ['Generating the landscape (1/2)...', generateTerrain_landscape_phase1],
-          ['Generating the landscape (2/2)...', generateTerrain_landscape_phase2],
-          ['Finalizing terrain...', generateTerrain_finalize1],
-          ['Cleaning up...', generateTerrain_cleanup]
+          ['Generating landscape (1/2)...', generateTerrain_landscape_phase1],
+          ['Generating landscape (2/2)...', generateTerrain_landscape_phase2],
+          ['Finalizing terrain (1/2)...', generateTerrain_finalize1],
+          ['Finalizing terrain (2/2)...', generateTerrain_cleanup],
+          ['Connecting islands...', generateTerrain_connect],
         ]        
         @:loading = import(:'game_function.loading.mt');
         @:next = ::{
@@ -436,8 +619,9 @@
 
 
       addLandmark::(map, island, base) { 
-        @:x = random.integer(from:BUFFER_SPACE + (0.2*(map.width  - BUFFER_SPACE*2))->floor, to:(map.width  - BUFFER_SPACE)-(0.2*(map.width  - BUFFER_SPACE*2))->floor);
-        @:y = random.integer(from:BUFFER_SPACE + (0.2*(map.height - BUFFER_SPACE*2))->floor, to:(map.height - BUFFER_SPACE)-(0.2*(map.height - BUFFER_SPACE*2))->floor);
+        @:loc = random.scrambled(:areas)[0];
+        @:x = loc.x;      
+        @:y = loc.y;      
         @:landmark = Landmark.new(
           island,
           base,
@@ -450,9 +634,13 @@
       },
       
       getAPosition ::(map) {
+        @:loc = random.scrambled(:areas)[0];
+        @:x = loc.x;      
+        @:y = loc.y;      
+
         return {
-          x:random.integer(from:BUFFER_SPACE + (0.2*(map.width  - BUFFER_SPACE*2))->floor, to:(map.width  - BUFFER_SPACE)-(0.2*(map.width  - BUFFER_SPACE*2))->floor),
-          y:random.integer(from:BUFFER_SPACE + (0.2*(map.height - BUFFER_SPACE*2))->floor, to:(map.height - BUFFER_SPACE)-(0.2*(map.height - BUFFER_SPACE*2))->floor)
+          x: x,
+          y: y
         }
       }
       

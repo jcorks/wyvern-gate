@@ -1184,13 +1184,13 @@ return empty;
               // move by one unit in that direction
               // or ON it if its within one unit.
               island.map.movePointerFree(
-                x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 2 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -2 else 0,
-                y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  2 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -2 else 0
+                x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
+                y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
               );
               island.map.title = island.name + ' : ' + world.timeString + '           ';
               steps += 1;
               
-              if (steps%2 == 0)
+              if (steps%4 == 0)
                 world.incrementTime();
               island.step();
               

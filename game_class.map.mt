@@ -310,10 +310,10 @@
       @:y = (current/width)->floor
       
       @i;
-      i = aStarNewNode(x:x+1, y:y+1); if (i != empty) neighbors->push(value:i);
-      i = aStarNewNode(x:x+1, y:y-1); if (i != empty) neighbors->push(value:i);
-      i = aStarNewNode(x:x-1, y:y+1); if (i != empty) neighbors->push(value:i);
-      i = aStarNewNode(x:x-1, y:y-1); if (i != empty) neighbors->push(value:i);
+      //i = aStarNewNode(x:x+1, y:y+1); if (i != empty) neighbors->push(value:i);
+      //i = aStarNewNode(x:x+1, y:y-1); if (i != empty) neighbors->push(value:i);
+      //i = aStarNewNode(x:x-1, y:y+1); if (i != empty) neighbors->push(value:i);
+      //i = aStarNewNode(x:x-1, y:y-1); if (i != empty) neighbors->push(value:i);
 
       i = aStarNewNode(x:x-1, y:y  ); if (i != empty) neighbors->push(value:i);
       i = aStarNewNode(x:x+1, y:y  ); if (i != empty) neighbors->push(value:i);
@@ -1156,15 +1156,18 @@
           y:path[path->keycount-1].y
         )
       },
+      
+      getPath::(fromX, fromY, toX, toY, useBFS) {
+        when(useBFS != empty)
+          bfsPath(start:{x:fromX, y:fromY}, goal:{x:toX, y:toY});
+        @:path = aStarPath(start:{x:fromX, y:fromY}, goal:{x:toX, y:toY});
+        when(path == empty || path->keycount == 0) empty;
+        return path;
+      },
 
       getPathTo::(data, x, y, useBFS) {
         @:ent = retrieveItem(data);      
-
-        when(useBFS != empty)
-          bfsPath(start:ent, goal:{x:x, y:y});
-        @:path = aStarPath(start:ent, goal:{x:x, y:y});
-        when(path == empty || path->keycount == 0) empty;
-        return path;
+        this.getXYPathTo(data, fromX:ent.x, fromY:ent.y,toX:x, toY:y, useBFS);
       },
       
       moveItem::(data, x, y) {

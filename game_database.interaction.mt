@@ -3053,6 +3053,7 @@ Interaction.newEntry(
       foreach(world.party.members) ::(index, member) {
         if (member.hp < member.stats.HP/2)
           member.heal(amount: member.stats.HP * 0.1);
+
       }
       
       

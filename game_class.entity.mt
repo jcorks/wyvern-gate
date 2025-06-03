@@ -208,7 +208,7 @@
     @:emotions   = feelings[set.affect][1];
     @:judgements = feelings[set.affect][2];
     
-    @:plural = if (set.plural == empty) false else true;
+    @:plural = if (set.plural == empty || set.plural == false) false else true;
     
     @:statement = statements[((statements->size-1) * set.statement)->round]
     @:emotion   = emotions  [((emotions->size-1)   * set.emotion)->round]
@@ -220,13 +220,13 @@
       statement + '\n' +
       '\n' +
       this.name + ' feels ' + emotion + '.\n' +
-      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.plural == true) ' were ' else ' are ') + judgement + '.\n'
+      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.pastTense == true) ' were ' else ' are ') + judgement + '.\n'
     
      else 
       statement + '\n' +
       '\n' +
       this.name + ' feels ' + emotion + '.\n' +
-      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.plural == true) ' was ' else ' is ') + judgement + '.\n'
+      'They are thinking about ' + which + '. ' + this.name + ' feels that ' + set.shortName + (if(set.pastTense == true) ' was ' else ' is ') + judgement + '.\n'
 
   }
 }
@@ -2778,8 +2778,32 @@
       
     rest :: {
       @:state = _.state;
+      @:this = _.this;
       state.hp = state.stats.HP;
       state.ap = state.stats.AP;
+
+      
+      if (random.flipCoin()) ::<= {
+        if (random.flipCoin()) ::<= {
+          this.addOpinion(
+            fullName : 'their dream',
+            shortName : 'the dream',
+            plural : false,
+            pastTense : true,
+            core : false
+          );
+        } else ::<= {
+          this.addOpinion(
+            fullName : 'their nightmare',
+            shortName : 'the nightmare',
+            plural : false,
+            pastTense : true,
+            core : false
+          );
+        
+        }
+      }
+
     },
       
     inventory : {
