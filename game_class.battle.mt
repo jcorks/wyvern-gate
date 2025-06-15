@@ -301,9 +301,9 @@
 
         winningGroup = empty;
         @everyoneWipedOut = true;
-        {:::} {
+        ::? {
           foreach(groups) ::(k, group) {
-            @groupAlive = {:::} {
+            @groupAlive = ::? {
               foreach(group) ::(i, entity) {
                 if (!entity.isIncapacitated())
                   send(message:true);
@@ -589,7 +589,7 @@
     this.interface = {
       partyWon :: {
         when(result == empty) false;
-        return {:::} {
+        return ::? {
           foreach(result) ::(k, ent) {
             if (party_.isMember(entity:ent))
               send(message:true);
@@ -920,7 +920,7 @@
         return out;
       },
       
-      isMember ::(entity) <- {:::} {
+      isMember ::(entity) <- ::? {
         foreach(groups) ::(k, group) {
           foreach(group) ::(i, ent) {
             if (ent == entity) send(:true);

@@ -628,7 +628,7 @@
     
     animateLevel();
   } else ::<= {
-    {:::} {
+    ::? {
       forever ::{
         when(exp == 0) send();
         if (set.level >= profession.arts->size) send();
@@ -2377,7 +2377,7 @@
     gainExp ::(amount => Number, chooseStat, afterLevel) {
       @:state = _.state;
       @:this = _.this;
-      {:::} {
+      ::? {
         forever ::{
           when(amount <= 0) send();
           when(amount < state.expNext) ::<={
@@ -2818,7 +2818,7 @@
     
     hasEquipped::(item) {
       @:this = _.this;
-      return {:::} {
+      return ::? {
         foreach(this.getSlotsForItem(item)) ::(k, v) {
           if (this.getEquipped(:v) == item)
             send(:true);
@@ -3513,7 +3513,7 @@
       // when we pick descriptive sentences, we dont want to 
       // reuse structures more than once except for the unflourished 
       // one.
-      {:::} {
+      ::? {
         forever ::{
           when(quals->keycount == 0) send();
           

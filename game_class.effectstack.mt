@@ -413,7 +413,7 @@
         when(all->size == 0) empty;
 
         all = all->filter(::(value) <-
-          {:::} {
+          ::? {
             // forget to ask someone?
             @:rets = this.emitEvent(
               name : 'onEffectRemoveForced',
@@ -501,7 +501,7 @@
 
       
         @:ret = [];
-        {:::} {
+        ::? {
           foreach(all) ::(k, v) {
             @:effect = Effect.find(:v.id);
             if (emitCondition != empty && !emitCondition(:v)) send();

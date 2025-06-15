@@ -792,7 +792,7 @@ return {
           ('Flags') ::(item) {
             @:traits = [];
             @trait = item.flags;
-            {:::} {
+            ::? {
               @iter = 0;
               forever ::{
                 when(iter > 12) send();
@@ -899,12 +899,12 @@ return {
           ('Traits') ::(item) {
             @:traits = [];
             @trait = item.traits;
-            {:::} {
+            ::? {
               @iter = 1;
               forever ::{
                 when(Arts.TRAIT->values->findIndex(:iter) == -1) send();
                 if (trait & iter) ::<= {
-                  @name = {:::} {
+                  @name = ::? {
                     foreach(Arts.TRAIT) ::(k, v) {
                       if (v == iter) ::<= {
                         send(:k);

@@ -112,7 +112,7 @@
           when (key->size != 0) key[0];
 
           // could be equipped
-          return {:::} {
+          return ::? {
             foreach(this.members)::(i, member) {
               foreach(Entity.EQUIP_SLOTS) ::(n, slot) {
                 @:wep = member.getEquipped(slot);
@@ -154,7 +154,7 @@
       },
             
       remove::(member => Entity.type, silent) {
-        {:::}{
+        ::?{
           foreach(state.members)::(index, m) {
             if (m == member)::<={
               state.members->remove(key:index);

@@ -2190,7 +2190,7 @@ Interaction.newEntry(
       when(items->size == 0) 
         empty;
 
-      {:::} {
+      ::? {
         foreach(items) ::(k, v) {
           if (v.data->type == MapEntity.type) ::<= {
             world.battle.start(
@@ -2404,7 +2404,7 @@ Interaction.newEntry(
 
           // get those refreshing 7 hours!
           @:world = import(module:'game_singleton.world.mt');
-          {:::} {
+          ::? {
             forever ::{
               world.incrementTime();
               if (world.time == world.TIME.MORNING)
@@ -2575,7 +2575,7 @@ Interaction.newEntry(
         
         // prevent same names from occurring
         if (other != empty && name == other.name) ::<= {
-          {:::} {
+          ::? {
             forever::{
               when(name != other.name) send();
               name = 'The ' + Material.getRandom().name + ' ' + getAWeapon().base.name + 's';
@@ -2751,7 +2751,7 @@ Interaction.newEntry(
                         npcBattle: true,
                         onEnd::(result) {
                           random.thaw();
-                          @aWon = {:::} {
+                          @aWon = ::? {
                             foreach(result) ::(k ,entity) {
                               foreach(teamA.members) ::(i, member) {
                                 if (member == entity) send(message:true);

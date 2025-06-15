@@ -140,7 +140,7 @@
       getRandomSet ::(count, filter => Function) {
         @:l = [];
         for(0, count)::(i) {
-          l->push(value:{:::} {
+          l->push(value:::? {
             forever ::{
               @:choice = this.getRandomFiltered(filter);
               if (l->all(condition:::(value) <- value != choice))              

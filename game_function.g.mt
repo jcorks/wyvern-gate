@@ -36,7 +36,7 @@ return ::(g) {
   
   // separators
   @out = '';
-  {:::} {
+  ::? {
     forever ::{
       when(g < 1000) ::<= {
         out = '' + g + out;

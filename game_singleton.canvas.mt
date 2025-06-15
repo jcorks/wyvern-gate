@@ -288,7 +288,7 @@ return class(
           chars->push(:word);
           if (chars->size >= MAX_WIDTH) ::<= {
             @nextLine = [];
-            {:::} {
+            ::? {
               forever ::{
                 @ch = chars[chars->size-1];
                 when(chars->size < MAX_WIDTH && ch == ' ') send();
@@ -561,14 +561,14 @@ return class(
         @h;
 
 
-        {:::} {
+        ::? {
           forever ::{
             @ch = console.getch(unbuffered:true);
             if (ch != empty) send();
           }
         }
 
-        {:::} {
+        ::? {
           @target = '';
           @ch = console.getch(unbuffered:true);
 

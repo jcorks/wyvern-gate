@@ -133,7 +133,7 @@ Playing the Game
       
         // draws to 5 cards from the deck
         draw::(deck => Deck.type) {
-          {:::} {
+          ::? {
             forever ::{
               when(hand->keycount == 5) send();
               if (deck.cardsLeft == 0) ::<= {

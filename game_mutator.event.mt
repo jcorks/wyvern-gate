@@ -314,7 +314,7 @@ Event.database.newEntry(
             
             (chance < 0.95):::<= {
               @:only = island.newAggressor();                        
-              {:::} {
+              ::? {
                 forever ::{
                   only.autoLevel();
                   if (only.level >= island.levelMax)

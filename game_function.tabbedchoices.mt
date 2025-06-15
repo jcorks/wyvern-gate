@@ -97,7 +97,7 @@ return ::(*args) {
 
     @out;
     @:origTab = tabIndex;
-    {:::} {
+    ::? {
       forever ::{
           out = lastTabState[tabs[tabIndex]];
           realOnGetChoices(:tabIndex)

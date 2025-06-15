@@ -460,7 +460,7 @@ return {
       onSelect::(island, landmark) {
         @:world = import(module:'game_singleton.world.mt');
         @firstAwake = empty;
-        {:::} {
+        ::? {
           foreach(world.party.members)::(index, member) {
             if (!member.isIncapacitated()) ::<= {
               firstAwake = member

@@ -233,7 +233,7 @@ return class(
         @:which = tt800.next()*totalWeight;
 
         return list[ 
-          {:::}{
+          ::?{
             for(0, weightTable->keycount-1)::(index) {
               when(which > weightTable[index] &&
                  which < weightTable[index+1])

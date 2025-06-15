@@ -484,7 +484,7 @@ Location.database.newEntry(data:{
     location.inventory.clear();
     @:origTier = world.island.tier;
     world.island.tier = 10;
-    {:::} {
+    ::? {
       forever ::{
         @item = Item.new(
           base : Item.database.getRandomFiltered(::(value) <- 
@@ -2628,7 +2628,7 @@ Location.database.newEntry(data:{
         }
           
         
-        @canInteract = {:::} {
+        @canInteract = ::? {
           return this.base.onInteract(location:this);
         }
           

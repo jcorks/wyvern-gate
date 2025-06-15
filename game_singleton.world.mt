@@ -603,13 +603,13 @@
       },
       
       wait::(until) {     
-        {:::} {
+        ::? {
           forever ::{
             when(this.time != until) send()
             this.incrementTime();
           }
         }
-        {:::} {
+        ::? {
           forever ::{
             when(this.time == until) send()
             this.incrementTime();
@@ -812,7 +812,7 @@
 
         // check to see if the current landmark is part of the current island. 
         // If it isnt, save it separately.
-        if (state.currentLandmarkID != -1 && ({:::} {
+        if (state.currentLandmarkID != -1 && (::? {
             foreach(island.landmarks) ::(k, v) {
               if (v.worldID == state.currentLandmarkID)
                 send(:false);
@@ -933,7 +933,7 @@
           
           island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
           island.load(:serialized.islands[state.currentIslandID]);
-          landmark = {:::} {  
+          landmark = ::? {  
             foreach(island.landmarks) ::(k, v) {
               if (v.worldID == state.currentLandmarkID)
                 send(:v);

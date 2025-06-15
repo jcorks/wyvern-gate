@@ -292,7 +292,7 @@
         
         
         
-        {:::} {
+        ::? {
           for(0, len) ::(i) {
             @:next = map.sceneryAt(x, y:iter);
             if (next == '▓')
@@ -348,10 +348,10 @@
   // prevent repeat getPath grinding
   @:connects = {};
 
-  {:::} {
+  ::? {
     forever :: {
       @needRemerge = false;
-      {:::} {
+      ::? {
         foreach(groups) ::(k, group) {
           // already has a group
           @:rep = group[0];
@@ -443,7 +443,7 @@
     }
   }
   
-  {:::} {
+  ::? {
     forever::{
       // no connecting needed! done :)
       when(groups->size == 1) send();
@@ -520,7 +520,7 @@
 @:LargeMap = class(
   name: 'Wyvern.LargeMap',
   define:::(this) {
-    @areas;
+    @areas = [];
   
     @:clearScenery::(map, x, y) {
       @index = map.addScenerySymbol(character:' ');

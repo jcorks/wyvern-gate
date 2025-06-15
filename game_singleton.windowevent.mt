@@ -196,7 +196,7 @@
       if (choiceStack->size) ::<= {
         @:val = choiceStack[choiceStack->size-1];
         if (val.stateID == empty) ::<= {
-          if ({:::} {
+          if (::? {
             foreach(choiceStack) ::(k, v) {
               if (v.disableCache)
                 send(:false);
@@ -327,7 +327,7 @@
     }
     
     @:commitInput ::(input, level, forceRedraw) {
-      {:::} {
+      ::? {
         if (record != empty) ::<= {
           if (input != empty) ::<= {
             record->push(:{
@@ -379,7 +379,7 @@
         if (continue == true || choiceStack->keycount == 0) ::<= {
           next(toRemove:val, level:if (level == empty) 0 else level);
         }
-      } : {
+      } => {
         onError ::(message) {
           this.queueReader(
             lines : [
@@ -1497,7 +1497,7 @@
         }
 
         @iter = 0;
-        {:::} {
+        ::? {
           forever ::{
 
             @last = iter + pageAfter >= lines->size;
@@ -1634,7 +1634,7 @@
         animationFrame
       ) {
         when(requestAutoSkip) ::<= {
-          {:::} {
+          ::? {
             forever ::{
               if (callback() == false)
                 send();
@@ -1776,7 +1776,7 @@
 
       canJumpToTag::(name => String) {
         @:cs = [...choiceStack];
-        return {:::} {
+        return ::? {
           forever ::{
             if (cs->keycount == 0)
               send(message:false);
@@ -1791,7 +1791,7 @@
 
       // pops all choices in the stack until the tag is hit.
       jumpToTag::(name => String, goBeforeTag, doResolveNext, clearResolve) {
-        {:::} {
+        ::? {
           forever ::{
             if (choiceStack->keycount == 0)
               error(detail:'jumpToTag() could not find a dialogue tag with name ' + name);

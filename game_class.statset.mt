@@ -52,7 +52,7 @@
     },
     
     isDifferent::(stats, other) {
-      return {:::} {
+      return ::? {
         foreach(NAMES) ::(k, v) {
           if (stats[v] != other[v])
             send(:true);
@@ -143,7 +143,7 @@
       get :: {
         @:state = _.state;
         @:this = _.this;
-        return {:::} {
+        return ::? {
           foreach(NAMES) ::(k, v) {
             if (this[v] != 0)
               send(:false);

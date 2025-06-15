@@ -53,9 +53,9 @@
 
 
 @BFS_NATIVE;
-{:::} { 
+::? { 
   BFS_NATIVE = getExternalFunction(name:"wyvern_gate__native__bfs");
-} : {
+} => {
   onError::(message) {}
 }
 //@:MemoryBuffer = import(module:'Matte.Core.MemoryBuffer');
@@ -280,7 +280,7 @@
 
     @:aStarReconstructPath::(cameFrom, current, start) {
       @:path = [];
-      return {:::} {
+      return ::? {
         forever ::{
           path->push(value:{
             x: current%width,
@@ -341,7 +341,7 @@
       aStarPQCompareTable = fScore;
       @m = 0;
       @n = pq->keycount - 1;
-      return {:::} {
+      return ::? {
         forever ::{
           when(m > n) send(message:pq->keycount+m);
           @k = ((n + m) / 2)->floor;
@@ -399,7 +399,7 @@
       @path;
       @iter = 0;
       
-      return {:::} {
+      return ::? {
         forever ::{
           // return empty: open set is empty but goal was never reached
           when(openSet->keycount == 0) send();
@@ -466,7 +466,7 @@
       visited[start] = start;
       q->push(value:start);
       
-      return {:::} {
+      return ::? {
         forever ::{
           when(qIter >= q->size) send();
           
@@ -478,7 +478,7 @@
             // build path
             send(message: ::<={
               @:path = [];
-              {:::} {
+              ::? {
                 @a = v;
                 @last;
                 forever ::{
@@ -641,7 +641,7 @@
         @x = pointer.x + 0.5;
         @y = pointer.y + 0.5;
         @:rads = (Number.PI() / 180)*degrees;
-        {:::} {
+        ::? {
           forever ::{
             x += rads->cos * SIGHT_RAY_EPSILON;
             y += rads->sin * SIGHT_RAY_EPSILON;
@@ -658,7 +658,7 @@
       }
       
 
-      {:::} {
+      ::? {
         @i = 0;
         forever ::{
           when (i >= 360) send();
@@ -792,7 +792,7 @@
       ];
       return ::(area, item, symbol, name, discovered) {
         area.occupy()
-        {:::} {        
+        ::? {        
           @iter = 0;
           forever ::{
             @:offset = tryMap[iter];
@@ -1071,7 +1071,7 @@
       
         @itemsA = itemIndex[item.x + (item.y)*(width)];
         when(itemsA == empty) empty;
-        {:::} {
+        ::? {
           foreach(itemsA)::(key, v) {
             when(v.data == data) ::<= {
               itemsA->remove(key);
@@ -1080,7 +1080,7 @@
           }
         }
         if (item.name != empty) ::<= {
-          {:::} {
+          ::? {
             foreach(legendEntries)::(key, v) {
               when(v.data == data) ::<= {
                 legendEntries->remove(key);
@@ -1167,7 +1167,7 @@
 
       getPathTo::(data, x, y, useBFS) {
         @:ent = retrieveItem(data);      
-        this.getXYPathTo(data, fromX:ent.x, fromY:ent.y,toX:x, toY:y, useBFS);
+        this.getPath(fromX:ent.x, fromY:ent.y,toX:x, toY:y, useBFS);
       },
       
       moveItem::(data, x, y) {
@@ -1244,7 +1244,7 @@
 
           @greater = new > old;
 
-          {:::} {
+          ::? {
             forever ::{
               when (isWalled(x:new, y)) ::<= {
                 new = new + (if (greater) -1 else 1);
@@ -1264,7 +1264,7 @@
 
           @greater = new > old;
 
-          {:::} {
+          ::? {
             forever ::{
               when (isWalled(x, y:new)) ::<= {
                 new = new + (if (greater) -1 else 1);

@@ -67,12 +67,12 @@ isTag[TAG__SPARSE_ARRAY] = true;
     
     default: ::<= {
       when (ALREADY_SERIALIZED != empty && ALREADY_SERIALIZED[value]) ::<= {
-        {:::} {
+        ::? {
           @:h = value.worldID;
           if (value.worldID->type != Number)
             error();
             
-        } : {
+        } => {
           onError::(message) {
             error(detail:'Only classes with a worldID can be serialized multiple times. Please ensure that only one copy of non-worldID objects get saved.');
           }
@@ -84,7 +84,7 @@ isTag[TAG__SPARSE_ARRAY] = true;
         //error(detail:'Already serialized object! likely infinite recursion (or at the very least erroneous instance copies)');
       }
 
-      @:obj = {:::} {
+      @:obj = ::? {
         // database items are always saved as strings.
         when (value->isa(type:Database.ItemType))
           {
@@ -112,7 +112,7 @@ isTag[TAG__SPARSE_ARRAY] = true;
         return if (value->size > 0) ::<= {
           @arr = {};
           @emptyCount = 0;
-          {:::} {
+          ::? {
             for(0, value->size) ::(i) {
               when(emptyCount > SPARSE_THRESHOLD) ::<= {
                 arr = empty;
@@ -216,11 +216,11 @@ isTag[TAG__SPARSE_ARRAY] = true;
           output[key] = out;      
         }
       }
-      {:::} {
+      ::? {
         if ((output[key]->keys->filter(::(value) <- value->type == String)->findIndex(:'worldID')) != -1)
           if (ALREADY_SERIALIZED != empty)
             ALREADY_SERIALIZED[output[key].worldID] = output[key]
-      } : {
+      } => {
         onError::(message) {
           // nuthin
         }
@@ -239,7 +239,7 @@ isTag[TAG__SPARSE_ARRAY] = true;
     @:next ::(serialized) {
       if (serialized->keys->size != 0) ::<= {
         serialized->remove(:TAG__WEIGHT);      
-        {:::} {
+        ::? {
           foreach(serialized) ::(k, v) {
             when(v->type != Object) empty;
             next(:v)

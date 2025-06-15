@@ -167,7 +167,7 @@
       },
       
       removeByID::(id) {
-        {:::} {
+        ::? {
           foreach(state.items)::(i, item) {
             if (item.base.id == id) ::<= {
               state.items->remove(key:i);

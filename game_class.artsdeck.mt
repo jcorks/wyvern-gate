@@ -450,7 +450,7 @@
       },     
        
       containsReaction ::{
-        return {:::} {
+        return ::? {
           foreach(state.hand) ::(k, card) {
             when(Arts.find(:card.id).kind == Arts.KIND.REACTION) ::<= {
               send(:true);

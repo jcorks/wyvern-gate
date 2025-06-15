@@ -553,7 +553,7 @@
       addLocation::(location) {
         // entrances take up 2 slots.
         when(location.base.category == Location.CATEGORY.ENTRANCE) ::<= {          
-          {:::} {
+          ::? {
             for(0, 20)::(i) {
               @x0;
               @y0;
@@ -632,7 +632,7 @@
         when(true) ::<= {
           @:wide = random.flipCoin();
           
-          return {:::} {
+          return ::? {
             for(0, 10)::(i) {
               @:space0 = random.pickArrayItem(list:freeSpaces);
               @space1;
@@ -769,7 +769,7 @@
       ) false;
 
     
-      return {:::} {
+      return ::? {
         foreach(zones)::(i, z) {
           // intersects with existing zones
           @xOverlap = is1DlineOverlap(
@@ -837,7 +837,7 @@
           }
         }
       } else ::<= {
-        {:::} {
+        ::? {
           forever ::{
             // pick a random zone and extend it 
             preZone = random.pickArrayItem(list:zones);

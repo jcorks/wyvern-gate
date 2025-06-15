@@ -250,7 +250,7 @@
       
       returnFromParty ::{
         @world = import(module:'game_singleton.world.mt');
-        {:::} {
+        ::? {
           foreach(world.party.members) ::(i, member) {
             if (state.member == member) ::<= {
               world.party.remove(member);
@@ -389,7 +389,7 @@
                     
                   state.lastAttackedBy = other.name;
                   windowEvent.autoSkip = true;
-                    {:::} {
+                    ::? {
                       forever ::{
                         when(state.member.isIncapacitated()) send();
                         when(other.isIncapacitated()) send();
@@ -445,7 +445,7 @@
           ).action);          
         }
         
-        {:::} {
+        ::? {
           foreach(actions) ::(k, v) {
             v();
             if (state.member.hp < state.member.stats.HP / 2) send();
@@ -1377,7 +1377,7 @@
         @:itemsMarkup  = [];
         @:itemsPopular = [];
 
-        {:::} {
+        ::? {
           for(world.TIME.LATE_MORNING, world.TIME.EVENING) ::(i) {
             @shoppers = random.integer(from:0, to:maxPerHour);              
 
@@ -1817,7 +1817,7 @@
               // This is possible with Skie, but could be done through other 
               // means perhaps. They are now your free employees!
               if (world.party.members->size > 1) ::<= {
-                {:::} {
+                ::? {
                   forever ::{
                     when(world.party.members->size == 1) send();
                     
@@ -1886,7 +1886,7 @@
 
       
       isHired ::(entity) {
-        return {:::} {
+        return ::? {
           foreach(state.hirees) ::(i, hiree) {
             if (hiree.entity == entity)
               send(message:true);
@@ -2796,7 +2796,7 @@
             
             @:finishHour ::{
               @:hour = world.time;
-              {:::} {
+              ::? {
                 forever ::{
                   when(world.time == hour)
                     world.incrementTime();
@@ -3139,7 +3139,7 @@ return {
     @party = world.party;      
 
 
-    {:::} {
+    ::? {
       forever ::{
         if (world.time == world.TIME.MORNING) send();
         world.incrementTime();

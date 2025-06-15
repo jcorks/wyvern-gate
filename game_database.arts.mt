@@ -589,7 +589,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
 
-          {:::} {
+          ::? {
             forever ::{
               world.incrementTime();
               if (world.time == world.TIME.EVENING)
@@ -624,7 +624,7 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
 
-          {:::} {
+          ::? {
             forever ::{
               world.incrementTime();
               if (world.time == world.TIME.MORNING)
@@ -2522,7 +2522,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-        return [...enemies]->filter(::(value) <- {:::} {
+        return [...enemies]->filter(::(value) <- ::? {
           foreach(Entity.EQUIP_SLOTS)::(i, slot) {
             @out = value.getEquipped(slot);
             if (out != empty && out.base.name != 'base:none') send(:true);
@@ -6903,7 +6903,7 @@ Arts.newEntry(
           effects->setSize(:2);
   
       user.removeEffectsByFilter(::(value) {
-        return {:::} {
+        return ::? {
           foreach(effects) ::(k, v) {
             if (v == value) send(:true);
           }
@@ -7225,7 +7225,7 @@ Arts.newEntry(
       when(user.hp >= user.stats.HP) false;
 
       // if has any effects, is good to use
-      return {:::} {
+      return ::? {
         foreach(allies) ::(k, v) {
           if (v.effectStack.getAll()->size > 0)
             send(:true);
@@ -7538,7 +7538,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      return {:::} {
+      return ::? {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:poisoned')->size > 0) 
             send(:[v]);
@@ -7579,7 +7579,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      return {:::} {
+      return ::? {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:burned')->size > 0) 
             send(:[v]);
@@ -7619,7 +7619,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      return {:::} {
+      return ::? {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:paralyzed')->size > 0) 
             send(:[v]);
@@ -7660,7 +7660,7 @@ Arts.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      return {:::} {
+      return ::? {
         foreach(allies) ::(k, v) {
           when (v.hp < v.stats.HP || v.effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified')->size > 0) 
             send(:[v]);
@@ -7702,7 +7702,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:Effect = import(module:'game_database.effect.mt');
-      return {:::} {
+      return ::? {
         foreach(allies) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- 
             (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0 ||
@@ -7754,7 +7754,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:Effect = import(module:'game_database.effect.mt');
-      return {:::} {
+      return ::? {
         foreach([...enemies, ...allies]) ::(k, v) {
           when (v.effectStack.getAllByFilter(::(value) <- 
             (Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0
@@ -9218,7 +9218,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:which = allies->filter(::(value) <-
-        {:::} {
+        ::? {
           foreach(Entity.EQUIP_SLOTS) ::(k, slot) {
             @:eq = value.getEquipped(slot);
             when(eq.equipEffects->size > 0) send(:true);
@@ -9325,7 +9325,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
       @:Effect = import(module:'game_database.effect.mt');
       @:whom = (allies)->filter(::(value) <-
-        {:::} {
+        ::? {
           foreach(value.effectStack.getAll()) ::(k, eff) {
             if ((Effect.find(:eff.id).traits & Effect.TRAIT.BUFF) != 0)
               send(:true);
@@ -11597,7 +11597,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      return {:::} {
+      return ::? {
         foreach(random.scrambled(:enemies)) ::(k, v) {
           if (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size)
             send(:[v]);
@@ -11642,7 +11642,7 @@ Arts.newEntry(
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      return {:::} {
+      return ::? {
         foreach(random.scrambled(:enemies)) ::(k, v) {
           if (v.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size)
             send(:[v]);
@@ -11711,7 +11711,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
-      return {:::} {
+      return ::? {
         @:userStacks = getStacks(:user);
         
         foreach(random.scrambled(:enemies)) ::(k, v) {
@@ -11770,7 +11770,7 @@ Arts.newEntry(
       @item;
       @:world = import(module:'game_singleton.world.mt');
       
-      {:::} {
+      ::? {
         foreach(random.scrambled(:user.battle.banished)) ::(k, v) {
           if (v.getEquips()->size > 0) ::<= {
             item = random.pickArrayItem(:v.getEquips());

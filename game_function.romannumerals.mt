@@ -40,7 +40,7 @@ return ::(value) {
 
   @out = '';
   @tier = 0;
-  {:::} {
+  ::? {
     forever ::{
       when(value == 0) send();
       @set = characters[tier];

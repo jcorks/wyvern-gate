@@ -27,9 +27,9 @@
 
 @MOD_DIR = './mods';
 
-{:::} {
+::? {
   MOD_DIR = import(module:'wyvern_gate__native__get_mod_dir')(); 
-} : {
+} => {
   onError::(message) {}
 };
 
@@ -131,7 +131,7 @@ canvas.onCommit = ::(lines, renderNow){
 @LOOP_DONE = false;
 @:mainLoop = ::{
   // standard event loop
-  {:::} {
+  ::? {
     forever ::{
       when(LOOP_DONE) ::<= {
         printMacro();
@@ -153,9 +153,9 @@ canvas.onCommit = ::(lines, renderNow){
   @CWD = Filesystem.cwd;
   Filesystem.cwd = path;
   @output;
-  {:::} {
+  ::? {
     output = action(filesystem:Filesystem);
-  } : {
+  } => {
     onError::(message) {
       Filesystem.cwd = CWD;    
       error(detail:message.detail);        
@@ -207,7 +207,7 @@ instance.mainMenu(
   onLoadState :::(
     slot
   ) {
-    return {:::} {
+    return ::? {
       return enterNewLocation(
         path: './',
         action::(filesystem) {
@@ -216,7 +216,7 @@ instance.mainMenu(
           );
         }
       );
-    } : {
+    } => {
       onError::(message) {
         return empty;
       }
@@ -224,7 +224,7 @@ instance.mainMenu(
   },
   
   onLoadSettings ::{
-    return {:::} {
+    return ::? {
       return enterNewLocation(
         path: './',
         action::(filesystem) {
@@ -233,7 +233,7 @@ instance.mainMenu(
           );
         }
       );
-    } : {
+    } => {
       onError::(message) {
         return empty;
       }
@@ -275,13 +275,13 @@ instance.mainMenu(
     
     @:preload ::(json) {
       foreach(json.files) ::(i, file) {
-        {:::} {
+        ::? {
           importModule(
             module:file,
             alias:json.id + '/' + file,
             preloadOnly: true 
           )
-        } : {
+        } => {
           onError::(message) {
             error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':' + message.detail);
           }
@@ -295,14 +295,14 @@ instance.mainMenu(
         path: file.path,
         action ::(filesystem) {
           // first, get the JSON 
-          @:json = {:::} {
+          @:json = ::? {
             @:data = filesystem.readString(path:'mod.json');
             
             if (data == empty || data == '')
               error();
               
             return JSON.decode(string:data);
-          } : {
+          } => {
             onError ::(message) {
               error(detail: 'Could not read or parse mod.json file within ' + file.path + '!');
             }
@@ -314,7 +314,7 @@ instance.mainMenu(
         }
       )
     }
-    {:::} {
+    ::? {
       enterNewLocation(
         path: MOD_DIR,
         action::(filesystem) {
@@ -325,7 +325,7 @@ instance.mainMenu(
           }
         }
       );
-    } : {
+    } => {
       onError ::(message) {
         error(detail:message.detail);
       }
@@ -345,7 +345,7 @@ instance.mainMenu(
   }
   /*
   onLoadMain ::{
-    return {:::} {
+    return ::? {
       return enterSaveLocation(
         action::(filesystem) {
           return filesystem.readString(

@@ -120,7 +120,7 @@ SCORING_FN[SCORE_TYPE.SIXES] = ::(rolls) {
 
 SCORING_FN[SCORE_TYPE.STRAIGHT] = ::(rolls) {
   @:slots = [];
-  return {:::} {
+  return ::? {
     for(0, 5)::(i) {
       if (slots[rolls[i].value] == true) send(message:0);
       slots[rolls[i].value] = true;
@@ -969,7 +969,7 @@ return ::(onFinish => Function) {
     }
     
     @:rollNext ::{
-      {:::} {
+      ::? {
         forever ::{
           when(index == 5) ::<= {
             index += 1;

@@ -1140,7 +1140,6 @@ Effect.newEntry(
       
       },
       onPreDamage ::(from, item, holder, attacker, damage) {
-        breakpoint();
         if (attacker == from) ::<= {
           windowEvent.queueMessage(text:from.name + "'s sneaking takes " + holder.name + ' by surprise!');
           damage.amount *= 3;

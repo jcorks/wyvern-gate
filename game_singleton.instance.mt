@@ -170,9 +170,9 @@ return class(
         
         
         // get entry point.
-        @:result = {:::} {
+        @:result = ::? {
           return import(module: mod.id + '/main.mt');
-        } : {
+        } => {
           onError::(message) {
             error(detail: 'An error occurred while loading the mod ' + mod.id + ':' + message.summary + '\n\n');
           }
@@ -907,9 +907,9 @@ return empty;
         canvas.reset();
 
         @mods;
-        {:::} {
+        ::? {
           mods = preloadMods();
-        } : {
+        } => {
           onError ::(message) {
             windowEvent.queueMessage(
               text: "Could not preload mods: " + message.summary

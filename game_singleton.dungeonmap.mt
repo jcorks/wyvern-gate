@@ -431,7 +431,7 @@
   // keep making path nodes until all 
   // adjacent nodes that connect to open 
   // directions have a path.
-  {:::} {
+  ::? {
     forever ::{
       @complete = true;
       for(0, AREA_HEIGHT) ::(y) {
@@ -506,7 +506,7 @@
       @:stack = [initialNode];
       initialNode.groupIndex = index;
       @:group = [initialNode];
-      {:::} {
+      ::? {
         forever ::{
           when(stack->keycount == 0) send();
           @:n = stack->pop;
@@ -556,7 +556,7 @@
     @:MERGE__IMPOSSIBLE = 2;
     
     @:merge = ::{
-      return {:::} {
+      return ::? {
         @nonLeaderCount = 0;
         @:leaderIndex = leader[0].groupIndex;
         @iter = 0;
@@ -600,7 +600,7 @@
     // keep merging adjacent groups until either 
     // all groups are merged into the leader group 
     // or a valley is discovered.
-    return {:::} {
+    return ::? {
       forever ::{
         match(merge()) {
           (MERGE__COMPLETE): send(message:false),
@@ -612,7 +612,7 @@
   }
   
   
-  {:::} {
+  ::? {
     forever ::{
       @:restart = ensureOneGroup();
 
@@ -633,7 +633,7 @@
       // So, now we can attempt to patch it by filling 
       // a random hole and trying again 
 
-      {:::} {
+      ::? {
         for(0, AREA_HEIGHT) ::(y) {
           for(0, AREA_WIDTH) ::(x) {
             @node = gridNodes[x + y*AREA_WIDTH];
@@ -1043,7 +1043,7 @@
         // Checks to see if a rectangle would be allowed to be placed
         isPlacementAllowed ::(x, y, width, height) {
           @:all = this.getRoot().getAllAttached();
-          return {:::} {
+          return ::? {
             foreach(all) ::(k, space) {
               if (space.overlaps(x, y, width, height))
                 send(message:false);
@@ -1115,7 +1115,7 @@
 
 
           
-          return {:::} {
+          return ::? {
             // choose a random direction          
             foreach(random.scrambled(list:[DIRECTION.NORTH, DIRECTION.SOUTH, DIRECTION.EAST, DIRECTION.WEST])) ::(k, dir) {
               @:openings = random.scrambled(list:this.getOpenings(dir));
@@ -1219,7 +1219,7 @@
         
         // find where it should go and keep trying till it fits.
         @:list = random.scrambled(list:root.getAllAttached());
-        {:::} {
+        ::? {
           foreach(list) ::(k, existing) {
             if (existing.placeAdjacent(other:next))
               send();

@@ -26,7 +26,7 @@
 @:LargeMap = import(module:'game_singleton.largemap.mt');
 @:Party = import(module:'game_class.party.mt');
 @:Profession = import(module:'game_database.profession.mt');
-@:Event = import(module:'game_mutator.event.mt');
+@:IslandEvent = import(module:'game_mutator.islandevent.mt');
 @:State = import(module:'game_class.state.mt');
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:Database = import(module:'game_class.database.mt');
@@ -260,7 +260,10 @@ Island.database.newEntry(
     // Whether the island experiences the normal set of possible events
     possibleEvents : empty,
 
-    data : empty
+    data : empty,
+    
+    // explored areas of the island. May or may not have a map marking
+    areas : empty,
   },
   
   database : Database.new(
@@ -331,7 +334,7 @@ Island.database.newEntry(
 
         // finally collect unique random support arts until 35 is reached
         @:addCondition ::(value) <- entity.supportArts->findIndex(:value.id) == -1
-        {:::} {
+        ::? {
           forever ::{
             if (entity.calculateDeckSize() >= 35) send();
 
@@ -642,13 +645,34 @@ Island.database.newEntry(
       description : {
         get :: {
           @:climate = Island.climateToString(climate:state.climate);
-          @out = state.name + ' is '+ correctA(:climate) + ' ' + climate + ' island.';
+          @out = state.name + ' is '+ correctA(:climate) + ' island.';
           if ((state.base.traits & Island.TRAIT.DIVERSE) != 0) ::<= {
             out = out + 'The island is mostly populated by people of ' + Species.find(:state.species[0].species).name + ' and ' + Species.find(:state.species[1].species).name + ' descent. ';          
           }
           
           return out;
         }
+      },
+      
+      //
+      explore ::(x, y) {
+        /*
+        // in most cases just like 100-200 max
+        ::? {
+          foreach(areas) ::(k, v) {
+            if (v.x == x && v.y == y) ::<= {
+              instance.visitLandmark(
+                landmark: v
+              );
+            }
+          }
+        }
+      
+        @:loc = Landmark.new(
+          x
+        ) 
+        */
+      
       },
       
       worldID : {
@@ -692,7 +716,7 @@ Island.database.newEntry(
       },
       
       findLocation ::(id) {
-        return {:::} {
+        return ::? {
           foreach(state.map.getAllItemData())::(i, landmark) {
             foreach(landmark.locations)::(n, location) {
               when(location.worldID == id)
@@ -719,9 +743,9 @@ Island.database.newEntry(
         if (state.stepsSinceLastEvent > 20) ::<= {
           if (random.number() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
             this.addEvent(
-              event:Event.new(
+              event:IslandEvent.new(
                 base:random.pickArrayItemWeighted(list:state.possibleEvents->map(
-                  ::(value) <- Event.database.find(:value)
+                  ::(value) <- IslandEvent.database.find(:value)
                 )),
                 parent:this
               )

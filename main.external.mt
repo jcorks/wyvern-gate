@@ -167,7 +167,7 @@ instance.mainMenu(
   onLoadState :::(
     slot
   ) {
-    return {:::} {
+    return ::? {
       return external_onLoadState(a:slot);
     } : {
       onError:::(detail) {

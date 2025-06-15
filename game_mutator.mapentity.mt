@@ -145,7 +145,7 @@ MapEntity.Task.database.newEntry(
       @:Location = import(module:'game_mutator.location.mt');
       @item = mapEntity.controller.map.getItem(data:mapEntity);
       when(item == empty) empty;
-      if ({:::} {
+      if (::? {
         foreach(mapEntity.controller.map.getItemsWithinRadius(
           x:item.x,
           y:item.y,
@@ -208,7 +208,7 @@ MapEntity.Task.database.newEntry(
         // swarming will group them in the same 
         // team as the currently swarmed enemy
         @:all = world.battle.getMembers();
-        {:::} {
+        ::? {
           foreach(all) ::(k, member) {
             if (
               (mapEntity.entities[0].species.swarms &&member.species.id == mapEntity.entities[0].species.id)
@@ -541,7 +541,7 @@ MapEntity.Task.database.newEntry(
         @index = 0;
         @specters = [];
         @tooClose = false;
-        {:::} {
+        ::? {
           foreach(mapEntity.controller.mapEntities) ::(k, ent) {
             when(ent.tag != 'specter') empty;
             
@@ -565,7 +565,7 @@ MapEntity.Task.database.newEntry(
           mapEntity.remove();
         }
         
-        {:::} {
+        ::? {
           foreach(specters) ::(k, specter) {
             if (specter == mapEntity) send();
             index += 1;     
@@ -823,7 +823,7 @@ MapEntity.Task.database.newEntry(
         map_ = parent;
 
         if (state.locationID != -1) ::<= {        
-          {:::} {
+          ::? {
             foreach(map_.parent.locations) ::(k, v) {
               if (v.worldID == state.locationID) ::<= {
                 location_ = v;
@@ -1041,7 +1041,7 @@ MapEntity.Task.database.newEntry(
             );
           */
             
-          @coversEntranceExit = {:::} {
+          @coversEntranceExit = ::? {
             foreach(map_.getItemsWithinRadius(
               x:otherItem.x,
               y:otherItem.y,
