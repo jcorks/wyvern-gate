@@ -3115,7 +3115,7 @@ Item.database.newEntry(data : {
 Item.database.newEntry(data : {
   name : "Ethereal Shard",
   id : 'base:item-box',
-  description: "It seems to be a solid object of light. It's abilities are unknown.",
+  description: "Its abilities are unknown.",
   examine : 'Its abilities are unknown.',
   sortType : SORT_TYPE.LOOT,
   equipType: TYPE.TWOHANDED,
@@ -3126,7 +3126,7 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 10,
-  possibleArts : ['base:prismatic-wisp', 'base:prismatic-wisp'],
+  possibleArts : [],
 
   blockPoints : 0,
   equipMod : StatSet.new(

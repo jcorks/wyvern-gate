@@ -756,7 +756,6 @@ Island.database.newEntry(
       },
       
       addLandmark ::(landmark) {
-      
         state.map.setItem(
           data:landmark, 
           x:landmark.x, 

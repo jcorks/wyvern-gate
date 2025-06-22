@@ -1208,6 +1208,12 @@
 
       if (data.iter == empty)
         data.iter = 0;
+        
+      if (data.maxWidth == empty) ::<= {
+        @w = 0;
+        foreach(data.lines) ::(k, line) <- if (w < line->length) w = line->length;
+        data.maxWidth = w;
+      }
 
       if(input == CURSOR_ACTIONS.UP||
          input == CURSOR_ACTIONS.DOWN) ::<= {

@@ -5656,10 +5656,10 @@ Effect.newEntry(
         breakpoint();
           
         @:instance = import(:'game_singleton.instance.mt');
-        instance.visitCurrentIsland();
+        instance.visitCurrentIsland(restorePos:true);
         windowEvent.queueMessage(text:'The party teleported out of the area.');
         if (erased)
-          windowEvent.queueMessage(text:'The party loses half their loot during the teleportation process');
+          windowEvent.queueMessage(text:'The party loses half of their loot during the teleportation process');
       }
     }
   }
@@ -5670,7 +5670,7 @@ Effect.newEntry(
   data : {
     name : 'Access Bank',
     id : 'base:access-bank',
-    description : 'Access an pocket dimension to transfer inventory to and from.',
+    description : 'Access a pocket dimension to transfer inventory to and from.',
     stackable : false,
     blockPoints :0,
     traits : TRAIT.SPECIAL,

@@ -371,13 +371,13 @@ EntityQuality.database.newEntry(
     descriptions : [
       '$0',
       '$0 and emotive',
-      'pierced and $0',
+      '$0 with shining jewelry',
     ],
     trait0qualifierChance : 0.2,
     trait0qualifiers : [],
     trait0 : [
       'small',
-      'large',
+      'long',
       'medium-size',
     ],
     

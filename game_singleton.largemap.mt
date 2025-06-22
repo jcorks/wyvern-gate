@@ -34,10 +34,6 @@
   return (xd**2 + yd**2)**0.5;
 }
 
-@:addLandscapeAreas ::(map, width, height, symbols, out, symbolList) {
-
-  
-}
 
 
 
@@ -520,7 +516,6 @@
 @:LargeMap = class(
   name: 'Wyvern.LargeMap',
   define:::(this) {
-    @areas = [];
   
     @:clearScenery::(map, x, y) {
       @index = map.addScenerySymbol(character:' ');
@@ -574,7 +569,7 @@
 
         
         @:out = [];
-        areas = [];
+        @:areas = [];
         @:args = {
           map : map,
           width:map.width - BUFFER_SPACE*2,
@@ -600,8 +595,21 @@
         ]        
         @:loading = import(:'game_function.loading.mt');
         @:next = ::{
-          when(phases->size == 0) 
+          when(phases->size == 0) ::<= {
+            foreach(areas) ::(k, v) {
+              map.addArea(:
+                Map.Area.new(
+                  x : v.x,
+                  y : v.y,
+                  
+                  // TODO:
+                  width: 1,
+                  height: 1
+                )
+              )
+            }
             onDone(:map);
+          }
         
           @:phase = phases[0];
           phases->remove(:0);
@@ -619,7 +627,7 @@
 
 
       addLandmark::(map, island, base) { 
-        @:loc = random.scrambled(:areas)[0];
+        @:loc = random.scrambled(:map.areas)[0];
         @:x = loc.x;      
         @:y = loc.y;      
         @:landmark = Landmark.new(
@@ -634,7 +642,7 @@
       },
       
       getAPosition ::(map) {
-        @:loc = random.scrambled(:areas)[0];
+        @:loc = random.scrambled(:map.areas)[0];
         @:x = loc.x;      
         @:y = loc.y;      
 

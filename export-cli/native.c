@@ -60,10 +60,10 @@ static int wyvern_gate__native__bfs__get_neighbors(
     wyvern_gate__native__bfs__map_t map
 ) {
     static int pattern[] = {
-        1, 1,
-        1, -1,
-        -1, 1,
-        -1, -1,
+        //1, 1,
+        //1, -1,
+        //-1, 1,
+        //-1, -1,
         
         -1, 0,
         1, 0,
@@ -78,7 +78,7 @@ static int wyvern_gate__native__bfs__get_neighbors(
     
     int i;
     int n;
-    for(n = 0; n < 8; ++n) {
+    for(n = 0; n < 4; ++n) {
         
         i = wyvern_gate__native__bfs__new_node(
             x + pattern[n*2+0],

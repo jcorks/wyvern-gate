@@ -1494,8 +1494,9 @@
         if (mapHint.outOfBoundsCharacter != empty) map.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
         
         areas = layoutToAreas(layout:mapHint.layoutType, map, mapHint);
-        
-        map.setAreas(new:areas);
+        foreach(areas) ::(k, v) {
+          map.addArea(area:v);
+        }
         return map;
       }
     } 

@@ -71,7 +71,7 @@ return ::(onBooted) {
         chance : 0.4,
         header : '::> ',
         lines : [
-          'cd ./GAMES/JC-RASA/WYVERN-GATE/'
+          'cd ./GAMES/WYVERN-GATE/'
         ]
       },    
       {

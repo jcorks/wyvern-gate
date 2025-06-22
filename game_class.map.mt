@@ -98,6 +98,7 @@
     @_y = 0;
     @_w = 0;
     @_h = 0;
+    @data = empty;
     @isOccupied = false;
     
     mapSizeH = canvas.height;
@@ -120,6 +121,11 @@
         isOccupied = true
       },
       
+      data : {
+        get ::<- data,
+        set::(value) <- data = value
+      },
+      
       isOccupied : {
         get ::<- isOccupied
       },
@@ -130,6 +136,7 @@
           y: _y,
           w: _w,
           h: _h,
+          data : data,
           isOccupied: isOccupied
         }
       },
@@ -140,7 +147,8 @@
         _y = serialized.y;
         _w = serialized.w;
         _h = serialized.h;
-        isOccupied = isOccupied;
+        data = serialized.data;
+        isOccupied = serialized.isOccupied;
       }
     }
   }
@@ -1167,7 +1175,7 @@
 
       getPathTo::(data, x, y, useBFS) {
         @:ent = retrieveItem(data);      
-        this.getPath(fromX:ent.x, fromY:ent.y,toX:x, toY:y, useBFS);
+        return this.getPath(fromX:ent.x, fromY:ent.y,toX:x, toY:y, useBFS);
       },
       
       moveItem::(data, x, y) {
@@ -1371,12 +1379,30 @@
       areas : {
         get ::<- areas
       },
+            
+      addArea ::(area => Area.type) {
+        if (areas == empty)
+          areas = [];
+        areas->push(:area)
+      },
       
-      setAreas ::(new) {
-        areas = {...new};
+      removeArea ::(area => Area.type) {
+        @:index = areas->findIndex(:area);
+        when(index == -1) empty;
+        areas->remove(:index);
       },
       
       'isWalled' : ::(x, y) <- isWalled(x, y),
+      addToArea ::(area => Area.type, item, symbol, name, discovered) {
+        return putArea(
+          area,
+          item,
+          symbol,
+          name,
+          discovered
+        );
+        
+      },
       
       addToRandomArea ::(item, symbol, name, discovered) {
         return putArea(
