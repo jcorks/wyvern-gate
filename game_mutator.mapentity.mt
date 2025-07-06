@@ -251,7 +251,7 @@ MapEntity.Task.database.newEntry(
             @:instance = import(module:'game_singleton.instance.mt');
             instance.gameOver(reason: 'The party has been wiped out.');
           }
-          breakpoint();
+          
           mapEntity.kill();
           mapEntity.remove();
         }

@@ -362,7 +362,8 @@
               fromX : rep.x,
               fromY : rep.y,
               toX : other.x,
-              toY : other.y
+              toY : other.y,
+              corners : false
             ) != empty) ::<={
               if (connects[rep] == empty)
                 connects[rep] = {};
@@ -384,7 +385,7 @@
         send();
     }
   }
-  breakpoint();
+  
 
 
   // no additional work needed
@@ -466,7 +467,7 @@
       mergeGroups(a:closestFrom, b:closestTo);
       
       
-      breakpoint();
+      
     }
   }
 

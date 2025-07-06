@@ -837,7 +837,7 @@
 
         @save = instance.getSaveDataRaw();
         
-        @:commitLoad ::(skipLoadMap) {
+        @:commitLoad :: {
           state.currentIslandID = id;
           if (alreadyLoaded != empty)
             island = alreadyLoaded 
@@ -856,12 +856,15 @@
             instance.savestate(saveOverride:save);      
           }
           
-          when (skipLoadMap)
+          //when (skipLoadMap)
             onDone(:this.island);        
-
-          this.island.loadMap(::(map) {
-            onDone(:this.island);        
-          });
+          /*
+          this.island.loadMap(
+            onDone::(map) {
+              onDone(:this.island);        
+            }
+          );
+          */
         }
         
         
@@ -900,7 +903,7 @@
             save.islands[id] = newIsland.save(); 
             which = save.islands[id];
 
-            commitLoad(skipLoadMap:true);          
+            commitLoad();          
           });
         } else 
           commitLoad();

@@ -702,7 +702,7 @@ Effect.newEntry(
         holder.removeEffectInstance(:
           (holder.effectStack.getAll()->filter(::(value) <- value.id == 'base:banishing-light'))[0]
         )
-        breakpoint();
+        
       }
     }
   }
@@ -5646,20 +5646,20 @@ Effect.newEntry(
 
         @loot = random.scrambled(:world.party.inventory.loot);
         @erased = false;
-        if (loot->size > 2) ::<= {
-          loot = loot->subset(from:0, to:(loot->size/2)->floor);
+        if (loot->size > 3) ::<= {
+          loot = loot->subset(from:0, to:(loot->size/3)->floor);
           foreach(loot) ::(k, v) {
             world.party.inventory.remove(:v);
           }
           erased = true;
         }
-        breakpoint();
+        
           
         @:instance = import(:'game_singleton.instance.mt');
         instance.visitCurrentIsland(restorePos:true);
         windowEvent.queueMessage(text:'The party teleported out of the area.');
         if (erased)
-          windowEvent.queueMessage(text:'The party loses half of their loot during the teleportation process');
+          windowEvent.queueMessage(text:'The party loses some of their loot during the teleportation process');
       }
     }
   }

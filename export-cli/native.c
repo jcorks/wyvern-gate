@@ -57,19 +57,11 @@ static int wyvern_gate__native__bfs__new_node(int x, int y, wyvern_gate__native_
 static int wyvern_gate__native__bfs__get_neighbors(
     int current,
     int * neighbors,
-    wyvern_gate__native__bfs__map_t map
+    wyvern_gate__native__bfs__map_t map,
+    int * pattern,
+    int patternSize
 ) {
-    static int pattern[] = {
-        //1, 1,
-        //1, -1,
-        //-1, 1,
-        //-1, -1,
-        
-        -1, 0,
-        1, 0,
-        0, 1,
-        0, -1
-    };
+
 
 
     int neighborCount = 0;
@@ -78,7 +70,7 @@ static int wyvern_gate__native__bfs__get_neighbors(
     
     int i;
     int n;
-    for(n = 0; n < 4; ++n) {
+    for(n = 0; n < patternSize; ++n) {
         
         i = wyvern_gate__native__bfs__new_node(
             x + pattern[n*2+0],
@@ -92,6 +84,8 @@ static int wyvern_gate__native__bfs__get_neighbors(
     
     return neighborCount;
 }
+
+
 /*
     5 arguments:
         0 -> "width" (NUMBER), width of the entire map
@@ -99,6 +93,7 @@ static int wyvern_gate__native__bfs__get_neighbors(
         2 -> "scenery" (OBJECT), array of number values
         3 -> "start" (NUMBER), packed ID of start
         4 -> "goal" (NUMBER), packed ID of goal
+        5 -> "corners" (BOOLEAN), false if no diagnal movement
 */
 static matteValue_t wyvern_gate__native__bfs(
     matteVM_t * vm,
@@ -115,6 +110,42 @@ static matteValue_t wyvern_gate__native__bfs(
     CHECK_ARG(args[2], MATTE_VALUE_TYPE_OBJECT);
     CHECK_ARG(args[3], MATTE_VALUE_TYPE_NUMBER);
     CHECK_ARG(args[4], MATTE_VALUE_TYPE_NUMBER);
+    CHECK_ARG(args[5], MATTE_VALUE_TYPE_BOOLEAN);
+    
+
+
+    static int patternCorner[] = {
+        1, 1,
+        1, -1,
+        -1, 1,
+        -1, -1,
+        
+        -1, 0,
+        1, 0,
+        0, 1,
+        0, -1
+    };
+
+    static int patternNoCorner[] = {
+        -1, 0,
+        1, 0,
+        0, 1,
+        0, -1
+    };
+
+
+    int * pattern = NULL;
+    int patternSize = 0;
+
+    if (matte_value_as_boolean(store, args[5])) {
+        pattern = patternCorner;
+        patternSize = 8;
+    } else {
+        pattern = patternNoCorner;
+        patternSize = 4;
+    }
+    
+    
     
     int width = matte_value_as_number(store, args[0]);
     int height = matte_value_as_number(store, args[1]);    
@@ -178,7 +209,9 @@ static matteValue_t wyvern_gate__native__bfs(
         neighborCount = wyvern_gate__native__bfs__get_neighbors(
             v,
             neighbors,
-            map
+            map,
+            pattern,
+            patternSize
         );
         
         int i;
@@ -199,7 +232,7 @@ L_DONE:
 
 
 
-void wyvern_gate_add_native(matte_t * m) {
+void wyvern_gate_add_native_bfs(matte_t * m) {
     matte_add_external_function(
         m,
         "wyvern_gate__native__bfs",
@@ -211,6 +244,7 @@ void wyvern_gate_add_native(matte_t * m) {
         "scenery",
         "start",
         "goal",
+        "corners",
         NULL
     );
 }

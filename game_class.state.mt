@@ -271,7 +271,7 @@ isTag[TAG__SPARSE_ARRAY] = true;
       if (serialized->size == 0) ::<= {
         if (realWeight != weight0) ::<= {
           h = false;
-          //breakpoint();
+          //
         }
       }
       return h;

@@ -41,7 +41,7 @@
 @:ZONE_BUILDING_MINIMUM_WIDTH  = 6;
 @:ZONE_BUILDING_MINIMUM_HEIGHT = 5;
 @:ZONE_MINIMUM_SPAN = 2;
-@:ZONE_MAXIMUM_SPAN  = 3;
+@:ZONE_MAXIMUM_SPAN  = 5;
 @:STRUCTURE_MAP_STARTING_X = 100;
 @:STRUCTURE_MAP_STARTING_Y = 100;
 @:STRUCTURE_MAP_SIZE = 200;
@@ -137,6 +137,7 @@
     // adds a non-functioning decoration
     @:addDecoration ::(left, top, symbol, location) {
       random.pickArrayItem(list:[
+          // pokemon style
           /*   
             x  x
             xxxx
@@ -145,7 +146,7 @@
           
           */
 
-
+        /*
         ::{
           addBuildingBlockTop(x:left + 1, y: top + 1);
           addBuildingBlockTop(x:left + 4, y: top + 1);
@@ -164,7 +165,7 @@
           addBuildingBlock(x:left + 4, y: top + 4);
           addBuildingBlock(x:left + 2, y: top + 4);
           addBuildingBlockBottom(x:left + 3, y: top + 4);
-        },
+        },*/
         
         
           /*   
@@ -838,9 +839,11 @@
         }
       } else ::<= {
         ::? {
+          @try = 0;
           forever ::{
             // pick a random zone and extend it 
-            preZone = random.pickArrayItem(list:zones);
+            preZone = zones[try]; try = (try+1)%zones->size;
+            when(preZone == empty) empty;
             match(random.integer(from:0, to:3)) {
               // North
               (NORTH):::<= {

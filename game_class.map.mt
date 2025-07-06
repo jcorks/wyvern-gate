@@ -90,6 +90,7 @@
 @:distance = import(module:'game_function.distance.mt');
 
 
+@area_debug_index = 0;
 @Area = LoadableClass.create(
   name: 'Wyvern.Map.Area',
   items : {},
@@ -138,6 +139,16 @@
           h: _h,
           data : data,
           isOccupied: isOccupied
+        }
+      },
+      
+      debug ::(map) {
+        @:ind = map.addScenerySymbol(:''+area_debug_index);
+        area_debug_index = (area_debug_index + 1)%10
+        for(_y, _y+_h) ::(y) {
+          for(_x, _x+_w) ::(x) {
+            map.setSceneryIndex(x, y, symbol:ind);
+          }        
         }
       },
       
@@ -312,16 +323,16 @@
         id;
     }
 
-    @:aStarGetNeighbors::(neighbors, current) {
+    @:aStarGetNeighborsCorners::(neighbors, current) {
       neighbors->setSize(size:0);
       @:x = current%width;
       @:y = (current/width)->floor
       
       @i;
-      //i = aStarNewNode(x:x+1, y:y+1); if (i != empty) neighbors->push(value:i);
-      //i = aStarNewNode(x:x+1, y:y-1); if (i != empty) neighbors->push(value:i);
-      //i = aStarNewNode(x:x-1, y:y+1); if (i != empty) neighbors->push(value:i);
-      //i = aStarNewNode(x:x-1, y:y-1); if (i != empty) neighbors->push(value:i);
+      i = aStarNewNode(x:x+1, y:y+1); if (i != empty) neighbors->push(value:i);
+      i = aStarNewNode(x:x+1, y:y-1); if (i != empty) neighbors->push(value:i);
+      i = aStarNewNode(x:x-1, y:y+1); if (i != empty) neighbors->push(value:i);
+      i = aStarNewNode(x:x-1, y:y-1); if (i != empty) neighbors->push(value:i);
 
       i = aStarNewNode(x:x-1, y:y  ); if (i != empty) neighbors->push(value:i);
       i = aStarNewNode(x:x+1, y:y  ); if (i != empty) neighbors->push(value:i);
@@ -329,6 +340,20 @@
       i = aStarNewNode(x:x  , y:y-1); if (i != empty) neighbors->push(value:i);
       return neighbors;
     }
+
+    @:aStarGetNeighborsNoCorners::(neighbors, current) {
+      neighbors->setSize(size:0);
+      @:x = current%width;
+      @:y = (current/width)->floor
+      
+      @i;
+      i = aStarNewNode(x:x-1, y:y  ); if (i != empty) neighbors->push(value:i);
+      i = aStarNewNode(x:x+1, y:y  ); if (i != empty) neighbors->push(value:i);
+      i = aStarNewNode(x:x  , y:y+1); if (i != empty) neighbors->push(value:i);
+      i = aStarNewNode(x:x  , y:y-1); if (i != empty) neighbors->push(value:i);
+      return neighbors;
+    }
+
     
     @:aStarGetScore::(value) <- if (value == empty) THE_BIG_ONE else value;
     
@@ -380,7 +405,13 @@
     
     // A* finds a path from start to goal.
     // h is the heuristic function. h(n) estimates the cost to reach goal from node n.
-    @:aStarPath::(start, goal) {    
+    @:aStarPath::(start, goal, corners) { 
+      @:getNeighbors = if (corners)
+        aStarGetNeighborsCorners
+      else 
+        aStarGetNeighborsNoCorners
+        
+           
       start = aStarNewNode(x:start.x, y:start.y);
       goal = aStarNewNode(x:goal.x, y:goal.y);
       
@@ -421,7 +452,7 @@
             
           }
           openSet->remove(key:0);
-          foreach(aStarGetNeighbors(neighbors, current))::(i, neighbor) {
+          foreach(getNeighbors(neighbors, current))::(i, neighbor) {
             // d(current,neighbor) is the weight of the edge from current to neighbor
             // tentative_gScore is the distance from start to the neighbor through current
             @:tentative_gScore = aStarMapFind(map:gScore, key:current) + 1;//d(current, neighbor)
@@ -438,9 +469,13 @@
     }
     
     @:bfsQ = [];
-    @:bfsPath::(start, goal) {
+    @:bfsPath::(start, goal, corners) {
       start = aStarNewNode(x:start.x, y:start.y);
       goal = aStarNewNode(x:goal.x, y:goal.y);    
+      @:getNeighbors = if (corners)
+        aStarGetNeighborsCorners
+      else 
+        aStarGetNeighborsNoCorners
     
       when (BFS_NATIVE!=empty) ::<= {
         @:result = BFS_NATIVE(
@@ -448,7 +483,8 @@
           height,
           scenery,
           start,
-          goal
+          goal,
+          corners
         );
         when(result == empty) empty;
         @:out = [];
@@ -507,7 +543,7 @@
             })
           }
 
-          foreach(aStarGetNeighbors(neighbors, current:v))::(i, w) {
+          foreach(getNeighbors(neighbors, current:v))::(i, w) {
             when(visited[w] != empty) empty;
             
             visited[w] = v; // parent
@@ -1165,10 +1201,14 @@
         )
       },
       
-      getPath::(fromX, fromY, toX, toY, useBFS) {
+      getPath::(fromX, fromY, toX, toY, useBFS, corners) {
+        // default
+        if (corners == empty)
+          corners = true;
+
         when(useBFS != empty)
-          bfsPath(start:{x:fromX, y:fromY}, goal:{x:toX, y:toY});
-        @:path = aStarPath(start:{x:fromX, y:fromY}, goal:{x:toX, y:toY});
+          bfsPath(start:{x:fromX, y:fromY}, goal:{x:toX, y:toY}, corners);
+        @:path = aStarPath(start:{x:fromX, y:fromY}, goal:{x:toX, y:toY}, corners);
         when(path == empty || path->keycount == 0) empty;
         return path;
       },

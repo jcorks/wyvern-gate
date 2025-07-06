@@ -18,6 +18,7 @@ env['CC'] = env['CXX'] # because of the C code it tries to be "smart"
 sources = Glob("../export-cli/matte/src/*.c")
 sources += Glob("../export-cli/matte/src/rom/native.c")
 sources += Glob("src/*.cpp")
+sources += Glob("../export-cli/native.c")
 
 env.Append(CPPFLAGS=["-DMATTE_USE_SYSTEM_EXTENSIONS", "-DMATTE_USE_SYSTEM_EXTENSIONS__BASIC"])
 env.Append(CXXFLAGS=["-lm", "-lpthread"])

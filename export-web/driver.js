@@ -253,7 +253,8 @@
         "height",
         "scenery",
         "start",
-        "goal"        
+        "goal",
+        "corners"     
     ], function(fn, args) {
         const store = matte.store;
 
@@ -262,6 +263,7 @@
         const scenery = args[2];
         const start = store.valueAsNumber(args[3]);
         const goal = store.valueAsNumber(args[4]);
+        const corners = store.valueAsBoolean(args[5]);
     
     
         const aStarNewNode = function(x, y) {
@@ -272,23 +274,40 @@
                 return id;
         }
 
-        const aStarGetNeighbors = function(neighbors, current) {
-            neighbors.length = 0;
-            const x = current%width;
-            const y = Math.floor(current/width);
-            
-            var i;
-            i = aStarNewNode(x+1, y+1); if (i != undefined) neighbors.push(i);
-            i = aStarNewNode(x+1, y-1); if (i != undefined) neighbors.push(i);
-            i = aStarNewNode(x-1, y+1); if (i != undefined) neighbors.push(i);
-            i = aStarNewNode(x-1, y-1); if (i != undefined) neighbors.push(i);
+        var aStarGetNeighbors;
+        if (corners) {
+            aStarGetNeighbors = function(neighbors, current) {
+                neighbors.length = 0;
+                const x = current%width;
+                const y = Math.floor(current/width);
+                
+                var i;
+                i = aStarNewNode(x+1, y+1); if (i != undefined) neighbors.push(i);
+                i = aStarNewNode(x+1, y-1); if (i != undefined) neighbors.push(i);
+                i = aStarNewNode(x-1, y+1); if (i != undefined) neighbors.push(i);
+                i = aStarNewNode(x-1, y-1); if (i != undefined) neighbors.push(i);
 
-            i = aStarNewNode(x-1, y  ); if (i != undefined) neighbors.push(i);
-            i = aStarNewNode(x+1, y  ); if (i != undefined) neighbors.push(i);
-            i = aStarNewNode(x  , y+1); if (i != undefined) neighbors.push(i);
-            i = aStarNewNode(x  , y-1); if (i != undefined) neighbors.push(i);
-            return neighbors;
-        }    
+                i = aStarNewNode(x-1, y  ); if (i != undefined) neighbors.push(i);
+                i = aStarNewNode(x+1, y  ); if (i != undefined) neighbors.push(i);
+                i = aStarNewNode(x  , y+1); if (i != undefined) neighbors.push(i);
+                i = aStarNewNode(x  , y-1); if (i != undefined) neighbors.push(i);
+                return neighbors;
+            }  
+        } else {
+            aStarGetNeighbors = function(neighbors, current) {
+                neighbors.length = 0;
+                const x = current%width;
+                const y = Math.floor(current/width);
+                
+                var i;
+                i = aStarNewNode(x-1, y  ); if (i != undefined) neighbors.push(i);
+                i = aStarNewNode(x+1, y  ); if (i != undefined) neighbors.push(i);
+                i = aStarNewNode(x  , y+1); if (i != undefined) neighbors.push(i);
+                i = aStarNewNode(x  , y-1); if (i != undefined) neighbors.push(i);
+                return neighbors;
+            }         
+        }
+  
     
     
         const q = bfs_q;

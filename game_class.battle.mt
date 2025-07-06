@@ -351,7 +351,10 @@
       when (turnPoppable->keycount == 0) empty;
       windowEvent.onResolveAll(
         onDone:: {
-        
+
+        // from a battle cancel
+        when (ended) empty;
+
         @:ent = turnPoppable[0];
         turnPoppable->remove(key:0);
         entityTurn = ent;
@@ -609,10 +612,17 @@
       },
       
       cancel ::{
-        if (windowEvent.canJumpToTag(name:'Battle'))                      
-          windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);          
+        foreach(groups) ::(k, group) {
+          foreach(group) ::(i, ent) {
+            ent.battleEnd();
+          }
+        }          
+
         active = false;
         ended = true;      
+
+        if (windowEvent.canJumpToTag(name:'Battle'))                      
+          windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);          
       },
     
       start ::(
@@ -1083,7 +1093,7 @@
               entAct.flags.add(flag:StateFlags.ABILITY);
 
             if (art.durationTurns > 0) ::<= {
-              breakpoint();
+              
               if (actions[entAct] == action && (action.turnIndex >= art.durationTurns || useArtReturn == Arts.CANCEL_MULTITURN)) ::<= {
                 actions[entAct] = empty;
               } else if (useArtReturn != Arts.CANCEL_MULTITURN) ::<= {

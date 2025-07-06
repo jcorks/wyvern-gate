@@ -381,7 +381,7 @@
                   } else if (random.number() > 0.02) ::<= {
                     other = world.island.newHostileCreature()
                     other.nickname = correctA(word:other.name);
-                    breakpoint();
+                    
                   } else ::<= {
                     @:TheBeast = import(module:'game_class.landmarkevent_thebeast.mt');
                     other = TheBeast.createEntity();
@@ -705,7 +705,7 @@
                 speaker: 'Courier',
                 text: '"It seems that your work order for upgrading your shop has finished successfully. Enjoy the new space."'
               );
-              breakpoint();
+              
               if (state.workOrder == WORK_ORDER__SPACE)
                 state.shopInventory.maxItems += 5
               else
@@ -1563,7 +1563,7 @@
             
             @:shopkeeps = [...state.hirees];
             @:nextShopkeep :: {
-              breakpoint();
+              
               when(shopkeeps->size == 0) onDone(); 
               @:hiree = shopkeeps->pop;
               when(hiree.role != ROLES.SHOPKEEP) nextShopkeep();
@@ -2275,7 +2275,7 @@
                       @:locations = city.locations;
                       @:shop = locations[locations->findIndexCondition(::(value) <- value.worldID == state.shopID)]
 
-                      breakpoint();
+                      
                       instance.visitLandmark(
                         landmark:city,
                         where: ::(landmark)<- shop

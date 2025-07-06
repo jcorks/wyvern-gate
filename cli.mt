@@ -105,7 +105,7 @@ canvas.onCommit = ::(lines, renderNow){
 @:printMacro ::{
   @:macro = windowEvent.getMacro();
   when(macro == empty) empty;
-  breakpoint();
+  
   print(:'\n\n[');
   foreach(macro) ::(k, v) {
     print(:'  {input: windowEvent.CURSOR_ACTIONS.' + 

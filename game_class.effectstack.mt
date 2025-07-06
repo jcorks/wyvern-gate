@@ -586,7 +586,7 @@
           
           when(out->size == 0)
             'None'
-          breakpoint();
+          
           return out->reduce(::(previous, value) <- 
             if (previous == empty)
               value

@@ -111,7 +111,7 @@ return ::(*args) {
 
   @:realOnChoice = args.onChoice;
   args.onChoice = ::(choice) {
-    breakpoint();
+    
     realOnChoice(choice, tab:tabIndex);
   }
 

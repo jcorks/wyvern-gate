@@ -1087,7 +1087,7 @@ return {
     
     Accolade.new(
       message: "The traps were kind of fun to setup, to be honest.",
-      info: 'Fell for a trap over 5 times.',
+      info: 'Fell for traps over 5 times.',
       condition::(world)<- world.accoladeCount(name:'trapsFallenFor') > 5
     ),
     
@@ -1147,8 +1147,8 @@ return {
     
     Accolade.new(
       message: "Easy money.",
-      info: 'Sold over 20 items.',
-      condition::(world)<- world.accoladeCount(name:'sellCount') > 20
+      info: 'Sold over 40 items.',
+      condition::(world)<- world.accoladeCount(name:'sellCount') > 40
     ),
     
     Accolade.new(
@@ -2879,7 +2879,7 @@ return {
         @:island = {
           island : empty
         }
-        breakpoint();
+        
         item.setIslandGenTraits(
           levelHint:  story.levelHint,
           nameHint:   'Island of Fire',

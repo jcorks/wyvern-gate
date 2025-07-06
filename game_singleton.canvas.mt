@@ -317,6 +317,7 @@ return class(
         leftWeight,
         maxWidth,
         maxHeight,
+        minWidth,
         notchText
       ) {
         @:WINDOW_BUFFER = 4;
@@ -334,6 +335,14 @@ return class(
 
         
         @width = if (title!=empty) (title->length + 2) else 0;
+
+        if (minWidth != empty) ::<= {
+          
+          if (width < minWidth)
+            width = minWidth;
+        }
+        
+            
         foreach(lines) ::(k, v) {
           if (v->length > width)
             width = v->length;

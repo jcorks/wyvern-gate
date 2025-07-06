@@ -358,9 +358,12 @@ Location.database.newEntry(data:{
       )->size;
 
       for(found, if (minCount == empty) 1 else minCount) ::(i) {
-        location.inventory.add(item:Item.new(base:Item.database.find(
-          id
-        )));  
+        location.inventory.add(item:Item.new(
+          base:Item.database.find(
+            id
+          ),
+          forceNeedsAppraisal : false
+        ));  
       }
     }
 
@@ -434,7 +437,7 @@ Location.database.newEntry(data:{
       location.ownedBy.profession = Profession.find(id:'base:trader');
       location.ownedBy.normalizeStats();        
       location.name = 'Shop';
-      location.inventory.maxItems = 50;
+      location.inventory.maxItems = 100;
 
       @:nameGen = import(module:'game_singleton.namegen.mt');
       @:story = import(module:'game_singleton.story.mt');
@@ -494,7 +497,7 @@ Location.database.newEntry(data:{
         );
         
         item = item.appraise();
-        breakpoint();
+        
         if (item.price * Item.SELL_PRICE_MULTIPLIER > PRICE_THRESHOLD) ::<= {
           location.inventory.add(:item)
           send();
@@ -2200,7 +2203,7 @@ Location.database.newEntry(data:{
   },
   
   onStep::(location, entities) {
-    breakpoint();
+    
     @:Damage = import(:'game_class.damage.mt');
     foreach(entities) ::(k, v) {
       when (v.hp <= 1) empty;

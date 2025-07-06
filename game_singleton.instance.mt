@@ -309,7 +309,7 @@ return class(
             }
           );
         }];
-        breakpoint();
+        
 
 
 
@@ -1082,7 +1082,7 @@ return empty;
       },      
       x:{ set ::(value) <- save},//+=1},
       visitCurrentIsland ::(restorePos, atGate, onReady) {  
-        breakpoint();
+        
         @:island = world.island;
         
 

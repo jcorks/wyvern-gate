@@ -290,7 +290,7 @@
   when(lines->size == 0) empty;
   when(needsUpdate == false) empty;
   
-  breakpoint();
+  
   windowEvent.queueDisplay(
     prompt: this.name + ' - Effects Changed!',
     lines: canvas.refitLines(input:lines)
@@ -571,7 +571,7 @@
         
         onGetPauseFinish ::<- true,
         onFinish :: {
-          breakpoint();
+          
           if (set.expToNext == 0) ::<= {
             levelUpProfession(this, state, profession);
             windowEvent.queueDisplay(
@@ -1352,7 +1352,7 @@
               windowEvent.queueMessage(
                 text: this.name + '\'s deck has too few cards to keep equipped. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize(:set) + ' out of the minimum of ' + DECK_MIN_ART_COUNT + '.'
               );
-              breakpoint();
+              
               
               start();
             }
@@ -1378,7 +1378,7 @@
             return categories;
           },
           onChoice::(art, category) {
-            breakpoint();
+            
             when(category == ' Add support...') ::<= {
               trunk();
             }
@@ -2670,20 +2670,19 @@
       this.checkStatChanged();
 
 
-      this.effectStack.emitEvent(
-        name: 'onPostAddEffect',
-        from,
-        id: id,
-        duration: durationTurns, 
-        effectData : effectData
-      );
-      
-      
-      if (!hasEffectStack)
+      if (this.effectStack) ::<= {
+        this.effectStack.emitEvent(
+          name: 'onPostAddEffect',
+          from,
+          id: id,
+          duration: durationTurns, 
+          effectData : effectData
+        );
+        
+        
         this.effectStack.clear(all:true);
-      if (!hasEffectStack)
-        _.effectStack = empty;
-
+       } else
+          _.effectStack = empty;
     },
     
     notifyEffect::(isAdding, effectIDs) <-

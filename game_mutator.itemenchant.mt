@@ -1258,7 +1258,7 @@ ItemEnchant.database.newEntry(
             'Soul of ' + Effect.find(:state.equipEffects[0]).name;
             
           when(state.condition == empty) state.name;
-          breakpoint();
+          
           return state.condition.name + ': ' + state.base.name;
         },
         

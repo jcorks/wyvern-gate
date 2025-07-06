@@ -2048,7 +2048,7 @@ Interaction.newEntry(
 
             @:key = keys[choice-1];
             world.loadIsland(key, onDone::(island) {
-              breakpoint();
+              
               instance.visitCurrentIsland(
                 atGate:true
               );
@@ -2103,7 +2103,7 @@ Interaction.newEntry(
     id :  'base:next-floor',
     keepInteractionMenu : false,
     onInteract ::(location, party) {
-      breakpoint();
+      
       if (location.targetLandmark == empty) ::<={
       
         if (location.landmark.floor > 5 && random.number() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
@@ -2959,13 +2959,13 @@ Interaction.newEntry(
             // Armor/clothing with x5 nice enchants (42%)
             // Ring with x5 nice enchantments(5%)
             // Life Crystal with x5 nice enchantments(1%)
-          @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+            @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
 
             @:get5positiveEffects ::{
               @:out = [];
               for(0, 3) ::(i) {
                 out->push(:ItemEnchant.database.getRandomFiltered(::(value) <-
-                  value.hasNoTraits(:ItemEnchant.TRAIT.SPECIAL) &&
+                  value.hasNoTrait(:ItemEnchant.TRAIT.SPECIAL) &&
                   value.priceMod > 0
                 ).id);
               }
@@ -3026,15 +3026,13 @@ Interaction.newEntry(
               },
             
             ]);
-            @message = 'The party received ' + correctA(word:item.name);
+            @message = 'The party received ' + correctA(word:item.item.name);
             windowEvent.queueMessage(text: message);
 
-
-            party.inventory.add(item);            
+            party.inventory.add(item:item.item);            
           });
         }                 
       );
-
     }
   }
 )  

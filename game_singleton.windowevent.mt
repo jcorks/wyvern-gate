@@ -33,7 +33,7 @@
   DONE : 3
 };
 
-@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText) <- 
+@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth) <- 
     canvas.renderTextFrameGeneral(
       leftWeight, 
       topWeight, 
@@ -41,6 +41,7 @@
       maxWidth,
       lines:lines, 
       title:speaker, 
+      minWidth,
       notchText:if(hasNotch != empty) (if (notchText == empty) "(next)" else notchText) else empty)
 
 
@@ -1209,10 +1210,12 @@
       if (data.iter == empty)
         data.iter = 0;
         
-      if (data.maxWidth == empty) ::<= {
+      ::<= {
         @w = 0;
         foreach(data.lines) ::(k, line) <- if (w < line->length) w = line->length;
-        data.maxWidth = w;
+        if (data.maxWidth == empty)
+          data.maxWidth = w;
+        data.minWidth = w;
       }
 
       if(input == CURSOR_ACTIONS.UP||
@@ -1237,12 +1240,13 @@
           topWeight: data.topWeight, 
           maxWidth : data.maxWidth,
           maxHeight : data.maxHeight,
+          minWidth : data.minWidth,
           lines: data.lines->subset(from:data.iter, to:data.iter+data.maxHeight),
           speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
           hasNotch: true,
           notchText : 'Scroll ' + ((fraction*100)->round) + '%' + 
-            (if (fraction != 1) '[v]' else '   ') + 
-            (if (fraction != 0) '[^]' else '   ')
+            (if (fraction != 1) '[v]' else '') + 
+            (if (fraction != 0) '[^]' else '')
           
           //limitLines : data.pageAfter,
         );
