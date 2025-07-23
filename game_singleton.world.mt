@@ -260,13 +260,14 @@
 
           ent.supportArts = [
             'base:cancel',
-            'base:cancel',
+            'base:prismatic-wisp',
             'base:pebble',
             'base:quick-shield',
             'base:bloods-summoning',
             'base:banish',
-            'base:banish',
-            'base:banish'
+            'base:shield-amplifier',
+            'base:banishing-light',
+            'base:greater-banish'
           ];
           
           
@@ -340,10 +341,14 @@
 
           ent.supportArts = [
             'base:cancel',
-            'base:cancel',
+            'base:prismatic-wisp',
             'base:pebble',
             'base:quick-shield',
-            'base:bloods-summoning'
+            'base:bloods-summoning',
+            'base:banish',
+            'base:shield-amplifier',
+            'base:banishing-light',
+            'base:greater-banish'
           ];
 
 
@@ -411,10 +416,14 @@
 
           ent.supportArts = [
             'base:cancel',
-            'base:cancel',
+            'base:prismatic-wisp',
             'base:pebble',
             'base:quick-shield',
-            'base:bloods-summoning'
+            'base:bloods-summoning',
+            'base:banish',
+            'base:shield-amplifier',
+            'base:banishing-light',
+            'base:greater-banish'
           ];
 
           ent.name = 'Mei';
@@ -464,10 +473,14 @@
 
           ent.supportArts = [
             'base:cancel',
-            'base:cancel',
+            'base:prismatic-wisp',
             'base:pebble',
             'base:quick-shield',
-            'base:bloods-summoning'
+            'base:bloods-summoning',
+            'base:banish',
+            'base:shield-amplifier',
+            'base:banishing-light',
+            'base:greater-banish'
           ];            
           
           ent.equip(item:skieWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);

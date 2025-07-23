@@ -6400,7 +6400,7 @@ Arts.newEntry(
 Arts.newEntry(
   data: {
     name: 'Greater Banish',
-    id : 'base:banish',
+    id : 'base:greater-banish',
     notifCommit : '$1 casts Greater Banish on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,

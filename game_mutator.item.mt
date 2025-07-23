@@ -3242,7 +3242,7 @@ Item.database.newEntry(data : {
 
 Item.database.newEntry(
   data : {
-    name : '',
+    name : 'Gemstone',
     id : 'base:inlet-gem',
     description: "An enchanted gemstone. When set in slots on equipment, it can rebalance stats.",
     examine : 'Its abilities are unknown.',
@@ -3310,7 +3310,7 @@ Item.database.newEntry(
 
 Item.database.newEntry(
   data : {
-    name : '',
+    name : 'Soul Gem',
     id : 'base:inlet-soulgem',
     description: "",
     examine : 'Its abilities are unknown.',
