@@ -37,7 +37,8 @@
   MULTIHIT : 1,
   FORCE_CRIT : 2,
   FORCE_DEF_BYPASS : 4,
-  IS_CRIT : 8
+  IS_CRIT : 8,
+  UNBLOCKABLE : 16
 }
 
 @:type = Object.newType(

@@ -646,7 +646,7 @@ Arts.newEntry(
     notifCommit : '$1 fires a glowing beam of moonlight!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target with Fire based on the user's INT. If night time, the damage is boosted. Additional levels boost the damage further.",
+    description: "Damages a target with Fire based on the user's INT. Cannot be blocked. If night time, the damage is boosted. Additional levels boost the damage further.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -674,7 +674,8 @@ Arts.newEntry(
             damage: Damage.new(
               amount: Arts.find(:'base:moonbeam').baseDamage(user, level),
               damageType : Damage.TYPE.FIRE,
-              damageClass: Damage.CLASS.HP
+              damageClass: Damage.CLASS.HP,
+              traits : Damage.TRAIT.UNBLOCKABLE
             ),
             targetPart: targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -693,7 +694,7 @@ Arts.newEntry(
     notifCommit : '$1 fires a glowing beam of sunlight!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target with Fire based on the user's INT. If day time, the damage is boosted.",
+    description: "Damages a target with Fire based on the user's INT. Cannot be blocked. If day time, the damage is boosted.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -721,7 +722,8 @@ Arts.newEntry(
             damage: Damage.new(
               amount:Arts.find(:'base:sunbeam').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
-              damageClass: Damage.CLASS.HP
+              damageClass: Damage.CLASS.HP.
+              traits : Damage.TRAIT.UNBLOCKABLE
             ),
             targetPart : targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -741,7 +743,7 @@ Arts.newEntry(
     notifCommit : '$1 lets loose a burst of sunlight!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Damages all enemies with Fire based on the user's INT. If day time, the damage is boosted.",
+    description: "Damages all enemies with Fire based on the user's INT. Cannot be blocked. If day time, the damage is boosted.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -772,7 +774,8 @@ Arts.newEntry(
               damage: Damage.new(
                 amount: Arts.find(:'base:sunburst').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                traits : Damage.TRAIT.UNBLOCKABLE
               )
             );
           }
@@ -2402,7 +2405,7 @@ Arts.newEntry(
     notifCommit : '$1 casts Fire on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: 'Magick that damages a target with fire based on INT. Additional levels increase its potency.',
+    description: 'Magick that damages a target with fire based on INT. Cannot be blocked. Additional levels increase its potency.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2421,7 +2424,8 @@ Arts.newEntry(
             damage: Damage.new(
               amount:Arts.find(:'base:fire').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
-              damageClass: Damage.CLASS.HP
+              damageClass: Damage.CLASS.HP,
+              traits: Damage.TRAIT.UNBLOCKABLE
             )
           );
         }
@@ -2497,7 +2501,8 @@ Arts.newEntry(
             damage: Damage.new(
               amount: Arts.find(:'base:flare').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
-              damageClass: Damage.CLASS.HP
+              damageClass: Damage.CLASS.HP,
+              traits: Damage.TRAIT.UNBLOCKABLE
             )
           );
         }
@@ -2573,7 +2578,7 @@ Arts.newEntry(
     notifCommit : '$1 casts Ice!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Multi-hit magick that damages all enemies with ice based on INT.',
+    description: 'Multi-hit magick that damages all enemies with ice based on INT. Cannot be blocked.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2593,7 +2598,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:ice').baseDamage(level, user),
                 damageType : Damage.TYPE.ICE,
                 damageClass: Damage.CLASS.HP,
-                traits: Damage.TRAIT.MULTIHIT
+                traits: Damage.TRAIT.MULTIHIT | Damage.TRAIT.UNBLOCKABLE
               )
             );
           }
@@ -2610,7 +2615,7 @@ Arts.newEntry(
     notifCommit : '$1 casts Frozen Flame!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Multi-hit magick that causes enemies to spontaneously combust in a cold, blue flame. Damage is based on INT with an additional chance to Freeze the hit targets. Additional levels increase damage.',
+    description: 'Multi-hit magick that causes enemies to spontaneously combust in a cold, blue flame. Cannot be blocked. Damage is based on INT with an additional chance to Freeze the hit targets. Additional levels increase damage.',
     keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2629,7 +2634,7 @@ Arts.newEntry(
                 amount: Arts.find(:'base:frozen-flame').baseDamage(level, user),
                 damageType : Damage.TYPE.ICE,
                 damageClass: Damage.CLASS.HP,
-                traits: Damage.TRAIT.MULTIHIT
+                traits: Damage.TRAIT.MULTIHIT | Damage.TRAIT.UNBLOCKABLE
               )
             );
           }
@@ -2700,7 +2705,7 @@ Arts.newEntry(
                 amount:Arts.find(:'base:explosion').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
                 damageClass: Damage.CLASS.HP,
-                traits: Damage.TRAIT.MULTIHIT
+                traits: Damage.TRAIT.MULTIHIT | Damage.TRAIT.UNBLOCKABLE
               )
             );
           }
@@ -2754,7 +2759,7 @@ Arts.newEntry(
     notifCommit : '$1 casts Thunder!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Multi-hit magick that deals 4 random strikes based on INT. Each additional level deals an additional 2 strikes.',
+    description: 'Multi-hit magick that deals 4 random strikes based on INT. Cannot be blocked. Each additional level deals an additional 2 strikes.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2774,7 +2779,7 @@ Arts.newEntry(
                 amount:Arts.find(:'base:thunder').baseDamage(level, user),
                 damageType : Damage.TYPE.THUNDER,
                 damageClass: Damage.CLASS.HP,
-                traits: Damage.TRAIT.MULTIHIT
+                traits: Damage.TRAIT.MULTIHIT | Damage.TRAIT.UNBLOCKABLE
               )
             );
           }

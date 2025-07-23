@@ -790,9 +790,10 @@
             }
           }
 
-          when(isDark == true && isLit[itemX+itemY*width] != true && chosenChar != empty) 
+          when(isDark == true && isLit[itemX+itemY*width] != true && chosenChar != empty) ::<= {
+            when(chosenChar != empty && chosenChar == ' ') empty;
             canvas.drawChar(text:TOO_FAR_CHARACTER);            
-
+          }
           if (chosenChar)
             canvas.drawChar(text:chosenChar);            
         }       

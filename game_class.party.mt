@@ -139,7 +139,7 @@
       bank : {
         get :: {
           if (state.bank == empty)
-            state.bank = Inventory.new(size:999999);                        
+            state.bank = Inventory.new(size:9999999);                        
           return state.bank
         }
       },

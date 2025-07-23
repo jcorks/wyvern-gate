@@ -1840,7 +1840,7 @@
         }
         @imperfectGuard = false;
 
-        if (targetPart != empty) ::<= {
+        if (targetPart != empty && ((dmg.traits & Damage.TRAIT.UNBLOCKABLE) == 0)) ::<= {
         
           if (targetDefendPart == empty)
             targetDefendPart = 0;
@@ -2670,17 +2670,19 @@
       this.checkStatChanged();
 
 
-      if (hasEffectStack) ::<= {
-        this.effectStack.emitEvent(
-          name: 'onPostAddEffect',
-          from,
-          id: id,
-          duration: durationTurns, 
-          effectData : effectData
-        );
-        
-       } else ::<= {
-          this.effectStack.clear(all:true);
+      if (this.effectStack != empty) ::<= {
+        if (hasEffectStack) ::<= {
+          this.effectStack.emitEvent(
+            name: 'onPostAddEffect',
+            from,
+            id: id,
+            duration: durationTurns, 
+            effectData : effectData
+          );
+          
+         } else ::<= {
+            this.effectStack.clear(all:true);
+         }
        }
        
        if (!hasEffectStack)

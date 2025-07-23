@@ -5703,8 +5703,14 @@ Effect.newEntry(
                   when (choice == 0) empty;        
                   when (choice == 1) choiceItem.describe();
                   when (choice == 2) ::<= {
-                    from.remove(:choiceItem);
-                    to.add(:choiceItem);
+                    if (to.isFull) ::<= {
+                      windowEvent.queueMessage(
+                        text: 'Inventory is full.'
+                      );
+                    } else ::<= {
+                      from.remove(:choiceItem);
+                      to.add(:choiceItem);
+                    }
                     windowEvent.jumpToTag(name: 'BANKING-ITEM', goBeforeTag: true);
                   }
                 }

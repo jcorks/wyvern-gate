@@ -27,7 +27,7 @@
 @:Filesystem = import(module:'Matte.System.Filesystem');
 
 windowEvent.errorHandler = ::<= {
-  @lines = [];
+  @lines = ['Wyvern Gate, commit ' + import(module:'GIT_COMMIT')];
   if (Filesystem.exists(:'ERROR.LOG'))
     Filesystem.remove(:'ERROR.LOG');
 
@@ -36,7 +36,7 @@ windowEvent.errorHandler = ::<= {
       ...lines,
       '--',
       '--',
-      'NEW ERROR ('+time.date.day + ' ' + time.date.month + ', ' + time.date.year+'):',
+      'NEW ERROR (d'+time.date.day + ' m' + time.date.month + ', ' + time.date.year+'):',
       '--',
       '--',
       ...message.summary->split(token:'\n')

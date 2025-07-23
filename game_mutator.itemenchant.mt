@@ -1237,7 +1237,7 @@ ItemEnchant.database.newEntry(
         get ::{
           @:Effect = import(module:'game_database.effect.mt');
           when(state.base.id == 'base:soul') 
-            "Grants the effect " + Effect.find(:state.equipEffects[0]).name + '.';
+            Effect.find(:state.equipEffects[0]).description;
             
           when(state.condition == empty) state.description;
           @out = state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);

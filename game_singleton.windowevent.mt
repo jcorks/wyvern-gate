@@ -1239,20 +1239,28 @@
           data.iter += 1;
           
           
-        if (data.iter < 0) data.iter = 0;
         if (data.iter > data.lines->size - data.maxHeight - 1) data.iter = data.lines->size - data.maxHeight - 1;
+        if (data.iter < 0) data.iter = 0;
         data.rendered = empty;
       }   
       
       data.thisRender = ::{
         @:fraction = (data.iter / (data.lines->size - data.maxHeight - 1));
+        
+        @:end = if (data.iter+data.maxHeight >= data.lines->size) 
+          data.lines->size-1 
+        else
+          data.iter+data.maxHeight
+          
+        breakpoint();
+          
         @:info = renderTextSingle(
           leftWeight: data.leftWeight, 
           topWeight: data.topWeight, 
           maxWidth : data.maxWidth,
           maxHeight : data.maxHeight,
           minWidth : data.minWidth,
-          lines: data.lines->subset(from:data.iter, to:data.iter+data.maxHeight),
+          lines: data.lines->subset(from:data.iter, to:end),
           speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
           hasNotch: true,
           notchText : 'Scroll ' + ((fraction*100)->round) + '%' + 
@@ -1262,6 +1270,9 @@
           //limitLines : data.pageAfter,
         );
         
+        // showing the full thing.
+        when (data.iter == 0 && end == data.lines->size-1) empty;
+
         // render scrollbar
         @space = info.height - 4;
         @scrollHeight = ((data.maxHeight / data.lines->size) * space)->floor;
@@ -1436,14 +1447,15 @@
         maxHeight,
         onLeave
       ) {
-        when(lines->size < 10)
-          this.queueDisplay(
-            skipAnimation: true,
-            prompt,
-            lines,
-            maxWidth,
-            maxHeight
-          );
+        if (maxHeight == empty) ::<= {
+          maxHeight = canvas.height-5;
+        }
+        if (maxHeight >= lines->size) maxHeight = lines->size;
+
+        if (maxWidth == empty) ::<= {
+          maxWidth = canvas.width - 4;
+        }
+
       
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
@@ -1451,8 +1463,8 @@
             prompt: prompt,
             lines : canvas.refitLines(input: lines, maxWidth),
             hasPages : hasPages,
-            maxHeight : if (maxHeight == empty) canvas.height-5 else maxHeight,
-            maxWidth : if (maxWidth == empty) canvas.width - 4 else maxWidth,
+            maxHeight : maxHeight,
+            maxWidth : maxWidth,
             onLeave : onLeave
           });
         }]); 

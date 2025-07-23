@@ -4235,60 +4235,60 @@ none.name = 'None';
         ]
       );
       
-      if (this.enchantLimit)    
-      windowEvent.queueReader(
-        prompt: this.name + ': Enchantments',
-        lines :            
-          
-          ::<= {
-          
-            @column0 = [];
-            @column1 = [];
-            @column2 = [];
-            @:LIMIT_DESCRIPT_LENGTH = 40;
-
-            for(0, this.enchantLimit) ::(i) {
-              column0->push(:'(' + romanNum(value:i+1) + ')');
-              when(state.enchants[i] == empty) ::<= {
-                column1->push(:'----');
-                column2->push(:'----');
-              }
-
-              column1->push(:state.enchants[i].name);
-                
-              @:desc = state.enchants[i].description;
-              when(desc->length < LIMIT_DESCRIPT_LENGTH) ::<= {
-                column2->push(:desc);
-                return empty;
-              }
-
-
-              @:descLines = canvas.refitLines(input:[desc], maxWidth:LIMIT_DESCRIPT_LENGTH)
-              column2->push(:descLines[0]);
-              descLines->remove(:0);
-              
- 
-              // tricky! add dummy lines to give the illusion
-              foreach(descLines) ::(k, line) {
-                column0->push(:'');
-                column1->push(:'');
-                column2->push(:line);
-              } 
-            }
+      if (this.enchantLimit > 0 && ((this.base.traits & Item.TRAIT.CAN_HAVE_ENCHANTMENTS) != 0))    
+        windowEvent.queueReader(
+          prompt: this.name + ': Enchantments',
+          lines :            
             
+            ::<= {
+            
+              @column0 = [];
+              @column1 = [];
+              @column2 = [];
+              @:LIMIT_DESCRIPT_LENGTH = 40;
 
-            return canvas.columnsToLines(
-              columns : [
-                column0,
-                column1,
-                column2
-              ],
-              spacing:2
-            )
-          }
+              for(0, this.enchantLimit) ::(i) {
+                column0->push(:'(' + romanNum(value:i+1) + ')');
+                when(state.enchants[i] == empty) ::<= {
+                  column1->push(:'----');
+                  column2->push(:'----');
+                }
 
-      );
-      
+                column1->push(:state.enchants[i].name);
+                  
+                @:desc = state.enchants[i].description;
+                when(desc->length < LIMIT_DESCRIPT_LENGTH) ::<= {
+                  column2->push(:desc);
+                  return empty;
+                }
+
+
+                @:descLines = canvas.refitLines(input:[desc], maxWidth:LIMIT_DESCRIPT_LENGTH)
+                column2->push(:descLines[0]);
+                descLines->remove(:0);
+                
+   
+                // tricky! add dummy lines to give the illusion
+                foreach(descLines) ::(k, line) {
+                  column0->push(:'');
+                  column1->push(:'');
+                  column2->push(:line);
+                } 
+              }
+              
+
+              return canvas.columnsToLines(
+                columns : [
+                  column0,
+                  column1,
+                  column2
+                ],
+                spacing:2
+              )
+            }
+
+        );
+        
         
       windowEvent.queueMessageSet(
         speakers : [

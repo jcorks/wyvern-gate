@@ -167,9 +167,10 @@
         //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
         if (entities->keycount < 1 && state.hasBeast && state.encountersOnFloor == 0) ::<= {
           addEntity();
+          addSlimeling(:entities[0]);
         } else if (entities->keycount > 0) ::<= {
           state.steps += 1;
-          if ((state.steps % 40) == 0) 
+          if ((state.steps % 300) == 0) 
             addSlimeling(:entities[0]);
           
         }
