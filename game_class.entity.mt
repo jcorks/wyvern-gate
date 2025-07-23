@@ -1955,9 +1955,13 @@
           @:ratioDiff = this.getChanceOfAttackSuccessDEXvDEF(:target);
           if (random.try(percentSuccess:(1-ratioDiff)*100)) ::<= {       
             windowEvent.queueMessage(
-              text: target.name + ' defended themself from the incoming attack!'
+              text: target.name + ' avoided the incoming attack!'
             );
             dmg.amount = 0;
+
+
+            // TODO: dodge
+            /*
             if (target.effectStack)
               target.effectStack.emitEvent(
                 name : 'onSuccessfulBlock',
@@ -1974,6 +1978,7 @@
               name: 'onGotBlocked',
               from: target
             );
+            */
           }
         }
         

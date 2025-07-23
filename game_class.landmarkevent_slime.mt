@@ -30,6 +30,7 @@
 
   
     @:addSlimeling ::(mapEntity) {
+      when (mapEntity == empty) empty;
       @:pos = mapEntity.position;
 
       @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -139,7 +140,7 @@
       ref.addFriendSpecies(:'base:slimeling')
       ref.addFriendSpecies(:'base:slimequeen')
       ref.addDeathTask(id:'base:to-poison');
-
+      return ref;
     }
     
 
@@ -161,13 +162,12 @@
       },
       
       step::{
-        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'slimequeen');
+        @entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'slimequeen');
       
         // add additional entities out of spawn points (stairs)
         //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
         if (entities->keycount < 1 && state.hasBeast && state.encountersOnFloor == 0) ::<= {
-          addEntity();
-          addSlimeling(:entities[0]);
+          addSlimeling(:addEntity());
         } else if (entities->keycount > 0) ::<= {
           state.steps += 1;
           if ((state.steps % 300) == 0) 

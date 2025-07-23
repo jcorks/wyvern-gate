@@ -275,6 +275,7 @@ void Matte::initializeVM() {
         NULL
     );    
 
+    wyvern_gate_add_native_bfs(ctx);
 
 
     matte_vm_import(
@@ -285,7 +286,6 @@ void Matte::initializeVM() {
         matte_store_new_value(store)
     );    
     
-    wyvern_gate_add_native_bfs(ctx);
 
     sendInputMatteCall = matte_run_source(ctx, "return import(:'input.mt');\n\n");
 
