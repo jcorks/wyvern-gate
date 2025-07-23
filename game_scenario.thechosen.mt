@@ -1200,7 +1200,6 @@ return {
         keepInteractionMenu : false,
         onInteract ::(location, party) {
           @:world = import(module:'game_singleton.world.mt');
-          @:Event = import(module:'game_mutator.event.mt');
 
           @:proceed ::{
             if (location.targetLandmark == empty) ::<={

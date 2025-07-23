@@ -35,7 +35,7 @@ import(module:'game_database.species.mt');
 import(module:'game_database.book.mt');
 
 import(module:'game_mutator.entityquality.mt');
-import(module:'game_mutator.event.mt');
+import(module:'game_mutator.islandevent.mt');
 import(module:'game_mutator.item.mt');
 import(module:'game_mutator.itemenchant.mt');
 import(module:'game_mutator.landmark.mt');
@@ -63,7 +63,6 @@ import(:'game_class.inletset.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Landmark = import(module:'game_mutator.landmark.mt');
 @:Island = import(module:'game_mutator.island.mt');
-@:Event  = import(module:'game_mutator.event.mt');
 @:Interaction = import(module:'game_database.interaction.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:namegen = import(module:'game_singleton.namegen.mt');
@@ -1328,7 +1327,6 @@ return empty;
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
         @:partyOptions = import(module:'game_function.partyoptions.mt');
         @:Island = import(module:'game_mutator.island.mt');
-        @:Event  = import(module:'game_mutator.event.mt');
 
         @:party = world.party;
         @:landmark = world.landmark;

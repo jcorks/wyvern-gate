@@ -3675,7 +3675,8 @@ none.name = 'None';
     appraisalCount : 0,
     inletData : empty,
     inletSlotData : empty,
-    coreDescription : ''
+    coreDescription : '',
+    forceEnchantCount : -1
   },
   
   database : Database.new(
@@ -3728,6 +3729,8 @@ none.name = 'None';
       state.useEffects = [];
       state.stats = StatSet.new();
       state.statsBase = StatSet.new();
+      if (forceEnchantCount != empty)
+        state.forceEnchantCount = forceEnchantCount;
       state.arts = ::<= {
         when (artsHint) artsHint;
         @:out = [
@@ -4108,6 +4111,7 @@ none.name = 'None';
     enchantLimit : {
       get ::{
         @:state = _.state;
+        when (state.forceEnchantCount != -1) state.forceEnchantCount;
         @a = state.base.enchantLimit;
         @b = if (state.apparel == empty ) MAX_ENCHANT_GLOBAL else state.apparel.enchantLimit;
         @c = if (state.material == empty) MAX_ENCHANT_GLOBAL else state.material.enchantLimit;
@@ -4253,8 +4257,10 @@ none.name = 'None';
               column1->push(:state.enchants[i].name);
                 
               @:desc = state.enchants[i].description;
-              when(desc->length < LIMIT_DESCRIPT_LENGTH)
+              when(desc->length < LIMIT_DESCRIPT_LENGTH) ::<= {
                 column2->push(:desc);
+                return empty;
+              }
 
 
               @:descLines = canvas.refitLines(input:[desc], maxWidth:LIMIT_DESCRIPT_LENGTH)
@@ -4271,7 +4277,6 @@ none.name = 'None';
             }
             
 
-            breakpoint();
             return canvas.columnsToLines(
               columns : [
                 column0,

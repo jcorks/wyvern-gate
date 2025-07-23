@@ -3593,7 +3593,6 @@ return {
         keepInteractionMenu : false,
         onInteract ::(location, party) {
           @:world = import(module:'game_singleton.world.mt');
-          @:Event = import(module:'game_mutator.event.mt');
 
           if (location.targetLandmark == empty) ::<={
             @:Landmark = import(module:'game_mutator.landmark.mt');

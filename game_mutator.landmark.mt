@@ -866,7 +866,6 @@ Landmark.database.newEntry(
     @:Map = import(module:'game_class.map.mt');
     @:windowEvent = import(module:'game_singleton.windowevent.mt');
     @:canvas = import(module:'game_singleton.canvas.mt');
-    @:Event = import(module:'game_mutator.event.mt');    
     @:Location = import(module:'game_mutator.location.mt');
     @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 

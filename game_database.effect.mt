@@ -3202,6 +3202,7 @@ Effect.newEntry(
       },
       
       onRemoveEffect ::(from, item, holder) {
+        breakpoint();
         windowEvent.queueMessage(text:holder.name + ' came to their senses!');
       }
     }
@@ -3904,6 +3905,7 @@ Effect.newEntry(
       },
       
       onRemoveEffect ::(from, item, holder) {
+        breakpoint();
         windowEvent.queueMessage(text:holder.name + " is no longer paralyzed.");
       }
     }

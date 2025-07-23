@@ -41,7 +41,7 @@ IslandEvent.database.newEntry(
     rarity: 3,    
     onEventStart ::(event) {
       // only one weather event at a time.
-      when (event.island.events->any(condition::(value) <- value.base.name->contains(key:'Weather'))) 0;
+      when (event.island.events->any(condition::(value) <- value.base.id->contains(key:'base:weather'))) 0;
       @:world = import(module:'game_singleton.world.mt');
       match(world.season) {
 

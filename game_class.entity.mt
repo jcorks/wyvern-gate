@@ -2670,7 +2670,7 @@
       this.checkStatChanged();
 
 
-      if (this.effectStack) ::<= {
+      if (hasEffectStack) ::<= {
         this.effectStack.emitEvent(
           name: 'onPostAddEffect',
           from,
@@ -2679,9 +2679,11 @@
           effectData : effectData
         );
         
-        
-        this.effectStack.clear(all:true);
-       } else
+       } else ::<= {
+          this.effectStack.clear(all:true);
+       }
+       
+       if (!hasEffectStack)
           _.effectStack = empty;
     },
     

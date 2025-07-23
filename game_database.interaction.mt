@@ -345,7 +345,6 @@ Interaction.newEntry(
 
 
           if (location.peaceful == false && !talkee.isIncapacitated()) ::<= {
-            @:Event = import(module:'game_mutator.event.mt');
 
 
             if (location.landmark.base.guarded == true) ::<= {
@@ -2040,7 +2039,6 @@ Interaction.newEntry(
           
           windowEvent.queueCustom( 
             onEnter::{
-            @:Event = import(module:'game_mutator.event.mt');
             @:Landmark = import(module:'game_mutator.landmark.mt');
             @:world = import(module:'game_singleton.world.mt');
             @:instance = import(module:'game_singleton.instance.mt');
@@ -2238,7 +2236,6 @@ Interaction.newEntry(
     keepInteractionMenu : false,
     onInteract ::(location, party) {
       @:world = import(module:'game_singleton.world.mt');
-      @:Event = import(module:'game_mutator.event.mt');
 
       if (location.targetLandmark == empty) ::<={
         @:Landmark = import(module:'game_mutator.landmark.mt');
