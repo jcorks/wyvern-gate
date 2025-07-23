@@ -87,7 +87,7 @@
 @:IS_OBSCURED_MASK = 0x100000;
 
 @:TOO_FAR_CHARACTER = '░';
-@:TOO_FAR_SYMBOL_CHARACTER = '╬';
+@:TOO_FAR_SYMBOL_CHARACTER = '╩';
 
 @:distance = import(module:'game_function.distance.mt');
 
