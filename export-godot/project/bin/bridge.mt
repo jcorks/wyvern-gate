@@ -24,6 +24,7 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:JSON = import(module:'Matte.Core.JSON');
 @:time = import(module:'Matte.System.Time');
+@:Filesystem = import(module:'Matte.System.Filesystem');
 //@:input = import(module:'input.mt');
 
 
@@ -38,7 +39,29 @@
 @MOD_DIR = './mods';
 
 
+windowEvent.errorHandler = ::<= {
+  @lines = ['Wyvern Gate, commit ' + import(module:'GIT_COMMIT')];
+  if (Filesystem.exists(:'ERROR.LOG'))
+    Filesystem.remove(:'ERROR.LOG');
 
+  return ::(message) {
+    lines = [
+      ...lines,
+      '--',
+      '--',
+      'NEW ERROR (d'+time.date.day + ' m' + time.date.month + ', ' + time.date.year+'):',
+      '--',
+      '--',
+      ...message.summary->split(token:'\n')
+    ]; 
+    
+    
+    Filesystem.writeString(
+      path:  'ERROR.LOG',
+      string: String.combine(:lines->map(::(value) <- value + '\n'))
+    );
+  }
+}
 
 
 
@@ -51,9 +74,9 @@
   @CWD = Filesystem.cwd;
   Filesystem.cwd = path;
   @output;
-  {:::} {
+  ::? {
     output = action(filesystem:Filesystem);
-  } : {
+  } => {
     onError::(message) {
       Filesystem.cwd = CWD;    
       error(detail:message.detail);        
@@ -124,7 +147,7 @@ instance.mainMenu(
   onLoadState :::(
     slot
   ) {
-    return {:::} {
+    return ::? {
       return enterNewLocation(
         path: './',
         action::(filesystem) {
@@ -133,7 +156,7 @@ instance.mainMenu(
           );
         }
       );
-    } : {
+    } => {
       onError::(message) {
         return empty;
       }
@@ -144,7 +167,7 @@ instance.mainMenu(
   onPlayBGM::(name, loop) <-  godot_onPlayBGM(a:name, b:loop),
   
   onLoadSettings ::{
-    return {:::} {
+    return ::? {
       return enterNewLocation(
         path: './',
         action::(filesystem) {
@@ -153,7 +176,7 @@ instance.mainMenu(
           );
         }
       );
-    } : {
+    } => {
       onError::(message) {
         return empty;
       }
@@ -188,13 +211,13 @@ instance.mainMenu(
     
     @:preload ::(json) {
       foreach(json.files) ::(i, file) {
-        {:::} {
+        ::? {
           importModule(
             module:file,
             alias:json.id + '/' + file,
             preloadOnly: true 
           )
-        } : {
+        } => {
           onError::(message) {
             error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':' + message.detail);
           }
@@ -208,14 +231,14 @@ instance.mainMenu(
         path: file.path,
         action ::(filesystem) {
           // first, get the JSON 
-          @:json = {:::} {
+          @:json = ::? {
             @:data = filesystem.readString(path:'mod.json');
             
             if (data == empty || data == '')
               error();
               
             return JSON.decode(string:data);
-          } : {
+          } => {
             onError ::(message) {
               error(detail: 'Could not read or parse mod.json file within ' + file.path + '!');
             }
@@ -227,7 +250,7 @@ instance.mainMenu(
         }
       )
     }
-    {:::} {
+    ::? {
       enterNewLocation(
         path: MOD_DIR,
         action::(filesystem) {
@@ -238,7 +261,7 @@ instance.mainMenu(
           }
         }
       );
-    } : {
+    } => {
       onError ::(message) {
         error(detail:message.detail);
       }
