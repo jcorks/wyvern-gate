@@ -24,6 +24,31 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:JSON = import(module:'Matte.Core.JSON');
 @:time = import(module:'Matte.System.Time');
+@:Filesystem = import(module:'Matte.System.Filesystem');
+
+windowEvent.errorHandler = ::<= {
+  @lines = [];
+  if (Filesystem.exists(:'ERROR.LOG'))
+    Filesystem.remove(:'ERROR.LOG');
+
+  return ::(message) {
+    lines = [
+      ...lines,
+      '--',
+      '--',
+      'NEW ERROR ('+time.date.day + ' ' + time.date.month + ', ' + time.date.year+'):',
+      '--',
+      '--',
+      ...message.summary->split(token:'\n')
+    ]; 
+    
+    
+    Filesystem.writeString(
+      path:  'ERROR.LOG',
+      string: String.combine(:lines->map(::(value) <- value + '\n'))
+    );
+  }
+}
 
 @MOD_DIR = './mods';
 
@@ -149,7 +174,6 @@ canvas.onCommit = ::(lines, renderNow){
 }
 
 @enterNewLocation ::(action, path) {
-  @:Filesystem = import(module:'Matte.System.Filesystem');
   @CWD = Filesystem.cwd;
   Filesystem.cwd = path;
   @output;

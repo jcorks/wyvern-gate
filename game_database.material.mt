@@ -37,6 +37,7 @@ Material.newEntry(
       ATK: 7,
       SPD: -5
     ),
+    enchantLimit : 2,
     pricePercentMod: 20
   }
 )
@@ -52,6 +53,7 @@ Material.newEntry(
       DEF: 5,
       ATK: 6
     ),
+    enchantLimit : 3,
     pricePercentMod: 20
   }
 )
@@ -67,6 +69,7 @@ Material.newEntry(
       DEF: 30,
       ATK: 30
     ),
+    enchantLimit : 4,
     pricePercentMod: 100
   }
 )
@@ -83,6 +86,7 @@ Material.newEntry(
       ATK: 20,
       SPD: -5
     ),
+    enchantLimit : 4,
     pricePercentMod: 35
   }
 )
@@ -100,6 +104,7 @@ Material.newEntry(
       INT: 30,
       SPD: 5
     ),
+    enchantLimit : 10,
     pricePercentMod: 300
   }
 )
@@ -118,6 +123,7 @@ Material.newEntry(
       INT: 30,
       SPD: 10
     ),
+    enchantLimit : 5,
     pricePercentMod: 500
   }
 )
@@ -137,6 +143,7 @@ Material.newEntry(
       INT: 35,
       SPD: 15
     ),
+    enchantLimit : 10,
     pricePercentMod: 800
   }
 )
@@ -155,6 +162,7 @@ Material.newEntry(
       ATK: 25,
       SPD: -10
     ),
+    enchantLimit : 5,
     pricePercentMod: 35
   }
 )
@@ -172,6 +180,7 @@ Material.newEntry(
       ATK: 70,
       SPD: 30
     ),
+    enchantLimit : 8,
     pricePercentMod: 1200
   }
 )
@@ -187,6 +196,7 @@ Material.newEntry(
       DEF: 100,
       ATK: 100
     ),
+    enchantLimit : 6,
     pricePercentMod: 1600
   }
 )  
@@ -204,6 +214,7 @@ Material.newEntry(
       SPD: 60,
       DEX: 40
     ),
+    enchantLimit : 5,
     pricePercentMod: 1900
   }
 )  
@@ -221,6 +232,7 @@ Material.newEntry(
       SPD: 10,
       DEX: 60
     ),
+    enchantLimit : 5,
     pricePercentMod: 1800
   }
 )  
@@ -237,6 +249,7 @@ Material.newEntry(
       ATK: 45,
       SPD: 20
     ),
+    enchantLimit : 5,
     pricePercentMod: 210
   }
 )  
@@ -254,6 +267,7 @@ Material.newEntry(
       SPD: 100,
       DEX: 150
     ),
+    enchantLimit : 8,
     pricePercentMod: 7500
   }
 )  
@@ -273,6 +287,7 @@ Material.newEntry(
       ATK: 200,
       SPD: 100
     ),
+    enchantLimit : 10,
     pricePercentMod: 9500
   }
 )  
@@ -289,6 +304,7 @@ Material.newEntry(
       INT: 15,
       ATK: 35
     ),
+    enchantLimit : 5,
     pricePercentMod: 150
   }
 )   
@@ -305,6 +321,7 @@ Material.newEntry(
       INT: 35,
       ATK: 35
     ),
+    enchantLimit : 5,
     pricePercentMod: 150
   }
 )
@@ -321,6 +338,7 @@ Material.newEntry(
     tier : Number,
     description : String,
     statMod : StatSet.type, // percentages
+    enchantLimit : Number,
     pricePercentMod : Number
   },
   reset      

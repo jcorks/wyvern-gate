@@ -4450,11 +4450,16 @@ return {
                   '"So, it\'s finally time. We always knew you were an adventurer at heart. We prepared for the day you would finally go out into the world on your own. It might be tough, but we truly think you can overcome anything. Hopefully you\'ll find these useful on your journey. Be strong."',
                   '"Ever since '+someoneElse.name+' left, you\'ve never been the same. Always looking out there thinking of a way to find them. I think that this "Chosen" thing is just another excuse to go out and look, but I can\'t blame you. I miss them too. Either way, stay safe and come back in one piece. Hopefully these will come in handy."' 
                 ]
-              )) + '\n\n - ' + someone.name
+              ))
             );
 
-            world.party.inventory.addGold(amount:125);
+           windowEvent.queueMessage(text:
+            '"Don\'t forget! If you\'re ever in a tight spot, use your Escape Stones. I think you\'ll need them. You can find more at any shop in a town or city, but I\'m sure you already know that."' +
+            '\n\n - '+someone.name
+           );
 
+
+            world.party.inventory.addGold(amount:250);
             world.party.inventory.add(item: ::<= {
                @:i = Item.new(
                   base:Item.database.find(id:'base:life-crystal'),

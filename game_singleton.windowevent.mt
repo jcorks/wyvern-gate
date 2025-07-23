@@ -142,6 +142,8 @@
     @queuedInputs = [];
     @record;
     @lastRecordFrames;
+    @markedError = false;
+    @errorHandler;
     
     resolveQueues->push(:{
       onResolveAll : {},
@@ -382,13 +384,22 @@
         }
       } => {
         onError ::(message) {
-          this.queueReader(
-            lines : [
-              'Unfortunately due to the Unexpected, an Error has Occurred.',
-              '',
-              ...message.summary->split(token:'\n')
-            ]
-          );
+          if (errorHandler) errorHandler(:message);
+        
+          if (markedError == false) ::<= {
+            markedError = true;
+            this.queueReader(
+              lines : [
+                'Unfortunately due to the Unexpected, an Error has Occurred.',
+                '',
+                ...message.summary->split(token:'\n'),
+                '',
+                'This and additional errors will be within the error log of your system.'
+              ]
+            );
+            if (canResolveNext())
+              resolveNext();
+          }
         }
       }
     }
@@ -1425,7 +1436,14 @@
         maxHeight,
         onLeave
       ) {
-      
+        when(lines->size < 10)
+          this.queueDisplay(
+            skipAnimation: true,
+            prompt,
+            lines,
+            maxWidth,
+            maxHeight
+          );
       
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
@@ -1966,6 +1984,11 @@
       autoSkipAnimations : {
         get ::<- autoSkipAnimations,
         set ::(value) <- autoSkipAnimations = value
+      },
+      
+      // the error handler will be called any time window event catches an error 
+      errorHandler : {
+        set ::(value) <- errorHandler = value
       },
       
       // queues a set of input events to be played

@@ -1415,7 +1415,7 @@ Location.database.newEntry(data:{
           ),
           rngEnchantHint:true, 
           forceEnchant:true
-        ).boxUp()
+        )
       );
     }
   },
@@ -1516,7 +1516,7 @@ Location.database.newEntry(data:{
           ),
           rngEnchantHint:true, 
           forceEnchant:true
-        ).boxUp()
+        )
       );
     }
   },
@@ -2067,7 +2067,7 @@ Location.database.newEntry(data:{
         ),
         qualityHint : 'base:masterwork',
         rngEnchantHint:true
-      ).boxUp()
+      )
     );    
 
     location.inventory.add(item:
@@ -2078,7 +2078,7 @@ Location.database.newEntry(data:{
             value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)          
         ),
         forceNeedsAppraisal : true
-      ).boxUp()
+      )
     );   
 
     location.inventory.add(item:
@@ -2151,7 +2151,7 @@ Location.database.newEntry(data:{
     @world = import(module:'game_singleton.world.mt');  
     if (world.party.inDungeon) ::<= {
       foreach(location.ownedBy.inventory.items)::(i, item) {
-        location.inventory.add(:item.boxUp());
+        location.inventory.add(:item);
       }
     } else ::<= {
       foreach(location.ownedBy.inventory.items)::(i, item) {

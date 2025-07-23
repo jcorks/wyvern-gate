@@ -28,7 +28,7 @@ return ::{
   @chosen = false;
   @:menuRenderable = {
     render ::{
-      canvas.blackout();
+      canvas.blackout(:'`');
       // Name (species, class)
       // HP, AP,
       // Weapon
@@ -44,11 +44,11 @@ return ::{
         
         if (whom == index) ::<= {
           canvas.movePen(
-            x: (canvas.width - width) / 4 - 4,
+            x: (canvas.width - width) / 4 - 6,
             y: top + height/2
           );
           canvas.drawText(
-            text: '-->'
+            text: '     >>'
           );
         }
           

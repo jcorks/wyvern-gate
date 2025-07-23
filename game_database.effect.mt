@@ -867,7 +867,7 @@ Effect.newEntry(
   data : {
     name : 'Seasoned Adventurer',
     id : 'base:seasoned-adventurer',
-    description: 'Is considerably harder to hit, as they are an experienced fighter.',
+    description: 'Is considerably harder to hit. 40% chance to negate damage from an incoming attack.',
     stackable: false,
     blockPoints : 0,
     traits : TRAIT.BUFF,
@@ -3571,6 +3571,7 @@ Effect.newEntry(
       },
       
       onRemoveEffect ::(from, item, holder) {
+        breakpoint();
         windowEvent.queueMessage(text:holder.name + " is no longer bleeding out.");
       },        
       
@@ -5630,7 +5631,7 @@ Effect.newEntry(
   data : {
     name : 'Escape',
     id : 'base:escape',
-    description : 'Escape from any area or battle. Loses half of any collected Ethereal Shards.',
+    description : 'Escape from any area or battle.',
     stackable : false,
     blockPoints :0,
     traits : TRAIT.SPECIAL,
@@ -5643,23 +5644,10 @@ Effect.newEntry(
 
         when(world.party.isMember(:holder) == false)
           empty;
-
-        @loot = random.scrambled(:world.party.inventory.loot);
-        @erased = false;
-        if (loot->size > 3) ::<= {
-          loot = loot->subset(from:0, to:(loot->size/3)->floor);
-          foreach(loot) ::(k, v) {
-            world.party.inventory.remove(:v);
-          }
-          erased = true;
-        }
-        
           
         @:instance = import(:'game_singleton.instance.mt');
         instance.visitCurrentIsland(restorePos:true);
         windowEvent.queueMessage(text:'The party teleported out of the area.');
-        if (erased)
-          windowEvent.queueMessage(text:'The party loses some of their loot during the teleportation process');
       }
     }
   }

@@ -29,6 +29,8 @@
 @:InletSet = import(:'game_class.inletset.mt');
 @:InletSet = import(:'game_class.inletset.mt');
 
+@:MAX_ENCHANT_GLOBAL = 10;
+
 /*
   Items. 
   
@@ -2680,7 +2682,7 @@ Item.database.newEntry(data : {
 Item.database.newEntry(data : {
   name : "Escape Stone",
   id : 'base:escape-stone',
-  description: 'A small magic stone that, when used, allows escaping from dungeons. The process will drop 50% of any Ethereal Shards found.',
+  description: 'A small magic stone that, when used, allows escaping from dungeons.',
   examine : '',
   sortType : SORT_TYPE.USABLES,
   equipType: TYPE.HAND,
@@ -4102,10 +4104,33 @@ none.name = 'None';
     material : {
       get ::<- _.state.material
     },
+    
+    enchantLimit : {
+      get ::{
+        @:state = _.state;
+        @a = state.base.enchantLimit;
+        @b = if (state.apparel == empty ) MAX_ENCHANT_GLOBAL else state.apparel.enchantLimit;
+        @c = if (state.material == empty) MAX_ENCHANT_GLOBAL else state.material.enchantLimit;
+        
+        return if (a < b) 
+          if (a < c)
+            a 
+          else
+            c
+        else 
+          if (c < b)
+            c 
+          else 
+            b
+      }
+    },
       
     addEnchant::(mod) {
       @:state = _.state;
-      when (state.enchants->keycount >= state.base.enchantLimit) empty;
+      @:enchLimit = _.this.enchantLimit;
+      
+      when (state.enchants->keycount >= enchLimit) false;
+
       state.enchants->push(value:mod);
       foreach(mod.equipEffects)::(i, effect) {
         state.equipEffects->push(value:effect);
@@ -4116,6 +4141,7 @@ none.name = 'None';
       recalculateName(*_);
       state.price += mod.base.priceMod;
       state.price = state.price->ceil;
+      return true;
     },
       
     description : {
@@ -4198,25 +4224,73 @@ none.name = 'None';
       @:Effect = import(module:'game_database.effect.mt');
       windowEvent.queueMessageSet(
         speakers : [
-          this.name + ': Description',
-          this.name + ': Enchantments',
-          this.name + if (this.inletStats != empty) ': Gem stats' else ': Equip Stats',
-          this.name + ': Equip Effects',
-          this.name + ': Use Effects'
+          this.name + ': Description'
         ],
         set : [
           this.description + '\n\nValue: ' + starsToString(:this),
+        ]
+      );
+      
+      if (this.enchantLimit)    
+      windowEvent.queueReader(
+        prompt: this.name + ': Enchantments',
+        lines :            
           
-          if (state.enchants->keycount != 0) ::<= {
-            @out = '';
-            when (state.enchants->keycount == 0) 'None.';
-            foreach(state.enchants)::(i, mod) {
-              out = out + romanNum(value:i+1) + ' - ' + mod.description + '\n';
+          ::<= {
+          
+            @column0 = [];
+            @column1 = [];
+            @column2 = [];
+            @:LIMIT_DESCRIPT_LENGTH = 40;
+
+            for(0, this.enchantLimit) ::(i) {
+              column0->push(:'(' + romanNum(value:i+1) + ')');
+              when(state.enchants[i] == empty) ::<= {
+                column1->push(:'----');
+                column2->push(:'----');
+              }
+
+              column1->push(:state.enchants[i].name);
+                
+              @:desc = state.enchants[i].description;
+              when(desc->length < LIMIT_DESCRIPT_LENGTH)
+                column2->push(:desc);
+
+
+              @:descLines = canvas.refitLines(input:[desc], maxWidth:LIMIT_DESCRIPT_LENGTH)
+              column2->push(:descLines[0]);
+              descLines->remove(:0);
+              
+ 
+              // tricky! add dummy lines to give the illusion
+              foreach(descLines) ::(k, line) {
+                column0->push(:'');
+                column1->push(:'');
+                column2->push(:line);
+              } 
             }
-            return out;
-          } else '',
-          
-          
+            
+
+            breakpoint();
+            return canvas.columnsToLines(
+              columns : [
+                column0,
+                column1,
+                column2
+              ],
+              spacing:2
+            )
+          }
+
+      );
+      
+        
+      windowEvent.queueMessageSet(
+        speakers : [
+          this.name + if (this.inletStats != empty) ': Gem stats' else ': Equip Stats',
+          this.name + ': Use Effects'
+        ],
+        set : [
           
           String.combine(:
             if (this.inletStats != empty)
@@ -4228,16 +4302,6 @@ none.name = 'None';
               state.stats.descriptionRateLinesBase(:this.equipModBase)->map(::(value) <- value + '\n')
           ),
           
-          
-          if (state.equipEffects->keycount != 0) ::<= {
-            @out = '';
-            when (state.equipEffects->keycount == 0) 'None.';
-            foreach(state.equipEffects)::(i, effect) {
-              out = out + '. ' + Effect.find(id:effect).description + '\n';
-            }
-            return out;
-          } else '',     
-          
           if (state.useEffects->size > 0) ::<= {
             @out = '';
             when (state.useEffects->keycount == 0) 'None.';
@@ -4248,8 +4312,7 @@ none.name = 'None';
             return out;
           } else '',
             
-        ],
-        pageAfter:canvas.height-4
+        ]
       )
       
       if (state.inletSlotData)

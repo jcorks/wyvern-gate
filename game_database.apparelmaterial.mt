@@ -32,6 +32,7 @@ ApparelMaterial.newEntry(
       DEF: 3,
       SPD: 5
     ),
+    enchantLimit : 2,
     pricePercentMod: 20
   }
 )
@@ -50,6 +51,7 @@ ApparelMaterial.newEntry(
       DEX: 5,
       SPD: -2
     ),
+    enchantLimit : 2,
     pricePercentMod: 20
   }
 )
@@ -67,6 +69,7 @@ ApparelMaterial.newEntry(
       DEX: 5,
       SPD: 5
     ),
+    enchantLimit : 3,
     pricePercentMod: 20
   }
 )
@@ -83,6 +86,7 @@ ApparelMaterial.newEntry(
       SPD: 20,
       DEX: 15
     ),
+    enchantLimit : 4,
     pricePercentMod: 200
   }
 )
@@ -100,6 +104,7 @@ ApparelMaterial.newEntry(
       DEX: 5,
       DEF: 5
     ),
+    enchantLimit : 5,
     pricePercentMod: 100
   }
 )
@@ -120,6 +125,7 @@ ApparelMaterial.newEntry(
       DEF: 25,
       ATK: 25
     ),
+    enchantLimit : 2,
     pricePercentMod: 30
   }
 )
@@ -136,6 +142,7 @@ ApparelMaterial.newEntry(
       ATK: 70,
       SPD: 30
     ),
+    enchantLimit : 5,
     pricePercentMod: 1200
   }
 )
@@ -156,6 +163,7 @@ ApparelMaterial.newEntry(
       ATK: 35,
       SPD: 35
     ),
+    enchantLimit : 7,
     pricePercentMod: 3000
   }
 )
@@ -176,6 +184,7 @@ ApparelMaterial.newEntry(
       SPD: 105,
       ATK: 105
     ),
+    enchantLimit : 10,
     pricePercentMod: 10000
   }
 )
@@ -188,6 +197,7 @@ ApparelMaterial.newEntry(
     id : String,
     rarity : Number,
     tier : Number,
+    enchantLimit: Number,
     description : String,
     statMod : StatSet.type, // percentages
     pricePercentMod : Number

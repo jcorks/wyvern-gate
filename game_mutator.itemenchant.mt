@@ -127,7 +127,7 @@ ItemEnchant.database.newEntry(
 
 ItemEnchant.database.newEntry(
   data : {
-    name : 'Chance to Break',
+    name : 'Break',
     id : 'base:chance-to-break',
     description : ', will $1 break.',
     equipModBase : StatSet.new(
@@ -151,7 +151,7 @@ ItemEnchant.database.newEntry(
 
 ItemEnchant.database.newEntry(
   data : {
-    name : 'Chance to Inflict Ailment',
+    name : 'Ailment',
     id : 'base:chance-to-inflict-ailment',
     description : ', will $1 give the holder a random status ailment.',
     equipModBase : StatSet.new(
@@ -177,7 +177,7 @@ ItemEnchant.database.newEntry(
 
 ItemEnchant.database.newEntry(
   data : {
-    name : 'Chance to Hurt',
+    name : 'Hurt',
     id : 'base:chance-to-hurt',
     description : ', will $1 hurt the wielder.',
     equipModBase : StatSet.new(
@@ -201,7 +201,7 @@ ItemEnchant.database.newEntry(
 
 ItemEnchant.database.newEntry(
   data : {
-    name : 'Chance to Fatigue',
+    name : 'Fatigue',
     id : 'base:chance-to-fatigue',
     description : ', will $1 fatigue the wielder.',
     equipModBase : StatSet.new(

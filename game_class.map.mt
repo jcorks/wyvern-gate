@@ -78,7 +78,7 @@
 @:THE_BIG_ONE = 100000000;
 @mapSizeW  = 50;
 @mapSizeH  = 18;
-@:SIGHT_RAY_LIMIT = 7;
+@:SIGHT_RAY_LIMIT = 8;
 @:SIGHT_RAY_EPSILON = 0.4;
 
 
@@ -86,6 +86,8 @@
 @:IS_WALLED_MASK   = 0x010000;
 @:IS_OBSCURED_MASK = 0x100000;
 
+@:TOO_FAR_CHARACTER = '░';
+@:TOO_FAR_SYMBOL_CHARACTER = '╬';
 
 @:distance = import(module:'game_function.distance.mt');
 
@@ -241,7 +243,7 @@
         [ 1,  1]
       ]
     
-      return ::(x, y, itemX, itemY) {
+      return ::(x, y, itemX, itemY) {      
         foreach(targetTable) ::(k, char) {
           @:dx = targetOffsets[k][0];
           @:dy = targetOffsets[k][1];
@@ -654,7 +656,9 @@
       }
 
       foreach(importantItems) ::(k, v) {
-        canvas.movePen(x:left + v.x, y:top + v.y);  
+        @xt = left + v.x;
+        @yt = top + v.y
+        canvas.movePen(x:xt, y:yt);  
         canvas.drawChar(text:v.ch);
       }
       
@@ -680,7 +684,7 @@
       
       
       
-      
+      @isLit = [];
       @:sightRay ::(degrees) {
         @x = pointer.x + 0.5;
         @y = pointer.y + 0.5;
@@ -695,6 +699,7 @@
 
             when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
             scenery[x->floor+y->floor*width] &= ~IS_OBSCURED_MASK;            
+            if (isDark == true) isLit[x->floor+y->floor*width] = true;
             if (isWalled(x:x->floor, y:y->floor))
               send();
           }
@@ -707,7 +712,7 @@
         forever ::{
           when (i >= 360) send();
           sightRay(degrees:i);
-          i += 10;          
+          i += 10; 
         }
       }      
       
@@ -759,40 +764,55 @@
           when(scenery[itemX+itemY*width] & IS_OBSCURED_MASK) ::<= {
             canvas.drawChar(text:outOfBoundsCharacter);            
           }
-
-
-          when(symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
-            canvas.drawChar(text:wallCharacter);
-          }
-
-          when(items != empty && items->keycount > 0) ::<= {
-            @:discovered = items[items->keycount-1].discovered;
+          
+          @:chosenChar = ::<= {
             
-            if (discovered == true && (items[items->keycount-1].noHalo == empty))
-              targets->push(:{x:x, y:y, itemX:itemX, itemY:itemY});
+            when(symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
+              return wallCharacter;
+            }
+
+            when(items != empty && items->keycount > 0) ::<= {
+              @:discovered = items[items->keycount-1].discovered;
               
-            importantItems->push(:{
-              ch:if (discovered == false) '?' else items[items->keycount-1].symbol,
-              x: x,
-              y: y
-            });
+              if (discovered == true && (items[items->keycount-1].noHalo == empty))
+                targets->push(:{x:x, y:y, itemX:itemX, itemY:itemY});
+                
+              importantItems->push(:{
+                ch:if (discovered == false) '?' else items[items->keycount-1].symbol,
+                x: x,
+                y: y,
+                itemX:itemX, itemY:itemY
+              });
+            }
+
+            when (symbol != empty) ::<= {
+              return symbol;
+            }
           }
 
-          when (symbol != empty) ::<= {
-            canvas.drawChar(text:symbol);
-          }
+          when(isDark == true && isLit[itemX+itemY*width] != true && chosenChar != empty) 
+            canvas.drawChar(text:TOO_FAR_CHARACTER);            
+
+          if (chosenChar)
+            canvas.drawChar(text:chosenChar);            
         }       
       }       
       
       foreach(targets) ::(k, v) {
+        when(isDark && isLit[v.itemX+v.itemY*width] != true) empty;
         drawTarget(*v);
       }
 
       foreach(importantItems) ::(k, v) {
-        canvas.movePen(x:v.x, y:v.y);  
+        @xt = v.x;
+        @yt = v.y
+        canvas.movePen(x:xt, y:yt);  
+        when(isDark && isLit[v.itemX+v.itemY*width] != true)
+          canvas.drawChar(:TOO_FAR_SYMBOL_CHARACTER);
+
         canvas.drawChar(text:v.ch);
       }
-
+      
       
       // TODO: walls
       
@@ -1083,6 +1103,7 @@
       },
       
       obscure::{
+        isDark = true;
         for(0, width)::(x) {
           for(0, height)::(y) {
             scenery[x+y*width] |= IS_OBSCURED_MASK;

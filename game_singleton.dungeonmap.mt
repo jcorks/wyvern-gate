@@ -39,7 +39,7 @@
 
 
 
-@:DungeonGamma = ::(map, mapHint) {
+@:DungeonAlpha = ::(map, mapHint) {
   @cavities = [];
   @:areas = [];
   
@@ -1252,26 +1252,18 @@
 
 
 // room based 
-//@:DungeonGamma ::(map, mapHint) {
-@:DungeonAlpha ::(map, mapHint) {
-  /*
-  @:LAYOUT_MIN_SIZE = 25;
-  @:LAYOUT_MAX_SIZE = 30;
-  @:LAYOUT_CENTER_OFFSET_MIN = 0.4;
-  @:LAYOUT_CENTER_OFFSET_MAX = 0.6;
-  @:LAYOUT_NEIGHBOR_DISTANCE = 5;
-  @:ROOM_MIN = 4;
-  @:ROOM_MAX = 6;
-  */
-  
+@:DungeonGamma ::(map, mapHint) {
+
   @:LAYOUT_ROOM_SIZE_MIN = 4;
-  @:LAYOUT_ROOM_SIZE_MAX = 8;
+  @:LAYOUT_ROOM_SIZE_MAX = 6;
   @:LAYOUT_ROOM_OFF_SIZE = 7;
-  @:LAYOUT_ROOM_OPEN_SIZE_MIN = 3;
-  @:LAYOUT_ROOM_OPEN_SIZE_MAX = 10;
+  @:LAYOUT_ROOM_OPEN_SIZE_MIN = 5;
+  @:LAYOUT_ROOM_OPEN_SIZE_MAX = 7;
   @:LAYOUT_NEIGHBOR_DISTANCE = 5;
   @:LAYOUT_ROOM_COUNT_MIN = 3;
-  @:LAYOUT_ROOM_COUNT_MAX = 8;
+  @:LAYOUT_ROOM_COUNT_MAX = 5;
+  @:LAYOUT_COUNT_MIN = 3;
+  @:LAYOUT_COUNT_MAX = 5;
   
   
   @:ABOVE = 0;
@@ -1293,7 +1285,6 @@
 
 
   
-  // incomplete "complicated" layout. Very messy with little to gain
   
   @:GammaLayout = class(
     name : 'Wyvern.DungeonMap.Gamma.Layout',
@@ -1314,34 +1305,39 @@
         // branch from an existing one
         @:r = random.scrambled(:layouts)[0];
         
-        @:facingDir = random.integer(from:ABOVE, to:LEFT);
+        @:facingDir = random.pickArrayItem(:[LEFT, ABOVE]);
         match(facingDir) {
           // above
-          (ABOVE): ::<= {
+          /*(BELOW): ::<= {
             x = r.x;
             y = r.y - (LAYOUT_NEIGHBOR_DISTANCE + r.height);
-          },
+          },*/
 
           // to the right
-          (RIGHT): ::<= {
+          (LEFT): ::<= {
             x = LAYOUT_NEIGHBOR_DISTANCE + r.x + r.width;
             y = r.y;
           },
           
           // below 
-          (BELOW): ::<= {
+          (ABOVE): ::<= {
             x = r.x;
             y = LAYOUT_NEIGHBOR_DISTANCE + r.y + r.height;
-          },
+          }
           
+          /*
           // to the left
-          (LEFT): ::<= {
+          (RIGHT): ::<= {
             x = r.x - (LAYOUT_NEIGHBOR_DISTANCE + r.width);
             y = r.y;
           }
+          */
           
         }
-
+        return {
+          neighbor : r,
+          facingDir : facingDir
+        };
       }
       
       @:makeWallPerimeter::(dims) {
@@ -1367,7 +1363,12 @@
         map.setSceneryIndex(x:dims.x+dims.w, y:dims.y+dims.h, symbol:wallIndex);
         map.enableWall(x:dims.x+dims.w, y:dims.y+dims.h);
 
-
+        if (dims.openings != empty) ::<= {
+          foreach(dims.openings) ::(k, v) {
+            map.setSceneryIndex(x:v.x, y:v.y, symbol:emptyIndex);
+            map.disableWall(x:v.x, y:v.y);
+          }
+        }
       }
       
       @:makeRoom::(dims) {
@@ -1378,13 +1379,266 @@
           height: dims.h-1
         );
 
-        // make initial walls
-        //area.debug(:map);
+        @faceOpen = random.flipCoin();
 
+        // check to see if we can even poke through others
+        if (faceOpen == false) ::<= {
+          faceOpen = match(openSide) {
+            (ABOVE, BELOW): dims.x == x,
+            (LEFT, RIGHT) : dims.y == y
+          }   
+        }
+        dims.openings = [];
+
+
+        // facing open area
+        if (faceOpen) ::<= {
+          dims.openings->push(:match(openSide) {
+            (ABOVE): {x:(dims.x + dims.w / 2)->floor, y:dims.y},
+            (BELOW): {x:(dims.x + dims.w / 2)->floor, y:dims.y+dims.h},
+            (LEFT) : {x:dims.x, y:(dims.y + dims.h / 2)->floor},
+            (RIGHT): {x:dims.x + dims.w, y:(dims.y + dims.h / 2)->floor}
+          });
+        } else ::<= {
+          dims.openings->push(:match(openSide) {
+            (LEFT, RIGHT)  : {x:(dims.x + dims.w / 2)->floor, y:dims.y},
+            (ABOVE, BELOW) : {x:dims.x, y:(dims.y + dims.h / 2)->floor}
+          });
+        }
+        
 
         dims.area = area;
         rooms->push(:dims);
         return dims;
+      }
+      
+      // makes a hallway connecting 2 empty spaces. It stops if a path on the way were to lead to a wall 
+      // if a wall is hit, it will keep "digging" in that direction until no wall is hit.
+      @:dig::(x0, y0, x1, y1, dir0) {
+        if (dir0 == BELOW || dir0 == ABOVE) ::<= {
+          if (y1 < y0) ::<= {
+            @temp = y1;
+            y1 = y0;
+            y0 = temp;
+            
+            temp = x1;
+            x1 = x0;
+            x0 = temp;
+          }
+        } else ::<= {
+          if (x1 < x0) ::<= {
+            @temp = x1;
+            x1 = x0;
+            x0 = temp;
+
+            temp = y1;
+            y1 = y0;
+            y0 = temp;
+          }
+        }
+
+      
+        @xiter = x0;
+        @yiter = y0;
+        @hitWall = false;
+
+        map.disableWall(x:x0, y:y0);
+        map.setSceneryIndex(x:x0, y:y0, symbol:emptyIndex);
+
+        map.disableWall(x:x1, y:y1);
+        map.setSceneryIndex(x:x1, y:y1, symbol:emptyIndex);
+        
+        @:path = [];
+        
+        ::? {
+          @:placeNext::(isX) {
+            if (map.isWalled(x:xiter, y:yiter)) ::<= {
+              hitWall = true;
+            }
+            path->push(:{x:xiter, y:yiter});
+
+            for(xiter-1, xiter+2) ::(x) {
+              for(yiter-1, yiter+2) ::(y) {
+                map.setSceneryIndex(x, y, symbol:wallIndex);
+                map.enableWall(x, y);              
+              }
+            }
+
+            //if (hitWall) send();
+          }
+          
+          path->push(:{x:xiter, y:yiter});
+          if (dir0 == BELOW || dir0 == ABOVE) ::<= {
+          
+            @half = y0 + ((y1 - y0) / 2)->floor;
+            for(y0+1, half) ::(i) {
+              yiter = i;
+              placeNext();
+            }            
+          
+            if (x0 < x1) ::<= {
+              for(x0, x1+1) ::(i) {
+                xiter = i;
+                placeNext(isX:true);
+              }
+            } else ::<= {
+              for(x0-1, x1) ::(i) {
+                xiter = i;
+                placeNext(isX:true);
+              }            
+            }
+
+            for(half, y1) ::(i) {
+              yiter = i;
+              placeNext();
+            }
+            path->push(:{x:xiter, y:yiter+1});
+
+
+          } else ::<= {
+          
+            @half = x0 + ((x1 - x0) / 2)->floor;
+            for(x0+1, half) ::(i) {
+              xiter = i;
+              placeNext();
+            }            
+          
+            if (y0 < y1) ::<= {
+              for(y0, y1+1) ::(i) {
+                yiter = i;
+                placeNext(isX:true);
+              }
+            } else ::<= {
+              for(y0-1, y1) ::(i) {
+                yiter = i;
+                placeNext(isX:true);
+              }            
+            }
+
+            for(half, x1) ::(i) {
+              xiter = i;
+              placeNext();
+            }
+            path->push(:{x:xiter+1, y:yiter});
+
+          }
+
+        } 
+        
+        
+        foreach(path) ::(k, p) {
+          map.disableWall(x:p.x, y:p.y);
+          map.setSceneryIndex(x:p.x, y:p.y, symbol:emptyIndex);
+        }        
+      }
+      
+      @:connectLayout ::(neighbor, facingDir) {
+        @:tunnelArea ::(from, to, dir) {
+          @fromPos;
+          @toPos;
+          match(dir) {
+            (ABOVE): ::<= {
+              fromPos = {x:(from.x + from.width/2)->floor, y:from.y-1};
+              toPos   = {x:(to.x + to.width/2)->floor, y:to.y+to.height};
+            },
+
+            (RIGHT): ::<= {
+              fromPos = {x:from.x+from.width, y:(from.y + from.height/2)->floor}
+              toPos   = {y:(to.y + to.height/2)->floor, x:to.x-1} 
+            },
+
+
+            (BELOW): ::<= {
+              fromPos = {x:(from.x + from.width/2)->floor, y:from.y+from.height}
+              toPos   = {x:(to.x + to.width/2)->floor, y:to.y-1} 
+            },
+            
+            (LEFT): ::<= {
+              fromPos = {y:(from.y + from.height/2)->floor, x:from.x-1};
+              toPos   = {y:(to.y + to.height/2)->floor, x:to.x+to.width};
+            }
+            
+          }
+          dig(
+            x0:fromPos.x, y0:fromPos.y,
+            x1:toPos.x,   y1:toPos.y,
+            
+            dir0:dir
+          );
+        }
+
+        // facing dir is the direction of neighbor relative to self
+        @:areasSelf = this.areas;
+        @:areasOther = neighbor.areas;
+
+        match(facingDir) {
+          (ABOVE): ::<= {
+            
+            areasSelf->sort(::(a, b) {
+              when (a.y < b.y) -1;
+              when (a.y > b.y)  1;
+              return 0
+            });
+
+            areasOther->sort(::(a, b) {
+              when (a.y > b.y) -1;
+              when (a.y < b.y)  1;
+              return 0
+            });
+            tunnelArea(from:areasSelf[0], to:areasOther[0], dir:ABOVE);
+            
+
+          },
+
+
+          (RIGHT): ::<= {
+            areasSelf->sort(::(a, b) {
+              when (a.x > b.x) -1;
+              when (a.x < b.x)  1;
+              return 0
+            });
+
+            areasOther->sort(::(a, b) {
+              when (a.x < b.x) -1;
+              when (a.x > b.x)  1;
+              return 0
+            });
+            tunnelArea(from:areasSelf[0], to:areasOther[0], dir:RIGHT);
+          },
+
+
+
+
+          (BELOW): ::<= {
+            areasSelf->sort(::(a, b) {
+              when (a.y > b.y) -1;
+              when (a.y < b.y)  1;
+              return 0
+            });
+
+            areasOther->sort(::(a, b) {
+              when (a.y < b.y) -1;
+              when (a.y > b.y)  1;
+              return 0
+            });
+            tunnelArea(from:areasSelf[0], to:areasOther[0], dir:BELOW);
+          },
+          
+          (LEFT): ::<= {
+            areasSelf->sort(::(a, b) {
+              when (a.x < b.x) -1;
+              when (a.x > b.x)  1;
+              return 0
+            });
+
+            areasOther->sort(::(a, b) {
+              when (a.x > b.x) -1;
+              when (a.x < b.x)  1;
+              return 0
+            });
+            tunnelArea(from:areasSelf[0], to:areasOther[0], dir:LEFT);
+          }
+        }
       }
 
 
@@ -1422,7 +1676,6 @@
         
         if (openSide == LEFT || openSide == RIGHT) ::<= {
           h = yiter - y;
-          breakpoint();
         } else ::<= {
           w = xiter - x;
         }
@@ -1439,7 +1692,7 @@
               x: x+1,
               y: y+1,
               width: w-1,
-              height: openH
+              height: openH-1
             );
           },
           
@@ -1450,7 +1703,7 @@
             return Map.Area.new(
               x: x+LAYOUT_ROOM_OFF_SIZE+1,
               y: y+1,
-              width: openW,
+              width: openW-1,
               height: h-1
             );
           
@@ -1464,7 +1717,7 @@
               x: x+1,
               y: y+LAYOUT_ROOM_OFF_SIZE+1,
               width: w-1,
-              height: openH
+              height: openH-1
             );          
           },
           
@@ -1503,22 +1756,22 @@
         y = empty;
              
         // horizontal -> 0, vertical -> 1
-        openSide = LEFT;//random.integer(from:ABOVE, to:LEFT);
+        openSide = random.integer(from:ABOVE, to:LEFT);
         openArea = empty;
         rooms = [];      
       }
       
       this.constructor = ::{
+        @neighbor;
         // this is not a good idea! Replace thank you!
         ::? {
           forever :: {
             reinit();
-
             if (layouts->size == 0) ::<= {
               x = mx;
               y = my;
             } else ::<= {
-              placeLayout();
+              neighbor = placeLayout();
             }
 
             makeRoomsSide();
@@ -1552,6 +1805,10 @@
           h: h
         });
         
+        if (neighbor != empty) ::<= {
+          connectLayout(*neighbor);
+        }
+        
         
         layouts->push(:this);        
       };
@@ -1572,6 +1829,10 @@
 
         height : {
           get ::<- h
+        },
+        
+        openArea : {
+          get ::<- openArea
         },
         
         areas : {
@@ -1596,468 +1857,12 @@
 
 
 
-  
-  /*
-  
-  // incomplete "complicated" layout. Very messy with little to gain
-  
-  @:GammaLayout = class(
-    name : 'Wyvern.DungeonMap.Gamma.Layout',
-    define ::(this) {
-      @w;
-      @h;
-      
-      // topleft!
-      @x;
-      @y;
-      
-      // for connecting
-      @facingDir;
-      
-      
-      @openArea;
-      @:areas = [];
+ 
 
 
-      // make rooms!
-      @:populateOpenArea ::{
-        // heres the trick: make an "open area"
-        // this defines the walls for the rooms in the layout
-        
-        //@subw = w - random.integer(from:LAYOUT_CENTER_OFFSET_MIN, to:LAYOUT_CENTER_OFFSET_MAX);
-        //@subh = h - random.integer(from:LAYOUT_CENTER_OFFSET_MIN, to:LAYOUT_CENTER_OFFSET_MAX);
-        
-        @subw = (w * random.range(from:LAYOUT_CENTER_OFFSET_MIN, to:LAYOUT_CENTER_OFFSET_MAX))->floor
-        @subh = (h * random.range(from:LAYOUT_CENTER_OFFSET_MIN, to:LAYOUT_CENTER_OFFSET_MAX))->floor
-        
-        @subx = 0;
-        @suby = 0;
-        
-        @hug = random.integer(from:0, to:3);
-
-        match(hug) {
-          // hugTopLeft
-          (0): ::<= {
-            subx = x;
-            suby = y;
-          },
-          
-          // hugTopRight 
-          (1): ::<= {
-            subx = x + (w - subw)->floor;
-            suby = y;
-          },
-
-          // hugBottomLeft
-          (2): ::<= {
-            subx = x;
-            suby = y + (h - subh)->floor;
-          },
-
-          // hugBottomRight
-          (3): ::<= {
-            subx = x + (w - subw)->floor;
-            suby = y + (h - subh)->floor;
-          }
-        }
-        
-        if (subx + subw > x + w)
-          subw = (x + w) - subx;
-
-        if (suby + subh > y + h)
-          subw = (y + h) - suby;
-        
-
-        
-        openArea = Map.Area.new(
-          x : subx,
-          y : suby,
-          width : subw,
-          height : subh
-        );
-
-        for(suby, suby + subh) ::(yiter) {
-          map.setSceneryIndex(x:subx, y:yiter, symbol:wallIndex);
-          map.enableWall(x:subx, y:yiter);
-
-
-          map.setSceneryIndex(x:subx+subw, y:yiter, symbol:wallIndex);
-          map.enableWall(x:subx+subw, y:yiter);
-        }
-
-        for(subx, subx + subw) ::(xiter) {
-          map.setSceneryIndex(x:xiter, y:suby, symbol:wallIndex);
-          map.enableWall(x:xiter, y:suby);
-
-
-          map.setSceneryIndex(x:xiter, y:suby+subh, symbol:wallIndex);
-          map.enableWall(x:xiter, y:suby+subh);
-        }
-        map.setSceneryIndex(x:subx+subw, y:suby+subh, symbol:wallIndex);
-        map.enableWall(x:subx+subw, y:suby+subh);
-
-
-        // open up walls for eventual "fusion" areas in the corner
-        match(hug) {
-          // hugTopLeft -> free BottomRight
-          (0): ::<= {
-            @:hugCornerX = openArea.x + openArea.width;
-            @:hugCornerY = openArea.y + openArea.height;
-
-            map.disableWall(x:hugCornerX, y:hugCornerY);
-            map.disableWall(x:hugCornerX, y:hugCornerY-1);
-            map.disableWall(x:hugCornerX-1, y:hugCornerY);
-
-            map.setSceneryIndex(x:hugCornerX, y:hugCornerY, symbol:emptyIndex);
-            map.setSceneryIndex(x:hugCornerX, y:hugCornerY-1, symbol:emptyIndex);
-            map.setSceneryIndex(x:hugCornerX-1, y:hugCornerY, symbol:emptyIndex);
-
-          },
-          
-          // hugTopRight -> freeBottomLeft
-          (1): ::<= {
-            @:hugCornerX = openArea.x;
-            @:hugCornerY = openArea.y + openArea.height;
-
-            map.disableWall(x:hugCornerX, y:hugCornerY);
-            map.disableWall(x:hugCornerX, y:hugCornerY-1);
-            map.disableWall(x:hugCornerX+1, y:hugCornerY);
-
-            map.setSceneryIndex(x:hugCornerX, y:hugCornerY, symbol:emptyIndex);
-            map.setSceneryIndex(x:hugCornerX, y:hugCornerY-1, symbol:emptyIndex);
-            map.setSceneryIndex(x:hugCornerX+1, y:hugCornerY, symbol:emptyIndex);
-
-          },
-
-          // hugBottomLeft -> freeTopRight
-          (2): ::<= {
-            @:hugCornerX = openArea.x + openArea.width;
-            @:hugCornerY = openArea.y;
-
-            map.disableWall(x:hugCornerX, y:hugCornerY);
-            map.disableWall(x:hugCornerX, y:hugCornerY+1);
-            map.disableWall(x:hugCornerX+1, y:hugCornerY);
-
-            map.setSceneryIndex(x:hugCornerX, y:hugCornerY, symbol:emptyIndex);
-            map.setSceneryIndex(x:hugCornerX, y:hugCornerY+1, symbol:emptyIndex);
-            map.setSceneryIndex(x:hugCornerX+1, y:hugCornerY, symbol:emptyIndex);
-
-          },
-
-          // hugBottomRight -> freeTopLeft
-          (3): ::<= {
-            @:hugCornerX = openArea.x;
-            @:hugCornerY = openArea.y;
-
-
-            map.disableWall(x:hugCornerX, y:hugCornerY);
-            map.disableWall(x:hugCornerX, y:hugCornerY+1);
-            map.disableWall(x:hugCornerX+1, y:hugCornerY);
-
-            map.setSceneryIndex(x:hugCornerX, y:hugCornerY, symbol:emptyIndex);
-            map.setSceneryIndex(x:hugCornerX, y:hugCornerY+1, symbol:emptyIndex);
-            map.setSceneryIndex(x:hugCornerX+1, y:hugCornerY, symbol:emptyIndex);
-
-          }
-        }
-
-
-
-        areas->push(:openArea);
-      }
-
-      @:makeLayoutWall ::{
-        for(y, y+h) ::(yiter) {
-          map.setSceneryIndex(x, y:yiter, symbol:wallIndex);
-          map.enableWall(x, y:yiter);
-
-
-          map.setSceneryIndex(x:x+w, y:yiter, symbol:wallIndex);
-          map.enableWall(x:x+w, y:yiter);
-
-        }
-
-        for(x, x+w) ::(xiter) {
-          map.setSceneryIndex(x:xiter, y:y, symbol:wallIndex);
-          map.enableWall(x:xiter, y:y);
-
-          map.setSceneryIndex(x:xiter, y:y+h, symbol:wallIndex);
-          map.enableWall(x:xiter, y:y+h);
-
-        } 
-        map.setSceneryIndex(x:x+w, y:y+h, symbol:wallIndex);
-        map.enableWall(x:x+w, y:y+h);
-
-
-      }
-
-
-      // initial placement
-      @:placeLayout ::{   
-        // branch from an existing one
-        ::? {
-          forever ::{
-            @:r = random.scrambled(:layouts)[0];
-            
-            facingDir = random.integer(from:0, to:3);
-            match(facingDir) {
-              // above
-              (0): ::<= {
-                x = r.x;
-                y = r.y - (LAYOUT_NEIGHBOR_DISTANCE + h);
-              },
-
-              // to the right
-              (1): ::<= {
-                x = LAYOUT_NEIGHBOR_DISTANCE + r.x + r.width;
-                y = r.y;
-              },
-              
-              // below 
-              (2): ::<= {
-                x = r.x;
-                y = LAYOUT_NEIGHBOR_DISTANCE + r.y + r.height;
-              },
-              
-              // to the left
-              (3): ::<= {
-                x = r.x - (LAYOUT_NEIGHBOR_DISTANCE + r.width);
-                y = r.y;
-              }
-              
-            }
-            breakpoint();
-            // if it overlaps, try again
-            if (!layouts->reduce(::(value, previous) <-
-              if (previous == true)
-                true
-              else 
-                value.overlaps(other:this)
-            )) ::<= {
-              // all good! no overlaps :)
-              
-              // now connect!
-              
-              send();
-            }
-          }
-        }  
-      }
-      
-      @:populateLayout ::{
-        @:getNext ::<- random.integer(from:ROOM_MIN, to:ROOM_MAX);
-        
-        // left 
-        if (openArea.x != x) ::<= {
-          @layerLimit = getNext();
-          @start = y + h - 1;
-          for(y+h, y) ::(yiter) {
-            when(layerLimit > 0) ::<= {layerLimit-=1;}
-
-            @:area = Map.Area.new(
-              x: x,
-              y: yiter,
-              height: start - yiter,
-              width: openArea.x - x
-            );
-
-            start = yiter;
-            areas->push(:area);
-            
-            // make opening
-            map.disableWall(x:area.x+area.width, y:area.y+2);
-            map.setSceneryIndex(x:area.x+area.width, y:area.y+2, symbol:funnyIndex);
-            
-
-
-
-            layerLimit = getNext();
-            
-            // make wall 
-            for(x, openArea.x) ::(xiter) {
-              map.setSceneryIndex(x:xiter, y:yiter, symbol:wallIndex);
-              map.enableWall(x:xiter, y:yiter);
-            }
-          }
-        }
-        
-        
-        
-        // right
-        if (openArea.x + openArea.width != x + w) ::<= {
-          @layerLimit = getNext();
-          @start = y;
-          for(y, y+h) ::(yiter) {
-            when(layerLimit > 0) ::<= {layerLimit-=1;}
-
-
-            
-            @:area = Map.Area.new(
-              x: openArea.x + openArea.width,
-              y: start,
-              height: yiter - start,
-              width: (x + w) - (openArea.width+openArea.x)
-            );
-            start = yiter+1;
-            areas->push(:area);
-            
-            // make opening
-            map.disableWall(x:area.x, y:area.y+1);
-            map.setSceneryIndex(x:area.x, y:area.y+1, symbol:funnyIndex);
-            
-
-
-
-            
-            layerLimit = getNext();
-            
-            
-            
-            // make wall 
-            for(openArea.x+openArea.width, x + w) ::(xiter) {
-              map.setSceneryIndex(x:xiter, y:yiter, symbol:wallIndex);
-              map.enableWall(x:xiter, y:yiter);
-            }
-          }
-        }
-
-
-
-        // top
-        if (openArea.y != y) ::<= {
-          @start = x+w;
-          @layerLimit = getNext();
-          for(x+w, openArea.x) ::(xiter) {
-            when(layerLimit > 0) ::<= {layerLimit-=1;}
-
-
-            @:area = Map.Area.new(
-              x: xiter,
-              y: y,
-              height: openArea.y - y,
-              width: start - xiter
-            );
-            start = area.x-1;
-            areas->push(:area);
-            
-            // make opening
-            map.disableWall(x:area.x+1, y:area.y+area.height);
-            map.setSceneryIndex(x:area.x+1, y:area.y+area.height, symbol:funnyIndex);
-
-
-
-
-
-            layerLimit = getNext();
-            
-            // make wall 
-            for(y, openArea.y) ::(yiter) {
-              map.setSceneryIndex(x:xiter, y:yiter, symbol:wallIndex);
-              map.enableWall(x:xiter, y:yiter);
-            }
-          }
-        }
-
-        // bottom
-        if (openArea.y + openArea.height != y + h) ::<= {
-          @start = openArea.x+1;
-          @layerLimit = getNext();
-          for(openArea.x, openArea.x + openArea.width) ::(xiter) {
-            when(layerLimit > 0) ::<= {layerLimit-=1;};
-
-
-            @:area = Map.Area.new(
-              x: start,
-              y: openArea.y + openArea.height,
-              height: (y + h) - (openArea.height + openArea.y),
-              width: xiter - start
-            );
-            start = xiter+1;
-            areas->push(:area);
-            
-            // make opening
-            map.disableWall(x:area.x+1, y:area.y);
-            map.setSceneryIndex(x:area.x+1, y:area.y, symbol:funnyIndex);
-
-
-
-
-            layerLimit = getNext();
-            
-            // make wall 
-            for(openArea.y+openArea.height, y + h) ::(yiter) {
-              map.setSceneryIndex(x:xiter, y:yiter, symbol:wallIndex);
-              map.enableWall(x:xiter, y:yiter);
-            }
-          }
-        }
-
-      }
-      
-      this.constructor = ::{
-        for(0, 1) ::{random.number();}
-      
-        w = random.integer(from:LAYOUT_MIN_SIZE, to:LAYOUT_MAX_SIZE);
-        h = random.integer(from:LAYOUT_MIN_SIZE, to:LAYOUT_MAX_SIZE);
-
-        if (layouts->size == 0) ::<= {
-          x = mx;
-          y = my;
-        } else ::<= {
-          placeLayout();
-        }
-        
-        layouts->push(:this);        
-        makeLayoutWall();
-        populateOpenArea();
-        populateLayout();
-        
-        // debug 
-      };
-      
-      
-      this.interface = {
-        x : {
-          get ::<- x
-        },
-
-        y : {
-          get ::<- y
-        },
-
-        width : {
-          get ::<- w
-        },
-
-        height : {
-          get ::<- w
-        },
-        
-        areas : {
-          get ::<- areas
-        },
-        
-        overlaps ::(other) {
-          @:ra_x0 = x;
-          @:ra_x1 = x + w;
-          @:ra_y0 = y;
-          @:ra_y1 = y + h;
-                  
-          return
-            (ra_x0 < other.x + other.width  && ra_x1 > other.x &&
-             ra_y0 < other.y + other.height && ra_y1 > other.y)
-          ;
-        }
-      }
-    }
-  );
-  */
-
-
-
-  //map.obscure();  
+  map.obscure();  
   @allAreas = [];
-  for(0, 2) ::(i) {
+  for(0, random.integer(from:LAYOUT_COUNT_MIN, to:LAYOUT_COUNT_MAX)) ::(i) {
     allAreas = [...allAreas, ...GammaLayout.new().areas]
   }
 

@@ -34,7 +34,7 @@
 @:g = import(module:'game_function.g.mt');
 @:Scene = import(module:'game_database.scene.mt');
 @:chooseMultiple = import(:'game_function.choosemultiple.mt');
-
+@:lootget = import(:'game_function.lootget.mt');
 
 
 Interaction.newEntry(
@@ -2849,7 +2849,7 @@ Interaction.newEntry(
     keepInteractionMenu : false,
     onInteract ::(location, party) {
       @:world = import(module:'game_singleton.world.mt');
-      @:items = [...location.inventory.items, ...location.inventory.loot];
+      @:items = [...location.inventory.items];
       when(items->keycount == 0)
         windowEvent.queueMessage(text:'The chest was empty.');
       
@@ -2861,21 +2861,7 @@ Interaction.newEntry(
         windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
       }
       
-
-      @lines = [
-        'The party found: ',
-        ...(canvas.columnsToLines(
-          columns : [
-            items->map(::(value) <- '- ' + correctA(word:value.name)),
-            items->map(::(value) <- value.starsString)
-          ]
-        ))
-      ]
-
-      windowEvent.queueDisplay(
-        lines
-      );
-      
+      lootget(items);      
       foreach(items)::(i, item) {
         world.party.inventory.add(item);
       }
@@ -3278,6 +3264,10 @@ Interaction.newEntry(
                 prompt: 'Continue?',
                 onChoice::(which) {
                   when(which == false) empty;
+                  when (item.addEnchant(mod:location.data.enchant) == false)
+                    windowEvent.queueMessage(text:'The ' + item.name + ' has reached its enchantment limit.');
+
+
                   world.accoladeIncrement(name:'enchantmentsReceived');
                   windowEvent.queueMessage(text:'The stand glows along with the item for a time before returning to normal.');
                   @oldStats;
@@ -3287,7 +3277,8 @@ Interaction.newEntry(
                     oldStats = StatSet.new(state:equippedBy.stats.save());
                     slot = equippedBy.unequipItem(item, silent:true);
                   }
-                  item.addEnchant(mod:location.data.enchant);
+                  
+                  
                   location.data.enchant = empty;
                   if (whom != empty) ::<= {
                     whom.equip(item, slot, silent:true);
@@ -3323,10 +3314,7 @@ Interaction.newEntry(
         windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
       }
       
-      foreach(items)::(i, item) {
-        windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
-      }
-      
+      lootget(items);      
       foreach(items)::(i, item) {
         world.party.inventory.add(item);
       }
@@ -3347,10 +3335,7 @@ Interaction.newEntry(
         windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
       }
       
-      foreach(location.inventory.items)::(i, item) {
-        windowEvent.queueMessage(text:'The party found ' + correctA(word:item.name) + '.');
-      }
-      
+      lootget(items:location.inventory.items);      
       foreach(location.inventory.items)::(i, item) {
         world.party.inventory.add(item);
       }

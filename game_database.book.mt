@@ -40,7 +40,7 @@ Book.newEntry(
 
 Book.newEntry(
   data : {
-    name : '???',
+    name : '(Ruined)',
     id : 'base:???',
     author : '???',
     onGetContents :: {
