@@ -722,7 +722,7 @@ Arts.newEntry(
             damage: Damage.new(
               amount:Arts.find(:'base:sunbeam').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
-              damageClass: Damage.CLASS.HP.
+              damageClass: Damage.CLASS.HP,
               traits : Damage.TRAIT.UNBLOCKABLE
             ),
             targetPart : targetParts[0],

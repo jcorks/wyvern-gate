@@ -169,7 +169,7 @@ instance.mainMenu(
   ) {
     return ::? {
       return external_onLoadState(a:slot);
-    } : {
+    } => {
       onError:::(detail) {
         return empty;
       }
