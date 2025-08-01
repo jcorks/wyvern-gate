@@ -500,25 +500,25 @@
         return out;
       }
       
-      
       // fallback on slow version
 
       
       when(start == goal) empty;
       @:q = bfsQ;
+      q->setSize(size:0);
       @qIter = 0;
       @:visited = {}
       @:neighbors = [];
       visited[start] = start;
       q->push(value:start);
       
+      @:searched = {};
       return ::? {
         forever ::{
           when(qIter >= q->size) send();
           
           @v = q[qIter];
           qIter +=1;
-
 
           when(v == goal) ::<= {
             // build path
@@ -551,6 +551,12 @@
             visited[w] = v; // parent
             q->push(value:w);
           }
+          
+          searched->push(:{
+            from: v,
+            neighbors : getNeighbors(neighbors, current:v)
+          });
+
         }
       }
     }
@@ -1559,7 +1565,8 @@
       },
       
       parent : {
-        get ::<- parent_
+        get ::<- parent_,
+        set ::(value) <- if (parent_ == empty) parent_ = value
       },
       
       
