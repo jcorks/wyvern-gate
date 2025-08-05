@@ -17,6 +17,9 @@
 @:Accolade = import(module:'game_struct.accolade.mt');
 @:loading = import(module:'game_function.loading.mt');
 @:romanNum = import(module:'game_function.romannumerals.mt');
+@:ParticleEmitter = import(module:'game_class.particle.mt');
+
+
 
 @:interactionsPerson = [
   commonInteractions.person.barter,
@@ -3068,12 +3071,38 @@ return {
     
     
     @:Scene = import(module:'game_database.scene.mt');
+    @:etherealEmitter = ParticleEmitter.new(
+      directionMin : 0,
+      directionMax : 360,
 
+      directionDeltaMin : 1,
+      directionDeltaMax : 3,
+  
+      speedMin : 0.5,
+      speedMax : 2,
+      
+      speedDeltaMin : -.1,
+      speedDeltaMax : -.3,
+
+      characters : ['O', 'O', 'O', '0', '0', '0', 'o', 'o', 'o', ',' , '.'],
+      charactersRepeat : false,
+      
+      lifeMax : 10,
+      lifeMin : 5
+    );
 
     Scene.newEntry(
       data : {
         id : 'thechosen:scene_intro',
         script: [
+          ::(location, landmark, doNext) {
+            etherealEmitter.move(
+              x : canvas.width / 2,
+              y : canvas.height / 2
+            );
+            etherealEmitter.start();          
+            doNext();
+          },
           ['???', '...You.. you have been chosen...'],
           ['???', 'Among those of the world, the Chosen are selected...'],
           ['???', '...Selected to seek me, the Wyvern of Light...'],

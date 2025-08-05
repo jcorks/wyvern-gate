@@ -616,12 +616,36 @@ return empty;
 */
 
 
+/*
+@:ParticleEmitter = import(module:'game_class.particle.mt');
+@:etherealEmitter = ParticleEmitter.new(
+  directionMin : 0,
+  directionMax : 360,
 
+  directionDeltaMin : 5,
+  directionDeltaMax : 180,
 
+  speedMin : 0.3,
+  speedMax : 1.5,
+  
+  speedDeltaMin : -.01,
+  speedDeltaMax : -.03,
 
+  characters : ['O', 'O', 'O', '0', '0', '0', 'o', 'o', 'o', ',' , '.'],
+  
+  lifeMax : 20,
+  lifeMin : 7
+);
 
-        
+etherealEmitter.move(x:canvas.width/2, y:canvas.height/2);
+etherealEmitter.start();
 
+windowEvent.queueMessage(
+  text: 'Particles!',
+  topWeight : 1
+);
+return empty;        
+*/
 
         @:choiceActions = [];
         

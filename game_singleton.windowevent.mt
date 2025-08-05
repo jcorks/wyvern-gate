@@ -27,6 +27,8 @@
 @:FRAME_COUNT_RENDER_TEXT = 3;
 @:CALLBACK_DONE = {};
 @:ANIMATION_FINISHED = -1;
+@:EFFECT_FINISHED = -1;
+
 
 @:RENDER_STATE = {
   ANIMATING : 2,
@@ -144,12 +146,25 @@
     @lastRecordFrames;
     @markedError = false;
     @errorHandler;
+    @effects = [];
     
     resolveQueues->push(:{
       onResolveAll : {},
       queue : {}
     });
     
+    
+    @:commitVisual :: {
+      if (autoSkipAnimations == false) ::<= {
+        foreach(effects) ::(effect, k) {
+          @:ret = effect();
+          if (ret == EFFECT_FINISHED) 
+            effects->remove(:effect);
+        }
+      }
+
+      canvas.commit();
+    }
       
     // Adds a resolve queue.
     // when queueing window events, you may optionally 
@@ -260,7 +275,7 @@
           data.renderState = RENDER_STATE.DONE;
         }
 
-        canvas.commit();
+        commitVisual();
         
       } else ::<= {        
 
@@ -274,7 +289,7 @@
         }
           
         if (renderOnly == empty && rerender != true)
-          canvas.commit();
+          commitVisual();
 
         
         if (renderAgain == false)
@@ -330,6 +345,8 @@
     }
     
     @:commitInput ::(input, level, forceRedraw) {
+      if (effects->keycount > 0) forceRedraw = true;
+    
       ::? {
         if (record != empty) ::<= {
           if (input != empty) ::<= {
@@ -370,6 +387,7 @@
             (CHOICE_MODE.CALLBACK):       commitInput_callback(data:val, input),
             (CHOICE_MODE.READER):         commitInput_reader(data:val, input)
           }    
+         
           
           // event callbacks mightve bonked out 
           // this current val. Double check 
@@ -1341,6 +1359,10 @@
         get ::<- ANIMATION_FINISHED
       },
       
+      EFFECT_FINISHED : {
+        get ::<- EFFECT_FINISHED
+      },
+      
       RENDER_AGAIN : {
         get ::<- 1
       },
@@ -1609,6 +1631,15 @@
       forceResolveNext::{
         when(canResolveNext())
           resolveNext();
+      },
+      
+      // Adds an effect to be called after rendering the current 
+      // window visual. Note that when effects are active, the 
+      // window will be rerendered every frame. So performance is a factor
+      //
+      // When the effect is done, it should 
+      addEffect ::(effect => Function) {
+        effects[effect] = true;
       },
 
 
