@@ -87,7 +87,7 @@
 @:IS_OBSCURED_MASK = 0x100000;
 
 @:TOO_FAR_CHARACTER = '░';
-@:TOO_FAR_SYMBOL_CHARACTER = '╩';
+@:TOO_FAR_SYMBOL_CHARACTER = 'o';
 
 @:distance = import(module:'game_function.distance.mt');
 
@@ -1092,6 +1092,9 @@
       getItem::(data) {
         return retrieveItem(data);
       },
+      
+      xMapToScreen::(x) <- x - pointer.x + mapSizeW/2,
+      yMapToScreen::(y) <- y - pointer.y + mapSizeH/2,
       
       getAllItemData::{
         @:out = {};

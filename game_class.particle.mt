@@ -19,13 +19,14 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:class = import(module:'Matte.Core.Class');
-
+@:Map = import(:'game_class.map.mt');
 @:randomRange ::(from, to) <- from + Number.random() * (to - from)
 
 
 return class(
   name : 'Wyvern.ParticleEmitter',
   define ::(this) {
+    @onFrameFunc;
     @directionMin_
     @directionMax_
     @directionDeltaMin_
@@ -37,8 +38,10 @@ return class(
     @characters_
     @lifeMin_
     @lifeMax_
+    @map_
     
     @particles = [];
+    @stopped = false;
 
     @x_ = 0;
     @y_ = 0;
@@ -99,6 +102,8 @@ return class(
     
       
     @:nextFrame ::{
+      if (onFrameFunc) onFrameFunc();
+    
       foreach(particles) ::(particle, nu) {
         particle.life -= 1;
         when (particle.life <= 0) particles->remove(:particle);
@@ -114,10 +119,17 @@ return class(
     
     @:render ::{
       foreach(particles) ::(particle, nu) {
-        canvas.movePen(
-          x:particle.x->floor, 
-          y:particle.y->floor
-        );
+
+        if (map_)
+          canvas.movePen(
+            x:map_.xMapToScreen(:particle.x->floor)->floor, 
+            y:map_.yMapToScreen(:particle.y->floor)->floor
+          )
+        else
+          canvas.movePen(
+            x:particle.x->floor, 
+            y:particle.y->floor
+          );
         
         canvas.drawText(
           text: characters_[((1 - particle.life / particle.maxLife) * characters_->size)->floor]
@@ -130,7 +142,9 @@ return class(
     @:effect :: {
       nextFrame();
       render();
-      emit();
+      
+      if (stopped == false)
+        emit();
       
       when (particles->keycount == 0) ::<= {
         effectActive = false;
@@ -144,13 +158,21 @@ return class(
         y_ = y
       },
       
+      tether::(map => Map.type) {
+        map_ = map;
+      },
+      
+      onFrame : {
+        set::(value) <- onFrameFunc = value
+      },
+      
       start::(emitCount) {
         count = emitCount;
         emit();
       },
       
       stop ::{
-        particles = {};
+        stopped = true;
       }
     }
   }

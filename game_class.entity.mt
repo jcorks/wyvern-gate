@@ -375,8 +375,65 @@
   return deck;
 }
 
+@:animateDamageParticles::() {
+  @:emitter = import(:'game_class.particle.mt').new(
+    directionMin: -70,
+    directionMax: -15,
+    directionDeltaMin: 0,
+    directionDeltaMax: 0,
+    
+    speedMin: 0.5,
+    speedMax: 2,
+    speedDeltaMin: -0.06,
+    speedDeltaMax: -0.02,
+    
+    characters : ['/', '/', '/', ',', ',', ',', '.', '.', '.'],
+    lifeMin: 5,
+    lifeMax: 9
+  );
+
+  @:emitterTrail = import(:'game_class.particle.mt').new(
+    directionMin: 0,
+    directionMax: 0,
+    directionDeltaMin: 0,
+    directionDeltaMax: 0,
+    
+    speedMin: 0,
+    speedMax: 0,
+    speedDeltaMin: 0,
+    speedDeltaMax: 0,
+    
+    characters : ['\\', '\\', '\\', ',', ',', ',', '.', '.', '.'],
+    lifeMin: 9,
+    lifeMax: 20
+  );
+
+
+  @emitterTransform = ::<= {
+    @x = canvas.width / 2 + canvas.width / 8;
+    @y = canvas.height / 2 - canvas.height / 3;
+    emitter.move(x, y);
+    emitterTrail.move(x, y);
+
+    return ::{
+      when (y > canvas.height / 2 + canvas.height/3) ::<= {
+        emitter.stop();
+        emitterTrail.stop();
+      }
+      emitter.move(x, y);
+      emitterTrail.move(x, y);
+      x -= 2.1;
+      y += 1.5;
+    }
+  };
+  emitter.onFrame = emitterTransform;
+  emitter.start();
+}
 
 @:animateDamage ::(this, from, to, caption) {
+
+  
+
   @hp = from - to;
   @frame = 0;
 
@@ -391,7 +448,13 @@
   
   @:maxHP = displayHP(:this.stats.HP);
   windowEvent.queueCustom(
-    onEnter ::{},
+    onEnter ::{
+      when (hp <= 1) empty;
+      when (windowEvent.autoSkip) empty
+      when (windowEvent.autoSkipAnimations) empty
+      
+      animateDamageParticles();    
+    },
     isAnimation: true,
     onInput ::(input) {
       match(input) {

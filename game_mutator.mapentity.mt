@@ -766,6 +766,42 @@ MapEntity.Task.database.newEntry(
 
 }
 
+
+@:stepEmitter = import(:'game_class.particle.mt').new(
+  directionMin: 0,
+  directionMax: 0,
+  directionDeltaMin: 0,
+  directionDeltaMax: 10,
+  
+  speedMin: 0,
+  speedMax: 0,
+  speedDeltaMin: 0,
+  speedDeltaMax: 0,
+  
+  characters : ['=', '-', '-', ',', ',', ',', '.', '.', '.'],
+  lifeMin: 5,
+  lifeMax: 9
+); 
+
+
+@:damageEmitter = import(:'game_class.particle.mt').new(
+  directionMin: 0,
+  directionMax: 360,
+  directionDeltaMin: 3,
+  directionDeltaMax: 10,
+  
+  speedMin: 1,
+  speedMax: 3,
+  speedDeltaMin: -0.06,
+  speedDeltaMax: -0.02,
+  
+  characters : ['X', 'X', 'x', ',', ',', ',', '.', '.', '.'],
+  lifeMin: 2,
+  lifeMax: 6
+); 
+
+
+
 @:MapEntity = LoadableClass.create(
   name : 'Wyvern.MapEntity',
   statics : {
@@ -815,6 +851,16 @@ MapEntity.Task.database.newEntry(
     @isRemoved = false;
     @location_;
     @lastPosition;
+    
+    @:animateClash::(other) {
+      damageEmitter.tether(:map_);
+      damageEmitter.move(
+        x:this.position.x,
+        y:this.position.y
+      );
+      damageEmitter.start(:5);
+      damageEmitter.stop();
+    }
     
     
     this.interface = {
@@ -880,10 +926,28 @@ MapEntity.Task.database.newEntry(
       move ::(x, y) {
         @:item = map_.getItem(data:this);
         when(item == empty) empty;
+
+        @:oldX = this.position.x;
+        @:oldY = this.position.y;
+
+        when(oldX == x &&
+             oldY == y) empty;
+
+
         map_.moveItem(data:this, x, y);
         if (location_ != empty) ::<= {
           map_.moveItem(data:location_, x, y);        
         }
+        stepEmitter.tether(:map_);
+        stepEmitter.move(
+          x:oldX,
+          y:oldY
+        );
+
+
+        stepEmitter.start();
+        stepEmitter.stop();
+        
       },
     
       step :: {
@@ -936,10 +1000,7 @@ MapEntity.Task.database.newEntry(
             useBFS:true
           );
         
-        map_.moveItem(data:this, x:next.x, y:next.y);
-        if (location_ != empty) ::<= {
-          map_.moveItem(data:location_, x:next.x, y:next.y);        
-        }
+        this.move(x:next.x, y:next.y);
         @:Location = import(module:'game_mutator.location.mt');
 
         @:items = map_.itemsAt(x:next.x, y:next.y);
@@ -1005,6 +1066,7 @@ MapEntity.Task.database.newEntry(
                   damageClass: Damage.CLASS.HP
                 )
               );     
+              animateClash(:other);
             }
           }
           
