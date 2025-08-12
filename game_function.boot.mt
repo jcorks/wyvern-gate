@@ -146,11 +146,10 @@ return ::(onBooted) {
   
   @:drawTerminal:: {
     @:from = if (alreadyPrinted->size < canvas.height) 0 else alreadyPrinted->size - canvas.height
-    canvas.penX = 0;
-    canvas.penY = 0;
+    canvas.movePen(x:0, y:0);
     for(from, alreadyPrinted->size) ::(i) {
       canvas.drawText(:alreadyPrinted[i]);
-      canvas.penY += 1;
+      canvas.movePenRelative(x:0, y:1);
     }
   }
   

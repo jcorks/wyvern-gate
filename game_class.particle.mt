@@ -96,8 +96,8 @@ return class(
       }
       
       if (effectActive == false) ::<= {
-        @:windowEvent = import(module:'game_singleton.windowevent.mt');
-        windowEvent.addEffect(:effect);
+        @:canvas = import(module:'game_singleton.canvas.mt');
+        canvas.addEffect(:effect);
         effectActive = true;
       }              
     }
@@ -149,10 +149,10 @@ return class(
         emit();
       
       when (particles->keycount == 0) ::<= {
-        @:windowEvent = import(module:'game_singleton.windowevent.mt');
+        @:canvas = import(module:'game_singleton.canvas.mt');
         effectActive = false;
         if (onDoneFunc) onDoneFunc()
-        return windowEvent.EFFECT_FINISHED;
+        return canvas.EFFECT_FINISHED;
       }
     }
     
@@ -168,10 +168,12 @@ return class(
         map_ = map;
       },
       
+      // NOT CALLED if effects are disabled.
       onFrame : {
         set::(value) <- onFrameFunc = value
       },
       
+      // NOT CALLED if effects are disabled.
       onDone : {
         set::(value) <- onDoneFunc = value
       },

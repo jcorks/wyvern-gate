@@ -19,8 +19,24 @@
 @:class = import(module:'Matte.Core.Class');
 
 
+
+/////////////////////////////////
+// See if we have a native (quick) implementation
+// If not, fallback on Matte implementation
+@native = ::? {
+  
+} => {
+  onError::(message) {
+    //fallback on Matte implementation  
+  }
+}
+
+when (native != empty) native
+//////////////////////////////////
+
 @CANVAS_WIDTH  = 80;
 @CANVAS_HEIGHT = 24;
+@:EFFECT_FINISHED = -1;
 
 @:hints = {
   // for general messages describing whats going on.
@@ -121,6 +137,8 @@ return class(
     @savestates = [];
     @idStatePool = 0;
     @idStatePool_dead = [];
+    @effects = [];
+    @counter = 0;
     
     
     
@@ -149,19 +167,14 @@ return class(
         penx = x->floor;
         peny = y->floor;
       },
-      
-      penX : {
-        set ::(value) <- (
-          penx = value
-        ),
-        get ::<- penx
+
+      movePenRelative ::(x => Number, y => Number) {
+        penx += x->floor;
+        peny += y->floor;
       },
       
-
-
-      penY : {
-        set ::(value) <- peny = value,
-        get ::<- peny
+      EFFECT_FINISHED : {
+        get ::<- EFFECT_FINISHED
       },
       
       onCommit : {
@@ -219,10 +232,10 @@ return class(
         );
         
         this.drawChar(text:CHAR__CORNER_TOPLEFT);
-        this.penX += 1;
+        penx += 1;
         for(2, width)::(x) {
           this.drawChar(text:CHAR__TOP);  
-          this.penX += 1;
+          penx += 1;
               
         }
         this.drawChar(text:CHAR__CORNER_TOPRIGHT);
@@ -232,11 +245,11 @@ return class(
         for(1, height - 1)::(y) {
           this.movePen(x: left, y: top+y);
           this.drawChar(text:CHAR__SIDE);
-          this.penX += 1;
+          penx += 1;
 
           for(2, width)::(x) {
             this.erase();    
-            this.penX += 1;
+            penx += 1;
           }
           this.drawChar(text:CHAR__SIDE);
         }
@@ -249,10 +262,10 @@ return class(
         );
         
         this.drawChar(text:CHAR__CORNER_BOTTOMLEFT);
-        this.penX += 1;
+        penx += 1;
         for(2, width)::(x) {
           this.drawChar(text:CHAR__BOTTOM);  
-          this.penX += 1;
+          penx += 1;
               
         }
         this.drawChar(text:CHAR__CORNER_BOTTOMRIGHT);
@@ -604,7 +617,41 @@ return class(
         h = ((Number.parse(:h) / 2)->floor)*2 -2;
 
         this.resize(width:w, height:h);
-      },      
+      },    
+
+      
+      // Adds an effect to be called after rendering the current 
+      // window visual. Note that when effects are active, the 
+      // window will be rerendered every frame. So performance is a factor
+      //
+      // When the effect is done, it should 
+      addEffect ::(effect => Function) {
+        effects[effect] = true;
+      },
+      
+      update ::{
+        when(effects->keycount == 0) empty;        
+        
+        @:copy = [...canvas];
+        @:old = canvas;
+        canvas = copy;
+
+        foreach(effects) ::(effect, k) {
+          @:ret = effect();
+          if (ret == EFFECT_FINISHED) 
+            effects->remove(:effect);
+        }     
+
+        for(0, CANVAS_HEIGHT)::(row) {
+          lines_output[row] = String.combine(strings:copy->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
+        }
+        onCommit(
+          lines:lines_output
+        ); 
+        
+        canvas = old;
+      },
+        
       commit ::(renderNow) {
         // debug lines happen as the LAST possible thing 
         // the canvas does to ensure that its always on top.
@@ -633,7 +680,7 @@ return class(
           lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
         }
         
-        
+        when(effects->keycount > 0 && (renderNow != true)) empty;
         onCommit(
           lines:lines_output,
           renderNow        

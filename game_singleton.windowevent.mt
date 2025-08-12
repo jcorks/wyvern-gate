@@ -27,7 +27,6 @@
 @:FRAME_COUNT_RENDER_TEXT = 3;
 @:CALLBACK_DONE = {};
 @:ANIMATION_FINISHED = -1;
-@:EFFECT_FINISHED = -1;
 
 
 @:RENDER_STATE = {
@@ -146,7 +145,6 @@
     @lastRecordFrames;
     @markedError = false;
     @errorHandler;
-    @effects = [];
     
     resolveQueues->push(:{
       onResolveAll : {},
@@ -155,14 +153,6 @@
     
     
     @:commitVisual :: {
-      if (autoSkipAnimations == false) ::<= {
-        foreach(effects) ::(effect, k) {
-          @:ret = effect();
-          if (ret == EFFECT_FINISHED) 
-            effects->remove(:effect);
-        }
-      }
-
       canvas.commit();
     }
       
@@ -345,7 +335,6 @@
     }
     
     @:commitInput ::(input, level, forceRedraw) {
-      if (effects->keycount > 0) forceRedraw = true;
     
       ::? {
         if (record != empty) ::<= {
@@ -1247,6 +1236,7 @@
         (CURSOR_ACTIONS.CONFIRM, 
          CURSOR_ACTIONS.CANCEL): ::<= {
           when (data.renderState == RENDER_STATE.ANIMATING) ::<= {
+            commitInput_display_emitter.stop();
             data.renderState = RENDER_STATE.DONE;
             return false;
           } 
@@ -1388,10 +1378,6 @@
       
       ANIMATION_FINISHED : {
         get ::<- ANIMATION_FINISHED
-      },
-      
-      EFFECT_FINISHED : {
-        get ::<- EFFECT_FINISHED
       },
       
       RENDER_AGAIN : {
@@ -1663,15 +1649,7 @@
         when(canResolveNext())
           resolveNext();
       },
-      
-      // Adds an effect to be called after rendering the current 
-      // window visual. Note that when effects are active, the 
-      // window will be rerendered every frame. So performance is a factor
-      //
-      // When the effect is done, it should 
-      addEffect ::(effect => Function) {
-        effects[effect] = true;
-      },
+
 
 
       // Queues a nested resolve queue. When entered, will push a new resolve queue, 

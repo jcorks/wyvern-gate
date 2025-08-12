@@ -165,6 +165,7 @@ canvas.onCommit = ::(lines, renderNow){
       
       @val = pollInput();
       windowEvent.commitInput(input:val);
+      canvas.update();
       
       if (canvasChanged) ::<= {
         rerender();  
