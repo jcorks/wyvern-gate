@@ -1116,6 +1116,25 @@
       return false;
     }
     
+    @:commitInput_display_emitter = import(:'game_class.particle.mt').new(
+      directionMin : -115,
+      directionMax : -30,
+
+      directionDeltaMin : -1,
+      directionDeltaMax : 2,
+  
+      speedMin : 0.3,
+      speedMax : 1,
+      
+      speedDeltaMin : 0.03,
+      speedDeltaMax : 0.05,
+
+      characters : ['▓', '▓', '▒', '░', '▒', '░', '░'],
+      charactersRepeat : false,
+      
+      lifeMax : 7,
+      lifeMin : 1    
+    );    
     @:commitInput_display ::(data, input) {
       when (requestAutoSkip) true;
 
@@ -1169,7 +1188,7 @@
       
         data.animationFrame = ::{
 
-          renderTextSingle(
+          @:location = renderTextSingle(
             leftWeight: data.leftWeight, 
             topWeight: data.topWeight, 
             maxWidth : data.maxWidth,
@@ -1179,9 +1198,21 @@
             //limitLines : data.pageAfter,
             hasNotch: true
           );
+          for(0, 4) ::(i) {
+            commitInput_display_emitter.move(
+              x: location.left + 2 + progressCh + i,
+              y: location.top  + 2 + progressL + 1
+            );
+            commitInput_display_emitter.emit();
+          }
+            
+            
 
-          when(progressL >= data.lines->size)
-            ANIMATION_FINISHED;
+
+          when(progressL >= data.lines->size) ::<= {
+            commitInput_display_emitter.stop();
+            return ANIMATION_FINISHED;
+          }
 
         }
         

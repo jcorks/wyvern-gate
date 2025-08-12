@@ -176,6 +176,7 @@ Scene.newEntry(
         @:left = [...scene.script];
         
         @:doNext ::{
+          breakpoint();
           when(left->keycount == 0) onDone();
           @:action = left[0];
           left->remove(key:0);
@@ -184,7 +185,14 @@ Scene.newEntry(
               action(location, landmark, doNext),
             
             (Object): ::<= {
-              windowEvent.queueMessage(speaker: action[0], text: action[1]);
+              if (action[2]) ::<= {
+                @:a = {...action[2]};
+                a.speaker = action[0];
+                a.text = action[1];
+                windowEvent.queueMessage(*a);
+              } else ::<= {
+                windowEvent.queueMessage(speaker: action[0], text: action[1]);
+              }
               windowEvent.queueCustom(onEnter:doNext);
             },
             default:

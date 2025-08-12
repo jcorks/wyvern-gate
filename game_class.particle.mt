@@ -17,7 +17,6 @@
 */
 
 @:canvas = import(module:'game_singleton.canvas.mt');
-@:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:class = import(module:'Matte.Core.Class');
 @:Map = import(:'game_class.map.mt');
 @:randomRange ::(from, to) <- from + Number.random() * (to - from)
@@ -27,6 +26,8 @@ return class(
   name : 'Wyvern.ParticleEmitter',
   define ::(this) {
     @onFrameFunc;
+    @onDoneFunc;
+    
     @directionMin_
     @directionMax_
     @directionDeltaMin_
@@ -95,6 +96,7 @@ return class(
       }
       
       if (effectActive == false) ::<= {
+        @:windowEvent = import(module:'game_singleton.windowevent.mt');
         windowEvent.addEffect(:effect);
         effectActive = true;
       }              
@@ -147,7 +149,9 @@ return class(
         emit();
       
       when (particles->keycount == 0) ::<= {
+        @:windowEvent = import(module:'game_singleton.windowevent.mt');
         effectActive = false;
+        if (onDoneFunc) onDoneFunc()
         return windowEvent.EFFECT_FINISHED;
       }
     }
@@ -158,6 +162,8 @@ return class(
         y_ = y
       },
       
+      'emit' : emit,
+      
       tether::(map => Map.type) {
         map_ = map;
       },
@@ -166,8 +172,13 @@ return class(
         set::(value) <- onFrameFunc = value
       },
       
+      onDone : {
+        set::(value) <- onDoneFunc = value
+      },
+      
       start::(emitCount) {
         count = emitCount;
+        stopped = false;
         emit();
       },
       

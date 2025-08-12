@@ -3078,38 +3078,60 @@ return {
       directionDeltaMin : 1,
       directionDeltaMax : 3,
   
-      speedMin : 0.5,
-      speedMax : 2,
+      speedMin : 0.2,
+      speedMax : 0.55,
       
-      speedDeltaMin : -.1,
-      speedDeltaMax : -.3,
+      speedDeltaMin : -.003,
+      speedDeltaMax : -.008,
 
-      characters : ['O', 'O', 'O', '0', '0', '0', 'o', 'o', 'o', ',' , '.'],
+      characters : ['O', 'O', 'O', '0', '0', 'o', 'o', ',', ',', ',' , '.', '.', '.'],
       charactersRepeat : false,
       
-      lifeMax : 10,
-      lifeMin : 5
+      lifeMax : 30,
+      lifeMin : 10
     );
 
     Scene.newEntry(
       data : {
         id : 'thechosen:scene_intro',
         script: [
+          /*
           ::(location, landmark, doNext) {
             etherealEmitter.move(
               x : canvas.width / 2,
               y : canvas.height / 2
             );
-            etherealEmitter.start();          
-            doNext();
+            etherealEmitter.start(:2);    
+            
+            
+            @counter = 0;
+            etherealEmitter.onFrame = ::{
+              counter += 1;
+              if (counter == 1000) ::<= {
+                breakpoint();
+                doNext();
+              }
+            }
+            
+            
           },
-          ['???', '...You.. you have been chosen...'],
-          ['???', 'Among those of the world, the Chosen are selected...'],
-          ['???', '...Selected to seek me, the Wyvern of Light...'],
-          ['???', 'If you seek me, I will grant you and anyone with you a wish...'],
-          ['???', 'But be warned: others will seek their own wish and will accept no others...'],
-          ['???', 'Come, Chosen: take this Key and seek me among the islands in the sky...'],
-          ['???', '...I will await you, Chosen...'],
+          */
+          ['???', '...You.. you have been chosen...', {topWeight:1}],
+          ['???', 'Among those of the world, the Chosen are selected...', {topWeight:1}],
+          ['???', '...Selected to seek me, the Wyvern of Light...', {topWeight:1}],
+          ['???', 'If you seek me, I will grant you and anyone with you a wish...', {topWeight:1}],
+          ['???', 'But be warned: others will seek their own wish and will accept no others...', {topWeight:1}],
+          ['???', 'Come, Chosen: take this Key and seek me among the islands in the sky...', {topWeight:1}],
+          ['???', '...I will await you, Chosen...', {topWeight:1}],
+          /*
+          ::(location, landmark, doNext) {
+            etherealEmitter.stop();
+            etherealEmitter.onDone = ::{
+              breakpoint();
+              doNext();
+            }
+          }
+          */
         ]
       }
     )   
