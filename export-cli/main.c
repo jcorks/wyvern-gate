@@ -14,7 +14,7 @@
 
 // Provided by native.c, binds native function implementations 
 // (external functions) to the runtime.
-void wyvern_gate_add_native_bfs(matte_t * m);
+void wyvern_gate_add_native(matte_t * m);
 
 
 
@@ -39,7 +39,7 @@ int main(int argc, char ** argv) {
 
     matte_t * m = matte_create();
     
-    wyvern_gate_add_native_bfs(m);
+    wyvern_gate_add_native(m);
     
     matte_set_io(m, NULL, NULL, NULL); // standard IO is fine
     matte_set_importer(m, NULL, NULL); // standard file import is fine

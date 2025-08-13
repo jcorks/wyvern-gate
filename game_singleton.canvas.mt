@@ -20,59 +20,53 @@
 
 
 
+@CANVAS_WIDTH  = 80;
+@CANVAS_HEIGHT = 24;
+@:EFFECT_FINISHED = -1;
+
 /////////////////////////////////
 // See if we have a native (quick) implementation
-// If not, fallback on Matte implementation
+// If not, fallback on Matte implementation. 
+// Matte version works okay, just might be a bit slower
+// when scenes get heavy, like in battle.
 @native = ::? {
+  @:a = getExternalFunction(:'wyvern_gate__native__canvas')();
   
+  a.EFFECT_FINISHED = EFFECT_FINISHED;
+  a.width = CANVAS_WIDTH;
+  a.height = CANVAS_HEIGHT;
+  
+  a.reset = getExternalFunction(:'wyvern_gate__native__canvas__reset');
+  a.resize = getExternalFunction(:'wyvern_gate__native__canvas__resize');
+  a.movePen = getExternalFunction(:'wyvern_gate__native__canvas__movePen');
+  a.movePenRelative = getExternalFunction(:'wyvern_gate__native__canvas__movePenRelative');
+  a.renderBarAsString = getExternalFunction(:'wyvern_gate__native__canvas__renderBarAsString');
+  a.renderFrame = getExternalFunction(:'wyvern_gate__native__canvas__renderFrame');
+  a.refitLines = getExternalFunction(:'wyvern_gate__native__canvas__refitLines');
+  a.renderTextFrameGeneral = getExternalFunction(:'wyvern_gate__native__canvas__renderTextFrameGeneral');
+  a.pushState = getExternalFunction(:'wyvern_gate__native__canvas__pushState');
+  a.removeState = getExternalFunction(:'wyvern_gate__native__canvas__removeState');
+  a.drawText = getExternalFunction(:'wyvern_gate__native__canvas__drawText');
+  a.drawChar = getExternalFunction(:'wyvern_gate__native__canvas__drawChar');
+  a.drawRectangle = getExternalFunction(:'wyvern_gate__native__canvas__drawRectange');
+  a.erase = getExternalFunction(:'wyvern_gate__native__canvas__erase');
+  a.writeText = getExternalFunction(:'wyvern_gate__native__canvas__writeText');
+  a.clear = getExternalFunction(:'wyvern_gate__native__canvas__clear');
+  a.blackout = getExternalFunction(:'wyvern_gate__native__canvas__blackout');
+  a.columnsToLines = getExternalFunction(:'wyvern_gate__native__canvas__columnsToLines');
+  a.addEffect = getExternalFunction(:'wyvern_gate__native__canvas__addEffect');
+  a.update = getExternalFunction(:'wyvern_gate__native__canvas__update');
+  a.commit = getExternalFunction(:'wyvern_gate__native__canvas__commit');
+  return a;  
 } => {
   onError::(message) {
     //fallback on Matte implementation  
   }
 }
 
-when (native != empty) native
+when (native != empty) native;
 //////////////////////////////////
 
-@CANVAS_WIDTH  = 80;
-@CANVAS_HEIGHT = 24;
-@:EFFECT_FINISHED = -1;
-
-@:hints = {
-  // for general messages describing whats going on.
-  NEUTRAL : 0,
-  
-  // For something positive to a player
-  GOOD : 1,
-
-
-  // For something not so good to a player
-  BAD : 2,
-
-
-  // Like neutral, but less focused
-  SUBDUED : 3,
-
-  // To really let the user know of something.
-  ALERT : 4,
-
-  // Dialog spoken by a character
-  QUOTE : 5,
-  
-  // for the speaker of a quote.
-  SPEAKER : 6,
-  
-  // For indicate a choice for the user non-diagetically
-  PROMPT: 7,
-
-  // To indicate to the IO system that a 
-  // break in output
-  NEWLINE: 8,
-  
-  // To indicate to the IO system to clear the currently 
-  // displayed output for clarity
-  CLEAR: 9
-}
 
 
 
@@ -129,7 +123,6 @@ return class(
     @canvas = [];
     @penx = 0;
     @peny = 0;
-    @penColor = hints.NEUTRAL;
     @onCommit;
     @debugLines = [];
     @:lines_output = [];
@@ -191,16 +184,6 @@ return class(
         get ::<- CANVAS_HEIGHT
       },
 
-      
-      penColor : {
-        set ::(value => Number)<- penColor = value,
-        get ::<- penColor
-      },
-      
-      debugLine : {
-        set ::(value) <- debugLines[0] = value => String,
-        get ::<- debugLines[0]
-      },
       
       renderBarAsString ::(width, fillFraction, character) {
         if (width == empty) width = 12;
@@ -414,21 +397,7 @@ return class(
         
         return id;
       },
-      
-      replaceState ::(id){
-        @w = savestates->filter(by::(value) <- value.id == id);
-        if (w->size != 1)
-          error(detail:'Tried to replaceState() on something that isnt a state!');
 
-        w[0].text = [...canvas];
-        return id;
-      },      
-      
-      states : {
-        get ::<- [...savestates]
-      },
-
-      
       removeState ::(id) {
         @w = savestates->filter(by::(value) <- value.id == id);
         if (w->size != 1)
@@ -437,10 +406,6 @@ return class(
         idStatePool_dead->push(value:w[0].id);
         savestates->remove(key:savestates->findIndex(value:w[0]));
         this.clear();
-      },
-      
-      stateCount : {
-        get ::<- savestates->keycount
       },
             
       drawText ::(text => String) {
@@ -469,7 +434,6 @@ return class(
       },
       
       erase :: {
-        this.penColor = hints.NEUTRAL;
         this.drawChar(text:' ');
       },
       
@@ -484,11 +448,6 @@ return class(
           ;
         }
       },
-      
-      drawTextCentered ::(text => String, y => Number) {
-        
-      },
-      
       clear :: {
         when (savestates->keycount) ::<= {
           @prevCanvas = savestates[savestates->keycount-1].text;
@@ -555,7 +514,6 @@ return class(
 
 
         for(0, rowcount)::(row) {
-          @line = '';
           parts->setSize(size:0);        
           foreach(columns)::(column, lines) {
             formatColumn(
@@ -574,7 +532,7 @@ return class(
       },
       
       
-
+      /*
       refitCanvas ::{
         @:console = import(:'Matte.System.ConsoleIO');
         console.put(:"\x1b[999;999H");
@@ -617,7 +575,8 @@ return class(
         h = ((Number.parse(:h) / 2)->floor)*2 -2;
 
         this.resize(width:w, height:h);
-      },    
+      },  
+      */  
 
       
       // Adds an effect to be called after rendering the current 
@@ -653,34 +612,12 @@ return class(
       },
         
       commit ::(renderNow) {
-        // debug lines happen as the LAST possible thing 
-        // the canvas does to ensure that its always on top.
-        if (debugLines[0] != empty) ::<= {
-        
-          this.movePen(x:0, y:0);
-          this.drawText(text: debugLines[0]);
-        }
-        
-        
-        // This helps debug which savestates are active.
-        /*
-          @:trackWindows ::{
-            @out = '{';
-            foreach(this.states) ::(i, state) {
-              out = out + state.id + ' ';
-            }
-            return out + '}';
-          }        
-
-          this.movePen(x:0, y:1);
-          this.drawText(text: trackWindows());
-        */
+        when(effects->keycount > 0 && (renderNow != true)) empty;
 
         for(0, CANVAS_HEIGHT)::(row) {
           lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
         }
         
-        when(effects->keycount > 0 && (renderNow != true)) empty;
         onCommit(
           lines:lines_output,
           renderNow        
