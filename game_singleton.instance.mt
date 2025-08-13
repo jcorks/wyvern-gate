@@ -1241,7 +1241,7 @@ return empty;
             leftWeight: 1,
             topWeight: 1,
             prompt: 'What next?',
-            renderable: island.map,
+            //renderable: island.map,
             canCancel : true,
             keep: true,
             jumpTag: 'LandmarkInteraction',

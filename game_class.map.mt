@@ -712,7 +712,7 @@
         }
       }
       
-
+      
       ::? {
         @i = 0;
         forever ::{
@@ -720,7 +720,8 @@
           sightRay(degrees:i);
           i += 10; 
         }
-      }      
+      } 
+      
       
       /*
       [0, mapSizeH+1]->for(do:::(y) {
@@ -746,7 +747,6 @@
 
           @symbol = this.sceneryAt(x:itemX, y:itemY);
 
-          @:items = this.itemsAt(x:itemX, y:itemY);
           canvas.movePen(x:left + x, y:top + y);  
 
 
@@ -771,12 +771,13 @@
             canvas.drawChar(text:outOfBoundsCharacter);            
           }
           
-          @:chosenChar = ::<= {
+          @chosenChar = ::<= {
             
             when(symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
               return wallCharacter;
             }
 
+            @:items = this.itemsAt(x:itemX, y:itemY);
             when(items != empty && items->keycount > 0) ::<= {
               @:discovered = items[items->keycount-1].discovered;
               
@@ -1512,7 +1513,7 @@
       },  
       
       render :: {
-        canvas.blackout();
+        //canvas.blackout();
         if (paged)
           renderPaged()
         else 

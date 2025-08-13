@@ -1106,8 +1106,8 @@
     }
     
     @:commitInput_display_emitter = import(:'game_class.particle.mt').new(
-      directionMin : -115,
-      directionMax : -30,
+      directionMin : -135,
+      directionMax : -45,
 
       directionDeltaMin : -1,
       directionDeltaMax : 2,
