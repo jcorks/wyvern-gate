@@ -71,6 +71,8 @@ windowEvent.errorHandler = ::<= {
   //time.sleep(milliseconds:1000 * (1 / 40.0));
 }
 canvas.onCommit = ::(lines, renderNow){
+
+  breakpoint();
   currentCanvas = lines;
   canvasChanged = true;
   if (renderNow != empty)

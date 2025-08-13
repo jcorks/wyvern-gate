@@ -48,7 +48,7 @@
   a.removeState = getExternalFunction(:'wyvern_gate__native__canvas__removeState');
   a.drawText = getExternalFunction(:'wyvern_gate__native__canvas__drawText');
   a.drawChar = getExternalFunction(:'wyvern_gate__native__canvas__drawChar');
-  a.drawRectangle = getExternalFunction(:'wyvern_gate__native__canvas__drawRectange');
+  a.drawRectangle = getExternalFunction(:'wyvern_gate__native__canvas__drawRectangle');
   a.erase = getExternalFunction(:'wyvern_gate__native__canvas__erase');
   a.writeText = getExternalFunction(:'wyvern_gate__native__canvas__writeText');
   a.clear = getExternalFunction(:'wyvern_gate__native__canvas__clear');
