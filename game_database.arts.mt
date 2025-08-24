@@ -72,7 +72,8 @@
   CAN_BLOCK : 2**13,
   ONCE_PER_BATTLE : 2**14,
   
-  COMMON_ATTACK_SPELL : 2**15
+  COMMON_ATTACK_SPELL : 2**15,
+  IS_ATTACK : 2**16
 }
 
 
@@ -136,7 +137,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.SPECIAL | TRAIT.COSTLESS | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.SPECIAL | TRAIT.COSTLESS | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.5) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -175,7 +176,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -226,11 +227,10 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     baseDamage ::(level, user) <- (user.stats.ATK * (0.2) + user.stats.DEX * (0.5)) * (1 + 0.1*(level-1)),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
       windowEvent.queueCustom(
@@ -264,7 +264,7 @@ Arts.newEntry(
     durationTurns: 0,
     keywords : ['base:paralyzed'],
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -339,7 +339,7 @@ Arts.newEntry(
     durationTurns: 0,
     keywords : [],
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -390,7 +390,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -448,7 +448,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -650,7 +650,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC | TRAIT.FIRE,
+    traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -698,7 +698,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC | TRAIT.FIRE,
+    traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -750,7 +750,7 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    traits : TRAIT.MAGIC | TRAIT.FIRE,
+    traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.IS_ATTACK,
     baseDamage ::(level, user) {
       @:world = import(module:'game_singleton.world.mt');
       return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.7 else 0.4) * (1 + (level-1)*.08);
@@ -1045,7 +1045,7 @@ Arts.newEntry(
     durationTurns: 0,
     kind : KIND.ABILITY,
     rarity : RARITY.UNCOMMON,
-    traits : TRAIT.PHYSICAL,
+    traits : TRAIT.PHYSICAL | TRAIT.IS_ATTACK,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
@@ -1178,7 +1178,7 @@ Arts.newEntry(
     keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1219,7 +1219,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1258,7 +1258,7 @@ Arts.newEntry(
     keywords : ['base:grappling', 'base:grappled'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1300,7 +1300,7 @@ Arts.newEntry(
     durationTurns: 0,
     kind : KIND.ABILITY,
     rarity : RARITY.UNCOMMON,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.2),
@@ -1346,7 +1346,7 @@ Arts.newEntry(
     keywords : ['base:stunned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1385,7 +1385,7 @@ Arts.newEntry(
     keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC | TRAIT.ICE | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK,
+    traits : TRAIT.MAGIC | TRAIT.ICE | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1525,7 +1525,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1783,7 +1783,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.POISON | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.POISON | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1821,7 +1821,7 @@ Arts.newEntry(
     keywords : ['base:petrified'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.LIGHT | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.LIGHT | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -1960,7 +1960,7 @@ Arts.newEntry(
     keywords : ['base:bleeding'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2409,7 +2409,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.COMMON_ATTACK_SPELL,
+    traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.COMMON_ATTACK_SPELL | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2446,7 +2446,7 @@ Arts.newEntry(
     keywords : ['base:burned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC | TRAIT.FIRE,
+    traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2486,7 +2486,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC | TRAIT.FIRE| TRAIT.COMMON_ATTACK_SPELL,
+    traits : TRAIT.MAGIC | TRAIT.FIRE| TRAIT.COMMON_ATTACK_SPELL | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2619,7 +2619,7 @@ Arts.newEntry(
     keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC | TRAIT.ICE | TRAIT.MULTIHIT,
+    traits : TRAIT.MAGIC | TRAIT.ICE | TRAIT.MULTIHIT | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2688,7 +2688,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.MULTIHIT | TRAIT.COMMON_ATTACK_SPELL,
+    traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.MULTIHIT | TRAIT.COMMON_ATTACK_SPELL | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2763,7 +2763,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC | TRAIT.THUNDER | TRAIT.MULTIHIT | TRAIT.COMMON_ATTACK_SPELL,
+    traits : TRAIT.MAGIC | TRAIT.THUNDER | TRAIT.MULTIHIT | TRAIT.COMMON_ATTACK_SPELL | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -2801,7 +2801,7 @@ Arts.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5140,7 +5140,7 @@ Arts.newEntry(
       keywords: [],
       durationTurns: 0,
       kind : KIND.ABILITY,
-      traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+      traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
       rarity : RARITY.RARE,
       usageHintAI : USAGE_HINT.OFFENSIVE,
       shouldAIuse ::(user, reactTo, enemies, allies) {},
@@ -5598,7 +5598,7 @@ Arts.newEntry(
     keywords: [],
     durationTurns: 0,
     kind : KIND.REACTION,
-    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL,
+    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -5685,7 +5685,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
@@ -5724,7 +5724,7 @@ Arts.newEntry(
       when(user.hp == user.stats.HP) false;
     },
     kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL,
+    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -5735,7 +5735,8 @@ Arts.newEntry(
             damage: Damage.new(
               amount:user.stats.HP - user.hp,
               damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP
+              damageClass: Damage.CLASS.HP,
+              traits : Damage.TRAIT.UNBLOCKABLE
             ),
             targetPart:targetParts[0],
             targetDefendPart:targetDefendParts[0]
@@ -5789,7 +5790,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) <- user.hp > 2,
     kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.3),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -6269,7 +6270,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.ABILITY,
-    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) <- user.stats.HP + user.stats.DEF/3,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -7864,7 +7865,7 @@ Arts.newEntry(
 
     },
     kind : KIND.ABILITY,
-    traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage::(level, user) <- user.stats.ATK * (0.2) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -7937,7 +7938,7 @@ Arts.newEntry(
 
     },
     kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK,
+    traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage::(level, user) <- user.stats.ATK * (0.35) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -7995,7 +7996,7 @@ Arts.newEntry(
 
     },
     kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.MULTIHIT,
+    traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.MULTIHIT | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage::(level, user) <- 4 * user.effectStack.getAllByFilter(::(value) <- 
         value.id == 'base:burned'
@@ -8421,7 +8422,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.3) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8460,7 +8461,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- user.stats.INT * (0.3) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8507,7 +8508,7 @@ Arts.newEntry(
       return [random.scrambled(:whom)[0]];
     },
     kind : KIND.EFFECT,
-    traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- 2,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8561,7 +8562,7 @@ Arts.newEntry(
       return [random.scrambled(:whom)[0]];
     },
     kind : KIND.EFFECT,
-    traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- 2,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8615,7 +8616,7 @@ Arts.newEntry(
       return [random.scrambled(:whom)[0]];
     },
     kind : KIND.EFFECT,
-    traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- 2,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -8666,7 +8667,7 @@ Arts.newEntry(
       return [random.pickArrayItem(:enemies)]
     },
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.MAGIC,
+    traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {
       @:baseDamage = user.stats.INT * (0.1 + 0.2*level)
@@ -8767,7 +8768,7 @@ Arts.newEntry(
       )->size == 0) false;
     },
     kind : KIND.ABILITY,
-    traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK,
+    traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) <- user.stats.INT * (0.3 * level),
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -10043,7 +10044,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.ABILITY,
-    traits : TRAIT.MAGIC,
+    traits : TRAIT.MAGIC | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- user.stats.INT * (0.5) * level,
     onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
@@ -11852,6 +11853,7 @@ Arts = class(
           (4096): 'Multi-hit',
           (4096*2): 'Blockable',
           (4096*4): 'Once Per Battle',
+          (2**16):  'Dodgeable',
           default: ''
         }
         return '';

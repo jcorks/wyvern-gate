@@ -1829,7 +1829,7 @@
     
       displayedHurt[target] = true;
       if (targetPart == empty) targetPart = Entity.normalizedDamageTarget();
-      if (targetDefendPart == empty) targetPart = Entity.normalizedDamageTarget();
+      if (targetDefendPart == empty) targetDefendPart = Entity.normalizedDamageTarget();
     
       @:hasNoEffectStack = this.effectStack == empty;
     
@@ -3069,7 +3069,7 @@
       return slotOut;
     },
       
-    pickTarget::(onPick, canCancel, showHitChance) {
+    pickTarget::(art, onPick, canCancel, showHitChance) {
       @:battle = _.battle;
       @:allies = battle.getAllies(entity:_.this);
       @:enemies = battle.getEnemies(entity:_.this);
@@ -3100,6 +3100,7 @@
           render :: {
             when (hovered == empty) empty;
             when (showHitChance != true) empty;
+            when (art.hasNoTrait(:Arts.TRAIT.IS_ATTACK)) empty;
             canvas.renderTextFrameGeneral(
               lines : canvas.columnsToLines(
                 columns : [
@@ -3237,6 +3238,7 @@
               
               
               this.pickTarget(
+                art,
                 canCancel,
                 showHitChance : true, // needs work since sometimes its not relevant
                 onPick ::(target) {
