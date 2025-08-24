@@ -1513,7 +1513,7 @@
       },  
       
       render :: {
-        //canvas.blackout();
+        canvas.blackout();
         if (paged)
           renderPaged()
         else 

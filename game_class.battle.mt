@@ -216,13 +216,30 @@
     @redraw;
     @party_;
     @turnPoppable = [];
+    @turnCount = 0;
     
     @result;
     @externalRenderable;
     @battleEnd;
+    @onEnd_;
+    @awkwardControlHack_ = false;
+    @lastNext;
+    @onTurnPrep_;
     
     @:getAllies::(ent) {
       return [...ent2group[ent]];
+    }
+
+    @:finishEnd :: {
+      breakpoint();
+      if (awkwardControlHack_)
+        windowEvent.removeOnResolveAll(:lastNext);
+      groups = [];
+      onEnd_(result);      
+      foreach(onFinish) ::(k, v) {
+        v(:result);
+      }      
+      onFinish = [];        
     }
 
     @:getEnemies::(ent) {   
@@ -349,8 +366,9 @@
     
     @:nextTurn ::{
       when (turnPoppable->keycount == 0) empty;
-      windowEvent.onResolveAll(
-        onDone:: {
+      if (onTurnPrep_) onTurnPrep_();
+      
+      @:next = :: {
 
         // from a battle cancel
         when (ended) empty;
@@ -400,12 +418,30 @@
           );
         }        
         if (onAct_) onAct_();
+      }
+      
+      lastNext = next;
 
-      });
+      
+      if (awkwardControlHack_) ::<= {
+        windowEvent.onResolveAll(
+          onDone : next
+        );      
+      } else ::<= {
+        windowEvent.queueNestedResolve(
+          onEnter : next 
+        );
+      }      
     }
     
     @:initTurn ::{
       when(ended) empty;
+      
+      if (windowEvent.log != empty)
+        windowEvent.log->push(:'-- TURN ' + (turnCount+1) + ' --');
+      
+      turnCount+=1;
+      
       // first reset stats according to current effects 
       foreach(turn)::(index, entity) {
         entity.startTurn();
@@ -617,10 +653,12 @@
             ent.battleEnd();
           }
         }          
-
+        breakpoint();
+        windowEvent.stopRecordLog();
         active = false;
         ended = true;      
 
+        finishEnd();
         if (windowEvent.canJumpToTag(name:'Battle'))                      
           windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);          
       },
@@ -641,9 +679,22 @@
         renderable,
         
         onStart,
+        onTurnPrep,
         skipResults,
+        
+        // Hello! Dont use this! This is literally only for the 
+        // battle tutorial to allow overrideable events in battle
+        // in cases where its not usually allowed.
+        // So, please do not use! ...Unless you wanna do something really 
+        // interesting, in that case :amen_emoji:
+        awkwardControlHack, 
+        
+        
         onEnd => Function
       ) {
+        awkwardControlHack_ = awkwardControlHack;
+        onEnd_ = onEnd;
+        onTurnPrep_ = onTurnPrep;
         @:world = import(module:'game_singleton.world.mt')
         foreach(allies) ::(k, v) {
           if (world.party.isMember(:v)) ::<= {
@@ -654,7 +705,7 @@
             );
           }
         }
-      
+        turnCount = 0;
         onFinish = [];
         actions = {} 
         defeated = {};
@@ -683,6 +734,7 @@
         turn = [];
         turnIndex = 0;
         active = true;
+        windowEvent.startRecordLog();
         ended = false;
         externalRenderable = renderable;
               
@@ -750,7 +802,9 @@
  
         battleEnd = ::{
           @:startEnd ::(message) {
+            breakpoint();
             active = false;
+            windowEvent.stopRecordLog();
 
             windowEvent.queueMessage(
               text: message
@@ -760,15 +814,7 @@
 
           }
         
-          @:finishEnd :: {
-          
-            groups = [];
-            onEnd(result);      
-            foreach(onFinish) ::(k, v) {
-              v(:result);
-            }      
-            onFinish = [];        
-          }
+
           result = winningGroup;
           
           
@@ -866,38 +912,42 @@
 
 
         @started = false;
-        windowEvent.queueCustom(
-          keep: true,
-          jumpTag: 'Battle',
-          disableCache : true,
+        windowEvent.queueNestedResolve(
           onEnter :: {
-          },
-          onLeave ::{
-          },
-          
-          renderable : {
-            render ::{
-              canvas.blackout();
-              this.render()
-            }
-          },
-          onUpdate::{
-            when(ended) ::<= {
-              if (windowEvent.hasAnyQueued() == false) ::<= {
-                battleEnd();                
-              }
-            }
+            windowEvent.queueCustom(
+              keep: true,
+              jumpTag: 'Battle',
+              disableCache : true,
+              onEnter :: {
+              },
+              onLeave ::{
+              },
+              
+              renderable : {
+                render ::{
+                  canvas.blackout();
+                  this.render()
+                }
+              },
+              onUpdate::{
+                when(ended) ::<= {
+                  if (windowEvent.hasAnyQueued() == false) ::<= {
+                    battleEnd();                
+                  }
+                }
 
-          
-          
-            if (!started && onStart) ::<= {
-              onStart();
-              started = true;
-            }
-            
-            if (turnPoppable->keycount == 0)
-              initTurn();  
-            nextTurn();
+              
+              
+                if (!started && onStart) ::<= {
+                  onStart();
+                  started = true;
+                }
+                
+                if (turnPoppable->keycount == 0)
+                  initTurn();  
+                nextTurn();
+              }
+            );
           }
         );
 
@@ -918,6 +968,10 @@
       
       addOnFinishCallback ::(cb) {
         onFinish->push(:cb);
+      },
+      
+      awkwardControlHack : {
+        get ::<- awkwardControlHack_
       },
       
       getMembers :: {

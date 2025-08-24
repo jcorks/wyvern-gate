@@ -54,6 +54,9 @@ return ::{
   @:realLeader = world.party.leader;
   world.party.add(:self);
   world.party.leader = self;
+  
+  @realInventory = world.party.inventory.save();
+  world.party.inventory.clear();
 
 
 
@@ -71,6 +74,7 @@ return ::{
     when(next.text != empty) ::<= {
       windowEvent.queueMessage(
         text:next.text,
+        topWeight: if (next.topWeight == empty) 1 else next.topWeight,
         onLeave::<- doScene(:acts)
       );
       when(next.resolve)
@@ -115,16 +119,16 @@ return ::{
     // yield back to natural battle menu
     {continue:true},
     
-    {resolve:true, text:"And finally, when it is the leader's turn, the menu below will appear. These are the actions that you can make as leader on your turn."},
-    {text:"Note that you only control the party's leader. All other combatants will act on their own."},
-    {text:"Before we go over these, let's cover some basics."},
-    {text:"All actions that a combatant can do are referred to as Arts. Arts typically cost 2 AP to use. If an Art is used without enough AP, it will fail."},
-    {text:"Note that each combatant gains 1 AP at the start of their turn. When a battle begins, each combatant starts with half of their total AP."},
-    {text:"Most of the commands in this menu below confer different Arts that are available."},
+    {resolve:true, text:"And finally, when it is the leader's turn, the menu below will appear. These are the actions that you can make as leader on your turn.", topWeight: 0.6},
+    {text:"Note that you only control the party's leader. All other combatants will act on their own.", topWeight: 0.6},
+    {text:"Before we go over these, let's cover some basics.", topWeight: 0.6},
+    {text:"All actions that a combatant can do are referred to as Arts. Arts typically cost 2 AP to use. If an Art is used without enough AP, it will fail.", topWeight: 0.6},
+    {text:"Note that each combatant gains 1 AP at the start of their turn. When a battle begins, each combatant starts with half of their total AP.", topWeight: 0.6},
+    {text:"Most of the commands in this menu below confer different Arts that are available.", topWeight: 0.6},
     {wait:true},
-    {text:"First is the Attack Art command. This Art is special in that it costs no AP."},
-    {text:"It simply does physical damage with whatever is in hand."},
-    {text:"Because it's costless, Attack is the most basic Ability Art, but it ends the turn after use."},
+    {text:"First is the Attack Art command. This Art is special in that it costs no AP.", topWeight: 0.6},
+    {text:"It simply does physical damage with whatever is in hand.", topWeight: 0.6},
+    {text:"Because it's costless, Attack is the most basic Ability Art, but it ends the turn after use.", topWeight: 0.6},
 
     // yield back to natural battle menu
     {continue:true},
@@ -135,14 +139,14 @@ return ::{
       {input:windowEvent.CURSOR_ACTIONS.DOWN, waitFrames:20},
       {input:empty, waitFrames:10}
     ]},
-    {resolve:true, text:"The Item Art command uses an item from the party\'s inventory. Item use does not end the turn."},
+    {resolve:true, text:"The Item Art command uses an item from the party\'s inventory. Item use does not end the turn.", topWeight: 0.6},
     {continue:true},
     {inputs: [
       {input:windowEvent.CURSOR_ACTIONS.LEFT, waitFrames:20},
       {input:windowEvent.CURSOR_ACTIONS.DOWN, waitFrames:20},
       {input:empty, waitFrames:20}
     ]},
-    {resolve:true, text:"The Wait Art command allows the user to rest for the turn, allowing them to gain 3 AP and, optionally, discard their normal Arts."},
+    {resolve:true, text:"The Wait Art command allows the user to rest for the turn, allowing them to gain 3 AP and, optionally, discard their normal Arts.", topWeight: 0.6},
     {continue:true},
     {inputs:[
       {input:windowEvent.CURSOR_ACTIONS.UP, waitFrames:20},
@@ -150,11 +154,11 @@ return ::{
       {input:windowEvent.CURSOR_ACTIONS.RIGHT, waitFrames:20},
       {input:empty, waitFrames:20}
     ]},
-    {resolve:true, text:"The Arts command is where all the normal Arts are."},
-    {text:"These Arts are drawn from a deck of Arts assigned to the combatant. At the start of combat, this deck is shuffled."},
-    {text:"On the start of the combatant's turn, Arts are drawn from the deck until the combatant's hand contains 5 Arts."},
-    {text:"As you fight, you will gain additional supporting Arts that you can customize your deck with in the Party menu outside of battle."},
-    {text:"Let\'s look and see what Arts the Leader has drawn."},
+    {resolve:true, text:"The Arts command is where all the normal Arts are.", topWeight: 0.6},
+    {text:"These Arts are drawn from a deck of Arts assigned to the combatant. At the start of combat, this deck is shuffled.", topWeight: 0.6},
+    {text:"On the start of the combatant's turn, Arts are drawn from the deck until the combatant's hand contains 5 Arts.", topWeight: 0.6},
+    {text:"As you fight, you will gain additional supporting Arts that you can customize your deck with in the Party menu outside of battle.", topWeight: 0.6},
+    {text:"Let\'s look and see what Arts the Leader has drawn.", topWeight: 0.6},
     {continue:true},
     {inputs:[
       {input:empty, waitFrames: 5, callback ::{ 
@@ -207,14 +211,14 @@ return ::{
     {wait:true},
     {text:"There are many attributes to each Art. Let's look at one called the Energy."},
     {text:"When each Art in your hand is drawn, it is assigned one of 4 Energy types: A, B, C, or D."},
-    {text:"In addition to being in the description, the Energy type is reflected in the card frame symbols, so each card with the same Energy will immediately look similar."},
+    {text:"In addition to being in the description, the Energy type is reflected in the card frame symbols, so each card with the same Energy will immediately look similar.", topWeight: 0.6},
     {text:"If 2 Arts in hand are the same Energy, they can be combined."},
     {wait:true},
     {text:"If an Ability is combined with an Art, the Ability gains a level. Higher-leveled Abilities are more potent."},
     {text:"If an Effect is combined, the Effect gains a counter. When played, the combatant using it will gain AP for each counter."},
     {text:"Utilizing combinations is key to a good flow of Arts."},
     {wait:true},
-    {text:"It looks like there are a few Arts with the same Energy types. Let's combine the Arts in our hand."},
+    {text:"It looks like there are a few Arts with the same Energy types. Let's combine the Arts in our hand.", topWeight: 0.6},
     {continue:true},
     {inputs:[
       {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:25},
@@ -249,11 +253,11 @@ return ::{
   ];
   
   @endTurn = [
-    {resolve:true, text:'Here are some extra pointers about attacking.'},
-    {text: 'When choosing an Art that attacks someone, the one getting attacked may have a chance to block. If so, they will choose a body part to block. If this matches the attacker\'s aiming part, then the attack is nullified.'},
-    {text: 'Note that when the leader is attacked and they\'re able to block, they will have a chance to choose a part to defend.'},
-    {text:'In most cases, aiming for the body is safest, as it has unreduced damage. However, be aware that most combatants will expect this and will try to defend this more often.'},    
-    {text:'It\'s also notable that some Arts, like offensive magick, are not able to be aimed to specific parts and will just focus on the body of the target.'}
+    {text:'Here are some extra pointers about attacking.', topWeight: 0.5},
+    {text: 'When choosing an Art that attacks someone, the one getting attacked may have a chance to block. If so, they will choose a body part to block. If this matches the attacker\'s aiming part, then the attack is nullified.', topWeight: 0.5},
+    {text: 'Note that when the leader is attacked and they\'re able to block, they will have a chance to choose a part to defend.', topWeight: 0.5},
+    {text:'In most cases, aiming for the body is safest, as it has unreduced damage. However, be aware that most combatants will expect this and will try to defend this more often.', topWeight: 0.5},    
+    {text:'It\'s also notable that some Arts, like offensive magick, are not able to be aimed to specific parts and will just focus on the body of the target.', topWeight: 0.5}
   ]
   
   
@@ -264,6 +268,7 @@ return ::{
     },
     onEnter ::{    
       world.battle.start(
+        awkwardControlHack : true,
         party:world.party,
         allies: [self],
         enemies: [target],
@@ -278,17 +283,21 @@ return ::{
               turn1 = empty;
             }
 
-            when(endTurn) ::<= {
-              doScene(acts:endTurn);
-              endTurn = empty;
-            }
-
           }
+        },
+        
+        onTurnPrep :: {
+          when(endTurn != empty && turn1 == empty) ::<= {
+            doScene(acts:endTurn);
+            endTurn = empty;
+          }
+        
         },
         
         onEnd::(result) {
           world.party.remove(member:self, silent:true);
           world.party.leader = realLeader;
+          world.party.inventory.load(:realInventory);
 
           when(endTurn) ::<= {
             doScene(acts:endTurn);

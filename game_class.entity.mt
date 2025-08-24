@@ -74,7 +74,7 @@
       [
         '"I\'m not sure about this..."',
         '"I don\'t feel very good."',
-        '"What was that?""',
+        '"What was that?"',
         '"Ugh."',
       ],      
 
@@ -432,7 +432,8 @@
 
 @:animateDamage ::(this, from, to, caption) {
 
-  
+  if (windowEvent.log != empty)
+    windowEvent.log->push(:'!!  ' + caption);
 
   @hp = from - to;
   @frame = 0;
@@ -1533,6 +1534,7 @@
       _.abilitiesUsedBattle = empty;        
       
       _.state.deck = empty;
+      breakpoint();
       
       _.this.recalculateStats(); 
       _.state.ap = 0;               
@@ -1896,6 +1898,49 @@
 
 
         @backupStats;
+
+        @isDexed = false;
+        @isDefed = false;
+        if (!target.isIncapacitated() && ((dmg.traits & Damage.TRAIT.FORCE_DEF_BYPASS) == 0)) ::<= {
+
+          @:ratioDiff = this.getChanceOfAttackSuccessDEXvDEF(:target);
+          if (random.try(percentSuccess:(1-ratioDiff)*100)) ::<= {       
+            windowEvent.queueMessage(
+              text: target.name + ' avoided the incoming attack!'
+            );
+            dmg.amount = 0;
+
+
+            // TODO: dodge
+            /*
+            if (target.effectStack)
+              target.effectStack.emitEvent(
+                name : 'onSuccessfulBlock',
+                attacker: this,
+                damage: dmg,
+                blockData : {
+                  targetDefendPart : DAMAGE_TARGET.BODY,
+                  targetPart : DAMAGE_TARGET.BODY,
+                  wasDefbased: true
+                }
+              );
+            
+            this.effectStack.emitEvent(
+              name: 'onGotBlocked',
+              from: target
+            );
+            */
+          }
+        }
+        
+        
+        when(dmg.amount <= 0) empty;
+
+
+
+
+
+
         @:which = match(targetPart) {
           (Entity.DAMAGE_TARGET.HEAD): 'head',
           (Entity.DAMAGE_TARGET.BODY): 'body',
@@ -2010,43 +2055,6 @@
 
         when(dmg.amount <= 0) empty;
 
-
-        @isDexed = false;
-        @isDefed = false;
-        if (!target.isIncapacitated() && ((dmg.traits & Damage.TRAIT.FORCE_DEF_BYPASS) == 0)) ::<= {
-
-          @:ratioDiff = this.getChanceOfAttackSuccessDEXvDEF(:target);
-          if (random.try(percentSuccess:(1-ratioDiff)*100)) ::<= {       
-            windowEvent.queueMessage(
-              text: target.name + ' avoided the incoming attack!'
-            );
-            dmg.amount = 0;
-
-
-            // TODO: dodge
-            /*
-            if (target.effectStack)
-              target.effectStack.emitEvent(
-                name : 'onSuccessfulBlock',
-                attacker: this,
-                damage: dmg,
-                blockData : {
-                  targetDefendPart : DAMAGE_TARGET.BODY,
-                  targetPart : DAMAGE_TARGET.BODY,
-                  wasDefbased: true
-                }
-              );
-            
-            this.effectStack.emitEvent(
-              name: 'onGotBlocked',
-              from: target
-            );
-            */
-          }
-        }
-        
-        
-        when(dmg.amount <= 0) empty;
 
 
 

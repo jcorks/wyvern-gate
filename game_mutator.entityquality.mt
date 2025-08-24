@@ -647,23 +647,23 @@ EntityQuality.database.newEntry(
       defaultLoad::(base, descriptionHint, trait0Hint, trait1Hint, trait2Hint) {
         state.base = base;      
         
-        if (trait0Hint != empty) 
+        if (trait0Hint != empty && trait0Hint < state.base.trait0->keycount) 
           state.trait0 = trait0Hint
         else 
           state.trait0 = random.integer(from:0, to:state.base.trait0->keycount-1);
 
 
-        if (trait1Hint != empty) 
+        if (trait1Hint != empty && trait1Hint < state.base.trait1->keycount) 
           state.trait1 = trait1Hint
         else 
           state.trait1 = random.integer(from:0, to:state.base.trait1->keycount-1);
 
-        if (trait2Hint != empty) 
+        if (trait2Hint != empty && trait2Hint < state.base.trait2->keycount) 
           state.trait2 = trait2Hint
         else 
           state.trait2 = random.integer(from:0, to:state.base.trait2->keycount-1);
         
-        if (descriptionHint != empty) 
+        if (descriptionHint != empty && descriptionHint < state.base.descriptions->keycount) 
           state.descIndex = descriptionHint
         else 
           state.descIndex = random.integer(from:0, to:state.base.descriptions->keycount-1);

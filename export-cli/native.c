@@ -592,10 +592,10 @@ static matteArray_t * refitLines(matteVM_t * vm, WyvGateCanvas * cr, matteValue_
                     &ch,
                     1
                 );
-                if (chars->size <= 2)
+                if (chars->size <= 1)
                     matte_array_set_size(chars, 0);
                 else                    
-                    matte_array_set_size(chars, chars->size - 2);
+                    matte_array_set_size(chars, chars->size - 1);
             }
             
             // combine and add to lines
@@ -618,6 +618,8 @@ static matteArray_t * refitLines(matteVM_t * vm, WyvGateCanvas * cr, matteValue_
         matte_string_append_char(line, ch);
     }
     matte_array_push(lines, line);
+    matte_string_destroy(text);
+    matte_array_destroy(chars);
     return lines;
 }
 
@@ -665,6 +667,7 @@ static matteValue_t wyvern_gate__native__canvas__refitLines(
         matte_store_recycle(store, matte_array_at(linesOut, matteValue_t, i));
     }
     matte_array_destroy(linesOut);
+    matte_array_destroy(lines);
     return linesOutV;
 }
 
@@ -687,6 +690,7 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
 
     matteArray_t * lines;
 
+    // maxWidth
     if (matte_value_type(args[4]) == MATTE_VALUE_TYPE_NUMBER) {
         lines = refitLines(
             vm,
@@ -709,8 +713,8 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
  
     }
     
-    const matteString_t * title = matte_value_type(args[4]) == MATTE_VALUE_TYPE_STRING ?
-        matte_value_string_get_string_unsafe(store, args[0])
+    const matteString_t * title = matte_value_type(args[1]) == MATTE_VALUE_TYPE_STRING ?
+        matte_value_string_get_string_unsafe(store, args[1])
       :
         NULL 
     ;
@@ -753,13 +757,18 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
     if (title && matte_string_get_length(title) > 0) {
         cr->penx = left+2;
         cr->peny = top;
-        drawText(cr, title);
+        matteString_t * titleFull = matte_string_create_from_c_str(
+            "[%s]",
+            matte_string_get_c_str(title)
+        ); 
+        drawText(cr, titleFull);
+        matte_string_destroy(titleFull);
     }
     
     if (matte_value_type(args[7]) == MATTE_VALUE_TYPE_STRING) {
         const matteString_t * notchText = matte_value_string_get_string_unsafe(store, args[7]);
-        cr->penx = left+width-2-(matte_string_get_length(notchText), 
-        cr->peny = top+height-1);
+        cr->penx = left+width-2-(matte_string_get_length(notchText));
+        cr->peny = top+height-1;
         drawText(cr, notchText);
     }
     
@@ -799,6 +808,11 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
         MATTE_VM_STR_CAST(vm, "height"),
         temp
     );
+    
+    for(i = 0; i < lines->size; ++i) {
+        matte_string_destroy(matte_array_at(lines, matteString_t *, i));
+    }
+    matte_array_destroy(lines);
 
     return out;
 
@@ -1043,14 +1057,18 @@ static void formatColumn(
     matteArray_t * parts,
     matteArray_t * widths
 ) {
+
+
+
     uint32_t i;
+    uint32_t count = abs(matte_string_get_length(text) - matte_array_at(widths, int, column));
     if (!leftJustifieds[column]) {
         for(
-            i = matte_string_get_length(text); 
-            i < matte_array_at(widths, int, column); 
+            i = 0; 
+            i < count; 
             ++i
         ) {
-            matteString_t * sp = matte_string_create(" ");
+            matteString_t * sp = matte_string_create_from_c_str(" ");
             matte_array_push(parts, sp);    
         }
     }
@@ -1060,17 +1078,18 @@ static void formatColumn(
 
     if (leftJustifieds[column]) {
         for(
-            i = matte_string_get_length(text); 
-            i < matte_array_at(widths, int, column); 
+            i = 0; 
+            i < count; 
             ++i
         ) {
-            matteString_t * sp = matte_string_create(" ");
+            matteString_t * sp = matte_string_create_from_c_str(" ");
             matte_array_push(parts, sp);    
         }
     }
     
 
 }
+
 
 static matteValue_t wyvern_gate__native__canvas__columnsToLines(
     matteVM_t * vm,

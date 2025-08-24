@@ -496,6 +496,7 @@ return class(
 
 
         @:parts = [];
+        breakpoint();
 
         @:formatColumn::(column, text) {
           if (!leftJustifieds[column]) ::<= {

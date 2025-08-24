@@ -145,6 +145,7 @@
     @lastRecordFrames;
     @markedError = false;
     @errorHandler;
+    @log_;
     
     resolveQueues->push(:{
       onResolveAll : {},
@@ -847,6 +848,7 @@
           choice == CURSOR_ACTIONS.LEFT ||
           choice == CURSOR_ACTIONS.RIGHT ||
           data.rendered == empty) ::<= {
+        
         data.rendered = empty;
         if (choice != empty) ::<= {
           onChoice(choice);
@@ -856,8 +858,10 @@
         //if (choice != empty)
           //resolveNext();
       }
-      renderThis(data);
       
+      if (data.rendered == empty) ::<= {
+          renderThis(data);
+      }      
       
       return false;  
     }    
@@ -1207,6 +1211,8 @@
         
         
         data.thisRender = ::{
+
+        
           renderTextSingle(
             leftWeight: data.leftWeight, 
             topWeight: data.topWeight, 
@@ -1266,6 +1272,13 @@
         if (data.maxWidth == empty)
           data.maxWidth = w;
         data.minWidth = w;
+      }
+      
+      if (data.startAtBottom != empty) ::<= {
+        data.iter = data.lines->size - data.maxHeight - 1;
+        data.rendered = empty;
+        data.startAtBottom = empty;
+        if (data.iter < 0) data.iter = 0;
       }
 
       if(input == CURSOR_ACTIONS.UP||
@@ -1401,6 +1414,18 @@
         });
       },
       
+      startRecordLog :: {
+        log_ = [];
+      },
+
+      stopRecordLog :: {
+        log_ = empty;
+      },
+      
+      log : {
+        get ::<- log_
+      },
+      
       // Similar to message, but accepts a set of 
       // messages to display
       queueMessageSet::(
@@ -1457,6 +1482,19 @@
         //text = text->replace(keys:['\t'], with: ' ');
         //text = text->replace(keys:['\n'], with: '\n');
         //@:words = text->split(token:' ');
+
+          if (log_) ::<= {
+            log_->push(:'[]  '+text);
+            /*
+            @:st = [];
+            foreach(data.lines) ::(k, l) {
+              st->push(:l);
+              st->push(:'\n');
+            }
+            
+            record->push(:'--'+String.combine(:st));
+            */
+          }
         
 
         this.queueDisplay(
@@ -1481,6 +1519,7 @@
         // if true, will split text into pages and 
         // disable normal scrolling.
         hasPages, 
+        startAtBottom,
 
         maxWidth,
         maxHeight,
@@ -1498,6 +1537,7 @@
       
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
+            startAtBottom : startAtBottom,
             mode: CHOICE_MODE.READER,
             prompt: prompt,
             lines : canvas.refitLines(input: lines, maxWidth),
@@ -1982,6 +2022,11 @@
         resolveQueues[resolveQueues->size-1].onResolveAll->push(:onDone);
         if (doResolveNext)
           resolveNext();        
+      },
+      
+      removeOnResolveAll ::(onDone) {
+        @:rq = resolveQueues[resolveQueues->size-1].onResolveAll;
+        rq->remove(:rq->findIndex(:onDone));
       },
         
       // request to not render or wait for nodisplay and display 

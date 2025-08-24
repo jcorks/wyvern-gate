@@ -3458,7 +3458,8 @@ return {
     commonInteractions.battle.arts,
     commonInteractions.battle.check,
     commonInteractions.battle.item,
-    commonInteractions.battle.wait
+    commonInteractions.battle.wait,
+    commonInteractions.battle.log
   ],
   interactionsOptions : [
     commonInteractions.options.system,

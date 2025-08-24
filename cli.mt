@@ -19,6 +19,8 @@
 //@:Random = import(module:'game_singleton.random.mt');
 
 
+
+
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:instance = import(module:'game_singleton.instance.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
@@ -72,7 +74,6 @@ windowEvent.errorHandler = ::<= {
 }
 canvas.onCommit = ::(lines, renderNow){
 
-  breakpoint();
   currentCanvas = lines;
   canvasChanged = true;
   if (renderNow != empty)

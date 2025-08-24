@@ -197,7 +197,21 @@ return {
           commitAction(action);
         });
       }
-    )
+    ),
+    
+    
+    // Speedrunners may find this a helpful tool
+    log : InteractionMenuEntry.new(
+      name : 'Log',
+      filter::(user, battle) <- true,
+      onSelect::(user, battle, commitAction) {        
+        windowEvent.queueReader(
+            prompt: if (random.flipCoin()) '"What just happened??"' else '"Is this for real??"',
+            startAtBottom: true,
+            lines : windowEvent.log
+        );
+      }
+    )    
   },
 
   options : {

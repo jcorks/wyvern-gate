@@ -51,22 +51,32 @@ return ::(
 
   @:choices = [...options]->map(to:::(value) <- value.name);
 
-  windowEvent.onResolveAll(
-    onDone:: {
-      windowEvent.queueChoiceColumns(
-        leftWeight: 1,
-        topWeight: 1,
-        choices : choices,
-        jumpTag: 'BattleMenu',
-        keep: true,
-        itemsPerRow: 2,
-        prompt: 'What will ' + user.name + ' do?',
-        canCancel: false,
-        onChoice::(choice) {
-          when(choice == 0) empty;
-          options[choice-1].onSelect(user, battle, commitAction);    
-        }
-      );  
-    }
-  );
+  @:next = ::{
+    windowEvent.queueChoiceColumns(
+      leftWeight: 1,
+      topWeight: 1,
+      choices : choices,
+      jumpTag: 'BattleMenu',
+      keep: true,
+      itemsPerRow: 2,
+      prompt: 'What will ' + user.name + ' do?',
+      canCancel: false,
+      onChoice::(choice) {
+        when(choice == 0) empty;
+        options[choice-1].onSelect(user, battle, commitAction);    
+      }
+    );   
+  }
+
+  if (battle.awkwardControlHack) 
+    windowEvent.onResolveAll(
+      onDone: next
+    )
+  else
+    windowEvent.queueNestedResolve(
+      onEnter: next
+    )
+
+
+
 }

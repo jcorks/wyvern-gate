@@ -1418,7 +1418,6 @@ return empty;
 
               return choices;        
             },
-            renderable:landmark.map,
             onChoice::(choice) {
               choiceActions[choice-1]();
             }
