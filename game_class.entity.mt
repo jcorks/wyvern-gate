@@ -1820,7 +1820,7 @@
       damage => Damage.type,
       target,
       targetPart,
-      targetDefendPart
+      onFinish
     ){
       when(target == empty) empty;
     
@@ -1829,7 +1829,6 @@
     
       displayedHurt[target] = true;
       if (targetPart == empty) targetPart = Entity.normalizedDamageTarget();
-      if (targetDefendPart == empty) targetDefendPart = Entity.normalizedDamageTarget();
     
       @:hasNoEffectStack = this.effectStack == empty;
     
@@ -1837,314 +1836,279 @@
         _.effectStack = EffectStack.new(parent:this);
         
       @:effectStack = _.effectStack;
-      @:retval = ::<= {
-        @:dmg = damage;
+      
+      @:dmg = damage;
+      
+      @:damaged = [];
+      // TODO: add weapon affinities if phys and equip weapon
+      // phys is always assumed to be with equipped weapon
+
+
+      @:overrideTarget = [];
+
+
+
+
+      @isCrit = false;
+      @isHitHead = false;
+      @isLimbHit = false;
+      @isHitBody = false;
+      
+      @missHead = false;
+      @missBody = false;
+      @missLimb = false;
+
+
+      @backupStats;
+
+      @isDexed = false;
+      @isDefed = false;
+      
+      @:doNextPhase :: {
+        @:next = phases[0];
+        when(next == empty)
+          onFinish(:true);
         
-        @:damaged = [];
-        // TODO: add weapon affinities if phys and equip weapon
-        // phys is always assumed to be with equipped weapon
-
-
-        @:overrideTarget = [];
-        effectStack.emitEvent(
-          name: 'onPreAttackOther',
-          to : target, 
-          damage : dmg,
-          emitCondition ::(effectInstance) <- dmg.amount > 0,
-          overrideTarget
-        );
+        phases->remove(key:0);
         
-        if (overrideTarget->size)
-          target = overrideTarget[0]
+        if (next() != false) 
+          windowEvent.queueCustom(
+            onEnter ::<- doNextPhase
+          );       
 
-        @critChance = (this.stats.LUK - target.stats.LUK) / 100;
-        if (critChance < 0.001) critChance = 0.001;
-        critChance *= 100;
-        if (critChance > 25) critChance = 25;
-        if (random.try(percentSuccess:critChance) || ((dmg.traits & Damage.TRAIT.FORCE_CRIT) != 0)) ::<={
-          if (dmg.amount < 5) dmg.amount = 5;
-          dmg.amount *= 2.5;
-          dmg.traits |= Damage.TRAIT.IS_CRIT;
-          isCrit = true;
-        }
-
-
-
-
-        
-        when(dmg.amount <= 0) empty;
-
-        if (target.effectStack)
-          target.effectStack.emitEvent(
-            name: 'onPreAttacked',
-            attacker : this, 
+        onFinish(:false);
+      }
+      
+      @:phases = [
+      
+      
+        // attack prep + crit
+        ::{
+          effectStack.emitEvent(
+            name: 'onPreAttackOther',
+            to : target, 
             damage : dmg,
-            emitCondition ::(effectInstance) <- dmg.amount > 0
+            emitCondition ::(effectInstance) <- dmg.amount > 0,
+            overrideTarget,
+            targetPart : targetPart
           );
-        
-
-        when(dmg.amount <= 0) empty;
-
-
-
-        @isCrit = false;
-        @isHitHead = false;
-        @isLimbHit = false;
-        @isHitBody = false;
-        
-        @missHead = false;
-        @missBody = false;
-        @missLimb = false;
-
-
-        @backupStats;
-
-        @isDexed = false;
-        @isDefed = false;
-        if (!target.isIncapacitated() && ((dmg.traits & Damage.TRAIT.FORCE_DEF_BYPASS) == 0)) ::<= {
-
-          @:ratioDiff = this.getChanceOfAttackSuccessDEXvDEF(:target);
-          if (random.try(percentSuccess:(1-ratioDiff)*100)) ::<= {       
-            windowEvent.queueMessage(
-              text: target.name + ' avoided the incoming attack!'
-            );
-            dmg.amount = 0;
-
-
-            // TODO: dodge
-            /*
-            if (target.effectStack)
-              target.effectStack.emitEvent(
-                name : 'onSuccessfulBlock',
-                attacker: this,
-                damage: dmg,
-                blockData : {
-                  targetDefendPart : DAMAGE_TARGET.BODY,
-                  targetPart : DAMAGE_TARGET.BODY,
-                  wasDefbased: true
-                }
-              );
-            
-            this.effectStack.emitEvent(
-              name: 'onGotBlocked',
-              from: target
-            );
-            */
-          }
-        }
-        
-        
-        when(dmg.amount <= 0) empty;
-
-
-
-
-
-
-        @:which = match(targetPart) {
-          (Entity.DAMAGE_TARGET.HEAD): 'head',
-          (Entity.DAMAGE_TARGET.BODY): 'body',
-          (Entity.DAMAGE_TARGET.LIMBS): 'limbs'
-        }
-        @imperfectGuard = false;
-
-        if (targetPart != empty && ((dmg.traits & Damage.TRAIT.UNBLOCKABLE) == 0)) ::<= {
-        
-          if (targetDefendPart == empty)
-            targetDefendPart = 0;
-          if (target.species.canBlock == false)
-            targetDefendPart = 0;
-          if (target.isIncapacitated())
-            targetDefendPart = 0
-          else ::<= {
-            @:blockData = {
-              targetDefendPart : targetDefendPart,
-              targetPart : targetPart
-            };
-            if (target.effectStack)
-              target.effectStack.emitEvent(
-                name: 'onPreBlock',
-                attacker : this, 
-                damage : dmg,
-                blockData
-              );   
-            
-            targetDefendPart = blockData.targetDefendPart
-            targetPart = blockData.targetPart;
-          }           
-          if (targetDefendPart == 0 && target.species.canBlock == true && target.isIncapacitated() == false) 
-            windowEvent.queueMessage(text: target.name + ' wasn\'t given a chance to block!');
-
-          if (isCrit == false && (targetPart & targetDefendPart) != 0) ::<= {
           
-            // Cant defend EVERYTHING perfectly. If you guard multiple parts of 
-            // your body, even with gear, you still arent a perfect fortress
-            imperfectGuard = (targetDefendPart != Entity.DAMAGE_TARGET.HEAD &&
-                      targetDefendPart != Entity.DAMAGE_TARGET.BODY &&
-                      targetDefendPart != Entity.DAMAGE_TARGET.LIMBS &&
-                      random.try(percentSuccess:5));
-            this.flags.add(flag:StateFlags.BLOCKED_ATTACK);
-            
-            if (!imperfectGuard) ::<= {
+          if (overrideTarget->size)
+            target = overrideTarget[0]
+
+          @critChance = (this.stats.LUK - target.stats.LUK) / 100;
+          if (critChance < 0.001) critChance = 0.001;
+          critChance *= 100;
+          if (critChance > 25) critChance = 25;
+          if (random.try(percentSuccess:critChance) || ((dmg.traits & Damage.TRAIT.FORCE_CRIT) != 0)) ::<={
+            if (dmg.amount < 5) dmg.amount = 5;
+            dmg.amount *= 2.5;
+            dmg.traits |= Damage.TRAIT.IS_CRIT;
+            isCrit = true;
+          }
+          when(dmg.amount <= 0) false;
+          
+        },
+        
+        
+        // pre attacked check 
+        :: {
+          if (target.effectStack)
+            target.effectStack.emitEvent(
+              name: 'onPreAttacked',
+              attacker : this, 
+              damage : dmg,
+              targetPart : targetPart,
+              emitCondition ::(effectInstance) <- dmg.amount > 0
+            );
+          
+
+          when(dmg.amount <= 0) false;        
+        },
+
+        // Def / Dex hit chance
+        ::{
+          when (target.isIncapacitated() || ((dmg.traits & Damage.TRAIT.FORCE_DEF_BYPASS) == 0)) empty;
+
+            @:ratioDiff = this.getChanceOfAttackSuccessDEXvDEF(:target);
+            if (random.try(percentSuccess:(1-ratioDiff)*100)) ::<= {       
               windowEvent.queueMessage(
-                text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ' and successfully blocked it!'
+                text: target.name + ' avoided the incoming attack!'
               );
-              
-              @:blockData = {
-                targetDefendPart : targetDefendPart,
-                targetPart : targetPart
-              };
-              if (target.effectStack)
-                target.effectStack.emitEvent(
-                  name : 'onSuccessfulBlock',
-                  attacker: this,
-                  damage: dmg,
-                  blockData
-                );
               dmg.amount = 0;
-              
-              this.effectStack.emitEvent(
-                name: 'onGotBlocked',
-                from: target
+            }
+          }
+          when(dmg.amount <= 0) false;
+        },
+        
+        
+        ::{
+          @:which = match(targetPart) {
+            (Entity.DAMAGE_TARGET.HEAD): 'head',
+            (Entity.DAMAGE_TARGET.BODY): 'body',
+            (Entity.DAMAGE_TARGET.LIMBS): 'limbs'
+          }
+          @imperfectGuard = false;
+              backupStats = this.stats.save();
+              match(true) {
+                ((targetPart & DAMAGE_TARGET.HEAD) != 0):::<= {
+                  when(isCrit)
+                    isHitHead = true;
+                
+                  if (random.try(percentSuccess:20)) ::<= {
+                    isCrit = true;
+                    dmg.amount += this.stats.DEX * 1.5;
+                    isHitHead = true;
+                  } else ::<= {
+                    missHead = true;
+                    dmg.amount = 1;
+                  }
+                },
+
+                ((targetPart & DAMAGE_TARGET.BODY) != 0):::<= {
+                  when(isCrit)
+                    isHitBody = true;
+                  dmg.amount *= 1;               
+                  isHitBody = true;   
+                },
+
+                ((targetPart & DAMAGE_TARGET.LIMBS) != 0):::<= {
+                  when(isCrit)
+                    isLimbHit = true;
+
+                  dmg.amount *= 0.4;                
+                  if (random.try(percentSuccess:30)) ::<= {
+                    isLimbHit = true;
+                  } else ::<= {
+                    missLimb = true;
+                    dmg.amount = 1;
+                  }
+                }
+
+              }
+            }
+          }
+
+          when(dmg.amount <= 0) false;
+        
+        },
+
+        ::{
+
+
+          @:hpWas0 = if (target.hp == 0) true else false;
+          @:result = target.damage(attacker:this, damage:dmg, dodgeable:true, critical:isCrit);
+          
+
+          
+          
+          if (backupStats != empty)
+            this.stats.load(serialized:backupStats);
+          
+          if (imperfectGuard) ::<= {
+            if (result)
+              windowEvent.queueMessage(
+                text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ', but wasn\'t able to fully block the damage!'
+              )
+            else        
+              windowEvent.queueMessage(
+                text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + '!'
               );
-            } else ::<= {
-              dmg.amount *= .4;
+
+          }
+          
+          when(!result) empty;
+
+          if (!imperfectGuard) ::<= {
+            if (isLimbHit) ::<= {
+              windowEvent.queueMessage(text: 'The hit caused direct damage to the limbs!');
+              if (!target.isIncapacitated())
+                target.addEffect(from:this, id:'base:stunned', durationTurns:1);          
+            }
+
+            if (isHitBody) ::<= {
+              windowEvent.queueMessage(text: 'The hit caused direct damage to the body!');
+            }
+
+            
+            if (isHitHead) ::<= {
+              windowEvent.queueMessage(text: 'The hit caused direct damage to the head!');
             }
             
-          } else ::<= {
-
-            backupStats = this.stats.save();
-            match(true) {
-              ((targetPart & DAMAGE_TARGET.HEAD) != 0):::<= {
-                when(isCrit)
-                  isHitHead = true;
-              
-                if (random.try(percentSuccess:20)) ::<= {
-                  isCrit = true;
-                  dmg.amount += this.stats.DEX * 1.5;
-                  isHitHead = true;
-                } else ::<= {
-                  missHead = true;
-                  dmg.amount *= 0.9;
-                }
-              },
-
-              ((targetPart & DAMAGE_TARGET.BODY) != 0):::<= {
-                when(isCrit)
-                  isHitBody = true;
-                dmg.amount *= 1;               
-                isHitBody = true;   
-              },
-
-              ((targetPart & DAMAGE_TARGET.LIMBS) != 0):::<= {
-                when(isCrit)
-                  isLimbHit = true;
-
-                dmg.amount *= 0.4;                
-                if (random.try(percentSuccess:30)) ::<= {
-                  isLimbHit = true;
-                } else ::<= {
-                  missLimb = true;
-                  dmg.amount = 1;
-                }
-              }
-
+            
+            if (missHead) ::<= {
+              windowEvent.queueMessage(text: 'The hit missed the head, but still managed to hit ' + target.name +' for minimal damage!');            
             }
+            if (missLimb) ::<= {
+              windowEvent.queueMessage(text: 'The hit missed the limbs, but still managed to hit ' + target.name +' for minimal damage!');            
+            }
+
           }
-        }
-
-        when(dmg.amount <= 0) empty;
+          this.flags.add(flag:StateFlags.ATTACKED);
 
 
 
 
-        @:hpWas0 = if (target.hp == 0) true else false;
-        @:result = target.damage(attacker:this, damage:dmg, dodgeable:true, critical:isCrit);
+          effectStack.emitEvent(
+            name : 'onPostAttackOther',
+            to: target,
+            damage: dmg,
+            targetPart : targetPart
+          );        
+        },
         
+        ::{
+          when(target.isDead == false && hpWas0 && target.hp == 0) ::<= {
+            this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
+            target.flags.add(flag:StateFlags.DIED);
+            target.kill(from:this);                  
+          }
 
-        
-        
-        if (backupStats != empty)
-          this.stats.load(serialized:backupStats);
-        
-        if (imperfectGuard) ::<= {
-          if (result)
-            windowEvent.queueMessage(
-              text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ', but wasn\'t able to fully block the damage!'
-            )
-          else        
-            windowEvent.queueMessage(
-              text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + '!'
+          if (target.effectStack)
+            target.effectStack.emitEvent(
+              name: 'onPostAttacked',
+              attacker : this, 
+              damage : dmg,
+              targetPart : targetPart
             );
-
-        }
+        },
         
-        when(!result) empty;
+        ::{
+          if (hasNoEffectStack)        
+            _.this.effectStack.clear(all:true);
+          if (hasNoEffectStack)        
+            _.effectStack = empty;
 
-        if (!imperfectGuard) ::<= {
-          if (isLimbHit) ::<= {
-            windowEvent.queueMessage(text: 'The hit caused direct damage to the limbs!');
-            if (!target.isIncapacitated())
-              target.addEffect(from:this, id:'base:stunned', durationTurns:1);          
-          }
-
-          if (isHitBody) ::<= {
-            windowEvent.queueMessage(text: 'The hit caused direct damage to the body!');
-          }
-
-          
-          if (isHitHead) ::<= {
-            windowEvent.queueMessage(text: 'The hit caused direct damage to the head!');
-          }
-          
-          
-          if (missHead) ::<= {
-            windowEvent.queueMessage(text: 'The hit missed the head, but still managed to hit ' + target.name +' for minimal damage!');            
-          }
-          if (missLimb) ::<= {
-            windowEvent.queueMessage(text: 'The hit missed the limbs, but still managed to hit ' + target.name +' for minimal damage!');            
-          }
-
+          displayedHurt->remove(key:target);
         }
-        this.flags.add(flag:StateFlags.ATTACKED);
+      
+      ];
+      
+      
+      
+      
+      
+      
+      @:retval = ::<= {
 
 
 
 
-        effectStack.emitEvent(
-          name : 'onPostAttackOther',
-          to: target,
-          damage: dmg
-        );
-        
-        if (target.effectStack)
-          target.effectStack.emitEvent(
-            name: 'onPostAttacked',
-            attacker : this, 
-            damage : dmg
-          );
+
+
         
 
-        when(target.isDead == false && hpWas0 && target.hp == 0) ::<= {
-          this.flags.add(flag:StateFlags.DEFEATED_ENEMY);
-          target.flags.add(flag:StateFlags.DIED);
-          target.kill(from:this);                  
-        }
 
         return true;
       }
-      
-      if (hasNoEffectStack)        
-        _.this.effectStack.clear(all:true);
-      if (hasNoEffectStack)        
-        _.effectStack = empty;
 
-
-      windowEvent.queueCustom(
+      windowEvent.queueNestedResolve(
         onEnter :: {
-          displayedHurt->remove(key:target);
+          doNextPhase();
         }
       );
+
+
       return retval;
     },
       
@@ -3148,7 +3112,7 @@
       @:ret = art.onAction(
         user:this,
         level,
-        targets, turnIndex, targetDefendParts, targetParts, extraData      
+        targets, turnIndex, targetParts, extraData      
       );      
       
 

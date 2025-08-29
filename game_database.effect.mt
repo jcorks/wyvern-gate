@@ -134,7 +134,7 @@ Effect.newEntry(
         }
       },
 
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage!");
         damage.amount *= 0.6;
       }
@@ -180,7 +180,7 @@ Effect.newEntry(
         );
       },
 
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         windowEvent.queueMessage(
           text: holder.name + '\'s attack was boosted x2!'
         );
@@ -204,7 +204,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         windowEvent.queueMessage(
           text: holder.name + '\'s attack bypassed ' + to.name +'\'s DEF!'
         );
@@ -230,7 +230,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         when(holder.battle == empty) empty;
         
         @:targets = holder.battle.getEnemies(:holder)->filter(::(value) <- value != to);
@@ -262,7 +262,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         when(holder.battle == empty) empty;
 
         when(random.try(percentSuccess:80)) empty;
@@ -290,7 +290,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         when(from == empty) empty;
         windowEvent.queueMessage(
           text: holder.name + ' fell for ' + from.name + '\'s taunt!'
@@ -313,7 +313,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         when(from == empty) empty;
         
         windowEvent.queueMessage(
@@ -336,7 +336,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when((damage.traits & Damage.TRAIT.MULTIHIT) == 0) empty;
         windowEvent.queueMessage(text:holder.name + "'s Field Barrier reduces multi-hit damage!");
         damage.amount *= 0.2;
@@ -356,7 +356,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text:holder.name + "'s Suppressor reduces multi-hit damage!");
         damage.amount *= 0.5;
       }
@@ -425,7 +425,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         @:Entity = import(module:'game_class.entity.mt');
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:block');
 
@@ -457,6 +457,97 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Parry',
+    id : 'base:parry',
+    description: 'The next incoming blockable attack has a chance to be negated. Upon attack, The holder will have a chance to pick a location of their body to defend. If this matches the incoming attack\'s location, the attack is blocked.',
+    stackable : true,
+    blockPoints: 0,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+
+
+      if (targetPart != empty && ((dmg.traits & Damage.TRAIT.UNBLOCKABLE) == 0)) ::<= {
+      
+        if (targetDefendPart == empty)
+          targetDefendPart = 0;
+        if (target.species.canBlock == false)
+          targetDefendPart = 0;
+        if (target.isIncapacitated())
+          targetDefendPart = 0
+        else ::<= {
+          @:blockData = {
+            targetDefendPart : targetDefendPart,
+            targetPart : targetPart
+          };
+          if (target.effectStack)
+          
+          targetDefendPart = blockData.targetDefendPart
+          targetPart = blockData.targetPart;
+        }           
+        if (targetDefendPart == 0 && target.species.canBlock == true && target.isIncapacitated() == false) 
+          windowEvent.queueMessage(text: target.name + ' wasn\'t given a chance to block!');
+
+        if (isCrit == false && (targetPart & targetDefendPart) != 0) ::<= {
+        
+          // Cant defend EVERYTHING perfectly. If you guard multiple parts of 
+          // your body, even with gear, you still arent a perfect fortress
+          imperfectGuard = (targetDefendPart != Entity.DAMAGE_TARGET.HEAD &&
+                    targetDefendPart != Entity.DAMAGE_TARGET.BODY &&
+                    targetDefendPart != Entity.DAMAGE_TARGET.LIMBS &&
+                    random.try(percentSuccess:5));
+          this.flags.add(flag:StateFlags.BLOCKED_ATTACK);
+          
+          if (!imperfectGuard) ::<= {
+            windowEvent.queueMessage(
+              text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ' and successfully blocked it!'
+            );
+            
+            @:blockData = {
+              targetDefendPart : targetDefendPart,
+              targetPart : targetPart
+            };
+            if (target.effectStack)
+              target.effectStack.emitEvent(
+                name : 'onSuccessfulBlock',
+                attacker: this,
+                damage: dmg,
+                blockData
+              );
+            dmg.amount = 0;
+            
+            this.effectStack.emitEvent(
+              name: 'onGotBlocked',
+              from: target
+            );
+          } else ::<= {
+            dmg.amount *= .4;
+          }
+          
+        } else ::<= {
+
+
+
+    
+        windowEvent.queueMessage(text:user.name + ' is ready to Parry!');
+    
+        target.effectStack.emitEvent(
+          name: 'onPreBlock',
+          attacker : this, 
+          damage : dmg,
+          blockData
+        );   
+      
+        
+      }
+    }
+  }
+);
+
+
+Effect.newEntry(
+  data : {
     name : 'Block',
     id : 'base:block',
     description: 'Next incoming attack\'s damage is negated. This counts as blocking. This effect is removed afterward.',
@@ -465,7 +556,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:block');
         @:Entity = import(module:'game_class.entity.mt');
 
@@ -502,7 +593,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:slingshot-block');
 
         windowEvent.queueMessage(text:holder.name + " is blocking!");
@@ -558,7 +649,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:ricochet-block');
         @:Entity = import(module:'game_class.entity.mt');
 
@@ -606,7 +697,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:reflective-block');
         @:Entity = import(module:'game_class.entity.mt');
 
@@ -653,7 +744,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPostAttackOther ::(from, item, holder, to, damage) {
+      onPostAttackOther ::(from, item, holder, to, damage, targetPart) {
         when(holder.battle == empty) empty;
         
         @:target = random.pickArrayItem(:holder.battle.getEnemies(:holder));
@@ -690,7 +781,7 @@ Effect.newEntry(
         );
       },
 
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(
           text: holder.name + '\'s Banishing Light translated the damage into Banishing!'
         );
@@ -727,7 +818,7 @@ Effect.newEntry(
         );
       },
 
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         @:StateFlags = import(module:'game_class.stateflags.mt');
         @whiff = false;
         @:hitrate::(this, attacker) {
@@ -779,7 +870,7 @@ Effect.newEntry(
         );
       
       },
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage significantly!");
         damage.amount *= 0.1;
       }
@@ -799,7 +890,7 @@ Effect.newEntry(
     stats: StatSet.new(
     ),
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         if (!holder.isIncapacitated() && random.try(percentSuccess:40)) ::<= {
           windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
           damage.amount = 0;
@@ -823,7 +914,7 @@ Effect.newEntry(
     stats: StatSet.new(
     ),
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         when (!holder.isIncapacitated() && random.try(percentSuccess:35)) ::<= {
           windowEvent.queueMessage(text:holder.name + " ferociously repels the attack!");
           damage.amount = 0;
@@ -845,7 +936,7 @@ Effect.newEntry(
     stats: StatSet.new(
     ),
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         when (!holder.isIncapacitated() && random.try(percentSuccess:15)) ::<= {
           windowEvent.queueMessage(text:random.pickArrayItem(list:[
             'You will have to try harder than that, Chosen!',
@@ -874,7 +965,7 @@ Effect.newEntry(
     stats: StatSet.new(
     ),
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         when (!holder.isIncapacitated() && random.try(percentSuccess:60)) ::<= {
           windowEvent.queueMessage(text:
             random.pickArrayItem(list: [
@@ -1027,7 +1118,7 @@ Effect.newEntry(
         );
       },
 
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when (holder == attacker) empty;
         when (damage.damageType != Damage.TYPE.PHYS) empty;
         
@@ -1068,7 +1159,7 @@ Effect.newEntry(
           text: holder.name + ' is prepared for an attack!'
         );
       },
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         @dmg = damage.amount * 0.75;
         when (dmg < 1) empty;
         damage.amount = 0;
@@ -1107,7 +1198,7 @@ Effect.newEntry(
         );
       },
 
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when (holder == attacker) empty;
         when (holder.ap == 0) empty;
         when(random.number() > .5) empty;
@@ -1139,7 +1230,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:from.name + " snuck behind " + holder.name + '!');
       
       },
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (attacker == from) ::<= {
           windowEvent.queueMessage(text:from.name + "'s sneaking takes " + holder.name + ' by surprise!');
           damage.amount *= 3;
@@ -1217,7 +1308,7 @@ Effect.newEntry(
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + '\'s shield of light fades away.');
       },        
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         when (random.number() < 0.3) ::<= {
           windowEvent.queueMessage(text:holder.name + '\'s shield of light blocks the attack!');
           damage.amount = 0;
@@ -1358,7 +1449,7 @@ Effect.newEntry(
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' is covered in a mysterious wind!');
       },
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text:holder.name + '\'s mysterious wind caused the attack to miss!');
         damage.amount = 0;
         return EffectStack.CANCEL_PROPOGATION;  
@@ -1573,7 +1664,7 @@ Effect.newEntry(
       onAffliction ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + ' is covered in spikes of light.');
       },
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text:attacker.name + ' gets hurt by ' + holder.name + '\'s spikes of light!');
         attacker.damage(attacker:holder, damage:Damage.new(
           amount:random.integer(from:1, to:4),
@@ -2227,7 +2318,7 @@ Effect.newEntry(
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:holder.name + '\'s halo disappears.');
       },        
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (holder.hp == 0) ::<= {
           damage.amount = 0;
           windowEvent.queueMessage(text:holder.name + ' is protected from death!');
@@ -2905,7 +2996,7 @@ Effect.newEntry(
       onRemoveEffect ::(from, item, holder) {
         windowEvent.queueMessage(text:from.name + ' resumes a normal stance!');
       },        
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         @:amount = damage.amount;
 
         when(from == holder) ::<= {
@@ -2944,7 +3035,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + ' is strongly guarding themself');
       },
       
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (attacker != holder) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from the damage!');
           damage.amount = 0;            
@@ -3012,7 +3103,7 @@ Effect.newEntry(
     blockPoints : 0,
     traits : Effect.TRAIT.DEBUFF,
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         if ((damage.traits & Damage.TRAIT.MULTIHIT) != 0) ::<= {
           windowEvent.queueMessage(text: holder.name + '\'s Dampen Multi-hit nullified the attack!');
           damage.amount = 0;
@@ -3033,7 +3124,7 @@ Effect.newEntry(
     blockPoints : 0,
     traits : Effect.TRAIT.BUFF,
     events : {
-      onPreAttacked ::(from, item, holder, attacker, damage) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.isMultihit) ::<= {
           windowEvent.queueMessage(text: holder.name + '\'s Multi-hit Guard nullified the attack!');
           damage.amount = 0;
@@ -3062,7 +3153,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + ' became desparate!');
       },
       
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         windowEvent.queueMessage(text: holder.name + '\'s desparation increased damage by 2.5 times!');
         damage.amount *= 2.5;
       },      
@@ -3392,7 +3483,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
 
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (random.number() > 0.8 && damage.damageType == Damage.TYPE.PHYS) ::<= {
           @:Entity = import(module:'game_class.entity.mt');
         
@@ -3420,7 +3511,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (holder.hp == 0) ::<= {
           windowEvent.queueMessage(text:holder.name + " glows!");
           holder.unequipItem(item, silent:true);
@@ -3456,7 +3547,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (attacker != holder) ::<= {
           @:Entity = import(module:'game_class.entity.mt');          
           windowEvent.queueMessage(text:holder.name + " dodges the damage from Flight!");
@@ -3517,7 +3608,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (from == attacker) ::<= {
           windowEvent.queueMessage(text: from.name + '\'s duel challenge focuses damage!');
           damage.amount *= 2.25;
@@ -3814,7 +3905,7 @@ Effect.newEntry(
         windowEvent.queueMessage(text:holder.name + " is no longer blind.");
       },        
 
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         when (random.number() > 0.5) empty;
         windowEvent.queueMessage(text:holder.name + " missed in their blindness!");
         damage.amount = 0;
@@ -4007,7 +4098,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
 
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.FIRE) ::<= {
           damage.amount *= 2;
         }
@@ -4034,7 +4125,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     events : {
 
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         
         if (damage.damageType == Damage.TYPE.FIRE) ::<= {
           damage.amount *= 0;
@@ -4060,7 +4151,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.FIRE) ::<= {
           damage.amount *= 0.25;
         }
@@ -4080,7 +4171,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.ICE) ::<= {
           damage.amount *= 0.25;
         }
@@ -4100,7 +4191,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.ICE) ::<= {
           damage.amount *= 0.25;
         }
@@ -4120,7 +4211,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.DARK) ::<= {
           damage.amount *= 0.25;
         }
@@ -4139,7 +4230,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
           damage.amount *= 0.25;
         }
@@ -4158,7 +4249,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.POISON) ::<= {
           damage.amount *= 0.25;
         }
@@ -4416,7 +4507,7 @@ Effect.newEntry(
         ),dodgeable: false);
       },
 
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.ICE) ::<= {
           damage.amount *= 0.5;
         }
@@ -4482,7 +4573,7 @@ Effect.newEntry(
         ),dodgeable: false);
       },
 
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.FIRE) ::<= {
           damage.amount *= 0.5;
         }
@@ -4531,7 +4622,7 @@ Effect.newEntry(
           damageClass: Damage.CLASS.HP
         ),dodgeable: false);
       },
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
           damage.amount *= 0.5;
         }
@@ -4581,7 +4672,7 @@ Effect.newEntry(
         dodgeable: false
         );
       },
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.POISON) ::<= {
           damage.amount *= 0.5;
         }
@@ -4627,7 +4718,7 @@ Effect.newEntry(
           damageClass: Damage.CLASS.HP
         ),dodgeable: false);
       },
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.DARK) ::<= {
           damage.amount *= 0.5;
         }
@@ -4673,7 +4764,7 @@ Effect.newEntry(
         ),dodgeable: false);
       },
 
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
           damage.amount *= 0.5;
         }
@@ -4810,7 +4901,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         @:id = match(damage.type) {
           (Damage.TYPE.FIRE) : 'base:burning',
           (Damage.TYPE.ICE) : 'base:icy',
@@ -5146,7 +5237,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when(random.flipCoin()) empty;
         if (attacker != holder) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from the damage thanks to Light Guard!');
@@ -5167,7 +5258,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (attacker != holder && ((damage.traits & Damage.TRAIT.MULTIHIT) != 0)) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from the damage thanks to Light Guard!');
           damage.amount = 1;            
@@ -5188,7 +5279,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (attacker != holder && ((damage.traits & Damage.TRAIT.IS_CRIT) != 0)) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from critical hit damage thanks to Premonition!');
           damage.amount = 1;            
@@ -5209,7 +5300,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {      
-      onPreAttack ::(from, item, holder, attacker, damage) {
+      onPreAttack ::(from, item, holder, attacker, damage, targetPart) {
         if (attacker != holder) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from damage thanks to the Crustacean Maneuver!');
           damage.amount = 1;            
@@ -5235,7 +5326,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (holder.hp == 0) ::<= {
      
           if (random.try(percentSuccess:20)) ::<= {
@@ -5264,7 +5355,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when(holder.battle == empty) empty;
         if (holder.hp == 0) ::<= {
           windowEvent.queueMessage(text:holder.name + " glows!");
@@ -5307,7 +5398,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when(holder.battle == empty) empty;
         if (holder.hp == 0) ::<= {
           windowEvent.queueMessage(text:holder.name + " glows!");
@@ -5351,7 +5442,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when(holder.battle == empty) empty;
         if (holder.hp == 0) ::<= {
           windowEvent.queueMessage(text:holder.name + " glows!");
@@ -5379,7 +5470,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when(holder.battle == empty) empty;
         if (holder.hp == 0) ::<= {
           windowEvent.queueMessage(text:holder.name + " glows!");
@@ -5523,14 +5614,14 @@ Effect.newEntry(
       DEF:4
     ),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         damage.amount -= 1;
         if (damage.amount < 0)
           damage.amount = 0;
         windowEvent.queueMessage(text:holder.name + "'s Shield Aura reduced damage!");
       },
 
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         windowEvent.queueMessage(
           text: holder.name + '\'s Shield Aura reduced the moved effectiveness!'
         );
@@ -5581,7 +5672,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType != Damage.TYPE.PHYS) ::<= { 
           windowEvent.queueMessage(text:holder.name + "'s Soul Buffer negates the damage!");
           damage.amount = 0;
@@ -5601,7 +5692,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.PHYS) ::<= { 
           windowEvent.queueMessage(text:holder.name + "'s Body Buffer negates the damage!");
           damage.amount = 0;
@@ -5621,7 +5712,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text:holder.name + "'s Perfect Barrier negates the damage!");
         damage.amount = 0;
       }
@@ -5912,7 +6003,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when (from.isIncapacitated()) empty;
         when (attacker == empty) empty;
     
@@ -5939,7 +6030,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text:holder.name + "'s Soul Split splits damage!");
 
 
@@ -5966,7 +6057,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when(holder == from) empty;
 
         windowEvent.queueMessage(text:holder.name + "'s Soul Projection redirects damage!");
@@ -6008,7 +6099,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         when (to != from) empty;
       
         windowEvent.queueMessage(
@@ -6031,7 +6122,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttacked ::(from, item, holder, to, damage) {
+      onPreAttacked ::(from, item, holder, to, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
           windowEvent.queueMessage(
             text: 'Incoming thunder damage was reduced!'
@@ -6065,7 +6156,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttacked ::(from, item, holder, to, damage) {
+      onPreAttacked ::(from, item, holder, to, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.FIRE) ::<= {
           windowEvent.queueMessage(
             text: 'Incoming fire damage was reduced!'
@@ -6099,7 +6190,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttacked ::(from, item, holder, to, damage) {
+      onPreAttacked ::(from, item, holder, to, damage, targetPart) {
         if (damage.damageType == Damage.TYPE.ICE) ::<= {
           windowEvent.queueMessage(
             text: 'Incoming ice damage was reduced!'
@@ -6340,7 +6431,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         when(from != to) empty;
         when(random.coinFlip()) empty;
         windowEvent.queueMessage(
@@ -6365,7 +6456,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         when(from != to) empty;
         windowEvent.queueMessage(
           text: holder.name + '\'s Enraged caused recoil damage!'
@@ -6410,7 +6501,7 @@ Effect.newEntry(
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         when(from != to) empty;
         when(holder.isIncapacitated()) empty;
         windowEvent.queueMessage(
@@ -6443,7 +6534,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreDamage ::(from, item, holder, attacker, damage) {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when(damage.amount == 0) empty;
         damage.amount += 1;
         windowEvent.queueMessage(
@@ -6465,7 +6556,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onSuccessfulBlock ::(from, item, holder, attacker, damage) {
+      onSuccessfulBlock ::(from, item, holder, attacker, damage, targetPart) {
         holder.addEffect(from:holder, id:'base:empowered', durationTurns:3);
       }
     }
@@ -6482,7 +6573,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         windowEvent.queueMessage(text: holder.name + '\'s Empowered increased damage by 1.5 times!');
         damage.amount = (damage.amount*1.5)->ceil;
         holder.removeEffectInstance(:
@@ -6503,7 +6594,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onSuccessfulBlock ::(from, item, holder, attacker, damage) {
+      onSuccessfulBlock ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text: holder.name + '\'s successful block stunned the attacker!');
         holder.addEffect(from:holder, id:'base:stunned', durationTurns:1);
       }
@@ -6521,7 +6612,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onSuccessfulBlock ::(from, item, holder, attacker, damage) {
+      onSuccessfulBlock ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text: holder.name + '\'s successful block activated b309!');
         @:world = import(module:'game_singleton.world.mt');
         @:Entity = import(module:'game_class.entity.mt');           
@@ -6557,7 +6648,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         @:banishCount = to.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
         when(banishCount == 0) empty;
         windowEvent.queueMessage(
@@ -6581,7 +6672,7 @@ Effect.newEntry(
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
-      onPreAttackOther ::(from, item, holder, to, damage, overrideTarget) {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
         @:banishCount = holder.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size;
         when(banishCount == 0) empty;
         windowEvent.queueMessage(

@@ -140,7 +140,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.SPECIAL | TRAIT.COSTLESS | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.5) * level,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -150,8 +150,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );        
         }
       );      
@@ -159,6 +158,31 @@ Arts.newEntry(
     }
   }
 )
+
+
+Arts.newEntry(
+  data: {
+    name: 'Parry',
+    id : 'base:parry',
+    notifCommit : '$1 attacks $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONEPART,
+    keywords : ['base:parry'],
+    description: "Adds the Parry effect for 4 turns.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.ABILITY,
+    traits : TRAIT.PHYSICAL,
+    rarity : RARITY.COMMON,
+    baseDamage ::(level, user) <- 0,
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) { 
+      user.removeEffectsByFilter(::(value) <- value.id == 'base:parry');
+      user.addEffect(from:user, id:'base:parry', durationTurns:4);      
+    }
+  }
+)
+
 
 
 
@@ -179,7 +203,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- 1,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       
       windowEvent.queueCustom(
@@ -192,8 +216,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: Entity.DAMAGE_TARGET.HEAD,
-            targetDefendPart:targetDefendParts[0]
+            targetPart: Entity.DAMAGE_TARGET.HEAD
           ) == true)
             if (random.try(percentSuccess:level*5)) ::<= {
               windowEvent.queueMessage(
@@ -232,7 +255,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     baseDamage ::(level, user) <- (user.stats.ATK * (0.2) + user.stats.DEX * (0.5)) * (1 + 0.1*(level-1)),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -242,8 +265,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );            
         }
       );
@@ -269,7 +291,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.DEX * (0.5),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           if (user.attack(
@@ -279,8 +301,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           ) == true)           
             if (random.try(percentSuccess:40 + level*10))
               targets[0].addEffect(from:user, id:'base:paralyzed', durationTurns:2);
@@ -309,7 +330,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -344,7 +365,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user)<- user.stats.ATK * (0.5 + 0.15 * level),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -357,8 +378,7 @@ Arts.newEntry(
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP
               ),
-              targetPart:targetParts[0],
-              targetDefendPart:targetDefendParts[0]
+              targetPart:targetParts[0]
             )
           else
             user.attack(
@@ -368,8 +388,7 @@ Arts.newEntry(
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP
               ),
-              targetPart : targetParts[0],
-              targetDefendPart:targetDefendParts[0]
+              targetPart : targetParts[0]
             );
         }
       );
@@ -395,7 +414,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.1),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           @target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
@@ -407,8 +426,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
             ),
-            targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
-            targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+            targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
         }
       );
@@ -425,8 +443,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
             ),
-            targetPart : targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
-            targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+            targetPart : targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
         }
       );
@@ -453,7 +470,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.07),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -467,8 +484,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
             ),
-            targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
-            targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+            targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
         }
       ); 
@@ -485,8 +501,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
             ),
-            targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
-            targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+            targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
         }
       );
@@ -502,8 +517,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
             ),
-            targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
-            targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+            targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
           );
         }
       );
@@ -528,7 +542,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:focus-perception', durationTurns: 5);            
@@ -554,7 +568,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           foreach(user.battle.getAllies(:user))::(index, ally) {
@@ -583,7 +597,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
 
       @:world = import(module:'game_singleton.world.mt');
       windowEvent.queueCustom(
@@ -619,7 +633,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     traits : TRAIT.MAGIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       windowEvent.queueCustom(
         onEnter :: {
@@ -658,7 +672,7 @@ Arts.newEntry(
       @:world = import(module:'game_singleton.world.mt');
       return user.stats.INT * (if (world.time >= world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);
     },
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -677,8 +691,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits : Damage.TRAIT.UNBLOCKABLE
             ),
-            targetPart: targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart: targetParts[0]
           );
         }
       );
@@ -706,7 +719,7 @@ Arts.newEntry(
       @:world = import(module:'game_singleton.world.mt');
       return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);    
     },
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -725,8 +738,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits : Damage.TRAIT.UNBLOCKABLE
             ),
-            targetPart : targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart : targetParts[0]
           );
         }
       );
@@ -755,7 +767,7 @@ Arts.newEntry(
       @:world = import(module:'game_singleton.world.mt');
       return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.7 else 0.4) * (1 + (level-1)*.08);
     },
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -802,7 +814,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -844,7 +856,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
@@ -886,7 +898,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Call of the Night on ' + targets[0].name + '!'
       );
@@ -933,7 +945,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       when (world.time < world.TIME.EVENING) Arts.FAIL;
       windowEvent.queueMessage(
@@ -964,7 +976,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.EVENING) ::<= {
@@ -1007,7 +1019,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
       if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) ::<= {
         windowEvent.queueMessage(
@@ -1049,7 +1061,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -1060,8 +1072,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: Entity.DAMAGE_TARGET.BODY,
-            targetDefendPart:targetDefendParts[0]
+            targetPart: Entity.DAMAGE_TARGET.BODY
           ) == true)            
             if (random.try(percentSuccess:80)) ::<= {
               targets[0].addEffect(from:user, id: 'base:ensnared', durationTurns: 3);            
@@ -1091,7 +1102,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       when (!random.try(percentSuccess:50+(level-1)*10)) Arts.FAIL;
       
       @:world = import(module:'game_singleton.world.mt');
@@ -1131,7 +1142,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
 
       when(targets[0].species.name != 'Creature') ::<= {
         windowEvent.queueMessage(
@@ -1183,7 +1194,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(i, enemy) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -1195,8 +1206,7 @@ Arts.newEntry(
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP
               ),
-              targetPart:Entity.DAMAGE_TARGET.LIMBS,
-              targetDefendPart:targetDefendParts[i]
+              targetPart:Entity.DAMAGE_TARGET.LIMBS
             ) == true)
               if (random.number() > 0.5)
                 enemy.addEffect(from:user, id: 'base:stunned', durationTurns: 1);  
@@ -1224,7 +1234,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*.05),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach(targets)::(index, target) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -1235,8 +1245,7 @@ Arts.newEntry(
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP
               ),
-              targetPart: Entity.DAMAGE_TARGET.BODY,
-              targetDefendPart:targetDefendParts[index]
+              targetPart: Entity.DAMAGE_TARGET.BODY
             );
           }
         )
@@ -1263,7 +1272,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.1),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
 
       windowEvent.queueCustom(
         onEnter :: {
@@ -1275,8 +1284,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: Entity.DAMAGE_TARGET.BODY,
-            targetDefendPart:targetDefendParts[0]
+            targetPart: Entity.DAMAGE_TARGET.BODY
           );
           if (random.try(percentSuccess:60)) ::<= {
             targets[0].addEffect(from:user, id: 'base:grappled', durationTurns: 1);            
@@ -1304,7 +1312,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.2),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:pickItem = import(module:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
       
@@ -1324,8 +1332,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart: targetParts[0]
           );
         }
       );
@@ -1351,7 +1358,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- user.stats.ATK * (0.3),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           
@@ -1362,8 +1369,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: Entity.DAMAGE_TARGET.BODY,
-            targetDefendPart:targetDefendParts[0]
+            targetPart: Entity.DAMAGE_TARGET.BODY
           ) == true)     
             if (random.try(percentSuccess:50 + (level-1)*10))
               targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 1);            
@@ -1390,7 +1396,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.ATK * (0.4) * (1 + (level-1)*0.07),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
 
       windowEvent.queueCustom(
         onEnter :: {
@@ -1403,8 +1409,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
             ),
-            targetPart: targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart: targetParts[0]
           ) == true)          
             if (random.number() < 0.9)
               targets[0].addEffect(from:user, id: 'base:frozen', durationTurns: 1);            
@@ -1428,7 +1433,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
-    onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' reads ' + targets[0].name + '\'s mind!'
       );
@@ -1472,7 +1477,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:flight', durationTurns: level);
@@ -1497,7 +1502,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -1530,7 +1535,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*0.05),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -1543,8 +1548,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
             ),
-            targetPart: targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart: targetParts[0]
           );
         }
       );
@@ -1559,8 +1563,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
             ),
-            targetPart: targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart: targetParts[0]
           );
         }
       );
@@ -1584,7 +1587,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:poison-rune', durationTurns: 10);            
@@ -1609,7 +1612,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
 
       windowEvent.queueCustom(
         onEnter :: {
@@ -1643,7 +1646,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- user.stats.INT * (1.2),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:destruction-rune', durationTurns: 5);            
@@ -1670,7 +1673,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:regeneration-rune', durationTurns: 10);            
@@ -1695,7 +1698,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:shield-rune', durationTurns: 10);            
@@ -1720,7 +1723,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:cure-rune', durationTurns: 5);            
@@ -1746,7 +1749,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:effects = targets[0].effectStack.getAll()->filter(by:::(value) <- 
         match(value.id) {
           (
@@ -1788,7 +1791,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user)<- user.stats.ATK * (0.3) * (1 + (level-1)*0.05) + (level-1),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -1799,8 +1802,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart: targetParts[0]
           ))
             targets[0].addEffect(from:user, id: 'base:poisoned', durationTurns: 4);             
         }
@@ -1826,7 +1828,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -1837,8 +1839,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart: targetParts[0]
           ))
             if (random.flipCoin())
                 targets[0].addEffect(from:user, id: 'base:petrified', durationTurns: 2);  
@@ -1865,7 +1866,7 @@ Arts.newEntry(
       
     },
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 2);            
@@ -1892,7 +1893,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- 15,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       when(random.try(percentSuccess:30)) Arts.FAIL;
       windowEvent.queueCustom(
         onEnter :: {
@@ -1925,7 +1926,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- 10,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
@@ -1965,7 +1966,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.07) + (level-1),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           if (user.attack(
@@ -1975,8 +1976,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart: targetParts[0]
           ) == true)
             targets[0].addEffect(from:user, id: 'base:bleeding', durationTurns: 4);            
         }
@@ -2001,7 +2001,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].heal(amount:1 + level*2);
@@ -2028,7 +2028,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].heal(amount:(0.2 * targets[0].stats.HP)->ceil);
@@ -2054,7 +2054,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {        
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {        
       @:chance = random.number();
       match(true) {
         (chance > 0.9) ::<= {    
@@ -2112,7 +2112,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @:Species = import(module:'game_database.species.mt');
 
@@ -2175,7 +2175,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @:Species = import(module:'game_database.species.mt');
 
@@ -2225,7 +2225,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
       when ([...user.battle.getAllies(:user)]->filter(
         ::(value) <- (value.species.traits & Species.TRAIT.SUMMON) != 0)->size >= 2
@@ -2273,7 +2273,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
       when ([...user.battle.getAllies(:user)]->filter(
         ::(value) <- (value.species.traits & Species.TRAIT.SUMMON) != 0)->size >= 2
@@ -2321,7 +2321,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
       when ([...user.battle.getAllies(:user)]->filter(
         ::(value) <- (value.species.traits & Species.TRAIT.SUMMON) != 0)->size >= 2
@@ -2371,7 +2371,7 @@ Arts.newEntry(
         return [...enemies]->filter(::(value) <- (value.species.traits & Species.TRAIT.SUMMON) != 0)->size > 0;
     },
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Species = import(module:'game_database.species.mt');
 
       windowEvent.queueMessage(
@@ -2414,12 +2414,11 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (1.2) * (1 + (level-1)*0.15),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
             target:targets[0],
-            targetDefendPart:-1,
             targetPart: Entity.DAMAGE_TARGET.BODY,
             damage: Damage.new(
               amount:Arts.find(:'base:fire').baseDamage(level, user),
@@ -2451,7 +2450,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (0.6) * (1 + (level-1)*0.08),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
@@ -2491,12 +2490,11 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (2.0) * (1 + (level-1) * 0.15),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
             target:targets[0],
-            targetDefendPart:-1,
             targetPart: Entity.DAMAGE_TARGET.BODY,
             damage: Damage.new(
               amount: Arts.find(:'base:flare').baseDamage(level, user),
@@ -2536,7 +2534,7 @@ Arts.newEntry(
         })
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       @:Random = import(module:'game_singleton.random.mt');
       @:item = ::<= {
@@ -2587,7 +2585,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (0.6 + (0.2)*(level-1)),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -2624,7 +2622,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (0.75) * (1 + (level-1)* 0.15),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -2663,7 +2661,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       when (!random.try(percentSuccess:40 + level*10)) Arts.FAIL;
 
       windowEvent.queueCustom(
@@ -2693,14 +2691,13 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (0.85) * (1 + (level-1)*0.1),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         windowEvent.queueCustom(
           onEnter :: {
             user.attack(
               target:enemy,
-              targetPart: Entity.DAMAGE_TARGET.BODY,
-              targetDefendPart: -1,
+              targetPart: Entity.DAMAGE_TARGET.BODY
               damage: Damage.new(
                 amount:Arts.find(:'base:explosion').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
@@ -2731,7 +2728,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Flash!'
       );
@@ -2768,7 +2765,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (0.45),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       for(0, 4 + (level-1)*2)::(index) {
         @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
         windowEvent.queueCustom(
@@ -2806,7 +2803,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- user.stats.ATK * (0.9),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       for(0, 4 + (level-1)*2)::(index) {
         @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
         windowEvent.queueCustom(
@@ -2819,8 +2816,7 @@ Arts.newEntry(
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT
               ),
-              targetPart: Entity.normalizedDamageTarget(),
-              targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+              targetPart: Entity.normalizedDamageTarget()
             );
           }
         )
@@ -2845,7 +2841,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].heal(amount:(targets[0].stats.HP*(0.2 + 0.1*(level-1)))->ceil);
@@ -2873,7 +2869,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       windowEvent.queueCustom(
         onEnter :: {
@@ -2904,7 +2900,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -2933,7 +2929,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -2962,7 +2958,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:protect', durationTurns: 10);
@@ -2988,7 +2984,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:dueled', durationTurns: 1000000);
@@ -3014,7 +3010,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:grace', durationTurns: 1000);
@@ -3040,7 +3036,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       when (world.time < world.TIME.MORNING && world.time < world.TIME.EVENING) Arts.FAIL;
 
@@ -3069,7 +3065,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Protect All!'
       );
@@ -3100,7 +3096,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.healAP(amount:((user.stats.AP*0.2)->ceil));
@@ -3127,7 +3123,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueMessage(
         text: user.name + ' casts Soothe on ' + targets[0].name + '!'
       );
@@ -3159,7 +3155,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
      
       when(targets[0].inventory.items->keycount == 0) 
@@ -3206,7 +3202,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:counter', durationTurns: 3);
@@ -3234,7 +3230,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @:Entity = import(module:'game_class.entity.mt');
       
@@ -3278,7 +3274,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:sneaked', durationTurns: 2);
@@ -3304,7 +3300,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:confused', durationTurns: 5);
@@ -3330,7 +3326,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:taunted', durationTurns: 3);
@@ -3356,7 +3352,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:terrified', durationTurns: 3);
@@ -3383,7 +3379,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:field-barrier', durationTurns: 3);
@@ -3411,7 +3407,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:potentiality-shared', durationTurns: A_LOT);
@@ -3437,7 +3433,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:copy-shared', durationTurns: A_LOT);
@@ -3464,7 +3460,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:suppressor', durationTurns: 2);
@@ -3491,7 +3487,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:block', durationTurns: A_LOT);
@@ -3517,7 +3513,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:slingshot-block', durationTurns: A_LOT);
@@ -3544,7 +3540,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:ricochet-block', durationTurns: A_LOT);
@@ -3572,7 +3568,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:reflective-block', durationTurns: A_LOT);
@@ -3598,7 +3594,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:conductive-block', durationTurns: A_LOT);
@@ -3627,7 +3623,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:mind-focused', durationTurns: 5);
@@ -3656,7 +3652,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:defend', durationTurns:1);
@@ -3683,7 +3679,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id: 'base:guard', durationTurns:1);
@@ -3710,7 +3706,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach(targets) ::(k, v) {
         windowEvent.queueCustom(
           onEnter :: {
@@ -3740,7 +3736,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           @:Effect = import(module:'game_database.effect.mt');
@@ -3769,7 +3765,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
 
@@ -3799,7 +3795,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
       windowEvent.queueCustom(
@@ -3828,7 +3824,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
       windowEvent.queueCustom(
@@ -3857,7 +3853,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
       windowEvent.queueCustom(
@@ -3886,7 +3882,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
       windowEvent.queueCustom(
@@ -3916,7 +3912,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
       windowEvent.queueCustom(
@@ -3945,7 +3941,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       @:stances = Effect.getAll()->filter(by:::(value) <- value.name->contains(key:'Stance'));
       windowEvent.queueCustom(
@@ -3974,7 +3970,7 @@ Arts.newEntry(
     kind : KIND.SPECIAL,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       user.healAP(amount:3);
     }
   }
@@ -3997,7 +3993,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id:'base:poisonroot-growing', durationTurns:2);              
@@ -4023,7 +4019,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id:'base:triproot-growing', durationTurns:2);              
@@ -4049,7 +4045,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id:'base:healroot-growing', durationTurns:2);              
@@ -4076,7 +4072,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:which = [
         'base:healroot-growing',
         'base:triproot-growing',
@@ -4114,7 +4110,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:burning', durationTurns:4);              
@@ -4141,7 +4137,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:elemental-tag', durationTurns:20);              
@@ -4168,7 +4164,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:elemental-shield', durationTurns:5);              
@@ -4196,7 +4192,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:icy', durationTurns:4);              
@@ -4222,7 +4218,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.addEffect(from:user, id:'base:shock', durationTurns:4);              
@@ -4248,7 +4244,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
 
@@ -4279,7 +4275,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:item = extraData[0];
       when (targets->size == 0) ::<= {
         foreach(item.useEffects)::(index, effect) {  
@@ -4313,7 +4309,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     oncePerBattle : false,
     canBlock : false,
-    onAction: ::(user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(user, targets, turnIndex, targetParts, extraData) {
       @item = extraData[0];
       foreach(item.base.useEffects)::(index, effect) {  
         foreach(targets)::(t, target) {
@@ -4352,7 +4348,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(user, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(user, level, targets, turnIndex, targetParts, extraData) {
       @:item = extraData[0];
       user.equip(
         item, 
@@ -4380,7 +4376,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(
@@ -4408,7 +4404,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(
@@ -4442,7 +4438,7 @@ Arts.newEntry(
         return [random.pickArrayItem(:allies)];    
     },
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
         Arts.FAIL;
@@ -4481,7 +4477,7 @@ Arts.newEntry(
         return [random.pickArrayItem(:enemies)];    
     },
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
         windowEvent.queueMessage(text:targets[0].name + ' has no armor to weaken!');          
@@ -4519,7 +4515,7 @@ Arts.newEntry(
         return [random.pickArrayItem(:enemies)];
     },
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).base.name == 'None')
         windowEvent.queueMessage(text:targets[0].name + ' has no weapon to dull!');          
@@ -4558,7 +4554,7 @@ Arts.newEntry(
         return [random.pickArrayItem(:allies)];
     },
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Entity = import(module:'game_class.entity.mt');
       when (targets[0].getEquipped(slot:Entity.EQUIP_SLOTS.ARMOR).base.name == 'None')
         windowEvent.queueMessage(text:targets[0].name + ' has no armor to strengthen!');          
@@ -4592,7 +4588,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       when(random.try(percentSuccess:50 - (level-1)*10)) Arts.FAIL;
 
@@ -4621,7 +4617,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
       if (world.party.isMember(entity:user)) ::<= {
@@ -4674,7 +4670,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
       if (world.party.isMember(entity:user)) ::<= {
@@ -4727,7 +4723,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
       if (world.party.isMember(entity:user)) ::<= {
@@ -4780,7 +4776,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
       if (world.party.isMember(entity:user)) ::<= {
@@ -4832,7 +4828,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @inventory;
       if (world.party.isMember(entity:user)) ::<= {
@@ -4918,7 +4914,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           @:world = import(module:'game_singleton.world.mt');
@@ -4955,7 +4951,7 @@ Arts.newEntry(
     usageHintAI: USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       when (user.battle.getAllies(:user)->any(condition:::(value) <- value == targets[0]))
         windowEvent.queueMessage(text: "Are you... trying to bribe me? we're... we're on the same team..");
         
@@ -5035,7 +5031,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         when(enemy.isIncapacitated()) empty;
         if (random.flipCoin())
@@ -5070,7 +5066,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       when(turnIndex == 0) ::<= {
 
         when(targets[0].isIncapacitated() == false && random.try(percentSuccess:25)) ::<= {
@@ -5145,7 +5141,7 @@ Arts.newEntry(
       usageHintAI : USAGE_HINT.OFFENSIVE,
       shouldAIuse ::(user, reactTo, enemies, allies) {},
       baseDamage ::(level, user) {},
-      onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {        
+      onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {        
 
         windowEvent.queueCustom(
           onEnter :: {
@@ -5156,8 +5152,7 @@ Arts.newEntry(
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP
               ),
-              targetPart:targetParts[0],
-              targetDefendPart:targetDefendParts[0]
+              targetPart:targetParts[0]
             );            
           }
         )
@@ -5192,7 +5187,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       user.drawArt(count:2);
     }
   }
@@ -5214,7 +5209,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       user.discardArt();
       user.drawArt(count:1);
     }
@@ -5238,7 +5233,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       targets[0].discardArt();
     }
   }
@@ -5260,7 +5255,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:oldHand = [...user.deck.hand]
       user.deck.hand = [...targets[0].deck.hand];
       targets[0].deck.hand = oldHand;
@@ -5286,7 +5281,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       user.discardArt();
       user.drawArt();      
     }
@@ -5309,7 +5304,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       user.deck.hand = [];
       foreach(user.deck.hand) ::(k, c) {
         user.deck.discardFromHand(:c);
@@ -5337,7 +5332,7 @@ Arts.newEntry(
       when(user.hp == user.stats.HP) false;
     },
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       user.deck.hand = [];
       foreach(user.deck.hand) ::(k, c) {
         user.deck.discardFromHand(:c);
@@ -5364,7 +5359,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:pickitem = import(:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
       if (world.party.leader == user) ::<= {
@@ -5399,7 +5394,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @:summon ::{
 
@@ -5461,7 +5456,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:pickitem = import(:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
       if (world.party.leader == user) ::<= {
@@ -5497,7 +5492,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       when(random.flipCoin()) Arts.FAIL;
 
@@ -5529,7 +5524,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       user.discardArt();
       user.addEffect(from:user, id:'base:brace', durationTurns:2);
     }
@@ -5552,7 +5547,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       user.discardArt();
       user.addEffect(from:user, id:'base:agile', durationTurns:5);
     }
@@ -5575,7 +5570,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       user.discardArt();
       windowEvent.queueMessage(text:user.name + ' views ' + targets[0].name + ' Arts hand.');
       @:party = import(module:'game_singleton.world.mt').party;          
@@ -5604,7 +5599,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
     baseDamage ::(level, user) <- 2,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -5614,8 +5609,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );    
         }
       )
@@ -5640,7 +5634,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       targets[0].heal(amount:2, isShield:true);           
       return false;
     }
@@ -5666,7 +5660,7 @@ Arts.newEntry(
       when(allies->findIndex(:reactTo) != -1) false;
     },
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       return true;
     }
   }
@@ -5688,7 +5682,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- 1,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -5699,8 +5693,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );            
         }
       )
@@ -5727,7 +5720,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -5738,8 +5731,7 @@ Arts.newEntry(
               damageClass: Damage.CLASS.HP,
               traits : Damage.TRAIT.UNBLOCKABLE
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );   
         }
       )
@@ -5764,7 +5756,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.PHYSICAL,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id:'base:banishing-light', durationTurns:A_LOT); 
@@ -5793,7 +5785,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.3),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.damage(
@@ -5816,8 +5808,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );            
         }
       )
@@ -5841,7 +5832,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.damage(
@@ -5880,7 +5871,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.damage(
@@ -5921,7 +5912,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.RARE,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.damage(
@@ -5961,7 +5952,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.damage(
@@ -6009,7 +6000,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.damage(
@@ -6047,7 +6038,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.damage(
@@ -6086,7 +6077,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Species = import(module:'game_database.species.mt');
 
       @:Entity = import(module:'game_class.entity.mt');
@@ -6135,7 +6126,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:targets[0], id:'base:cursed-binding', durationTurns:10);
     }
   }
@@ -6159,7 +6150,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
           user.damage(
@@ -6226,7 +6217,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.RARE,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:unbalanced', durationTurns:2);      
       user.drawArt(count:1); 
     }
@@ -6249,7 +6240,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:desparate', durationTurns:2);      
       user.drawArt(count:1); 
     }
@@ -6273,7 +6264,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) <- user.stats.HP + user.stats.DEF/3,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       
       windowEvent.queueCustom(
         onEnter :: {
@@ -6284,8 +6275,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: Entity.DAMAGE_TARGET.BODY,
-            targetDefendPart:targetDefendParts[0]
+            targetPart: Entity.DAMAGE_TARGET.BODY
           );        
         }
       );    
@@ -6316,7 +6306,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:enlarged', durationTurns:2);      
       
     }
@@ -6340,7 +6330,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       if (targets[0].shield == 0)
         targets[0].heal(amount:1, isShield:true)          
       else      
@@ -6365,7 +6355,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       for(0, 1) ::(i) {
         targets[0].addEffect(from:user, id:'base:banish', durationTurns:A_LOT);      
       }
@@ -6390,7 +6380,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       for(0, 2) ::(i) {
         targets[0].addEffect(from:user, id:'base:banish', durationTurns:A_LOT);      
       }
@@ -6414,7 +6404,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       for(0, 3) ::(i) {
         targets[0].addEffect(from:user, id:'base:banish', durationTurns:A_LOT);      
       }
@@ -6439,7 +6429,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:paralyzed',durationTurns:2);
       for(0, 3) ::(i) {
         targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);      
@@ -6465,7 +6455,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       foreach(targets[0].effectStack.getAll()) ::(k, inst) {
         targets[0].addEffect(
           from:user, id:inst.id, durationTurns:2
@@ -6491,7 +6481,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       foreach(targets) ::(k, target) {
         foreach(target.effectStack.getAll()) ::(k, inst) {
           target.addEffect(
@@ -6519,7 +6509,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       foreach(targets) ::(k, inst) {
         for(0, 3) ::(i) {
           inst.addEffect(
@@ -6549,7 +6539,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       
       // only valid for non-wyvern battles. No cheating!
       when (targets->any(condition::(value) <-
@@ -6695,7 +6685,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.ONCE_PER_BATTLE,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
 
       @:filter = ::(value) <- (Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0
@@ -6737,7 +6727,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.ONCE_PER_BATTLE,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
 
       @:filter = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
@@ -6780,7 +6770,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
 
 
@@ -6842,7 +6832,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:condition = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0)
 
@@ -6897,7 +6887,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:effects = random.scrambled(:user.effectStack.getAllByFilter(::(value)<-true));
       @:Effect = import(module:'game_database.effect.mt');
 
@@ -6958,7 +6948,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       
       @:filter = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
@@ -6997,7 +6987,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       
       @:filter = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF) != 0)      
@@ -7035,7 +7025,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:filter = ::(value) <- ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0) ||
                               ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0)
@@ -7093,7 +7083,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       
       @toput = [];
@@ -7136,7 +7126,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.ONCE_PER_BATTLE,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.removeEffectsByFilter(::(value) <- true);
 
       user.heal(
@@ -7194,7 +7184,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:effectStackSize = targets[0].effectStack.getAll()->size;
       when(effectStackSize == 0) Arts.FAIL;
                                  
@@ -7243,7 +7233,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @tally = 0;
       foreach(targets) ::(k, v) {
         tally += v.effectStack.getAll()->size;
@@ -7282,7 +7272,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
         ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  != 0) ||
@@ -7325,7 +7315,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
           ((Effect.find(:value.id).traits & Effect.TRAIT.BUFF)  != 0)
@@ -7365,7 +7355,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = [...targets[0].effectStack.getAll()->filter(::(value) <- 
         (Effect.find(:value.id).traits & Effect.TRAIT.BUFF)  != 0
@@ -7418,7 +7408,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       foreach(targets) ::(k, v) {
         @:amount = v.effectStack.getAll()->size;
         when(amount == 0) empty;
@@ -7471,7 +7461,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @total = 0;
       foreach(targets) ::(k, v) {
         @:amount = v.effectStack.getAll()->size;
@@ -7518,7 +7508,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @total = 0;
       @oldBanish = user.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish');
       when(oldBanish->size == 0) Arts.FAIL;  
@@ -7557,7 +7547,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @total = 0;
       @oldPoison = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:poisoned');
       when(oldPoison->size == 0) Arts.FAIL;
@@ -7598,7 +7588,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @total = 0;
       @oldBurn = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:burned');
       when(oldBurn->size == 0) Arts.FAIL;
@@ -7638,7 +7628,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @total = 0;
       @oldParalyze = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:paralyzed');
       when(oldParalyze->size == 0) Arts.FAIL;
@@ -7679,7 +7669,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @total = 0;
       @oldPetr = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified');
       when(oldPetr->size == 0) Arts.FAIL;
@@ -7724,7 +7714,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @total = 0;
       @oldBad = targets[0].effectStack.getAllByFilter(::(value) <- 
@@ -7775,7 +7765,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @total = 0;
       @oldGood = targets[0].effectStack.getAllByFilter(::(value) <- 
         true
@@ -7820,7 +7810,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK,
     rarity : RARITY.RARE,
     baseDamage::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @total = 0;
       @oldGood = user.effectStack.getAllByFilter(::(value) <- 
         true
@@ -7868,7 +7858,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage::(level, user) <- user.stats.ATK * (0.2) * level,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
 
       windowEvent.queueCustom(
@@ -7881,8 +7871,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:Entity.DAMAGE_TARGET.BODY,
-            targetDefendPart:targetDefendParts[0]
+            targetPart:Entity.DAMAGE_TARGET.BODY
           )) ::<= {
             @effUser   = [...user.effectStack.getAll()]
             @effTarget = [...targets[0].effectStack.getAll()]
@@ -7941,7 +7930,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.MULTIHIT | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage::(level, user) <- user.stats.ATK * (0.35) * level,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @oldPois = user.effectStack.getAllByFilter(::(value) <- 
         value.id == 'base:poisoned'
       );
@@ -7964,8 +7953,7 @@ Arts.newEntry(
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT
               ),
-              targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
-              targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+              targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
             );
             
             target.addEffect(from:user, id:'base:poisoned',durationTurns:5);
@@ -8001,7 +7989,7 @@ Arts.newEntry(
     baseDamage::(level, user) <- 4 * user.effectStack.getAllByFilter(::(value) <- 
         value.id == 'base:burned'
       )->size * level,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @oldPois = user.effectStack.getAllByFilter(::(value) <- 
         value.id == 'base:burned'
       );
@@ -8025,8 +8013,7 @@ Arts.newEntry(
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT
               ),
-              targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)],
-              targetDefendPart:targetDefendParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
+              targetPart: targetParts[(user.battle.getEnemies(:user))->findIndex(value:target)]
             );
           }
         );            
@@ -8058,7 +8045,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.removeEffectsByFilter(::(value) <-
         value.id == 'base:blind'
       );
@@ -8085,7 +8072,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
       @:equipped = user.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR); 
       if (equipped.name != 'None') ::<= {
@@ -8170,7 +8157,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:redirect-momentum', durationTurns:1);
       user.drawArt(count:1);
     }
@@ -8203,7 +8190,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:burned')->size;
       targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:burned');
       for(0, size) ::(i) {
@@ -8239,7 +8226,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:frozen')->size;
       targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:frozen');
       for(0, size) ::(i) {
@@ -8276,7 +8263,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:paralyzed')->size;
       targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:paralyzed');
       for(0, size) ::(i) {
@@ -8312,7 +8299,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:blind')->size;
       targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:blind');
       for(0, size) ::(i) {
@@ -8348,7 +8335,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:size = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:petrified')->size;
       targets[0].removeEffectsByFilter(::(value) <- value.id == 'base:petrified');
       for(0, size) ::(i) {
@@ -8389,7 +8376,7 @@ Arts.newEntry(
     traits : TRAIT.SUPPORT | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:convert = {
         ("base:petrified"): "base:shimmering",
         ("base:burned"): "base:burning",
@@ -8425,7 +8412,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.3) * level,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
       @:baseDamage = Arts.find(:'base:b205').baseDamage(level, user);
       windowEvent.queueCustom(
@@ -8437,8 +8424,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );        
         }
       );      
@@ -8464,7 +8450,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- user.stats.INT * (0.3) * level,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
       @:baseDamage = Arts.find(:'base:b205').baseDamage(level, user);
       windowEvent.queueCustom(
@@ -8476,8 +8462,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.LIGHT,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );        
         }
       );      
@@ -8511,7 +8496,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- 2,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
       @:size = targets[0].effectStack.getAllByFilter(::(value) <- 
         value.id == 'base:burned' ||
@@ -8527,8 +8512,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );        
           
           targets[0].addEffect(durationTurns:3, from:user, id: 'base:burned');
@@ -8565,7 +8549,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- 2,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
       @:size = targets[0].effectStack.getAllByFilter(::(value) <- 
         value.id == 'base:icy' ||
@@ -8581,8 +8565,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.ICE,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );        
           
           targets[0].addEffect(durationTurns:3, from:user, id: 'base:icy');
@@ -8619,7 +8602,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- 2,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
       @:size = targets[0].effectStack.getAllByFilter(::(value) <- 
         value.id == 'base:shock' ||
@@ -8635,8 +8618,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.THUNDER,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );        
           
           targets[0].addEffect(durationTurns:3, from:user, id: 'base:shock');
@@ -8677,7 +8659,7 @@ Arts.newEntry(
       
       return baseDamage * (1 + 0.2 * count);
     },
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
       @:baseDamage = Arts.find(:'base:b210').baseDamage(level, user);
 
@@ -8690,8 +8672,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );        
         }
       );      
@@ -8717,7 +8698,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       foreach(targets) ::(k, v) {
         v.addEffect(durationTurns:3, from:user, id: random.pickArrayItem(:ATTACK_SHIFTS));
       }
@@ -8745,7 +8726,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(durationTurns:3, from:user, id: 'base:shift-boost');
     }
   }
@@ -8771,7 +8752,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) <- user.stats.INT * (0.3 * level),
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
 
       when(turnIndex == 0) ::<= {
@@ -8834,8 +8815,7 @@ Arts.newEntry(
             damageType,
             damageClass: Damage.CLASS.HP
           ),
-          targetPart:targetParts[0],
-          targetDefendPart:targetDefendParts[0]
+          targetPart:targetParts[0]
         ); 
       }
       
@@ -8866,7 +8846,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:which = user.effectStack.getAllByFilter(::(value) <-
         ATTACK_SHIFTS->findIndex(:value.id) != -1
       );
@@ -8927,7 +8907,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:which = user.effectStack.getAllByFilter(::(value) <-
         (Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  == 0 &&
@@ -8973,7 +8953,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:which = user.effectStack.getAllByFilter(::(value) <-
         (Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF)  != 0 ||
@@ -9021,7 +9001,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].removeEffectsByFilter(::(value) <-
         value.id == 'base:burned' ||
         value.id == 'base:poisoned' 
@@ -9057,7 +9037,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].removeEffectsByFilter(::(value) <-
         value.id == 'base:elemental-tag' ||
         CURSED_SHIFTS->findIndex(:value.id) != -1
@@ -9095,7 +9075,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].removeEffectsByFilter(::(value) <-
         value.id == 'base:poisonroot-growing' ||
         value.id == 'base:triproot-growing' ||
@@ -9132,7 +9112,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].removeEffectsByFilter(::(value) <-
         value.id == 'base:banish'
       );
@@ -9166,7 +9146,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].removeEffectsByFilter(::(value) <-
         value.id == 'base:stunned'
       );
@@ -9201,7 +9181,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].removeEffectsByFilter(::(value) <-
         AILMENTS->findIndex(:value.id) != -1
       );
@@ -9241,7 +9221,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       
       foreach(Entity.EQUIP_SLOTS) ::(k, slot) {
         @:eq = targets[0].getEquipped(slot);
@@ -9277,7 +9257,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(
         from:user,
         id: 'base:clean-blessing',
@@ -9305,7 +9285,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(
         from:user,
         id: 'base:clean-curse',
@@ -9349,7 +9329,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:table = {};
       foreach(targets[0].effectStack.getAll()) ::(k, eff) {
         if (table[eff.id] == empty)
@@ -9389,7 +9369,7 @@ Arts.newEntry(
     traits : TRAIT.PHYSICAL,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(id: 'base:take-aim', durationTurns: A_LOT, from:user);
     }
   }
@@ -9412,7 +9392,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(
         from:user,
         id: 'base:splinter',
@@ -9440,7 +9420,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(
         from:user,
         id: 'base:mirrored',
@@ -9467,7 +9447,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(
         from:user,
         id: 'base:scorching',
@@ -9494,7 +9474,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(
         from:user,
         id: 'base:freezing',
@@ -9521,7 +9501,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(
         from:user,
         id: 'base:paralyzing',
@@ -9548,7 +9528,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(
         from:user,
         id: 'base:petrifying',
@@ -9575,7 +9555,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(
         from:user,
         id: 'base:blinding',
@@ -9602,7 +9582,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(
         from:user,
         id: 'base:seeping',
@@ -9630,7 +9610,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(
         from:user,
         id: 'base:dampen-multi-hit',
@@ -9657,7 +9637,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(
         from:user,
         id: 'base:multi-hit-guard',
@@ -9685,7 +9665,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
       @:Inventory = import(:'game_class.inventory.mt');
 
@@ -9746,7 +9726,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:critical-reaction', durationTurns:6);
     }
   }
@@ -9770,7 +9750,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:first-strike', durationTurns:3);
     }
   }
@@ -9794,7 +9774,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
       @:card = user.deck.draw();
       user.deck.discardFromHand(:card);
@@ -9849,7 +9829,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       when(user.deck.discardPile->size == 0) Arts.FAIL;
       @:card = user.deck.discardPile[user.deck.discardPile->size-1];
       @:world = import(module:'game_singleton.world.mt');
@@ -9906,7 +9886,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:cascading-flash', durationTurns:3);
     }
   }
@@ -9930,7 +9910,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
 
       @:cards = [
@@ -9998,7 +9978,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:claivoyance', durationTurns:3);
     }
   }
@@ -10023,7 +10003,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:scatterbrained', durationTurns:3);
     }
   }
@@ -10047,7 +10027,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) <- user.stats.INT * (0.5) * level,
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @effCount = 0;
       foreach( user.battle.getAllies(:user)) ::(k, v) {
         effCount += v.effectStack.getAll()->size;
@@ -10062,8 +10042,7 @@ Arts.newEntry(
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:targetParts[0],
-            targetDefendPart:targetDefendParts[0]
+            targetPart:targetParts[0]
           );        
         }
       );      
@@ -10089,7 +10068,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
       windowEvent.queueCustom(
         onEnter :: {
@@ -10122,7 +10101,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:light-guard', durationTurns:3);
     }
   }
@@ -10146,7 +10125,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:multi-guard', durationTurns:3);
     }
   }
@@ -10170,7 +10149,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:premonition', durationTurns:3);
     }
   }
@@ -10200,7 +10179,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:calcification', durationTurns:3);
     }
   }
@@ -10224,7 +10203,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:crustacean-maneuver', durationTurns:3);
     }
   }
@@ -10248,7 +10227,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC | TRAIT.ONCE_PER_BATTLE,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:lucky-charm', durationTurns:2);
     }
   }
@@ -10271,7 +10250,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC | TRAIT.ONCE_PER_BATTLE,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:spirit-loan', durationTurns:2);
     }
   }
@@ -10295,7 +10274,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC | TRAIT.ONCE_PER_BATTLE,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:procrastinate-death', durationTurns:3);
     }
   }
@@ -10319,7 +10298,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC | TRAIT.ONCE_PER_BATTLE,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:cheat-death', durationTurns:3);
     }
   }
@@ -10342,7 +10321,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:death-reflection', durationTurns:A_LOT);
     }
   }
@@ -10365,7 +10344,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:random.pickArrayItem(:AILMENTS), durationTurns:2);
     }
   }
@@ -10388,7 +10367,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:limit-break', durationTurns:A_LOT);
     }
   }
@@ -10415,7 +10394,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:all = targets[0].effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL); 
       when(all->size == 0) Arts.FAIL;
 
@@ -10453,7 +10432,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:Effect = import(module:'game_database.effect.mt');
       @:all = targets[0].effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL); 
       when(all->size == 0) Arts.FAIL;
@@ -10490,7 +10469,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @count = 0;
       foreach(targets)::(k, target) {
         @:all = target.effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL); 
@@ -10531,7 +10510,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @count = 0;
       foreach(targets)::(k, target) {
         @:all = target.effectStack.getAllByFilter(::(value) <- value.traits & Effect.TRAIT.REVIVAL); 
@@ -10577,7 +10556,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:pool = targets->filter(::(value) <- value.effectStack.getAllByFilter(::(value) <- (value.traits & Effect.TRAIT.REVIVAL) == 0));
       when(pool->size == 0) Arts.FAIL;
 
@@ -10613,7 +10592,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:deathless-overflow', durationTurns:A_LOT);
     }
   }
@@ -10637,7 +10616,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:soul-buffer', durationTurns:1);
     }
   }
@@ -10661,7 +10640,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:body-buffer', durationTurns:1);
     }
   }
@@ -10685,7 +10664,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       random.pickArrayItem(:targets).addEffect(from:user, id:'base:perfect-barrier', durationTurns:1);
     }
   }
@@ -10708,7 +10687,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
       @:Species = import(module:'game_database.species.mt');
 
@@ -10769,7 +10748,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:soul-split', durationTurns:3);
     }
   }
@@ -10794,7 +10773,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:concentrating', durationTurns:1);
       targets[0].addEffect(from:user, id:'base:soul-projection', durationTurns:2);
     }
@@ -10819,7 +10798,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:charmed', durationTurns:3);
     }
   }
@@ -10843,7 +10822,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:static-shield', durationTurns:3);
     }
   }
@@ -10868,7 +10847,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:scorching-shield', durationTurns:3);
     }
   }
@@ -10891,7 +10870,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:freezing-shield', durationTurns:3);
     }
   }
@@ -10915,7 +10894,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:acid-dust', durationTurns:A_LOT);
     }
   }
@@ -10938,7 +10917,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:conduction-dust', durationTurns:A_LOT);
     }
   }
@@ -10962,7 +10941,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:crystalized-dust', durationTurns:A_LOT);
     }
   }
@@ -10985,7 +10964,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:embarrassed', durationTurns:4);
     }
   }
@@ -11008,7 +10987,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:enraged', durationTurns:3);
     }
   }
@@ -11032,7 +11011,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:self-illusion', durationTurns:3);
     }
   }
@@ -11058,7 +11037,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:paralyzed', durationTurns:1);
       user.addEffect(from:user, id:'base:shock', durationTurns:A_LOT);
     }
@@ -11083,7 +11062,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:burned', durationTurns:3);
       user.addEffect(from:user, id:'base:burning', durationTurns:A_LOT);
     }
@@ -11107,7 +11086,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:frozen', durationTurns:1);
       user.addEffect(from:user, id:'base:icy', durationTurns:A_LOT);
     }
@@ -11132,7 +11111,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
 
 
@@ -11203,7 +11182,7 @@ Arts.newEntry(
     traits : TRAIT.MAGIC,
     rarity : RARITY.EPIC,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @:world = import(module:'game_singleton.world.mt');
 
 
@@ -11249,7 +11228,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:b305', durationTurns:5);
     }
   }
@@ -11272,7 +11251,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:b307', durationTurns:5);
     }
   }
@@ -11297,7 +11276,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:b308', durationTurns:5);
     }
   }
@@ -11321,7 +11300,7 @@ Arts.newEntry(
     traits : 0,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {      
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:b308', durationTurns:5);
     }
   }
@@ -11346,7 +11325,7 @@ Arts.newEntry(
       return false;
     },
     baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:BattleAction = import(:'game_struct.battleaction.mt');
       @:ArtsDeck = import(:'game_class.artsdeck.mt');
       
@@ -11385,7 +11364,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:corrupted-punishment', durationTurns: 3);             
@@ -11414,7 +11393,7 @@ Arts.newEntry(
       when(banishCount > 0) true;
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:corrupted-empowerment', durationTurns: 3);             
@@ -11443,7 +11422,7 @@ Arts.newEntry(
       when(banishCount > 0) true;
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:corrupted-radioactivity', durationTurns: 3);             
@@ -11472,7 +11451,7 @@ Arts.newEntry(
       when(banishCount > 0) true;
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:corrupted-inspiration', durationTurns: 3);             
@@ -11502,7 +11481,7 @@ Arts.newEntry(
       when(banishCount > 0) true;
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].addEffect(from:user, id: 'base:corrupted-corruption', durationTurns: 3);             
@@ -11530,7 +11509,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           @:allies = user.battle.getAllies(:user);
@@ -11568,7 +11547,7 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
           foreach(
@@ -11613,7 +11592,7 @@ Arts.newEntry(
          
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:s = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size
       @:amount = s*targets[0].stats.HP*0.05;
       
@@ -11658,7 +11637,7 @@ Arts.newEntry(
          
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:s = targets[0].effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size
       user.battle.evict(:targets[0]);
       
@@ -11691,7 +11670,7 @@ Arts.newEntry(
       
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       targets[0].addEffect(from:user, id: 'base:banish-shield', durationTurns: 4);
     }
   }
@@ -11728,7 +11707,7 @@ Arts.newEntry(
       }
     },
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:userStacks = getStacks(:user);
       @:othrStacks = getStacks(:targets[0]);
 
@@ -11771,7 +11750,7 @@ Arts.newEntry(
       } else false
     ,
     baseDamage ::(level, user){},
-    onAction: ::(level, user, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @whom;
       @item;
       @:world = import(module:'game_singleton.world.mt');
