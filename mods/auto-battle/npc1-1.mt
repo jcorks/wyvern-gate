@@ -1,6 +1,6 @@
 return {
   name : 'A-1',
-  profession : empty,
+  profession : 'base:runologist',
   level : 6, // default
   giveWeapon : false,
   giveArmor : false,

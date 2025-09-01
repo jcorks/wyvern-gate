@@ -110,7 +110,9 @@
 
       commitTargettedAction::(battle, onCommit, card, condition, overrideTargets) {
         @enemies = battle.getEnemies(:user_);
-        @:allies = battle.getAllies(:user_);
+        @allies = battle.getAllies(:user_);
+        
+        
         @:art = Arts.find(id:card.id);
         @atEnemy = (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE) ||
                (art.usageHintAI == Arts.USAGE_HINT.DEBUFF);
@@ -122,14 +124,18 @@
             (Arts.TARGET_MODE.ONE,
              Arts.TARGET_MODE.ONEPART) :::<= {
               if (atEnemy) ::<= {
+                if (condition)
+                  enemies = [...enemies]->filter(:condition);
                 if (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE)
                   enemies = enemies->filter(::(value) <- value.hp != 0);
                 targets->push(value:Random.pickArrayItem(list:enemies))
                 if (art.targetMode == Arts.TARGET_MODE.ONEPART)
                   targetParts = [Entity.normalizedDamageTarget()];
-              } else 
+              } else ::<= {
+                if (condition)
+                  allies = [...allies]->filter(:condition);
                 targets->push(value:Random.pickArrayItem(list:allies))
-              ;
+              }
             },
             
             (Arts.TARGET_MODE.ALLALLY) :::<= {
@@ -145,6 +151,10 @@
 
 
             (Arts.TARGET_MODE.RANDOM) :::<= {
+              if (condition) ::<= {
+                allies = [...allies]->filter(:condition);
+                enemies = [...enemies]->filter(:condition);
+              }
               if (random.number() < 0.5) 
                 targets->push(value:Random.pickArrayItem(list:enemies))
               else 
@@ -154,20 +164,19 @@
 
           }
         } else ::<= {
-          if (overrideTargets->findIndexCondition(::(value) <- value->type != Entity.type) != -1) 
+          @targetIndex = overrideTargets->findIndexCondition(::(value) <- value->type != Entity.type);
+          if (targetIndex != -1) 
           ::<= {
             error(:'Hi. This error is happening because the AI decision for an Art returned an invalid value. It is likely that the Art ' + 
               if (card == empty)
                 '... Actually hold on, there is apparently another error (card == empty?)'
               else 
-                card.id + ' is the culprit. (overrideTargets is of type ' + String(:targets->type) + ')'
+                card.id + ' is the culprit. (overrideTargets member in question is of type ' + String(:overrideTargets[targetIndex]->type) + ')'
             )
           }        
           targets = overrideTargets;
         }
         
-        if (condition)
-          targets = [...targets]->filter(:condition);
         
         when (targets->size == 0 && art.targetMode != Arts.TARGET_MODE.NONE)
           defaultAttack(battle, onCommit);

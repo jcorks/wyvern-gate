@@ -1751,12 +1751,15 @@
         onFinish,
         renderable
       ) {
+        @finished = false;
         phases = [...phases]
         @:doNextPhase :: {
           @:next = phases[0];
           when(next == empty)
-            if (onFinish)
+            if (onFinish) ::<= {
+              finished = true;
               onFinish(:true);
+            }
           
           phases->remove(key:0);
           
@@ -1764,14 +1767,16 @@
             this.queueCustom(
               onEnter ::<- doNextPhase()
             );       
-
-          if (onFinish)
-            onFinish(:false);
         }      
         this.queueNestedResolve(
           renderable,
           onEnter :: {
             doNextPhase();
+          },
+          
+          onLeave ::{
+            if (onFinish != empty && finished == false)
+              onFinish(:false);
           }
         );
       },

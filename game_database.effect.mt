@@ -114,7 +114,7 @@ Effect.newEntry(
   data : {
     name : 'Defend',
     id: 'base:defend',
-    description: 'Adds an additional block point. Reduces damage by 40%. When first getting this effect and HP is below 50%, gain 10% HP back.',
+    description: 'Reduces incoming attack damage by 40%. When first getting this effect and HP is below 50%, gain 10% HP back.',
     stackable: false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -131,7 +131,7 @@ Effect.newEntry(
         }
       },
 
-      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage!");
         damage.amount *= 0.6;
       }
@@ -526,25 +526,24 @@ Effect.newEntry(
             Entity.DAMAGE_TARGET.LIMBS
           ] 
           
-          @:doNext = ::{
+          
 
-            windowEvent.queueChoices(
-              renderable : {
-                render : renderFrame
-              },
-              topWeight:0.9,
-              leftWeight: 0.5,
-              onGetChoices ::{
-                return choiceNames
-              },
-              canCancel: false,   
-              onChoice ::(choice) {
-                targetDefendPart = choices[choice-1];
-                choices->remove(key:choice-1);
-                choiceNames->remove(key:choice-1);
-              }
-            );
-          }
+          windowEvent.queueChoices(
+            renderable : {
+              render : renderFrame
+            },
+            topWeight:0.9,
+            leftWeight: 0.5,
+            onGetChoices ::{
+              return choiceNames
+            },
+            canCancel: false,   
+            onChoice ::(choice) {
+              targetDefendPart = choices[choice-1];
+              choices->remove(key:choice-1);
+              choiceNames->remove(key:choice-1);
+            }
+          );
         }
 
 
@@ -969,10 +968,9 @@ Effect.newEntry(
     events : {
       onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         if (!holder.isIncapacitated() && random.try(percentSuccess:40)) ::<= {
-          windowEvent.queueMessage(text:holder.name + "'s ghostly body bends around the attack!");
-          damage.amount = 0;
+          windowEvent.queueMessage(text:holder.name + "'s ghostly body repels the attack, reducing it to 1 damage!");
+          damage.amount = 1;
         }    
-        return EffectStack.CANCEL_PROPOGATION;
       }
     }
   }
@@ -992,9 +990,8 @@ Effect.newEntry(
     events : {
       onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         when (!holder.isIncapacitated() && random.try(percentSuccess:35)) ::<= {
-          windowEvent.queueMessage(text:holder.name + " ferociously repels the attack!");
-          damage.amount = 0;
-          return EffectStack.CANCEL_PROPOGATION;
+          windowEvent.queueMessage(text:holder.name + " ferociously repels the attack, reducing it to cause 1 damage!");
+          damage.amount = 1;
         }
       }
     }
@@ -1019,9 +1016,8 @@ Effect.newEntry(
             'You disrespect me with such a weak attack, Chosen!',
             'Nice try, but it is not enough!'
           ]));
-          windowEvent.queueMessage(text:holder.name + ' deflected the attack!');
-          damage.amount = 0;
-          return EffectStack.CANCEL_PROPOGATION;
+          windowEvent.queueMessage(text:holder.name + ' reflected the attack, making it cause 1 damage instead!');
+          damage.amount = 1;
         }
       }
     }
@@ -1033,7 +1029,7 @@ Effect.newEntry(
   data : {
     name : 'Seasoned Adventurer',
     id : 'base:seasoned-adventurer',
-    description: 'Is considerably harder to hit. 40% chance to negate damage from an incoming attack.',
+    description: '40% chance to negate damage from an incoming attack.',
     stackable: false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
@@ -1061,7 +1057,7 @@ Effect.newEntry(
   data : {
     name : 'Defensive Stance',
     id : 'base:defensive-stance',
-    description: 'ATK base -5, DEF base +10, gains an additional block point.',
+    description: 'ATK base -5, DEF base +10, reduces incoming attack damage by 33%.',
     stackable: false,
     traits : 0,
     stats: StatSet.new(ATK:-5, DEF:10),
@@ -1070,6 +1066,10 @@ Effect.newEntry(
         windowEvent.queueMessage(
           text: holder.name + ' changes their stance to be defensive!'
         );
+      },
+
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        damage.amount = (damage.amount * .66)->floor;
       }
     }
   }
@@ -1118,7 +1118,7 @@ Effect.newEntry(
   data : {
     name : 'Heavy Stance',
     id : 'base:heavy-stance',
-    description: 'SPD base -5, DEF base +10, additional block point.',
+    description: 'SPD base -5, DEF base +10.',
     stackable: false,
     traits : 0,
     stats: StatSet.new(SPD:-5, DEF:10),
@@ -5446,7 +5446,7 @@ Effect.newEntry(
   data : {
     name : 'Aura',
     id : 'base:aura',
-    description: 'ATK,DEF,INT,SPD,DEX base +4, gains an additional block point.',
+    description: 'ATK,DEF,INT,SPD,DEX base +4',
     stackable: true,
     traits : 0,
     stats: StatSet.new(
@@ -5506,7 +5506,7 @@ Effect.newEntry(
   data : {
     name : 'Shield Aura',
     id : 'base:shield-aura',
-    description: 'DEF base +4, gains an additional block point, and reduces both incoming and outgoing damage by 1.',
+    description: 'DEF base +4, and reduces both incoming and outgoing damage by 1.',
     stackable: true,
     traits : 0,
     stats: StatSet.new(
@@ -6405,13 +6405,17 @@ Effect.newEntry(
   data : {
     name : '@b305',
     id : 'base:b305',
-    description: 'Adds one additional block point. Any damage taken is increased by 1.',
+    description: '33% change to negate damage. Any damage taken is increased by 1.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when(damage.amount == 0) empty;
+        
+        when(random.try(percentSuccess:33))
+          damage.amount = 0
+        
         damage.amount += 1;
         windowEvent.queueMessage(
           text: holder.name + '\'s b305 increased the damage received!'

@@ -1856,6 +1856,16 @@
 
       
       windowEvent.queueNestedPhases(
+        onFinish ::(proper)  {
+          if (hasNoEffectStack)        
+            parent.this.effectStack.clear(all:true);
+          if (hasNoEffectStack)        
+            parent.effectStack = empty;
+
+          displayedHurt->remove(key:target);
+        },
+        
+        
         phases : [
       
       
@@ -2026,15 +2036,6 @@
               damage : dmg,
               targetPart : targetPart
             );
-        },
-        
-        ::{
-          if (hasNoEffectStack)        
-            parent.this.effectStack.clear(all:true);
-          if (hasNoEffectStack)        
-            parent.effectStack = empty;
-
-          displayedHurt->remove(key:target);
         }
       
       ]);

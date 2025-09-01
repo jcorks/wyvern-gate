@@ -1616,7 +1616,7 @@ Arts.newEntry(
               'base:regeneration-rune',
               'base:cure-rune',
               'base:shield-rune'               
-            ]
+            ]->map(::(value) <- Arts.find(id:value))
           );
         }
       );           

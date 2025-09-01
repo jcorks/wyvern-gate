@@ -251,7 +251,8 @@ return ::{
     {text:'Also recall that Effect Arts can be used freely in a turn while Ability arts end the turn.'},    
     {text:'Now that you know the basics, try to play out the rest of the battle.'}
   ];
-  
+
+  /*  
   @endTurn = [
     {text:'Here are some extra pointers about attacking.', topWeight: 0.5},
     {text: 'When choosing an Art that attacks someone, the one getting attacked may have a chance to block. If so, they will choose a body part to block. If this matches the attacker\'s aiming part, then the attack is nullified.', topWeight: 0.5},
@@ -259,6 +260,7 @@ return ::{
     {text:'In most cases, aiming for the body is safest, as it has unreduced damage. However, be aware that most combatants will expect this and will try to defend this more often.', topWeight: 0.5},    
     {text:'It\'s also notable that some Arts, like offensive magick, are not able to be aimed to specific parts and will just focus on the body of the target.', topWeight: 0.5}
   ]
+  */
   
   
   
@@ -287,10 +289,12 @@ return ::{
         },
         
         onTurnPrep :: {
+          /*
           when(endTurn != empty && turn1 == empty) ::<= {
             doScene(acts:endTurn);
             endTurn = empty;
           }
+          */
         
         },
         
