@@ -141,8 +141,10 @@ Arts.newEntry(
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- user.stats.ATK * (0.5) * level,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      breakpoint();
       windowEvent.queueCustom(
         onEnter :: {
+          breakpoint();
           user.attack(
             target:targets[0],
             damage: Damage.new(
@@ -164,18 +166,18 @@ Arts.newEntry(
   data: {
     name: 'Parry',
     id : 'base:parry',
-    notifCommit : '$1 attacks $2!',
+    notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.ONEPART,
+    targetMode : TARGET_MODE.NONE,
     keywords : ['base:parry'],
     description: "Adds the Parry effect for 4 turns.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    kind : KIND.ABILITY,
+    kind : KIND.EFFECT,
     traits : TRAIT.PHYSICAL,
-    rarity : RARITY.COMMON,
-    baseDamage ::(level, user) <- 0,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) <- empty,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) { 
       user.removeEffectsByFilter(::(value) <- value.id == 'base:parry');
       user.addEffect(from:user, id:'base:parry', durationTurns:4);      
@@ -204,33 +206,30 @@ Arts.newEntry(
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user) <- 1,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      
-      
-      windowEvent.queueCustom(
-        onEnter :: {
 
-          if (user.attack(
-            target:targets[0],
-            damage: Damage.new(
-              amount:1,
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP
-            ),
-            targetPart: Entity.DAMAGE_TARGET.HEAD
-          ) == true)
-            if (random.try(percentSuccess:level*5)) ::<= {
-              windowEvent.queueMessage(
-                text: user.name + ' does a connecting blow, finishing off ' + targets[0].name +'!'
-              );              
-              targets[0].damage(attacker:user, damage:Damage.new(
-                amount:A_LOT,
-                damageType:Damage.TYPE.PHYS,
-                damageClass:Damage.CLASS.HP
-              ),dodgeable: false);                
-            }   
+      user.attack(
+        target:targets[0],
+        damage: Damage.new(
+          amount:1,
+          damageType : Damage.TYPE.PHYS,
+          damageClass: Damage.CLASS.HP
+        ),
+        targetPart: Entity.DAMAGE_TARGET.HEAD,
+        onFinish ::(hit) {
+          when(hit != true) empty;
+
+          if (random.try(percentSuccess:level*5)) ::<= {
+            windowEvent.queueMessage(
+              text: user.name + ' does a connecting blow, finishing off ' + targets[0].name +'!'
+            );              
+            targets[0].damage(attacker:user, damage:Damage.new(
+              amount:A_LOT,
+              damageType:Damage.TYPE.PHYS,
+              damageClass:Damage.CLASS.HP
+            ),dodgeable: false);                
+          }   
         }
-      );
-                      
+      )                            
     }     
   }
 )
@@ -292,22 +291,20 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.DEX * (0.5),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
-      windowEvent.queueCustom(
-        onEnter :: {
-          if (user.attack(
-            target:targets[0],
-            damage: Damage.new(
-              amount:Arts.find(:'base:tranquilizer').baseDamage(level, user),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP
-            ),
-            targetPart:targetParts[0]
-          ) == true)           
-            if (random.try(percentSuccess:40 + level*10))
-              targets[0].addEffect(from:user, id:'base:paralyzed', durationTurns:2);
+      user.attack(
+        target:targets[0],
+        damage: Damage.new(
+          amount:Arts.find(:'base:tranquilizer').baseDamage(level, user),
+          damageType : Damage.TYPE.PHYS,
+          damageClass: Damage.CLASS.HP
+        ),
+        targetPart:targetParts[0],
+        onFinish ::(value) {
+          when(value != true) empty;
+          if (random.try(percentSuccess:40 + level*10))
+            targets[0].addEffect(from:user, id:'base:paralyzed', durationTurns:2);
         }
-      );
-
+      )
     }
   }
 )
@@ -1063,24 +1060,22 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
-      windowEvent.queueCustom(
-        onEnter :: {
-          if (user.attack(
-            target:targets[0],
-            damage: Damage.new(
-              amount:user.stats.ATK * (0.3 + (level-1)*0.05),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP
-            ),
-            targetPart: Entity.DAMAGE_TARGET.BODY
-          ) == true)            
-            if (random.try(percentSuccess:80)) ::<= {
-              targets[0].addEffect(from:user, id: 'base:ensnared', durationTurns: 3);            
-              user.addEffect(from:user, id: 'base:ensnaring', durationTurns: 3);            
-            }
+      user.attack(
+        target:targets[0],
+        damage: Damage.new(
+          amount:user.stats.ATK * (0.3 + (level-1)*0.05),
+          damageType : Damage.TYPE.PHYS,
+          damageClass: Damage.CLASS.HP
+        ),
+        targetPart: Entity.DAMAGE_TARGET.BODY,
+        onFinish ::(value) {
+          when(value != true) empty;            
+          if (random.try(percentSuccess:80)) ::<= {
+            targets[0].addEffect(from:user, id: 'base:ensnared', durationTurns: 3);            
+            user.addEffect(from:user, id: 'base:ensnaring', durationTurns: 3);            
+          }
         }
       );
-        
     }
   }
 ) 
@@ -1196,20 +1191,18 @@ Arts.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(i, enemy) {
-        windowEvent.queueCustom(
-          onEnter :: {
-
-            if (user.attack(
-              target:enemy,
-              damage: Damage.new(
-                amount:user.stats.ATK * (0.3),
-                damageType : Damage.TYPE.PHYS,
-                damageClass: Damage.CLASS.HP
-              ),
-              targetPart:Entity.DAMAGE_TARGET.LIMBS
-            ) == true)
-              if (random.number() > 0.5)
-                enemy.addEffect(from:user, id: 'base:stunned', durationTurns: 1);  
+        user.attack(
+          target:enemy,
+          damage: Damage.new(
+            amount:user.stats.ATK * (0.3),
+            damageType : Damage.TYPE.PHYS,
+            damageClass: Damage.CLASS.HP
+          ),
+          targetPart:Entity.DAMAGE_TARGET.LIMBS,
+          onFinish ::(value) {
+            when(value != true) empty;
+            if (random.number() > 0.5)
+              enemy.addEffect(from:user, id: 'base:stunned', durationTurns: 1);  
           }
         );
       }
@@ -1362,18 +1355,20 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
           
-          if (user.attack(
+          user.attack(
             target:targets[0],
             damage: Damage.new(
               amount:Arts.find(:'base:stun').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart: Entity.DAMAGE_TARGET.BODY
-          ) == true)     
-            if (random.try(percentSuccess:50 + (level-1)*10))
-              targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 1);            
-
+            targetPart: Entity.DAMAGE_TARGET.BODY,
+            onFinish::(value) {
+              when(value != true) empty;
+              if (random.try(percentSuccess:50 + (level-1)*10))
+                targets[0].addEffect(from:user, id: 'base:stunned', durationTurns: 1);            
+            }
+          )
         }
       );        
     }
@@ -1398,23 +1393,21 @@ Arts.newEntry(
     baseDamage ::(level, user) <- user.stats.ATK * (0.4) * (1 + (level-1)*0.07),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
 
-      windowEvent.queueCustom(
-        onEnter :: {
-
-          if (user.attack(
-            target:targets[0],
-            damage: Damage.new(          
-              amount:Arts.find(:'base:sheer-cold').baseDamage(level, user),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP,
-              traits: Damage.TRAIT.MULTIHIT
-            ),
-            targetPart: targetParts[0]
-          ) == true)          
-            if (random.number() < 0.9)
-              targets[0].addEffect(from:user, id: 'base:frozen', durationTurns: 1);            
-        }
-      );        
+      user.attack(
+        target:targets[0],
+        damage: Damage.new(          
+          amount:Arts.find(:'base:sheer-cold').baseDamage(level, user),
+          damageType : Damage.TYPE.PHYS,
+          damageClass: Damage.CLASS.HP,
+          traits: Damage.TRAIT.MULTIHIT
+        ),
+        targetPart: targetParts[0],
+        onFinish::(value) {
+          when (value != true) empty;
+          if (random.number() < 0.9)
+            targets[0].addEffect(from:user, id: 'base:frozen', durationTurns: 1);            
+        } 
+      )
     }
   }
 )
@@ -1792,22 +1785,20 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user)<- user.stats.ATK * (0.3) * (1 + (level-1)*0.05) + (level-1),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      windowEvent.queueCustom(
-        onEnter :: {
 
-          if (user.attack(
-            target: targets[0],
-            damage: Damage.new(
-              amount: Arts.find(:'base:poison-attack').baseDamage(level, user),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP
-            ),
-            targetPart: targetParts[0]
-          ))
-            targets[0].addEffect(from:user, id: 'base:poisoned', durationTurns: 4);             
+      user.attack(
+        target: targets[0],
+        damage: Damage.new(
+          amount: Arts.find(:'base:poison-attack').baseDamage(level, user),
+          damageType : Damage.TYPE.PHYS,
+          damageClass: Damage.CLASS.HP
+        ),
+        targetPart: targetParts[0],
+        onFinish ::(value) {
+          when(value != true) empty;
+          targets[0].addEffect(from:user, id: 'base:poisoned', durationTurns: 4);             
         }
-      );
-         
+      )
     }
   }
 )
@@ -1829,22 +1820,22 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.05),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      windowEvent.queueCustom(
-        onEnter :: {
 
-          if (user.attack(
-            target: targets[0],
-            damage: Damage.new(
-              amount: Arts.find(:'base:petrify').baseDamage(level, user),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP
-            ),
-            targetPart: targetParts[0]
-          ))
-            if (random.flipCoin())
-                targets[0].addEffect(from:user, id: 'base:petrified', durationTurns: 2);  
+      user.attack(
+        target: targets[0],
+        damage: Damage.new(
+          amount: Arts.find(:'base:petrify').baseDamage(level, user),
+          damageType : Damage.TYPE.PHYS,
+          damageClass: Damage.CLASS.HP
+        ),
+        targetPart: targetParts[0],
+        onFinish ::(value) {
+          when(value != true) empty;
+          
+          if (random.flipCoin())
+              targets[0].addEffect(from:user, id: 'base:petrified', durationTurns: 2);  
         }
-      )            
+      )
     }
   }
 )      
@@ -1967,20 +1958,19 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage::(level, user) <- user.stats.ATK * (0.3) * (1 + (level-1)*0.07) + (level-1),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      windowEvent.queueCustom(
-        onEnter :: {
-          if (user.attack(
-            target: targets[0],
-            damage: Damage.new(
-              amount: Arts.find(:'base:stab').baseDamage(level, user),
-              damageType : Damage.TYPE.PHYS,
-              damageClass: Damage.CLASS.HP
-            ),
-            targetPart: targetParts[0]
-          ) == true)
-            targets[0].addEffect(from:user, id: 'base:bleeding', durationTurns: 4);            
+      user.attack(
+        target: targets[0],
+        damage: Damage.new(
+          amount: Arts.find(:'base:stab').baseDamage(level, user),
+          damageType : Damage.TYPE.PHYS,
+          damageClass: Damage.CLASS.HP
+        ),
+        targetPart: targetParts[0],
+        onFinish ::(value) {
+          when(value != true) empty;
+          targets[0].addEffect(from:user, id: 'base:bleeding', durationTurns: 4);            
         }
-      );
+      )
     }
   }
 )
@@ -2455,15 +2445,18 @@ Arts.newEntry(
       foreach(targets)::(i, target) {
         windowEvent.queueCustom(
           onEnter :: {
-            if (user.attack(
+            user.attack(
               target:target,
               damage: Damage.new(
                 amount: Arts.find(:'base:backdraft').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
-                damageClass: Damage.CLASS.HP
+                damageClass: Damage.CLASS.HP,
+                onFinish ::(value) {
+                  when(value != true) empty;
+                  targets[0].addEffect(from:user, id:'base:burned', durationTurns:5);
+                }
               )
-            ))
-              targets[0].addEffect(from:user, id:'base:burned', durationTurns:5);
+            )
           }
         );
       }
@@ -2697,7 +2690,7 @@ Arts.newEntry(
           onEnter :: {
             user.attack(
               target:enemy,
-              targetPart: Entity.DAMAGE_TARGET.BODY
+              targetPart: Entity.DAMAGE_TARGET.BODY,
               damage: Damage.new(
                 amount:Arts.find(:'base:explosion').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
@@ -5518,14 +5511,13 @@ Arts.newEntry(
     description: 'Discard an Arts card. User gains the Brace effect for 2 turns.',
     keywords: ['base:brace'],
     durationTurns: 0,
-    kind : KIND.EFFECT,
+    kind : KIND.REACTION,
     traits : TRAIT.SUPPORT,
-    rarity : RARITY.UNCOMMON,
+    rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      user.discardArt();
       user.addEffect(from:user, id:'base:brace', durationTurns:2);
     }
   }
@@ -7864,41 +7856,41 @@ Arts.newEntry(
       windowEvent.queueCustom(
         onEnter :: {
 
-          if (user.attack(
+          user.attack(
             target:targets[0],
             damage: Damage.new(
               amount:Arts.find(:'base:b194').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
-            targetPart:Entity.DAMAGE_TARGET.BODY
-          )) ::<= {
-            @effUser   = [...user.effectStack.getAll()]
-            @effTarget = [...targets[0].effectStack.getAll()]
+            targetPart:Entity.DAMAGE_TARGET.BODY,
+            onFinish::(value) {
+              when(value != true) empty;
+              @effUser   = [...user.effectStack.getAll()]
+              @effTarget = [...targets[0].effectStack.getAll()]
 
-            targets[0].removeEffectsByFilter(::(value) <- true);
-            user.removeEffectsByFilter(::(value) <- true);
+              targets[0].removeEffectsByFilter(::(value) <- true);
+              user.removeEffectsByFilter(::(value) <- true);
 
 
-            foreach(effUser) ::(k, v) {
-              targets[0].addEffect(
-                from:user, 
-                id:v.id, 
-                durationTurns: v.duration,
-                item: v.id
-              );              
+              foreach(effUser) ::(k, v) {
+                targets[0].addEffect(
+                  from:user, 
+                  id:v.id, 
+                  durationTurns: v.duration,
+                  item: v.id
+                );              
+              }
+              foreach(effTarget) ::(k, v) {
+                user.addEffect(
+                  from:targets[0], 
+                  id:v.id, 
+                  durationTurns: v.duration,
+                  item: v.id
+                );              
+              }
             }
-            foreach(effTarget) ::(k, v) {
-              user.addEffect(
-                from:targets[0], 
-                id:v.id, 
-                durationTurns: v.duration,
-                item: v.id
-              );              
-            }
-
-
-          }
+          )
         }
       );
     }

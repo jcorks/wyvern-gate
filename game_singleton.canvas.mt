@@ -132,6 +132,7 @@ return class(
     @idStatePool_dead = [];
     @effects = [];
     @counter = 0;
+    @showEffects = true;
     
     
     
@@ -585,8 +586,15 @@ return class(
       // window will be rerendered every frame. So performance is a factor
       //
       // When the effect is done, it should 
-      addEffect ::(effect => Function) {
+      addEffect ::(effect => Function) {  
+        breakpoint();
+        when(showEffects == false) empty;
         effects[effect] = true;
+      },
+      
+      showEffects : {
+        get ::<- showEffects,
+        set ::(value => Boolean) <- showEffects = value
       },
       
       update ::{

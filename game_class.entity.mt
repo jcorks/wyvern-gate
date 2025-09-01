@@ -792,26 +792,10 @@
     PROF_EXP_PER_KNOCKOUT : {get::<- PROF_EXP_PER_KNOCKOUT},
     EQUIP_SLOTS : {get::<- EQUIP_SLOTS},
     DAMAGE_TARGET : {get::<- DAMAGE_TARGET},
-    normalizedDamageTarget ::(blockPoints) {
-      when(blockPoints == 1 || blockPoints == empty) ::<={
-        @:rate = random.number();
-        when (rate <= 0.25) DAMAGE_TARGET.HEAD;
-        when (rate <  0.75) DAMAGE_TARGET.BODY;
-        return DAMAGE_TARGET.LIMBS
-      };
-      when(blockPoints >= 3)
-        DAMAGE_TARGET.HEAD |
-        DAMAGE_TARGET.BODY |
-        DAMAGE_TARGET.LIMBS
-      
-      @:list = [
-        DAMAGE_TARGET.HEAD,
-        DAMAGE_TARGET.BODY,
-        DAMAGE_TARGET.LIMBS
-      ]
-      
-      return random.removeArrayItem(list) |
-           random.removeArrayItem(list)
+    normalizedDamageTarget :: {
+      @:rate = random.number();
+      when (rate <= 0.25) DAMAGE_TARGET.HEAD;
+      when (rate <  0.75) DAMAGE_TARGET.BODY;
     },
     
     displayedHurt : {
@@ -853,7 +837,6 @@
     expNext : 1,
     level : 0,
     data : empty,
-    deck : empty,
     deckTemplates : empty,
     equippedDeck : 'MAIN',
     professionArts : empty,
@@ -872,7 +855,8 @@
     onInteract : Function,
     abilitiesUsedBattle : Nullable,
     owns : Nullable,
-    canActThisTurn : Boolean
+    canActThisTurn : Boolean,
+    deck : Nullable
   },
   
   
@@ -1127,9 +1111,9 @@
         this.effectStack.addInnate(id:passiveName);
       }      
       _.battle = battle;
-      state.deck = assembleDeck(this, state);
-      state.deck.shuffle();
-      state.deck.redraw();
+      _.deck = assembleDeck(this, state);
+      _.deck.shuffle();
+      _.deck.redraw();
       initializeEffectStackProper(*_);
       state.ap = (state.stats.AP / 2)->floor
 
@@ -1183,7 +1167,7 @@
     },
     
     deck : {
-      get ::<- _.state.deck
+      get ::<- _.deck
     },
     
     
@@ -1533,12 +1517,12 @@
       _.effectStack = empty;
       _.abilitiesUsedBattle = empty;        
       
-      _.state.deck = empty;
-      breakpoint();
+      _.deck = empty;
       
       _.this.recalculateStats(); 
       _.state.ap = 0;               
       _.state.shield = 0;
+      breakpoint();
     },
     
     calculateDeckSize ::(set){
@@ -1668,7 +1652,7 @@
       @:state = _.state;
       @:this = _.this;
       
-      state.deck.redraw();
+      _.deck.redraw();
       @act = true;
       state.ap += 1;
       
@@ -1822,6 +1806,10 @@
       targetPart,
       onFinish
     ){
+
+      if (targetPart == empty)
+        targetPart = DAMAGE_TARGET.BODY;
+
       when(target == empty) empty;
     
       @:this = _.this;
@@ -1838,6 +1826,7 @@
       @:effectStack = _.effectStack;
       
       @:dmg = damage;
+      @:parent = _;
       
       @:damaged = [];
       // TODO: add weapon affinities if phys and equip weapon
@@ -1863,23 +1852,11 @@
 
       @isDexed = false;
       @isDefed = false;
-      
-      @:doNextPhase :: {
-        @:next = phases[0];
-        when(next == empty)
-          onFinish(:true);
-        
-        phases->remove(key:0);
-        
-        if (next() != false) 
-          windowEvent.queueCustom(
-            onEnter ::<- doNextPhase
-          );       
+      @:hpWas0 = if (target.hp == 0) true else false;
 
-        onFinish(:false);
-      }
       
-      @:phases = [
+      windowEvent.queueNestedPhases(
+        phases : [
       
       
         // attack prep + crit
@@ -1930,13 +1907,12 @@
         ::{
           when (target.isIncapacitated() || ((dmg.traits & Damage.TRAIT.FORCE_DEF_BYPASS) == 0)) empty;
 
-            @:ratioDiff = this.getChanceOfAttackSuccessDEXvDEF(:target);
-            if (random.try(percentSuccess:(1-ratioDiff)*100)) ::<= {       
-              windowEvent.queueMessage(
-                text: target.name + ' avoided the incoming attack!'
-              );
-              dmg.amount = 0;
-            }
+          @:ratioDiff = this.getChanceOfAttackSuccessDEXvDEF(:target);
+          if (random.try(percentSuccess:(1-ratioDiff)*100)) ::<= {       
+            windowEvent.queueMessage(
+              text: target.name + ' avoided the incoming attack!'
+            );
+            dmg.amount = 0;
           }
           when(dmg.amount <= 0) false;
         },
@@ -1949,46 +1925,39 @@
             (Entity.DAMAGE_TARGET.LIMBS): 'limbs'
           }
           @imperfectGuard = false;
-              backupStats = this.stats.save();
-              match(true) {
-                ((targetPart & DAMAGE_TARGET.HEAD) != 0):::<= {
-                  when(isCrit)
-                    isHitHead = true;
-                
-                  if (random.try(percentSuccess:20)) ::<= {
-                    isCrit = true;
-                    dmg.amount += this.stats.DEX * 1.5;
-                    isHitHead = true;
-                  } else ::<= {
-                    missHead = true;
-                    dmg.amount = 1;
-                  }
-                },
+          backupStats = this.stats.save();
+          match(true) {
+            ((targetPart & DAMAGE_TARGET.HEAD) != 0):::<= {
+              when(isCrit)
+                isHitHead = true;
+            
+              if (random.try(percentSuccess:20)) ::<= {
+                isCrit = true;
+                dmg.amount += this.stats.DEX * 1.5;
+                isHitHead = true;
+              } else ::<= {
+                missHead = true;
+                dmg.amount = 1;
+              }
+            },
 
-                ((targetPart & DAMAGE_TARGET.BODY) != 0):::<= {
-                  when(isCrit)
-                    isHitBody = true;
-                  dmg.amount *= 1;               
-                  isHitBody = true;   
-                },
+            ((targetPart & DAMAGE_TARGET.BODY) != 0):::<= {
+              isHitBody = true;   
+            },
 
-                ((targetPart & DAMAGE_TARGET.LIMBS) != 0):::<= {
-                  when(isCrit)
-                    isLimbHit = true;
+            ((targetPart & DAMAGE_TARGET.LIMBS) != 0):::<= {
+              when(isCrit)
+                isLimbHit = true;
 
-                  dmg.amount *= 0.4;                
-                  if (random.try(percentSuccess:30)) ::<= {
-                    isLimbHit = true;
-                  } else ::<= {
-                    missLimb = true;
-                    dmg.amount = 1;
-                  }
-                }
-
+              dmg.amount = 1;
+              if (random.try(percentSuccess:30)) ::<= {
+                isLimbHit = true;
+              } else ::<= {
+                missLimb = true;
               }
             }
-          }
 
+          }
           when(dmg.amount <= 0) false;
         
         },
@@ -1996,7 +1965,6 @@
         ::{
 
 
-          @:hpWas0 = if (target.hp == 0) true else false;
           @:result = target.damage(attacker:this, damage:dmg, dodgeable:true, critical:isCrit);
           
 
@@ -2004,46 +1972,33 @@
           
           if (backupStats != empty)
             this.stats.load(serialized:backupStats);
-          
-          if (imperfectGuard) ::<= {
-            if (result)
-              windowEvent.queueMessage(
-                text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ', but wasn\'t able to fully block the damage!'
-              )
-            else        
-              windowEvent.queueMessage(
-                text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + '!'
-              );
 
-          }
           
           when(!result) empty;
 
-          if (!imperfectGuard) ::<= {
-            if (isLimbHit) ::<= {
-              windowEvent.queueMessage(text: 'The hit caused direct damage to the limbs!');
-              if (!target.isIncapacitated())
-                target.addEffect(from:this, id:'base:stunned', durationTurns:1);          
-            }
-
-            if (isHitBody) ::<= {
-              windowEvent.queueMessage(text: 'The hit caused direct damage to the body!');
-            }
-
-            
-            if (isHitHead) ::<= {
-              windowEvent.queueMessage(text: 'The hit caused direct damage to the head!');
-            }
-            
-            
-            if (missHead) ::<= {
-              windowEvent.queueMessage(text: 'The hit missed the head, but still managed to hit ' + target.name +' for minimal damage!');            
-            }
-            if (missLimb) ::<= {
-              windowEvent.queueMessage(text: 'The hit missed the limbs, but still managed to hit ' + target.name +' for minimal damage!');            
-            }
-
+          if (isLimbHit) ::<= {
+            windowEvent.queueMessage(text: 'The hit caused direct damage to the limbs!');
+            if (!target.isIncapacitated())
+              target.addEffect(from:this, id:'base:stunned', durationTurns:1);          
           }
+
+          if (isHitBody) ::<= {
+            windowEvent.queueMessage(text: 'The hit caused direct damage to the body!');
+          }
+
+          
+          if (isHitHead) ::<= {
+            windowEvent.queueMessage(text: 'The hit caused direct damage to the head!');
+          }
+          
+          
+          if (missHead) ::<= {
+            windowEvent.queueMessage(text: 'The hit missed the head, but still managed to hit ' + target.name +' for minimal damage!');            
+          }
+          if (missLimb) ::<= {
+            windowEvent.queueMessage(text: 'The hit missed the limbs, but still managed to hit ' + target.name +' for minimal damage!');            
+          }
+
           this.flags.add(flag:StateFlags.ATTACKED);
 
 
@@ -2075,41 +2030,14 @@
         
         ::{
           if (hasNoEffectStack)        
-            _.this.effectStack.clear(all:true);
+            parent.this.effectStack.clear(all:true);
           if (hasNoEffectStack)        
-            _.effectStack = empty;
+            parent.effectStack = empty;
 
           displayedHurt->remove(key:target);
         }
       
-      ];
-      
-      
-      
-      
-      
-      
-      @:retval = ::<= {
-
-
-
-
-
-
-        
-
-
-        return true;
-      }
-
-      windowEvent.queueNestedResolve(
-        onEnter :: {
-          doNextPhase();
-        }
-      );
-
-
-      return retval;
+      ]);
     },
       
     damage ::(attacker => Object, damage => Object, dodgeable => Boolean, critical, exact) {
@@ -2122,6 +2050,7 @@
         
       if (attacker == this)
         dodgeable = false;
+        
         
         
       @:hasNoEffectStack = this.effectStack == empty;
@@ -3151,8 +3080,8 @@
                 [
                   [
                     'The attack aims for the head.',
-                    'Attack damage is reduced by 90%, but has a ',
-                    '20% chance to do an unreduced critical hit.'
+                    'Has a 20% chance to do an unreduced critical hit.',
+                    'If unsuccessful, does 1 damage instead.'
                   ],
                   [
                     'The attack aims for the body.',
@@ -3160,8 +3089,8 @@
                   ],
                   [
                     'The attack aims for the limbs.',
-                    'Attack damage is reduced by 60%, but has a 30%',
-                    'chance to cause Stunned for a turn.'
+                    'Has a 30% chance to cause Stunned for a turn.',
+                    'Always deals 1 damage.'
                   ]
                 ];
                 
@@ -3312,7 +3241,7 @@
       onChoice
     ) {
       @:this = _.this;
-      @:deck = _.state.deck;
+      @:deck = _.deck;
       @:world = import(module:'game_singleton.world.mt');
 
       when(world.party.leader == this) 
@@ -3326,11 +3255,11 @@
     
 
     discardArt::(chosenBy) {
-      if (_.state.deck == empty)
+      if (_.deck == empty)
         error(detail: 'Can\'t discard when not in battle.');
         
       @:this = _.this;
-      @:deck = _.state.deck;
+      @:deck = _.deck;
       @:world = import(module:'game_singleton.world.mt');
       
       if (chosenBy == empty) ::<= {
@@ -3355,13 +3284,13 @@
     },
     
     react::(source, onReact) {
-      if (_.state.deck == empty)
+      if (_.deck == empty)
         error(detail: 'Can\'t react when not in battle.');
       @:priv = _;
       @:this = _.this;
       @:state = _.state;
       @:abilitiesUsedBattle = _.abilitiesUsedBattle;
-      @:deck = state.deck;
+      @:deck = _.deck;
       @:world = import(module:'game_singleton.world.mt');
 
       when (this.canUseReactions() == false)
@@ -3377,7 +3306,7 @@
         @:art = Arts.find(:card.id);
         when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAIT.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[card.id] == true) ::<= {
           windowEvent.queueMessage(
-            text: this.name + " tried to use " + card.name + ", but already was used and could not be used again!"
+            text: this.name + " tried to use " + art.name + ", but already was used and could not be used again!"
           ) 
           onReact()
         }
@@ -3445,11 +3374,11 @@
     },
     
     drawArt ::(count) {
-      if (_.state.deck == empty)
+      if (_.deck == empty)
         error(detail: 'Can\'t draw when not in battle.');
         
       @:this = _.this;
-      @:deck = _.state.deck;
+      @:deck = _.deck;
       @:world = import(module:'game_singleton.world.mt');
       windowEvent.queueMessage(
         text: this.name + ' draws ' + (if (count == empty) 'an Art card.' else ''+count+' Art cards.')

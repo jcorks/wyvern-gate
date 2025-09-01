@@ -1,7 +1,7 @@
 return {
   name : 'B-3',
-  profession : 'base:field-mage',
-  level : 6, // default
+  profession : empty,
+  level : 6, // not default
   giveWeapon : false,
   giveArmor : false,
   randomEffectCount : 0,

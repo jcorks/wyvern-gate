@@ -291,6 +291,7 @@ return class(
         settings.fgColor = [186, 240, 228];
         settings.debugMode = false;
         settings.animations = true;
+        settings.effects = true;
         this.updateSettings();
       },
       
@@ -325,6 +326,19 @@ return class(
           );
         });
 
+
+        opts->push(:'Effects');
+        optActs->push(::{
+          windowEvent.queueAskBoolean(
+            onGetPrompt::<- 'Toggle Effects? (currently: ' + (if(settings.effects) 'Enabled' else 'Disabled') + ')',
+            onChoice::(which) {
+              when(which == false) empty;
+              settings.effects = !settings.effects;
+              canvas.showEffects = settings.effects;
+              this.updateSettings();
+            }
+          );
+        });
 
         foreach(FEATURES) ::(k, i) <-
           if ((features_ & i) != 0)
@@ -464,7 +478,10 @@ return class(
       updateSettings::{
         if (settings.animations == empty)
           settings.animations = true;
+        if (settings.effects == empty)
+          settings.effects = true;
         windowEvent.autoSkipAnimations = !settings.animations;
+        canvas.showEffects = settings.effects;
         onSaveSettings_(data:JSON.encode(object:settings));      
       },
 

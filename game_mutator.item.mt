@@ -222,7 +222,6 @@ Item.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.KEY_ITEM |
       TRAIT.STACKABLE,
-    blockPoints : 0,
     onCreate ::(item, creationHint) {},
     possibleArts : [],
   }
@@ -252,7 +251,6 @@ Item.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.KEY_ITEM |
       TRAIT.STACKABLE,
-    blockPoints : 0,
     onCreate ::(item, creationHint) {},
     possibleArts : [],
   }
@@ -271,7 +269,6 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   tier: 0,
   enchantLimit : 0,
-  blockPoints : 0,
   useTargetHint : USE_TARGET_HINT.ONE,
   onCreate ::(item, creationHint) {},
   possibleArts : [],
@@ -311,7 +308,6 @@ Item.database.newEntry(data : {
   onCreate ::(item, creationHint) {},
   possibleArts : [],
   
-  blockPoints : 0,
   equipMod : StatSet.new(
     HP: 10,
     DEF: 10
@@ -407,7 +403,6 @@ Item.database.newEntry(data : {
     levelMinimum : 1,
     enchantLimit : 0,
     useTargetHint : USE_TARGET_HINT.ONE,
-    blockPoints : 0,
     equipMod : StatSet.new(
       SPD: -2, // itll slow you down
       DEX: -10   // its oddly shaped.
@@ -490,7 +485,6 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   enchantLimit : 0,
   useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
   equipMod : StatSet.new(
     SPD: -2, // itll slow you down
     DEX: -10   // its oddly shaped.
@@ -531,7 +525,6 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   enchantLimit : 0,
   useTargetHint : USE_TARGET_HINT.ONE,
-  blockPoints : 0,
   equipMod : StatSet.new(
   ),
   useEffects : [
@@ -627,7 +620,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 2,
   equipMod : StatSet.new(
     ATK: 15,
     DEF: 20
@@ -666,7 +658,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 20,
     DEF: 10,
@@ -710,7 +701,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 25,
     DEF: 5,
@@ -757,7 +747,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     ATK: 25,
     DEX: 5
@@ -800,7 +789,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 20,
     DEF: 15,
@@ -848,7 +836,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 30,
     DEF: 10,
@@ -900,7 +887,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 35,
     DEF: 15,
@@ -950,7 +936,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 2,
   equipMod : StatSet.new(
     ATK: 25,
     DEF: 35,
@@ -1003,7 +988,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 2,
   equipMod : StatSet.new(
     ATK: 15,
     DEF: 55,
@@ -1060,7 +1044,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 25,
     DEF: 5,
@@ -1110,7 +1093,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 2,
   equipMod : StatSet.new(
     ATK: 35,
     DEF: -20,
@@ -1162,7 +1144,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 35,
     DEF: 10,
@@ -1213,7 +1194,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 35,
     DEF: 20,
@@ -1263,7 +1243,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 30,
     DEF: 10,
@@ -1313,7 +1292,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 35,
     SPD: 10,
@@ -1355,14 +1333,13 @@ Item.database.newEntry(data : {
   enchantLimit : 10,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
-    'base:doublestrike',
-    'base:triplestrike',
+    //'base:doublestrike',
+    //'base:triplestrike',
     'base:precise-strike',
     'base:tranquilizer'
   ],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     ATK: 55,
     SPD: -10,
@@ -1410,7 +1387,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     ATK: 35,
     SPD: -10,
@@ -1459,7 +1435,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 2,
   equipMod : StatSet.new(
     ATK: 30,
     DEF: 25,
@@ -1500,7 +1475,6 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
 
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 15,
     SPD: 10,
@@ -1546,7 +1520,6 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
 
-  blockPoints : 0,
   equipMod : StatSet.new(
     ATK: 15,
     DEF: -20,
@@ -1597,7 +1570,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK:  30,
     SPD: -30,
@@ -1642,7 +1614,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK:  40,
     SPD:  15,
@@ -1689,7 +1660,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK:  35,
     SPD:  20,
@@ -1736,7 +1706,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK:  35,
     SPD:  15,
@@ -1783,7 +1752,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK:  25,
     SPD:  15,
@@ -1839,7 +1807,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK:  25,
     SPD:  -10,
@@ -1891,7 +1858,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     ATK:  5,
     INT:  85,
@@ -1940,7 +1906,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 2,
   equipMod : StatSet.new(
     ATK: 45,
     DEF: 30,
@@ -1988,7 +1953,6 @@ Item.database.newEntry(data : {
   ],
 
   // fatigued
-  blockPoints : 2,
   equipMod : StatSet.new(
     ATK: 75,
     DEF: 10,
@@ -2038,7 +2002,6 @@ Item.database.newEntry(data : {
     'base:cure',
   ],
   // fatigued
-  blockPoints : 1,
   equipMod : StatSet.new(
     DEF: 15,
     INT: 60,
@@ -2080,7 +2043,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 5,
     SPD: 5
@@ -2118,7 +2080,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 5,
     INT: 5
@@ -2155,7 +2116,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 3
   ),
@@ -2192,7 +2152,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 3
   ),
@@ -2224,7 +2183,6 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
 
-  blockPoints : 0,
   equipMod : StatSet.new(
     ATK: 15,
     SPD: 10,
@@ -2266,7 +2224,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 3
   ),
@@ -2302,7 +2259,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     SPD: 3,
     DEX: 5
@@ -2339,7 +2295,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 3
   ),
@@ -2375,7 +2330,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 15,
     SPD: -10
@@ -2411,7 +2365,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 23,
     INT: 15
@@ -2449,7 +2402,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 40,
     SPD: -10
@@ -2486,7 +2438,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 55,
     ATK: 20,
@@ -2526,7 +2477,6 @@ Item.database.newEntry(data : {
   possibleArts : [],
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     DEF: 75,
     ATK: 40,
@@ -2574,7 +2524,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
-  blockPoints : 0,
   equipMod : StatSet.new(
     ATK: 15,
     SPD: -5,
@@ -2611,7 +2560,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [],
 
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 2, // well. its hard!
     DEF: 2, // well. its hard!
@@ -2655,7 +2603,6 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.NONE,
   possibleArts : [],
-  blockPoints : 0,
 
   equipMod : StatSet.new(
     ATK: 2, // well. its hard!
@@ -2694,7 +2641,6 @@ Item.database.newEntry(data : {
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.NONE,
   possibleArts : [],
-  blockPoints : 0,
 
   equipMod : StatSet.new(
     ATK: 2, // well. its hard!
@@ -2733,7 +2679,6 @@ Item.database.newEntry(data : {
   basePrice: 5,
   possibleArts : [],
 
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 2, // well. its hard!
     DEF: 2, // well. its hard!
@@ -2769,7 +2714,6 @@ Item.database.newEntry(data : {
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 1000,
   possibleArts : [],
-  blockPoints : 0,
 
   equipMod : StatSet.new(
     ATK: 2, // well. its hard!
@@ -2808,7 +2752,6 @@ Item.database.newEntry(data : {
   basePrice: 3000,
   possibleArts : [],
 
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 10, // well. its hard!
     DEF: 2, // well. its hard!
@@ -2848,7 +2791,6 @@ Item.database.newEntry(data : {
   basePrice: 600,
   possibleArts : [],
 
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 10, // well. its hard!
     DEF: 2, // well. its hard!
@@ -2931,7 +2873,6 @@ Item.database.newEntry(data : {
   basePrice: 175,
   possibleArts : [],
 
-  blockPoints : 1,
   equipMod : StatSet.new(
     ATK: 2, // well. its hard!
     DEF: 2, // well. its hard!
@@ -2969,7 +2910,6 @@ Item.database.newEntry(data : {
   basePrice: 5,
   possibleArts : [],
 
-  blockPoints : 0,
   equipMod : StatSet.new(
     ATK: 0,
     DEF: 2, 
@@ -3007,7 +2947,6 @@ Item.database.newEntry(data : {
   basePrice: 30,
   possibleArts : [],
 
-  blockPoints : 0,
   equipMod : StatSet.new(
     ATK: 0,
     DEF: 2, 
@@ -3047,7 +2986,6 @@ Item.database.newEntry(data : {
   basePrice: 10000,
   possibleArts : [],
 
-  blockPoints : 0,
   equipMod : StatSet.new(
   ),
   useEffects : [
@@ -3095,7 +3033,6 @@ Item.database.newEntry(data : {
   basePrice: 10,
   possibleArts : [],
 
-  blockPoints : 0,
   equipMod : StatSet.new(
   ),
   useEffects : [
@@ -3130,7 +3067,6 @@ Item.database.newEntry(data : {
   basePrice: 10,
   possibleArts : [],
 
-  blockPoints : 0,
   equipMod : StatSet.new(
   ),
   useEffects : [
@@ -3174,7 +3110,6 @@ Item.database.newEntry(data : {
   basePrice: 10000,
   possibleArts : [],
 
-  blockPoints : 0,
   equipMod : StatSet.new(
   ),
   useEffects : [
@@ -3257,7 +3192,6 @@ Item.database.newEntry(
     basePrice: 30000,
     possibleArts : [],
 
-    blockPoints : 0,
     equipMod : StatSet.new(
     ),
     useEffects : [
@@ -3325,7 +3259,6 @@ Item.database.newEntry(
     basePrice: 70000,
     possibleArts : [],
 
-    blockPoints : 0,
     equipMod : StatSet.new(
     ),
     useEffects : [
@@ -3379,8 +3312,7 @@ Item.database.newEntry(
     ],
 
     // fatigued
-    blockPoints : 2,
-    equipMod : StatSet.new(
+      equipMod : StatSet.new(
       ATK: 15,
       SPD: -5,
       DEX: -5
@@ -3580,8 +3512,6 @@ none.name = 'None';
     if (base.hasTraits(:TRAIT.HAS_QUALITY) && state.quality != empty) state.quality.description + ' ' else '',
     if (base.hasTraits(:TRAIT.METAL)) state.material.description + ' ' else '',
     if (base.hasTraits(:TRAIT.APPAREL)) state.apparel.description + ' ' else '',
-    if (base.blockPoints == 1) 'This equipment helps block an additional part of the body while equipped in combat.' else '',
-    if (base.blockPoints > 1) 'This equipment helps block multiple additional parts of the body while equipped in combat.' else '',
   ]);
   if (base.hasTraits(:TRAIT.HAS_COLOR)) ::<= {
     out = out->replace(key:'$color$', with:state.color.name);
@@ -3700,7 +3630,6 @@ none.name = 'None';
       onCreate : Function,
       basePrice : Number,
       tier : Number,
-      blockPoints : Number,
       possibleArts : Object,
       sortType : Number,
     },

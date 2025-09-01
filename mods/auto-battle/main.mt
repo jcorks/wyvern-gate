@@ -40,156 +40,166 @@ return {
         )
         
 
-        world.loadIsland(key:keyhome, skipSave:true); 
-        @:island = world.island;   
+        world.loadIsland(
+          key:keyhome, 
+          skipSave:true,
+          onDone ::(island){
+            startBattle(:island)
+          }
+        ); 
+        
+
+        @:startBattle ::(island) {
     
-        @:getNPC::(data) {
-          @:ent = Entity.new(
-            island,
-            
-            speciesHint:  if (data.species == empty)
-                  Species.getRandomFiltered(
-                  filter:::(value) <- (value.traits & Species.TRAIT.SPECIAL) == 0
-                ).id 
-              else 
-                data.species,
-                
-            levelHint: if (data.level == empty)
-                6
-              else 
-                data.level,
-            professionHint: if (data.profession == empty) 
-                Profession.getRandomFiltered(filter::(value)<-value.learnable).id 
-              else 
-                data.profession
-          );
-          
-          if (data.giveWeapon) ::<= {
-            @:wep = Item.database.getRandomFiltered(
-              filter:::(value) <-
-                value.isUnique == false &&
-                value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
+          @:getNPC::(data) {
+            @:ent = Entity.new(
+              island,
+              
+              speciesHint:  if (data.species == empty)
+                    Species.getRandomFiltered(
+                    filter:::(value) <- (value.traits & Species.TRAIT.SPECIAL) == 0
+                  ).id 
+                else 
+                  data.species,
+                  
+              levelHint: if (data.level == empty)
+                  6
+                else 
+                  data.level,
+              professionHint: if (data.profession == empty) 
+                  Profession.getRandomFiltered(filter::(value)<-value.learnable).id 
+                else 
+                  data.profession
             );
-              
-            ent.equip(
-              slot:Entity.EQUIP_SLOTS.HAND_LR, 
-              item:Item.new(
-                base:wep
-              ), 
-              inventory:ent.inventory, 
-              silent:true
-            );          
-          }
-          
-          for(0, 10) ::(i) {
-            ent.autoLevelProfession(:ent.profession);
-          }
-          ent.equipAllProfessionArts();  
-          ent.supportArts = []; 
-          
-          
-          ent.data.sourceImport = data;
-          
-          
-          if (data.giveArmor) ::<= {
-            @:wep = Item.database.getRandomFiltered(
-              filter:::(value) <-
-                value.isUnique == false &&
-                value.equipType == Item.database.statics.TYPE.ARMOR
-            );;
-              
-            ent.equip(
-              slot:Entity.EQUIP_SLOTS.ARMOR, 
-              item:Item.new(
-                base: wep
-              ), 
-              inventory:ent.inventory, 
-              silent:true
-            );    
             
-      
-          }
-          
-          foreach(data.arts) ::(k, v) {
-            ent.supportArts->push(:v);
-          }
-          
-          
-          if (data.randomAdditionalArtsCount->type == Number) ::<= {
-            @:Arts = import(module:'game_database.arts.mt');
-            for(0, data.randomAdditionalArtsCount) ::(i) {
-              ent.supportArts->push(:
-                Arts.getRandomFiltered(::(value) <- 
-                  ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
-                  ((value.traits & Arts.TRAIT.SUPPORT) != 0) 
-                ).id
+            if (data.giveWeapon) ::<= {
+              @:wep = Item.database.getRandomFiltered(
+                filter:::(value) <-
+                  value.isUnique == false &&
+                  value.attributes & Item.database.statics.ATTRIBUTE.WEAPON
               );
+                
+              ent.equip(
+                slot:Entity.EQUIP_SLOTS.HAND_LR, 
+                item:Item.new(
+                  base:wep
+                ), 
+                inventory:ent.inventory, 
+                silent:true
+              );          
             }
-          }
-
-
-          if (data.name) 
-            ent.name = data.name;
-          
-          return ent;
-        }
-        
-        @:teamA = [
-          getNPC(:import(:'mod.example.rasa.auto-battle/npc1-1.mt')),
-          getNPC(:import(:'mod.example.rasa.auto-battle/npc1-2.mt')),      
-          getNPC(:import(:'mod.example.rasa.auto-battle/npc1-3.mt'))
-        ]
-
-
-
-        @:teamB = [
-          getNPC(:import(:'mod.example.rasa.auto-battle/npc2-1.mt')),
-          getNPC(:import(:'mod.example.rasa.auto-battle/npc2-2.mt')),      
-          getNPC(:import(:'mod.example.rasa.auto-battle/npc2-3.mt'))
-        ]
-        
-        world.party.add(:teamA[0]);
-        @:a = teamA[0].stats.save();
-        a.SPD = 9999;
-        teamA[0].stats.load(:a);
-        
-        world.party.leader = teamA[0];
-
-        
-        @:item = Item.new(base:Item.database.getRandom());
-        world.party.inventory.add(:item);
-
-        world.battle.start(
-          party: world.party,
-          //npcBattle : true,
-          allies: teamA,
-          enemies : teamB,
-          landmark: {},
-          onStart :: {
-            foreach([...teamA, ...teamB]) ::(k, v) {
-              if (v.data.sourceImport.randomEffectCount->type == Number) ::<= {
-                for(0, v.data.sourceImport.randomEffectCount) ::(i) {
-                  @:effect = Effect.getRandom();
-                  v.effectStack.add(
-                    from: v,
-                    id: effect.id, 
-                    duration: if (random.flipCoin())
-                      1000
-                    else 
-                      random.integer(from:3, to:10),
-                    item : item
-                  );
-                }
-              }          
+            
+            for(0, 10) ::(i) {
+              ent.autoLevelProfession(:ent.profession);
             }
-          
-          },
-          onEnd ::(result) {          
-            @:instance = import(module:'game_singleton.instance.mt');
-            instance.quitRun();
-          }
-        );
+            ent.equipAllProfessionArts();  
+            ent.supportArts = []; 
+            
+            
+            ent.data.sourceImport = data;
+            
+            
+            if (data.giveArmor) ::<= {
+              @:wep = Item.database.getRandomFiltered(
+                filter:::(value) <-
+                  value.isUnique == false &&
+                  value.equipType == Item.database.statics.TYPE.ARMOR
+              );;
+                
+              ent.equip(
+                slot:Entity.EQUIP_SLOTS.ARMOR, 
+                item:Item.new(
+                  base: wep
+                ), 
+                inventory:ent.inventory, 
+                silent:true
+              );    
+              
+        
+            }
+            
+            foreach(data.arts) ::(k, v) {
+              ent.supportArts->push(:v);
+            }
+            
+            
+            if (data.randomAdditionalArtsCount->type == Number) ::<= {
+              @:Arts = import(module:'game_database.arts.mt');
+              for(0, data.randomAdditionalArtsCount) ::(i) {
+                ent.supportArts->push(:
+                  Arts.getRandomFiltered(::(value) <- 
+                    ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
+                    ((value.traits & Arts.TRAIT.SUPPORT) != 0) 
+                  ).id
+                );
+              }
+            }
 
+
+            if (data.name) 
+              ent.name = data.name;
+            
+            return ent;
+          }
+          
+          @:teamA = [
+            getNPC(:import(:'mod.example.rasa.auto-battle/npc1-1.mt')),
+            getNPC(:import(:'mod.example.rasa.auto-battle/npc1-2.mt')),      
+            getNPC(:import(:'mod.example.rasa.auto-battle/npc1-3.mt'))
+          ]
+
+
+
+          @:teamB = [
+            getNPC(:import(:'mod.example.rasa.auto-battle/npc2-1.mt')),
+            getNPC(:import(:'mod.example.rasa.auto-battle/npc2-2.mt')),      
+            getNPC(:import(:'mod.example.rasa.auto-battle/npc2-3.mt'))
+          ]
+          
+          world.party.add(:teamA[0]);
+          @:a = teamA[0].stats.save();
+          a.SPD = 9999;
+          teamA[0].stats.load(:a);
+          
+          world.party.leader = teamA[0];
+
+          
+          @:item = Item.new(base:Item.database.getRandom());
+          world.party.inventory.add(:item);
+
+          world.battle.start(
+            party: world.party,
+            //npcBattle : true,
+            allies: teamA,
+            enemies : teamB,
+            landmark: {},
+            onStart :: {
+              foreach([...teamA, ...teamB]) ::(k, v) {
+                if (v.data.sourceImport.randomEffectCount->type == Number) ::<= {
+                  for(0, v.data.sourceImport.randomEffectCount) ::(i) {
+                    @:effect = Effect.getRandom();
+                    v.effectStack.add(
+                      from: v,
+                      id: effect.id, 
+                      duration: if (random.flipCoin())
+                        1000
+                      else 
+                        random.integer(from:3, to:10),
+                      item : item
+                    );
+                  }
+                }          
+              }
+            
+            },
+            onEnd ::(result) {          
+              @:instance = import(module:'game_singleton.instance.mt');
+              instance.quitRun();
+            }
+          );        
+        }        
+        
+        
       },
       
       // Called when a new day starts
@@ -224,7 +234,8 @@ return {
         commonInteractions.battle.arts,
         commonInteractions.battle.check,
         commonInteractions.battle.item,
-        commonInteractions.battle.wait
+        commonInteractions.battle.wait,
+        commonInteractions.battle.log,
       ],
       
       // List of general options available, such as quitting the game.

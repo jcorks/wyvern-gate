@@ -509,7 +509,7 @@ return {
           do :: {
             @:basicArts = [
               'base:pebble',
-              'base:brace',
+              'base:parry',
               'base:retaliate',
               'base:reevaluate',
               'base:agility',

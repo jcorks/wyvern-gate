@@ -1742,6 +1742,39 @@
         return getResolveQueue()->size-1;
       },
       
+      // Convenience function. Creates a nested resolve (queueNestedResolve) 
+      // and adds a queueCustom for each "phase" (a function call).
+      // If a phase returns false, the remaining phases are cancelled.
+      // Note that each queueCustom happens AFTER each phase function ends.
+      queueNestedPhases ::(
+        phases => Object,
+        onFinish,
+        renderable
+      ) {
+        phases = [...phases]
+        @:doNextPhase :: {
+          @:next = phases[0];
+          when(next == empty)
+            if (onFinish)
+              onFinish(:true);
+          
+          phases->remove(key:0);
+          
+          if (next() != false) 
+            this.queueCustom(
+              onEnter ::<- doNextPhase()
+            );       
+
+          if (onFinish)
+            onFinish(:false);
+        }      
+        this.queueNestedResolve(
+          renderable,
+          onEnter :: {
+            doNextPhase();
+          }
+        );
+      },
       
       // An empty action that, when visited, will fire off 
       // the given callback. If the callback returns windowEvent.CALLBACK_DONE, it will 

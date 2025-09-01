@@ -426,7 +426,6 @@
       
       leaveDungeon ::(landmark) {
         state.inDungeon = false;
-        when(state.inventory.loot->size == 0) empty;
         
         windowEvent.queueNestedResolve(
           renderable : {
@@ -440,6 +439,15 @@
               text: 'The party returns from ' + landmark.name
             );  
 
+            if (state.queuedArts->size) ::<= {
+              this.queueCollectSupportArt(
+                :(state.queuedArts->map(::(value) <- Arts.find(:value)))
+              );              
+              state.queuedArts = [];
+            }            
+
+
+            /*
             @:loot = state.inventory.loot;
             if (loot != empty && loot->size > 0) ::<= {
               windowEvent.queueMessage(
@@ -495,14 +503,8 @@
                   }
                 }
               );
-              
-              if (state.queuedArts->size) ::<= {
-                this.queueCollectSupportArt(
-                  :(state.queuedArts->map(::(value) <- Arts.find(:value)))
-                );              
-                state.queuedArts = [];
-              }              
             }
+            */
           }
         );
       },

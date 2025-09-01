@@ -142,8 +142,12 @@ return class(
     
     @effectActive = false;
     @:effect :: {
+      when (canvas.showEffects == false)
+        stopped = true;
+        
+        
       nextFrame();
-      render();
+      if (canvas.showEffects) render();
       
       if (stopped == false)
         emit();

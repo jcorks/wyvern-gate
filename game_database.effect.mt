@@ -64,7 +64,6 @@ Effect.newEntry(
     id : 'base:read',
     description: 'The user is in the middle of reading a book.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
@@ -98,7 +97,6 @@ Effect.newEntry(
     id: 'base:dying',
     description: 'The holder is dying. When this effect\'s duration is reached and HP of the holder is 0, the combatant will die.',
     stackable: false,
-    blockPoints : 1,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -118,7 +116,6 @@ Effect.newEntry(
     id: 'base:defend',
     description: 'Adds an additional block point. Reduces damage by 40%. When first getting this effect and HP is below 50%, gain 10% HP back.',
     stackable: false,
-    blockPoints : 1,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -147,18 +144,20 @@ Effect.newEntry(
   data : {
     name : 'Brace',
     id: 'base:brace',
-    description: '+3 base DEF and grants an additional block point.',
-    stackable: false,
-    blockPoints : 1,
+    description: 'Reduces incoming damage by 50%. This removes a stack of Brace.',
+    stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
-      DEF: 3
     ),
     events : {
-      onAffliction ::(from, item, holder) {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        when (damage.amount <= 0) empty;
+        
         windowEvent.queueMessage(
-          text: holder.name + ' braces for damage!'
+          text: holder.name + ' braces for damage, reducing its effectiveness by 50%'
         );
+        
+        damage.amount *= 0.5;
       }
     }
   }
@@ -170,7 +169,6 @@ Effect.newEntry(
     id : 'base:next-attack-x2',
     description: 'Next attack\'s damage will be 2 times as strong.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -200,7 +198,6 @@ Effect.newEntry(
     id : 'base:take-aim',
     description: 'Next holder\'s attack bypasses target\'s DEF. After the next attack, this effect is removed.',
     stackable : false,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -226,7 +223,6 @@ Effect.newEntry(
     id : 'base:splinter',
     description: 'Attacks by the holder now damage all other enemies for 20% of the original attack\'s damage.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -258,7 +254,6 @@ Effect.newEntry(
     id : 'base:confused',
     description: '20% chance that attacks to others target their self or their allies.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -286,7 +281,6 @@ Effect.newEntry(
     id : 'base:taunted',
     description: 'All of the holder\'s attacks can only target the person who inflicted this effect.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -309,7 +303,6 @@ Effect.newEntry(
     id : 'base:terrified',
     description: 'The holder\'s attacks that target the person who inflicted this effect cause 0 damage.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -332,7 +325,6 @@ Effect.newEntry(
     id : 'base:field-barrier',
     description: 'Reduces incoming multi-hit damage by 80%.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -352,7 +344,6 @@ Effect.newEntry(
     id : 'base:suppressor',
     description: 'Reduces incoming attack damage by 50%.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -371,7 +362,6 @@ Effect.newEntry(
     id : 'base:potentiality-shard',
     description: 'Next played Art has a 25% chance of activating twice. This effect gets removed afterward.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -398,7 +388,6 @@ Effect.newEntry(
     id : 'base:copy-shard',
     description: 'Next played Art is duplicated and added to hand. This effect gets removed afterward.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -421,7 +410,6 @@ Effect.newEntry(
     id : 'base:conductive-block',
     description: 'Next incoming attack\'s damage is negated and gives the holder the effect 2x Damage. This counts as blocking. This effect is removed afterward.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -461,85 +449,184 @@ Effect.newEntry(
     id : 'base:parry',
     description: 'The next incoming blockable attack has a chance to be negated. Upon attack, The holder will have a chance to pick a location of their body to defend. If this matches the incoming attack\'s location, the attack is blocked.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
       onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
 
-
-      if (targetPart != empty && ((dmg.traits & Damage.TRAIT.UNBLOCKABLE) == 0)) ::<= {
+        when (targetPart == empty || ((damage.traits & Damage.TRAIT.UNBLOCKABLE) != 0)) empty
+     
       
-        if (targetDefendPart == empty)
-          targetDefendPart = 0;
-        if (target.species.canBlock == false)
-          targetDefendPart = 0;
-        if (target.isIncapacitated())
-          targetDefendPart = 0
-        else ::<= {
-          @:blockData = {
-            targetDefendPart : targetDefendPart,
-            targetPart : targetPart
-          };
-          if (target.effectStack)
-          
-          targetDefendPart = blockData.targetDefendPart
-          targetPart = blockData.targetPart;
-        }           
-        if (targetDefendPart == 0 && target.species.canBlock == true && target.isIncapacitated() == false) 
-          windowEvent.queueMessage(text: target.name + ' wasn\'t given a chance to block!');
+        @targetDefendPart;
+        @:combatChooseDefend:: {
+          @:Entity = import(module:'game_class.entity.mt');
 
-        if (isCrit == false && (targetPart & targetDefendPart) != 0) ::<= {
-        
-          // Cant defend EVERYTHING perfectly. If you guard multiple parts of 
-          // your body, even with gear, you still arent a perfect fortress
-          imperfectGuard = (targetDefendPart != Entity.DAMAGE_TARGET.HEAD &&
-                    targetDefendPart != Entity.DAMAGE_TARGET.BODY &&
-                    targetDefendPart != Entity.DAMAGE_TARGET.LIMBS &&
-                    random.try(percentSuccess:5));
-          this.flags.add(flag:StateFlags.BLOCKED_ATTACK);
-          
-          if (!imperfectGuard) ::<= {
-            windowEvent.queueMessage(
-              text: target.name + ' predicted ' + this.name + '\'s attack to their ' + which + ' and successfully blocked it!'
-            );
+          @:notAttack = ::<= {
+            @:list = [
+              Entity.DAMAGE_TARGET.HEAD,
+              Entity.DAMAGE_TARGET.BODY,
+              Entity.DAMAGE_TARGET.LIMBS
+            ]
             
-            @:blockData = {
-              targetDefendPart : targetDefendPart,
-              targetPart : targetPart
-            };
-            if (target.effectStack)
-              target.effectStack.emitEvent(
-                name : 'onSuccessfulBlock',
-                attacker: this,
-                damage: dmg,
-                blockData
-              );
-            dmg.amount = 0;
-            
-            this.effectStack.emitEvent(
-              name: 'onGotBlocked',
-              from: target
-            );
-          } else ::<= {
-            dmg.amount *= .4;
+            list->remove(key:list->findIndex(value:targetPart));
+            return random.pickArrayItem(list);
           }
+
           
-        } else ::<= {
+          @:partToString::(part) {
+            return match(part) {
+              (Entity.DAMAGE_TARGET.HEAD): 'head',
+              (Entity.DAMAGE_TARGET.BODY): 'body',
+              (Entity.DAMAGE_TARGET.LIMBS): 'limbs'
+            }
+          }
+          @:showNot = random.try(percentSuccess:70);
+          
+          @:renderFrame ::{
+            @:lines = [
+              attacker.name + ' is preparing to attack ' + holder.name + '.',
+              'How will ' + holder.name + ' respond?',
+              
+              ... ::<= {
+                when(holder.stats.INT < attacker.stats.INT) [''];
+                
+                return [
+                  '',
+                  holder.name + '\'s intuition tells them that the enemy will:',
+                  if (showNot)
+                    '- NOT attack the ' + partToString(part:notAttack)
+                  else
+                    '- DEFINITELY attack the ' + partToString(part:targetPart)
+                 ]
+               }
+            ];
+            
+            
+            canvas.renderTextFrameGeneral(
+              lines:canvas.refitLines(input:lines),
+              topWeight: 0,
+              leftWeight: 0.5
+            );
+            
+            
+          }
+
+          @choiceNames;
+          @choices;
+
+          choiceNames = [
+            'Defend the head',
+            'Defend the body',
+            'Defend the limbs'
+          ];
+          
+          choices = [
+            Entity.DAMAGE_TARGET.HEAD,
+            Entity.DAMAGE_TARGET.BODY,
+            Entity.DAMAGE_TARGET.LIMBS
+          ] 
+          
+          @:doNext = ::{
+
+            windowEvent.queueChoices(
+              renderable : {
+                render : renderFrame
+              },
+              topWeight:0.9,
+              leftWeight: 0.5,
+              onGetChoices ::{
+                return choiceNames
+              },
+              canCancel: false,   
+              onChoice ::(choice) {
+                targetDefendPart = choices[choice-1];
+                choices->remove(key:choice-1);
+                choiceNames->remove(key:choice-1);
+              }
+            );
+          }
+        }
 
 
+             
 
-    
-        windowEvent.queueMessage(text:user.name + ' is ready to Parry!');
-    
-        target.effectStack.emitEvent(
-          name: 'onPreBlock',
-          attacker : this, 
-          damage : dmg,
-          blockData
-        );   
-      
+        @:prepareBlock ::{      
+          if (holder.effectStack)
+            holder.effectStack.emitEvent(
+              name: 'onPreBlock',
+              attacker : from, 
+              damage,
+              targetPart
+            );          
+          
+          windowEvent.queueCustom(
+            onEnter :: {
+              commit();
+            }
+          ); 
+        }
+        @:Entity = import(module:'game_class.entity.mt');
+        @:idToName = ::(target)<- match(target) {
+          (Entity.DAMAGE_TARGET.HEAD): 'head',
+          (Entity.DAMAGE_TARGET.BODY): 'body',
+          (Entity.DAMAGE_TARGET.LIMBS): 'limbs'
+        }
+        @:commit ::{
+
+          if (targetDefendPart == empty)
+            targetDefendPart = 0;
+          if (holder.species.canBlock == false)
+            targetDefendPart = 0;
+          if (holder.isIncapacitated())
+            targetDefendPart = 0
+
+  
+          if ((targetPart & targetDefendPart) != 0) ::<= {
+            @:StateFlags = import(module:'game_class.stateflags.mt');          
+            holder.flags.add(flag:StateFlags.BLOCKED_ATTACK);
+            
+
+            
+            @:which = idToName(:targetPart);
+            
+            windowEvent.queueMessage(
+              text: holder.name + ' predicted ' + from.name + '\'s attack to their ' + which + ' and successfully Parried it!'
+            );
+            
+            if (holder.effectStack)
+              holder.effectStack.emitEvent(
+                name : 'onSuccessfulBlock',
+                attacker: from,
+                damage,
+                targetPart
+              );
+            damage.amount = 0;
+            
+            if (from.effectStack)
+              from.effectStack.emitEvent(
+                name: 'onGotBlocked',
+                from
+              );
+          } else ::<= {
+            windowEvent.queueMessage(text: holder.name + ' defended their ' + idToName(:targetDefendPart) + ', but the attack aimed for the ' + idToName(:targetPart) + '!');
+          
+          }
         
+        }
+
+
+        windowEvent.queueNestedResolve(
+          onEnter :: {
+            @:world = import(module:'game_singleton.world.mt');
+            if (world.party.isMember(:holder)) ::<= {
+              combatChooseDefend();
+            } else ::<= {
+              targetDefendPart = Entity.normalizedDamageTarget();
+            }
+
+            prepareBlock();
+          }
+        )
       }
     }
   }
@@ -552,7 +639,6 @@ Effect.newEntry(
     id : 'base:block',
     description: 'Next incoming attack\'s damage is negated. This counts as blocking. This effect is removed afterward.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -589,7 +675,6 @@ Effect.newEntry(
     id : 'base:slingshot-block',
     description: 'Next incoming attack\'s damage is reduced to 2 damage. The original damage is redirected to a target of the holder\'s choice. This counts as blocking. This effect is removed afterward.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -645,7 +730,6 @@ Effect.newEntry(
     id : 'base:ricochet-block',
     description: 'Next incoming attack\'s is redirected to a random target. This counts as blocking. This effect is removed afterward.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -693,7 +777,6 @@ Effect.newEntry(
     id : 'base:reflective-block',
     description: 'Next incoming attack\'s is redirected to the origin attacker. This counts as blocking. This effect is removed afterward.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -740,7 +823,6 @@ Effect.newEntry(
     id : 'base:mirrored',
     description: 'Attacks by the holder now damage a random enemy for the same damage amount.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -771,7 +853,6 @@ Effect.newEntry(
     id : 'base:banishing-light',
     description: 'Next attack received is translated instead to 4 Banish stacks. When an attack is translated in this way, the holder loses a stack of Banishing Light.',
     stackable : true,
-    blockPoints: 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -806,7 +887,6 @@ Effect.newEntry(
     id: 'base:agile',
     description: '+2 base DEX. The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
     stackable: true,
-    blockPoints : 1,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEX: 2
@@ -839,10 +919,9 @@ Effect.newEntry(
         
         when(whiff) ::<= {
           windowEvent.queueMessage(text:random.pickArrayItem(list:[
-            holder.name + ' lithely dodges ' + attacker.name + '\'s attack!',         
-            holder.name + ' narrowly dodges ' + attacker.name + '\'s attack!',         
-            holder.name + ' dances around ' + attacker.name + '\'s attack!',         
-            attacker.name + '\'s attack completely misses ' + holder.name + '!'
+            holder.name + ' lithely dodges ' + attacker.name + '\'s attack due to their Agile status!',         
+            holder.name + ' narrowly dodges ' + attacker.name + '\'s attack due to their Agile status!',         
+            holder.name + ' dances around ' + attacker.name + '\'s attack due to their Agile status!'
           ]));
           holder.flags.add(flag:StateFlags.DODGED_ATTACK);
           damage.amount = 0;
@@ -860,7 +939,6 @@ Effect.newEntry(
     id : 'base:guard',
     description: 'Reduces incoming damage from attacks by 90%.',
     stackable: false,
-    blockPoints : 1,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -885,7 +963,6 @@ Effect.newEntry(
     id : 'base:apparition',
     description: 'Ghostly apparition makes it particularly hard to hit.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -909,7 +986,6 @@ Effect.newEntry(
     id : 'base:the-beast',
     description: 'The ferocity of this creature makes it particularly hard to hit.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -931,7 +1007,6 @@ Effect.newEntry(
     id : 'base:the-wyvern',
     description: 'The swiftness and power of the wyvern makes it particularly hard to hit.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -960,7 +1035,6 @@ Effect.newEntry(
     id : 'base:seasoned-adventurer',
     description: 'Is considerably harder to hit. 40% chance to negate damage from an incoming attack.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -989,7 +1063,6 @@ Effect.newEntry(
     id : 'base:defensive-stance',
     description: 'ATK base -5, DEF base +10, gains an additional block point.',
     stackable: false,
-    blockPoints : 1,
     traits : 0,
     stats: StatSet.new(ATK:-5, DEF:10),
     events : {
@@ -1009,7 +1082,6 @@ Effect.newEntry(
     id : 'base:offensive-stance',
     description: 'DEF base -5, ATK base +10',
     stackable: false,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(DEF:-5, ATK:10),
     events : {
@@ -1030,7 +1102,6 @@ Effect.newEntry(
     id : 'base:light-stance',    
     description: 'ATK base -5; SPD, DEX base +5',
     stackable: false,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(ATK:-5, SPD:5, DEX:5),
     events : { 
@@ -1049,7 +1120,6 @@ Effect.newEntry(
     id : 'base:heavy-stance',
     description: 'SPD base -5, DEF base +10, additional block point.',
     stackable: false,
-    blockPoints : 1,
     traits : 0,
     stats: StatSet.new(SPD:-5, DEF:10),
     events : {
@@ -1069,7 +1139,6 @@ Effect.newEntry(
     id : 'base:meditative-stance',
     description: 'ATK base -5, INT base +10',
     stackable: false,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(ATK:-5, INT:10),
     events : {
@@ -1089,7 +1158,6 @@ Effect.newEntry(
     id : 'base:striking-stance',
     description: 'Base stats: SPD -2, DEF -2, ATK +10, DEX + 5',
     stackable: false,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(SPD:-2, DEF:-2, ATK:10, DEX:5),
     events : {
@@ -1109,7 +1177,6 @@ Effect.newEntry(
     description: 'For incoming physical attacks, negate the damage and send half of the would-be damage back to the attacker.',
     stackable: false,
     stats: StatSet.new(),
-    blockPoints : 0,
     traits : 0,
     events : {
       onAffliction ::(from, item, holder) {
@@ -1147,7 +1214,6 @@ Effect.newEntry(
     id : 'base:counter',
     description: 'Negates incoming attacks and redirects a portion of the would-be damage back at the attacker. Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
@@ -1188,7 +1254,6 @@ Effect.newEntry(
     id : 'base:evasive-stance',
     description: '%50 chance damage nullify when from others. -1 AP for each successful dodge. If the user has no AP, this effect is ignored.',
     stackable: false,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -1222,7 +1287,6 @@ Effect.newEntry(
     id : 'base:sneaked',
     description: 'Guarantees next damage from the one inflicting is 3 times more damage.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -1248,7 +1312,6 @@ Effect.newEntry(
     id : 'base:mind-focused',
     description: 'INT base +5',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       INT: 5
@@ -1272,7 +1335,6 @@ Effect.newEntry(
     id : 'base:protect',
     description: 'DEF base +10',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 10
@@ -1295,7 +1357,6 @@ Effect.newEntry(
     id : 'base:shield',
     description: 'DEF base +2, 30% chance to block',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 2
@@ -1325,7 +1386,6 @@ Effect.newEntry(
     id : 'base:seed',
     description: 'Increases a base stat permanently.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
@@ -1356,7 +1416,6 @@ Effect.newEntry(
     id : 'base:wyvern-flower',
     description: 'Increases base stats permanently.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL ,
     stats: StatSet.new(
     ),
@@ -1380,7 +1439,6 @@ Effect.newEntry(
     id : 'base:trigger-itemart',
     description: 'Casts an Art from an item.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
@@ -1398,7 +1456,6 @@ Effect.newEntry(
     id : 'base:trigger-protect',
     description: 'Casts Protect',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -1420,7 +1477,6 @@ Effect.newEntry(
     id : 'base:trigger-evade',
     description: 'Allows the user to evade all attacks for the next turn.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
@@ -1441,7 +1497,6 @@ Effect.newEntry(
     id : 'base:evade',
     description: 'All incoming attacks are nullified.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -1466,7 +1521,6 @@ Effect.newEntry(
     id : 'base:cursed-binding',
     description: 'The holder attacking causes 1 damage to the original caster.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -1496,7 +1550,6 @@ Effect.newEntry(
     id : 'base:trigger-regen',
     description: 'Heals 1 HP.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
@@ -1518,7 +1571,6 @@ Effect.newEntry(
     id : 'base:trigger-hurt-chance',
     description: '10% chance to hurt for 1HP.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -1547,7 +1599,6 @@ Effect.newEntry(
     id : 'base:trigger-random-ailment',
     description: '50% chance to give a random status ailment to the holder for 2 turns.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -1582,7 +1633,6 @@ Effect.newEntry(
     id : 'base:trigger-fatigue-chance',
     description: '10% chance to hurt for 1AP.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
@@ -1611,7 +1661,6 @@ Effect.newEntry(
     id : 'base:trigger-break-chance',
     description: '5% chance to break item.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
@@ -1633,7 +1682,6 @@ Effect.newEntry(
     id : 'base:trigger-spikes',
     description: 'Casts Spikes',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -1655,7 +1703,6 @@ Effect.newEntry(
     id : 'base:spikes',
     description: 'DEF base +2, causes 1-4 light damage when attacked.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 2
@@ -1688,7 +1735,6 @@ Effect.newEntry(
     id : 'base:trigger-ap-regen',
     description: 'Slightly recovers AP.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL  | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(
     ),
@@ -1709,7 +1755,6 @@ Effect.newEntry(
     id : 'base:trigger-shield',
     description: 'Casts Shield',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -1732,7 +1777,6 @@ Effect.newEntry(
     id : 'base:trigger-strength-boost',
     description: 'Triggers a boost in strength.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -1753,7 +1797,6 @@ Effect.newEntry(
     id : 'base:strength-boost',
     description: 'ATK base +4',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK:4
@@ -1776,7 +1819,6 @@ Effect.newEntry(
     id : 'base:minor-strength-boost',
     description: 'ATK base +2',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK:2
@@ -1798,7 +1840,6 @@ Effect.newEntry(
     id : 'base:trigger-defense-boost',
     description: 'Triggers a boost in defense.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -1819,7 +1860,6 @@ Effect.newEntry(
     id : 'base:defense-boost',
     description: 'DEF base +4',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF:4
@@ -1841,7 +1881,6 @@ Effect.newEntry(
     id : 'base:minor-defense-boost',
     description: 'DEF base +2',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF:2
@@ -1864,7 +1903,6 @@ Effect.newEntry(
     id : 'base:trigger-mind-boost',
     description: 'Triggers a boost in mental acuity.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -1885,7 +1923,6 @@ Effect.newEntry(
     id : 'base:mind-boost',
     description: 'INT base +4',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       INT:4
@@ -1907,7 +1944,6 @@ Effect.newEntry(
     id : 'base:minor-mind-boost',
     description: 'INT base +2',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       INT:2
@@ -1929,7 +1965,6 @@ Effect.newEntry(
     id : 'base:trigger-dex-boost',
     description: 'Triggers a boost in dexterity.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -1950,7 +1985,6 @@ Effect.newEntry(
     id : 'base:dex-boost',
     description: 'DEX base +4',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEX:4
@@ -1973,7 +2007,6 @@ Effect.newEntry(
     id : 'base:minor-dex-boost',    
     description: 'DEX base +2',
     stackable: false,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(DEX:2),
     events : { 
@@ -1993,7 +2026,6 @@ Effect.newEntry(
     id : 'base:trigger-speed-boost',
     description: 'Triggers a boost in speed.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
     ),
@@ -2014,7 +2046,6 @@ Effect.newEntry(
     id : 'base:speed-boost',
     description: 'SPD base +4',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       SPD:4
@@ -2036,7 +2067,6 @@ Effect.newEntry(
     id : 'base:minor-speed-boost',
     description: 'SPD base +2',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       SPD:2
@@ -2061,7 +2091,6 @@ Effect.newEntry(
     id : 'base:night-veil',
     description: 'DEF base +3',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 3
@@ -2080,7 +2109,6 @@ Effect.newEntry(
     id : 'base:dayshroud',
     description: 'DEF base +3',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 3
@@ -2099,7 +2127,6 @@ Effect.newEntry(
     id : 'base:call-of-the-night',
     description: 'ATK base +3',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK: 3
@@ -2119,7 +2146,6 @@ Effect.newEntry(
     id : 'base:lunacy',
     description: 'Skips turn and, instead, attacks a random enemy. ATK,DEF base +3.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 3,
@@ -2153,7 +2179,6 @@ Effect.newEntry(
     id : 'base:greater-call-of-the-night',
     description: 'ATK base +5',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK: 5
@@ -2172,7 +2197,6 @@ Effect.newEntry(
     id : 'base:greater-night-veil',
     description: 'DEF base +5',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 5
@@ -2192,7 +2216,6 @@ Effect.newEntry(
     id : 'base:greater-dayshroud',
     description: 'DEF base +5',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 5
@@ -2212,7 +2235,6 @@ Effect.newEntry(
     id : 'base:moonsong',
     description: 'Heals 1 HP every turn.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -2235,7 +2257,6 @@ Effect.newEntry(
     id : 'base:sol-attunement',
     description: 'Heals 1 HP every turn.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -2258,7 +2279,6 @@ Effect.newEntry(
     id : 'base:greater-moonsong',
     description: 'Heals 2 HP every turn.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -2281,7 +2301,6 @@ Effect.newEntry(
     id : 'base:greater-sol-attunement',
     description: 'Heals 2 HP every turn.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -2304,9 +2323,8 @@ Effect.newEntry(
   data : {
     name : 'Grace',
     id : 'base:grace',
-    description: 'If hurt while HP is 0, the damage is nullified and this effect disappears.',
+    description: 'If hurt while HP is 0, the damage is nullified and this effect disappears. The user gains 1 HP.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -2321,6 +2339,7 @@ Effect.newEntry(
       onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (holder.hp == 0) ::<= {
           damage.amount = 0;
+          holder.heal(amount: 1);
           windowEvent.queueMessage(text:holder.name + ' is protected from death!');
           holder.removeEffects(
             effectBases : [
@@ -2341,7 +2360,6 @@ Effect.newEntry(
     id : 'base:consume-item',
     description: 'The item is destroyed in the process of its effects',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
@@ -2362,7 +2380,6 @@ Effect.newEntry(
     id : 'base:cast-spell',
     description: 'The item casts a spell when used.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
@@ -2445,7 +2462,6 @@ Effect.newEntry(
     id : 'base:break-item',
     description: 'The item is destroyed in the process of misuse or strain',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
@@ -2467,7 +2483,6 @@ Effect.newEntry(
     id : 'base:fling',
     description: 'The item is violently lunged at a target, likely causing damage. The target may catch the item.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
@@ -2511,7 +2526,6 @@ Effect.newEntry(
     id : 'base:hp-recovery-all',
     description: 'Heals 100% of HP.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
@@ -2528,7 +2542,6 @@ Effect.newEntry(
     id : 'base:ap-recovery-all',
     description: 'Heals 100% of AP.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
@@ -2546,7 +2559,6 @@ Effect.newEntry(
     id : 'base:hp-recovery-half',
     description: 'Heals 50% of HP.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
@@ -2563,7 +2575,6 @@ Effect.newEntry(
     id : 'base:ap-recovery-half',
     description: 'Heals 50% of AP.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.INSTANTANEOUS,
     stats: StatSet.new(),
     events : {
@@ -2580,7 +2591,6 @@ Effect.newEntry(
     id : 'base:treasure-1',
     description: 'Opening gives a fair number of G.',
     stackable: true,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -2603,7 +2613,6 @@ Effect.newEntry(
     id : 'base:field-cook',
     description: 'Chance to cook a meal after battle.',
     stackable: false,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -2638,7 +2647,6 @@ Effect.newEntry(
     id : 'base:penny-picker',
     description: 'Looks on the ground for G after battle.',
     stackable: false,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {      
@@ -2669,7 +2677,6 @@ Effect.newEntry(
     id : 'base:alchemists-scavenging',
     description: 'Scavenges for alchemist ingredients.',
     stackable: false,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -2706,7 +2713,6 @@ Effect.newEntry(
     id : 'base:trained-hand',
     description: 'ATK base +3',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(ATK:3),
     events : {
@@ -2727,7 +2733,6 @@ Effect.newEntry(
     id : 'base:focus-perception',
     description: 'ATK base +3',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(ATK:3),
     events : {
@@ -2742,7 +2747,6 @@ Effect.newEntry(
     id : 'base:cheered',
     description: 'ATK base +4',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(ATK:4),
     events : {}
@@ -2756,7 +2760,6 @@ Effect.newEntry(
     description: 'Vines grow on holder. SPD base -2.',
     stackable: true,        
     stats: StatSet.new(SPD:-2),
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     events : {
       
@@ -2779,7 +2782,6 @@ Effect.newEntry(
     description: 'Every turn, holder takes 1 to 4 poison damage. SPD base -2',
     stackable: true,
     stats: StatSet.new(SPD:-2),
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
 
     events : {    
@@ -2805,7 +2807,6 @@ Effect.newEntry(
     id : 'base:triproot-growing',
     description: 'Vines grow on holder. SPD base -2',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(SPD:-2),
     events : {
@@ -2828,7 +2829,6 @@ Effect.newEntry(
     id : 'base:triproot',
     description: 'Every turn 40% chance to trip the holder, cancelling their turn. SPD base -2',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(SPD:-2),
     events : {    
@@ -2853,7 +2853,6 @@ Effect.newEntry(
     id : 'base:healroot-growing',
     description: 'Vines grow on holder. SPD base -2',
     stackable: true,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(SPD:-2),
     events : {    
@@ -2876,7 +2875,6 @@ Effect.newEntry(
     id : 'base:healroot',
     description: 'Every turn heals the holder by 2 HP. SPD base -2',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(SPD:-2),
     events : {    
@@ -2899,7 +2897,6 @@ Effect.newEntry(
     id : 'base:learn-arts-perfect',
     description: 'Grants the learning of support Arts for use later.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
     stats: StatSet.new(
     ),
@@ -2945,7 +2942,6 @@ Effect.newEntry(
     id : 'base:learn-arts',
     description: 'Grants the learning of support Arts for use later.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.INSTANTANEOUS | TRAIT.SPECIAL,
     stats: StatSet.new(
     ),
@@ -2989,7 +2985,6 @@ Effect.newEntry(
     id : 'base:defend-other',
     description: 'The original caster receives damage instead of the holder.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
@@ -3027,7 +3022,6 @@ Effect.newEntry(
     id : 'base:perfect-guard',
     description: 'All damage from others to the holder is nullified.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -3052,7 +3046,6 @@ Effect.newEntry(
     description: 'Convinced by someone or something: the holder is unable to use Abilities.',
     stackable: false,
     stats: StatSet.new(),
-    blockPoints : 0,
     traits : TRAIT.CANT_USE_ABILITIES,
     events : {
       onRemoveEffect ::(from, item, holder) {
@@ -3077,7 +3070,6 @@ Effect.newEntry(
     stats: StatSet.new(
       ATK: -6
     ),
-    blockPoints : 0,
     traits : 0,
     events : {
       onAffliction ::(from, item, holder) {
@@ -3100,7 +3092,6 @@ Effect.newEntry(
     stackable: false,
     stats: StatSet.new(
     ),
-    blockPoints : 0,
     traits : Effect.TRAIT.DEBUFF,
     events : {
       onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
@@ -3121,7 +3112,6 @@ Effect.newEntry(
     stackable: false,
     stats: StatSet.new(
     ),
-    blockPoints : 0,
     traits : Effect.TRAIT.BUFF,
     events : {
       onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
@@ -3146,7 +3136,6 @@ Effect.newEntry(
       DEF: -5,
       HP: -5
     ),
-    blockPoints : 0,
     traits : 0,
     events : {
       onAffliction ::(from, item, holder) {
@@ -3175,7 +3164,6 @@ Effect.newEntry(
       DEF: 3,
       HP: 3
     ),
-    blockPoints : 0,
     traits : 0,
     events : {
       onAffliction ::(from, item, holder) {
@@ -3193,9 +3181,8 @@ Effect.newEntry(
   data : {
     name : 'Grappled',
     id : 'base:grappled',
-    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : -3,
     stats: StatSet.new(),
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     events : {
@@ -3212,9 +3199,8 @@ Effect.newEntry(
   data : {
     name : 'Ensnared',
     id : 'base:ensnared',
-    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : -3,
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
@@ -3228,9 +3214,8 @@ Effect.newEntry(
   data : {
     name : 'Grappling',
     id : 'base:grappling',
-    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : -3,
     traits : TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
@@ -3244,9 +3229,8 @@ Effect.newEntry(
   data : {
     name : 'Ensnaring',
     id : 'base:ensnaring',
-    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : -3,
     traits : TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
@@ -3264,7 +3248,6 @@ Effect.newEntry(
     id : 'base:bribed',
     description: 'Unable to use abilities.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL | TRAIT.CANT_USE_ABILITIES,
     stats: StatSet.new(),
     events : {
@@ -3279,9 +3262,8 @@ Effect.newEntry(
   data : {
     name : 'Stunned',
     id : 'base:stunned',
-    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : -3,
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
@@ -3306,7 +3288,6 @@ Effect.newEntry(
     id : 'base:sharpen',
     description: 'ATK base +1',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK: 1
@@ -3322,7 +3303,6 @@ Effect.newEntry(
     id : 'base:weaken-armor',
     description: 'DEF base -1',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
       DEF: -1
@@ -3337,7 +3317,6 @@ Effect.newEntry(
     id : 'base:dull-weapon',
     description: 'ATK base -1',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
       ATK: -1
@@ -3352,7 +3331,6 @@ Effect.newEntry(
     id : 'base:strengthen-armor',
     description: 'DEF base +1',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 1
@@ -3368,7 +3346,6 @@ Effect.newEntry(
     id : 'base:lunar-affinity',
     description: 'INT,DEF,ATK base + 3 if night time.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       
@@ -3398,7 +3375,6 @@ Effect.newEntry(
     id : 'base:coordinated',
     description: 'SPD,DEF,ATK base +2',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK:2,
@@ -3418,7 +3394,6 @@ Effect.newEntry(
     id : 'base:cautious',
     description: 'DEF base +2',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       
@@ -3446,7 +3421,6 @@ Effect.newEntry(
     id : 'base:solar-affinity',
     description: 'INT,DEF,ATK base +3 if day time.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       
@@ -3478,7 +3452,6 @@ Effect.newEntry(
     id : 'base:non-combat-weapon',
     description: '20% chance to deflect attack then break weapon.',
     stackable: true,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -3507,7 +3480,6 @@ Effect.newEntry(
     id : 'base:auto-life',
     description: '50% chance to fully revive if damaged while at 0 HP. This breaks the item.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {
@@ -3543,7 +3515,6 @@ Effect.newEntry(
     id : 'base:flight',
     description: 'Causes all damaging attacks from others to miss.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -3565,7 +3536,6 @@ Effect.newEntry(
     id : 'base:assassins-pride',
     description: 'Add a stack of Pride for each person defeated.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -3584,7 +3554,6 @@ Effect.newEntry(
     id : 'base:pride',
     description: 'SPD, ATK base +1',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       ATK:1,
@@ -3604,7 +3573,6 @@ Effect.newEntry(
     id : 'base:dueled',
     description: 'If attacked by the original caster, the holder receives 1.5x damage.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -3623,7 +3591,6 @@ Effect.newEntry(
     id : 'base:consume-item-partially',
     description: 'The item has a chance of being used up',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
@@ -3649,7 +3616,6 @@ Effect.newEntry(
     id : 'base:bleeding',
     description: '-5% total HP every turn on holder. ATK,DEF,SPD -1 base.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.AILMENT,
     stats: StatSet.new(
       ATK: -1,
@@ -3689,7 +3655,6 @@ Effect.newEntry(
     id : 'base:explode',
     description: 'Damage to holder.',
     stackable: true,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(),
     events : {
@@ -3715,7 +3680,6 @@ Effect.newEntry(
     id : 'base:poison-rune',
     description: 'Deals 1 to 3 Poison damage every turn to holder.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -3750,7 +3714,6 @@ Effect.newEntry(
     id : 'base:destruction-rune',
     description: 'Causes INT-based damage when rune is released.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -3779,7 +3742,6 @@ Effect.newEntry(
     id : 'base:regeneration-rune',
     description: 'Heals holder every turn by 1 HP.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -3805,7 +3767,6 @@ Effect.newEntry(
     id : 'base:shield-rune',
     description: 'DEF base +5',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
       DEF: 5
@@ -3830,7 +3791,6 @@ Effect.newEntry(
     id : 'base:cure-rune',
     description: 'Cures the holder by 3 HP when the rune is released.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -3857,7 +3817,6 @@ Effect.newEntry(
     id : 'base:poisoned',
     description: 'Holder takes damage equal to 5% total HP every turn.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.AILMENT,
     stats: StatSet.new(),
     events : {
@@ -3892,7 +3851,6 @@ Effect.newEntry(
     id : 'base:blind',
     description: '50% chance to miss attacks made by the user.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.AILMENT,
     stats: StatSet.new(),
     events : {
@@ -3921,7 +3879,6 @@ Effect.newEntry(
     id : 'base:burned',
     description: '50% chance to get damage each turn.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.AILMENT,
     stats: StatSet.new(),
     events : {
@@ -3953,9 +3910,8 @@ Effect.newEntry(
   data : {
     name : 'Frozen',
     id : 'base:frozen',
-    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : -3,
     traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
@@ -3981,7 +3937,6 @@ Effect.newEntry(
     id : 'base:paralyzed',
     description: 'SPD base -10. Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
       SPD: -10
@@ -4008,9 +3963,8 @@ Effect.newEntry(
   data : {
     name : 'Mesmerized',
     id : 'base:mesmerized',
-    description: 'SPD,DEF base -4. Unable to use Ability or Reaction Arts, unable to block.',
+    description: 'SPD,DEF base -4. Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : -3,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
       SPD: -4,
@@ -4037,9 +3991,8 @@ Effect.newEntry(
   data : {
     name : 'Wrapped',
     id : 'base:wrapped',
-    description: 'Unable to use Abilities. Unable to block.',
+    description: 'Unable to use Abilities.',
     stackable: false,
-    blockPoints : -3,
     traits : TRAIT.SPECIAL | TRAIT.CANT_USE_ABILITIES,
     stats: StatSet.new(
     ),
@@ -4066,7 +4019,6 @@ Effect.newEntry(
     id : 'base:petrified',
     description: 'Unable to use Ability or Reaction Arts. DEF base -4',
     stackable: false,
-    blockPoints : -3,
     traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
       DEF: -4
@@ -4093,7 +4045,6 @@ Effect.newEntry(
     id : 'base:elemental-tag',
     description: 'Weakness to Fire, Ice, and Thunder damage by 100%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -4121,7 +4072,6 @@ Effect.newEntry(
     description: 'Completely nullifies fire, ice, and thunder damage types.',
     stats: StatSet.new(),
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     events : {
 
@@ -4147,7 +4097,6 @@ Effect.newEntry(
     id : 'base:fire-guard',
     description: 'Reduces incoming fire damage by 25%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4167,7 +4116,6 @@ Effect.newEntry(
     id : 'base:ice-guard',
     description: 'Reduces incoming ice damage by 25%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4187,7 +4135,6 @@ Effect.newEntry(
     id : 'base:thunder-guard',
     description: 'Reduces incoming thunder damage by 25%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4207,7 +4154,6 @@ Effect.newEntry(
     id : 'base:dark-guard',
     description: 'Reduces incoming dark damage by 25%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4226,7 +4172,6 @@ Effect.newEntry(
     id : 'base:light-guard',
     description: 'Reduces incoming light damage by 25%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4245,7 +4190,6 @@ Effect.newEntry(
     id : 'base:poison-guard',
     description: 'Reduces incoming poison damage by 25%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4266,7 +4210,6 @@ Effect.newEntry(
     id : 'base:fire-curse',
     description: 'Deals 1 to 2 fire damage to holder every turn. If the holder gains Burning, all instances of this are removed.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4303,7 +4246,6 @@ Effect.newEntry(
     id : 'base:ice-curse',
     description: 'Deals 1 to 2 fire damage to holder every turn. If the holder gains Icy, all instances of this are removed.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4343,7 +4285,6 @@ Effect.newEntry(
     id : 'base:thunder-curse',
     description: 'Deals 1 to 2 thunder damage to holder every turn. If the holder gains Shock, all instances of this are removed.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4382,7 +4323,6 @@ Effect.newEntry(
     id : 'base:dark-curse',
     description: 'Deals 1 to 2 dark damage to holder every turn. If the holder gains Dark, all instances of this are removed.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4419,7 +4359,6 @@ Effect.newEntry(
     id : 'base:light-curse',
     description: 'Deals 1 to 2 light damage to holder every turn. If the holder gains Shimmering, all instances of this are removed.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4457,7 +4396,6 @@ Effect.newEntry(
     id : 'base:poison-curse',
     description: 'Deals 1 to 2 poison damage to holder every turn. If the holder gains Toxic, all instances of this are removed.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4495,7 +4433,6 @@ Effect.newEntry(
     id : 'base:burning',
     description: 'Gives 1 to 4 additional fire damage per attack and reduces incoming ice damage by 50%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4522,7 +4459,6 @@ Effect.newEntry(
     id : 'base:scorching',
     description: 'Attacks have 20% chance to inflict a stack of Burn for 5 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4541,7 +4477,6 @@ Effect.newEntry(
     id : 'base:sharp',
     description: 'Attacks have 20% chance to inflict a stack of Bleeding for 5 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4561,7 +4496,6 @@ Effect.newEntry(
     id : 'base:icy',
     description: 'Gives 1 to 4 additional ice damage per attack and reduces incoming fire damage by 50%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4588,7 +4522,6 @@ Effect.newEntry(
     id : 'base:freezing',
     description: 'Attacks have 10% chance to inflict Frozen for 2 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4611,7 +4544,6 @@ Effect.newEntry(
     id : 'base:shock',
     description: 'Gives 1 to 4 additional thunder damage per attack and reduces incoming thunder damage by 50%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4637,7 +4569,6 @@ Effect.newEntry(
     id : 'base:paralyzing',
     description: 'Attacks have 10% chance to inflict Paralyzed for 2 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4659,7 +4590,6 @@ Effect.newEntry(
     id : 'base:toxic',
     description: 'Gives 1 to 4 additional poison damage per attack and reduces incoming poison damage by 50%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4687,7 +4617,6 @@ Effect.newEntry(
     id : 'base:seeping',
     description: 'Attacks have 20% chance to inflict a stack of Poisoned for 5 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4707,7 +4636,6 @@ Effect.newEntry(
     id : 'base:shimmering',
     description: 'Gives 1 to 4 additional light damage per attack and reduces incoming dark damage by 50%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4733,7 +4661,6 @@ Effect.newEntry(
     id : 'base:petrifying',
     description: 'Attacks have 10% chance to inflict Petrified for 2 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4752,7 +4679,6 @@ Effect.newEntry(
     id : 'base:dark',
     description: 'Gives 1 to 4 additional dark damage per attack and reduces incoming light damage by 50%',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4779,7 +4705,6 @@ Effect.newEntry(
     id : 'base:blinding',
     description: 'Attacks have 10% chance to inflict Blind for 3 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4800,7 +4725,6 @@ Effect.newEntry(
     id : 'base:banish',
     description: 'ATK, SPD base -1. At 10 stacks, the holder is removed from battle.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
       ATK: -1,
@@ -4828,7 +4752,6 @@ Effect.newEntry(
     id : 'base:banish-shield',
     description: 'Prevents all additional Banish stacks.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -4852,7 +4775,6 @@ Effect.newEntry(
     id : 'base:redirect-momentum',
     description: 'If the holder is to be afflicted with Grappled, instead the holder inflicts 1/3 of the source\'s DEF in damage to the source of the Grappled effect and Stuns them for a turn.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4897,7 +4819,6 @@ Effect.newEntry(
     id : 'base:shift-boost',
     description: 'Attack shifts now increase the power of their respective damage type. The damage is boosted by 20% for each stack.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4944,7 +4865,6 @@ Effect.newEntry(
     id : 'base:clean-blessing',
     description: 'Any time an effect is forcibly removed from the holder, a random positive effect is added for 3 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -4972,7 +4892,6 @@ Effect.newEntry(
     id : 'base:clean-curse',
     description: 'Any time an effect is forcibly removed from the holder, a random negative effect is added for 3 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -5004,7 +4923,6 @@ Effect.newEntry(
     id: 'base:critical-reaction',
     description: 'When the holder lands a critical hit, a random, non-reaction Art is used from their hand at no AP cost.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -5064,7 +4982,6 @@ Effect.newEntry(
     id: 'base:cascading-flash',
     description: 'At the start of the holder\'s turn, 30% chance to play the Art at the top of the holder\'s deck as long as the Art is not a reaction.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -5122,7 +5039,6 @@ Effect.newEntry(
     id : 'base:first-strike',
     description: 'The holder always goes first. If another combatant also always goes first, the order is decided randomly.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF | TRAIT.ALWAYS_FIRST,
     stats: StatSet.new(),
     events : {
@@ -5137,7 +5053,6 @@ Effect.newEntry(
     id: 'base:clairvoyance',
     description: 'At the start of the holder\'s turn after drawing, they can view the top 2 cards of their deck.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -5176,7 +5091,6 @@ Effect.newEntry(
     id: 'base:scatterbrained',
     description: 'At the start of the holder\'s turn, 50% chance to play a random non-reaction Art from the holder\'s hand.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
     ),
@@ -5233,7 +5147,6 @@ Effect.newEntry(
     id : 'base:half-guard',
     description: '50% of the time, damage from others to the holder is reduced by half.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
@@ -5254,7 +5167,6 @@ Effect.newEntry(
     id : 'base:multi-guard',
     description: 'Multi-hit damage from others to the holder is reduced to 1.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
@@ -5275,7 +5187,6 @@ Effect.newEntry(
     id : 'base:premonition',
     description: 'All incoming critical hits are reduced to 1 damage.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
@@ -5296,7 +5207,6 @@ Effect.newEntry(
     id : 'base:crustacean-maneuver',
     description: 'All incoming attacks are nullified. Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {      
@@ -5322,7 +5232,6 @@ Effect.newEntry(
     id : 'base:lucky-charm',
     description: '20% chance to avoid death once, granting 1 HP. On revival, all stacks of Lucky Charm are removed.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
@@ -5351,7 +5260,6 @@ Effect.newEntry(
     id : 'base:spirit-loan',
     description: 'Avoids death, but sends a Dark blast to another ally upon revival that deals damage equivalent to the ally\'s total health. If there are no other allies, revival happens regardless.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
@@ -5394,7 +5302,6 @@ Effect.newEntry(
     id : 'base:procrastinate-death',
     description: 'The next time the holder would die, their HP is set to 1 and this effect is removed. If this effect is never triggered prior to removal, the holder receives Dark damage equal to their total health.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
@@ -5438,7 +5345,6 @@ Effect.newEntry(
     id : 'base:cheat-death',
     description: 'Avoids death, but when avoided stuns the holder for 2 turns.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
@@ -5466,7 +5372,6 @@ Effect.newEntry(
     id : 'base:death-reflection',
     description: 'Grants a 25% chance to reflect death onto a random combatant instead of the holder.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
@@ -5497,7 +5402,6 @@ Effect.newEntry(
     id : 'base:limit-break',
     description: 'If damage would cause the holder to get knocked out, the holder gains 50% of their HP and inflicts the Limit Reached effect.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
@@ -5522,7 +5426,6 @@ Effect.newEntry(
     id : 'base:limit-reached',
     description: 'The holder getting knocked out will also kill the holder.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {      
@@ -5545,7 +5448,6 @@ Effect.newEntry(
     id : 'base:aura',
     description: 'ATK,DEF,INT,SPD,DEX base +4, gains an additional block point.',
     stackable: true,
-    blockPoints : 1,
     traits : 0,
     stats: StatSet.new(
       ATK:4, 
@@ -5567,7 +5469,6 @@ Effect.newEntry(
     id : 'base:minor-aura',
     description: 'ATK,DEF,INT,SPD,DEX base +1',
     stackable: true,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(
       ATK:1, 
@@ -5587,7 +5488,6 @@ Effect.newEntry(
     id : 'base:minor-curse',
     description: 'ATK,DEF,INT,SPD,DEX base -1',
     stackable: true,
-    blockPoints : 0,
     traits : 0,
     stats: StatSet.new(
       ATK:-1, 
@@ -5608,7 +5508,6 @@ Effect.newEntry(
     id : 'base:shield-aura',
     description: 'DEF base +4, gains an additional block point, and reduces both incoming and outgoing damage by 1.',
     stackable: true,
-    blockPoints : 1,
     traits : 0,
     stats: StatSet.new(
       DEF:4
@@ -5641,7 +5540,6 @@ Effect.newEntry(
     id : 'base:deathless-overflow',
     description: 'If damage would cause the holder to get knocked out, the holder gains 50% of their HP. Holder gain 5 Banish stacks.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
     events : {      
@@ -5668,7 +5566,6 @@ Effect.newEntry(
     id : 'base:soul-buffer',
     description: 'Prevents all non-physical damage.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
@@ -5688,7 +5585,6 @@ Effect.newEntry(
     id : 'base:body-buffer',
     description: 'Prevents all physical damage.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
@@ -5708,7 +5604,6 @@ Effect.newEntry(
     id : 'base:perfect-barrier',
     description: 'Prevents all damage.',
     stackable: false,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
@@ -5726,7 +5621,6 @@ Effect.newEntry(
     id : 'base:escape',
     description : 'Escape from any area or battle.',
     stackable : false,
-    blockPoints :0,
     traits : TRAIT.SPECIAL,
     stats : StatSet.new(),
     events : {
@@ -5753,7 +5647,6 @@ Effect.newEntry(
     id : 'base:access-bank',
     description : 'Access a pocket dimension to transfer inventory to and from.',
     stackable : false,
-    blockPoints :0,
     traits : TRAIT.SPECIAL,
     stats : StatSet.new(),
     events : {
@@ -5999,7 +5892,6 @@ Effect.newEntry(
     id : 'base:soul-guard',
     description: '1/4th chance that the caster nullifies damage done to the holder if the caster is conscious. Upon successful blocking, has a 1/4th chance to cause Paralysis indefinitely.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
@@ -6026,7 +5918,6 @@ Effect.newEntry(
     id : 'base:soul-split',
     description: 'Redistributes incoming damage between the holder and caster evenly.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
@@ -6053,7 +5944,6 @@ Effect.newEntry(
     id : 'base:soul-projection',
     description: 'Original caster receives damage instead of the holder. If the holder is the caster, nothing happens.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {      
@@ -6077,9 +5967,8 @@ Effect.newEntry(
   data : {
     name : 'Concentrating',
     id : 'base:concentrating',
-    description: 'Unable to use Ability or Reaction Arts. Unable to block.',
+    description: 'Unable to use Ability or Reaction Arts.',
     stackable: false,
-    blockPoints : -3,
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
@@ -6095,7 +5984,6 @@ Effect.newEntry(
     id : 'base:charmed',
     description: 'Attacks from the holder that target the original caster is reduced by 50%',
     stackable: true,
-    blockPoints : -3,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -6118,7 +6006,6 @@ Effect.newEntry(
     id : 'base:static-shield',
     description: 'Incoming lightning damage is reduced by 75%. Incoming attacks deal 1 - 4 lighting damage to the attacker.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6152,7 +6039,6 @@ Effect.newEntry(
     id : 'base:scorching-shield',
     description: 'Incoming fire damage is reduced by 75%. Incoming attacks deal 1 - 4 fire damage to the attacker.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6186,7 +6072,6 @@ Effect.newEntry(
     id : 'base:freezing-shield',
     description: 'Incoming ice damage is reduced by 75%. Incoming attacks deal 1 - 4 ice damage to the attacker.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6246,7 +6131,6 @@ Effect.newEntry(
     id : 'base:acid-dust',
     description: 'Upon recieving fire-based damage or receiving the Burning effect, the holder and any allies take 4 - 6 fire damage.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -6299,7 +6183,6 @@ Effect.newEntry(
     id : 'base:conduction-dust',
     description: 'Upon recieving thunder-based damage or receiving the Shock effect, the holder and any allies take 4 - 6 thunder damage.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -6349,7 +6232,6 @@ Effect.newEntry(
     id : 'base:conduction-dust',
     description: 'Upon recieving thunder-based damage or receiving the Shock effect, the holder and any allies take 4 - 6 thunder damage.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -6398,7 +6280,6 @@ Effect.newEntry(
     id : 'base:crystalized-dust',
     description: 'Upon recieving ice-based damage or receiving the Icy effect, the holder and any allies take 4 - 6 ice damage.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -6427,7 +6308,6 @@ Effect.newEntry(
     id : 'base:embarrassed',
     description: 'When the holder attacks the original caster, 50% chance to miss.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -6452,7 +6332,6 @@ Effect.newEntry(
     id : 'base:enraged',
     description: 'When the holder attacks the original caster, 33% of damage is inflicted to the holder as well.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -6481,7 +6360,6 @@ Effect.newEntry(
     id : 'base:berserk',
     description: 'Unable to use Effect and Reaction Arts.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_EFFECTS | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
@@ -6497,7 +6375,6 @@ Effect.newEntry(
     id : 'base:self-illusion',
     description: 'When the holder attacks the original caster, it is inflicted on their self instead.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
     events : {
@@ -6530,7 +6407,6 @@ Effect.newEntry(
     id : 'base:b305',
     description: 'Adds one additional block point. Any damage taken is increased by 1.',
     stackable: true,
-    blockPoints : 1,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6552,7 +6428,6 @@ Effect.newEntry(
     id : 'base:b307',
     description: 'Successful blocks add a stack of Empowered to the holder for 3 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6569,7 +6444,6 @@ Effect.newEntry(
     id : 'base:empowered',
     description: 'Next attack from the holder is 1.5x more damaging. This effect is removed after.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6590,7 +6464,6 @@ Effect.newEntry(
     id : 'base:b308',
     description: 'Successful blocks inflicts the Stunned effect on the attacker for 1 turn.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6608,7 +6481,6 @@ Effect.newEntry(
     id : 'base:b309',
     description: 'Successful blocks have a 10% chance of unequipping a the weapon of the attacker. Else, add a stack of Bleeding to the attacker for 3 turns.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6644,7 +6516,6 @@ Effect.newEntry(
     id : 'base:corrupted-punishment',
     description: 'Attacks against a target are 1.3x more effective for each stack of Banish they have.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6668,7 +6539,6 @@ Effect.newEntry(
     id : 'base:corrupted-empowerment',
     description: 'Attacks against a target are 1.3x more effective for each stack of Banish the holder has.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6692,7 +6562,6 @@ Effect.newEntry(
     id : 'base:corrupted-radioactivity',
     description: 'At the start of the holder\'s turn, an enemy is struck with an INT-based Fire attack to a random enemy based on the number of Banish stacks.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6730,7 +6599,6 @@ Effect.newEntry(
     id : 'base:corrupted-inspiration',
     description: 'At the start of the holder\'s turn, if the holder has a Banish stack, remove the Banish stack and grant Minor Aura to all allies for the duration of the battle.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6761,7 +6629,6 @@ Effect.newEntry(
     id : 'base:corrupted-corruption',
     description: 'At the start of the holder\'s turn, if the holder has a Banish stack, remove the Banish stack and grant Minor Curse to all allies for the duration of the battle.',
     stackable: true,
-    blockPoints : 0,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {
@@ -6811,7 +6678,6 @@ Effect.newEntry(
     description : String,
     stats : StatSet.type,
     traits : Number,
-    blockPoints : Number,
     events : Object,
     stackable : Boolean // whether multiple of the same effect can coexist
   },

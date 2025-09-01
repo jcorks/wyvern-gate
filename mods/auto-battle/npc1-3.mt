@@ -1,11 +1,16 @@
 return {
   name : 'A-3',
-  profession : 'base:field-mage',
+  profession : empty,
   level : 6, // default
   giveWeapon : false,
   giveArmor : false,
   randomEffectCount : 0,
-  randomAdditionalArtsCount : 7,
+  randomAdditionalArtsCount : 0,
   arts : [
+    'base:parry',
+    'base:parry',
+    'base:parry',
+    'base:parry',
+    'base:parry'
   ]
 }

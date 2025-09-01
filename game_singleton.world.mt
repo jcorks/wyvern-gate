@@ -844,11 +844,13 @@
         return save;        
       },
 
-      loadIslandID ::(id, islandGenTraits, skipSave, onDone) {
+      loadIslandID ::(id, islandGenTraits, skipSave, onDone => Function) {
         // first load existing save. The save has all the current islands 
         @:instance = import(:'game_singleton.instance.mt');
 
-        @save = instance.getSaveDataRaw();
+        @save = if (skipSave != true)
+          instance.getSaveDataRaw();
+
         
         @:commitLoad :: {
           state.currentIslandID = id;
@@ -860,11 +862,11 @@
             island.load(serialized:which);
           }
           
-          save.world = state.save();
-          save.rng = random.save();
 
           // traveling always triggers a save.
-          if (skipSave == empty || skipSave == false) ::<= {
+          if (skipSave != true) ::<= {
+            save.world = state.save();
+            save.rng = random.save();
             State.weightEmplace(:save);
             instance.savestate(saveOverride:save);      
           }
@@ -924,13 +926,13 @@
 
       // makes the key's island the current island. If the key's island 
       // doesnt exist, it is made, saved, and set to the island
-      loadIsland ::(key, skipSave, onDone) {
+      loadIsland ::(key, skipSave, onDone => Function) {
         // get ID if none exists
         if (key.islandID == 0) ::<= {
           key.islandID = this.getNextID();
         }
 
-        this.loadIslandID(id:key.islandID, islandGenTraits:key.islandGenTraits, onDone);
+        this.loadIslandID(id:key.islandID, skipSave, islandGenTraits:key.islandGenTraits, onDone);
       },
      
       

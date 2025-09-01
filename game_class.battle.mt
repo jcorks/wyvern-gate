@@ -30,115 +30,7 @@
 @:displayHP = import(:'game_function.displayhp.mt');
 @:AP_COST = 2;
 
-@:combatChooseDefend::(targetPart, attacker, defender, onDone) {
-  when (defender.blockPoints == 0) onDone(which:0);
-  @:Entity = import(module:'game_class.entity.mt');
 
-  @:notAttack = ::<= {
-    @:list = [
-      Entity.DAMAGE_TARGET.HEAD,
-      Entity.DAMAGE_TARGET.BODY,
-      Entity.DAMAGE_TARGET.LIMBS
-    ]
-    
-    list->remove(key:list->findIndex(value:targetPart));
-    return random.pickArrayItem(list);
-  }
-
-  @blockPoints = defender.blockPoints;
-  
-  @:partToString::(part) {
-    return match(part) {
-      (Entity.DAMAGE_TARGET.HEAD): 'head',
-      (Entity.DAMAGE_TARGET.BODY): 'body',
-      (Entity.DAMAGE_TARGET.LIMBS): 'limbs'
-    }
-  }
-  @blocking = 0;
-  @:showNot = random.try(percentSuccess:70);
-  
-  @:renderFrame ::{
-    @:lines = [
-      attacker.name + ' is preparing to attack ' + defender.name + '.',
-      'How will ' + defender.name + ' respond?',
-      '',
-      defender.name + ' is currently capable of defending ' + defender.blockPoints + ' ' + (if (defender.blockPoints == 1) 'part' else 'parts') + ' of their body.',
-      '',
-      if (defender.stats.INT > attacker.stats.INT) defender.name + '\'s intuition tells them that the enemy will:' else '',
-      if (defender.stats.INT > attacker.stats.INT)
-        if (showNot)
-          '- NOT attack the ' + partToString(part:notAttack)
-        else
-          '- DEFINITELY attack the ' + partToString(part:targetPart)
-      else 
-        '',
-      'Able to block: ' + blockPoints + ' point(s).'
-    ];
-
-    if ((blocking & Entity.DAMAGE_TARGET.HEAD) != 0)  lines->push(value:'Currently blocking: Head')
-    if ((blocking & Entity.DAMAGE_TARGET.BODY) != 0)  lines->push(value:'Currently blocking: Body')
-    if ((blocking & Entity.DAMAGE_TARGET.LIMBS) != 0) lines->push(value:'Currently blocking: Limbs')
-    
-    
-    canvas.renderTextFrameGeneral(
-      lines:canvas.refitLines(input:lines),
-      topWeight: 0,
-      leftWeight: 0.5
-    );
-    
-    
-  }
-
-  @choiceNames;
-  @choices;
-  
-  @:resetBlocking = ::{
-    blockPoints = defender.blockPoints;
-    blocking = 0
-    choiceNames = [
-      'Defend the head',
-      'Defend the body',
-      'Defend the limbs'
-    ];
-    
-    choices = [
-      Entity.DAMAGE_TARGET.HEAD,
-      Entity.DAMAGE_TARGET.BODY,
-      Entity.DAMAGE_TARGET.LIMBS
-    ]
-    doNext();
-  
-  }
-  
-  @:doNext = ::{
-
-    windowEvent.queueChoices(
-      renderable : {
-        render : renderFrame
-      },
-      topWeight:0.9,
-      leftWeight: 0.5,
-      onGetChoices ::{
-        return choiceNames
-      },
-      canCancel: true,   
-      onCancel :: {
-        resetBlocking();
-      },
-      onChoice ::(choice) {
-        blocking |= choices[choice-1];
-        choices->remove(key:choice-1);
-        choiceNames->remove(key:choice-1);
-        blockPoints-=1;
-        
-        when(blockPoints == 0)
-          onDone(which:blocking);
-        doNext();
-      }
-    );
-  }
-  resetBlocking();
-}
 
 
 @:battleLoot ::(rngLoot, defeated, landmark, party, finishEnd) {
@@ -1119,10 +1011,6 @@
           
         @:Entity = import(module:'game_class.entity.mt');
         @:world = import(module:'game_singleton.world.mt');
-        @:targetDefendParts = [];
-        foreach(action.targets) ::(index, target) {        
-          targetDefendParts[index] = if (target.blockPoints <= 0 || random.try(percentSuccess:35)) 0 else Entity.normalizedDamageTarget(blockPoints:target.blockPoints);
-        }
         
         @pendingChoices = [];
         @:art = Arts.find(id:action.card.id);
@@ -1174,7 +1062,6 @@
             level: action.card.level,
             targets:action.targets,
             targetParts:action.targetParts,
-            targetDefendParts: targetDefendParts,
             turnIndex : action.turnIndex,
             extraData : action.extraData
           );
@@ -1229,7 +1116,6 @@
                   level: 1,
                   user: reactor,
                   targets : reaction.targets,
-                  targetDefendParts: [0],
                   targetParts : reaction.targetParts,
                   turnIndex: 0,
                   extraData : {
@@ -1268,27 +1154,7 @@
         
         }
       
-        @:chooseDefend ::(onDone) {
-          @:doNext = :: {
-            when(pendingChoices->size == 0) onDone();
-            @:next = pendingChoices->pop;
-            when(Arts.find(:action.card.id).targetMode != Arts.TARGET_MODE.ONEPART) ::<= { // todo: luck delta affecting chance
-              targetDefendParts[action.targets->findIndex(value:next)] = 0;
-              doNext();
-            }
-            combatChooseDefend(
-              targetPart: action.targetParts[action.targets->findIndex(value:next)],
-              attacker:entAct,
-              defender:next,
-              onDone ::(which) {
-                @:index = action.targets->findIndex(value:next);
-                targetDefendParts[index] = which;
-                doNext();
-              }
-            );
-          }
-          doNext();          
-        }
+
       
       
         entAct.deck.discardFromHand(card:action.card);
@@ -1314,9 +1180,7 @@
                       onEnter ::{
                         when (!entAct.canActThisTurn())
                           endTurn();
-                        chooseDefend(::{
-                          doAction();
-                        });
+                        doAction();
                       }
                     );
                   },
