@@ -332,6 +332,13 @@
         @:Item = import(module:'game_mutator.item.mt');
         if (item == empty) item = Item.NONE;
         @:Arts = import(module:'game_database.arts.mt');
+
+        if (item == empty)
+          item = Item.NONE;
+
+        if (from == empty)
+          from = holder;
+
         @:ref = {
           holder : holder,
           from : from,
