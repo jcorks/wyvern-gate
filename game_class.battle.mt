@@ -98,6 +98,7 @@
     @onFinish = [];
     @queuedCallbacks = [];
     @banished = [];
+    @storage = {};
     
   
     // some actions last multiple turns.
@@ -119,7 +120,9 @@
     @onTurnPrep_;
     
     @:getAllies::(ent) {
-      return [...ent2group[ent]];
+      @:v = ent2group[ent];
+      when(v == empty) [];
+      return [...v];
     }
 
     @:finishEnd :: {
@@ -131,6 +134,7 @@
       foreach(onFinish) ::(k, v) {
         v(:result);
       }      
+      storage = {};
       onFinish = [];        
     }
 
@@ -584,6 +588,7 @@
         
         onEnd => Function
       ) {
+        storage = {};
         awkwardControlHack_ = awkwardControlHack;
         onEnd_ = onEnd;
         onTurnPrep_ = onTurnPrep;
@@ -866,6 +871,10 @@
         get ::<- awkwardControlHack_
       },
       
+      turnIndex : {
+        get ::<- turnIndex
+      },
+      
       getMembers :: {
         @:out = [];
         foreach(groups) ::(k, group) {
@@ -925,6 +934,10 @@
         windowEvent.queueMessage(
           text: entity.name + ' was evicted from battle.'
         );
+      },
+      
+      storage : {
+        get ::<- storage
       },
       
       join ::(group, sameGroupAs) {

@@ -32,33 +32,36 @@
     windowEvent.queueMessage(text:'The party falls through a trap door to the next floor.', renderable:{render::{canvas.blackout();}});
 
     @:hurt = random.pickArrayItem(list:party.members);
-    @:oldStats = StatSet.new();
-    oldStats.load(serialized:hurt.stats.save());
     (random.pickArrayItem(list: [
       :: {
         windowEvent.queueMessage(text: hurt.name + ' hurt their head from the fall...', renderable:{render::{canvas.blackout();}});
-        hurt.stats.add(stats:StatSet.new(INT:-2));
       },
 
       :: {
         windowEvent.queueMessage(text: hurt.name + ' injured their legs from the fall...', renderable:{render::{canvas.blackout();}});
-        hurt.stats.add(stats:StatSet.new(SPD:-2));
       },
 
       :: {
         windowEvent.queueMessage(text: hurt.name + ' injured their arms from the fall...', renderable:{render::{canvas.blackout();}});
-        hurt.stats.add(stats:StatSet.new(ATK:-2));
       },
 
       :: {
         windowEvent.queueMessage(text: hurt.name + ' injured their hands from the fall...', renderable:{render::{canvas.blackout();}});
-        hurt.stats.add(stats:StatSet.new(DEX:-2));
       }
-    
     ]
     ))();
-    
-    oldStats.printDiff(other:hurt.stats, prompt:'Ouch...', renderable:{render::{canvas.blackout();}});
+    hurt.damage(
+      attacker:hurt, 
+      damage: Damage.new(
+        amount:hurt.stats.HP, 
+        damageType:Damage.TYPE.PHYS, 
+        damageClass:Damage.CLASS.HP,
+        traits : Damage.TRIAT.UNBLOCKABLE
+      ), 
+      dodgeable: false, 
+      exact: true
+    );
+
     @:instance = import(module:'game_singleton.instance.mt');
     
     instance.visitLandmark(landmark:location.targetLandmark);

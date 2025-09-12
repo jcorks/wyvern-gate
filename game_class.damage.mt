@@ -28,6 +28,17 @@
   POISON   : 7  //<- The Sigil
 }
 
+@:TYPE_NAMES = [
+  '',
+  'Fire',
+  'Thunder',
+  'Ice',
+  'Light',
+  'Dark',
+  'Physical',
+  'Poison'
+];
+
 @:CLASS = {
   HP : 0,
   AP : 1
@@ -53,6 +64,7 @@
 
 @:Damage = {
   TYPE : TYPE,
+  TYPE_NAMES : TYPE_NAMES,
   TRAIT : TRAIT,
   CLASS : CLASS,
   type : type,

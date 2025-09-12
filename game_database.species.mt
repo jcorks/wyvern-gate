@@ -1257,6 +1257,33 @@ Species.newEntry(data:{
   passives : [
   ]
 })
+
+
+Species.newEntry(data:{
+  name : 'Banished Beast',
+  id : 'base:banished-beast',
+  rarity : 2000000000000,
+  description: 'A creature from the banished realm.',
+  growth : StatSet.new(
+    HP : 1,
+    AP : 5,
+    ATK: 5,
+    DEF: 5,
+    INT: 1,
+    LUK: 5,
+    SPD: 5,
+    DEX: 5
+  ),
+  qualities : [
+  ],
+  swarms : true,
+  
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
+  canBlock : false,
+  passives : [
+    'base:banishing-touch'
+  ]
+})
 }
 
 

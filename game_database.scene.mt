@@ -176,7 +176,6 @@ Scene.newEntry(
         @:left = [...scene.script];
         
         @:doNext ::{
-          breakpoint();
           when(left->keycount == 0) onDone();
           @:action = left[0];
           left->remove(key:0);

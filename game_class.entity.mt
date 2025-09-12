@@ -234,17 +234,41 @@
 // returns EXP recommended for next level
 @:levelUp ::(level, stats => StatSet.type, growthPotential => StatSet.type, whichStat) {
       
+  /*
+    @:stat = ::(name) {
+      when (random.flipCoin()) 0;
+      @:base = growthPotential[name];
+      @val =  (0.5 * (random.number()/2) * (base / 4) + base/5)->floor
+      when (val < 1)
+        random.number() * 2;
+      return val;
+    }
+        
+    stats.add(stats:StatSet.new(
+      HP  : (if(random.flipCoin()) 3 else 1) + (stat(name:'HP')),
+      AP  : 0,
+      ATK : stat(name:'ATK'),
+      INT : stat(name:'INT'),
+      DEF : stat(name:'DEF'),
+      SPD : stat(name:'SPD'),
+      LUK : stat(name:'LUK'),
+      DEX : stat(name:'DEX')
+    ));  
+  */
+      
   @:stat = ::(name) {
     when (random.flipCoin()) 0;
     @:base = growthPotential[name];
     @val =  (0.5 * (random.number()/2) * (base / 4) + base/5)->floor
-    when (val < 1)
-      random.number() * 2;
+    when(val < 1) 1;
     return val;
   }
-      
+  @:story = import(:'game_singleton.story.mt');
   stats.add(stats:StatSet.new(
-    HP  : (if(random.flipCoin()) 3 else 1) + (stat(name:'HP')),
+    HP  : if (level <= story.levelHint)
+        (if(random.flipCoin()) 1 else 2) + (stat(name:'HP'))
+      else 
+        (random.integer(from:3, to:5)) + (stat(name:'HP')),
     AP  : 0,
     ATK : stat(name:'ATK'),
     INT : stat(name:'INT'),
@@ -792,6 +816,7 @@
     PROF_EXP_PER_KNOCKOUT : {get::<- PROF_EXP_PER_KNOCKOUT},
     EQUIP_SLOTS : {get::<- EQUIP_SLOTS},
     DAMAGE_TARGET : {get::<- DAMAGE_TARGET},
+    STARSIGN_NAMES : {get::<- STARSIGN_NAMES},
     normalizedDamageTarget :: {
       @:rate = random.number();
       when (rate <= 0.25) DAMAGE_TARGET.HEAD;
@@ -1184,26 +1209,6 @@
       get ::<- _.state.deckTemplates->keys
     },
       
-    blockPoints : {
-      get :: {
-        @:this = _.this;
-        @:state = _.state;
-        when(this.isIncapacitated()) 0;
-        @:am = ::<= {
-          @wep = this.getEquipped(slot:EQUIP_SLOTS.HAND_LR);
-          @amount = if (wep.base.id == 'base:none') 0 else wep.base.blockPoints;
-          
-          foreach(this.effectStack.getAll()) ::(index, f) {
-            @:effect = Effect.find(:f.id);
-            amount += effect.blockPoints
-          }
-          
-          return amount;
-        }
-        when (am < 0) 0;
-        return am;
-      }
-    },
     
     addDeck ::(name) {
       @:state = _.state;
@@ -1608,6 +1613,10 @@
     personality : {
       get ::<- _.state.personality
     },
+
+    starsign : {
+      get ::<- _.state.affinity
+    },
       
     endTurn ::(battle) {
       @:state = _.state;
@@ -1615,6 +1624,8 @@
       @:equips = state.equips;
       this.effectStack.endTurn();
     },
+    
+    
     
     canUseAbilities :: {
       when(_.this.isIncapacitated()) false;
@@ -1804,7 +1815,8 @@
       damage => Damage.type,
       target,
       targetPart,
-      onFinish
+      onFinish,
+      exact
     ){
 
       if (targetPart == empty)
@@ -1863,6 +1875,7 @@
             parent.effectStack = empty;
 
           displayedHurt->remove(key:target);
+          if (onFinish) onFinish(:proper);
         },
         
         
@@ -1975,7 +1988,7 @@
         ::{
 
 
-          @:result = target.damage(attacker:this, damage:dmg, dodgeable:true, critical:isCrit);
+          @:result = target.damage(attacker:this, damage:dmg, dodgeable:true, critical:isCrit, exact);
           
 
           

@@ -833,7 +833,7 @@ return {
 
 
 
-    /*    
+    
     @:Arts = import(:'game_database.arts.mt');
     @:dump ::(filter, filename) {
       Arts.dumpCSV(
@@ -929,7 +929,7 @@ return {
     }
 
     dump(filename: 'arts.csv', filter::(value) <- true);
-    */
+    
     
     
     
@@ -4875,7 +4875,8 @@ return {
         'base:stun',
         'base:fire',
         'base:wild-swing',
-        'base:summon-fire-sprite'
+        'base:summon-fire-sprite',
+        'base:vulnerability-fire'
       ],
       passives : [
       ]
@@ -4909,7 +4910,8 @@ return {
         'base:ice',
         //'Magic Mist', // remove all effects
         'base:wild-swing',
-        'base:sheer-cold'
+        'base:sheer-cold',
+        'base:vulnerability-ice'
       ],
       passives : [
       ]
@@ -4947,7 +4949,8 @@ return {
         'base:leg-sweep',
         'base:summon-defensive-pylon',
         'base:flash',
-        'base:unarm'
+        'base:unarm',
+        'base:vulnerability-thunder'
       ],
       passives : [
       ]
@@ -4988,7 +4991,8 @@ return {
         'base:triplestrike',
         'base:leg-sweep',
         'base:flash',
-        'base:unarm'
+        'base:unarm',
+        'base:vulnerability-light'
       ],
       passives : [
       ]

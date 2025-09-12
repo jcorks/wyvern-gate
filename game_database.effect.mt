@@ -2466,12 +2466,10 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
-        if (random.number() > 0.5) ::<= {
-          windowEvent.queueMessage(
-            text: "The " + item.name + ' broke.'
-          );
-          item.throwOut();        
-        }
+        windowEvent.queueMessage(
+          text: "The " + item.name + ' broke.'
+        );
+        item.throwOut();        
       }
     }
   }
@@ -2752,6 +2750,22 @@ Effect.newEntry(
     events : {}
   }
 )       
+
+
+Effect.newEntry(
+  data : {
+    name : 'Funny Smell',
+    id : 'base:funny-smell',
+    description: 'Doesn\'t smell good, but: ATK, DEF base +4',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(ATK:4, DEF:4),
+    events : {}
+  }
+)  
+
+
+
 
 Effect.newEntry(
   data : {
@@ -4748,6 +4762,24 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Banishing Touch',
+    id : 'base:banishing-touch',
+    description: 'Upon successful attack, the target gains 1 stack of Banish.',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPostAttackOther ::(from, item, holder, to, damage, targetPart) {
+        @:Arts = import(:'game_database.arts.mt');
+        to.addEffect(from:holder, id:'base:banish', durationTurns:Arts.A_LOT);      
+      }
+    }
+  }  
+);
+
+
+Effect.newEntry(
+  data : {
     name : 'Banish Shield',
     id : 'base:banish-shield',
     description: 'Prevents all additional Banish stacks.',
@@ -6657,6 +6689,168 @@ Effect.newEntry(
   }
 )  
 
+
+@chaosCounter = (Number.random()*3)->floor;
+Effect.newEntry(
+  data : {
+    name : 'Vulnerability: Chaos',
+    id : 'base:vulnerability-chaos',
+    description: 'When attacked, 33% chance to boost incoming elemental damage by 100%.',
+    stackable: true,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        when(
+          damage.damageType != Damage.TYPE.FIRE &&
+          damage.damageType != Damage.TYPE.ICE &&
+          damage.damageType != Damage.TYPE.THUNDER
+        ) empty;
+        
+        when(random.try(percentSuccess:66)) empty; 
+        
+        windowEvent.queueMessage(text:holder.name + " is prone to Elemental damage!");
+        damage.amount *= 2;
+      }
+    }
+  }
+) 
+
+Effect.newEntry(
+  data : {
+    name : 'Vulnerability: Ice',
+    id : 'base:vulnerability-ice',
+    description: 'When attacked, received Ice damage is 100% more potent.',
+    stackable: true,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.ICE) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is prone to Ice damage!");
+          damage.amount *= 2;
+        }
+      }
+    }
+  }
+) 
+
+Effect.newEntry(
+  data : {
+    name : 'Vulnerability: Thunder',
+    id : 'base:vulnerability-thunder',
+    description: 'When attacked, received Thunder damage is 100% more potent.',
+    stackable: true,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is prone to Thunder damage!");
+          damage.amount *= 2;
+        }
+      }
+    }
+  }
+)    
+
+
+Effect.newEntry(
+  data : {
+    name : 'Vulnerability: Fire',
+    id : 'base:vulnerability-fire',
+    description: 'When attacked, received Fire damage is 100% more potent.',
+    stackable: true,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is prone to Fire damage!");
+          damage.amount *= 2;
+        }
+      }
+    }
+  }
+)    
+
+Effect.newEntry(
+  data : {
+    name : 'Vulnerability: Dark',
+    id : 'base:vulnerability-dark',
+    description: 'When attacked, received Dark damage is 100% more potent.',
+    stackable: true,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.DARK) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is prone to Dark damage!");
+          damage.amount *= 2;
+        }
+      }
+    }
+  }
+)  
+
+Effect.newEntry(
+  data : {
+    name : 'Vulnerability: Light',
+    id : 'base:vulnerability-light',
+    description: 'When attacked, received Light damage is 100% more potent.',
+    stackable: true,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is prone to Light damage!");
+          damage.amount *= 2;
+        }
+      }
+    }
+  }
+)    
+  
+  
+Effect.newEntry(
+  data : {
+    name : 'Vulnerability: Poison',
+    id : 'base:vulnerability-poison',
+    description: 'When attacked, received Poison damage is 100% more potent.',
+    stackable: true,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.POISON) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is prone to Poison damage!");
+          damage.amount *= 2;
+        }
+      }
+    }
+  }
+)      
+
+Effect.newEntry(
+  data : {
+    name : 'Starsign Alignment',
+    id : 'base:starsign-alignment',
+    description: 'All attacks made by the holder will shift to the damage type corresponding to the holder\'s starsign.',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        @:Entity = import(module:'game_class.entity.mt');
+        windowEvent.queueMessage(text:holder.name + '\'s ' + Entity.STARSIGN_NAMES[holder.starsign] + ' starsign is now making their attacks do ' +  Damage.TYPE_NAMES[holder.starsign] + ' damage!');
+      },      
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
+        damage.damageType = holder.starsign
+      }
+    }
+  }
+)  
 
 
 }

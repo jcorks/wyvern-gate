@@ -87,6 +87,21 @@ ArtsTerm.newEntry(
   }
 );
 
+ArtsTerm.newEntry(
+  data : {
+    name : 'Rune',
+    id : 'base:rune',
+    description : 'Rune effects are those that contain \'Rune\' in the name.'
+  }
+);
+
+ArtsTerm.newEntry(
+  data : {
+    name : 'Elemental',
+    id : 'base:elemental',
+    description : 'Fire, Thunder, and Ice are elemental sources.'
+  }
+);
 
 }
 

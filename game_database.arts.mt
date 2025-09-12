@@ -5492,8 +5492,8 @@ Arts.newEntry(
       @:sacr = random.pickArrayItem(:user.battle.getAllies(:user));
 
       for(0, 10) ::(i) {
-        sacr.addEffect(from:user, id:'base:banish', durationTurns:10000);      
-        targets[0].addEffect(from:user, id:'base:banish', durationTurns:10000);      
+        sacr.addEffect(from:user, id:'base:banish', durationTurns:A_LOT);      
+        targets[0].addEffect(from:user, id:'base:banish', durationTurns:A_LOT);      
       }
     }
   }
@@ -11747,20 +11747,22 @@ Arts.newEntry(
       @item;
       @:world = import(module:'game_singleton.world.mt');
       
-      ::? {
-        foreach(random.scrambled(:user.battle.banished)) ::(k, v) {
-          if (v.getEquips()->size > 0) ::<= {
-            item = random.pickArrayItem(:v.getEquips());
-            whom = v;
-            send();
+      if (user.battle.banished->size > 0) ::<= {
+        ::? {
+          foreach(random.scrambled(:user.battle.banished)) ::(k, v) {
+            if (v.getEquips()->size > 0) ::<= {
+              item = random.pickArrayItem(:v.getEquips());
+              whom = v;
+              send();
+            }
           }
         }
-      }
-      
-      if (whom != empty && item != empty) ::<= {
-        whom.unequipItem(item);
-        if (world.party.isMember(:user)) ::<= {
-          world.party.inventory.add(:item);
+        
+        if (whom != empty && item != empty) ::<= {
+          whom.unequipItem(item);
+          if (world.party.isMember(:user)) ::<= {
+            world.party.inventory.add(:item);
+          }
         }
       }
 
@@ -11769,6 +11771,769 @@ Arts.newEntry(
     }
   }
 )
+
+
+Arts.newEntry(
+  data: {
+    name: 'Absorb the Exiled',
+    id : 'base:absorb-the-exiled',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "For each banished fighter, gain a stack of Aura for 5 turns. Gain a stack of Banish.",
+    keywords : ['base:banish', 'base:aura'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when (user.battle.banished->size > 0) true;
+      return false;
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
+      @whom;
+      @item;
+      @:world = import(module:'game_singleton.world.mt');
+      
+      if (user.battle.banished->size > 0) ::<= {
+        foreach(random.scrambled(:user.battle.banished)) ::(k, v) {
+          user.addEffect(from:user, id: 'base:aura', durationTurns: 5);
+        }
+      }
+      user.addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Invoke the Exiled',
+    id : 'base:invoke-the-exiled',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Among each exiled combatant, choose a random equipment they are using. It becomes a summon on your side. Gain 1 stack of Banish. ",
+    keywords : ['base:banish'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) <-
+      if (user.battle.banished->size > 0) ::<= {
+        foreach(user.battle.banished) ::(k, v) {
+          if (v.getEquips()->size > 0) ::<= {
+            send(:true);
+          }
+        }
+      } else false
+    ,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
+      @whom;
+      @item;
+      @:world = import(module:'game_singleton.world.mt');
+      
+      if (user.battle.banished->size > 0) ::<= {
+        ::? {
+          foreach(random.scrambled(:user.battle.banished)) ::(k, v) {
+            if (v.getEquips()->size > 0) ::<= {
+              item = random.pickArrayItem(:v.getEquips());
+              whom = v;
+              send();
+            }
+          }
+        }
+        
+        if (whom != empty && item != empty) ::<= {
+          @:sprite = Entity.new(
+            island : world.island,
+            speciesHint: 'base:spirit',
+            professionHint: 'base:spirit',
+            levelHint:2 + item.stars // wahoo!
+          );
+          sprite.name = 'the ' + item.name;
+
+        }
+      }
+
+
+      user.addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Draw the Exiled',
+    id : 'base:draw-the-exiled',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "A random exiled combatant is chosen. The user draws 2 Arts from their deck and adds it to their own hand. Gain 1 stack of Banish. ",
+    keywords : ['base:banish'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when (user.battle.banished->size > 0) true;
+      return false;
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
+      @whom;
+      @item;
+      @:world = import(module:'game_singleton.world.mt');
+      if (user.battle.banished->size > 0) ::<= {
+        @:whom = random.scrambled(:user.battle.banished);
+        for(0, 2) ::(i) {
+          user.addHandCardTemporary(:random.pickArrayItem(:whom.supportArts));
+        }
+      }
+      
+      user.addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Reanimate the Exiled',
+    id : 'base:reanimate-the-exiled',
+    notifCommit : '$1 starts to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "A random exiled combatant is chosen. This combatant returns to the battlefield as an ally with all banish stacks removed. Gain 9 stacks of Banish.",
+    keywords : ['base:banish'],
+    durationTurns: 0,
+    kind : KIND.EFFECT,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      when (user.battle.banished->size > 0) true;
+      return false;
+    },
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
+      @whom;
+      @item;
+      @:world = import(module:'game_singleton.world.mt');
+      if (user.battle.banished->size > 0) ::<= {
+        @:whom = random.scrambled(:user.battle.banished);
+        whom.removeEffectsByFilter(::(value) <- value.id == 'base:banish');
+        user.battle.join(group:[whom], sameGroupAs: user);
+      }
+      
+      for(0, 9) ::(i) {
+        user.addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Summon: Banished Beast',
+    id : 'base:summon-banished-beast',
+    notifCommit : '$1 summons a Banished Beast!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Summons a Banished Beast to fight on your side. Gain 3 stacks of Banish.",
+    keywords: [],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.ABILITY,
+    traits : TRAIT.SUPPORT | TRAIT.MAGIC,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      @:Species = import(module:'game_database.species.mt');
+
+      @:Entity = import(module:'game_class.entity.mt');
+      @:Species = import(module:'game_database.species.mt');
+      @:world = import(module:'game_singleton.world.mt');
+      @:sprite = Entity.new(
+        island: world.island,
+        speciesHint: 'base:banished-beast',
+        professionHint: 'base:spirit',
+        levelHint:10
+      );
+      sprite.name = 'the Banished Beast';
+      
+      
+      
+      @:battle = user.battle;
+      windowEvent.queueCustom(
+        onEnter :: {
+          battle.join(
+            group: [sprite],
+            sameGroupAs:user
+          );
+        }
+      )
+
+      for(0, 9) ::(i) {
+        user.addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);
+      }
+
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Behold! The Banished Realms!',
+    id : 'base:behold-the-banished-realms',
+    notifCommit : 'Light engulfs $1!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "21 stacks of Banish are given to random allies. Afterward, Banished Beasts are summoned on the user's side until the user's side reaches 4 members.",
+    keywords: [],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.ABILITY,
+    traits : TRAIT.SUPPORT | TRAIT.MAGIC | TRAIT.ONCE_PER_BATTLE,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      @:Species = import(module:'game_database.species.mt');
+
+      @:Entity = import(module:'game_class.entity.mt');
+      @:Species = import(module:'game_database.species.mt');
+      @:world = import(module:'game_singleton.world.mt');
+
+      @battle = user.battle;
+      @:allies = battle.getAllies(:user);
+      for(0, 21) ::(i) {
+        random.pickArrayItem(:allies).addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);
+      }
+      
+
+
+
+      windowEvent.queueCustom(
+        onEnter:: {
+          // cant use user since they may have been banished!
+          @:sideAs = ::? {
+            foreach(allies) ::(k, v) {
+              if (battle.getAllies(:v)->size > 0)
+                send(:v);
+            }
+          }   
+
+          for(battle.getAllies(:sideAs)->size, 4) ::(i) {
+            @:sprite = Entity.new(
+              island: world.island,
+              speciesHint: 'base:banished-beast',
+              professionHint: 'base:spirit',
+              levelHint:10
+            );
+            sprite.name = 'the Banished Beast';
+            
+            
+            
+            @:battle = user.battle;
+            // naturally creates a new team if no allies are left.. Uhm. Not sure about that tho!
+            windowEvent.queueCustom(
+              onEnter :: {
+                battle.join(
+                  group: [sprite],
+                  sameGroupAs:sideAs
+                );
+              }
+            )
+          }
+        }
+      );
+      
+      
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Summon: Runic Beast',
+    id : 'base:summon-runic-beast',
+    notifCommit : '$1 summons a Runic Beast!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Summons a Runic Beast to fight on your side. It uses Rune-based Arts.",
+    keywords: ['base:rune'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.ABILITY,
+    traits : TRAIT.SUPPORT | TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      @:Species = import(module:'game_database.species.mt');
+
+      @:Entity = import(module:'game_class.entity.mt');
+      @:Species = import(module:'game_database.species.mt');
+      @:world = import(module:'game_singleton.world.mt');
+      @:sprite = Entity.new(
+        island: world.island,
+        speciesHint: 'base:beast',
+        professionHint: 'base:runic-beast',
+        levelHint:10
+      );
+      sprite.name = 'the Runic Beast';
+      
+      
+      
+      @:battle = user.battle;
+      windowEvent.queueCustom(
+        onEnter :: {
+          battle.join(
+            group: [sprite],
+            sameGroupAs:user
+          );
+        }
+      )
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Conjure Runes',
+    id : 'base:conjure-runes',
+    notifCommit : '$1 begins to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Applies 2 random rune-based effects to 2 random combatants. The runes last for 5 turns.",
+    keywords: ['base:rune'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT | TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      for(0, 2) ::(i){         
+        random.pickArrayItem(:
+          user.battle.getMembers()
+        ).addEffect(
+          from:user, 
+          id:Effect.getRandomFiltered(::(value) <- 
+            value.id->contains(:'-rune')
+          ),
+          durationTurns:5
+        );      
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Runic Revelation',
+    id : 'base:runic-revelation',
+    notifCommit : '$1 begins to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Applies a random rune-based effect to each combatant. The runes last for 5 turns.",
+    keywords: ['base:rune'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT | TRAIT.MAGIC,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      foreach(user.battle.getMembers()) ::(k, v) {
+        v.addEffect(
+          from:user, 
+          id:Effect.getRandomFiltered(::(value) <- 
+            value.id->contains(:'-rune')
+          ),
+          durationTurns:5
+        );      
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Transfer Rune',
+    id : 'base:runic-revelation',
+    notifCommit : '$1 begins to glow!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Transfers a random rune-based effect to a target. The newly-transferred effect lasts for 5 turns.",
+    keywords: ['base:rune'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+      return user.effectStack.getAllByFilter(::(value) <- 
+        value.id->contains(:'-rune')
+      )->size > 0
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT | TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      
+      @:which = random.pickArrayItem(:
+        user.effectStack.getAllByFilter(::(value) <- 
+          value.id->contains(:'-rune')
+        )
+      );
+
+      user.removeEffectsByFilter(::(value) <- which == value);
+
+      targets[0].addEffect(from:user, id:which.id, durationTurns:5);      
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Noxious Fume',
+    id : 'base:noxious-fume',
+    notifCommit : '$1 uses a tool that emits gas!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Inflicts a target with Poison. 50% chance to inflict and Berserk and Funny Smell. All Effects last 4 turns.",
+    keywords: ['base:funny-smell', 'base:poisoned', 'base:berserk'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:poisoned', durationTurns:4);
+      if (random.flipCoin()) ::<= {
+        user.addEffect(from:user, id:'base:berserk', durationTurns:4);
+        user.addEffect(from:user, id:'base:funny-smell', durationTurns:4);
+      }      
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Noxious Fumigation',
+    id : 'base:noxious-fumigation',
+    notifCommit : '$1 uses a tool that emits a lot of gas!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALL,
+    description: "Inflicts every combatant with Poison. 50% chance to inflict and Berserk and Funny Smell on each. All Effects last 4 turns.",
+    keywords: ['base:funny-smell', 'base:poisoned', 'base:berserk'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.ABILITY,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      foreach(targets) ::(k, target) {
+        target.addEffect(from:user, id:'base:poisoned', durationTurns:4);
+        if (random.flipCoin()) ::<= {
+          target.addEffect(from:user, id:'base:berserk', durationTurns:4);
+          target.addEffect(from:user, id:'base:funny-smell', durationTurns:4);
+        }      
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Vulnerability: Ice',
+    id : 'base:vulnerability-ice',
+    notifCommit : '$2 glows!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Deals 1 Ice damage and inflicts Vulnerability: Ice",
+    keywords: ['base:vulnerability-ice'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      user.attack(
+        exact: true,
+        target:targets[0],
+        damage: Damage.new(
+          amount:1,
+          damageType : Damage.TYPE.ICE,
+          damageClass: Damage.CLASS.HP
+        ),
+        onFinish ::(hit) {
+          when(!hit) empty;
+          targets[0].addEffect(from:user, id:'base:vulnerability-ice', durationTurns: A_LOT);
+        }
+      );        
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Vulnerability: Thunder',
+    id : 'base:vulnerability-thunder',
+    notifCommit : '$2 glows!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Deals 1 Thunder damage and inflicts Vulnerability: Thunder",
+    keywords: ['base:vulnerability-thunder'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      user.attack(
+        exact: true,
+        target:targets[0],
+        damage: Damage.new(
+          amount:1,
+          damageType : Damage.TYPE.THUNDER,
+          damageClass: Damage.CLASS.HP
+        ),
+        onFinish ::(hit) {
+          when(!hit) empty;
+          targets[0].addEffect(from:user, id:'base:vulnerability-thunder', durationTurns: A_LOT);
+        }
+      );        
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Vulnerability: Fire',
+    id : 'base:vulnerability-fire',
+    notifCommit : '$2 glows!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Deals 1 Fire damage and inflicts Vulnerability: Fire",
+    keywords: ['base:vulnerability-fire'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      user.attack(
+        exact: true,
+        target:targets[0],
+        damage: Damage.new(
+          amount:1,
+          damageType : Damage.TYPE.FIRE,
+          damageClass: Damage.CLASS.HP
+        ),
+        onFinish ::(hit) {
+          when(!hit) empty;
+          targets[0].addEffect(from:user, id:'base:vulnerability-fire', durationTurns: A_LOT);
+        }
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Vulnerability: Dark',
+    id : 'base:vulnerability-dark',
+    notifCommit : '$2 glows!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Deals 1 Dark damage and inflicts Vulnerability: Dark",
+    keywords: ['base:vulnerability-dark'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      user.attack(
+        exact: true,
+        target:targets[0],
+        damage: Damage.new(
+          amount:1,
+          damageType : Damage.TYPE.DARK,
+          damageClass: Damage.CLASS.HP
+        ),
+        onFinish ::(hit) {
+          when(!hit) empty;
+          targets[0].addEffect(from:user, id:'base:vulnerability-dark', durationTurns: A_LOT);
+        }
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Vulnerability: Light',
+    id : 'base:vulnerability-light',
+    notifCommit : '$2 glows!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Deals 1 Light damage and inflicts Vulnerability: Light",
+    keywords: ['base:vulnerability-light'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      user.attack(
+        exact: true,
+        target:targets[0],
+        damage: Damage.new(
+          amount:1,
+          damageType : Damage.TYPE.DARK,
+          damageClass: Damage.CLASS.HP
+        ),
+        onFinish ::(hit) {
+          when(!hit) empty;
+          targets[0].addEffect(from:user, id:'base:vulnerability-light', durationTurns: A_LOT);
+        }
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Vulnerability: Poison',
+    id : 'base:vulnerability-poison',
+    notifCommit : '$2 glows!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Deals 1 Poison damage and inflicts Vulnerability: Poison",
+    keywords: ['base:vulnerability-poison'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      user.attack(
+        exact: true,
+        target:targets[0],
+        damage: Damage.new(
+          amount:1,
+          damageType : Damage.TYPE.POISON,
+          damageClass: Damage.CLASS.HP
+        ),
+        onFinish ::(hit) {
+          when(!hit) empty;
+          targets[0].addEffect(from:user, id:'base:vulnerability-poison', durationTurns: A_LOT);
+        }
+      );
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Chaotic Drain Portal',
+    id : 'base:chaotic-drain-portal',
+    notifCommit : '$2 glows!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: "Inflicts Vulnerability: Chaos on a target for 3 turns.",
+    keywords: ['base:vulnerability-chaos', 'base:elemental'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      targets[0].addEffect(from:user, id:'base:vulnerability-chaos', durationTurns: 3);
+    }
+  }
+)
+
+
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Starsign Alignment',
+    id : 'base:starsign-alignment',
+    notifCommit : '$1 glows!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "Grants Starsign Alignment to a target for 3 turns.",
+    keywords: [],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      targets[0].addEffect(from:user, id:'base:starsign-alignment', durationTurns: A_LOT);
+    }
+  }
+)
+
+
 
 
 

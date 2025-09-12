@@ -206,7 +206,10 @@ return {
       filter::(user, battle) <- true,
       onSelect::(user, battle, commitAction) {        
         windowEvent.queueReader(
-            prompt: if (random.flipCoin()) '"What just happened??"' else '"Is this for real??"',
+            prompt: if (random.flipCoin()) 
+              '"What just happened??"' 
+            else 
+              '"Is this for real??"',
             startAtBottom: true,
             lines : windowEvent.log
         );

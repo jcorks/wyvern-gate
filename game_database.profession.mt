@@ -1492,6 +1492,42 @@ Profession.newEntry(data:{
   passives : [
   ]
 }) 
+
+
+Profession.newEntry(data:{
+  name: 'Runic Beast',
+  id : 'base:runic-breast',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 6,
+    INT: 1,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 3
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:poison-rune',
+    'base:destruction-rune',
+    'base:regeneration-rune',
+    'base:cure-rune',
+    'base:shield-rune',
+    'base:multiply-runes'          
+  ],
+  passives : [
+  ]
+}) 
+
 }
 
 @:Profession = Database.new(
