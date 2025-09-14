@@ -56,7 +56,7 @@
         amount:hurt.stats.HP, 
         damageType:Damage.TYPE.PHYS, 
         damageClass:Damage.CLASS.HP,
-        traits : Damage.TRIAT.UNBLOCKABLE
+        traits : Damage.TRAIT.UNBLOCKABLE
       ), 
       dodgeable: false, 
       exact: true

@@ -3144,7 +3144,7 @@ Effect.newEntry(
   data : {
     name : 'Desparate',
     id : 'base:desparate',
-    description: 'The holder is is desparate. HP base -4, DEF base -5. Attacks to others are 2.5 times more damaging.',
+    description: 'The holder is desparate. HP base -4, DEF base -5. Attacks to others are 2.5 times more damaging.',
     stackable: false,
     stats: StatSet.new(
       DEF: -5,
@@ -3167,6 +3167,60 @@ Effect.newEntry(
     }
   }
 )
+
+Effect.newEntry(
+  data : {
+    name : 'Primally Desparate',
+    id : 'base:primally-desparate',
+    description: 'The holder is primally desparate. On affliction and every turn, HP is reduced to 1. x4 damage for all attacks.',
+    stackable: false,
+    stats: StatSet.new(
+    ),
+    traits : 0,
+    events : {
+      onNextTurn ::(from, item, holder, duration) {        
+        when (holder.hp == 0) empty;
+        
+        windowEvent.queueMessage(text: holder.name + '\'s primal desparation reduces HP to 1!');
+        holder.damage(
+          attacker: holder,
+          exact: true,
+          damage: Damage.new(
+            amount:holder.hp-1,
+            damageType : Damage.TYPE.NEUTRAL,
+            damageClass: Damage.CLASS.HP
+          ),dodgeable: false
+        );
+      },
+
+
+      onAffliction ::(from, item, holder) {
+        when (holder.hp == 0) empty;
+        
+        windowEvent.queueMessage(text: holder.name + '\'s primal desparation reduces HP to 1!');
+        holder.damage(
+          attacker: holder,
+          exact: true,
+          damage: Damage.new(
+            amount:holder.hp-1,
+            damageType : Damage.TYPE.NEUTRAL,
+            damageClass: Damage.CLASS.HP
+          ),dodgeable: false
+        );
+      },
+      
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
+        windowEvent.queueMessage(text: holder.name + '\'s desparation increased damage by 2.5 times!');
+        damage.amount *= 2.5;
+      },      
+      
+      onRemoveEffect ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + ' is no longer desparate!');
+      }
+    }
+  }
+)
+
 
 Effect.newEntry(
   data : {
@@ -3859,6 +3913,33 @@ Effect.newEntry(
   }
 )   
 
+
+Effect.newEntry(
+  data : {
+    name : 'Cursed Energy',
+    id : 'base:cursed-energy',
+    description: 'Holder takes 2 damage each turn.',
+    stackable: true,
+    traits : TRAIT.AILMENT,
+    stats: StatSet.new(),
+    events : {      
+      onNextTurn ::(from, item, holder, duration) {
+        windowEvent.queueMessage(text:holder.name + " was hurt by their cursed energy!");
+        
+        holder.damage(
+          attacker: holder,
+          exact: true,
+          damage: Damage.new(
+            amount:2,
+            damageType : Damage.TYPE.NEUTRAL,
+            damageClass: Damage.CLASS.HP
+          ),dodgeable: false 
+        );
+      }
+    }
+  }
+) 
+
 Effect.newEntry(
   data : {
     name : 'Blind',
@@ -4465,7 +4546,118 @@ Effect.newEntry(
       }
     }
   }
-)     
+)  
+
+Effect.newEntry(
+  data : {
+    name : 'Aspect: Fire',
+    id : 'base:aspect-fire',
+    description: 'Attacks now do Fire damage instead of their original damage type. ATK +1',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(
+      ATK: 1
+    ),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
+        damage.damageType = Damage.TYPE.FIRE
+      }
+    }
+  }
+) 
+
+Effect.newEntry(
+  data : {
+    name : 'Aspect: Ice',
+    id : 'base:aspect-ice',
+    description: 'Attacks now do Ice damage instead of their original damage type. ATK +1',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(
+      ATK: 1
+    ),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
+        damage.damageType = Damage.TYPE.ICE
+      }
+    }
+  }
+) 
+
+Effect.newEntry(
+  data : {
+    name : 'Aspect: Thunder',
+    id : 'base:aspect-thunder',
+    description: 'Attacks now do Thunder damage instead of their original damage type. ATK +1',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(
+      ATK: 1
+    ),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
+        damage.damageType = Damage.TYPE.THUNDER
+      }
+    }
+  }
+) 
+
+Effect.newEntry(
+  data : {
+    name : 'Aspect: Poison',
+    id : 'base:aspect-poison',
+    description: 'Attacks now do Poison damage instead of their original damage type. ATK +1',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(
+      ATK: 1
+    ),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
+        damage.damageType = Damage.TYPE.POISON
+      }
+    }
+  }
+) 
+
+Effect.newEntry(
+  data : {
+    name : 'Aspect: Light',
+    id : 'base:aspect-light',
+    description: 'Attacks now do Light damage instead of their original damage type. ATK +1',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(
+      ATK: 1
+    ),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
+        damage.damageType = Damage.TYPE.LIGHT
+      }
+    }
+  }
+) 
+
+Effect.newEntry(
+  data : {
+    name : 'Aspect: Dark',
+    id : 'base:aspect-dark',
+    description: 'Attacks now do Dark damage instead of their original damage type. ATK +1',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(
+      ATK: 1
+    ),
+    events : {
+      onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
+        damage.damageType = Damage.TYPE.DARK
+      }
+    }
+  }
+) 
+
+
+   
 
 Effect.newEntry(
   data : {
@@ -5532,6 +5724,7 @@ Effect.newEntry(
     }
   }
 )    
+  
   
 
 Effect.newEntry(
@@ -6831,6 +7024,136 @@ Effect.newEntry(
     }
   }
 )      
+
+
+
+
+
+
+
+Effect.newEntry(
+  data : {
+    name : 'Resist: Ice',
+    id : 'base:resist-ice',
+    description: 'When attacked, received Ice damage is nullified',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.ICE) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is immune to Ice attacks!");
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+) 
+
+Effect.newEntry(
+  data : {
+    name : 'Resist: Thunder',
+    id : 'base:resist-thunder',
+    description: 'When attacked, received Thunder damage is nullified',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.THUNDER) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is immune to Thunder attacks!");
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)  
+
+
+Effect.newEntry(
+  data : {
+    name : 'Resist: Fire',
+    id : 'base:resist-fire',
+    description: 'When attacked, received Fire damage is nullified',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.FIRE) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is immune to Fire attacks!");
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)  
+
+
+Effect.newEntry(
+  data : {
+    name : 'Resist: Dark',
+    id : 'base:resist-dark',
+    description: 'When attacked, received Dark damage is nullified',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.DARK) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is immune to Dark attacks!");
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
+    name : 'Resist: Light',
+    id : 'base:resist-light',
+    description: 'When attacked, received Light damage is nullified',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.LIGHT) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is immune to Light attacks!");
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)    
+  
+  
+Effect.newEntry(
+  data : {
+    name : 'Resist: Poison',
+    id : 'base:resist-poison',
+    description: 'When attacked, received Poison damage is nullified',
+    stackable: true,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        if (damage.damageType == Damage.TYPE.POISON) ::<= {
+          windowEvent.queueMessage(text:holder.name + " is immune to Poison attacks!");
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)       
+
+
+
+
+
+
 
 Effect.newEntry(
   data : {

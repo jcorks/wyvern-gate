@@ -1448,7 +1448,8 @@ return {
           'thechosen:stairs-down',
           'thechosen:stairs-down',
           'base:enchantment-stand',
-          'base:small-chest'
+          'base:item',
+          'base:item'
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_ALPHA
@@ -1511,7 +1512,8 @@ return {
         ],
         requiredLocations : [
           'thechosen:stairs-down',
-          'base:small-chest',
+          'base:item',
+          'base:item',
           'base:enchantment-stand'
           
         ],
@@ -1579,6 +1581,7 @@ return {
         requiredLocations : [
           'thechosen:stairs-down',
           'base:small-chest',
+          'base:item',
 
           'base:warp-point',
           'base:warp-point',
@@ -2867,7 +2870,8 @@ return {
       useEffects : [
       ],
       equipEffects : [
-        "base:burning"
+        "base:burning",
+        'base:aspect-fire'
       ],
       traits : 
         Item.TRAIT.SHARP |
@@ -2924,7 +2928,8 @@ return {
       useEffects : [
       ],
       equipEffects : [
-        "base:icy"
+        "base:icy",
+        'base:aspect-ice'
       ],
       traits : 
         Item.TRAIT.SHARP |
@@ -2980,7 +2985,8 @@ return {
       useEffects : [
       ],
       equipEffects : [
-        "base:shock"
+        "base:shock",
+        'base:aspect-thunder'
       ],
       traits : 
         Item.TRAIT.SHARP |
@@ -3025,7 +3031,8 @@ return {
       enchantLimit : 0,
       useTargetHint : Item.USE_TARGET_HINT.ONE,
       possibleArts : [
-        "base:explosion" // for fun!
+        "base:explosion", // for fun!
+        'base:aspect-light'
       ],
 
       // fatigued
@@ -3444,11 +3451,7 @@ return {
                           materialHint: 'base:gold'
                         );
                         @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
-                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:burning')));
-                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:burning')));
-                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:scorching')));
-                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:scorching')));
-
+                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:heart-of-flame')));
 
                         windowEvent.queueMessage(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
                         world.party.inventory.add(item);
@@ -3690,10 +3693,8 @@ return {
                             qualityHint:'base:masterwork'
                           );
                           @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
-                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:icy')));
-                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:icy')));
-                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:frozen')));
-                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:frozen')));
+                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:soul-of-ice')));
+                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:soul-of-ice')));
 
                           party.inventory.add(item:prize);
                           windowEvent.queueMessage(text:'The party was given a ' + prize.name + '.',
@@ -4309,6 +4310,11 @@ return {
               designHint: 'base:striking',
               abilityHint: 'base:greater-cure'
             );
+            @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+            item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:blessing-of-light')));
+            item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:blessing-of-light')));
+
+
             item.name = 'Wyvern\'s Hope';
             @:world = import(module:'game_singleton.world.mt');
             world.party.inventory.add(item);                

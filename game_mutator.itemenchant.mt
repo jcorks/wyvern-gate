@@ -22,6 +22,7 @@
 @:random = import(module:'game_singleton.random.mt');
 @:Arts = import(:'game_database.arts.mt');
 @:ArtsDeck = import(:'game_class.artsdeck.mt');
+@:Damage = import(module:'game_class.damage.mt');
 
 @:CONDITION_CHANCES = [
   10,
@@ -40,7 +41,8 @@
 ];
 
 @:TRAIT = {
-    SPECIAL : 1
+  SPECIAL : 1,
+  HARMFUL : 2
 }
 
 
@@ -61,7 +63,7 @@ ItemEnchant.database.newEntry(
     ),
     levelMinimum : 1,
     priceMod: 1000,
-    tier : 10,
+    tier : 3,
     
     triggerConditionEffects : [
       'base:trigger-itemart',
@@ -144,7 +146,7 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0,
+    traits : TRAIT.HARMFUL,
     onCreate ::(this){}
   }
 )
@@ -168,7 +170,7 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0,
+    traits : TRAIT.HARMFUL,
     onCreate ::(this){}
   }
 )
@@ -194,7 +196,7 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0,
+    traits : TRAIT.HARMFUL,
     onCreate ::(this){}
   }
 )
@@ -218,7 +220,7 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 1,
+    traits : TRAIT.HARMFUL,
     onCreate ::(this){}
   }
 )
@@ -243,7 +245,7 @@ ItemEnchant.database.newEntry(
     ],
     
     useEffects : [],
-    traits : 0,
+    traits : TRAIT.HARMFUL,
     onCreate ::(this){}
   }
 )
@@ -320,12 +322,126 @@ ItemEnchant.database.newEntry(
   }
 )
 
-/*
+
+
 ItemEnchant.database.newEntry(
   data : {
-    name : 'Boost Strength',
-    id : 'base:boost-strength',
-    description : ', will $1 boost the wielder\'s power for a while.',
+    name : 'Inflict Status',
+    id : 'base:status',
+    description : '',
+    equipModBase : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 200,
+    tier : 0,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+    ],
+    
+    useEffects : [],
+    traits : 0,
+    onCreate ::(this){
+      @:elements = [
+        Damage.TYPE.FIRE,
+        Damage.TYPE.THUNDER,
+        Damage.TYPE.ICE,
+        Damage.TYPE.LIGHT,
+        Damage.TYPE.DARK,
+        Damage.TYPE.PHYS,
+        Damage.TYPE.POISON
+      ]
+
+      @:shifts = [
+        'not used silly',
+        'base:scorching',
+        'base:paralyzing',
+        'base:freezing',
+        'base:petrifying',
+        'base:blinding',
+        'base:bleeding',
+        'base:seeping',
+      ]      
+
+      @:shiftNames = [
+        'not used silly',
+        'Burned',
+        'Paralyzed',
+        'Frozen',
+        'Petrified',
+        'Blind',
+        'Bleeding',
+        'Poisoned',
+      ]      
+      
+      
+      @:element = random.pickArrayItem(:elements);
+      @:Effect = import(module:'game_database.effect.mt');
+      this.name = 'Inflict Status: ' + Effect.find(:shifts[element]).name;
+      
+
+      
+      this.equipEffects->push(:shifts[element]);
+    
+    }
+  }
+)
+
+
+
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Shift',
+    id : 'base:shift',
+    description : '',
+    equipModBase : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 200,
+    tier : 0,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+    ],
+    
+    useEffects : [],
+    traits : 0,
+    onCreate ::(this){
+      @:elements = [
+        Damage.TYPE.FIRE,
+        Damage.TYPE.THUNDER,
+        Damage.TYPE.ICE,
+        Damage.TYPE.LIGHT,
+        Damage.TYPE.DARK
+      ]
+      @:element = random.pickArrayItem(:elements);
+      this.name = 'Shift: ' + Damage.TYPE_NAMES[element];
+      
+      @:shifts = [
+        'not used silly',
+        'base:burning',
+        'base:shock',
+        'base:icy',
+        'base:toxic',
+        'base:shimmering',
+        'base:dark',
+      ]
+      
+      this.equipEffects->push(:shifts[element]);
+    }
+  }
+)
+
+
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Aspect',
+    id : 'base:aspect',
+    description : '',
     equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
@@ -333,422 +449,153 @@ ItemEnchant.database.newEntry(
     tier : 0,
     
     triggerConditionEffects : [
-      'base:trigger-strength-boost'
     ],
     
     equipEffects : [
-    ],
-    
-    useEffects : []
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Boost Defense',
-    id : 'base:boost-defense',
-    description : ', will $1 boost the wielder\'s defense for a while.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 250,
-    tier : 0,
-    
-    triggerConditionEffects : [
-      'base:trigger-defense-boost'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : []
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Boost Mind',
-    id : 'base:boost-mind',
-    description : ', will $1 boost the wielder\'s mental acquity for a while.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 250,
-    tier : 0,
-    
-    triggerConditionEffects : [
-      'base:trigger-mind-boost'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : []
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Boost Dex',
-    id : 'base:boost-dex',
-    description : ', will $1 boost the wielder\'s dexterity for a while.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 250,
-    tier : 0,
-    
-    triggerConditionEffects : [
-      'base:trigger-dex-boost'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : []
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Boost Speed',
-    id : 'base:boost-speed',
-    description : ', will $1 boost the wielder\'s speed for a while.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 250,
-    tier : 0,
-    
-    triggerConditionEffects : [
-      'base:trigger-speed-boost'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : []
-  }
-)
-*/
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Sharp',
-    id : 'base:sharp',
-    description : 'Has a chance of causing bleed on a target when attacking.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:sharp"
     ],
     
     useEffects : [],
     traits : 0,
-    onCreate ::(this){}
-  }
-)
-
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Burning',
-    id : 'base:burning',
-    description : 'The material its made of is warm to the touch. Grants a fire aspect to attacks and gives ice resistance when used as armor.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:burning"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Scorching',
-    id : 'base:scorching',
-    description : 'Has a chance of causing burns on a target when attacking.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:scorching"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-)
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Icy',
-    id : 'base:icy',
-    description : 'The material its made of is cold to the touch. Grants an ice aspect to attacks and gives fire resistance when used as armor.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:icy"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
+    onCreate ::(this){
+      @:elements = [
+        Damage.TYPE.FIRE,
+        Damage.TYPE.THUNDER,
+        Damage.TYPE.ICE,
+        Damage.TYPE.LIGHT,
+        Damage.TYPE.DARK,
+        Damage.TYPE.POISON
+      ]
+      @:element = random.pickArrayItem(:elements);
+      this.name = 'Aspect: ' + Damage.TYPE_NAMES[element];
+      
+      @:shifts = [
+        'not used silly',
+        'base:aspect-fire',
+        'base:aspect-thunder',
+        'base:aspect-ice',
+        'base:aspect-light',
+        'base:aspect-dark',
+        'Also not used?',
+        'base:aspect-poison'
+      ]
+      
+      this.equipEffects->push(:shifts[element]);
+    }
   }
 )
 
 ItemEnchant.database.newEntry(
   data : {
-    name : 'Freezing',
-    id : 'base:freezing',
-    description : 'Has a chance of freezing targets when attacking.',
+    name : 'Heart of Flame',
+    id : 'base:heart-of-flame',
+    description : '',
     equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
-    priceMod: 200,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:freezing"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-)
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Shock',
-    id : 'base:shock',
-    description : 'The material its made of gently hums. Grants a thunder aspect to attacks and gives thunder resistance when used as armor.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:shock"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-)
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Paralyzing',
-    id : 'base:paralyzing',
-    description : 'Has a chance of causing paralysis to targets when attacking.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
+    priceMod: 2500,
     tier : 3,
     
     triggerConditionEffects : [
     ],
     
     equipEffects : [
-      "base:paralyzing"
+      'base:scorching',
+      'base:burning',
+      'base:aspect-fire',
+      'base:resist-fire'
     ],
     
     useEffects : [],
     traits : 0,
-    onCreate ::(this){}
+    onCreate ::(this){
+    }
   }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Toxic',
-    id : 'base:toxic',
-    description : 'The material its made has been made poisonous. Grants a poison aspect to attacks and gives poison resistance when used as armor.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:toxic"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Seeping',
-    id : 'base:seeping',
-    description : 'Has a chance of poisoning targets when attacking.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 1,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:seeping"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-)
+);
 
 
 ItemEnchant.database.newEntry(
   data : {
-    name : 'Shimmering',
-    id : 'base:shimmering',
-    description : 'The material its made of glows softly. Grants a light aspect to attacks and gives dark resistance when used as armor.',
+    name : 'Soul of Ice',
+    id : 'base:soul-of-ice',
+    description : '',
     equipModBase : StatSet.new(
     ),
     levelMinimum : 1,
-    priceMod: 200,
-    tier : 2,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:shimmering"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Petrifying',
-    id : 'base:petrifying',
-    description : 'Has a chance of causing petrification to targets when attacking.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 4,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:petrifying"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Dark',
-    id : 'base:dark',
-    description : 'The material its made of is very dark. Grants a dark aspect to attacks and gives light resistance when used as armor.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 1,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      "base:dark"
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Blinding',
-    id : 'base:blinding',
-    description : 'Has a chance of causing blindness to targets when attacking.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
+    priceMod: 2500,
     tier : 3,
     
     triggerConditionEffects : [
     ],
     
     equipEffects : [
-      "base:blinding"
+      'base:freezing',
+      'base:icy',
+      'base:aspect-ice',
+      'base:resist-ice'
     ],
     
     useEffects : [],
     traits : 0,
     onCreate ::(this){}
   }
-)
+);
+
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Sigil of Thunder',
+    id : 'base:sigil-of-thunder',
+    description : '',
+    equipModBase : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 2500,
+    tier : 3,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+      'base:shock',
+      'base:paralyzing',
+      'base:aspect-thunder',
+      'base:resist-thunder'
+    ],
+    
+    useEffects : [],
+    traits : 0,
+    onCreate ::(this){}
+  }
+);
+
+
+ItemEnchant.database.newEntry(
+  data : {
+    name : 'Blessing of Light',
+    id : 'base:aura-of-light',
+    description : '',
+    equipModBase : StatSet.new(
+    ),
+    levelMinimum : 1,
+    priceMod: 2500,
+    tier : 3,
+    
+    triggerConditionEffects : [
+    ],
+    
+    equipEffects : [
+      'base:shimmering',
+      'base:petrifying',
+      'base:aspect-light',
+      'base:resist-light'
+    ],
+    
+    useEffects : [],
+    traits : 0,
+    onCreate ::(this){}
+  }
+);
+
+
 
 
 @:stats = {
@@ -1118,7 +965,7 @@ ItemEnchant.database.newEntry(
     description : '',
     equipModBase : StatSet.new(
     ),
-    priceMod: 500,
+    priceMod: 1000,
     tier : 0,
     levelMinimum : 1,
     
@@ -1239,7 +1086,17 @@ ItemEnchant.database.newEntry(
           when(state.base.id == 'base:soul') 
             Effect.find(:state.equipEffects[0]).description;
             
-          when(state.condition == empty) state.description;
+          breakpoint();
+          @desc = if (state.description == '') ::<= {
+            @str = 'When this item is equipped: ';
+            foreach(state.equipEffects) ::(k, v) {
+              str = str + Effect.find(:v).description + (if (k != state.equipEffects->size-1) ',' else '');
+            }
+            return str;
+          } else 
+            state.base.description;
+            
+          when(state.condition == empty) desc;
           @out = state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
           when (state.artID == '') out;
           out = out->replace(key:'$2', with: Arts.find(id:state.artID).name);

@@ -268,7 +268,7 @@
     HP  : if (level <= story.levelHint)
         (if(random.flipCoin()) 1 else 2) + (stat(name:'HP'))
       else 
-        (random.integer(from:3, to:5)) + (stat(name:'HP')),
+        ((random.integer(from:3, to:5)) + (stat(name:'HP')) * (1+(level)*0.1))->floor,
     AP  : 0,
     ATK : stat(name:'ATK'),
     INT : stat(name:'INT'),
@@ -315,7 +315,7 @@
   when(needsUpdate == false) empty;
   
   
-  windowEvent.queueDisplay(
+  windowEvent.queueReader(
     prompt: this.name + ' - Effects Changed!',
     lines: canvas.refitLines(input:lines)
   );

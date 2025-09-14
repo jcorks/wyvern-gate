@@ -3591,6 +3591,7 @@ none.name = 'None';
     improvements : 0,
     improvementEXP : 0,
     improvementEXPtoNext : 100,
+    improvementStats : empty,
     equipEffects : empty,
     useEffects : empty,
     intuition : 0,
@@ -3676,6 +3677,7 @@ none.name = 'None';
       state.improvementsLeft = if (base.id == 'base:none') 0 else random.integer(from:10, to:25);
       state.improvements = 0;
       state.improvementEXP = 0;
+      state.improvementStats = StatSet.new();
       state.data = {};
       state.needsAppraisal = if (forceNeedsAppraisal != empty) forceNeedsAppraisal
         else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess::<= {
@@ -3780,7 +3782,7 @@ none.name = 'None';
           for(0, enchantCount)::(i) {
             @mod = ItemEnchant.new(
               base:
-              if (world.island.tier > 1 && random.try(percentSuccess:25)) 
+              if (world.island.tier > 0 && random.try(percentSuccess:25)) 
                 ItemEnchant.database.find(id:'base:soul')
               else
                 ItemEnchant.database.getRandomFiltered(
@@ -3961,11 +3963,18 @@ none.name = 'None';
     
     equipModBase : {
       get ::{ 
-        when(_.state.inletSlotData == empty)_.state.statsBase
-        @:out = StatSet.new();
-        out.add(:_.state.statsBase);
-        out.add(:_.state.inletSlotData.stats);
-        return out;
+
+        @:state = _.state;
+        if (state.improvementStats == empty) state.improvementStats = StatSet.new();
+        @:a = _.state.improvementStats.clone();
+        a.add(: ::<= {
+          when(state.inletSlotData == empty)state.statsBase
+          @:out = StatSet.new();
+          out.add(:state.statsBase);
+          out.add(:state.inletSlotData.stats);
+          return out;
+        });
+        return a
       }
     },
 
@@ -4119,6 +4128,14 @@ none.name = 'None';
     
     starsString : {
       get ::<- starsToString(:_.this)
+    },
+    
+    improvementStats : {
+      get :: {
+        @:state = _.state;
+        if (state.improvementStats == empty) state.improvementStats = StatSet.new();
+        return state.improvementStats
+      }
     },
 
     improve ::(exp) {

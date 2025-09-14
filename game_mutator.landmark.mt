@@ -294,8 +294,8 @@ Landmark.database.newEntry(
       'base:stairs-down',
       'base:stairs-down',
       'base:enchantment-stand',
-      'base:small-chest',
-      'base:small-chest',
+      'base:item',
+      'base:item',
       'base:warp-point',
       'base:warp-point'
     ],
@@ -652,7 +652,12 @@ Landmark.database.newEntry(
       {id: 'base:small-chest', rarity:1},
     ],
     requiredLocations : [
-      'base:small-chest'
+      'base:item',
+      'base:item',
+      'base:item',
+      'base:item',
+      'base:item',
+      'base:item'
     ],
     requiredEvents : [
       'base:the-snakesiren'

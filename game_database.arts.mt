@@ -12507,7 +12507,62 @@ Arts.newEntry(
 )
 
 
+Arts.newEntry(
+  data: {
+    name: 'Field of Elemental Chaos',
+    id : 'base:field-of-elemental-chaos',
+    notifCommit : '$2 glows!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALL,
+    description: "Inflicts a random elemental Vulnerability and Cursed Energy on all combatants for 3 turns.",
+    keywords: ['base:cursed-energy', 'base:elemental'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {  
+      @:ouchie = random.pickArrayItem(:[
+        'base:vulnerability-fire',
+        'base:vulnerability-ice',
+        'base:vulnerability-thunder'
+      ]);
+      foreach(targets) ::(k, target) {
+        
+        target.addEffect(from:user, id:ouchie, durationTurns: 3);
+        target.addEffect(from:user, id:'base:cursed-energy', durationTurns: 3);
+      }
+    }
+  }
+)
 
+Arts.newEntry(
+  data: {
+    name: 'Primal Desperation',
+    id : 'base:primal-desparation',
+    notifCommit : '$1 screams with power!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: "If the user has the Desparate Effect, add the Primally Desparate effect on user indefinitely. Else, grants the Desparate effect indefinitely.",
+    keywords: ['base:primally-desparate'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.ABILITY,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      if (user.effectStack.getAllByFilter(::(value) <- value.id == 'base:desparate'))
+        user.addEffect(from:user, id:'base:primally-desparate', durationTurns:A_LOT)
+      else
+        user.addEffect(from:user, id:'base:desparate', durationTurns:A_LOT)
+    }
+  }
+)
 
 
 Arts.newEntry(
@@ -12536,6 +12591,144 @@ Arts.newEntry(
 
 
 
+
+Arts.newEntry(
+  data: {
+    name: 'Bound Toxin',
+    id : 'base:bound-toxin',
+    notifCommit : '$1 and $2 are bound!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "Inflicts Poisoned on 2 random enemies for 5 turns. Inflicts Paralyzed on the user for 1 turn.",
+    keywords: ['base:poisoned', 'base:paralyzed'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:paralyzed', durationTurns:1);      
+      for(0, 2) ::(i) {
+        @:picked = random.pickArrayItem(:targets);
+        when(picked == empty) empty;
+        picked.addEffect(from:user, id:'base:poisoned', durationTurns:5);      
+      }
+    }
+  }
+)
+
+
+
+Arts.newEntry(
+  data: {
+    name: 'Bound Lacerations',
+    id : 'base:bound-lacerations',
+    notifCommit : '$1 and $2 are bound!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "Inflicts Bleeding on 2 random enemies for 5 turns. Inflicts Paralyzed on the user for 1 turn.",
+    keywords: ['base:bleeding', 'base:paralyzed'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:paralyzed', durationTurns:1);      
+      for(0, 2) ::(i) {
+        @:picked = random.pickArrayItem(:targets);
+        when(picked == empty) empty;
+        picked.addEffect(from:user, id:'base:bleeding', durationTurns:5);      
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Bound Searing',
+    id : 'base:bound-searing',
+    notifCommit : '$1 and $2 are bound!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "Inflicts Burned on 2 random enemies for 5 turns. Inflicts Paralyzed on the user for 1 turn.",
+    keywords: ['base:burned', 'base:paralyzed'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:paralyzed', durationTurns:1);      
+      for(0, 2) ::(i) {
+        @:picked = random.pickArrayItem(:targets);
+        when(picked == empty) empty;
+        picked.addEffect(from:user, id:'base:burned', durationTurns:5);      
+      }
+    }
+  }
+)
+
+Arts.newEntry(
+  data: {
+    name: 'Bound Chilling',
+    id : 'base:bound-chilling',
+    notifCommit : '$1 and $2 are bound!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "Inflicts Frozen on 2 random enemies for 1 turn. Inflicts Paralyzed on the user for 1 turn.",
+    keywords: ['base:burned', 'base:paralyzed'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:paralyzed', durationTurns:1);      
+      for(0, 2) ::(i) {
+        @:picked = random.pickArrayItem(:targets);
+        when(picked == empty) empty;
+        picked.addEffect(from:user, id:'base:frozen', durationTurns:1);      
+      }
+    }
+  }
+)
+
+
+Arts.newEntry(
+  data: {
+    name: 'Bound Bounding',
+    id : 'base:bound-bounding',
+    notifCommit : '$1 and $2 are bound!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    description: "Inflicts Paralyed on 2 random enemies for 1 turn. Inflicts Paralyzed on the user for 1 turn.",
+    keywords: ['base:paralyzed'],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    kind : KIND.EFFECT,
+    traits : TRAIT.SUPPORT,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user){},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      user.addEffect(from:user, id:'base:paralyzed', durationTurns:1);      
+      for(0, 2) ::(i) {
+        @:picked = random.pickArrayItem(:targets);
+        when(picked == empty) empty;
+        picked.addEffect(from:user, id:'base:paralyzed', durationTurns:1);      
+      }
+    }
+  }
+)
 
 };
 

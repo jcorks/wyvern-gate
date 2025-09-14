@@ -6,6 +6,7 @@
 
 
 @:levelUp::(item, user, onDone) {
+  breakpoint();
   @:statChoices = [
     'ATK',
     'INT',
@@ -37,8 +38,11 @@
         other:newStats,
         prompt: 'New stats: ' + item.name
       );
+
+      @:state = item.improvementStats.save();
+      state[stat] += 1;
+      item.improvementStats.load(:state);
       
-      item.equipModBase.load(serialized:newStats.save());
       
       if (user != empty) ::<= {
         @:oldStats = StatSet.new();
@@ -67,6 +71,7 @@
 
 
 @:addExpAnimated::(item, user, other, exp, onDone) {
+  breakpoint();
   @remainingForLevel = item.improvementEXPtoNext - item.improvementEXP;
   
   
@@ -121,6 +126,7 @@
 
 
 @:improve::(item, user) {
+  breakpoint();
   @:party = import(module:'game_singleton.world.mt').party;
           
   @:others = party.inventory.items->filter(by:::(value) <- value.material == item.material && value != item);
@@ -162,7 +168,7 @@
                 prompt: 'Improve again?',
                 onChoice::(which) {
                   when (which == false) empty;
-                  improve(item);
+                  improve(item, user);
                 }
               );
             }

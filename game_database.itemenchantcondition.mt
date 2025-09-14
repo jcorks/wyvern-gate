@@ -30,11 +30,11 @@
 
 ItemEnchantCondition.newEntry(
   data : {
-    name : 'On Heal',
-    id : 'base:on-heal',
-    description : 'After the wielder heals',        
+    name : 'On Attack',
+    id : 'base:on-attack',
+    description : 'After the wielder attacks',        
     isState : false,
-    effectEvent: 'onPostHeal',     
+    effectEvent: 'onPostAttackOther',     
   }
 )
 
@@ -92,17 +92,7 @@ ItemEnchantCondition.newEntry(
 )
 
 
- 
 
-ItemEnchantCondition.newEntry(
-  data : {
-    name : 'On Block Attack',
-    id : 'base:on-block-attack',
-    description : 'After the wielder blocks an attack',        
-    isState : false,
-    effectEvent : 'onSuccessfulBlock'
-  }
-)   
 
 
 ItemEnchantCondition.newEntry(

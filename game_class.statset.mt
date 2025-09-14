@@ -158,6 +158,19 @@
       n.load(:_.this.save());
       return n;
     },
+    
+    isDiff ::(other) {
+      @:this = _.this;
+      return 
+        other.HP != this.HP ||
+        other.AP != this.AP ||
+        other.ATK != this.ATK ||
+        other.INT != this.INT ||
+        other.DEF != this.DEF ||
+        other.LUK != this.LUK ||
+        other.SPD != this.SPD ||
+        other.DEX != this.DEX
+    },
 
 
   

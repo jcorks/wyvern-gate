@@ -3270,6 +3270,7 @@ Interaction.newEntry(
                   @oldStats;
                   @slot
                   @:whom = equippedBy;
+                  breakpoint();
                   if (equippedBy != empty) ::<= {
                     oldStats = StatSet.new(state:equippedBy.stats.save());
                     slot = equippedBy.unequipItem(item, silent:true);
@@ -3279,7 +3280,8 @@ Interaction.newEntry(
                   location.data.enchant = empty;
                   if (whom != empty) ::<= {
                     whom.equip(item, slot, silent:true);
-                    if (isStatBased)
+                    breakpoint();
+                    if (oldStats.isDiff(:whom.stats))
                       oldStats.printDiff(prompt: whom.name + ': enchanted ' + item.name, other:whom.stats);
                   }                  
                   windowEvent.jumpToTag(name:'pickItem', goBeforeTag: true, doResolveNext:true);

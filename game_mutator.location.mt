@@ -1427,6 +1427,60 @@ Location.database.newEntry(data:{
 
 
 Location.database.newEntry(data:{
+  name: 'Item',
+  id: 'base:item',
+  rarity: 1000000000000,
+  ownVerb : 'owned',
+  symbol: 'i',
+  category : CATEGORY.UTILITY,
+  minStructureSize : 1,
+  onePerLandmark : false,
+
+  descriptions: [
+    'An item of some kind.'
+  ],
+  interactions : [
+    'base:take'
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  onFirstInteract::(location){},      
+  onInteract ::(location) {
+  },
+  onStep ::(location, entities) {
+  
+  },  
+  onCreate ::(location) {
+    @:item = Item.new(
+      base:Item.database.getRandomFiltered(
+        filter:::(value) <- 
+          value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+          value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
+          value.tier <= location.landmark.island.tier
+      ),
+      rngEnchantHint:true, 
+      forceEnchant:true
+    )
+    location.name = item.name;
+    location.inventory.add(item:
+      item
+    );
+  },
+  
+  onIncrementTime::(location, time) {
+  
+  }
+}) 
+
+
+
+Location.database.newEntry(data:{
   name: 'Magic Chest',
   id: 'base:magic-chest',
   rarity: 1000000000000,
@@ -1505,7 +1559,7 @@ Location.database.newEntry(data:{
     location.lockWithPressurePlate();  
   
     @:story = import(module:'game_singleton.story.mt');
-    for(0, 4) ::{
+    for(0, 3) ::{
       location.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
@@ -1737,7 +1791,14 @@ Location.database.newEntry(data:{
   onCreate ::(location) { 
     @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
     location.data.enchant = ItemEnchant.new(
-      base:ItemEnchant.database.getRandom()
+      base:
+        if (random.try(percentSuccess:25)) 
+          ItemEnchant.database.find(id:'base:soul')
+        else
+          ItemEnchant.database.getRandomFiltered(::(value) <- 
+            ((value.traits & ItemEnchant.TRAIT.SPECIAL) == 0) &&
+            ((value.traits & ItemEnchant.TRAIT.HARMFUL) == 0)
+          )
     )
   },
   onStep ::(location, entities) {

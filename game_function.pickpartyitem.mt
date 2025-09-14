@@ -57,6 +57,7 @@ return ::(canCancel => Boolean, onPick => Function, keep, onCancel, leftWeight, 
     onCancel : onCancel,
     keep:if (keep == empty) true else keep,
     onPick ::(item) {
+      breakpoint();
       onPick(item, equippedBy:equippedBy[item]);
     }
   );
