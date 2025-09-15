@@ -38,7 +38,7 @@
 
 @MOD_DIR = './mods';
 
-
+breakpoint();
 windowEvent.errorHandler = ::<= {
   @lines = ['Wyvern Gate, commit ' + import(module:'GIT_COMMIT')];
   if (Filesystem.exists(:'ERROR.LOG'))
@@ -108,6 +108,7 @@ instance.mainMenu(
     instance.FEATURES.CRT_SHADER |
     instance.FEATURES.INPUT_MAPPING |
     instance.FEATURES.AUDIO |
+    instance.FEATURES.DEBUGGING |
     instance.FEATURES.BGFG,
 
   onSaveState :::(

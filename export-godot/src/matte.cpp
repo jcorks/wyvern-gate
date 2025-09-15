@@ -8,7 +8,7 @@
 using namespace godot;
 
 
-void wyvern_gate_add_native_bfs(matte_t * m);
+void wyvern_gate_add_native(matte_t * m);
 
 
 static matteValue_t send_line(
@@ -140,6 +140,7 @@ static void error_messenger(
 void Matte::_bind_methods() {
     ClassDB::bind_method(D_METHOD("initialize_vm"), &Matte::initializeVM);
     ClassDB::bind_method(D_METHOD("send_input"), &Matte::sendInput);
+    //ClassDB::bind_method(D_METHOD("on_frame"), &Matte::onFrame);
     ClassDB::bind_method(D_METHOD("enable_debugging"), &Matte::enableDebugging);
     ClassDB::bind_method(D_METHOD("save_settings", "settings"), &Matte::saveSettings);
     ADD_SIGNAL(
@@ -275,7 +276,7 @@ void Matte::initializeVM() {
         NULL
     );    
 
-    wyvern_gate_add_native_bfs(ctx);
+    wyvern_gate_add_native(ctx);
 
 
     matte_vm_import(

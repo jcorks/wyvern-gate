@@ -4,3 +4,4 @@ all:
 	cp ./project/bin/*.mt ./project/bin/output/
 	cp ./project/bin/*.dll ./project/bin/output/
 	cp ../*.mt ./project/bin/output/
+	cp ../GIT_COMMIT ./project/bin/output

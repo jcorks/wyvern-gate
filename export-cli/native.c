@@ -284,7 +284,7 @@ static matteValue_t wyvern_gate__native__canvas__reset(
     const matteValue_t * args,
     void * userData
 ) {
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas*)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     uint32_t i;
     for(i = 0; i < cr->savestates->size; ++i) {
@@ -310,13 +310,13 @@ static matteValue_t wyvern_gate__native__canvas__resize(
 
     wyvern_gate__native__canvas__reset(vm, fn, args, userData);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     cr->width = matte_value_as_number(store, args[0]);
     cr->height = matte_value_as_number(store, args[1]);
     
     free(cr->canvas);
-    cr->canvas = calloc(sizeof(uint32_t), cr->width * cr->height);
+    cr->canvas = (uint32_t*)calloc(sizeof(uint32_t), cr->width * cr->height);
     
 
     
@@ -352,7 +352,7 @@ static matteValue_t wyvern_gate__native__canvas__movePen(
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_NUMBER);
     CHECK_ARG(args[1], MATTE_VALUE_TYPE_NUMBER);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     cr->penx = matte_value_as_number(store, args[0]);
     cr->peny = matte_value_as_number(store, args[1]);   
@@ -368,7 +368,7 @@ static matteValue_t wyvern_gate__native__canvas__movePenRelative(
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_NUMBER);
     CHECK_ARG(args[1], MATTE_VALUE_TYPE_NUMBER);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     cr->penx += matte_value_as_number(store, args[0]);
     cr->peny += matte_value_as_number(store, args[1]);   
@@ -384,7 +384,7 @@ static matteValue_t wyvern_gate__native__canvas__renderBarAsString(
 ) {
     CHECK_ARG(args[1], MATTE_VALUE_TYPE_NUMBER);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     
     int width = matte_value_type(args[0]) == MATTE_VALUE_TYPE_EMPTY ? 
@@ -409,7 +409,7 @@ static matteValue_t wyvern_gate__native__canvas__renderBarAsString(
     int numFilled = ((width - 2) * (ratio));
     if (fillFraction > 0 && numFilled < 1) numFilled = 1;
     
-    matteString_t * out = matte_string_create(' ');
+    matteString_t * out = matte_string_create_from_c_str(" ");
     uint32_t i;
     for(i = 0; i < numFilled; ++i) {
         matte_string_append_char(out, character);
@@ -512,7 +512,7 @@ static matteValue_t wyvern_gate__native__canvas__renderFrame(
     CHECK_ARG(args[2], MATTE_VALUE_TYPE_NUMBER);
     CHECK_ARG(args[3], MATTE_VALUE_TYPE_NUMBER);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     
     renderFrame(
@@ -632,7 +632,7 @@ static matteValue_t wyvern_gate__native__canvas__refitLines(
 ) {
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_OBJECT);
     
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
 
     
@@ -680,7 +680,7 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
 ) {
     const int WINDOW_BUFFER = 4;
     
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     
     
@@ -826,11 +826,11 @@ static matteValue_t wyvern_gate__native__canvas__pushState(
     const matteValue_t * args,
     void * userData
 ) {
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
 
     uint32_t numBytes = sizeof(uint32_t) * cr->width * cr->height;
-    uint32_t * canvasCopy = malloc(numBytes);
+    uint32_t * canvasCopy = (uint32_t *)malloc(numBytes);
     memcpy(canvasCopy, cr->canvas, numBytes);
 
     uint32_t id;
@@ -876,7 +876,7 @@ static matteValue_t wyvern_gate__native__canvas__removeState(
     const matteValue_t * args,
     void * userData
 ) {
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
 
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_NUMBER);
@@ -895,7 +895,8 @@ static matteValue_t wyvern_gate__native__canvas__removeState(
 
         }
     }
-    
+    return matte_store_new_value(store);
+
 
 }
 
@@ -907,7 +908,7 @@ static matteValue_t wyvern_gate__native__canvas__drawText(
 ) {
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_STRING);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     const matteString_t * text = matte_value_string_get_string_unsafe(store, args[0]);
 
@@ -926,7 +927,7 @@ static matteValue_t wyvern_gate__native__canvas__drawChar(
 ) {
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_STRING);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     const matteString_t * text = matte_value_string_get_string_unsafe(store, args[0]);
 
@@ -950,7 +951,7 @@ static matteValue_t wyvern_gate__native__canvas__drawRectangle(
     CHECK_ARG(args[1], MATTE_VALUE_TYPE_NUMBER);
     CHECK_ARG(args[2], MATTE_VALUE_TYPE_NUMBER);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     uint32_t ch = matte_string_get_char(matte_value_string_get_string_unsafe(store, args[0]), 0);
     int width  = matte_value_as_number(store, args[1]);
@@ -981,7 +982,7 @@ static matteValue_t wyvern_gate__native__canvas__erase(
     const matteValue_t * args,
     void * userData
 ) {
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     drawChar(cr, ' ');
     return matte_store_new_value(store);
@@ -995,7 +996,7 @@ static matteValue_t wyvern_gate__native__canvas__writeText(
 ) {
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_STRING);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     const matteString_t * text = matte_value_string_get_string_unsafe(store, args[0]);
 
@@ -1023,7 +1024,7 @@ static matteValue_t wyvern_gate__native__canvas__blackout(
     void * userData
 ) {
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
 
     uint32_t ch = 0;
@@ -1041,7 +1042,7 @@ static matteValue_t wyvern_gate__native__canvas__clear(
     void * userData
 ) {
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
 
     canvasClear(cr);
@@ -1061,7 +1062,7 @@ static void formatColumn(
 
 
     uint32_t i;
-    uint32_t count = abs(matte_string_get_length(text) - matte_array_at(widths, int, column));
+    uint32_t count = abs((int)(matte_string_get_length(text) - matte_array_at(widths, int, column)));
     if (!leftJustifieds[column]) {
         for(
             i = 0; 
@@ -1099,12 +1100,12 @@ static matteValue_t wyvern_gate__native__canvas__columnsToLines(
 ) {
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_OBJECT);
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     
     
     uint32_t nColumns = matte_value_object_get_number_key_count(store, args[0]);
-    uint8_t * leftJustifieds = malloc(nColumns);
+    uint8_t * leftJustifieds = (uint8_t*)malloc(nColumns);
     memset(leftJustifieds, 1, nColumns);
 
     
@@ -1228,7 +1229,7 @@ static matteValue_t wyvern_gate__native__canvas__addEffect(
     void * userData
 ) {
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
 
     assert(matte_value_is_function(args[0]));
@@ -1304,7 +1305,7 @@ static matteValue_t wyvern_gate__native__canvas__update(
 ) {
 
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
 
     if (cr->effects->size == 0)
@@ -1312,7 +1313,7 @@ static matteValue_t wyvern_gate__native__canvas__update(
 
 
     uint32_t nBytes = cr->width * cr->height * sizeof(uint32_t);
-    uint32_t * copy = malloc(nBytes);
+    uint32_t * copy = (uint32_t*)malloc(nBytes);
     memcpy(copy, cr->canvas, nBytes);
     
     uint32_t * old = cr->canvas;
@@ -1353,7 +1354,7 @@ static matteValue_t wyvern_gate__native__canvas__commit(
 ) {
 
 
-    WyvGateCanvas * cr = userData;
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     
     int renderNow = 0;
@@ -1377,14 +1378,14 @@ static matteValue_t wyvern_gate__native__canvas(
     matteVM_t * vm,
     matteValue_t fn,
     const matteValue_t * args,
-    void * userData
+    void * userDataIn
 ) {
     matteStore_t * store = matte_vm_get_store(vm);
     matteValue_t a = matte_store_new_value(store);
-    
+    matte_t * userData = (matte_t *) userDataIn;
     matte_value_into_new_object_ref(store, &a);
     
-    WyvGateCanvas * cr = calloc(1, sizeof(WyvGateCanvas));
+    WyvGateCanvas * cr = (WyvGateCanvas*)calloc(1, sizeof(WyvGateCanvas));
     cr->self = a;
     cr->penx = 0;
     cr->peny = 0;
@@ -1392,7 +1393,7 @@ static matteValue_t wyvern_gate__native__canvas(
     cr->height = 24;
     cr->m = userData;
     
-    cr->canvas = calloc(cr->width * cr->height, sizeof(uint32_t));
+    cr->canvas = (uint32_t*)calloc(cr->width * cr->height, sizeof(uint32_t));
     cr->savestates = matte_array_create(sizeof(uint32_t *));
     cr->savestates_id = matte_array_create(sizeof(uint32_t));
 

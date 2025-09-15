@@ -70,12 +70,12 @@ func _ready() -> void:
     )
 
     connect("on_send_error", func(strn): 
-        if (debug == false):
+        if debug == false:
             canvas.set_error(strn)
             print(str("MATTE VM ERROR: ", strn))
+            keepSending = false;
         else:
             print(strn)
-        keepSending = false;
     )
 
     connect("on_send_settings", func(str): 
