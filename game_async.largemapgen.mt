@@ -15,13 +15,16 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-@:AsyncWorker = ::? {
+@:AsyncWorker = empty;
+/*
+::? {
   return import(:'Matte.System.AsyncWorker');
 } => {
   onError::(message) {
     // synchronous
   }
 }
+*/
 
 @:JSON = import(:'Matte.Core.JSON');
 

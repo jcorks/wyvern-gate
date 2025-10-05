@@ -22,13 +22,13 @@
 @:Map = import(module:'game_class.map.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 
-@:Async = ::? {
+@:Async = empty/*::? {
   return import(:'Matte.System.Async');
 } => {
   onError::(message) {
     
   }
-}
+}*/
 
 
 
