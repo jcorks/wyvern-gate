@@ -303,10 +303,10 @@ return ::{
           world.party.leader = realLeader;
           world.party.inventory.load(:realInventory);
 
-          when(endTurn) ::<= {
+          /*when(endTurn) ::<= {
             doScene(acts:endTurn);
             endTurn = empty;
-          }
+          }*/
         }
       );
     }
