@@ -22,13 +22,13 @@
 @:Map = import(module:'game_class.map.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 
-@:Async = empty/*::? {
+@:Async = ::? {
   return import(:'Matte.System.Async');
 } => {
   onError::(message) {
     
   }
-}*/
+}
 
 
 
@@ -101,10 +101,14 @@
               (3): '[/]'
             }
           }
+          @:before = windowEvent.autoSkipAnimations;
+          windowEvent.autoSkipAnimations = false;
           windowEvent.queueCustom(
             isAnimation: true,
             animationFrame ::{
               Async.update();
+
+              breakpoint();
 
               
               ct += 1;
@@ -117,12 +121,14 @@
               canvas.drawText(text:message + genDots());
               
               return match(status) {
-                (Async.Worker.State.Failed):
-                  error(:worker.error),
+                (Async.Worker.State.Failed): ::<= {
+                  windowEvent.autoSkipAnimations = before;
+                  error(:worker.error)
+                },
                   
                 (Async.Worker.State.Finished): ::<= {
+                  windowEvent.autoSkipAnimations = before;
                   handleResults(:worker.result);
-
                   return windowEvent.ANIMATION_FINISHED
                 }                  
               }
