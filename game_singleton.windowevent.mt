@@ -315,7 +315,13 @@
             choiceStack[choiceStack->keycount-1].rendered = empty;
         }
       }
-      if (dontResolveNext == empty && ((level == empty) || (level < KEEP_STACK_INPUT_SAFETY_LIMIT))) ::<= {
+
+      when ((level != empty) && (level > KEEP_STACK_INPUT_SAFETY_LIMIT)) ::<= {
+        breakpoint();
+        error(:'An internal threshold was reached. It is safe to continue, but note that this indicates an issue in the program.')
+      }
+
+      if (dontResolveNext == empty) ::<= {
         resolveNext(level);
       }
     }
@@ -420,6 +426,8 @@
       @inst = resolveQueues[resolveQueues->size-1];
       @:queue = inst.queue;
       @:onResolveAll = inst.onResolveAll;
+
+      if (level->type == Number) level += 1;
 
       if (queue->keycount) ::<= {
         @:cbs = queue[0].fns;

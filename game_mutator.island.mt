@@ -527,6 +527,12 @@ Island.database.newEntry(
           state.encounterRate = random.number();
           state.sizeW  = sizeW;
           state.sizeH  = sizeH;
+
+          if (state.sizeW < base.minSize) state.sizeW = base.minSize;
+          if (state.sizeW > base.maxSize) state.sizeW = base.maxSize;
+          if (state.sizeH < base.minSize) state.sizeH = base.minSize;
+          if (state.sizeH > base.maxSize) state.sizeH = base.maxSize;
+
           state.stepsSinceLastEvent = 0;
           state.worldID = worldID;
           state.climate = random.integer(
