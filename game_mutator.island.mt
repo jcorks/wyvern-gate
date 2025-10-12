@@ -68,6 +68,9 @@
   DIVERSE : 1,
   
   SPECIAL : 2,
+  
+  // the island skips generation entirely.
+  EMPTY : 3
 }
 
 
@@ -77,22 +80,21 @@ Island.database.newEntry(
   data : {
     id : 'base:none',
     requiredLandmarks : [
-      'base:wyvern-gate',
     ],
     possibleLandmarks : [
       
     ],
     minAdditionalLandmarkCount : 0,
     maxAdditionalLandmarkCount : 0,
-    minSize : 40,//80,
-    maxSize : 40, //130,
+    minSize : 1,//80,
+    maxSize : 1, //130,
     events : [
       
     ],
     possibleSceneryCharacters : [
       '╿', '.', '`', '^', ','
     ],
-    traits : TRAIT.SPECIAL,
+    traits : TRAIT.SPECIAL | TRAIT.EMPTY,
     
     overrideSpecies : empty,
     overrideNativeCreatures : empty,
@@ -581,6 +583,14 @@ Island.database.newEntry(
       // calls end function after
       loadMap ::(onDone, extraLandmarks) {
         @:base = state.base;
+        
+        when((base.traits & TRAIT.EMPTY) != 0) ::<= {
+          @:Map = import(module:'game_class.map.mt');
+          state.map = Map.new();
+          state.map.title = '';
+          onDone(:state.map);
+        }
+        
         LargeMap.create(
           parent:this, 
           sizeW:state.sizeW, 

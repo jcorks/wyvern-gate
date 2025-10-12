@@ -33,9 +33,9 @@ return {
         );
 
         keyhome.setIslandGenTraits(
-          nameHint:'Test Island', 
+          nameHint:'', 
           levelHint:6,
-          idHint: 'base:starting-island',
+          idHint: 'base:none',
           tierHint: 0  
         )
         
@@ -50,6 +50,7 @@ return {
         
 
         @:startBattle ::(island) {
+          breakpoint();
     
           @:getNPC::(data) {
             @:ent = Entity.new(

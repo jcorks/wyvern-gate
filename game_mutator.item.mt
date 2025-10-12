@@ -3987,7 +3987,7 @@ none.name = 'None';
     },
       
       
-    setIslandGenTraits ::(levelHint, nameHint, tierHint, extraLandmarks, idHint) {
+    setIslandGenTraits ::(levelHint, nameHint, tierHint, extraLandmarks, idHint, isEmptyHint) {
       @:state = _.state;
       if (levelHint)  
         state.islandLevelHint = levelHint;
@@ -3996,6 +3996,9 @@ none.name = 'None';
         
       if (tierHint != empty)
         state.islandTierHint = tierHint;
+        
+      if (isEmptyHint)
+        state.islandIsEmptyHint = isEmptyHint;
         
       if (extraLandmarks != empty)
         state.islandExtraLandmarks = extraLandmarks;
