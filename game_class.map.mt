@@ -207,7 +207,7 @@
     @scenery = [];
     @sceneryValues = [];
     @stepAction = [];
-    @areas;
+    @areas = [];
     @renderOutOfBounds = true;
     @isDark = false;
     @parent_;

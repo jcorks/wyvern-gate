@@ -26,6 +26,9 @@
   Scenario.database.newEntry(
     data : import(module:'game_scenario.thetrader.mt')
   )   
+  Scenario.database.newEntry(
+    data : import(module:'game_scenario.therogue.mt')
+  )   
 }
 
 

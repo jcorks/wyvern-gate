@@ -3330,13 +3330,20 @@ Interaction.newEntry(
     onInteract ::(location, party) {
       @:world = import(module:'game_singleton.world.mt');
             
-      when(world.party.inventory.isFull) ::<= {
+      when(world.party.inventory.isFull && location.inventory.items->size > 0) ::<= {
         windowEvent.queueMessage(text: '...but the party\'s inventory was full.');
       }
       
-      lootget(items:location.inventory.items);      
-      foreach(location.inventory.items)::(i, item) {
-        world.party.inventory.add(item);
+      if (location.inventory.items->size > 0) ::<= {
+        lootget(items:location.inventory.items);      
+        foreach(location.inventory.items)::(i, item) {
+          world.party.inventory.add(item);
+        }
+      }
+      
+      if (location.inventory.gold > 0) ::<= {
+        windowEvent.queueMessage(text:'The party found ' + g(g:location.inventory.gold) + '.');
+        world.party.addGoldAnimated(amount:location.inventory.gold, onDone::{});  
       }
       location.inventory.clear();
       location.landmark.removeLocation(:location);

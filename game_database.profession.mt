@@ -1496,7 +1496,7 @@ Profession.newEntry(data:{
 
 Profession.newEntry(data:{
   name: 'Runic Beast',
-  id : 'base:runic-breast',
+  id : 'base:runic-beast',
   traits : 0,
   weaponAffinity: 'base:none',
   description : "", 

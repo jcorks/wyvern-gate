@@ -106,6 +106,50 @@ Landmark.database.newEntry(
   }
 )
 
+
+Landmark.database.newEntry(
+  data: {
+    name: '',
+    id: 'base:none',
+    legendName : '',
+    symbol : ' ',
+    rarity : 100000,
+    minLocations : 7,
+    maxLocations : 15,
+    minEvents : 0,
+    maxEvents : 3,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+    landmarkType : TYPE.STRUCTURE,
+    traits : 
+      TRAIT.GUARDED |
+      TRAIT.CAN_SAVE |
+      TRAIT.PEACEFUL | 
+      TRAIT.UNIQUE,
+
+    requiredEvents : [],
+    possibleLocations : [
+    ],
+    requiredLocations : [
+    ],
+    mapHint : {
+      roomSize: 30,
+      roomAreaSize: 7,
+      roomAreaSizeLarge: 9,
+      emptyAreaCount: 6,
+      wallCharacter: '!',
+      scatterChar: 'Y',
+      scatterRate: 0.3
+    },
+    onCreate ::(landmark, island){},
+    onIncrementTime ::(landmark, island){},
+    onStep ::(landmark, island) {},
+    onVisit ::(landmark, island) {
+    }
+  }
+)
+
+
+
 Landmark.database.newEntry(
   data: {
     name: 'City',

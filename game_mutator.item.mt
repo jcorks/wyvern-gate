@@ -187,6 +187,35 @@
 
 
 
+@:keyThemes = [
+  'Horror',
+  'Wonder',
+  'Power',
+  'Honor',
+  'Awakening',
+  'Dawn',
+  'Dusk',
+  'Sol',
+  'Luna',
+  'Righteousness',
+  'Greatness',
+  'Corruption',
+  'the Ether',
+  'Empowerment',
+  'Moons',
+  'Glamor',
+  'Death',
+  'Life',
+  'Exile',
+  'the Exiled',
+  'the Herald',
+  'Wrath',
+  'Stars',
+  'the Wyverns'
+]
+
+
+
 
 @:reset ::{
 
@@ -437,7 +466,7 @@ Item.database.newEntry(data : {
       ::<= { 
         // rare potion   
         when (random.try(percentSuccess:10) && creationHint->type != Number) ::<= {
-          item.name = random.pickArrayItem(:keyQualifiers) + ' Potion';
+          item.name = random.pickArrayItem(:keyQualifiers) + ' Potion' + (if(random.flipCoin()) '' else random.pickArrayItem(:keyThemes));
         
           // FULL random
           when(random.flipCoin()) ::<= {
@@ -3663,6 +3692,7 @@ none.name = 'None';
         state.forceEnchantCount = forceEnchantCount;
       state.arts = ::<= {
         when (artsHint) artsHint;
+        when (base.possibleArts->size == 0) empty;
         @:out = [
           random.pickArrayItem(list:base.possibleArts),
           random.pickArrayItem(list:base.possibleArts)
@@ -3932,7 +3962,7 @@ none.name = 'None';
         materialHint : if ((base.traits & TRAIT.METAL) != 0) Material.getRandom().id,
         apparelHint : if ((base.traits & TRAIT.APPAREL) != 0) ApparelMaterial.getRandom().id
       );
-      item.name = random.pickArrayItem(:keyQualifiers) + ' ' + base.name;
+      item.name = random.pickArrayItem(:keyQualifiers) + ' ' + base.name + (if(random.flipCoin()) '' else random.pickArrayItem(:keyThemes));
       _.state.appraisalCount += 1;
       return item;
     },

@@ -36,16 +36,7 @@
   name: 'Wyvern.LargeMap',
   define:::(this) {
   
-    @:clearScenery::(map, x, y) {
-      @index = map.addScenerySymbol(character:' ');
 
-      for(x-1, x+2) ::(ix) {
-        for(y-1, y+2) ::(iy) {
-          map.setSceneryIndex(x:ix, y:iy, symbol:index);
-          map.clearScenery
-        }
-      }
-    }   
     
     
     this.interface = {
@@ -108,7 +99,6 @@
             animationFrame ::{
               Async.update();
 
-              breakpoint();
 
               
               ct += 1;
@@ -158,21 +148,6 @@
         
       },
 
-
-      addLandmark::(map, island, base) { 
-        @:loc = random.scrambled(:map.areas)[0];
-        @:x = loc.x;      
-        @:y = loc.y;      
-        @:landmark = Landmark.new(
-          island,
-          base,
-          x,
-          y
-        );
-        clearScenery(map, x, y);
-        island.addLandmark(:landmark);
-        return landmark;
-      },
       
       getAPosition ::(map) {
         @:loc = random.scrambled(:map.areas)[0];

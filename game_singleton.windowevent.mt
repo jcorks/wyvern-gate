@@ -116,6 +116,7 @@
 }
 
 
+
 // When dealing with kept commitInput handlers that immediately 
 // return, some can get stuck and never give back control.
 // This is most common when commitInput handlers are kept but 
@@ -129,6 +130,7 @@
 // the programmer know whats up.
 //
 @:KEEP_STACK_INPUT_SAFETY_LIMIT = 100;
+@KEEP_STACK_INPUT_SAFETY_LIMIT_REACHED = false;
 
 @:WindowEvent = class(
   name: 'Wyvern.WindowEvent',
@@ -317,8 +319,10 @@
       }
 
       when ((level != empty) && (level > KEEP_STACK_INPUT_SAFETY_LIMIT)) ::<= {
-        breakpoint();
-        error(:'An internal threshold was reached. It is safe to continue, but note that this indicates an issue in the program.')
+        if (KEEP_STACK_INPUT_SAFETY_LIMIT_REACHED == false) ::<= {
+          KEEP_STACK_INPUT_SAFETY_LIMIT_REACHED = true;
+          error(:'An internal threshold was reached (next/resolve queue is possibly empty! recusion level above KEEP_STACK_INPUT_SAFETY_LIMIT). It is safe to continue, but note that this indicates an issue in the program.')
+        }
       }
 
       if (dontResolveNext == empty) ::<= {
@@ -1312,7 +1316,6 @@
         else
           data.iter+data.maxHeight
           
-        breakpoint();
           
         @:info = renderTextSingle(
           leftWeight: data.leftWeight, 

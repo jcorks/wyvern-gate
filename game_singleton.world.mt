@@ -908,14 +908,14 @@
             
             // need a location too if first making.
             @gate = newIsland.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
-            when(gate->size == 0) empty;
-            
-            gate = gate[0];
-            newIsland.map.setPointer(
-              x: gate.x,
-              y: gate.y
-            );               
-          
+            if (gate->size != 0) ::<= {
+              
+              gate = gate[0];
+              newIsland.map.setPointer(
+                x: gate.x,
+                y: gate.y
+              );               
+            }
             save.islands[id] = newIsland.save(); 
             which = save.islands[id];
 

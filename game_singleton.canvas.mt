@@ -599,11 +599,6 @@ return class(
       
       update ::{
         when(effects->keycount == 0) empty;        
-        
-        @:copy = [...canvas];
-        @:old = canvas;
-        canvas = copy;
-
         foreach(effects) ::(effect, k) {
           @:ret = effect();
           if (ret == EFFECT_FINISHED) 
@@ -611,13 +606,11 @@ return class(
         }     
 
         for(0, CANVAS_HEIGHT)::(row) {
-          lines_output[row] = String.combine(strings:copy->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
+          lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
         }
         onCommit(
           lines:lines_output
         ); 
-        
-        canvas = old;
       },
         
       commit ::(renderNow) {

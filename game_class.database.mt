@@ -137,6 +137,10 @@
         );
       },
       
+      getAllFiltered::(filter => Function) <-
+        items_->values->filter(by:filter)
+      ,
+      
       getRandomSet ::(count, filter => Function) {
         @:l = [];
         for(0, count)::(i) {

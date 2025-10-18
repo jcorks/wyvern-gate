@@ -70,7 +70,7 @@
   SPECIAL : 2,
   
   // the island skips generation entirely.
-  EMPTY : 3
+  EMPTY : 4
 }
 
 
@@ -179,6 +179,42 @@ Island.database.newEntry(
 
 }
 
+
+@:addLandmarkDefaults = ::<= {
+
+  @:clearScenery::(map, x, y) {
+    @index = map.addScenerySymbol(character:' ');
+
+    for(x-1, x+2) ::(ix) {
+      for(y-1, y+2) ::(iy) {
+        when (ix < 0 || iy < 0) empty;
+        map.setSceneryIndex(x:ix, y:iy, symbol:index);
+      }
+    }
+  }   
+
+  return ::(map, island, base) {
+    @:loc = if (map.areas->size == 0)
+      {x:0, y:0}
+    else
+      random.scrambled(:map.areas)[0];
+      
+      
+    @:x = loc.x;      
+    @:y = loc.y;      
+    @:landmark = Landmark.new(
+      island,
+      base,
+      x,
+      y
+    );
+
+    if (x != 0 && y != 0)
+      clearScenery(map, x, y);
+    island.addLandmark(:landmark);
+    return landmark;
+  }
+}
 
 @:Island = databaseItemMutatorClass.create(  
   name : 'Wyvern.Island',
@@ -590,11 +626,60 @@ Island.database.newEntry(
       loadMap ::(onDone, extraLandmarks) {
         @:base = state.base;
         
+        @:baseOnDone = ::{
+          state.map.title = '';
+
+          foreach(base.requiredLandmarks) ::(i, landmarkName) {
+            addLandmarkDefaults(
+              map:state.map,
+              base:Landmark.database.find(id:landmarkName),
+              island:this
+            )          
+          }
+
+          for(0, random.integer(from:base.minAdditionalLandmarkCount, to:base.maxAdditionalLandmarkCount)) ::(i) {
+            @:landmarkName = random.pickArrayItem(:base.possibleLandmarks);
+            addLandmarkDefaults(
+              map:state.map,
+              base:Landmark.database.find(id:landmarkName),
+              island:this
+            )          
+          }
+
+
+          if (extraLandmarks != empty) ::<= {
+            foreach(extraLandmarks) ::(i, landmarkName) {
+              addLandmarkDefaults(
+                map:state.map,
+                base:Landmark.database.find(id:landmarkName),
+                island:this
+              )          
+            }
+          
+          }
+          
+          
+          onDone(:state.map);        
+        }
+        
+        breakpoint();
         when((base.traits & TRAIT.EMPTY) != 0) ::<= {
+          
           @:Map = import(module:'game_class.map.mt');
           state.map = Map.new();
           state.map.title = '';
-          onDone(:state.map);
+
+          baseOnDone();
+          
+          if (this.landmarks->size == 0) ::<= {
+            @:landmark = Landmark.new(
+              island:this,
+              base: Landmark.database.find(:'base:none'),
+              x:0,
+              y:0
+            );
+            this.addLandmark(:landmark);          
+          }
         }
         
         LargeMap.create(
@@ -604,40 +689,7 @@ Island.database.newEntry(
           symbols:base.possibleSceneryCharacters,
           onDone ::(map) {
             state.map = map;
-            state.map.title = '';
-
-            foreach(base.requiredLandmarks) ::(i, landmarkName) {
-              LargeMap.addLandmark(
-                map:state.map,
-                base:Landmark.database.find(id:landmarkName),
-                island:this
-              )          
-            }
-
-            for(0, random.integer(from:base.minAdditionalLandmarkCount, to:base.maxAdditionalLandmarkCount)) ::(i) {
-              @:landmarkName = random.pickArrayItem(:base.possibleLandmarks);
-              LargeMap.addLandmark(
-                map:state.map,
-                base:Landmark.database.find(id:landmarkName),
-                island:this
-              )          
-            }
-
-
-            if (extraLandmarks != empty) ::<= {
-              foreach(extraLandmarks) ::(i, landmarkName) {
-                LargeMap.addLandmark(
-                  map:state.map,
-                  base:Landmark.database.find(id:landmarkName),
-                  island:this
-                )          
-              }
-            
-            }
-            
-            
-            onDone(:state.map);
-          
+            baseOnDone();
           }
         );
 
@@ -868,10 +920,12 @@ Island.database.newEntry(
       },
       
       levelMin : {
-        get ::<- state.levelMin
+        get ::<- state.levelMin,
+        set ::(value) <- state.levelMin = value
       },
       levelMax : {
-        get ::<- state.levelMax
+        get ::<- state.levelMax,
+        set ::(value) <- state.levelMax = value
       },
       
       world : {
