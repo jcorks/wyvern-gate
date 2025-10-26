@@ -284,15 +284,14 @@
           endTurn();
         }
 
-        windowEvent.queueMessage(
-          text: 'It is now ' + ent.name + '\'s turn.'
-        );
-
-
         // may have died this turn.
         when (!ent.canActThisTurn()) ::<={
           endTurn();
         }
+
+        windowEvent.queueMessage(
+          text: 'It is now ' + ent.name + '\'s turn.'
+        );
         
         // multi turn actions
         if (actions[ent]) ::<= {

@@ -38,8 +38,8 @@
 
 
 Location.database.newEntry(data:{
-  name: 'Stairs Down',
-  id: 'therogue:stairs-down',
+  name: 'Stairs Up',
+  id: 'therogue:stairs-up',
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '\\',
@@ -51,7 +51,7 @@ Location.database.newEntry(data:{
     "Decrepit stairs",
   ],
   interactions : [
-    'base:next-floor',
+    'therogue:next-floor',
   ],
   
   aggressiveInteractions : [
@@ -436,7 +436,14 @@ return {
   onNewDay ::(data){},
 
   // Called when a file is loaded with this scenario 
-  onResume ::(data){},
+  onResume ::(data){
+    @world = import(module:'game_singleton.world.mt');
+    @:instance = import(module:'game_singleton.instance.mt');
+    instance.islandTravel();
+    if (world.landmark) ::<= {
+      instance.landmarkTravel();
+    }      
+  },
   
   // Called when a party member dies.
   onDeath ::(data, entity){},
@@ -482,7 +489,10 @@ return {
 
   // Function reserved for overriding database options. Good for database 
   // items that are specific to this scenario.
-  databaseOverrides ::(){},
+  databaseOverrides ::{
+    initializeItems();    
+
+  },
   
   // List of accolades (achievements) available when beating this scenario.
   accolades : [],
@@ -505,7 +515,6 @@ return {
 
 
   
-    initializeItems();    
 
 
     party.reset();

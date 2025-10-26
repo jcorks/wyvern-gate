@@ -49,7 +49,7 @@ import(module:'game_function.trap.mt');
 import(module:'game_singleton.commoninteractions.mt');
 import(module:'game_function.questguild.mt');
 import(:'game_class.inletset.mt');
-
+@:choicesColumns = import(:'game_function.choicescolumns.mt');
 
 
 @:Database = import(module:'game_class.database.mt');
@@ -99,8 +99,15 @@ import(module:'game_mutator.island.mt');
   return (xd**2 + yd**2)**0.5;
 }
 @:JSON = import(module:'Matte.Core.JSON');
-@:GIT_COMMIT = import(module:'GIT_COMMIT');
+@:GIT_COMMIT = ::? {
+  return import(module:'GIT_COMMIT');
+} => {
+  onError::(message) {
+    return '<unknown>';
+  }
+}
 @:VERSION = '0.3.0 - ' + GIT_COMMIT;
+@:QUICK_SAVE_SUFFIX = '-qs';
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');
 
@@ -672,49 +679,130 @@ return empty;
           if (onListSlots()->size != 0) ::<= {
             choiceNames->push(value:'Load');
             choiceActions->push(value: ::{
-              @:choices = onListSlots();
-              
+              @choices = onListSlots();
+              when (choices->size == 0) ::<= {
+                windowEvent.queueMessage(text: 'No save files were found.');
+              }
+
+
+              // wrap in quicksave if exists.
               choices->sort(comparator:::(a, b) {
                 when(a < b) -1;
                 when(a > b)  1;
                 return 0;
               });
+              @choicesRaw = [...choices];
+              choices = choices->filter(::(value) <- !value->contains(:QUICK_SAVE_SUFFIX));
+              @isQS = [];
               
-              when (choices->size == 0) ::<= {
-                windowEvent.queueMessage(text: 'No save files were found.');
+              foreach(choices) ::(k, choice) {
+                isQS->push(: (::? {
+                  foreach(choicesRaw) ::(k, v) {
+                    if (choice+QUICK_SAVE_SUFFIX == v)
+                      send(:true);
+                    
+                  }
+                  return false;
+                }));
               }
-              windowEvent.queueChoices(
-                choices,
+
+
+              @:loadTrue ::(name, remove, onDone) {
+                loading(
+                  message: 'Loading scenario...',
+                  do:: {
+                    this.resetDatabase();
+                    loading(
+                      message: 'Loading save...',
+                      do :: {
+                        @:data = this.getSaveDataRaw(:name);
+                        world.load(serialized:data);
+                        
+                        if (save > 0) ::<= {
+                          world.disgruntled = true;
+                        }
+                        
+                        if (remove == true)
+                          this.savestate(saveOverride:'', nameOverride:name);
+                          
+                          
+                        pointOfNoReturn(
+                          do::{
+                            if (onDone) onDone();
+                            this.startResume()
+                          }
+                        );
+                      }
+                    )
+                  }
+                );              
+              }
+              
+              @:loadQuickSave ::(name) {
+                windowEvent.queueMessage(
+                  text: 'This save has a Quick Save available.'
+                );
+                  
+                windowEvent.queueChoices(
+                  keep: true,
+                  canCancel : true,
+                  jumpTag : 'quickSave',
+                  prompt: 'Save : ' + name,
+                  choices : [
+                    'Load Quick Save',
+                    'Load normal save'
+                  ],
+                  
+                  onChoice::(choice) {
+                    windowEvent.queueMessage(
+                      text: 'This will remove the Quick Save.'
+                    );
+                    windowEvent.queueAskBoolean(
+                      prompt: if (choice == 1)
+                        'Load Quick Save?'
+                      else 
+                        'Load normal save?',
+                        
+                      onChoice::(which) {
+                        when(which == true)
+                          // quicksave!
+                          if (choice == 1) 
+                            loadTrue(
+                              name: name+QUICK_SAVE_SUFFIX,
+                              remove: true
+                            )
+                          else
+                            loadTrue(
+                              name,
+                              onDone ::{
+                                this.savestate(saveOverride:'', nameOverride:name+QUICK_SAVE_SUFFIX);                              
+                              }
+                            );
+                        
+                      }
+                    );
+                  }
+                );
+              }
+
+              choicesColumns(
+                columns : [
+                  choices,
+                  isQS->map(::(value) <- if (value == true) '(!)' else '')
+                ],
+                leftJustified : [
+                  true, true
+                ],
                 prompt: 'Load which save?',
                 canCancel: true,
+                keep:true,
                 onChoice::(choice) {
                   when(choice == 0) empty;
-                  loading(
-                    message: 'Loading scenario...',
-                    do:: {
-                      this.resetDatabase();
-                      loading(
-                        message: 'Loading save...',
-                        do :: {
-                          @:data = this.getSaveDataRaw(:choices[choice-1]);
-                          world.load(serialized:data);
-                          
-                          if (save > 0) ::<= {
-                            world.disgruntled = true;
-                          }
-                          
-                          if (data.worldlyTether != empty) ::<= {
-                            this.savestate(saveOverride:'', nameOverride:'.Quick Save.');
-                          }
-
-                          pointOfNoReturn(
-                            do::<- this.startResume()
-                          );
-                        }
-                      )
-                    }
-                  );
-                
+                  
+                  when (isQS[choice-1] == true)
+                    loadQuickSave(:choices[choice-1]);
+                  
+                  loadTrue(name:choices[choice-1]);
                 }
               );          
             });
@@ -1090,16 +1178,16 @@ return empty;
             
             windowEvent.queueCustom(
               onEnter :: {
-                windowEvent.jumpToTag(name:"GameOver", goBeforeTag: true);
+                windowEvent.jumpToTag(name:'MainMenu', doResolveNext:true);
               }
             );          
           }
         );
 
-        windowEvent.jumpToTag(name:'MainMenu', doResolveNext:true);
       },
       
       unlockScenarios :: {
+        breakpoint();
         if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
           settings.unlockedScenarios = true;
           onSaveSettings_(data:JSON.encode(object:settings));
@@ -1506,11 +1594,9 @@ return empty;
       },
       
       quicksave :: {
-        @:data = world.save();
-        onSaveState(
-          slot:'.Quick Save.',
-          data
-        )
+        this.savestate(
+          nameOverride: world.saveName + QUICK_SAVE_SUFFIX
+        );
       },
       
       

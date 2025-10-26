@@ -28,8 +28,27 @@
 @:time = import(module:'Matte.System.Time');
 @:Filesystem = import(module:'Matte.System.Filesystem');
 
+@:getchWait = ::? {
+  return getExternalFunction(:'wyvern_gate__native__getchWait');
+} => {
+  onError::(message) {
+    // fallback simple CPU reduction
+    return :: {
+      ::? {
+        forever :: {
+          lastVal = console.getch(unbuffered:true);
+          if (lastVal != empty && lastVal != '')
+            send();
+
+          Time.sleep(milliseconds:30);
+        }
+      }    
+    }  
+  }
+}
+
 windowEvent.errorHandler = ::<= {
-  @lines = ['Wyvern Gate, commit ' + import(module:'GIT_COMMIT')];
+  @lines = ['Wyvern Gate, commit ' + (::? {return import(module:'GIT_COMMIT');} => {onError::(message) <- '<unknown>'})];
   if (Filesystem.exists(:'ERROR.LOG'))
     Filesystem.remove(:'ERROR.LOG');
 
@@ -80,17 +99,70 @@ canvas.onCommit = ::(lines, renderNow){
     rerender();
 }
 
+@:refitCanvasCLI::{
+      
+  console.clear();
+  console.put(:"\x1b[999;999H");
+  console.put(:"\x1b[6n");
+  @w;
+  @h;
+
+
+  ::? {
+    forever ::{
+      @ch = console.getch(unbuffered:true);
+      if (ch != empty) send();
+    }
+  }
+
+  ::? {
+    @target = '';
+    @ch = console.getch(unbuffered:true);
+
+    forever ::{
+      @ch = console.getch(unbuffered:true);
+      //console.println(:"ch: " + ch);
+      when(ch == empty) send();
+      when (ch == 'R') ::<= {
+        w = target;
+        send();
+      }
+      when (ch == ';') ::<= {
+        h = target;
+        target = '';
+      }
+      target = target + ch;
+    }
+  }
+  
+  console.clear();
+  when(w == empty || h == empty) empty;
+  
+  w = Number.parse(:w);
+  h = ((Number.parse(:h) / 2)->floor)*2 -2;
+
+  when (canvas.width == w && canvas.height == h) empty;
+  breakpoint();
+
+
+  canvas.resize(width:w, height:h);
+}
 
 
 
 @:console = import(module:'Matte.System.ConsoleIO');
 @:Time = import(module:'Matte.System.Time');
-
+@msResize = 0 ;
+@lastVal = empty;
 @:pollInput = ::{
     
   @command = '';
   @:getPiece = ::{
-    @:ch = console.getch(unbuffered:true);
+    @:ch = if (lastVal != empty) ::<= {
+      @out = lastVal;
+      lastVal = empty;
+      return out;
+    } else console.getch(unbuffered:true);
     when (ch == empty || ch == '') '';
     return ch->charCodeAt(index:0);
   }
@@ -118,15 +190,29 @@ canvas.onCommit = ::(lines, renderNow){
   }
   @val = CURSOR_ACTIONS[command];
 
-  if (command != '' && val == empty) ::<= {
-      //canvas.refitCanvas();
-      //windowEvent.commitInput(forceRedraw:true);    
+
+  
+  if (val == empty) ::<= {
+    /*
+    if (Time.getTicks() > msResize+2000) ::<= {
+      refitCanvasCLI();
+      windowEvent.commitInput(forceRedraw:true);    
+      msResize = Time.getTicks();
+    }
+    */
   }
 
 
 
-  if (val == empty)
+  if (val == empty) ::<= {
     Time.sleep(milliseconds:30);
+    // now wait till we get some input to save some CPU huh!
+    if (windowEvent.needsCommit == false) ::<= {
+      lastVal = getchWait();
+
+    }
+    
+  }
   return val;   
 }
 
@@ -168,7 +254,7 @@ canvas.onCommit = ::(lines, renderNow){
       
       @val = pollInput();
       windowEvent.commitInput(input:val);
-      canvas.update();
+      
       
       if (canvasChanged) ::<= {
         rerender();  
@@ -206,6 +292,7 @@ instance.mainMenu(
     enterNewLocation(
       path: './',
       action::(filesystem) {
+        breakpoint();
         when (data->type == String && data == '') 
           filesystem.remove(path: 'save_' + slot);
         

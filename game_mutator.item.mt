@@ -466,7 +466,7 @@ Item.database.newEntry(data : {
       ::<= { 
         // rare potion   
         when (random.try(percentSuccess:10) && creationHint->type != Number) ::<= {
-          item.name = random.pickArrayItem(:keyQualifiers) + ' Potion' + (if(random.flipCoin()) '' else random.pickArrayItem(:keyThemes));
+          item.name = random.pickArrayItem(:keyQualifiers) + ' Potion' + (if(random.flipCoin()) '' else (" of " + random.pickArrayItem(:keyThemes)));
         
           // FULL random
           when(random.flipCoin()) ::<= {

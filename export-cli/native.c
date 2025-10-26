@@ -230,7 +230,84 @@ L_DONE:
     return out;
 }
 
+#include <stdio.h>
 
+#ifdef __WIN32__
+#include <windows.h>
+#include <conio.h>
+#include <ctype.h>
+static char getch_unbuffered() {
+    char c = 0;
+    if (_kbhit())
+        c = _getch();  
+    return c;
+}
+#else
+#include <termios.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/time.h>
+static char getch_unbuffered() {
+    int retrievedTerm = 0;
+    struct termios term0 = {};
+    if (!tcgetattr(0, &term0)) {
+        retrievedTerm = 1;
+        struct termios termN = term0;
+        termN.c_lflag &= ~ICANON;
+        termN.c_lflag |= ECHO;
+        termN.c_cc[VMIN] = 0;
+        termN.c_cc[VTIME] = 0;
+        
+        tcsetattr(0, TCSANOW, &termN);
+        setvbuf(stdin, NULL, _IONBF, 0);
+    }
+    char cstr[2] = {};
+    cstr[1] = 0;
+    read(0, &cstr[0], 1);
+    
+    if (retrievedTerm) {
+        tcsetattr(0, TCSANOW, &term0);        
+        setvbuf(stdin, NULL, _IOLBF, BUFSIZ);
+    }    
+    return cstr[0];
+}
+#endif
+
+
+#ifdef __WIN32__
+static void sleep_a_little() {
+    usleep(1000*30);
+}
+#else 
+static void sleep_a_little() {
+    usleep(1000*30);
+}
+#endif
+
+
+static matteValue_t wyvern_gate__native__getchWait(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    char c[2] = {};
+    matteStore_t * store = matte_vm_get_store(vm);
+    for(;;) {
+        c[0] = getch_unbuffered();
+        
+        if (c[0] != 0) {
+            matteValue_t v = matte_store_new_value(store);
+            matte_value_into_string(store, &v, MATTE_VM_STR_CAST(vm, c));
+            return v;
+        }
+        sleep_a_little();
+    }
+    
+    return matte_store_new_value(store);
+  
+}
 
 
 
@@ -1240,6 +1317,22 @@ static matteValue_t wyvern_gate__native__canvas__addEffect(
     return matte_store_new_value(store);
 }
 
+static matteValue_t wyvern_gate__native__canvas__hasEffects(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
+    matteStore_t * store = matte_vm_get_store(vm);
+
+    matteValue_t output = matte_store_new_value(store);
+    matte_value_into_boolean(store, &output, matte_array_get_size(cr->effects) > 0);
+
+    return output;
+}
+
 static void pushToScreen(
     WyvGateCanvas * cr,
     matteVM_t * vm,
@@ -1606,6 +1699,15 @@ static matteValue_t wyvern_gate__native__canvas(
         "effect",
         NULL
     );
+    
+    matte_add_external_function(
+        userData,
+        "wyvern_gate__native__canvas__hasEffects",
+        wyvern_gate__native__canvas__hasEffects,
+        cr,
+        
+        NULL
+    );    
 
     matte_add_external_function(
         userData,
@@ -1645,6 +1747,16 @@ void wyvern_gate_add_native(matte_t * m) {
         "start",
         "goal",
         "corners",
+        NULL
+    );
+
+
+    matte_add_external_function(
+        m,
+        "wyvern_gate__native__getchWait",
+        wyvern_gate__native__getchWait,
+        NULL,
+        
         NULL
     );
 

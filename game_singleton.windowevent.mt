@@ -148,6 +148,7 @@
     @markedError = false;
     @errorHandler;
     @log_;
+    @hadInputLast = false;
     
     resolveQueues->push(:{
       onResolveAll : {},
@@ -187,6 +188,7 @@
     }
     
     @:pushResolveQueueTop ::(fns, setID) {
+      hadInputLast = true;
       return getResolveQueue()->push(:{
         fns : fns,
         setID : setID
@@ -346,8 +348,12 @@
     }
     
     @:commitInput ::(input, level, forceRedraw) {
-    
+      canvas.update();
       ::? {
+        if (input == empty)
+          hadInputLast = false
+        else
+          hadInputLast = true;
         if (record != empty) ::<= {
           if (input != empty) ::<= {
             record->push(:{
@@ -836,7 +842,7 @@
         resolveNext();
         return false;
       }
-      
+      breakpoint();
 
       when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
         @res;
@@ -872,6 +878,7 @@
       }
       
       if (data.rendered == empty) ::<= {
+          breakpoint();
           renderThis(data);
       }      
       
@@ -1699,6 +1706,22 @@
       forceResolveNext::{
         when(canResolveNext())
           resolveNext();
+      },
+      
+      
+      // communicates whether commitInput is required to be called to pump 
+      // additional updates.
+      needsCommit : {
+        get::{
+          when (canvas.hasEffects()) true;
+          when (choiceStack->size == 0) true;
+          @:val = choiceStack[choiceStack->keycount-1];
+          when (val.mode == CHOICE_MODE.CUSTOM) true;
+          when (val.rendered != true) true;
+          when (val.renderState != empty && val.renderState != RENDER_STATE.DONE) true;
+          when (hadInputLast == true) true;
+          return false
+        }
       },
 
 

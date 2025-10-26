@@ -29,7 +29,6 @@ return ::(input) {
     console.println(:"input: " + input);
   }
   windowEvent.commitInput(input:if (input == -1) empty else input);
-  canvas.update();
   if (canvasChanged) 
     rerender();
   return 1;
