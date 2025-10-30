@@ -73,6 +73,14 @@
   EMPTY : 4
 }
 
+@:levelGen ::(level) {
+  @:dev = level * 0.2;
+  @min = level-dev;
+  @max = level+dev;
+  if (min < 0) min = 1;
+  if (max < 0) max = 1;
+  return random.integer(from:min, to:max);
+}
 
 @:reset = :: {
 
@@ -252,11 +260,8 @@ Island.database.newEntry(
     // the base of the island
     base : empty,
 
-    // minimum level of encountered individuals
-    levelMin : 0,
-
     // maximum level of encountered individuals
-    levelMax : 0,
+    level : 0,
 
     // how often encounters happen between turns.
     encounterRate: 0,    
@@ -557,8 +562,7 @@ Island.database.newEntry(
           
           state.base = base;
           state.name = NameGen.island();
-          state.levelMin = 0;
-          state.levelMax = 0;
+          state.level = 0;
           state.possibleEvents = if (possibleEventsHint) possibleEventsHint else [...base.events];
           state.encounterRate = random.number();
           state.sizeW  = sizeW;
@@ -602,9 +606,8 @@ Island.database.newEntry(
       
         state.tier = tierHint;
 
-        state.levelMin = (levelHint - random.number() * (levelHint * 0.2))->round;
-        state.levelMax = (levelHint + random.number() * (levelHint * 0.2))->round;
-        if (state.levelMin < 1) state.levelMin = 1;
+        state.level = (levelHint - random.number() * (levelHint * 0.2))->round;
+        if (state.level < 1) state.leven = 1;
         if (nameHint != empty || nameHint == '')
           state.name = (nameHint) => String;
 
@@ -862,7 +865,7 @@ Island.database.newEntry(
         @:out = Entity.new(
           island: this,
           speciesHint:  if (speciesHint == empty) species else speciesHint,
-          levelHint:    if (levelHint == empty) random.integer(from:state.levelMin, to:state.levelMax) else levelHint,
+          levelHint:    if (levelHint == empty) levelGen(:state.level) else levelHint,
           professionHint: if (professionHint == empty) Profession.getRandomFiltered(filter::(value)<-value.learnable).id else professionHint
         );
         
@@ -876,11 +879,13 @@ Island.database.newEntry(
         get :: <- [...state.species]->map(to:::(value) <- value.species)
       },
       
-      newAggressor ::(levelMaxHint, professionHint) {
+      newAggressor ::(levelHint, professionHint) {
         if (professionHint == empty) 
           professionHint = Profession.getRandomFiltered(filter::(value)<-value.learnable).id
 
-        @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
+        if (levelHint == empty)
+          levelHint = levelGen(:state.level);
+
         @:angy =  Entity.new(
           island: this,
           speciesHint: random.pickArrayItemWeighted(list:state.species).species,
@@ -892,8 +897,9 @@ Island.database.newEntry(
         return angy;  
       },
 
-      newHostileCreature ::(levelMaxHint) {
-        @levelHint = random.integer(from:state.levelMin, to:if(levelMaxHint == empty) state.levelMax else levelMaxHint);
+      newHostileCreature ::(levelHint) {
+        if (levelHint == empty)
+          levelHint = levelGen(:state.level);;
         @:angy =  Entity.new(
           island: this,
           speciesHint: 'base:creature',
@@ -919,15 +925,11 @@ Island.database.newEntry(
         get ::<- state.map.getAllItemData()
       },
       
-      levelMin : {
-        get ::<- state.levelMin,
-        set ::(value) <- state.levelMin = value
+      level : {
+        get ::<- state.level,
+        set ::(value) <- state.level = value
       },
-      levelMax : {
-        get ::<- state.levelMax,
-        set ::(value) <- state.levelMax = value
-      },
-      
+
       world : {
         get :: {
           return world_;

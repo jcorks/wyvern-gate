@@ -317,7 +317,7 @@ IslandEvent.database.newEntry(
               ::? {
                 forever ::{
                   only.autoLevel();
-                  if (only.level >= island.levelMax)
+                  if (only.level >= island.level+island.level*0.2)
                     send();                  
                 }
               }

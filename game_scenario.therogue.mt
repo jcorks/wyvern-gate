@@ -27,9 +27,58 @@
 @:Arts = import(module:'game_database.arts.mt');
 @:Entity = import(module:'game_class.entity.mt');
 @:Location = import(module:'game_mutator.location.mt');
+@:State = import(module:'game_class.state.mt');
+@:Inventory = import(module:'game_class.inventory.mt');
+
+
+@:DATA_KEY = 'therogue';
+
+@:TheRogueState = LoadableClass.create(
+  name : 'TheRogueState',
+  items : {
+    etherealChestLocation : empty
+  },
+  
+  define::(this, state) {
+    this.interface = {
+      defaultLoad::() {
+        
+      }
+      
+    }
+  }
+)
 
 
 
+/*
+
+main area:
+- venerated inventory: inventory to save across runs 
+-.no limit!!
+  - sacrifices the item for the run, but stores it there for other runs 
+  - can do the same for G
+- unlockable after death?
+- Arts are always kept, only inventory is wiped
+
+
+sub-areas:
+- Rest place that contains places to upgrade 
+- Always gets 3 choices, each costs money
+  - Level up x2
+  - Enchanter 
+  - Generic Shop (fully stocked)
+  -.Free mone
+  -.Temporary teammate (one stint, matches current NPC level)
+  -.
+  
+
+
+completion:
+- 5 floor stints
+- NPC Level increase after each
+-.Boss after 4 stints
+*/
 
 
 @:initializeItems ::{
@@ -38,8 +87,8 @@
 
 
 Location.database.newEntry(data:{
-  name: 'Stairs Up',
-  id: 'therogue:stairs-up',
+  name: 'Stairs Down',
+  id: 'therogue:stairs-down',
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '\\',
@@ -71,12 +120,11 @@ Location.database.newEntry(data:{
   },
   
   onCreate ::(location) {
-    /*
     if (location.landmark.island.tier > 1) 
       if (random.flipCoin()) ::<= {
         location.lockWithPressurePlate();
       }
-    */
+    
   },
   onStep ::(location, entities) {
   
@@ -119,9 +167,13 @@ Location.database.newEntry(data:{
   onStep ::(location, entities) {
   
   },  
-  onCreate ::(location) <-
-    location.inventory.addGold(:random.integer(from: 20, to: 250))
-  ,
+  onCreate ::(location) {
+    @mark = random.integer(
+      from:1, 
+      to:((location.landmark.island).level - 6)*2
+    )
+    location.inventory.addGold(:mark*10);
+  },
   
   onIncrementTime::(location, time) {
   
@@ -131,6 +183,43 @@ Location.database.newEntry(data:{
 
 
 
+Location.database.newEntry(data:{
+  name: 'The Vault',
+  id: 'therogue:the-vault',
+  rarity: 1000000000000,
+  ownVerb : '',
+  symbol: '$',
+  category : Location.CATEGORY.UTILITY,
+  minStructureSize : 1,
+  onePerLandmark : false,
+
+  descriptions: [
+    'A mysterious chest in the shape of a small vault.'
+  ],
+  interactions : [
+    'therogue:check-vault'
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  onFirstInteract::(location){},      
+  onInteract ::(location) {
+  },
+  onStep ::(location, entities) {
+  
+  },  
+  onCreate ::(location) {
+  },
+  
+  onIncrementTime::(location, time) {
+  
+  }
+}) 
 
 
 
@@ -171,8 +260,7 @@ Location.database.newEntry(data:{
 
       ],
       requiredLocations : [
-        'base:stairs-down',
-        'base:stairs-down',
+        'base:stairs-up',
         'base:item',
         'base:item',
         'therogue:gold',
@@ -182,12 +270,144 @@ Location.database.newEntry(data:{
         layoutType: DungeonMap.LAYOUT_EPSILON
       },
       onCreate ::(landmark, island){  
-        island.levelMin+=1
-        island.levelMax+=1
+        island.level+=1
       },
       onIncrementTime ::(landmark, island){},
       onStep ::(landmark, island) {},
       onVisit ::(landmark, island) {
+        @world = import(module:'game_singleton.world.mt');
+        if (landmark.floor == 0)
+          windowEvent.queueMessage(
+            speaker: world.party.members[0].name, 
+            text:"\"Further in is the only way to go...\""
+          );
+      }
+    }
+  )
+
+
+
+
+
+  @:createHome::(landmark) {
+  
+
+    
+    
+  
+  
+    @:map = landmark.map;
+    map.width = 100;
+    map.height = 100;
+    
+    @:wall = map.addScenerySymbol(:'Y');
+    @:OFFSET = 50;
+    
+    @:REAL_WIDTH = 12;
+    @:REAL_HEIGHT = 10;
+
+    // need to place chest 
+    @:CHEST_LOCATION = {
+      x: 3,
+      y: (REAL_HEIGHT/2)->floor
+    }
+
+    @:STAIRS_LOCATION = {
+      x: 8,
+      y: (REAL_HEIGHT/2)->floor
+    }
+
+    landmark.addLocation(
+      location: 
+        Location.new(
+          base: Location.database.find(id:'therogue:the-vault'),
+          x: CHEST_LOCATION.x,
+          y: CHEST_LOCATION.y
+        ),
+        
+      width: 1, height: 1,
+      discovered: false
+    );
+
+
+    landmark.addLocation(
+      location: 
+        Location.new(
+          base: Location.database.find(id:'therogue:stairs-down'),
+          x: STAIRS_LOCATION.x,
+          y: STAIRS_LOCATION.y
+        ),
+        
+      width: 1, height: 1,
+      discovered: false
+    );
+
+
+    
+
+
+    
+
+    map.painScenerySolidRectangle(
+      symbol : wall,
+      isWall : true,
+      x : 0,
+      y : 0,
+      width: map.width,
+      height: map.height
+    );
+    
+    map.painScenerySolidRectangle(
+      symbol : wall,
+      isWall : false,
+      x : map.width  - (OFFSET/2)->floor,
+      y : map.height - (OFFSET/2)->floor,
+      width: OFFSET,
+      height: OFFSET
+    );
+    
+    
+    
+    
+    map.setPointer(
+      x: OFFSET,
+      y: OFFSET
+    );
+  }
+
+
+  Landmark.database.newEntry(
+    data: {
+      name: 'Ethereal Home',
+      id: 'therogue:ethereal-home',
+      symbol : 'M',
+      legendName: 'Shrine',
+      rarity : 100000,    
+      minLocations : 0,
+      maxLocations : 2,
+      traits : 
+        Landmark.TRAIT.UNIQUE |
+        Landmark.TRAIT.POINT_OF_NO_RETURN,
+      minEvents : 1,
+      maxEvents : 7,
+      eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+      landmarkType : Landmark.TYPE.CUSTOM,
+      requiredEvents : [
+      ],
+      possibleLocations : [
+      ],
+      requiredLocations : [
+      ],
+      mapHint:{},
+      onCreate ::(landmark, island) {
+        createHome(:landmark);
+      },
+      onIncrementTime ::(landmark, island){},
+      onStep ::(landmark, island) {},
+      onVisit ::(landmark, island) {
+        island.level+=1
+      
         @world = import(module:'game_singleton.world.mt');
         if (landmark.floor == 0)
           windowEvent.queueMessage(
@@ -208,7 +428,7 @@ Location.database.newEntry(data:{
     data : {
       id : 'therogue:home',
       requiredLandmarks : [
-        'therogue:mysterious-shrine'
+        'therogue:ethereal-home'
       ],
       possibleLandmarks : [
       ],
@@ -513,7 +733,8 @@ return {
     @:LargeMap = import(module:'game_singleton.largemap.mt');
     @party = world.party;      
 
-
+    @:therogueState = TheRogueState.new();
+    data[DATA_KEY] = therogueState;
   
 
 

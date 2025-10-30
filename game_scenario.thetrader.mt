@@ -3615,7 +3615,7 @@ return {
             @:namegen = import(module:'game_singleton.namegen.mt');
             @:name = namegen.island();
             key.setIslandGenTraits(
-              levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->ceil,
+              levelHint: world.island.level + 1 + (world.island.level * 1.2)->ceil,
               nameHint: name,
               tierHint: world.island.tier + 1,
               extraLandmarks : [
@@ -3978,7 +3978,7 @@ return {
         @:namegen = import(module:'game_singleton.namegen.mt');
         @:name = namegen.island();
         key.setIslandGenTraits(
-          levelHint: world.island.levelMax + 1 + (world.island.levelMax * 1.2)->ceil,
+          levelHint: world.island.level + 1 + (world.island.level * 1.2)->ceil,
           nameHint: name,
           tierHint: world.island.tier + 1,
           extraLandmarks : [

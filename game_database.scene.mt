@@ -102,28 +102,7 @@ Scene.newEntry(
             
             
             return e;
-            } else empty);/*,
-            
-            
-            default: match(true) {
-            (random.number() > 0.9):
-              [
-                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.01)->floor),
-                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.01)->floor),
-                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.01)->floor)            
-              ],
-              
-            (random.number() > 0.8):
-              [
-                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.10)->floor)
-              ],
-              
-            default:
-              [
-                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.05)->floor),
-                island.newHostileCreature(levelMaxHint:((island.levelMax+landmark.floor/2)*1.05)->floor)                            
-              ]
-            }*/
+            } else empty);
           
         when(enemies == empty) 0;
 

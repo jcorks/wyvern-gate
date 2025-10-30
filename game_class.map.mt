@@ -200,7 +200,7 @@
     @offsetX = 0;
     @offsetY = 0;
     @drawLegend = false;
-    @paged = true;
+    @paged = false;
     @outOfBoundsCharacter = '▓';
     @wallCharacter = '▓';
     //@scenery = MemoryBuffer.new();
