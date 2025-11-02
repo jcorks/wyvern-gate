@@ -1030,77 +1030,80 @@ return empty;
           });  
           return choiceNames;      
         }
-
-        windowEvent.clearAll();
-        canvas.reset();
-
         @mods;
-        ::? {
-          mods = preloadMods();
-        } => {
-          onError ::(message) {
-            windowEvent.queueMessage(
-              text: "Could not preload mods: " + message.summary
-            )
-            mods = {};
-          }
-        }
-        loadMods(mods);
 
-        sound.playBGM(name:'boot', loop:false);
-        (import(:'game_function.boot.mt'))(          
-          onBooted :: {
-            sound.playBGM(name:"title", loop:false)
-            windowEvent.queueChoices(
-              onGetChoices ::{
-                return genChoices();
-              },
-              topWeight: 0.75,
-              keep : true,
-              jumpTag : 'MainMenu',
-              renderable : {
-                render ::{
-                  @: title = 'Wyvern Gate';
-                  @:subtitle = '~ A Tale of Wishes ~';
-                  canvas.blackout();
-                  canvas.movePen(x:
-                    canvas.width / 2 - title->length / 2,
-                    y: 2
-                  );
-                    
-                  canvas.drawText(
-                    text:title
-                  );
+        canvas.reset();
+        windowEvent.clearAll(
+          onReady ::{
 
-                  canvas.movePen(x:
-                    canvas.width / 2 - subtitle->length / 2,
-                    y: 3
-                  );
-                    
-                  canvas.drawText(
-                    text:subtitle
-                  );
-                  
-                  
-                  
-                  @:loc = 'https://github.com/jcorks/wyvern-gate/ (' + VERSION + ')'              
-                  canvas.movePen(
-                    x: canvas.width / 2 - loc->length / 2,
-                    y: canvas.height - 2
-                  );
-                  
-                  canvas.drawText(
-                    text:loc
-                  );
-
-                }
-              },
-              onChoice ::(choice) {
-                choiceActions[choice-1]();              
+            ::? {
+              mods = preloadMods();
+            } => {
+              onError ::(message) {
+                windowEvent.queueMessage(
+                  text: "Could not preload mods: " + message.summary
+                )
+                mods = {};
               }
-            );
+            }
+            loadMods(mods);
+
+            sound.playBGM(name:'boot', loop:false);
+            (import(:'game_function.boot.mt'))(          
+              onBooted :: {
+                sound.playBGM(name:"title", loop:false)
+                windowEvent.queueChoices(
+                  onGetChoices ::{
+                    return genChoices();
+                  },
+                  topWeight: 0.75,
+                  keep : true,
+                  jumpTag : 'MainMenu',
+                  renderable : {
+                    render ::{
+                      @: title = 'Wyvern Gate';
+                      @:subtitle = '~ A Tale of Wishes ~';
+                      canvas.blackout();
+                      canvas.movePen(x:
+                        canvas.width / 2 - title->length / 2,
+                        y: 2
+                      );
+                        
+                      canvas.drawText(
+                        text:title
+                      );
+
+                      canvas.movePen(x:
+                        canvas.width / 2 - subtitle->length / 2,
+                        y: 3
+                      );
+                        
+                      canvas.drawText(
+                        text:subtitle
+                      );
+                      
+                      
+                      
+                      @:loc = 'https://github.com/jcorks/wyvern-gate/ (' + VERSION + ')'              
+                      canvas.movePen(
+                        x: canvas.width / 2 - loc->length / 2,
+                        y: canvas.height - 2
+                      );
+                      
+                      canvas.drawText(
+                        text:loc
+                      );
+
+                    }
+                  },
+                  onChoice ::(choice) {
+                    choiceActions[choice-1]();              
+                  }
+                );
+              }
+            )          
           }
-        )
+        );
       },
 
       queueCredits :: {

@@ -842,7 +842,6 @@
         resolveNext();
         return false;
       }
-      breakpoint();
 
       when(choice == CURSOR_ACTIONS.CANCEL && canCancel) ::<= {
         @res;
@@ -878,7 +877,6 @@
       }
       
       if (data.rendered == empty) ::<= {
-          breakpoint();
           renderThis(data);
       }      
       
@@ -886,7 +884,7 @@
     }    
   
     @:commitInput_custom ::(data => Object, input) {
-      
+
       //if (canCancel) ::<= {
       //  choicesModified->push(value:'(Cancel)');
       //}
@@ -913,7 +911,7 @@
         return false;
       }
 
-        
+   
       when(data.resolveStack == true) ::<= {
         when(canResolveNext()) ::<= {
           resolveNext();
@@ -1419,7 +1417,8 @@
         get ::<- -1
       },
       
-      clearAll ::{
+      clearAll ::(onReady){
+        breakpoint();
         onInput = empty;
         isCursor = true;
         choiceStack = [];
@@ -1430,6 +1429,32 @@
           onResolveAll : {},
           queue : {}
         });
+
+        onReady();
+
+        /*
+        @:pushMainArena = ::{
+          breakpoint();
+          this.queueNestedResolve(
+            onEnter ::{
+              onReady();
+            }, 
+            onUpdate ::{
+              breakpoint();
+            }, 
+            onLeave ::{
+              breakpoint();
+              this.queueMessage(
+                text: 'If you are seeing this message, hi! You have encountered a bug! This message appears when no windowevent action is active. This should never happen under normal circumstances, as the player would not be able to progress. Tell the developer of the mod or the base game!'
+              );
+              
+              pushMainArena();
+            }
+          )
+        }
+        
+        pushMainArena();
+        */
       },
       
       startRecordLog :: {
@@ -1742,6 +1767,7 @@
         
       ) {
         @:onEnterReal::{
+          breakpoint();
           pushResolveQueue();
           if (onEnter) onEnter();
         }
@@ -2176,6 +2202,9 @@
         }
       }
     }  
+    this.clearAll(::{});
+
+
   }
 ).new();
 

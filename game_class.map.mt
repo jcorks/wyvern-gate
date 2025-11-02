@@ -1035,7 +1035,7 @@
       },
       
       paintScenerySolidRectangle::(
-        symbol => Number,
+        symbol, // if empty, clears scenery
         isWall,
         x => Number,
         y => Number,
@@ -1044,7 +1044,10 @@
       ) {
         for(y, y+height) ::(iy) {
           for(x, x+width) ::(ix) {
-            this.setSceneryIndex(x:ix, y:iy, symbol);
+            if (symbol == empty)
+              this.clearScenery(x:ix, y:iy)
+            else
+              this.setSceneryIndex(x:ix, y:iy, symbol);
             if (isWall == true)
               this.enableWall(x:ix, y:iy)
             else 

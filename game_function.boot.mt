@@ -161,6 +161,7 @@ return ::(onBooted) {
     @requestTerm = false;
     
     @currentIter = empty;
+    breakpoint();
     windowEvent.queueCustom(
       isAnimation : true,
       animationFrame ::{
