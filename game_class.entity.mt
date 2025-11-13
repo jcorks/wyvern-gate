@@ -2109,8 +2109,10 @@
           emitCondition ::(v) <- (damage.amount > 0 || exact != empty)
         );
 
-        if (exact)
+        if (exact) ::<= {
           damage.amount = originalAmount;
+          critical = false;
+        }
 
         when (damage.amount == 0) false;
 
