@@ -187,7 +187,7 @@ return class(
       },
 
       
-      renderBarAsString ::(width, fillFraction, character) {
+      renderBarAsString ::(width, fillFraction, character, emptyCharacter) {
         if (width == empty) width = 12;
         
         @ratio = fillFraction;;
@@ -203,7 +203,7 @@ return class(
           out = out+character;
         }
         for(0, width - numFilled - 2)::(i) {
-          out = out+'▁';
+          out = out+if(emptyCharacter) emptyCharacter else '▁';
         }
         return out + ' ';      
       },

@@ -12,7 +12,7 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:ArtsDeck = import(module:'game_class.artsdeck.mt');
 
 
@@ -25,7 +25,7 @@ return {
       name : 'Attack',
       filter::(user, battle) <- true,
       onSelect::(user, battle, commitAction) {
-        @:card = ArtsDeck.synthesizeHandCard(id:'base:attack');
+        @:card = Arts.new(base:Arts.database.find(id:'base:attack'));
 
         when(user.canUseAbilities() == false) 
           windowEvent.queueMessage(
@@ -40,13 +40,13 @@ return {
           topWeight : 1,
           renderable : {
             render ::{
-              ArtsDeck.renderArt(user, handCard:card, topWeight:0.1);
+              Arts.renderArt(user, id:card.base.id, topWeight:0.1);
               
             },
           },
           onChoice::(choice) {
             user.playerUseArt(
-              card: card,
+              art: card,
               commitAction
             )        
           }
@@ -58,32 +58,130 @@ return {
       name : 'Arts',
       filter::(user, battle) <- true,
       onSelect::(user, battle, commitAction) {
+        @:choicesColumns = import(module:'game_function.choicescolumns.mt');
+        @which;
+        @choiceActs = [];
+        @arts
         
-        user.deck.chooseArtPlayer(
-          user,
+        windowEvent.queueChoices(
+          topWeight: 1,
+          leftWeight: 1,
+          prompt: 'Choose an Art type:',
           canCancel: true,
-          act: 'Use',
-          onChoice::(card) {
-            when (Arts.find(:card.id).kind == Arts.KIND.REACTION)
-              windowEvent.queueMessage(
-                text: 'Reaction Arts can only be used in response to other Arts. They cannot be played right now.'
-              );
-              
-            @:canUse = match(Arts.find(:card.id).kind) {
-              (Arts.KIND.ABILITY): user.canUseAbilities(),
-              (Arts.KIND.EFFECT): user.canUseEffects(),
-              default: true
-            }
-            when(canUse == false) 
-              windowEvent.queueMessage(
-                text: 'This cannot be played right now.'
-              );
+          choices : [
+            'Abilities',
+            'Effects',
+          ],
+          
+          onChoice ::(choice) {
+            arts = if (choice == 1)
+              user.arts->filter(::(value) <- value.base.kind == Arts.KIND.ABILITY)
+            else
+              user.arts->filter(::(value) <- value.base.kind == Arts.KIND.EFFECT)
             
-            user.playerUseArt(
-              card,
-              commitAction::(action){
-                commitAction(action);
-              }
+            when(arts->size == 0) 
+              windowEvent.queueMessage(:'There are no Arts equipped of this category.');
+              
+            Arts.queuePick(
+              arts,
+              prompt: user.name + '\'s ' + (if (choice == 1) 'Ability' else 'Effect') + ' Arts:',
+              onChoice::(art) {
+                @:source = art;
+                windowEvent.queueChoices(
+                  renderable : {
+                    render :: {
+                      @:id = source.id;
+                      when(id == empty) empty;
+                      Arts.renderArt(
+                        user,
+                        id,
+                        topWeight: 0.0,
+                        leftWeight: 0.5,
+                        maxWidth: 0.7
+                      );          
+                    }
+                  }, 
+                  topWeight: 1,
+                  canCancel: true,
+                  onHover ::(choice) {
+                    which = choice-1;
+                  },
+                  
+                  choices: [
+                    'Use',
+                    'Donate charge',
+                    'Convert charge to AP'
+                  ],             
+                  
+                  onChoice::(choice) {
+
+                    // use
+                    when (choice == 1) ::<= {
+                      
+                      @:canUse = match(source.base.kind) {
+                        (Arts.KIND.ABILITY): user.canUseAbilities(),
+                        (Arts.KIND.EFFECT): user.canUseEffects(),
+                        default: true
+                      }
+                      
+                      when(source.canUse == false)
+                        windowEvent.queueMessage(
+                          text: 'This art has not charged fully yet!'
+                        );
+                      
+                      when(canUse == false) 
+                        windowEvent.queueMessage(
+                          text: 'This cannot be played right now.'
+                        );
+                      
+                      user.playerUseArt(
+                        art:source,
+                        commitAction::(action){
+                          commitAction(action);
+                        }
+                      );          
+                    }
+                    
+                    // donate
+                    when(choice == 2) ::<= {
+                      when(source.canUse == false)
+                        windowEvent.queueMessage(
+                          text: 'This art has not charged fully yet!'
+                        );
+                      @which = 0;
+                      windowEvent.queueMessage(
+                        text: 'Pick an Art to donate charge to.'
+                      );
+                      
+                      Arts.queuePick(
+                        arts : user.arts,
+                        leftWeight: 1,
+                        topWeight : 1,
+                        keep : false,
+                        onChoice ::(other) {
+                          when(other.canUse)
+                            windowEvent.queueMessage(
+                              text: 'This Art is already charged!'
+                            );
+                            
+                          other.charge += source.charge;
+                          source.charge = 0;
+                        } 
+                      );
+                    }
+                    
+                    // trade for 1 AP
+                    when(choice == 3) ::<= {
+                      when(source.canUse == false)
+                        windowEvent.queueMessage(
+                          text: 'This Art has not charged fully yet!'
+                        );
+                      source.charge = 0;
+                      user.ap += 1;
+                    }
+                  }
+                );  
+              }            
             );
           }
         );
@@ -150,33 +248,31 @@ return {
       name : 'Wait',
       filter::(user, battle) <- true,
       onSelect::(user, battle, commitAction) {
-
-        windowEvent.queueAskBoolean(
-          prompt: 'Discard hand as well?',
-          onChoice::(which) {
-
-            if (which == true) ::<= {
-              windowEvent.queueMessage(
-                text: user.name + ' discards their hand.'
-              );
-              foreach(user.deck.hand) ::(k, v) {
-                user.deck.discardFromHand(:v);              
-              }
+        windowEvent.queueChoices(
+          choices : [
+            'Use',
+          ],
+          canCancel: true,
+          topWeight : 1,
+          renderable : {
+            render ::{
+              Arts.renderArt(user, id:'base:wait', topWeight:0.1);
             }
-
-
+          },
+          onChoice::(choice) {
             commitAction(action:
               BattleAction.new(
-                card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
+                card: Arts.new(base:Arts.database.find(id:'base:wait')),
                 targets: [],
                 extraData: {},
                 turnIndex : 0,
                 targetParts : []
               )        
-            );
-            
+            );     
           }
-        );      
+        );
+
+             
       }
     ),
     
@@ -498,7 +594,7 @@ return {
           onAct::(action) {
             when(action == empty) empty;
             firstAwake.useArt(
-              art:Arts.find(id:action.card.id),
+              art:Arts.new(base:Arts.database.find(id:action.card.id)),
               targets:action.targets,
               turnIndex : 0,
               extraData : action.extraData

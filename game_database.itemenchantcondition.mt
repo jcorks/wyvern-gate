@@ -58,16 +58,6 @@ ItemEnchantCondition.newEntry(
   }
 )
 
-ItemEnchantCondition.newEntry(
-  data : {
-    name : 'On React',
-    id : 'base:on-react',
-    description : 'After the wielder reacts',
-    isState : false,
-    effectEvent: 'onPostReact'
-  }
-)
-
 
 ItemEnchantCondition.newEntry(
   data : {

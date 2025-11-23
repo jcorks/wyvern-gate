@@ -1594,7 +1594,7 @@ Interaction.newEntry(
     keepInteractionMenu : true,
     onInteract ::(location, party) {
       @:world = import(module:'game_singleton.world.mt');
-      @:Arts = import(:'game_database.arts.mt');
+      @:Arts = import(:'game_mutator.arts.mt');
       @:ArtsDeck = import(:'game_class.artsdeck.mt');
       
 
@@ -1620,7 +1620,7 @@ Interaction.newEntry(
         location.data.arts = [];
         
         for(0, 15)::(i) {
-          location.data.arts->push(:Arts.getRandomFiltered(::(value) <-
+          location.data.arts->push(:Arts.database.getRandomFiltered(::(value) <-
             value.hasNoTrait(:Arts.TRAIT.SPECIAL) &&
             value.hasTraits(:Arts.TRAIT.SUPPORT)
           ).id);
@@ -1635,7 +1635,7 @@ Interaction.newEntry(
         canCancel: true,
         prompt: 'Arts for sale:',
         onChoice ::(art, category) {
-          art = Arts.find(:art);
+          art = Arts.database.find(:art);
           
           windowEvent.queueAskBoolean(
             prompt: 'Learn new Support Arts for 125G?',
@@ -1739,13 +1739,13 @@ Interaction.newEntry(
 
       windowEvent.queueMessage(
         speaker: 'Arts Tecker',
-        text: '"For 3 of your reserve Support Arts, I may give you one from my collection..."'
+        text: '"For 3 of your reserve Arts, I may give you one from my collection..."'
       );
 
 
       when(world.party.arts->size < 3)
         windowEvent.queueMessage(
-          text: 'The party does not have 3 Support Arts in the Trunk for trading.'
+          text: 'The party does not have 3 Arts in the Trunk for trading.'
         );
 
       windowEvent.queueAskBoolean(
@@ -1763,13 +1763,13 @@ Interaction.newEntry(
           @:choiceItems = [];
           @:choiceNames = [];
           
-          @:Arts = import(:'game_database.arts.mt');
+          @:Arts = import(:'game_mutator.arts.mt');
           @:ArtsDeck = import(:'game_class.artsdeck.mt');
           
           foreach(world.party.arts) ::(k, v) {
             for(0, v.count) ::(i) {
               choiceItems->push(:v.id);
-              choiceNames->push(:Arts.find(:v.id).name);
+              choiceNames->push(:Arts.database.find(:v.id).name);
             }
           }
           
@@ -1783,8 +1783,8 @@ Interaction.newEntry(
             renderable : {
               render :: {
                 when(hoveredArt == empty) empty;
-                ArtsDeck.renderArt(
-                  handCard:ArtsDeck.synthesizeHandCard(id:hoveredArt),
+                Arts.renderArt(
+                  id:hoveredArt,
                   topWeight: 0.5,
                   leftWeight: 0
                 );                  

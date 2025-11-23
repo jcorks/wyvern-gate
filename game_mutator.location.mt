@@ -636,7 +636,7 @@ Location.database.newEntry(data:{
     
   onIncrementTime::(location) {
     @:world = import(module:'game_singleton.world.mt');
-    @:Arts = import(:'game_database.arts.mt');
+    @:Arts = import(:'game_mutator.arts.mt');
     if (world.time == world.TIME.MIDNIGHT) ::<= {
       when (location.data.arts == empty) empty;
       @:items = random.scrambled(:location.data.arts);
@@ -644,7 +644,7 @@ Location.database.newEntry(data:{
       items->setSize(:(items->size / 2)->floor);
         
       for(items->size, 15)::(i) {
-        location.data.arts->push(:Arts.getRandomFiltered(::(value) <-
+        location.data.arts->push(:Arts.database.getRandomFiltered(::(value) <-
           value.hasNoTrait(:Arts.TRAIT.SPECIAL) &&
           value.hasTraits(:Arts.TRAIT.SUPPORT)
 
@@ -1860,7 +1860,7 @@ Location.database.newEntry(data:{
       location.inventory.add(item:
         Item.new(
           base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.hasTraits(:Item.TRAIT.APPAREL)
+            filter:::(value) <- value.hasTraits(:Item.TRAIT.APPAREL) && value.hasNoTrait(:Item.TRAIT.UNIQUE)
           ),
           forceNeedsAppraisal : false,
           apparelHint: 'base:wool-plus',

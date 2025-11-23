@@ -16,7 +16,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-@:Arts = import(:'game_database.arts.mt');
+@:Arts = import(:'game_mutator.arts.mt');
 @:windowEvent = import(:'game_singleton.windowevent.mt');
 @:ArtsDeck = import(:'game_class.artsdeck.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');

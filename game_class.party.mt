@@ -22,7 +22,7 @@
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:g = import(module:'game_function.g.mt');
 
 @:MAX_QUEST_COUNT = 15
@@ -239,30 +239,20 @@
       ) {
         if (arts == empty)
           arts = [
-            Arts.getRandomFiltered(::(value) <- 
-              (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
-              ((value.traits & Arts.TRAIT.SPECIAL) == 0)         
-            ),        
-            Arts.getRandomFiltered(::(value) <- 
+            Arts.database.getRandomFiltered(::(value) <- 
               (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
               ((value.traits & Arts.TRAIT.SPECIAL) == 0)         
             )
           ]        
           
-        when (state.inDungeon) ::<= {
+        /*when (state.inDungeon) ::<= {
           state.queuedArts = [...state.queuedArts, ...(arts->map(::(value) <- value.id))];
-        }
+        }*/
       
       
         if (arts->size <= 2) ::<= {    
           @:ArtsDeck = import(:'game_class.artsdeck.mt');
         
-          @:newArtRender ::(art){
-            ArtsDeck.renderArt(
-              handCard:ArtsDeck.synthesizeHandCard(id:art.id),
-              topWeight: 0
-            );
-          }
 
           foreach(arts) ::(k, v) {      
             this.addSupportArt(id:v.id);
@@ -270,39 +260,22 @@
               topWeight: 1,
               text: 'A new Art has been revealed!',
               renderable : {
-                render :: {newArtRender(:v);}
+                render :: {
+                  Arts.renderArt(
+                    id:v.id,
+                    topWeight: 0
+                  );
+                }
               }
             );
           }
 
 
-        } else ::<= {
-          windowEvent.queueMessage(
-            topWeight: 1,
-            text: 'New Arts have been revealed!'
-          );
-
-
-          @:pickArt = import(:'game_function.pickart.mt');
-          @:artIDs = arts->map(::(value) <- value.id);
-          pickArt(
-            onGetList::<- artIDs,
-            keep: true,
-            canCancel: true,
-            prompt: 'New Arts!',
-            onChoice ::(art, category) {
-            },
-            onCancel ::{
-              foreach(arts) ::(k, v) {      
-                this.addSupportArt(id:v.id);
-              }
-            }
-          );        
         }
 
-        windowEvent.queueMessage(
+        /*windowEvent.queueMessage(
           text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'
-        );      
+        );*/      
 
       },
       
@@ -327,7 +300,7 @@
       },
       
       arts : {
-        get ::<- [...state.arts]
+        get ::<- [...state.arts->map(::(value) <- value.id)]
       },
       
       addGoldAnimated ::(amount, onDone) {
@@ -441,7 +414,7 @@
 
             if (state.queuedArts->size) ::<= {
               this.queueCollectSupportArt(
-                :(state.queuedArts->map(::(value) <- Arts.find(:value)))
+                :(state.queuedArts->map(::(value) <- Arts.database.find(:value)))
               );              
               state.queuedArts = [];
             }            

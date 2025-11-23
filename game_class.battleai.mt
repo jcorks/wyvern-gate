@@ -18,7 +18,7 @@
 @:Random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
 @:class  = import(module:'Matte.Core.Class');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:ArtsDeck = import(module:'game_class.artsdeck.mt');
@@ -37,7 +37,7 @@
         enemies = battle.getEnemies(:user_);
 
       onCommit(:BattleAction.new(
-        card: ArtsDeck.synthesizeHandCard(id:'base:attack'),
+        card: Arts.new(base:Arts.database.find(id:'base:attack')),
         turnIndex : 0,
 
         targets: [
@@ -70,9 +70,9 @@
 
           when(user_.canUseReactions() == false) empty;
         
-          @hand = [...user_.deck.hand]->map(to::(value) <- {
+          @hand = user_.arts->map(to::(value) <- {
               card:value, 
-              overrideTargets:(Arts.find(id:value.id).shouldAIuse(
+              overrideTargets:(Arts.database.find(id:value.id).shouldAIuse(
                   user:user_,
                   enemies,
                   reactTo:source,
@@ -82,8 +82,8 @@
 
           
           @hand = hand->filter(
-            ::(value) <- Arts.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE &&
-                         Arts.find(id:value.card.id).kind == Arts.KIND.REACTION &&
+            ::(value) <- Arts.database.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE &&
+                         value.card.canUse && 
                         (!(value.overrideTargets->type == Boolean && value.overrideTargets == false))
           );
           
@@ -100,7 +100,7 @@
         this.commitTargettedAction(
           card:cardI.card,
           battle,
-          condition : if (Arts.find(id:cardI.card.id).usageHintAI == Arts.USAGE_HINT.HEAL) ::<= {
+          condition : if (Arts.database.find(id:cardI.card.id).usageHintAI == Arts.USAGE_HINT.HEAL) ::<= {
             ::(value) <- value.hp < value.stats.HP
           },
           overrideTargets: cardI.overrideTargets,
@@ -113,7 +113,7 @@
         @allies = battle.getAllies(:user_);
         
         
-        @:art = Arts.find(id:card.id);
+        @:art = Arts.database.find(id:card.id);
         @atEnemy = (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE) ||
                (art.usageHintAI == Arts.USAGE_HINT.DEBUFF);
         
@@ -211,7 +211,7 @@
           when(((user_.profession.traits & Profession.TRAIT.PACIFIST) != 0) || enemies->keycount == 0 || enemies->findIndexCondition(::(value) <- !value.isIncapacitated()) == -1)
             
             acts->push(:BattleAction.new(
-              card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
+              card: Arts.new(base:Arts.database.find(id:'base:wait')),
               targets: [],
               turnIndex : 0,
               targetParts : [],
@@ -220,9 +220,9 @@
         
           
           
-          @hand = [...user_.deck.hand]->map(to::(value) <- {
+          @hand = user_.arts->map(to::(value) <- {
               card:value, 
-              overrideTargets:(Arts.find(id:value.id).shouldAIuse(
+              overrideTargets:(Arts.database.find(id:value.id).shouldAIuse(
                   user:user_,
                   enemies,
                   allies
@@ -231,7 +231,7 @@
 
 
           hand = hand->filter(::(value) <- 
-              (Arts.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE) &&
+              (Arts.database.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE) &&
               (!(value.overrideTargets->type == Boolean && value.overrideTargets == false))
           );
                   
@@ -239,7 +239,7 @@
           @projectedAP = user_.ap; 
           foreach(hand) ::(k, full) {
             @v = full.card;
-            @art = Arts.find(id:v.id);
+            @art = Arts.database.find(id:v.id);
             
             // objects with no size are equivalent to no override targets.
             if (full.overrideTargets->type == Object &&
@@ -278,7 +278,7 @@
            
         
           when (user_.canUseAbilities() == false) empty;
-          @c = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.find(id:value.card.id).kind == Arts.KIND.ABILITY));
+          @c = Random.pickArrayItem(list:hand->filter(by::(value) <- Arts.database.find(id:value.card.id).kind == Arts.KIND.ABILITY));
 
           when (c == empty)
             defaultAttack(
@@ -289,7 +289,7 @@
             ); 
            
 
-          @:ability = Arts.find(id:c.card.id);
+          @:ability = Arts.database.find(id:c.card.id);
           
           
           @:world = import(module:'game_singleton.world.mt');
@@ -336,7 +336,7 @@
         
         if (acts->size == 0) 
           acts->push(:BattleAction.new(
-            card: ArtsDeck.synthesizeHandCard(id:'base:wait'),
+            card: Arts.new(base:Arts.database.find(id:'base:wait')),
             targets: [],
             turnIndex : 0,
             targetParts : [],

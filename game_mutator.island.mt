@@ -271,7 +271,7 @@ Island.database.newEntry(
     sizeH : 0,
 
     // steps since the last event
-    stepsSinceLastEvent : 0,
+    steps : 0,
 
     // map of the region
     map : empty,
@@ -345,19 +345,16 @@ Island.database.newEntry(
     // augments an entity based on the current tier
     @augmentTiered = ::(entity) {
       @:instance = import(:'game_singleton.instance.mt');
-      @:Arts = import(module:'game_database.arts.mt');
+      @:Arts = import(module:'game_mutator.arts.mt');
 
       // Assigns support arts for every entity.
       @:assignSupportArts::(entity, professionLevel, removeBasicCount) {
         // basic arts: 10 + 12 = 22
         entity.supportArts = [
           'base:pebble',    //5
-          'base:cycle',     //5
-          'base:diversify', //3
           'base:parry',     //3
-          'base:prismatic-wisp', //3
-          'base:mind-games',//3
-        ];
+          'base:prismatic-wisp' //3
+        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
         
         
         entity.supportArts = random.scrambled(:entity.supportArts);
@@ -376,19 +373,22 @@ Island.database.newEntry(
         
 
         // finally collect unique random support arts until 35 is reached
-        @:addCondition ::(value) <- entity.supportArts->findIndex(:value.id) == -1
+        @:addCondition ::(value) <- 
+          entity.supportArts->map(::(value) <- 
+            value.id
+          )->findIndex(:value.id) == -1
         ::? {
           forever ::{
-            if (entity.calculateDeckSize() >= 35) send();
+            if (entity.arts->size > 15) send();
 
             entity.supportArts->push(:
-              Arts.getRandomFiltered(::(value) <- 
+              Arts.new(base:Arts.database.getRandomFiltered(::(value) <- 
                 ((value.traits & Arts.TRAIT.SPECIAL) == 0)
                 &&
                 ((value.traits & Arts.TRAIT.SUPPORT) != 0)
                 &&
                 addCondition(:value)
-              ).id
+              ))
             );
 
           }
@@ -573,7 +573,7 @@ Island.database.newEntry(
           if (state.sizeH < base.minSize) state.sizeH = base.minSize;
           if (state.sizeH > base.maxSize) state.sizeH = base.maxSize;
 
-          state.stepsSinceLastEvent = 0;
+          state.steps = 0;
           state.worldID = worldID;
           state.climate = random.integer(
             from:Island.CLIMATE.WARM, 
@@ -799,20 +799,21 @@ Island.database.newEntry(
       
       // represents a physical step in island space (not in a landmark)
       step :: {      
-        state.stepsSinceLastEvent += 1;    
+        state.steps += 1;    
 
         foreach(state.events)::(index, event) {
           event.step();
         }
 
-
+        foreach(world_.party.members) ::(k, member) <- member.recharge(:10);
+        
         
         when(state.possibleEvents->size == 0) empty;
       
         // every step, an event can occur.
         //if (stepsSinceLastEvent > 200000) ::<= {
-        if (state.stepsSinceLastEvent > 20) ::<= {
-          if (random.number() > 13 - (state.stepsSinceLastEvent-5) / 5) ::<={
+        if (state.steps > 20) ::<= {
+          if (random.number() > 13 - (state.steps-5) / 5) ::<={
             this.addEvent(
               event:IslandEvent.new(
                 base:random.pickArrayItemWeighted(list:state.possibleEvents->map(
@@ -821,7 +822,7 @@ Island.database.newEntry(
                 parent:this
               )
             );            
-            state.stepsSinceLastEvent = 0;
+            state.steps = 0;
           }
         }  
       },

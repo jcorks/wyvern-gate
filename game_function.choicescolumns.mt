@@ -22,7 +22,13 @@ return ::(*args) {
   @headerCompiled;
   @headerSrc = args.header;
   @leftJustified = args.leftJustified => Object;
-  @separator = ' ' + (if (args.separator == empty) '|' else args.separator) + ' ';
+  @separator = (if (args.separator == empty) '|' else args.separator);
+  
+  if (args.columnPadding == false) ::<= {
+  } else ::<= {
+    separator = ' ' + separator + ' ';
+  }
+  
   @:convertToChoices::(columns => Object, header) {
 
   

@@ -20,6 +20,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:g = import(module:'game_function.g.mt');
 @:StatSet = import(module:'game_class.statset.mt');
+@:Arts = import(:'game_mutator.arts.mt');
 
 
 
@@ -100,74 +101,128 @@ return ::{
 
   
   @:viewArts::(member) {
-    @:deleteDeck ::(name) {
-      when (member.getEquippedDeckName() == name)
+    @:deleteLoadout ::(name) {
+      when (member.getEquippedLoadoutName() == name)
         windowEvent.queueMessage(
-          text:'This deck is currently equipped and cannot be removed. Only unequipped decks can be removed.'
+          text:'This loadout is currently equipped and cannot be removed. Only unequipped loadouts can be removed.'
         )
 
         
       windowEvent.queueMessage(
-        text:'If the deck is removed, all of the Support Arts will be sent back to the trunk. This operation cannot be undone.'
+        text:'If the loadout is removed, all of the Support Arts will be sent back to the trunk. This operation cannot be undone.'
       )
       
       windowEvent.queueAskBoolean(
-        prompt: 'Remove deck ' + name +'?',
+        prompt: 'Remove loadout ' + name +'?',
         onChoice::(which) {
           when(which == false) empty;
           
-          member.removeDeck(:name);
+          member.removeLoadout(:name);
           windowEvent.jumpToTag(name:'DECKMENU');
         }
       );
     
     }
-  
-    windowEvent.queueChoices(
-      leftWeight: 1,
-      topWeight : 1,
-      prompt: member.name + 's decks:',
-      keep : true,
-      jumpTag : 'DECKMENU',
-      canCancel: true,
-      onGetChoices::<- [
-        ...(member.deckTemplateNames->map(::(value) <- 
-          if (member.getEquippedDeckName() == value) 
-            '* ' + value 
-          else 
-            '  ' + value
-        )), 
-        'Make new deck...'
-      ],
-      onChoice::(choice) {
-        when(choice-1 == member.deckTemplateNames->size) ::<= {
-          import(:'game_function.name.mt')(
-            prompt: 'New deck name:',
+    @:loadouts :: {
+      //when (member.loadoutTemplateNames->size == 1) 
+    
+      windowEvent.queueChoices(
+        leftWeight: 1,
+        topWeight : 1,
+        prompt: member.name + 's loadouts:',
+        keep : true,
+        jumpTag : 'DECKMENU',
+        canCancel: true,
+        onGetChoices::<- [
+          ...(member.loadoutTemplateNames->map(::(value) <- 
+            if (member.getEquippedLoadoutName() == value) 
+              '* ' + value 
+            else 
+              '  ' + value
+          )), 
+          'Make new loadout...'
+        ],
+        onChoice::(choice) {
+          when(choice-1 == member.loadoutTemplateNames->size) ::<= {
+            import(:'game_function.name.mt')(
+              prompt: 'New loadout name:',
+              canCancel: true,
+              onDone ::(name) {
+                member.addLoadout(:name);
+              }
+            );
+          }
+          @:loadoutName = member.loadoutTemplateNames[choice-1];
+          windowEvent.queueChoices(
+            prompt: 'Loadout: ' + loadoutName,
+            choices: ['Equip loadout', 'Edit...', 'Remove'],
+            leftWeight : 1,
+            topWeight : 1,
+            keep : true,
             canCancel: true,
-            onDone ::(name) {
-              member.addDeck(:name);
+            onChoice::(choice) {
+              when(choice-1 == 0)
+                member.equipLoadout(name:loadoutName);
+                
+              when(choice-1 == 1)
+                member.editLoadout(:loadoutName);            
+                
+                
+              deleteLoadout(:loadoutName);
             }
+
           );
         }
-        @:deckName = member.deckTemplateNames[choice-1];
-        windowEvent.queueChoices(
-          prompt: 'Deck: ' + deckName,
-          choices: ['Equip deck', 'Edit...', 'Remove'],
-          leftWeight : 1,
-          topWeight : 1,
-          keep : true,
-          canCancel: true,
-          onChoice::(choice) {
-            when(choice-1 == 0)
-              member.equipDeck(name:deckName);
-              
-            when(choice-1 == 1)
-              member.editDeck(:deckName);            
-              
-              
-            deleteDeck(:deckName);
-          }
-        );
+      );
+    }
+    
+    @:quickViewArts:: {
+      @:choicesColumns = import(module:'game_function.choicescolumns.mt');
+      @which;
+      @choiceActs = [];
+      
+      
+      Arts.queuePick(
+        arts : member.arts,
+        leftWeight: 1,
+        topWeight : 1,
+        keep: true,
+        prompt: member.name + 's Arts',
+        canCancel : true,
+   
+        onChoice::(art) {
+          windowEvent.queueMessage(
+            renderable : {
+              render ::{
+                @:id = art.id;
+                Arts.renderArt(
+                  id:art.id,
+                  topWeight: 0.5,
+                  leftWeight: 0.5,
+                  maxWidth: 0.9
+                );              
+              }
+            }
+          );
+        }        
+      );
+    }
+    
+    
+    windowEvent.queueChoices(
+      prompt: member.name + 's Arts',
+
+      choices : [
+        'Check',
+        'Loadouts...'
+      ],
+      leftWeight: 1,
+      topWeight : 1,
+      keep: true,
+      canCancel: true,
+      onChoice::(choice) {
+        when(choice == 1) quickViewArts();
+        when(choice == 2) loadouts();
       }
     );
   }

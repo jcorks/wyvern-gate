@@ -331,7 +331,7 @@
       addInnate::(id, item, from) {
         @:Item = import(module:'game_mutator.item.mt');
         if (item == empty) item = Item.NONE;
-        @:Arts = import(module:'game_database.arts.mt');
+        @:Arts = import(module:'game_mutator.arts.mt');
 
         if (item == empty)
           item = Item.NONE;

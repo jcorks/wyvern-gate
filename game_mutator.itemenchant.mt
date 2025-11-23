@@ -20,7 +20,7 @@
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:random = import(module:'game_singleton.random.mt');
-@:Arts = import(:'game_database.arts.mt');
+@:Arts = import(:'game_mutator.arts.mt');
 @:ArtsDeck = import(:'game_class.artsdeck.mt');
 @:Damage = import(module:'game_class.damage.mt');
 
@@ -1041,7 +1041,7 @@ ItemEnchant.database.newEntry(
         }
         
         if (base.id == 'base:art') ::<= {
-          state.artID = Arts.getRandomFiltered(::(value) <- 
+          state.artID = Arts.database.getRandomFiltered(::(value) <- 
             (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
             (value.kind != Arts.KIND.REACTION) &&
             (value.traits & Arts.TRAIT.SPECIAL) == 0
@@ -1099,8 +1099,8 @@ ItemEnchant.database.newEntry(
           when(state.condition == empty) desc;
           @out = state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
           when (state.artID == '') out;
-          out = out->replace(key:'$2', with: Arts.find(id:state.artID).name);
-          return out->replace(key:'$3', with: Arts.find(id:state.artID).description);          
+          out = out->replace(key:'$2', with: Arts.database.find(id:state.artID).name);
+          return out->replace(key:'$3', with: Arts.database.find(id:state.artID).description);          
         },
         
         set ::(value) {
@@ -1145,7 +1145,7 @@ ItemEnchant.database.newEntry(
             );
             args.holder.deck.revealArt(
               handCard:card, 
-              prompt:'The Art ' + Arts.find(:state.artID).name + ' was added to ' + args.holder.name + '\'s hand.'
+              prompt:'The Art ' + Arts.database.find(:state.artID).name + ' was added to ' + args.holder.name + '\'s hand.'
             );
             /*
             // insanity: instant casting

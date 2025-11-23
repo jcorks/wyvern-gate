@@ -569,8 +569,8 @@ Item.database.newEntry(data : {
     TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
-    @:Arts = import(module:'game_database.arts.mt');
-    @:art = Arts.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAIT.COMMON_ATTACK_SPELL));
+    @:Arts = import(module:'game_mutator.arts.mt');
+    @:art = Arts.database.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAIT.COMMON_ATTACK_SPELL));
     item.data.spell = art.id;
     item.name = 'Scroll of ' + art.name;
   }
@@ -3390,7 +3390,7 @@ none.name = 'None';
 @:ItemDesign = import(module:'game_database.itemdesign.mt');
 @:Material = import(module:'game_database.material.mt');
 @:ApparelMaterial = import(module:'game_database.apparelmaterial.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:Island = import(module:'game_mutator.island.mt');
 @:world = import(module:'game_singleton.world.mt');
 */
@@ -3514,7 +3514,7 @@ none.name = 'None';
 
 
 @:calculateDescription ::(this, state){
-  @:Arts = import(module:'game_database.arts.mt');
+  @:Arts = import(module:'game_mutator.arts.mt');
   @:base = this.base;
   
   when(state.needsAppraisal)
@@ -3525,9 +3525,9 @@ none.name = 'None';
     ' ',
     (if (state.arts == empty) '' else 'If equipped, ' + 
       (if (state.arts[0] == state.arts[1])
-          'the Art "' + Arts.find(id:state.arts[0]).name + '" becomes available often in battle. '
+          'the Art "' + Arts.database.find(id:state.arts[0]).name + '" becomes available often in battle. '
         else
-          'the Arts "' + Arts.find(id:state.arts[0]).name + '" and "' + Arts.find(id:state.arts[1]).name + '" become available in battle. '
+          'the Arts "' + Arts.database.find(id:state.arts[0]).name + '" and "' + Arts.database.find(id:state.arts[1]).name + '" become available in battle. '
       )
     ),
     if (state.size == -1) '' else 'It is ' + sizeToString(state) + '. ',
@@ -3945,7 +3945,7 @@ none.name = 'None';
       @:Material = import(module:'game_database.material.mt');
       @:ApparelMaterial = import(module:'game_database.apparelmaterial.mt');
       @:ItemQuality = import(module:'game_database.itemquality.mt');
-      @:Arts = import(module:'game_database.arts.mt');
+      @:Arts = import(module:'game_mutator.arts.mt');
       @:base = _.state.base;
       @:item = Item.new(
         base,
@@ -3954,9 +3954,9 @@ none.name = 'None';
         rngEnchantHint : true,
         forceNeedsAppraisal : false,
         artsHint : [
-          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAIT.SPECIAL) == 0)).id,
-          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAIT.SPECIAL) == 0)).id,
-          Arts.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAIT.SPECIAL) == 0)).id
+          Arts.database.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAIT.SPECIAL) == 0)).id,
+          Arts.database.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAIT.SPECIAL) == 0)).id,
+          Arts.database.getRandomFiltered(::(value) <- value.kind == Arts.KIND.ABILITY && ((value.traits & Arts.TRAIT.SPECIAL) == 0)).id
         ],
         qualityHint : if ((base.traits & TRAIT.HAS_QUALITY) != 0) ItemQuality.getRandom().id,
         materialHint : if ((base.traits & TRAIT.METAL) != 0) Material.getRandom().id,
@@ -4009,7 +4009,7 @@ none.name = 'None';
     },
 
     arts : {
-      get ::<- if (_.state.arts == empty) empty else _.state.arts
+      get ::<- if (_.state.arts == empty) [] else _.state.arts
     },
       
     equipEffects : {

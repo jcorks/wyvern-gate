@@ -435,7 +435,7 @@ Effect.newEntry(
           from: holder
         );
         
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         holder.addEffect(from:holder, id: 'base:next-attack-x2', durationTurns: Arts.A_LOT);
 
       }
@@ -2384,7 +2384,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
       onAffliction ::(from, item, holder) {
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         @:ArtsDeck = import(:'game_class.artsdeck.mt');
         @:world = import(module:'game_singleton.world.mt');
 
@@ -2392,12 +2392,12 @@ Effect.newEntry(
           windowEvent.queueMessage(text:'The casting fizzled!');
 
         if (item.data.spell == empty) ::<= {
-          @:art = Arts.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAIT.COMMON_ATTACK_SPELL));
+          @:art = Arts.database.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAIT.COMMON_ATTACK_SPELL));
           item.data.spell = art.id;        
         }
         
-        @:art = Arts.find(:item.data.spell);
-        @:card = ArtsDeck.synthesizeHandCard(id:item.data.spell);
+        @:art = Arts.database.find(:item.data.spell);
+        @:card = Arts.new(base:Arts.database.find(id:item.data.spell));
         
         
         @:enemies = random.scrambled(:world.battle.getEnemies(:from))
@@ -2916,14 +2916,14 @@ Effect.newEntry(
     ),
     events : {
       onAffliction ::(from, item, holder) {
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         @:ArtsDeck = import(:'game_class.artsdeck.mt');
         @:world = import(module:'game_singleton.world.mt');
 
         @ARTS_COUNT = 4;
         @:arts = [];
         for(0, ARTS_COUNT) ::(i) {
-          @:art = Arts.getRandomFiltered(::(value) <- 
+          @:art = Arts.database.getRandomFiltered(::(value) <- 
             (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
             ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
             (value.rarity >= Arts.RARITY.RARE)
@@ -2935,9 +2935,28 @@ Effect.newEntry(
         windowEvent.queueMessage(
           text: 'New Arts have been revealed!'
         );
-        
-        ArtsDeck.viewCards(
-          cards: arts->map(::(value) <- ArtsDeck.synthesizeHandCard(id:value))
+        @:choiceActs = arts->map(::(value) <- Arts.new(base:Arts.database.find(id:value)));
+        @which;
+        Arts.queuePick(
+          arts: choiceActs,
+          renderable : {
+            render :: {
+              @:id = choiceActs[which].id;
+              when(id == empty) empty;
+              Arts.renderArt(
+                user:holder,
+                id,
+                topWeight: 0.0,
+                leftWeight: 0.5,
+                maxWidth: 0.7
+              );          
+            }
+          }, 
+          topWeight: 1,
+          canCancel: true,
+          onHover ::(choice) {
+            which = choice-1;
+          }
         );
 
         windowEvent.queueMessage(
@@ -2961,14 +2980,14 @@ Effect.newEntry(
     ),
     events : {
       onAffliction ::(from, item, holder) {
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         @:ArtsDeck = import(:'game_class.artsdeck.mt');
         @:world = import(module:'game_singleton.world.mt');
 
         @ARTS_COUNT = 6;
         @:arts = [];
         for(0, ARTS_COUNT) ::(i) {
-          @:art = Arts.getRandomFiltered(::(value) <- 
+          @:art = Arts.database.getRandomFiltered(::(value) <- 
             (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
             ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
             (value.rarity < Arts.RARITY.EPIC)
@@ -2980,10 +2999,30 @@ Effect.newEntry(
         windowEvent.queueMessage(
           text: 'New Arts have been revealed!'
         );
-        
-        ArtsDeck.viewCards(
-          cards: arts->map(::(value) <- ArtsDeck.synthesizeHandCard(id:value))
+        @choiceActs = arts->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
+        @which;
+        Arts.queuePick(
+          arts: choiceActs,
+          renderable : {
+            render :: {
+              @:id = choiceActs[which].id;
+              when(id == empty) empty;
+              Arts.renderArt(
+                user:holder,
+                id,
+                topWeight: 0.0,
+                leftWeight: 0.5,
+                maxWidth: 0.7
+              );          
+            }
+          }, 
+          topWeight: 1,
+          canCancel: true,
+          onHover ::(choice) {
+            which = choice-1;
+          }
         );
+
 
         windowEvent.queueMessage(
           text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'
@@ -4962,7 +5001,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
       onPostAttackOther ::(from, item, holder, to, damage, targetPart) {
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         to.addEffect(from:holder, id:'base:banish', durationTurns:Arts.A_LOT);      
       }
     }
@@ -5152,14 +5191,14 @@ Effect.newEntry(
     ),
     events : {
       onCrit ::(to, item, holder) {
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         @:world = import(module:'game_singleton.world.mt');
         // outside of battle?
         when (holder.battle == empty) empty;
 
 
         @:arts = holder.deck.hand->filter(
-          ::(value) <- Arts.find(:value.id).kind != Arts.KIND.REACTION
+          ::(value) <- Arts.database.find(:value.id).kind != Arts.KIND.REACTION
         );
         
         when(arts->size == 0) empty;
@@ -5211,14 +5250,14 @@ Effect.newEntry(
     ),
     events : {
       onNextTurn ::(item, holder) {
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         @:world = import(module:'game_singleton.world.mt');
         // outside of battle?
         when (holder.battle == empty) empty;
         when (random.try(percentSuccess:70)) empty;
 
         when (
-          Arts.find(:holder.deck.deckPile[holder.deck.deckPile->size-1]).kind == Arts.KIND.REACTION
+          Arts.database.find(:holder.deck.deckPile[holder.deck.deckPile->size-1]).kind == Arts.KIND.REACTION
         ) empty;
 
         @:card = holder.deck.draw();
@@ -5282,7 +5321,7 @@ Effect.newEntry(
     ),
     events : {
       onNextTurn ::(item, holder) {
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         @:world = import(module:'game_singleton.world.mt');
         // outside of battle?
         when (world.party.leader != holder) empty;
@@ -5320,12 +5359,12 @@ Effect.newEntry(
     ),
     events : {
       onNextTurn ::(item, holder) {
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         @:world = import(module:'game_singleton.world.mt');
         // outside of battle?
         when (holder.battle == empty) empty;
 
-        @:cards = holder.deck.hand->filter(::(value) <- Arts.find(:value.id).kind != Arts.KIND.REACTION);
+        @:cards = holder.deck.hand->filter(::(value) <- Arts.database.find(:value.id).kind != Arts.KIND.REACTION);
         when(cards->size == 0) empty;
 
         when (random.flipCoin()) empty;
@@ -5635,7 +5674,7 @@ Effect.newEntry(
         holder.effectStack.removeAllByID(:'base:limit-break');
 
         @:Entity = import(module:'game_class.entity.mt');
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         holder.heal(amount:(holder.stats.HP / 2)->ceil);
         holder.addEffect(from:holder, id:'base:limit-reached', durationTurns:Arts.A_LOT);
       }
@@ -5774,7 +5813,7 @@ Effect.newEntry(
         holder.effectStack.removeAllByID(:'base:deathless-overflow');
 
         @:Entity = import(module:'game_class.entity.mt');
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         holder.heal(amount:(holder.stats.HP / 2)->ceil);
         for(0, 5) ::(i) {
           holder.addEffect(from:holder, id:'base:banish', durationTurns:Arts.A_LOT);
@@ -6127,7 +6166,7 @@ Effect.newEntry(
         when(random.try(percentSuccess:75)) empty;
         damage.amount = 0;
         windowEvent.queueMessage(text:holder.name + "'s Soul Guard negates the damage!");
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
 
         when(random.try(percentSuccess:75)) empty;
         attacker.addEffect(from, id:'base:paralyzed',durationTurns:Arts.A_LOT);
@@ -6841,7 +6880,7 @@ Effect.newEntry(
         );
 
         holder.effectStack.removeFirstEffectByFilter(::(value) <- value.id == 'base:banish');
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         foreach(allies) ::(k, v) {
           v.addEffect(from:holder, id: 'base:minor-aura', durationTurns: Arts.A_LOT);
         }
@@ -6872,7 +6911,7 @@ Effect.newEntry(
         );
 
         holder.effectStack.removeFirstEffectByFilter(::(value) <- value.id == 'base:banish');
-        @:Arts = import(:'game_database.arts.mt');
+        @:Arts = import(:'game_mutator.arts.mt');
         foreach(enemies) ::(k, v) {
           v.addEffect(from:holder, id: 'base:minor-curse', durationTurns: Arts.A_LOT);
         }

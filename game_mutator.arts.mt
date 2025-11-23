@@ -17,6 +17,9 @@
 */
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'game_class.database.mt');
+@:canvas = import(module:'game_singleton.canvas.mt');
+@:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
+@:choicesColumns = import(:'game_function.choicescolumns.mt');
 
 @:A_LOT = 999999999;
 
@@ -124,7 +127,7 @@
 @:Entity = import(module:'game_class.entity.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:Effect = import(module:'game_database.effect.mt');
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Attack',
     id : 'base:attack',
@@ -148,7 +151,7 @@ Arts.newEntry(
           user.attack(
             target:targets[0],
             damage: Damage.new(
-              amount:Arts.find(:'base:attack').baseDamage(level, user),
+              amount:Arts.database.find(:'base:attack').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
@@ -162,7 +165,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Parry',
     id : 'base:parry',
@@ -189,7 +192,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Headhunter',
     id : 'base:headhunter',
@@ -238,14 +241,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Precise Strike',
     id : 'base:precise-strike',
     notifCommit : '$1 takes aim at $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's ATK and DEX. Additional levels increase the damage by 10%.",
+    description: "Damages a target based on the user's ATK and DEX.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -260,7 +263,7 @@ Arts.newEntry(
           user.attack(
             target:targets[0],
             damage: Damage.new(
-              amount:Arts.find(:'base:precise-strike').baseDamage(level, user),
+              amount:Arts.database.find(:'base:precise-strike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
@@ -274,14 +277,14 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Tranquilizer',
     id : 'base:tranquilizer',
     notifCommit : '$1 attempts to tranquilize $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's DEX with a 45% chance to inflict Paralyzed. Additional levels increase the paralysis chance by 10%.",
+    description: "Damages a target based on the user's DEX with a 45% chance to inflict Paralyzed.",
     durationTurns: 0,
     keywords : ['base:paralyzed'],
     kind : KIND.ABILITY,
@@ -294,7 +297,7 @@ Arts.newEntry(
       user.attack(
         target:targets[0],
         damage: Damage.new(
-          amount:Arts.find(:'base:tranquilizer').baseDamage(level, user),
+          amount:Arts.database.find(:'base:tranquilizer').baseDamage(level, user),
           damageType : Damage.TYPE.PHYS,
           damageClass: Damage.CLASS.HP
         ),
@@ -311,7 +314,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Coordination',
     id : 'base:coordination',
@@ -345,7 +348,7 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Follow Up',
     id : 'base:follow-up',
@@ -353,7 +356,7 @@ Arts.newEntry(
     notifFail : Arts.NO_NOTIF,
 
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's ATK, doing 100% more damage if the target was hit since their last turn. Additional levels increase the boost by 20%.",
+    description: "Damages a target based on the user's ATK, doing 100% more damage if the target was hit since their last turn.",
     durationTurns: 0,
     keywords : [],
     kind : KIND.ABILITY,
@@ -371,7 +374,7 @@ Arts.newEntry(
             user.attack(
               target:targets[0],
               damage: Damage.new(
-                amount:Arts.find(:'base:follow-up').baseDamage(level, user)*2,
+                amount:Arts.database.find(:'base:follow-up').baseDamage(level, user)*2,
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP
               ),
@@ -381,7 +384,7 @@ Arts.newEntry(
             user.attack(
               target:targets[0],
               damage: Damage.new(
-                amount:Arts.find(:'base:follow-up').baseDamage(level, user),
+                amount:Arts.database.find(:'base:follow-up').baseDamage(level, user),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP
               ),
@@ -395,14 +398,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Doublestrike',
     id : 'base:doublestrike',
     notifCommit : '$1 attacks twice!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Multi-hit attack that damages a target based on the user's ATK. Additional levels increase the damage per hit.",
+    description: "Multi-hit attack that damages a target based on the user's ATK.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -418,7 +421,7 @@ Arts.newEntry(
           user.attack(
             target,
             damage: Damage.new(
-              amount: Arts.find(:'base:doublestrike').baseDamage(level, user),
+              amount: Arts.database.find(:'base:doublestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
@@ -435,7 +438,7 @@ Arts.newEntry(
           user.attack(
             target,
             damage: Damage.new(
-              amount:Arts.find(:'base:doublestrike').baseDamage(level, user),
+              amount:Arts.database.find(:'base:doublestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
@@ -451,7 +454,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Triplestrike',
     id : 'base:triplestrike',
@@ -476,7 +479,7 @@ Arts.newEntry(
           user.attack(
             target,
             damage: Damage.new(
-              amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
+              amount:Arts.database.find(:'base:triplestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
@@ -493,7 +496,7 @@ Arts.newEntry(
           user.attack(
             target,
             damage: Damage.new(
-              amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
+              amount:Arts.database.find(:'base:triplestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
@@ -509,7 +512,7 @@ Arts.newEntry(
           user.attack(
             target,
             damage: Damage.new(
-              amount:Arts.find(:'base:triplestrike').baseDamage(level, user),
+              amount:Arts.database.find(:'base:triplestrike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
@@ -523,7 +526,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Focus Perception',
     id : 'base:focus-perception',    
@@ -549,7 +552,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cheer',
     id : 'base:cheer',
@@ -578,14 +581,14 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Lunar Blessing',
     id : 'base:lunar-blessing',
     notifCommit : '$1\'s Lunar Blessing made it night time!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: "Puts all of the combatants into stasis until it is night time. Additional levels have no effect.",
+    description: "Puts all of the combatants into stasis until it is night time.",
     durationTurns: 0,
     keywords : [],
     kind : KIND.ABILITY,
@@ -614,14 +617,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Solar Blessing',
     id : 'base:solar-blessing',
     notifCommit : '$1\'s Solar Blessing made it day time!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: "Puts all of the combatants into stasis until it is morning. Additional levels have no effect.",
+    description: "Puts all of the combatants into stasis until it is morning.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -650,14 +653,14 @@ Arts.newEntry(
 )      
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Moonbeam',
     id : 'base:moonbeam',
     notifCommit : '$1 fires a glowing beam of moonlight!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target with Fire based on the user's INT. Cannot be blocked. If night time, the damage is boosted. Additional levels boost the damage further.",
+    description: "Damages a target with Fire based on the user's INT. Cannot be blocked. If night time, the damage is boosted.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -683,7 +686,7 @@ Arts.newEntry(
           user.attack(
             target: targets[0],
             damage: Damage.new(
-              amount: Arts.find(:'base:moonbeam').baseDamage(user, level),
+              amount: Arts.database.find(:'base:moonbeam').baseDamage(user, level),
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP,
               traits : Damage.TRAIT.UNBLOCKABLE
@@ -697,7 +700,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Sunbeam',
     id : 'base:sunbeam',
@@ -730,7 +733,7 @@ Arts.newEntry(
           user.attack(
             target: targets[0],
             damage: Damage.new(
-              amount:Arts.find(:'base:sunbeam').baseDamage(level, user),
+              amount:Arts.database.find(:'base:sunbeam').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP,
               traits : Damage.TRAIT.UNBLOCKABLE
@@ -745,7 +748,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Sunburst',
     id : 'base:sunburst',
@@ -781,7 +784,7 @@ Arts.newEntry(
             user.attack(
               target: enemy,
               damage: Damage.new(
-                amount: Arts.find(:'base:sunburst').baseDamage(level, user),
+                amount: Arts.database.find(:'base:sunburst').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
                 damageClass: Damage.CLASS.HP,
                 traits : Damage.TRAIT.UNBLOCKABLE
@@ -795,7 +798,7 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Night Veil',
     id : 'base:night-veil',
@@ -837,7 +840,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Dayshroud',
     id : 'base:dayshroud',
@@ -879,7 +882,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Call of the Night',
     notifCommit : '$1 casts Call of the Night on $2!',
@@ -926,7 +929,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Lunacy',
     id : 'base:lunacy',
@@ -957,7 +960,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Moonsong',
     id : 'base:moonsong',
@@ -1000,7 +1003,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Sol Attunement',
     id : 'base:sol-attunement',
@@ -1042,14 +1045,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Ensnare',
     id : 'base:ensnare',
     notifCommit : '$1 tries to ensnare $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Damages a target and Ensnares both the user and the target for 3 turns with an 80% success rate. Damage done increases with additional levels.",
+    description: "Damages a target and Ensnares both the user and the target for 3 turns with an 80% success rate.",
     keywords : ['base:ensnaring', 'base:ensnared'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1081,14 +1084,14 @@ Arts.newEntry(
 ) 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Call',
     id : 'base:call',
     notifCommit : '$1 makes an eerie call!',
     notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.NONE,
-    description: "Calls a creature to come and join the fight. Additional levels increase chances of success.",
+    description: "Calls a creature to come and join the fight.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1121,14 +1124,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Tame',
     id : 'base:tame',
     notifCommit : '$1 attempts to tame $2',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Attempts to tame a creature, making it a party member if successful. Additional levels increase chances of success.",
+    description: "Attempts to tame a creature, making it a party member if successful.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1173,7 +1176,7 @@ Arts.newEntry(
   }
 ) 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Leg Sweep',
     id : 'base:leg-sweep',
@@ -1211,14 +1214,14 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Big Swing',
     id : 'base:big-swing',
     notifCommit : '$1 does a big swing!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: "Damages targets based on the user's strength. Additional levels increase the power.",
+    description: "Damages targets based on the user's strength.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1234,7 +1237,7 @@ Arts.newEntry(
             user.attack(
               target,
               damage: Damage.new(
-                amount:Arts.find(:'base:big-swing').baseDamage(level, user),
+                amount:Arts.database.find(:'base:big-swing').baseDamage(level, user),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP
               ),
@@ -1249,14 +1252,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Tackle',
     id : 'base:tackle',
     notifCommit : '$1 bashes $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Damages a target based on the user's strength. Has a chance to Grapple the user and the target for a turn. Additional levels increase the power.",
+    description: "Damages a target based on the user's strength. Has a chance to Grapple the user and the target for a turn.",
     keywords : ['base:grappling', 'base:grappled'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1273,7 +1276,7 @@ Arts.newEntry(
           user.attack(
             target:targets[0],
             damage: Damage.new(
-              amount:Arts.find(:'base:tackle').baseDamage(level, user),
+              amount:Arts.database.find(:'base:tackle').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
@@ -1289,14 +1292,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Throw Item',
     id : 'base:throw-item',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target by throwing an item. The base damage is boosted by the weight of the item chosen. Additional levels increase the damage done.",
+    description: "Damages a target by throwing an item. The base damage is boosted by the weight of the item chosen.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1321,7 +1324,7 @@ Arts.newEntry(
           user.attack(
             target:targets[0],              
             damage: Damage.new(
-              amount:Arts.find(:'base:throw-item').baseDamage(level, user) * (item.base.weight * 4),
+              amount:Arts.database.find(:'base:throw-item').baseDamage(level, user) * (item.base.weight * 4),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
@@ -1335,7 +1338,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Stun',
     id : 'base:stun',
@@ -1358,7 +1361,7 @@ Arts.newEntry(
           user.attack(
             target:targets[0],
             damage: Damage.new(
-              amount:Arts.find(:'base:stun').baseDamage(level, user),
+              amount:Arts.database.find(:'base:stun').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
@@ -1375,14 +1378,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Sheer Cold',
     id : 'base:sheer-cold',
     notifCommit : 'A cold air emanates from $1!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Multi-hit attack that damages a target with an ice attack. 90% chance to Freeze. Additional levels increase its power.",
+    description: "Multi-hit attack that damages a target with an ice attack. 90% chance to Freeze. ",
     keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1396,7 +1399,7 @@ Arts.newEntry(
       user.attack(
         target:targets[0],
         damage: Damage.new(          
-          amount:Arts.find(:'base:sheer-cold').baseDamage(level, user),
+          amount:Arts.database.find(:'base:sheer-cold').baseDamage(level, user),
           damageType : Damage.TYPE.PHYS,
           damageClass: Damage.CLASS.HP,
           traits: Damage.TRAIT.MULTIHIT
@@ -1413,7 +1416,7 @@ Arts.newEntry(
 )
 
 /*
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Mind Read',
     id : 'base:mind-read',
@@ -1454,7 +1457,7 @@ Arts.newEntry(
   }
 )      
 */ 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Flight',
     id : 'base:flight',
@@ -1479,7 +1482,7 @@ Arts.newEntry(
     }
   }
 )     
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Grapple',
     id : 'base:grapple',
@@ -1512,14 +1515,14 @@ Arts.newEntry(
 )      
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Combo Strike',
     id : 'base:combo-strike',
     notifCommit : '$1 does a combo strike $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Multi-hit attack that damages the same target twice at the same target and location. Additional levels increases the power.",
+    description: "Multi-hit attack that damages the same target twice at the same target and location.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1536,7 +1539,7 @@ Arts.newEntry(
           user.attack(
             target: targets[0],
             damage: Damage.new(
-              amount: Arts.find(:'base:combo-strike').baseDamage(level, user),
+              amount: Arts.database.find(:'base:combo-strike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
@@ -1551,7 +1554,7 @@ Arts.newEntry(
           user.attack(
             target: targets[0],
             damage: Damage.new(
-              amount:Arts.find(:'base:combo-strike').baseDamage(level, user),
+              amount:Arts.database.find(:'base:combo-strike').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.MULTIHIT
@@ -1564,7 +1567,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Poison Rune',
     id : 'base:poison-rune',
@@ -1589,7 +1592,7 @@ Arts.newEntry(
     }
   }
 )      
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Rune Release',
     id : 'base:rune-release',
@@ -1616,14 +1619,14 @@ Arts.newEntry(
               'base:regeneration-rune',
               'base:cure-rune',
               'base:shield-rune'               
-            ]->map(::(value) <- Arts.find(id:value))
+            ]->map(::(value) <- Arts.database.find(id:value))
           );
         }
       );           
     }
   }
 )      
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Destruction Rune',
     id : 'base:destruction-rune',
@@ -1650,7 +1653,7 @@ Arts.newEntry(
 )     
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Regeneration Rune',
     id : 'base:regeneration-rune',
@@ -1675,7 +1678,7 @@ Arts.newEntry(
     }
   }
 )
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Shield Rune',
     id : 'base:shield-rune',
@@ -1700,7 +1703,7 @@ Arts.newEntry(
     }
   }
 )  
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cure Rune',
     id : 'base:cure-rune',
@@ -1726,7 +1729,7 @@ Arts.newEntry(
   }
 )       
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Multiply Runes',
     id : 'base:multiply-runes',
@@ -1768,14 +1771,14 @@ Arts.newEntry(
 )  
 
          
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Poison Attack',
     id : 'base:poison-attack',
     notifCommit : '$1 prepares a poison attack against $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's ATK with a poisoned weapon. Additional levels increase the damage done.",
+    description: "Damages a target based on the user's ATK with a poisoned weapon.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1789,7 +1792,7 @@ Arts.newEntry(
       user.attack(
         target: targets[0],
         damage: Damage.new(
-          amount: Arts.find(:'base:poison-attack').baseDamage(level, user),
+          amount: Arts.database.find(:'base:poison-attack').baseDamage(level, user),
           damageType : Damage.TYPE.PHYS,
           damageClass: Damage.CLASS.HP
         ),
@@ -1803,14 +1806,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Petrify',
     id : 'base:petrify',
     notifCommit : '$1 prepares a petrifying attack against $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's ATK with special Light energy, causing the Petrified effect for 2 turns. Additional levels increase the power of the Art.",
+    description: "Damages a target based on the user's ATK with special Light energy, causing the Petrified effect for 2 turns.",
     keywords : ['base:petrified'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1824,7 +1827,7 @@ Arts.newEntry(
       user.attack(
         target: targets[0],
         damage: Damage.new(
-          amount: Arts.find(:'base:petrify').baseDamage(level, user),
+          amount: Arts.database.find(:'base:petrify').baseDamage(level, user),
           damageType : Damage.TYPE.PHYS,
           damageClass: Damage.CLASS.HP
         ),
@@ -1839,7 +1842,7 @@ Arts.newEntry(
     }
   }
 )      
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Tripwire',
     id : 'base:tripwire',
@@ -1849,7 +1852,7 @@ Arts.newEntry(
     description: "Activates a tripwire set up prior to battle, causing the target to be stunned for 3 turns. Only works once per battle.",
     keywords : ['base:stunned'],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.ABILITY,
     traits : TRAIT.PHYSICAL | TRAIT.ONCE_PER_BATTLE,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -1868,7 +1871,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Trip Explosive',
     id : 'base:trip-explosive',
@@ -1878,7 +1881,7 @@ Arts.newEntry(
     description: "Activates a tripwire-activated explosive set up prior to battle, causing the target to be damaged. Only works once per battle.",
     keywords : [],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.ABILITY,
     rarity : RARITY.RARE,
     traits : TRAIT.PHYSICAL | TRAIT.ONCE_PER_BATTLE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -1901,7 +1904,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Spike Pit',
     id : 'base:spike-pit',
@@ -1911,7 +1914,7 @@ Arts.newEntry(
     description: "Activates a floor trap leading to a spike pit which damages and stuns for 2 turns. Only works once per battle.",
     keywords : ['base:stunned'],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.ABILITY,
     traits : TRAIT.PHYSICAL | TRAIT.ONCE_PER_BATTLE,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -1941,14 +1944,14 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Stab',
     id : 'base:stab',
     notifCommit : '$1 stabs $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Damages a target based on the user's ATK and causes Bleeding. Additional levels increases the power of the move.",
+    description: "Damages a target based on the user's ATK and causes Bleeding.",
     keywords : ['base:bleeding'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1961,7 +1964,7 @@ Arts.newEntry(
       user.attack(
         target: targets[0],
         damage: Damage.new(
-          amount: Arts.find(:'base:stab').baseDamage(level, user),
+          amount: Arts.database.find(:'base:stab').baseDamage(level, user),
           damageType : Damage.TYPE.PHYS,
           damageClass: Damage.CLASS.HP
         ),
@@ -1975,14 +1978,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'First Aid',
     id : 'base:first-aid',
     notifCommit : '$1 does first aid $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Heals a target by 3 HP. Additional levels increase the potency by 2 points.",
+    description: "Heals a target by 3 HP.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2002,7 +2005,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Mend',
     id : 'base:mend',
@@ -2028,7 +2031,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Give Snack',
     id : 'base:give-snack',
@@ -2086,7 +2089,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Summon: Slimeling',
     id : 'base:summon-slimeling',
@@ -2149,14 +2152,14 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Summon: Fire Sprite',
     id : 'base:summon-fire-sprite',
     notifCommit : '$1 summons a Fire Sprite!',
     notifFail : '...but the summoning fizzled!',
     targetMode : TARGET_MODE.NONE,
-    description: 'Summons a fire sprite to fight on your side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
+    description: 'Summons a fire sprite to fight on your side. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2199,14 +2202,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Summon: Ice Elemental',
     id : 'base:summon-ice-elemental',
     notifCommit : '$1 summons an Ice Elemental!',
     notifFail : '...but the summoning fizzled!',
     targetMode : TARGET_MODE.NONE,
-    description: 'Summons an ice elemental to fight on your side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
+    description: 'Summons an ice elemental to fight on your side. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2247,14 +2250,14 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Summon: Thunder Spawn',
     id : 'base:summon-thunder-spawn',
     notifCommit : '$1 summons a Thunder Spawn!',
     notifFail : '...but the summoning fizzled!',
     targetMode : TARGET_MODE.NONE,
-    description: 'Summons a thunder spawn to fight on your side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
+    description: 'Summons a thunder spawn to fight on your side. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2295,14 +2298,14 @@ Arts.newEntry(
   }
 )     
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Summon: Guiding Light',
     id : 'base:summon-guiding-light',
     notifCommit : '$1 summons a Guiding Light!',
     notifFail : '...but the summoning fizzled!',
     targetMode : TARGET_MODE.NONE,
-    description: 'Summons a guiding light to fight on the user\'s side. Additional levels makes the summoning stronger. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
+    description: 'Summons a guiding light to fight on the user\'s side. If 2 or more summons exist on the user\'s side of battle, the summoning fails.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2342,7 +2345,7 @@ Arts.newEntry(
   }
 )           
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Unsummon',
     id : 'base:unsummon',
@@ -2388,19 +2391,19 @@ Arts.newEntry(
   }
 )            
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Fire',
     id : 'base:fire',
     notifCommit : '$1 casts Fire on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: 'Magick that damages a target with fire based on INT. Cannot be blocked. Additional levels increase its potency.',
+    description: 'Magick that damages a target with fire based on INT. Cannot be blocked.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.COMMON_ATTACK_SPELL | TRAIT.IS_ATTACK,
-    rarity : RARITY.COMMON,
+    rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (1.2) * (1 + (level-1)*0.15),
@@ -2411,7 +2414,7 @@ Arts.newEntry(
             target:targets[0],
             targetPart: Entity.DAMAGE_TARGET.BODY,
             damage: Damage.new(
-              amount:Arts.find(:'base:fire').baseDamage(level, user),
+              amount:Arts.database.find(:'base:fire').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.UNBLOCKABLE
@@ -2424,14 +2427,14 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Backdraft',
     id : 'base:backdraft',
     notifCommit : '$1 generates a great amount of heat!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Using great amount of heat, gives targets the Burned effect. Damage is based on INT. Additional levels increases the potency.',
+    description: 'Using great amount of heat, gives targets the Burned effect. Damage is based on INT.',
     keywords : ['base:burned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2448,7 +2451,7 @@ Arts.newEntry(
             user.attack(
               target:target,
               damage: Damage.new(
-                amount: Arts.find(:'base:backdraft').baseDamage(level, user),
+                amount: Arts.database.find(:'base:backdraft').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
                 damageClass: Damage.CLASS.HP,
                 onFinish ::(value) {
@@ -2467,14 +2470,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Flare',
     id : 'base:flare',
     notifCommit : '$1 casts Flare on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: 'Magick that greatly damages a target with fire based on INT. Additional levels increase the destructive power.',
+    description: 'Magick that greatly damages a target with fire based on INT.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2490,7 +2493,7 @@ Arts.newEntry(
             target:targets[0],
             targetPart: Entity.DAMAGE_TARGET.BODY,
             damage: Damage.new(
-              amount: Arts.find(:'base:flare').baseDamage(level, user),
+              amount: Arts.database.find(:'base:flare').baseDamage(level, user),
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP,
               traits: Damage.TRAIT.UNBLOCKABLE
@@ -2503,7 +2506,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Dematerialize',
     id : 'base:dematerialize',
@@ -2562,7 +2565,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Ice',
     id : 'base:ice',
@@ -2586,7 +2589,7 @@ Arts.newEntry(
             user.attack(
               target:enemy,
               damage: Damage.new(
-                amount: Arts.find(:'base:ice').baseDamage(level, user),
+                amount: Arts.database.find(:'base:ice').baseDamage(level, user),
                 damageType : Damage.TYPE.ICE,
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT | Damage.TRAIT.UNBLOCKABLE
@@ -2599,14 +2602,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Frozen Flame',
     id : 'base:frozen-flame',
     notifCommit : '$1 casts Frozen Flame!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Multi-hit magick that causes enemies to spontaneously combust in a cold, blue flame. Cannot be blocked. Damage is based on INT with an additional chance to Freeze the hit targets. Additional levels increase damage.',
+    description: 'Multi-hit magick that causes enemies to spontaneously combust in a cold, blue flame. Cannot be blocked. Damage is based on INT with an additional chance to Freeze the hit targets.',
     keywords : ['base:frozen'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2622,7 +2625,7 @@ Arts.newEntry(
             user.attack(
               target:enemy,
               damage: Damage.new(
-                amount: Arts.find(:'base:frozen-flame').baseDamage(level, user),
+                amount: Arts.database.find(:'base:frozen-flame').baseDamage(level, user),
                 damageType : Damage.TYPE.ICE,
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT | Damage.TRAIT.UNBLOCKABLE
@@ -2638,7 +2641,7 @@ Arts.newEntry(
 )      
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Telekinesis',
     id : 'base:telekinesis',
@@ -2668,19 +2671,19 @@ Arts.newEntry(
 )      
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Explosion',
     id : 'base:explosion',
     notifCommit : '$1 casts Explosion!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Multi-hit magick that damages all enemies with fire based on the user\'s INT. Additional levels increase the damage.',
+    description: 'Multi-hit magick that damages all enemies with fire based on the user\'s INT.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.MULTIHIT | TRAIT.COMMON_ATTACK_SPELL | TRAIT.IS_ATTACK,
-    rarity : RARITY.UNCOMMON,
+    rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (0.85) * (1 + (level-1)*0.1),
@@ -2692,7 +2695,7 @@ Arts.newEntry(
               target:enemy,
               targetPart: Entity.DAMAGE_TARGET.BODY,
               damage: Damage.new(
-                amount:Arts.find(:'base:explosion').baseDamage(level, user),
+                amount:Arts.database.find(:'base:explosion').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT | Damage.TRAIT.UNBLOCKABLE
@@ -2705,14 +2708,14 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Flash',
     id : 'base:flash',
     notifCommit : '$1 casts Flash!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Magick that blinds all enemies with a bright light. 50% chance to cause blindness, additional levels increase the chance.',
+    description: 'Magick that blinds all enemies with a bright light. 50% chance to cause blindness.',
     keywords : ['base:blind'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2742,14 +2745,14 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Thunder',
     id : 'base:thunder',
     notifCommit : '$1 casts Thunder!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Multi-hit magick that deals 4 random strikes based on INT. Cannot be blocked. Each additional level deals an additional 2 strikes.',
+    description: 'Multi-hit magick that deals 4 random strikes based on INT. Cannot be blocked.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2766,7 +2769,7 @@ Arts.newEntry(
             user.attack(
               target,
               damage: Damage.new(
-                amount:Arts.find(:'base:thunder').baseDamage(level, user),
+                amount:Arts.database.find(:'base:thunder').baseDamage(level, user),
                 damageType : Damage.TYPE.THUNDER,
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT | Damage.TRAIT.UNBLOCKABLE
@@ -2780,14 +2783,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Wild Swing',
     id : 'base:wild-swing',
     notifCommit : '$1 swings wildly!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Multi-hit attack that deals 4 random strikes based on ATK. Additional levels increase the number of strikes.',
+    description: 'Multi-hit attack that deals 4 random strikes based on ATK.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2804,7 +2807,7 @@ Arts.newEntry(
             user.attack(
               target,
               damage: Damage.new(
-                amount:Arts.find(:'base:wild-swing').baseDamage(level, user),
+                amount:Arts.database.find(:'base:wild-swing').baseDamage(level, user),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT
@@ -2818,14 +2821,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cure',
     id : 'base:cure',
     notifCommit : '$1 casts Cure on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Heals a target by 20% HP. Additional levels increase potency by 10%.",
+    description: "Heals a target by 20% HP.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2846,14 +2849,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cleanse',
     id : 'base:cleanse',
     notifCommit : '$1 casts Cleanse on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Removes all status ailments and most negative effects. Additional levels have no benefit.",
+    description: "Removes all status ailments and most negative effects.",
     keywords : ['base:ailments'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2877,7 +2880,7 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Magic Mist',
     id : 'base:magic-mist',
@@ -2906,14 +2909,14 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cure All',
     id : 'base:cure-all',
     notifCommit : '$1 casts Cure All!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLALLY,
-    description: "Heals all party members by 20%. Additional levels increase the effect by 5%.",
+    description: "Heals all party members by 20%.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2935,7 +2938,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Protect',
     id : 'base:protect',
@@ -2961,7 +2964,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Duel',
     id : 'base:duel',
@@ -2987,14 +2990,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Grace',
     id : 'base:grace',
     notifCommit : '$1 casts Grace on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Grants the Grace effect to a target for the rest of battle. Additional levels have no effect.",
+    description: "Grants the Grace effect to a target for the rest of battle.",
     keywords : ['base:grace'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -3013,14 +3016,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Phoenix Soul',
     id : 'base:phoenix-soul',
     notifCommit : '$1 casts Phoenix Soul on $2!',
     notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.ONE,
-    description: "If used during day time, grants the Grace effect to a target. Additional levels have no effect.",
+    description: "If used during day time, grants the Grace effect to a target.",
     keywords : ['base:grace'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -3042,7 +3045,7 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Protect All',
     id : 'base:protect-all',
@@ -3073,7 +3076,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Meditate',
     id : 'base:meditate',
@@ -3100,14 +3103,14 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Soothe',
     id : 'base:soothe',
     notifCommit : '$1 casts Soothe on !',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Relaxes a target, healing 4 AP. Additional levels increase this by 2.",
+    description: "Relaxes a target, healing 4 AP.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -3132,14 +3135,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Steal',
     id : 'base:steal',
     notifCommit : '$1 attempts to steal from $2',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: 'Steals an item from a target. Additional levels increase the stealing success rate.',
+    description: 'Steals an item from a target.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -3179,7 +3182,7 @@ Arts.newEntry(
 )      
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Counter',
     id : 'base:counter',
@@ -3189,7 +3192,7 @@ Arts.newEntry(
     description: 'Grants the Counter effect to the user for 3 turns.',
     keywords : ['base:counter'],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     rarity : RARITY.RARE,
     traits : TRAIT.PHYSICAL,
     usageHintAI : USAGE_HINT.DEBUFF,
@@ -3207,14 +3210,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Unarm',
     id : 'base:unarm',
     notifCommit : '$1 attempts to disarm $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: 'Attempts to disarm a target. Base chance is 30%. Additional levels increases the success rate.',
+    description: 'Attempts to disarm a target. Base chance is 30%.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -3251,7 +3254,7 @@ Arts.newEntry(
 ) 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Sneak',
     id : 'base:sneak',
@@ -3277,7 +3280,7 @@ Arts.newEntry(
   }
 )   
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Confusion',
     id : 'base:confusion',
@@ -3303,7 +3306,7 @@ Arts.newEntry(
   }
 )   
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Taunt',
     id : 'base:taunt',
@@ -3329,7 +3332,7 @@ Arts.newEntry(
   }
 ) 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Terrify',
     id : 'base:terrify',
@@ -3356,7 +3359,7 @@ Arts.newEntry(
 ) 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Field Barrier',
     id : 'base:field-barrier',
@@ -3384,7 +3387,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Potentiality Shard',
     id : 'base:potentiatily-shard',
@@ -3410,7 +3413,7 @@ Arts.newEntry(
   }
 ) 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Copy Shard',
     id : 'base:potentiatily-shard',
@@ -3437,7 +3440,7 @@ Arts.newEntry(
 ) 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Suppressor',
     id : 'base:field-barrier',
@@ -3464,7 +3467,7 @@ Arts.newEntry(
 ) 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Block',
     id : 'base:block',
@@ -3474,7 +3477,7 @@ Arts.newEntry(
     description: 'Grants the Block status to the user.',
     keywords : ['base:block'],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : 0,
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.BUFF,
@@ -3490,7 +3493,7 @@ Arts.newEntry(
   }
 ) 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Slingshot Block',
     id : 'base:slingshot-block',
@@ -3500,7 +3503,7 @@ Arts.newEntry(
     description: 'Grants the Slingshot Block status to the user.',
     keywords : ['base:slingshot-block'],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
@@ -3517,7 +3520,7 @@ Arts.newEntry(
 ) 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Ricochet Block',
     id : 'base:ricochet-block',
@@ -3527,7 +3530,7 @@ Arts.newEntry(
     description: 'Grants the Ricochet Block status to the user.',
     keywords : ['base:ricochet-block'],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
@@ -3545,7 +3548,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Reflective Block',
     id : 'base:reflective-block',
@@ -3555,7 +3558,7 @@ Arts.newEntry(
     description: 'Grants the Reflective Block status to the user.',
     keywords : ['base:reflective-block'],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : 0,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
@@ -3571,7 +3574,7 @@ Arts.newEntry(
   }
 ) 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Conductive Block',
     id : 'base:conductive-block',
@@ -3581,7 +3584,7 @@ Arts.newEntry(
     description: 'Grants the Conductive Block status to the user.',
     keywords : ['base:conductive-block', 'base:next-attack-x2'],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : 0,
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.BUFF,
@@ -3600,7 +3603,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Mind Focus',
     id : 'base:mind-focus',
@@ -3629,7 +3632,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Defend',
     id : 'base:defend',
@@ -3656,7 +3659,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Guard',
     id : 'base:guard',
@@ -3683,7 +3686,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Proceed with Caution',
     id : 'base:proceed-with-caution',
@@ -3713,7 +3716,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Defensive Stance',
     id : 'base:defensive-stance',
@@ -3742,7 +3745,7 @@ Arts.newEntry(
   }
 )       
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Offensive Stance',
     id : 'base:offensive-stance',
@@ -3772,7 +3775,7 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Light Stance',
     id : 'base:light-stance',
@@ -3801,7 +3804,7 @@ Arts.newEntry(
   }
 )      
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Heavy Stance',
     id : 'base:heavy-stance',
@@ -3830,7 +3833,7 @@ Arts.newEntry(
   }
 ) 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Meditative Stance',
     id : 'base:meditative-stance',
@@ -3859,7 +3862,7 @@ Arts.newEntry(
   }
 )         
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Striking Stance',
     id : 'base:striking-stance',
@@ -3889,7 +3892,7 @@ Arts.newEntry(
 )  
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Reflective Stance',
     id : 'base:reflective-stance',
@@ -3918,7 +3921,7 @@ Arts.newEntry(
   }
 ) 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Evasive Stance',
     id : 'base:evasive-stance',
@@ -3947,7 +3950,7 @@ Arts.newEntry(
   }
 )              
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Wait',
     id : 'base:wait',
@@ -3970,7 +3973,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Plant Poisonroot',
     id : 'base:plant-poisonroot',
@@ -3996,7 +3999,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Plant Triproot',
     id : 'base:plant-triproot',
@@ -4022,7 +4025,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Plant Healroot',
     id : 'base:plant-healroot',
@@ -4049,7 +4052,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Green Thumb',
     id : 'base:green-thumb',
@@ -4087,7 +4090,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Fire Shift',
     id : 'base:fire-shift',
@@ -4114,7 +4117,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Elemental Tag',
     id : 'base:elemental-tag',
@@ -4141,7 +4144,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Elemental Shield',
     id : 'base:elemental-shield',
@@ -4169,7 +4172,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Ice Shift',
     id : 'base:ice-shift',
@@ -4195,7 +4198,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Thunder Shift',
     id : 'base:thunder-shift',
@@ -4221,7 +4224,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Tri Shift',
     id : 'base:tri-shift',
@@ -4251,7 +4254,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Use Item',
     id : 'base:use-item',
@@ -4289,7 +4292,7 @@ Arts.newEntry(
 
 
 /*
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Quickhand Item',
     id : 'base:quickhand-item',
@@ -4323,7 +4326,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Equip Item',
     id : 'base:equip-item',
@@ -4353,7 +4356,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Defend Other',
     id : 'base:defend-other',
@@ -4381,14 +4384,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Perfect Guard',
     id : 'base:perfect-guard',
     notifCommit : '$1 casts Perfect Guard on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Grants the Perfect Guard effect to a target for 3 turns. Additional levels have no effect.",
+    description: "Grants the Perfect Guard effect to a target for 3 turns.",
     keywords : ['base:perfect-guard'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -4409,7 +4412,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Sharpen',
     id : 'base:sharpen',
@@ -4448,7 +4451,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Weaken Armor',
     id : 'base:weaken-armor',
@@ -4486,7 +4489,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Dull Weapon',
     id : 'base:dull-weapon',
@@ -4525,7 +4528,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Strengthen Armor',
     id : 'base:strengthen-armor',
@@ -4565,14 +4568,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Convince',
     id : 'base:convince',
     notifCommit : '$1 tries to convince $2 to wait!',
     notifFail : '$2 ignored $1!',
     targetMode : TARGET_MODE.ONE,
-    description: "50% chance to inflict the Convinced status on the target for 1 to 3 turns. Additional levels increase the success chance by 10%.",
+    description: "50% chance to inflict the Convinced status on the target for 1 to 3 turns.",
     keywords : ['base:convinced'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -4594,7 +4597,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Make: Heal Potion',
     id : 'base:make-heal-potion',
@@ -4647,7 +4650,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Make: Buff Potion',
     id : 'base:make-buff-potion',
@@ -4700,7 +4703,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Make: Debuff Potion',
     id : 'base:make-debuff-potion',
@@ -4753,7 +4756,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Make: Essence',
     id : 'base:make-essence',
@@ -4805,7 +4808,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Mix Potion',
     id : 'base:mix-potion',
@@ -4891,7 +4894,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Scavenge',
     id : 'base:scavenge',
@@ -4928,14 +4931,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bribe',
     id : 'base:bribe',
     notifCommit : '$1 tries to bribe $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Pays a combatant to not fight any more. Additional levels decrease the required cost.",
+    description: "Pays a combatant to not fight any more.",
     keywords: ['base:bribed'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -5008,7 +5011,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Sweet Song',
     id : 'base:sweet-song',
@@ -5043,7 +5046,7 @@ Arts.newEntry(
 )   
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Wrap',
     id : 'base:wrap',
@@ -5118,7 +5121,7 @@ Arts.newEntry(
 
 /* NOT USED ANYMORE */
 /////////
-  Arts.newEntry(
+  Arts.database.newEntry(
     data: {
       name: 'Swipe Kick',
       id : 'base:swipe-kick',
@@ -5164,7 +5167,7 @@ Arts.newEntry(
 */
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Diversify',
     id : 'base:diversify',
@@ -5186,135 +5189,19 @@ Arts.newEntry(
   }
 )   
 
-Arts.newEntry(
-  data: {
-    name: 'Cycle',
-    id : 'base:cycle',
-    notifCommit : Arts.NO_NOTIF,
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Discard an Arts card. Draw an Arts card.',
-    keywords: [],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT,
-    rarity : RARITY.UNCOMMON,
-    usageHintAI : USAGE_HINT.BUFF,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      user.discardArt();
-      user.drawArt(count:1);
-    }
-  }
-)  
-
-
-Arts.newEntry(
-  data: {
-    name: 'Mind Games',
-    id : 'base:mind-games',
-    notifCommit : Arts.NO_NOTIF,
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.ONE,
-    description: 'Target discards an Art card.',
-    keywords: [],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT,
-    rarity : RARITY.UNCOMMON,
-    usageHintAI : USAGE_HINT.DEBUFF,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      targets[0].discardArt();
-    }
-  }
-)   
-
-Arts.newEntry(
-  data: {
-    name: 'Crossed Wires',
-    id : 'base:crossed-wires',
-    notifCommit : '$1 swapped Arts with $2!',
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.ONE,
-    description: 'Swap hands with a target.',
-    keywords: [],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT,
-    rarity : RARITY.RARE,
-    usageHintAI : USAGE_HINT.DEBUFF,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      @:oldHand = [...user.deck.hand]
-      user.deck.hand = [...targets[0].deck.hand];
-      targets[0].deck.hand = oldHand;
-    }
-  }
-)   
 
 
 
-Arts.newEntry(
-  data: {
-    name: 'Recycle',
-    id : 'base:recycle',
-    notifCommit : Arts.NO_NOTIF,
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Discard an Arts card and draw an Arts card from the user\'s discard pile.',
-    durationTurns: 0,
-    keywords: [],
-    kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT,
-    rarity : RARITY.UNCOMMON,
-    usageHintAI : USAGE_HINT.BUFF,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      user.discardArt();
-      user.drawArt();      
-    }
-  }
-)   
 
-Arts.newEntry(
-  data: {
-    name: 'Reevaluate',
-    id : 'base:reevaluate',
-    notifCommit : Arts.NO_NOTIF,
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Discards entire hand and draws 5 cards.',
-    keywords: [],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT,
-    rarity : RARITY.UNCOMMON,
-    usageHintAI : USAGE_HINT.BUFF,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      user.deck.hand = [];
-      foreach(user.deck.hand) ::(k, c) {
-        user.deck.discardFromHand(:c);
-      }
-      user.drawArt(count:5);      
-    }
-  }
-)
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Catch Breath',
     id : 'base:catch-breath',
     notifCommit : Arts.NO_NOTIF,
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Discards entire hand, gain 10% HP.',
+    description: 'Gain 10% HP. ',
     keywords: [],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -5326,17 +5213,13 @@ Arts.newEntry(
     },
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      user.deck.hand = [];
-      foreach(user.deck.hand) ::(k, c) {
-        user.deck.discardFromHand(:c);
-      }
       user.heal(amount:(user.stats.HP * 0.1)->ceil);
     }
   }
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Makeshift Breather',
     id : 'base:makeshift-breather',
@@ -5371,7 +5254,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Makeshift Transmutation',
     id : 'base:makeshift-transmutation',
@@ -5433,7 +5316,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Makeshift Shield',
     id : 'base:quick-shield',
@@ -5469,7 +5352,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Mutual Destruction',
     id : 'base:mutual-destruction',
@@ -5501,17 +5384,17 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Brace',
     id : 'base:brace',
     notifCommit : '$1 started to brace for damage!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Discard an Arts card. User gains the Brace effect for 2 turns.',
+    description: 'User gains the Brace effect for 2 turns.',
     keywords: ['base:brace'],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : TRAIT.SUPPORT,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
@@ -5523,14 +5406,14 @@ Arts.newEntry(
   }
 )  
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Agility',
     id : 'base:agility',
     notifCommit : '$1 increases their agility!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Discard an Arts card. User gains the Agile effect for 5 turns.',
+    description: 'User gains the Agile effect for 5 turns.',
     keywords: ['base:agile'],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -5540,41 +5423,13 @@ Arts.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      user.discardArt();
       user.addEffect(from:user, id:'base:agile', durationTurns:5);
     }
   }
 )  
 
-Arts.newEntry(
-  data: {
-    name: 'Foresight',
-    id : 'base:foresight',
-    notifCommit : Arts.NO_NOTIF,
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.ONE,
-    description: 'Discard an Arts card. View a target\'s Arts hand.',
-    keywords: [],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT,
-    rarity : RARITY.COMMON,
-    usageHintAI : USAGE_HINT.DEBUFF,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      user.discardArt();
-      windowEvent.queueMessage(text:user.name + ' views ' + targets[0].name + ' Arts hand.');
-      @:party = import(module:'game_singleton.world.mt').party;          
-
-      when(party.leader == user) ::<= {
-        targets[0].deck.viewHand();
-      }
-    }
-  }
-)  
-
-Arts.newEntry(
+/*
+Arts.database.newEntry(
   data: {
     name: 'Attack Reflex',
     id : 'base:retaliate',
@@ -5609,8 +5464,9 @@ Arts.newEntry(
     }
   }
 )
+*/
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Quick Shield',
     id : 'base:quick-shield',
@@ -5620,7 +5476,7 @@ Arts.newEntry(
     description: 'The user heals 2 Shield HP. This counts as healing.',
     keywords: [],
     durationTurns: 0,
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : TRAIT.SUPPORT | TRAIT.PHYSICAL,
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.BUFF,
@@ -5634,7 +5490,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cancel',
     id : 'base:cancel',
@@ -5658,7 +5514,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Pebble',
     id : 'base:pebble',
@@ -5694,7 +5550,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Shared Pain',
     id : 'base:shared-pain',
@@ -5732,7 +5588,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banishing Light',
     id : 'base:banishing-light',
@@ -5761,7 +5617,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Blood\'s Pain',
     id : 'base:bloods-pain',
@@ -5808,7 +5664,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Blood\'s Shield',
     id : 'base:bloods-shield',
@@ -5847,7 +5703,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Blood\'s Exaltation',
     id : 'base:bloods-exaltation',
@@ -5884,8 +5740,8 @@ Arts.newEntry(
     }
   }
 )
-
-Arts.newEntry(
+/*
+Arts.database.newEntry(
   data: {
     name: 'Blood\'s Ward',
     id : 'base:bloods-ward',
@@ -5927,8 +5783,9 @@ Arts.newEntry(
     }
   }
 )
-
-Arts.newEntry(
+*/
+/*
+Arts.database.newEntry(
   data: {
     name: 'Blood\'s Seeking',
     id : 'base:bloods-seeking',
@@ -5975,8 +5832,11 @@ Arts.newEntry(
     }
   }
 )
+*/
 
-Arts.newEntry(
+
+/*
+Arts.database.newEntry(
   data: {
     name: 'Blood\'s Sacrifice',
     id : 'base:bloods-sacrifice',
@@ -6012,9 +5872,9 @@ Arts.newEntry(
       )
     }
   }
-)
+)*/
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Blood\'s Wind',
     id : 'base:bloods-wind',
@@ -6053,7 +5913,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cursed Summoning',
     id : 'base:cursed-summoning',
@@ -6102,7 +5962,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cursed Binding',
     id : 'base:cursed-binding',
@@ -6126,7 +5986,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Blood\'s Summoning',
     id : 'base:bloods-summoning',
@@ -6193,7 +6053,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Unexpected Swipe',
     id : 'base:unexpected-swipe',
@@ -6216,7 +6076,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Desperation',
     id : 'base:desparation',
@@ -6240,7 +6100,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bodyslam',
     id : 'base:bodyslam',
@@ -6263,7 +6123,7 @@ Arts.newEntry(
           user.attack(
             target:targets[0],
             damage: Damage.new(
-              amount:Arts.find(:'base:bodyslam').baseDamage(level, user),
+              amount:Arts.database.find(:'base:bodyslam').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
@@ -6282,7 +6142,7 @@ Arts.newEntry(
 );
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Enlarge',
     id : 'base:enlarge',
@@ -6306,7 +6166,7 @@ Arts.newEntry(
 );
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Shield Amplifier',
     id : 'base:shield-amplifier',
@@ -6331,7 +6191,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Lesser Banish',
     id : 'base:banish',
@@ -6356,7 +6216,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banish',
     id : 'base:banish',
@@ -6380,7 +6240,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Greater Banish',
     id : 'base:greater-banish',
@@ -6405,7 +6265,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bound Banish',
     id : 'base:bound-banish',
@@ -6431,7 +6291,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Proliferate',
     id : 'base:proliferate',
@@ -6457,7 +6317,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Proliferate All',
     id : 'base:proliferate',
@@ -6485,7 +6345,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banishing Aura',
     id : 'base:banishing-aura',
@@ -6515,14 +6375,14 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Wyvern Prayer',
     id : 'base:wyvern-prayer',
     notifCommit : '$1 closes their eyes, lifts their arms, and prays to the Wyverns for a miracle!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
-    description: "Prays for a miracle, causing a variety of potent effects. Reduces current AP by half if successful. Additional levels reduce the AP cost.",
+    description: "Prays for a miracle, causing a variety of potent effects. Reduces current AP by half if successful.",
     keywords: [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -6651,7 +6511,7 @@ Arts.newEntry(
 
 
 // ver 0.2.0 starting supports
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Refresh',
     id : 'base:b169',
@@ -6692,14 +6552,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Purification',
     id : 'base:b170',
     notifCommit : '$2 is covered in a soothing aura!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Removes all ailments and negative effects from the target. Only usable once per battle. Additional levels have no effect.",
+    description: "Removes all ailments and negative effects from the target. Only usable once per battle.",
     keywords: ['base:ailments'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -6736,7 +6596,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Osmotic Sponge',
     id : 'base:b171',
@@ -6799,7 +6659,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Chaotic Slurp',
     id : 'base:b172',
@@ -6858,7 +6718,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Sip of Chaos',
     id : 'base:b173',
@@ -6913,14 +6773,14 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Miasma Expungement',
     id : 'base:b174',
     notifCommit : 'Everyone is covered in soothing aura!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALL,
-    description: "Removes all ailments and negative effects from all combatants, then discard a card and draw a card. Additional levels have no effect.",
+    description: "Removes all ailments and negative effects from all combatants. All equipped Arts are fully recharged.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -6948,12 +6808,15 @@ Arts.newEntry(
       
       foreach(targets) ::(k, target) {
         target.removeEffectsByFilter(:filter);
+        foreach(target.arts) ::(k, art) {
+          art.recharge();
+        }
       }
     }
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Joy Expungement',
     id : 'base:b175',
@@ -6992,7 +6855,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Radiation State',
     id : 'base:b176',
@@ -7039,7 +6902,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Chaotic Redistribution',
     id : 'base:b177',
@@ -7099,14 +6962,14 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Tendril of Time',
     id : 'base:b178',
     notifCommit : '$1 is enveloped in eerie tendrils of light!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: "Removes all effects from user and resets HP and AP to full. This Art is permanently removed from the user\'s deck upon use. Additional levels have no effect.",
+    description: "Removes all effects from user and resets HP and AP to full. This Art is permanently removed from the user\'s deck upon use.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.HEAL,
@@ -7151,7 +7014,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Chaotic Funnel',
     id : 'base:b179',
@@ -7197,7 +7060,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Restorative Resonance',
     id : 'base:b180',
@@ -7238,7 +7101,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banish Conversion: Negative',
     id : 'base:b181',
@@ -7283,7 +7146,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banish Conversion: Positive',
     id : 'base:b182',
@@ -7323,7 +7186,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Quantum Rearrangement',
     id : 'base:b183',
@@ -7366,7 +7229,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Destructive Resonance',
     id : 'base:b184',
@@ -7419,7 +7282,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banish Conversion: Ultima',
     id : 'base:b185',
@@ -7477,7 +7340,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banishing Regurgitation',
     id : 'base:b186',
@@ -7514,7 +7377,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Poison Empowerment',
     id : 'base:b187',
@@ -7555,7 +7418,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Burning Empowerment',
     id : 'base:b188',
@@ -7595,7 +7458,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Paralysis Empowerment',
     id : 'base:b189',
@@ -7636,7 +7499,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Petrification Empowerment',
     id : 'base:b190',
@@ -7677,7 +7540,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Negativity Empowerment',
     id : 'base:b191',
@@ -7729,7 +7592,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bestow State',
     id : 'base:b192',
@@ -7778,7 +7641,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Gifting Tether',
     id : 'base:b193',
@@ -7826,7 +7689,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Exchange of Blows',
     id : 'base:b194',
@@ -7859,7 +7722,7 @@ Arts.newEntry(
           user.attack(
             target:targets[0],
             damage: Damage.new(
-              amount:Arts.find(:'base:b194').baseDamage(level, user),
+              amount:Arts.database.find(:'base:b194').baseDamage(level, user),
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
@@ -7900,7 +7763,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Venomous Redirection',
     id : 'base:b195',
@@ -7940,7 +7803,7 @@ Arts.newEntry(
             user.attack(
               target,
               damage: Damage.new(
-                amount: Arts.find(:'base:b195').baseDamage(level, user),
+                amount: Arts.database.find(:'base:b195').baseDamage(level, user),
                 damageType : Damage.TYPE.PHYS,
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT
@@ -7957,7 +7820,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Explosive Redirection',
     id : 'base:b196',
@@ -8000,7 +7863,7 @@ Arts.newEntry(
             user.attack(
               target,
               damage: Damage.new(
-                amount: Arts.find(:'base:b196').baseDamage(level, user),
+                amount: Arts.database.find(:'base:b196').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
                 damageClass: Damage.CLASS.HP,
                 traits: Damage.TRAIT.MULTIHIT
@@ -8015,7 +7878,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Unlock Senses',
     id : 'base:b197',
@@ -8047,7 +7910,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bound Weapon',
     id : 'base:b198',
@@ -8132,7 +7995,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Momentum Preparation',
     id : 'base:b199',
@@ -8157,7 +8020,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Burning Conversion',
     id : 'base:b200',
@@ -8193,7 +8056,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Icy Conversion',
     id : 'base:b201',
@@ -8230,7 +8093,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Shock Conversion',
     id : 'base:b202',
@@ -8266,7 +8129,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Blind Conversion',
     id : 'base:b202-2',
@@ -8302,7 +8165,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Petrified Conversion',
     id : 'base:b202-3',
@@ -8338,7 +8201,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Full Shift Conversion',
     id : 'base:b203',
@@ -8388,7 +8251,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Resonant Rush',
     id : 'base:b205',
@@ -8406,7 +8269,7 @@ Arts.newEntry(
     baseDamage ::(level, user) <- user.stats.ATK * (0.3) * level,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
-      @:baseDamage = Arts.find(:'base:b205').baseDamage(level, user);
+      @:baseDamage = Arts.database.find(:'base:b205').baseDamage(level, user);
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -8426,7 +8289,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Resonant Blast',
     id : 'base:b206',
@@ -8444,7 +8307,7 @@ Arts.newEntry(
     baseDamage ::(level, user) <- user.stats.INT * (0.3) * level,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
-      @:baseDamage = Arts.find(:'base:b205').baseDamage(level, user);
+      @:baseDamage = Arts.database.find(:'base:b205').baseDamage(level, user);
       windowEvent.queueCustom(
         onEnter :: {
           user.attack(
@@ -8464,7 +8327,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Pyre Unleashed',
     id : 'base:b207',
@@ -8517,7 +8380,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Glacier Unleashed',
     id : 'base:b208',
@@ -8570,7 +8433,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Pylon Unleashed',
     id : 'base:b209',
@@ -8622,7 +8485,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Feedback Cascade',
     id : 'base:b210',
@@ -8630,7 +8493,7 @@ Arts.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:attack-shifts'],
-    description: "Summons a fire explosion on a target, dealing damage based on the user's INT. This total damage is boosted by 20% for each attack shift on the user. Additional levels increase damage.",
+    description: "Summons a fire explosion on a target, dealing damage based on the user's INT. This total damage is boosted by 20% for each attack shift on the user.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -8653,7 +8516,7 @@ Arts.newEntry(
     },
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
-      @:baseDamage = Arts.find(:'base:b210').baseDamage(level, user);
+      @:baseDamage = Arts.database.find(:'base:b210').baseDamage(level, user);
 
       windowEvent.queueCustom(
         onEnter :: {
@@ -8673,7 +8536,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Chaotic Shift',
     id : 'base:b211',
@@ -8701,7 +8564,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Shift Boost',
     id : 'base:b214',
@@ -8724,7 +8587,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Elemental Radiation',
     id : 'base:b215',
@@ -8803,7 +8666,7 @@ Arts.newEntry(
         user.attack(
           target:targets[0],
           damage: Damage.new(
-            amount:Arts.find(:'base:b215').baseDamage(level, user) * (1.0 + 0.2 * theSet->size),
+            amount:Arts.database.find(:'base:b215').baseDamage(level, user) * (1.0 + 0.2 * theSet->size),
             damageType,
             damageClass: Damage.CLASS.HP
           ),
@@ -8818,7 +8681,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Elemental Transmutation',
     id : 'base:b216',
@@ -8877,7 +8740,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Resonant Empowerment',
     id : 'base:b217',
@@ -8923,7 +8786,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Resonant Debilitation',
     id : 'base:b218',
@@ -8968,7 +8831,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Expel: Brimstone',
     id : 'base:b219',
@@ -9004,7 +8867,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Expel: Misalignment',
     id : 'base:b220',
@@ -9041,7 +8904,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Expel: Growth',
     id : 'base:b221',
@@ -9080,7 +8943,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Expel: Banishment',
     id : 'base:b222',
@@ -9114,7 +8977,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Expel Control',
     id : 'base:b223',
@@ -9149,7 +9012,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Expel: Ultima',
     id : 'base:b224',
@@ -9183,7 +9046,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Refortification Ultima',
     id : 'base:b225',
@@ -9232,7 +9095,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Clean Blessing',
     id : 'base:b226',
@@ -9260,7 +9123,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Clean Curse',
     id : 'base:b227',
@@ -9289,7 +9152,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Resonant Tessellation',
     id : 'base:b228',
@@ -9344,7 +9207,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Take Aim',
     id : 'base:b229',
@@ -9367,7 +9230,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Splinter',
     id : 'base:b230',
@@ -9395,7 +9258,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Split View',
     id : 'base:b231',
@@ -9422,7 +9285,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Scorching',
     id : 'base:b232-1',
@@ -9449,7 +9312,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Freezing',
     id : 'base:b232-2',
@@ -9476,7 +9339,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Paralyzing',
     id : 'base:b232-3',
@@ -9503,7 +9366,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Petrifying',
     id : 'base:b232-4',
@@ -9530,7 +9393,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Blinding',
     id : 'base:b232-5',
@@ -9557,7 +9420,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Seeping',
     id : 'base:b232-6',
@@ -9585,7 +9448,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Dampen Multi-hit',
     id : 'base:b233',
@@ -9612,7 +9475,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Multi-hit Guard',
     id : 'base:b234',
@@ -9640,7 +9503,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Telemarket Leyline',
     id : 'base:b235',
@@ -9701,7 +9564,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Critical Reaction',
     id : 'base:b236',
@@ -9725,7 +9588,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'First Strike',
     id : 'base:b237',
@@ -9748,8 +9611,8 @@ Arts.newEntry(
   }
 )
 
-
-Arts.newEntry(
+/*
+Arts.database.newEntry(
   data: {
     name: 'Future Moment',
     id : 'base:b238',
@@ -9802,9 +9665,10 @@ Arts.newEntry(
     }
   }
 )
+*/
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Boomerang',
     id : 'base:b239',
@@ -9812,7 +9676,7 @@ Arts.newEntry(
     notifFail : "...But nothing happened!",
     targetMode : TARGET_MODE.NONE,
     keywords : [],
-    description: "Immediately plays the Art at the bottom of the user's discard pile for no AP cost.",
+    description: "Immediately activates the user's last-equipped Art for no AP cost and no Charge.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -9822,17 +9686,14 @@ Arts.newEntry(
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
-      when(user.deck.discardPile->size == 0) Arts.FAIL;
-      @:card = user.deck.discardPile[user.deck.discardPile->size-1];
-      @:world = import(module:'game_singleton.world.mt');
-      
-
-
-      user.deck.revealArt(
-        prompt: user.name + ' activated the Art from the bottom of their discard pile!',
-        user:user,
-        handCard: card
+      error(:'Implement me!');
+      @:card = user.arts[user.arts->size-1];
+      @charge = card.charge;
+      card.revealArt(
+        prompt: user.name + ' activated the next Art from their deck!',
+        user:user
       );
+      @:world = import(module:'game_singleton.world.mt');
       
       // hacky! but fun. maybe functional
       if (world.party.leader == user) ::<= {
@@ -9841,6 +9702,8 @@ Arts.newEntry(
           canCancel: false,
           commitAction::(action) {            
             user.battle.entityCommitAction(action, from:user);
+            card.charge = charge;
+            user.ap += 2;
           }
         );
       } else ::<= {
@@ -9849,6 +9712,8 @@ Arts.newEntry(
           card: card,
           onCommit ::(action) {
             user.battle.entityCommitAction(action, from:user);
+            card.charge = charge;
+            user.ap += 2;
           }
         );
         
@@ -9861,7 +9726,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cascading Flash',
     id : 'base:b240',
@@ -9874,7 +9739,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
@@ -9884,8 +9749,8 @@ Arts.newEntry(
   }
 )
 
-
-Arts.newEntry(
+/*
+Arts.database.newEntry(
   data: {
     name: 'Divination',
     id : 'base:b241',
@@ -9949,11 +9814,11 @@ Arts.newEntry(
     }
   }
 )
+*/
 
 
 
-
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Clairvoyance',
     id : 'base:b242',
@@ -9966,7 +9831,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
@@ -9978,7 +9843,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Scatterbrained',
     id : 'base:b243',
@@ -9991,7 +9856,7 @@ Arts.newEntry(
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {
     },
-    kind : KIND.REACTION,
+    kind : KIND.EFFECT,
     traits : TRAIT.MAGIC,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {},
@@ -10003,7 +9868,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Resonant Soulfire',
     id : 'base:b244',
@@ -10030,7 +9895,7 @@ Arts.newEntry(
           user.attack(
             target:targets[0],
             damage: Damage.new(
-              amount:Arts.find(:'base:b244').baseDamage(level, user) + effCount,
+              amount:Arts.database.find(:'base:b244').baseDamage(level, user) + effCount,
               damageType : Damage.TYPE.FIRE,
               damageClass: Damage.CLASS.HP
             ),
@@ -10043,8 +9908,8 @@ Arts.newEntry(
   }
 )
 
-
-Arts.newEntry(
+/*
+Arts.database.newEntry(
   data: {
     name: 'Antimagic Trap',
     id : 'base:antimagic-trap',
@@ -10074,9 +9939,9 @@ Arts.newEntry(
     }
   }
 )   
+*/
 
-
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Half Guard',
     id : 'base:b247',
@@ -10100,7 +9965,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Multi Guard',
     id : 'base:b248',
@@ -10124,7 +9989,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Premonition',
     id : 'base:b251',
@@ -10154,7 +10019,7 @@ Arts.newEntry(
 // I FUCKED UP I DONT REMEMBER WHAT THIS EFFECT WAS SUPPOSED TO BE
 // UUUGHHHHH CRYING AND FARTING
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Calcification',
     id : 'base:b253',
@@ -10178,7 +10043,7 @@ Arts.newEntry(
 )
 */
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Crustacean Maneuver',
     id : 'base:b254',
@@ -10202,7 +10067,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Lucky Charm',
     id : 'base:b255',
@@ -10225,7 +10090,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Spirit Loan',
     id : 'base:b256',
@@ -10249,7 +10114,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Procrastinate Death',
     id : 'base:b257',
@@ -10273,7 +10138,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Cheat Death',
     id : 'base:b258',
@@ -10296,7 +10161,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Death Reflection',
     id : 'base:b259',
@@ -10319,7 +10184,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Prismatic Wisp',
     id : 'base:prismatic-wisp',
@@ -10342,7 +10207,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Limit Break',
     id : 'base:b260',
@@ -10365,7 +10230,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Resonant Doomsday',
     id : 'base:b261',
@@ -10405,7 +10270,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Shared Salvation',
     id : 'base:b263',
@@ -10441,7 +10306,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Deathly Empowerment',
     id : 'base:b264',
@@ -10482,7 +10347,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Purgatory',
     id : 'base:b265',
@@ -10531,7 +10396,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Deathly Gamble',
     id : 'base:b266',
@@ -10567,7 +10432,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Deathless Overflow',
     id : 'base:b267',
@@ -10591,7 +10456,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Soul Buffer',
     id : 'base:b271',
@@ -10615,7 +10480,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Body Buffer',
     id : 'base:b272',
@@ -10639,7 +10504,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Perfect Barrier',
     id : 'base:b273',
@@ -10663,7 +10528,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Summon: Defensive Pylon',
     id : 'base:summon-defensive-pylon',
@@ -10721,7 +10586,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Soul Split',
     id : 'base:b283',
@@ -10746,7 +10611,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Soul Projection',
     id : 'base:b284',
@@ -10773,7 +10638,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Charm',
     id : 'base:b286',
@@ -10797,7 +10662,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Static Shield',
     id : 'base:b277',
@@ -10822,7 +10687,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Scorching Shield',
     id : 'base:b278',
@@ -10845,7 +10710,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Freezing Shield',
     id : 'base:b279',
@@ -10869,7 +10734,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Acid Dust',
     id : 'base:b280',
@@ -10892,7 +10757,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Conduction Dust',
     id : 'base:b281',
@@ -10916,7 +10781,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Crystalized Dust',
     id : 'base:b282',
@@ -10939,7 +10804,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Humiliate',
     id : 'base:b290',
@@ -10962,7 +10827,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Enraged',
     id : 'base:b291',
@@ -10986,7 +10851,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Imposter',
     id : 'base:b292',
@@ -11012,7 +10877,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Static Infusion',
     id : 'base:b294',
@@ -11037,7 +10902,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Burning Infusion',
     id : 'base:b295',
@@ -11061,7 +10926,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Icy Infusion',
     id : 'base:b296',
@@ -11086,7 +10951,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Elemental Contract',
     id : 'base:b296',
@@ -11157,7 +11022,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Chaotic Elemental',
     id : 'base:b298',
@@ -11203,7 +11068,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: '@b305',
     id : 'base:b305',
@@ -11226,7 +11091,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: '@b307',
     id : 'base:b307',
@@ -11251,7 +11116,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: '@b308',
     id : 'base:b308',
@@ -11275,7 +11140,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: '@b309',
     id : 'base:b309',
@@ -11298,8 +11163,8 @@ Arts.newEntry(
   }
 )
 
-
-Arts.newEntry(
+/*
+Arts.database.newEntry(
   data: {
     name: 'Sudden Provocation',
     id : 'base:b311',
@@ -11337,10 +11202,10 @@ Arts.newEntry(
     }
   }
 )
-
+*/
 
          
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Corrupted Punishment',
     id : 'base:corrupted-punishment',
@@ -11366,7 +11231,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Corrupted Empowerment',
     id : 'base:corrupted-empowerment',
@@ -11395,7 +11260,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Corrupted Radioactivity',
     id : 'base:corrupted-radioactivity',
@@ -11424,7 +11289,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Corrupted Inspiration',
     id : 'base:corrupted-inspiration',
@@ -11454,7 +11319,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Corrupted Corruption',
     id : 'base:corrupted-corruption',
@@ -11484,7 +11349,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banishing Accumulation',
     id : 'base:banishing-accumulation',
@@ -11522,7 +11387,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banishing Resonance',
     id : 'base:banishing-resonance',
@@ -11559,7 +11424,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Corrupted Drain',
     id : 'base:corrupted-drain',
@@ -11604,7 +11469,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Phasing Banishment',
     id : 'base:phasing-banishment',
@@ -11644,7 +11509,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Banish Shield',
     id : 'base:banish-shield',
@@ -11673,7 +11538,7 @@ Arts.newEntry(
 @:getStacks ::(ent) <-
   ent.effectStack.getAllByFilter(::(value) <- value.id == 'base:banish')->size
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Corrupted Soulbind',
     id : 'base:corrupted-soulbind',
@@ -11718,7 +11583,7 @@ Arts.newEntry(
 }
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Scavenge the Exiled',
     id : 'base:scavenge-the-exiled',
@@ -11773,7 +11638,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Absorb the Exiled',
     id : 'base:absorb-the-exiled',
@@ -11808,7 +11673,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Invoke the Exiled',
     id : 'base:invoke-the-exiled',
@@ -11867,8 +11732,8 @@ Arts.newEntry(
 )
 
 
-
-Arts.newEntry(
+/*
+Arts.database.newEntry(
   data: {
     name: 'Draw the Exiled',
     id : 'base:draw-the-exiled',
@@ -11902,10 +11767,10 @@ Arts.newEntry(
     }
   }
 )
+*/
 
 
-
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Reanimate the Exiled',
     id : 'base:reanimate-the-exiled',
@@ -11942,7 +11807,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Summon: Banished Beast',
     id : 'base:summon-banished-beast',
@@ -11993,7 +11858,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Behold! The Banished Realms!',
     id : 'base:behold-the-banished-realms',
@@ -12066,7 +11931,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Summon: Runic Beast',
     id : 'base:summon-runic-beast',
@@ -12113,7 +11978,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Conjure Runes',
     id : 'base:conjure-runes',
@@ -12137,7 +12002,7 @@ Arts.newEntry(
           from:user, 
           id:Effect.getRandomFiltered(::(value) <- 
             value.id->contains(:'-rune')
-          ),
+          ).id,
           durationTurns:5
         );      
       }
@@ -12146,7 +12011,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Runic Revelation',
     id : 'base:runic-revelation',
@@ -12176,7 +12041,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Transfer Rune',
     id : 'base:runic-revelation',
@@ -12212,7 +12077,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Noxious Fume',
     id : 'base:noxious-fume',
@@ -12240,7 +12105,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Noxious Fumigation',
     id : 'base:noxious-fumigation',
@@ -12269,7 +12134,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Vulnerability: Ice',
     id : 'base:vulnerability-ice',
@@ -12304,7 +12169,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Vulnerability: Thunder',
     id : 'base:vulnerability-thunder',
@@ -12339,7 +12204,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Vulnerability: Fire',
     id : 'base:vulnerability-fire',
@@ -12375,7 +12240,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Vulnerability: Dark',
     id : 'base:vulnerability-dark',
@@ -12411,7 +12276,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Vulnerability: Light',
     id : 'base:vulnerability-light',
@@ -12447,7 +12312,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Vulnerability: Poison',
     id : 'base:vulnerability-poison',
@@ -12483,7 +12348,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Chaotic Drain Portal',
     id : 'base:chaotic-drain-portal',
@@ -12507,7 +12372,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Field of Elemental Chaos',
     id : 'base:field-of-elemental-chaos',
@@ -12539,7 +12404,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Primal Desperation',
     id : 'base:primal-desparation',
@@ -12565,13 +12430,13 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Starsign Alignment',
     id : 'base:starsign-alignment',
     notifCommit : '$1 glows!',
     notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
+    targetMode : TARGET_MODE.ONE,
     description: "Grants Starsign Alignment to a target for 3 turns.",
     keywords: [],
     durationTurns: 0,
@@ -12592,7 +12457,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bound Toxin',
     id : 'base:bound-toxin',
@@ -12621,7 +12486,7 @@ Arts.newEntry(
 
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bound Lacerations',
     id : 'base:bound-lacerations',
@@ -12648,7 +12513,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bound Searing',
     id : 'base:bound-searing',
@@ -12675,7 +12540,7 @@ Arts.newEntry(
   }
 )
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bound Chilling',
     id : 'base:bound-chilling',
@@ -12703,7 +12568,7 @@ Arts.newEntry(
 )
 
 
-Arts.newEntry(
+Arts.database.newEntry(
   data: {
     name: 'Bound Bounding',
     id : 'base:bound-bounding',
@@ -12732,99 +12597,436 @@ Arts.newEntry(
 
 };
 
-Arts = class(
-  inherits: [Database],
-  define::(this) {
-    this.interface = {   
-      NO_NOTIF : {get ::<- '[[]]'}, 
-      FAIL : {get ::<- '[[]]'},
-      TARGET_MODE : {get::<- TARGET_MODE},
-      USAGE_HINT : {get::<- USAGE_HINT},
-      KIND : {get::<- KIND},
-      RARITY : {get::<- RARITY},
-      TRAIT : {get::<- TRAIT},
-      CANCEL_MULTITURN : {get::<- -1},
-      A_LOT : {get ::<- A_LOT},
-      generateKeywordDefinitionLines ::(art) {
-        @:ArtsTerm = import(:'game_database.artsterm.mt');
-        @:Effect = import(:'game_database.effect.mt');
-        @:lines = [];
-        foreach(art.keywords) ::(k, v)  {
-          // first check if its an effect 
-          @thing = Effect.findSoft(:v);
-          
-          when(thing) ::<= {
-            lines->push(:'[Effect: ' + thing.name + ']: ' + thing.description + (if (thing.stackable == false) ' This is unstackable.' else ''));
-          }
 
-          thing = ArtsTerm.find(id:v);
-          when(thing) ::<= {
-            lines->push(:'[' + thing.name + ']: ' + thing.description);
-          }
-        }  
-        return lines;    
-      },
-      
-      traitToString::(trait) {
-        return match(trait) {
-          (1): 'Physical',
-          (2): 'Magick',
-          (4): 'Healing',
-          (8): 'Fire',
-          (16): 'Ice',
-          (32): 'Thunder',
-          (64): 'Support',
-          (128): 'Light',
-          (256): 'Dark',
-          (512): 'Poison',
-          (1024): 'Special',
-          (2048): 'Costless',
-          (4096): 'Multi-hit',
-          (4096*2): 'Blockable',
-          (4096*4): 'Once Per Battle',
-          (2**16):  'Dodgeable',
-          default: ''
-        }
-        return '';
-      }
+
+
+@:ENERGY = {
+    A : 0,
+    B : 1,
+    C : 2,
+    D : 3
+}
+
+
+
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
+@:CARD_WIDTH = 8;
+@:CARD_HEIGHT = 7;
+@:MAX_ART_WIDTH = (canvas.width * 0.7)->floor;
+@:renderCard ::<= {
+  @:cardSymbols = [
+    '//',
+    '!!',
+    '^^',
+    '**',
+  ]
+  
+  @:energySymbols = [
+    '_',
+    '=',
+    '.',
+    '~',
+  ];
+
+  @:drawRectangle::(x, y, width, height, art, showEnergy) {
+    canvas.movePen(x:x, y:y); canvas.drawRectangle(text: ' ', width:width, height: height);        
+    canvas.movePen(x:x, y:y); canvas.drawChar(text:'┌');
+    canvas.movePen(x:x+width-1, y:y); canvas.drawChar(text:'┐');
+    for(1, width-1)::(i) {
+      canvas.movePen(x:x+i, y:y);      canvas.drawChar(text:'─');
     }
 
-  }  
-).new(
-  name : 'Wyvern.Arts',
-  attributes : {
-    name : String,
-    id : String,
-    
-    // String to display when committing the action 
-    // and when the action fails to occur.
-    //
-    // $1 is for the user's name 
-    // $2 is for the first target's name
-    notifCommit : String,
-    notifFail : String,
-    
-    // an array of keywords that will "hyperlink" when 
-    // the art is chosen graphically. Can either be 
-    // IDs of effects or IDs of ArtsTerms.
-    keywords : Object,
-    description : String,
-    targetMode : Number,
-    usageHintAI : Number,
-    // returns false if conditions arent good to use the art. 
-    // If returns empty, behavior continues as normal. 
-    // If returns an object, should contain the targets for 
-    // that Art that should be used
-    shouldAIuse : Function, 
-    kind : Number,
-    traits : Number,
-    rarity : Number,
-    baseDamage : Function,
-    durationTurns : Number, // multiduration turns supercede the choice of action
+    canvas.movePen(x:x, y:y+height-1); canvas.drawChar(text:'└');
+    canvas.movePen(x:x+width-1, y:y+height-1); canvas.drawChar(text:'┘');
+    for(1, height-1)::(i) {
+      canvas.movePen(x:x,     y:y+i); canvas.drawChar(text:'│');
+      canvas.movePen(x:x+width-1, y:y+i); canvas.drawChar(text:'│');
+    }
+  
+  }
 
-    onAction : Function
+
+  return ::(x, y, art, flipped, showEnergy) {
+    drawRectangle(x, y, width:CARD_WIDTH, height:CARD_HEIGHT, art, showEnergy);
+    drawRectangle(x:x+1, y:y+1, width:CARD_WIDTH-2, height:(CARD_HEIGHT/2)->floor, art, showEnergy);
+
+
+    // inner graphic box
+
+
+    if (flipped) ::<= {
+    } else ::<= {
+      @:base = (CARD_HEIGHT/2)->floor+1;      
+      canvas.movePen(x:x+1, y:y + base); canvas.drawText(text:cardSymbols[art.kind]);
+
+    }      
+  }
+}
+
+
+@:getTraits::(art) {
+  when(art.traits == 0) 'None';
+  
+  @out = '';
+  @val = art.traits;
+  
+  foreach(Arts.TRAIT) ::(k, val) {
+    if (art.traits & val)
+      out = out + (if (out == '') 
+        Arts.traitToString(:val)
+      else 
+        ', ' + Arts.traitToString(:val))
+  }
+  
+  return out;
+  
+}
+
+
+@:getCharges::(count) {
+  @a = [];
+  for(0, count) ::(i) {
+    a->push(:'*');
+  }
+  return String.combine(:a);
+}
+
+@:renderArt::(user, id, topWeight, leftWeight, maxWidth, showEnergy){
+  if (maxWidth == empty) maxWidth = 1;
+  @baseDamageMax;
+  @baseDamageMin;  
+  
+  @:art = Arts.database.find(:id);
+  
+  if (user) ::<= {
+    baseDamageMin = user.getArtMinDamage(:id);
+    baseDamageMax = user.getArtMaxDamage(:id);
+  }
+  
+
+  @lines = [
+    art.name,
+    " - Kind: " + match(art.kind) {
+      (Arts.KIND.ABILITY): "Ability (//)",
+      (Arts.KIND.EFFECT): "Effect (^^)"
+    },
+    " - Charge: " + getCharges(:Arts.getMaxCharge(:art.rarity)),
+    " - Traits: " + getTraits(:art),
+    art.description,
+    if (user != empty && baseDamageMin != empty) 'Around: ' + baseDamageMin + ' - ' + baseDamageMax + " damage" else '',
+  ]
+  
+  lines = [...lines, ...Arts.generateKeywordDefinitionLines(:art)];
+  canvas.renderTextFrameGeneral(
+    topWeight,
+    leftWeight,
+    maxWidth,
+    lines
+  );
+}
+
+@selected = 0;
+@:renderCards ::(user, ids, enabled, showEnergy){
+  @index;
+  if (enabled != empty) ::<= {
+    index = enabled[selected]
+  } else 
+    index = selected;
+
+  @fitWidth = CARD_WIDTH;
+
+  @x = (canvas.width / 2 - (CARD_WIDTH/2) * ids->size)->floor;
+  if (x < 1)
+    fitWidth = 3;
+
+
+  @:y = canvas.height - (CARD_HEIGHT);
+  
+  for(0, ids->size) ::(i) {
+    renderCard(x, y:y + (if (i == index) -1 else 0), art:Arts.database.find(:ids[i]), showEnergy);
+    x += fitWidth;
+    
+    if (i == index) ::<= {
+      renderArt(user, id:ids[i], topWeight:0.1, showEnergy);
+    }
+    
+  }
+}
+
+
+Arts = databaseItemMutatorClass.create(  
+  name : 'Wyvern.Arts',
+  statics : {
+    NO_NOTIF : {get ::<- '[[]]'}, 
+    FAIL : {get ::<- '[[]]'},
+    TARGET_MODE : {get::<- TARGET_MODE},
+    USAGE_HINT : {get::<- USAGE_HINT},
+    KIND : {get::<- KIND},
+    RARITY : {get::<- RARITY},
+    TRAIT : {get::<- TRAIT},
+    CANCEL_MULTITURN : {get::<- -1},
+    A_LOT : {get ::<- A_LOT},
+    
+    renderListItem::(art) {
+      return [
+        art.base.name,
+        canvas.renderBarAsString(
+          width:art.maxCharge+2,
+          fillFraction: art.charge / art.maxCharge,
+          emptyCharacter : '░'
+        ),
+        '' + art.charge + '/' + art.maxCharge
+      ]
+    },
+    
+    queuePick ::(
+      arts => Object,
+      onGetArts,
+      topWeight,
+      leftWeight,
+      renderable,
+      onHover,
+      keep,
+      canCancel,
+      onChoice,
+      prompt
+    ) {
+      @which;
+      @choiceActs = [...arts];
+      choicesColumns(
+        leftWeight: 1,
+        topWeight : 1,
+        leftJustified : [
+          false, true, true
+        ],
+        prompt,
+        canCancel : if (canCancel == empty) true else canCancel,
+        keep: if (keep == empty) true else keep,
+        separator : '',
+        columnPadding : false,
+        onHover::(choice) {
+          which = choice-1;
+
+          if (onGetArts) choiceActs = onGetArts();
+          if (onHover) onHover(:choiceActs[which]);
+        },        
+
+        onGetChoices ::{
+          @:bars   = [];
+          @:status = [];
+          @:names  = [];
+          choiceActs->map(::(value) {
+            @:items = Arts.renderListItem(art:value);
+            
+            if (value.canUse) ::<= {
+              //status->push(:'');
+              status->push(:'');
+            } else ::<= {
+              status->push(:items[2]);
+            }
+            bars->push(:items[1]);
+            names->push(:items[0]);
+          });
+          return [
+            status,
+            bars,
+            names
+          ];
+        },
+                    
+        onChoice::(choice) {
+          if (onChoice) onChoice(:choiceActs[choice-1]);
+        }
+      )
+    },
+    
+    generateKeywordDefinitionLines ::(art) {
+      @:ArtsTerm = import(:'game_database.artsterm.mt');
+      @:Effect = import(:'game_database.effect.mt');
+      @:lines = [];
+      foreach(art.keywords) ::(k, v)  {
+        // first check if its an effect 
+        @thing = Effect.findSoft(:v);
+        
+        when(thing) ::<= {
+          lines->push(:'[Effect: ' + thing.name + ']: ' + thing.description + (if (thing.stackable == false) ' This is unstackable.' else ''));
+        }
+
+        thing = ArtsTerm.find(id:v);
+        when(thing) ::<= {
+          lines->push(:'[' + thing.name + ']: ' + thing.description);
+        }
+      }  
+      return lines;    
+    },
+    
+    traitToString::(trait) {
+      return match(trait) {
+        (1): 'Physical',
+        (2): 'Magick',
+        (4): 'Healing',
+        (8): 'Fire',
+        (16): 'Ice',
+        (32): 'Thunder',
+        (64): 'Support',
+        (128): 'Light',
+        (256): 'Dark',
+        (512): 'Poison',
+        (1024): 'Special',
+        (2048): 'Costless',
+        (4096): 'Multi-hit',
+        (4096*2): 'Blockable',
+        (4096*4): 'Once Per Battle',
+        (2**16):  'Dodgeable',
+        default: ''
+      }
+      return '';
+    },
+    
+    getMaxCharge::(rarity) <- match(rarity) {
+      (RARITY.COMMON): 1,
+      (RARITY.UNCOMMON): 2,
+      (RARITY.RARE): 3,
+      (RARITY.EPIC): 4
+    },
+
+    viewCards ::(user, cards, onChoice, canCancel) {
+      when(cards->size == 0) ::<= {
+        if (user == empty) 
+          windowEvent.queueMessage(
+            text: 'There were no Arts in hand.'
+          )
+        else 
+          windowEvent.queueMessage(
+            text: user.name + ' has no Arts in their hand.'
+          );
+      }
+    
+
+      windowEvent.queueChoices(
+        hideWindow : true,
+        keep : true,
+        choices : cards->map(::(value) <- value.id),
+        onHover::(choice) {
+          selected = choice-1;
+        },
+        renderable : {
+          render ::{
+            renderCards(user, cards, showEnergy:true);          
+          }
+        },
+        canCancel:if (canCancel == empty) true else canCancel,
+        
+        onChoice ::(choice) {          
+          if (onChoice)
+            onChoice(choice);
+        }        
+      );      
+    },    
+    
+    renderArt : renderArt    
   },
-  reset
+  
+  items : {
+    charge : 99
+  },
+
+  database : Database.new(
+    name : 'Wyvern.Arts',
+    attributes : {
+      name : String,
+      id : String,
+      
+      // String to display when committing the action 
+      // and when the action fails to occur.
+      //
+      // $1 is for the user's name 
+      // $2 is for the first target's name
+      notifCommit : String,
+      notifFail : String,
+      
+      // an array of keywords that will "hyperlink" when 
+      // the art is chosen graphically. Can either be 
+      // IDs of effects or IDs of ArtsTerms.
+      keywords : Object,
+      description : String,
+      targetMode : Number,
+      usageHintAI : Number,
+      // returns false if conditions arent good to use the art. 
+      // If returns empty, behavior continues as normal. 
+      // If returns an object, should contain the targets for 
+      // that Art that should be used
+      shouldAIuse : Function, 
+      kind : Number,
+      traits : Number,
+      rarity : Number,
+      baseDamage : Function,
+      durationTurns : Number, // multiduration turns supercede the choice of action
+
+      onAction : Function
+    },
+    reset
+  ),
+  
+  define ::(this, state) {
+
+    this.interface = {
+      initialize ::(parent) {
+
+      },
+
+      defaultLoad::(base) {
+        state.base = base;
+        state.charge = this.maxCharge;
+      },
+
+      charge : {
+        get ::<- state.charge,
+        set ::(value) <- state.charge = value
+      },
+      
+      canUse : {
+        get ::<- state.charge >= this.maxCharge
+      },
+      
+      recharge :: {
+        state.charge = this.maxCharge
+      },
+      
+      revealArt ::(user, prompt) {
+        windowEvent.queueMessage(
+          renderable : {
+            render ::{
+              Arts.renderArt(user, id:this.base.id, topWeight:0.3);
+            }
+          },
+          topWeight: 1,
+          text: prompt
+        );
+      },      
+      maxCharge : {
+        get ::<- Arts.getMaxCharge(:state.base.rarity)
+      },
+      
+      id : {
+        get ::<- state.base.id
+      },
+            
+      donateCharge::(art => Arts.type) {
+        art.charge = 0;
+        state.charge = this.maxCharge;
+      },
+      
+      addCharge::(count) {
+        if (count == empty) count = 1;
+        state.charge += count;
+        if (state.charge > this.maxCharge)
+          this.charge = this.maxCharge
+      }
+      
+      
+    }
+  }
 );
 
 

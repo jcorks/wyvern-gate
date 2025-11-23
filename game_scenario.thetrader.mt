@@ -17,6 +17,7 @@
 @:Scene = import(module:'game_database.scene.mt');
 @:Accolade = import(module:'game_struct.accolade.mt');
 @:romanNum = import(module:'game_function.romannumerals.mt');
+@:Arts = import(:'game_mutator.arts.mt');
 
 
 @:WORK_ORDER__SPACE = 1;
@@ -3223,16 +3224,12 @@ return {
 
       @:basicArts = [
         'base:pebble',
-        'base:parry',
-        'base:retaliate',
-        'base:reevaluate',
         'base:agility',
         'base:foresight',
-        'base:mind-games',
         'base:wyvern-prayer'
       ];
 
-      p0.supportArts = [...basicArts];
+      p0.supportArts = [...basicArts]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));;
 
 
         

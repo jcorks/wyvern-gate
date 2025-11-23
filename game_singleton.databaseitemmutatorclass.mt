@@ -113,6 +113,9 @@ return {
     staticsOut.database = {
       get ::<- database
     };
+
+
+
     items.base = empty;
     
     @:c = LoadableClass.create(
@@ -128,7 +131,7 @@ return {
             state.base = args.base;
             if (defaultLoad != empty)
               defaultLoad(*args)
-          },
+          },  
 
           base : {
             get ::<- state.base

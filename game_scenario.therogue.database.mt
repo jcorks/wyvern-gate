@@ -24,7 +24,7 @@
 @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 @:DungeonMap = import(:'game_singleton.dungeonmap.mt');
 @:Profession = import(module:'game_database.profession.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:Entity = import(module:'game_class.entity.mt');
 @:Location = import(module:'game_mutator.location.mt');
 @:State = import(module:'game_class.state.mt');

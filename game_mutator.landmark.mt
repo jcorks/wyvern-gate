@@ -867,7 +867,7 @@ Landmark.database.newEntry(
     peaceful : false,
     floor : 0,
     map : empty,
-    stepsSinceLast: 0,
+    steps: 0,
     data : empty,
     events : empty,
     mapEntityController : empty,
@@ -1072,7 +1072,7 @@ Landmark.database.newEntry(
         state.x = 0;
         state.y = 0;
         state.floor = 0;
-        state.stepsSinceLast = 0;
+        state.steps = 0;
         state.data = {};
         state.events = [];
         state.symbol = base.symbol;
@@ -1240,18 +1240,22 @@ Landmark.database.newEntry(
         foreach(state.events) ::(k, event) {
           event.step();
         }
+        
+        if (state.steps > 0 && (state.steps % 25) == 0) ::<= {
+          foreach(world.party.members) ::(k, member) {
+            member.recharge()
+          }
+        }
 
 
 
         when(state.base.landmarkType == TYPE.STRUCTURE) ::<= {
           if (this.peaceful == false) ::<= {
-            if (state.stepsSinceLast >= 30 && random.number() > 0.7) ::<= {
+            if (((state.steps != 0) && state.steps % 30 == 0) && random.number() > 0.7) ::<= {
               @:Scene = import(module:'game_database.scene.mt');            
               Scene.start(id:'base:scene_guards0', onDone::{}, location:empty, landmark:this);
-              state.stepsSinceLast = 0;
             }
           }
-          state.stepsSinceLast += 1;        
         }
         
         foreach(state.events) ::(k, event) {
@@ -1267,7 +1271,7 @@ Landmark.database.newEntry(
           }
         }
 
-        state.stepsSinceLast += 1;                
+        state.steps += 1;                
         
       },
       

@@ -24,7 +24,7 @@
 @:NameGen = import(module:'game_singleton.namegen.mt');
 @:Item = import(module:'game_mutator.item.mt');
 @:Damage = import(module:'game_class.damage.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:Effect = import(module:'game_database.effect.mt');
 @:Inventory = import(module:'game_class.inventory.mt');
 @:BattleAI = import(module:'game_class.battleai.mt');
@@ -35,7 +35,6 @@
 @:correctA = import(module:'game_function.correcta.mt');
 @:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:ArtsDeck = import(module:'game_class.artsdeck.mt');
 @:EffectStack = import(:'game_class.effectstack.mt');
 @:BattleAction = import(:'game_struct.battleaction.mt');
 @:displayHP = import(:'game_function.displayhp.mt');
@@ -45,7 +44,6 @@
 @:MIN_SUPPORT_COUNT = 5;
 @:DAMAGE_RNG_SPREAD = 0.3;
 @:PROF_EXP_PER_KNOCKOUT = 35;
-@:DECK_MIN_ART_COUNT = 25;
 @:FEELING_TYPE = {
   PERSON : 1,
   ITEM : 2,
@@ -341,63 +339,9 @@
   return temp->keys;
 }
 
-@:newDeckTemplate ::<- {
-  supportArts : [],
-  professionArts : []
-}
 
 
 
-@:assembleDeck ::(this, state) {
-  @:deck = ArtsDeck.new(profession: this.profession.id);
-  @:set = state.deckTemplates[state.equippedDeck];
-  
-  deck.subscribe(::(event, card) {
-    match(event) {
-      (ArtsDeck.EVENTS.DRAW): this.effectStack.emitEvent(
-        name: 'onDraw',
-        card
-      ),
-
-      (ArtsDeck.EVENTS.DISCARD): this.effectStack.emitEvent(
-        name: 'onDiscard',
-        card
-      ),
-
-      (ArtsDeck.EVENTS.LEVEL): this.effectStack.emitEvent(
-        name: 'onLevel',
-        card
-      ),
-
-      (ArtsDeck.EVENTS.SHUFFLE): this.effectStack.emitEvent(
-        name: 'onShuffle'
-      )
-    }
-  });
-  
-
-  // add weapon
-  @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
-  if (hand != empty && hand.arts->size >= 2) ::<= {
-    deck.addArt(id:hand.arts[0]);
-    deck.addArt(id:hand.arts[1]);
-  }  
-  
-  // profession boosts
-  foreach(set.professionArts) ::(k, v) {
-    deck.addArt(id:v);
-  }
-  
-  
-  @:world = import(module:'game_singleton.world.mt');
-  if (set.supportArts) ::<= {
-    foreach(set.supportArts)::(k, v) {
-      deck.addArt(id:v);
-    }
-  }
-  
-  return deck;
-}
 
 @:animateDamageParticles::() {
   @:emitter = import(:'game_class.particle.mt').new(
@@ -667,7 +611,7 @@
                 'Level Up!',
                 this.name + ', the ' + profession.name + ' is now Level ' + if (set.level >= profession.arts->size) 'MAX' else set.level,
                 '',
-                'Learned: ' + Arts.find(:profession.arts[set.level-1]).name
+                'Learned: ' + Arts.database.find(:profession.arts[set.level-1]).name
               ]
             )
             
@@ -862,14 +806,15 @@
     expNext : 1,
     level : 0,
     data : empty,
-    deckTemplates : empty,
-    equippedDeck : 'MAIN',
+    loadoutTemplates : empty,
     professionArts : empty,
+    equippedLoadout : 'MAIN',
     innateEffects : empty,
     professionProgress : empty,
     opinions : empty,
     recentOpinions : empty,
-    affinity : -1
+    affinity : -1,
+    equipArts : empty
   },
   
   private : {
@@ -881,7 +826,6 @@
     abilitiesUsedBattle : Nullable,
     owns : Nullable,
     canActThisTurn : Boolean,
-    deck : Nullable
   },
   
   
@@ -891,6 +835,7 @@
       @:this = _.this;
       _.state.battleAI = BattleAI.new(user:this); 
       @:state = _.state;
+      state.equipArts = [];
     },
       
     
@@ -902,11 +847,15 @@
 
       state.innateEffects = innateEffects;
       state.affinity = random.pickArrayItem(:Damage.TYPE->values);
-      
+      state.equipArts = [];
       state.worldID = world.getNextID();
-      state.deckTemplates = {
-        MAIN : newDeckTemplate()
+      state.loadoutTemplates = {
+        MAIN : {
+          supportArts : [],
+          professionArts : []
+        }
       };
+      state.professionArts = [];
 
       // starting supports
       state.stats = StatSet.new(
@@ -967,7 +916,6 @@
           Profession.find(id:professionHint)
 
       state.professionProgress = [];
-      state.professionArts = [];
 
       if (state.profession.traits & Profession.TRAIT.NON_COMBAT) ::<= {
         for(0, 21) ::(i) {
@@ -1106,19 +1054,19 @@
       return ratioDiff;            
     },
     
-    getArtMinDamage ::(handCard) {
+    getArtMinDamage ::(id) {
       @:this = _.this;
-      @:art = Arts.find(id:handCard.id);
-      @dmg= art.baseDamage(user:this, level:handCard.level);
+      @:art = Arts.database.find(id);
+      @dmg= art.baseDamage(user:this, level:1);
       when(dmg == empty) empty;
       
       return (dmg * (1 - 0.5 * DAMAGE_RNG_SPREAD))->ceil;
     },
 
-    getArtMaxDamage ::(handCard) {
+    getArtMaxDamage ::(id) {
       @:this = _.this;
-      @:art = Arts.find(id:handCard.id);
-      @dmg= art.baseDamage(user:this, level:handCard.level);
+      @:art = Arts.database.find(id);
+      @dmg= art.baseDamage(user:this, level:1);
       when(dmg == empty) empty;
       
       return (dmg * (1 + 0.5 * DAMAGE_RNG_SPREAD))->ceil;
@@ -1136,9 +1084,6 @@
         this.effectStack.addInnate(id:passiveName);
       }      
       _.battle = battle;
-      _.deck = assembleDeck(this, state);
-      _.deck.shuffle();
-      _.deck.redraw();
       initializeEffectStackProper(*_);
       state.ap = (state.stats.AP / 2)->floor
 
@@ -1191,76 +1136,88 @@
       get ::<- _.state.aiAbilityChance
     },
     
-    deck : {
-      get ::<- _.deck
-    },
-    
     
     supportArts : {
-      get ::<- _.state.deckTemplates[_.state.equippedDeck].supportArts,
-      set ::(value) <- _.state.deckTemplates[_.state.equippedDeck].supportArts = value
+      get ::<- _.state.loadoutTemplates[_.state.equippedLoadout].supportArts,
+      set ::(value) <- _.state.loadoutTemplates[_.state.equippedLoadout].supportArts = value
     },
     
     professionArts : {
       get ::<- [..._.state.professionArts]
     },
     
-    deckTemplateNames : {
-      get ::<- _.state.deckTemplates->keys
+    arts : {
+      get ::<- [..._.state.equipArts,
+                ..._.state.loadoutTemplates[_.state.equippedLoadout].professionArts,
+                ..._.state.loadoutTemplates[_.state.equippedLoadout].supportArts
+               ]
+    },
+    
+    loadoutTemplateNames : {
+      get ::<- _.state.loadoutTemplates->keys
     },
       
     
-    addDeck ::(name) {
+    addLoadout ::(name) {
       @:state = _.state;
       @:this = _.this;
       
-      state.deckTemplates[name] = newDeckTemplate();
+      state.loadoutTemplates[name] = {
+        supportArts : [],
+        professionArts : []
+      };
     },
     
-    getEquippedDeckName ::<- _.state.equippedDeck,
+    getEquippedLoadoutName ::<- _.state.equippedLoadout,
     
-    equipDeck ::(name, silent) {
+    equipLoadout ::(name, silent) {
       @:state = _.state;
       @:this = _.this;
 
-      when (state.deckTemplates->keys->findIndex(:name) == -1) 
-        error(:"No such deck is equippable. Check your code!");
+      when (state.loadoutTemplates->keys->findIndex(:name) == -1) 
+        error(:"No such loadout is equippable. Check your code!");
 
-      @:set = state.deckTemplates[name];
-      when(this.calculateDeckSize(:set) < DECK_MIN_ART_COUNT)
+      @:set = state.loadoutTemplates[name];
+      
+      when (::? {
+        foreach(this.arts) ::(k, v) {
+          if (!v.canUse) send(:true);
+        }
+        return false;
+      })
         windowEvent.queueMessage(
-          text: "Deck "+name+' has too few cards to be equipped. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize(:set) + ' out of the minimum of ' + DECK_MIN_ART_COUNT + '.'
+          text: 'Loadouts can\'t be switched while Arts are not fully charged!'
         );
       
       if (silent != true)
         windowEvent.queueMessage(
-          text: this.name + ' is now using the deck ' + name + '.'
+          text: this.name + ' is now using the loadout ' + name + '.'
         );
 
-      _.state.equippedDeck = name;
+      _.state.equippedLoadout = name;
     },
     
-    removeDeck ::(which) {
+    removeLoadout ::(which) {
       @:state = _.state;
       @:this = _.this;
 
-      when(which == state.equippedDeck) empty;
+      when(which == state.equippedLoadout) empty;
       @:world = import(module:'game_singleton.world.mt');
       
-      foreach(state.deckTemplates[which].supportArts) ::(k, v) {
+      foreach(state.loadoutTemplates[which].supportArts) ::(k, v) {
         world.party.addSupportArt(id:v);
       }
-      state.deckTemplates->remove(:which);
+      state.loadoutTemplates->remove(:which);
     },
     
-    editDeck ::(which) {
+    editLoadout ::(which) {
       @:state = _.state;
       @:this = _.this;
       @:pickArt = import(:'game_function.pickart.mt');
       
-      @:set = state.deckTemplates[which];
+      @:set = state.loadoutTemplates[which];
       if (set == empty)
-        error(:'Incorrect deck name');
+        error(:'Incorrect loadout name');
       
       
       
@@ -1272,14 +1229,6 @@
       
         @:pickArt = import(:'game_function.pickart.mt');
         pickArt( 
-          onGetPrompt :: {
-            @:size = this.calculateDeckSize(:set);
-            return which + ': ' + (if(size <= DECK_MIN_ART_COUNT) 
-                ''+size + ' / ' + DECK_MIN_ART_COUNT + ' cards'
-              else
-                ''+size + ' cards'
-            )
-          },
            
           onGetList :: {
             return set.supportArts;
@@ -1292,7 +1241,7 @@
             
             when(id == empty) empty;
             
-            @:art = Arts.find(id:id);
+            @:art = Arts.database.find(id:id);
             
             windowEvent.queueChoices(
               prompt: art.name,
@@ -1303,9 +1252,10 @@
               onChoice::(choice) {
                 @:world = import(module:'game_singleton.world.mt');
                 
-                when (set.supportArts->size == MIN_SUPPORT_COUNT) ::<= {
-                  windowEvent.queueMessage(text: 'Each person must have at least 5 supports in their deck. Please try adding a different Support to this person\'s deck before removing this Art.');
-                }
+                when (art.canUse == false)
+                  windowEvent.queueMessage(
+                    text: 'This art is not fully charged. Only fully charged arts can be unequipped.'
+                  );
                 
                 world.party.addSupportArt(id:art.id);
                 set.supportArts->remove(:set.supportArts->findIndex(:art.id));
@@ -1334,31 +1284,24 @@
           keep: true,
           prompt : 'Support Trunk:', 
           canCancel:true,
-          onGetList :: {
-            list = [...world.party.arts]->map(::(value) <- value.id);
-            return list;
-          },
+          onGetList ::<- world.party.arts,
           onChoice::(art, category) {
             @id = art;
             when(id == empty) empty;
             
-            art = Arts.find(id);
+            art = Arts.database.find(id);
             
             windowEvent.queueChoices(
               prompt: art.name,
               choices : [
-                'Put in ' + this.name + '\'s Deck'
+                this.name + ' has equipped the Art.'
               ],
               canCancel: true,
               onChoice::(choice) {
                 @:world = import(module:'game_singleton.world.mt');
-                when(set.supportArts->findIndex(:id) != -1)
-                  windowEvent.queueMessage(
-                    text: 'Only one of each kind of Support Art can be equipped at a time.'
-                  );
                 
                 world.party.takeSupportArt(id:art.id);
-                set.supportArts->push(:art.id);
+                set.supportArts->push(:Arts.new(base:art));
               }
             );
           }
@@ -1379,7 +1322,7 @@
           onGetList ::<- this.getUnequippedProfessionArts(),
           canCancel: true,
           onChoice ::(art, category) {
-            set.professionArts->push(:art);
+            set.professionArts->push(:Arts.new(base:Arts.database.find(:art)));
           }
         );
       }
@@ -1389,44 +1332,20 @@
       @:start ::{
         pickArt(
           keep:true,
-          onGetPrompt :: {
-            @:size = this.calculateDeckSize(:set);
-            return which + ': ' + (if(size <= DECK_MIN_ART_COUNT) 
-                ''+size + ' / ' + DECK_MIN_ART_COUNT + ' cards'
-              else
-                ''+size + ' cards'
-            )
-          },
-
-
-
-          onCancel ::{
-            when(this.calculateDeckSize(:set) < DECK_MIN_ART_COUNT && state.equippedDeck == which) ::<= {
-              windowEvent.queueMessage(
-                text: this.name + '\'s deck has too few cards to keep equipped. Each art gives cards to the Arts deck based on its rarity. A minimum threshold is required. Your deck has ' + this.calculateDeckSize(:set) + ' out of the minimum of ' + DECK_MIN_ART_COUNT + '.'
-              );
-              
-              
-              start();
-            }
-          },
           onGetCategories ::{
             @:categories = [];
             @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
-            categories->push(:['Weapon:', if (hand != empty && hand.arts != empty && hand.arts->size >= 2) [
-              hand.arts[0],        
-              hand.arts[1]
-            ] else [empty, empty]]);
+            categories->push(:['Weapon:', state.equipArts->map(::(value) <- value.id)]);
 
             categories->push(:['Profession:',::<= {
-              @:profArts = [...set.professionArts];
+              @:profArts = set.professionArts->map(::(value) <- value.id);
               for(profArts->size, 5) ::(i) {
                 profArts->push(:empty);
               }
               return profArts;
             }]);
 
-            categories->push(:['Support:', [...set.supportArts]]);
+            categories->push(:['Support:', set.supportArts->map(::(value) <- value.id)]);
             categories->push(:[' Add support...', []]);
             return categories;
           },
@@ -1487,7 +1406,7 @@
       start();
     },
 
-    viewDeckArts ::(prompt, which) {
+    viewLoadoutArts ::(prompt, which) {
       @:this = _.this;
       @:state = _.state;
       // add weapon
@@ -1500,13 +1419,13 @@
           hand.arts[1]
         ]])
       }  
-      @:set = state.deckTemplates[state.equippedDeck];
+      @:set = state.loadoutTemplates[state.equippedLoadout];
 
       // profession boosts
-      categories->push(:['Profession:', [...set.professionArts]]);
+      categories->push(:['Profession:', set.professionArts->map(::(value) <- value.id)]);
 
       if (set.supportArts) ::<= {
-        categories->push(:['Support:', [...set.supportArts]]);;
+        categories->push(:['Support:', set.supportArts->map(::(value) <- value.id)]);
       }
 
       
@@ -1522,7 +1441,6 @@
       _.effectStack = empty;
       _.abilitiesUsedBattle = empty;        
       
-      _.deck = empty;
       
       _.this.recalculateStats(); 
       _.state.ap = 0;               
@@ -1530,34 +1448,6 @@
       breakpoint();
     },
     
-    calculateDeckSize ::(set){
-      @:state = _.state;
-      @:this = _.this;
-      @:pickArt = import(:'game_function.pickart.mt');
-      
-      if (set == empty)
-        set = state.deckTemplates[state.equippedDeck];
-      
-      @:cards = [
-        ...set.supportArts, 
-        ...set.professionArts,
-        ...(if (state.equips[EQUIP_SLOTS.HAND_LR] != empty && state.equips[EQUIP_SLOTS.HAND_LR].arts != empty) 
-          [
-            state.equips[EQUIP_SLOTS.HAND_LR].arts[0],        
-            state.equips[EQUIP_SLOTS.HAND_LR].arts[1]
-          ]
-        else 
-          []
-        )
-      ]      
-      
-      when(cards->size == 0) 0;
-      return cards->reduce(::(previous, value) <-
-          (if (previous == empty) 0 else previous) + 
-          ArtsDeck.artIDtoCount(:value)
-        );    
-    },
-
       
     recalculateStats :: {  
       @:this = _.this;
@@ -1662,10 +1552,10 @@
     actTurn ::() => Boolean {
       @:state = _.state;
       @:this = _.this;
-      
-      _.deck.redraw();
+
       @act = true;
       state.ap += 1;
+      this.recharge();
       
       
       @:rets = this.effectStack.emitEvent(
@@ -2520,19 +2410,20 @@
     
     removeAllProfessionArts ::{
       @:state = _.state;
-      state.deckTemplates[state.equippedDeck].professionArts = [];
+      state.loadoutTemplates[state.equippedLoadout].professionArts = [];
     },
     
     equipAllProfessionArts:: {
       @:state = _.state;
-      state.deckTemplates[state.equippedDeck].professionArts = [...state.professionArts];
+      state.loadoutTemplates[state.equippedLoadout].professionArts = [...state.professionArts]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
     },
     
     getUnequippedProfessionArts:: {
       @:state = _.state;
+      @:equippedIDs = state.loadoutTemplates[state.equippedLoadout].professionArts->map(::(value) <- value.id);
 
       return state.professionArts->filter(::(value) <-
-        (state.deckTemplates[state.equippedDeck].professionArts->findIndex(:value) == -1)
+        equippedIDs->findIndex(:value) == -1
       )
     },
       
@@ -2814,6 +2705,36 @@
         return false;
       }
     },
+    
+    recharge ::(amount) {
+      @:state = _.state;
+      @:this = _.this;
+      @:arts = this.arts;
+      @canUse = {};
+      if (amount == empty) amount = 1;
+      foreach(arts) ::(k, art) {
+        canUse[art] = art.canUse;
+        art.addCharge(:amount);
+      }
+      @:world = import(module:'game_singleton.world.mt');
+      
+      // physical alert... clunky!
+      /*
+      if (world.party.isMember(:this)) ::<= {
+        @:ready = [];
+        foreach(arts) ::(k, art) {
+          when(!(art.canUse == true && canUse[art] == false)) empty;
+          ready->push(:art);
+        }      
+        when(ready->size > 0)
+          windowEvent.queueMessage(
+            text: 'The following arts are now fully charged\n' + 
+                  String.combine(:ready->map(::(value) <- '- ' + value.base.name + '\n'))
+          );
+      }
+      */
+      
+    },
       
     equip ::(item => Item.type, slot, silent, inventory) {
       @:state = _.state;
@@ -2837,6 +2758,15 @@
       this.addOpinion(
         fullName : 'the ' + item.name
       );
+      
+      foreach(item.arts) ::(k, v) {
+        @:art = Arts.new(base:
+          Arts.database.find(:v)
+        );
+        art.charge = 0;
+        state.equipArts->push(:art);
+        breakpoint();
+      }
 
 
       if (item.base.equipType == Item.TYPE.TWOHANDED) ::<={
@@ -2933,6 +2863,9 @@
       @:this = _.this;
       @:current = state.equips[slot];
       when (current == empty) empty;
+      
+
+      state.equipArts = [];
       state.equips[slot] = empty;        
       
 
@@ -3034,10 +2967,12 @@
       )
     },
       
-    useArt::(art, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {
+    useArt::(art => Arts.type, level, targets, turnIndex, targetDefendParts, targetParts, extraData) {
       @:state = _.state;
       @:this = _.this;
       @:abilitiesUsedBattle = _.abilitiesUsedBattle;
+      @:artStr = art;
+      art = art.base;
       
       when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAIT.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
         text: this.name + " tried to use " + art.name + ", but already was used and could not be used!"
@@ -3052,7 +2987,8 @@
           mess = mess->replace(key:'$2', with:targets[0].name);
         windowEvent.queueMessage(text: mess);
       }
-     
+      
+      artStr.charge = 0;
 
       @:ret = art.onAction(
         user:this,
@@ -3072,18 +3008,17 @@
       return ret;
     },
     
-    playerUseArt ::(commitAction, onCancel, card, canCancel) {
+    playerUseArt ::(commitAction, onCancel, art, canCancel) {
       @:battle = _.battle;
       @:allies = battle.getAllies(entity:_.this);
       @:enemies = battle.getEnemies(entity:_.this);
       @:state = _.state;
       @:this = _.this;
-
+      @card = art;
       @battleAction;
       windowEvent.queueNestedResolve(
         onEnter ::{
-          @:art = Arts.find(id:card.id);
-          @:level = card.level;
+          @:art = Arts.database.find(id:card.id);
           
           @:Entity = import(module:'game_class.entity.mt');
 
@@ -3252,158 +3187,6 @@
     },
     
     
-    chooseDiscard::(
-      act,
-      onChoice
-    ) {
-      @:this = _.this;
-      @:deck = _.deck;
-      @:world = import(module:'game_singleton.world.mt');
-
-      when(world.party.leader == this) 
-        deck.chooseDiscardPlayer(
-          act,
-          onChoice
-        )
-        
-      onChoice(id:deck.chooseDiscardRandom());
-    },
-    
-
-    discardArt::(chosenBy) {
-      if (_.deck == empty)
-        error(detail: 'Can\'t discard when not in battle.');
-        
-      @:this = _.this;
-      @:deck = _.deck;
-      @:world = import(module:'game_singleton.world.mt');
-      
-      if (chosenBy == empty) ::<= {
-        if (world.party.leader == this)
-          deck.discardPlayer()
-        else ::<= {
-          windowEvent.queueMessage(
-            text: this.name + ' discards an Art.'
-          );
-          deck.discardRandom()        
-        }
-      } else ::<= {
-        if (world.party.leader == chosenBy) ::<= {
-          deck.discardPlayer()
-        } else ::<= {
-          @:which = deck.discardRandom()        
-          windowEvent.queueMessage(
-            text: this.name + ' is told to discard the Art: ' + Arts.find(:which.id).name + ' by ' + chosenBy.name + '.' 
-          );
-        }      
-      }
-    },
-    
-    react::(source, onReact) {
-      if (_.deck == empty)
-        error(detail: 'Can\'t react when not in battle.');
-      @:priv = _;
-      @:this = _.this;
-      @:state = _.state;
-      @:abilitiesUsedBattle = _.abilitiesUsedBattle;
-      @:deck = _.deck;
-      @:world = import(module:'game_singleton.world.mt');
-
-      when (this.canUseReactions() == false)
-        onReact();
-      
-      @:chooseReact::(action) {
-        when(action == empty)
-          onReact();
-
-
-        @:card = action.card;
-
-        @:art = Arts.find(:card.id);
-        when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAIT.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[card.id] == true) ::<= {
-          windowEvent.queueMessage(
-            text: this.name + " tried to use " + art.name + ", but already was used and could not be used again!"
-          ) 
-          onReact()
-        }
-        @:rets = this.effectStack.emitEvent(
-          name: 'onPreReact',
-          card: card
-        );
-        
-        // event cancelled reaction.
-        when (rets->findIndexCondition(::(value) <- value.returned == false) != -1) onReact();
-
-
-        if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
-
-        onReact(:action);
-
-        @:rets = this.effectStack.emitEvent(
-          name: 'onPostReact',
-          card: card
-        );
-
-      
-      }
-
-      if (world.party.leader == this) ::<= {
-        windowEvent.queueMessage(
-          text: '' + this.name + ' is able to react to this Art. You can either choose a Reaction Art or cancel to pass.'
-        );
-        
-        windowEvent.queueCustom(
-          onEnter :: {
-            deck.chooseArtPlayer(
-              user:this,
-              act: 'React',
-              canCancel: true,
-              filter::(value) <- Arts.find(:value.id).kind == Arts.KIND.REACTION,
-              onChoice::(
-                card
-              ) {
-                this.playerUseArt(
-                  card, 
-                  commitAction::(action) {
-                    chooseReact(:action)                    
-                  }
-                );
-              },
-              
-              onCancel ::{
-                onReact();
-              }
-            )
-          }
-        )
-      } else ::<= {
-        state.battleAI.chooseReaction(
-          source,
-          battle:priv.battle,
-          onCommit ::(action) {
-            chooseReact(
-              action
-            );
-          }
-        );
-      }
-    },
-    
-    drawArt ::(count) {
-      if (_.deck == empty)
-        error(detail: 'Can\'t draw when not in battle.');
-        
-      @:this = _.this;
-      @:deck = _.deck;
-      @:world = import(module:'game_singleton.world.mt');
-      windowEvent.queueMessage(
-        text: this.name + ' draws ' + (if (count == empty) 'an Art card.' else ''+count+' Art cards.')
-      );
-      for(0, if (count == empty) 1 else count) ::(i) {
-        deck.draw()        
-      }
-    
-    },
       
     // interacts with this entity
     interactPerson ::(party, location, onDone, overrideChat, skipIntro) {

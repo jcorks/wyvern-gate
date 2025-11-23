@@ -164,12 +164,12 @@ return ::{
       {input:empty, waitFrames: 5, callback ::{ 
         @:ArtsDeck = import(:'game_class.artsdeck.mt');
         // artificially create hand 
-        self.deck.hand = [
-          ArtsDeck.synthesizeHandCard(id:'base:stab', energy:ArtsDeck.ENERGY.B),
-          ArtsDeck.synthesizeHandCard(id:'base:pebble', energy:ArtsDeck.ENERGY.C),
-          ArtsDeck.synthesizeHandCard(id:'base:quick-shield', energy:ArtsDeck.ENERGY.A),
-          ArtsDeck.synthesizeHandCard(id:'base:banish', energy:ArtsDeck.ENERGY.B),
-          ArtsDeck.synthesizeHandCard(id:'base:cycle', energy:ArtsDeck.ENERGY.C),
+        self.supportArts = [
+          Arts.new(base:Arts.database.new(id:'base:stab')),
+          Arts.new(base:Arts.database.new(id:'base:pebble')),
+          Arts.new(base:Arts.database.new(id:'base:quick-shield')),
+          Arts.new(base:Arts.database.new(id:'base:banish')),
+          Arts.new(base:Arts.database.new(id:'base:cycle')),
         ]
       }},
       {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:5},

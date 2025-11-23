@@ -18,7 +18,7 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:random = import(module:'game_singleton.random.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:class = import(module:'Matte.Core.Class');
 @:Die = import(module:'game_class.die.mt');
 

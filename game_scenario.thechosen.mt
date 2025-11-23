@@ -18,6 +18,7 @@
 @:loading = import(module:'game_function.loading.mt');
 @:romanNum = import(module:'game_function.romannumerals.mt');
 @:ParticleEmitter = import(module:'game_class.particle.mt');
+@:Arts = import(:'game_mutator.arts.mt');
 
 
 
@@ -510,11 +511,7 @@ return {
             @:basicArts = [
               'base:pebble',
               'base:parry',
-              'base:retaliate',
-              'base:reevaluate',
-              'base:agility',
-              'base:foresight',
-              'base:mind-games'
+              'base:agility'
               
               //////////////
 
@@ -522,7 +519,7 @@ return {
             ];
 
             party.members->foreach(::(k, v) {
-              v.supportArts = [...basicArts];
+              v.supportArts = basicArts->map(::(value) <- Arts.new(base:Arts.database.find(:value)))
             });
           
           
@@ -741,21 +738,19 @@ return {
           professionHint : 'base:adventurer',
           levelHint:story.levelHint*2 // the power of a changeling shouldnt be underestimated
         );
+        @:Arts = import(:'game_mutator.arts.mt');
 
         changeling.name = '[   ]';
         changeling.supportArts = [
-          'base:cancel',
-          'base:retaliate',
           'base:wyvern-prayer',
           'base:quick-shield',
-          'base:diversify',
           'base:bloods-summoning',
           'base:shield-amplifier',
           'base:pebble',
           'base:prismatic-wisp',
           'base:b260',
           'base:b177'
-        ]
+        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
         
         @:keyother = Item.new(
           base: Item.database.find(id:'thechosen:wyvern-key-of-fire')
@@ -834,9 +829,9 @@ return {
 
 
     
-    @:Arts = import(:'game_database.arts.mt');
+    @:Arts = import(:'game_mutator.arts.mt');
     @:dump ::(filter, filename) {
-      Arts.dumpCSV(
+      Arts.database.dumpCSV(
         filter,
         filename,
         //sort      
@@ -1411,7 +1406,7 @@ return {
         symbol : 'M',
         rarity : 100000,    
         minLocations : 1,
-        maxLocations : 3,
+        maxLocations : 2,
         landmarkType : Landmark.TYPE.DUNGEON,
         traits : 
           Landmark.TRAIT.UNIQUE |
@@ -1431,13 +1426,14 @@ return {
 
           // the standard set
           {id: 'base:fountain', rarity:18},
-          {id: 'base:potion-shop', rarity: 20},
+          {id: 'base:potion-shop', rarity: 100},
           {id: 'base:wyvern-statue', rarity: 15},
-          {id: 'base:small-chest', rarity: 16},
-          {id: 'base:locked-chest', rarity: 11},
+          {id: 'base:enchantment-stand', rarity: 35},
+          {id: 'base:small-chest', rarity: 30},
+          {id: 'base:locked-chest', rarity: 40},
 
 
-          {id: 'base:healing-circle', rarity:20},
+          {id: 'base:healing-circle', rarity:30},
 
 
           {id: 'base:clothing-shop', rarity: 100},
@@ -1447,7 +1443,6 @@ return {
         requiredLocations : [
           'thechosen:stairs-down',
           'thechosen:stairs-down',
-          'base:enchantment-stand',
           'base:item',
           'base:item'
         ],
@@ -1499,14 +1494,13 @@ return {
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
-          {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 12},
           {id: 'base:magic-chest', rarity: 15},
-
-
           {id: 'base:healing-circle', rarity:20},
+
+          {id: 'base:potion-shop', rarity: 100},
           {id: 'base:clothing-shop', rarity: 300},
           {id: 'base:fancy-shop', rarity: 500},
         ],
@@ -1583,8 +1577,6 @@ return {
           'base:small-chest',
           'base:item',
 
-          'base:warp-point',
-          'base:warp-point',
           'base:warp-point',
           'base:warp-point',
           'base:enchantment-stand'
@@ -1983,7 +1975,7 @@ return {
           'base:foresight',
           'base:mind-games',
           'base:banishing-light'
-        ];      
+        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
         location.ownedBy.name = 'Wyvern of Fire';
         location.ownedBy.removeAllProfessionArts();
         for(0, location.ownedBy.profession.arts->size) ::(i) {
@@ -2120,16 +2112,11 @@ return {
         );
         
         location.ownedBy.supportArts = [
-          'base:cancel',
-          'base:retaliate',
           'base:bloods-shield',                  
           'base:bloods-exaltation',                  
           'base:bloods-summoning',
-          'base:reevaluate',
-          'base:foresight',
-          'base:mind-games',
           'base:banishing-light'
-        ];      
+        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));  
         location.ownedBy.name = 'Wyvern of Ice';
         location.ownedBy.removeAllProfessionArts();
         for(0, location.ownedBy.profession.arts->size) ::(i) {
@@ -2220,15 +2207,12 @@ return {
         
         location.ownedBy.name = 'Wyvern of Thunder';
         location.ownedBy.supportArts = [
-          'base:cancel',
-          'base:retaliate',
           'base:bloods-shield',                  
           'base:bloods-exaltation',                  
           'base:bloods-ward',                  
           'base:bloods-summoning',
-          'base:mind-games',
           'base:banishing-light'
-        ];      
+        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value))); 
         location.ownedBy.removeAllProfessionArts();
         for(0, location.ownedBy.profession.arts->size) ::(i) {
           location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
@@ -2318,12 +2302,10 @@ return {
         );
         
         location.ownedBy.supportArts = [
-          'base:cancel',
-          'base:retaliate',
           'base:bloods-shield',                  
           'base:bloods-exaltation',                  
           'base:bloods-ward',                  
-        ];      
+        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));  
         location.ownedBy.name = 'Wyvern of Light';
         location.ownedBy.removeAllProfessionArts();
         for(0, location.ownedBy.profession.arts->size) ::(i) {
@@ -3162,14 +3144,13 @@ return {
     )   
 
     @:perfectLearning ::{
-      @:Arts = import(:'game_database.arts.mt');
       @:ArtsDeck = import(:'game_class.artsdeck.mt');
       @:world = import(module:'game_singleton.world.mt');
 
       @ARTS_COUNT = 4;
       @:arts = [];
       for(0, ARTS_COUNT) ::(i) {
-        @:art = Arts.getRandomFiltered(::(value) <- 
+        @:art = Arts.database.getRandomFiltered(::(value) <- 
           (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
           ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
           (value.rarity >= Arts.RARITY.RARE)

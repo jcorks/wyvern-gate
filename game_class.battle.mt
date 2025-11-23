@@ -24,7 +24,7 @@
 @:Party = import(module:'game_class.party.mt');
 @:correctA = import(module:'game_function.correcta.mt');
 @:StateFlags = import(module:'game_class.stateflags.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:g = import(module:'game_function.g.mt');
 @:Entity = import(module:'game_class.entity.mt');
 @:displayHP = import(:'game_function.displayhp.mt');
@@ -1003,15 +1003,15 @@
           
         
         @:passesCheck ::{
-          @:art = Arts.find(:action.card.id);
+          @:art = Arts.database.find(:action.card.id);
           when(art.traits & Arts.TRAIT.SUPPORT == 0) true;
           return false;
         }
           
-        @:requiresAP = ((Arts.find(:action.card.id).traits & Arts.TRAIT.COSTLESS) == 0);
+        @:requiresAP = ((Arts.database.find(:action.card.id).traits & Arts.TRAIT.COSTLESS) == 0);
           
         when (requiresAP && entAct.ap < AP_COST) ::<= {
-          @:art = Arts.find(:action.card.id);
+          @:art = Arts.database.find(:action.card.id);
           windowEvent.queueMessage(
             text: entAct.name + ' tried to use the Art ' + art.name + ' but couldn\'t muster the mental strength!'
           );
@@ -1025,19 +1025,13 @@
         @:world = import(module:'game_singleton.world.mt');
         
         @pendingChoices = [];
-        @:art = Arts.find(id:action.card.id);
+        @:art = Arts.database.find(id:action.card.id);
         if (world.party != empty && ((art.traits & Arts.TRAIT.CAN_BLOCK) != 0) && action.targets->size > 0) ::<= {
           pendingChoices = [...action.targets]->filter(by::(value) <- world.party.leader == value);
         }
       
         @:finish ::(useArtReturn) {
 
-          if (Arts.find(:action.card.id).kind == Arts.KIND.EFFECT && action.card.level > 1) ::<= {
-            windowEvent.queueMessage(
-              text : 'The Art had ' + (action.card.level-1) + ' counter(s)!'
-            );
-            entAct.healAP(amount:action.card.level-1);
-          }
 
 
           if (art.kind == Arts.KIND.ABILITY || art.kind == Arts.KIND.SPECIAL) ::<= {
@@ -1067,11 +1061,11 @@
         
         @:doAction ::{
           
-          @:art = Arts.find(id:action.card.id);
+          @:art = Arts.database.find(id:action.card.id);
         
           @:ret = entAct.useArt(
-            art,
-            level: action.card.level,
+            art:action.card,
+            level: 1,
             targets:action.targets,
             targetParts:action.targetParts,
             turnIndex : action.turnIndex,
@@ -1083,121 +1077,28 @@
             }
           );
         }
-      
-        // react andy time
-        @checkReactions ::(onPass, onReject) {
-          @toReact = getAll()->filter(::(value) <- value.canUseReactions() && value.deck.containsReaction());
-          toReact->sort(:::(a, b) <- a.stats.SPD > b.stats.SPD);
-          when(toReact->size == 0)
-            onPass();
-
-          @:tryNext:: {
-            when(toReact->size == 0)
-              onPass();
-              
-            @reactor = toReact->pop;
-            when(reactor == entAct || reactor.ap < AP_COST)
-              tryNext();
-
-            reactor.react(
-              source: entAct,
-              onReact::(reaction) {
-                when(reaction == empty)
-                  tryNext();
-                  
-                when(!reactor.canUseReactions())
-                  windowEvent.queueCustom(
-                    onEnter ::{
-                      tryNext();
-                    }
-                  );
-
-                  
-                reactor.deck.discardFromHand(:reaction.card);
-                @art = Arts.find(:reaction.card.id);
-                
-                
-                windowEvent.queueMessage(
-                  text: reactor.name + ' reacts with the Art ' + art.name + '!'
-                );
-        
-                reactor.ap -= AP_COST;
-                
-                
-                @cancel = art.onAction(
-                  level: 1,
-                  user: reactor,
-                  targets : reaction.targets,
-                  targetParts : reaction.targetParts,
-                  turnIndex: 0,
-                  extraData : {
-                    action: action
-                  }
-                );
-                
-                
-                
-                when(cancel->type == Boolean && cancel) ::<= {
-                  windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' cancelled ' + entAct.name + '\'s Art!');
-                  windowEvent.queueCustom(
-                    onEnter :: {
-                      onReject();
-                    }
-                  )
-                }
-                
-                if (cancel->isa(:Object)) ::<= {
-                  windowEvent.queueMessage(text: reactor.name + '\'s ' + art.name + ' transformed ' + entAct.name + '\'s Art!');
-                  action = cancel;                
-                }
-                  
-                
-                  
-                windowEvent.queueCustom(
-                  onEnter :: {
-                    tryNext();                
-                  }
-                );
-              }
-            )
-          }
-          
-          tryNext();
-        
-        }
-      
 
       
-      
-        entAct.deck.discardFromHand(card:action.card);
         //windowEvent.onResolveAll(
         windowEvent.queueNestedResolve(
           onEnter :: {
             // entAct.deck was likely BLASTED due to death
-            when (active == false || entAct == empty || entAct.deck == empty) 
+            when (active == false || entAct == empty) 
               empty;
 
-            entAct.deck.revealArt(
+            action.card.revealArt(
               user:entAct,
-              handCard:action.card,
               prompt: entAct.name + ' uses the Art: ' + art.name + '!'
             );
             
             windowEvent.queueCustom(
               onEnter :: {
                 // react here
-                checkReactions(
-                  onPass::{
-                    windowEvent.queueCustom(
-                      onEnter ::{
-                        when (!entAct.canActThisTurn())
-                          endTurn();
-                        doAction();
-                      }
-                    );
-                  },
-                  onReject::{
-                    finish();                
+                windowEvent.queueCustom(
+                  onEnter ::{
+                    when (!entAct.canActThisTurn())
+                      endTurn();
+                    doAction();
                   }
                 );
               }

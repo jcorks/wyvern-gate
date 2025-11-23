@@ -19,7 +19,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:Random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:itemmenu = import(module:'game_function.itemmenu.mt');
 
 
@@ -34,7 +34,7 @@ return ::(
   @:world = import(module:'game_singleton.world.mt');
 
   @:commitAction ::(action => BattleAction->type) {
-    if (Arts.find(id:action.card.id).kind == Arts.KIND.ABILITY) ::<= {
+    if (Arts.database.find(id:action.card.id).kind == Arts.KIND.ABILITY) ::<= {
       windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true)
       battle.entityCommitAction(action:action);  
     } else ::<= {

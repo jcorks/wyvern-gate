@@ -461,6 +461,8 @@ static matteValue_t wyvern_gate__native__canvas__renderBarAsString(
 ) {
     CHECK_ARG(args[1], MATTE_VALUE_TYPE_NUMBER);
 
+
+
     WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     
@@ -469,6 +471,13 @@ static matteValue_t wyvern_gate__native__canvas__renderBarAsString(
         :
       matte_value_as_number(store, args[0])
     ;
+
+    uint32_t emptyChar = matte_value_type(args[3]) == MATTE_VALUE_TYPE_EMPTY ? 
+      0x2581
+        :
+      matte_string_get_char(matte_value_string_get_string_unsafe(store, args[3]), 0)
+    ;
+
     
     
     double fillFraction = matte_value_as_number(store, args[1]);
@@ -492,7 +501,7 @@ static matteValue_t wyvern_gate__native__canvas__renderBarAsString(
         matte_string_append_char(out, character);
     }
     for(i = 0; i < width - numFilled - 2; ++i) {
-        matte_string_append_char(out, 0x2581); // low block
+        matte_string_append_char(out, emptyChar); // low block
     }
     matte_string_append_char(out, ' ');
 
@@ -1546,6 +1555,7 @@ static matteValue_t wyvern_gate__native__canvas(
         "width",
         "fillFraction",
         "character",
+        "emptyCharacter",
         NULL
     );
 

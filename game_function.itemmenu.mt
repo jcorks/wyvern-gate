@@ -19,7 +19,7 @@
 @:canvas = import(module:'game_singleton.canvas.mt');
 @:random = import(module:'game_singleton.random.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:pickItem = import(module:'game_function.pickitem.mt');
 @:ArtsDeck = import(:'game_class.artsdeck.mt');
 @:g = import(:'game_function.g.mt');
@@ -55,7 +55,7 @@ return ::(
         (Item.USE_TARGET_HINT.ONE): ::<={
           @:commit ::(who) {
             commitAction(action:BattleAction.new(
-                card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
+                card : Arts.new(base:Arts.database.find(id:'base:use-item')),
                 targets: [who],
                 extraData : [choiceItem],
                 turnIndex : 0,
@@ -157,7 +157,7 @@ return ::(
            
             when(choice == 0) empty;                          
               commitAction(action:BattleAction.new(
-                card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
+                card : Arts.new(base:Arts.database.find(id:'base:use-item')),
                 targets: if (choice == 1) allies else enemies,
                 extraData : [choiceItem],
                 turnIndex : 0,
@@ -177,7 +177,7 @@ return ::(
             enemies = world.battle.getEnemies(:user)
           }
           commitAction(action:BattleAction.new(
-              card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
+              card : Arts.new(base:Arts.database.find(id:'base:use-item')),
               targets: [...party.members, ...enemies],
               extraData : [choiceItem],
               turnIndex : 0,
@@ -191,7 +191,7 @@ return ::(
         
         (Item.USE_TARGET_HINT.NONE): ::<= {
           commitAction(action:BattleAction.new(
-              card : ArtsDeck.synthesizeHandCard(id:'base:use-item'),
+              card : Arts.new(base:Arts.database.find(id:'base:use-item')),
               targets: [],
               extraData : [choiceItem],
               turnIndex : 0,
@@ -221,7 +221,7 @@ return ::(
       choiceNames->push(value:'Equip');
       choices->push(value::{
         commitAction(action:BattleAction.new(
-          card : ArtsDeck.synthesizeHandCard(id:'base:equip-item'),
+          card : Arts.new(base:Arts.database.find(id:'base:equip-item')),
           targets: [user],
           extraData : [choiceItem, party.inventory],
           turnIndex : 0,

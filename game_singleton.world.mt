@@ -23,6 +23,7 @@
 @:State = import(module:'game_class.state.mt');
 @:random = import(:'game_singleton.random.mt');
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 
 @:TIME = {
   DAWN : 0,
@@ -259,7 +260,6 @@
           fausCloak.maxOut();
 
           ent.supportArts = [
-            'base:cancel',
             'base:prismatic-wisp',
             'base:pebble',
             'base:quick-shield',
@@ -268,7 +268,7 @@
             'base:shield-amplifier',
             'base:banishing-light',
             'base:greater-banish'
-          ];
+          ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
           
           
           ent.equip(item:fausWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
@@ -340,7 +340,6 @@
           ent.equip(item:sylvAcc,  slot:Entity.EQUIP_SLOTS.TRINKET, silent:true);
 
           ent.supportArts = [
-            'base:cancel',
             'base:prismatic-wisp',
             'base:pebble',
             'base:quick-shield',
@@ -349,7 +348,7 @@
             'base:shield-amplifier',
             'base:banishing-light',
             'base:greater-banish'
-          ];
+          ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
 
 
           ent.name = 'Sylvia';
@@ -415,7 +414,6 @@
           );
 
           ent.supportArts = [
-            'base:cancel',
             'base:prismatic-wisp',
             'base:pebble',
             'base:quick-shield',
@@ -424,7 +422,7 @@
             'base:shield-amplifier',
             'base:banishing-light',
             'base:greater-banish'
-          ];
+          ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
 
           ent.name = 'Mei';
           return ent;
@@ -472,7 +470,6 @@
           skieCloak.maxOut();
 
           ent.supportArts = [
-            'base:cancel',
             'base:prismatic-wisp',
             'base:pebble',
             'base:quick-shield',
@@ -481,7 +478,7 @@
             'base:shield-amplifier',
             'base:banishing-light',
             'base:greater-banish'
-          ];            
+          ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));            
           
           ent.equip(item:skieWeapon, slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
           ent.equip(item:skieRobe,   slot:Entity.EQUIP_SLOTS.ARMOR, silent:true);

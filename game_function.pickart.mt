@@ -16,7 +16,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-@:Arts = import(:'game_database.arts.mt');
+@:Arts = import(:'game_mutator.arts.mt');
 @:windowEvent = import(:'game_singleton.windowevent.mt');
 @:ArtsDeck = import(:'game_class.artsdeck.mt');
 
@@ -53,7 +53,7 @@ return ::(
       choices->push(:' ▆ - [Empty]')
       choiceActs->push(:empty);
     } else ::<= {
-      @art = Arts.find(:id);
+      @art = Arts.database.find(:id);
       choices->push(:' ▆ - ' + typeToStr[(art.kind)]);
       choiceActs->push(:id);
     }
@@ -112,8 +112,8 @@ return ::(
           renderable.render();
         
         when(choiceActs[which] == empty) empty;
-        ArtsDeck.renderArt(
-          handCard: ArtsDeck.synthesizeHandCard(id:choiceActs[which]),
+        Arts.renderArt(
+          id:choiceActs[which],
           topWeight: 0.5,
           leftWeight: 0,
           maxWidth: 0.7

@@ -20,7 +20,6 @@
 
 
 
-import(module:'game_database.arts.mt');
 import(module:'game_database.apparelmaterial.mt');
 import(module:'game_database.effect.mt');
 import(module:'game_database.interaction.mt');
@@ -33,7 +32,9 @@ import(module:'game_database.personality.mt');
 import(module:'game_database.scene.mt');
 import(module:'game_database.species.mt');
 import(module:'game_database.book.mt');
+import(module:'game_database.artsterm.mt');
 
+@:Arts = import(module:'game_mutator.arts.mt');
 import(module:'game_mutator.entityquality.mt');
 import(module:'game_mutator.islandevent.mt');
 import(module:'game_mutator.item.mt');
@@ -128,6 +129,52 @@ import(module:'game_function.newrecord.mt');
   );
 }
 
+
+
+@:renderArtsStatus ::{
+  @needsDisplay = [];
+  @bars;
+  foreach(world.party.members) ::(k, member) {
+    @:artsNames = [];
+    @:artsBar = [];
+    @:artsStatus = [];
+    @:arts = [];
+    foreach(member.arts->filter(::(value) <- value.canUse == false)) ::(k, art) {
+      @data = Arts.renderListItem(
+        art
+      );
+      
+      artsNames->push(:data[0]);
+      artsBar->push(:data[1]);
+      artsStatus->push(:data[2]);
+    }
+    
+    when(artsNames->size > 0) ::<= {
+      needsDisplay->push(:member.name + ':');
+      
+      needsDisplay = [...needsDisplay, ...canvas.columnsToLines(
+        columns : [
+          artsBar,
+          artsStatus,
+          artsNames
+        ],
+        leftJustifieds : [
+          true,
+          true,
+          true
+        ]
+      )];
+    }
+  }
+  
+  if (needsDisplay->size > 0)
+    canvas.renderTextFrameGeneral(
+      leftWeight: 1,
+      topWeight: 1,
+      lines: needsDisplay,
+      title: 'Arts recharging:'
+    );
+}
 return class(
   name: 'Wyvern.Instance',
   define:::(this) {
@@ -1543,7 +1590,8 @@ return empty;
           renderable:{
             render :: {
               landmark.map.render();
-              
+
+              renderArtsStatus();
               when(nearby == empty || nearby->size == 0) empty;
               
               @:lines = [];
@@ -1556,6 +1604,8 @@ return empty;
                 lines,
                 title: 'Arrived at:'
               );
+              
+
             }
           },
           onMove ::(choice) {

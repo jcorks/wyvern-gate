@@ -27,7 +27,7 @@
 @:FRAME_COUNT_RENDER_TEXT = 3;
 @:CALLBACK_DONE = {};
 @:ANIMATION_FINISHED = -1;
-
+@errorCount = 0;
 
 @:RENDER_STATE = {
   ANIMATING : 2,
@@ -408,6 +408,11 @@
         }
       } => {
         onError ::(message) {
+          errorCount += 1;
+          
+          when (errorCount >= 1000) 
+            error(:'The game has encountered too many errors to continue. Check the game\'s error log (usually ERROR.LOG)');
+            
           if (errorHandler) errorHandler(:message);
         
           if (markedError == false) ::<= {
@@ -418,7 +423,7 @@
                 '',
                 ...message.summary->split(token:'\n'),
                 '',
-                'This and additional errors will be within the error log of your system.'
+                'This and additional errors will be within the error log (usually ERROR.LOG).'
               ]
             );
             if (canResolveNext())
@@ -1150,7 +1155,7 @@
 
     
 
-      if (data.animationFrame == empty) ::<= {
+      if (data.animationFrame == empty && data.lines->size > 0) ::<= {
       
         @progressCh = 0;
         @progressL = 0;
@@ -1225,8 +1230,13 @@
           }
 
         }
-        
-        
+      }
+      if (data.thisRender == empty) ::<= {
+        when (data.lines->size == 0)
+          data.thisRender = ::{
+            
+          }
+      
         data.thisRender = ::{
 
         
@@ -1418,7 +1428,6 @@
       },
       
       clearAll ::(onReady){
-        breakpoint();
         onInput = empty;
         isCursor = true;
         choiceStack = [];
@@ -1546,7 +1555,7 @@
           maxHeight,
           prompt:speaker,
           renderable,
-          lines : canvas.refitLines(input:[text]),
+          lines : if (text == empty) empty else canvas.refitLines(input:[text]),
           pageAfter,
           onLeave,
           setID,
@@ -1613,11 +1622,13 @@
         when(requestAutoSkip) ::<= {
           if (onLeave) onLeave();
         }
+        
+        if (lines == empty) lines = [];
 
         @:queuePage ::(iter, width, more){
           pushResolveQueueTop(fns:[::{
             @:limit = min(a:iter+pageAfter, b:lines->keycount)-1;
-            @:linesOut = lines->subset(
+            @:linesOut = if (lines == empty) empty else lines->subset(
               from:iter, 
               to:limit
             )
@@ -1767,7 +1778,6 @@
         
       ) {
         @:onEnterReal::{
-          breakpoint();
           pushResolveQueue();
           if (onEnter) onEnter();
         }

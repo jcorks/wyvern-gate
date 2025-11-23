@@ -24,7 +24,7 @@
 @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 @:DungeonMap = import(:'game_singleton.dungeonmap.mt');
 @:Profession = import(module:'game_database.profession.mt');
-@:Arts = import(module:'game_database.arts.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 @:Entity = import(module:'game_class.entity.mt');
 @:Location = import(module:'game_mutator.location.mt');
 @:State = import(module:'game_class.state.mt');
@@ -42,9 +42,9 @@ return ::(onDone) {
   @profession = Profession.getRandomFiltered(::(value) <- value.learnable)
   @name = namegen.person();
   @arts = [
-    Arts.getRandomFiltered(::(value) <- (value.traits & Arts.TRAIT.SPECIAL) == 0),
-    Arts.getRandomFiltered(::(value) <- (value.traits & Arts.TRAIT.SPECIAL) == 0),
-    Arts.getRandomFiltered(::(value) <- (value.traits & Arts.TRAIT.SPECIAL) == 0)  
+    Arts.database.getRandomFiltered(::(value) <- (value.traits & Arts.TRAIT.SPECIAL) == 0),
+    Arts.database.getRandomFiltered(::(value) <- (value.traits & Arts.TRAIT.SPECIAL) == 0),
+    Arts.database.getRandomFiltered(::(value) <- (value.traits & Arts.TRAIT.SPECIAL) == 0)  
   ];
 
   @:choiceActions = [
@@ -183,7 +183,7 @@ return ::(onDone) {
                   if (entity.calculateDeckSize() >= 35) send();
 
                   entity.supportArts->push(:
-                    Arts.getRandomFiltered(::(value) <- 
+                    Arts.database.getRandomFiltered(::(value) <- 
                       ((value.traits & Arts.TRAIT.SPECIAL) == 0)
                       &&
                       ((value.traits & Arts.TRAIT.SUPPORT) != 0)
