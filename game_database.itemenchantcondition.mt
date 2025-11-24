@@ -48,15 +48,6 @@ ItemEnchantCondition.newEntry(
   }
 )
 
-ItemEnchantCondition.newEntry(
-  data : {
-    name : 'On Discard',
-    id : 'base:on-discard',
-    description : 'After the wielder discards an Art',
-    isState : false,
-    effectEvent: 'onDiscard'
-  }
-)
 
 
 ItemEnchantCondition.newEntry(

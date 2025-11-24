@@ -826,6 +826,7 @@
     abilitiesUsedBattle : Nullable,
     owns : Nullable,
     canActThisTurn : Boolean,
+    temporaryArts : Nullable
   },
   
   
@@ -836,6 +837,7 @@
       _.state.battleAI = BattleAI.new(user:this); 
       @:state = _.state;
       state.equipArts = [];
+      _.temporaryArts = [];
     },
       
     
@@ -848,6 +850,7 @@
       state.innateEffects = innateEffects;
       state.affinity = random.pickArrayItem(:Damage.TYPE->values);
       state.equipArts = [];
+      _.temporaryArts = [];
       state.worldID = world.getNextID();
       state.loadoutTemplates = {
         MAIN : {
@@ -1080,6 +1083,7 @@
       _.abilitiesUsedBattle = {}
       _.effectStack = EffectStack.new(parent:this);
       _.canActThisTurn = true;
+      _.temporaryArts = [];
       foreach(this.species.passives)::(index, passiveName) {
         this.effectStack.addInnate(id:passiveName);
       }      
@@ -1149,8 +1153,13 @@
     arts : {
       get ::<- [..._.state.equipArts,
                 ..._.state.loadoutTemplates[_.state.equippedLoadout].professionArts,
-                ..._.state.loadoutTemplates[_.state.equippedLoadout].supportArts
+                ..._.state.loadoutTemplates[_.state.equippedLoadout].supportArts,
+                ..._.temporaryArts
                ]
+    },
+    
+    temporaryArts : {
+      get ::<- _.temporaryArts
     },
     
     loadoutTemplateNames : {
@@ -1445,6 +1454,7 @@
       _.this.recalculateStats(); 
       _.state.ap = 0;               
       _.state.shield = 0;
+      _.temporaryArts = [];
       breakpoint();
     },
     

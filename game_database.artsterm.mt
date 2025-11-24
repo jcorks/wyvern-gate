@@ -102,7 +102,6 @@ ArtsTerm.newEntry(
     description : 'Fire, Thunder, and Ice are elemental sources.'
   }
 );
-breakpoint();
 }
 
 @:ArtsTerm = Database.new(

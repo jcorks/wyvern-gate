@@ -69,7 +69,7 @@ return ::{
 
       }
       canvas.movePen(x: ((canvas.width - width) / 2)+1, y: 1);  
-      canvas.drawText(text:'Party: (' + g(g:party.inventory.gold) + ', ' + party.inventory.items->keycount + ' items)');   
+      canvas.drawText(text:'[Party: (' + g(g:party.inventory.gold) + ', ' + party.inventory.items->keycount + ' items)]');   
 
       when(!chosen) empty;
       @:member = party.members[whom]

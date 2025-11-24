@@ -386,7 +386,7 @@ Effect.newEntry(
   data : {
     name : 'Copy Shard',
     id : 'base:copy-shard',
-    description: 'Next played Art is duplicated and added to hand. This effect gets removed afterward.',
+    description: 'Next played Art is duplicated. This effect gets removed afterward.',
     stackable : true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -396,7 +396,12 @@ Effect.newEntry(
 
         when(random.try(percentSuccess:50)) ::<= {
           windowEvent.queueMessage(text:holder.name + "'s Copy Shard activates!");
-          holder.deck.addHandCard(id:action.id);
+          holder.battle.commitFreeAction(
+            action,
+            from:holder,
+            onDone::{}
+          )          
+          
         }
       }
     }
@@ -2404,7 +2409,7 @@ Effect.newEntry(
         @:commitRandom ::{
           from.useArt(
             level: 1,
-            art,
+            art:card,
             targets : 
               enemies,
             turnIndex: 0,
@@ -2420,9 +2425,8 @@ Effect.newEntry(
         
         windowEvent.queueNestedResolve(
           onEnter :: {
-            from.deck.revealArt(
+            card.revealArt(
               user:from,
-              handCard:card,
               prompt: 'From the power of the ' + item.name + ', ' + from.name + ' casted the spell: ' + art.name + '!'
             );
 
@@ -2430,7 +2434,7 @@ Effect.newEntry(
               from.playerUseArt(
                 commitAction::(action) {
                   from.useArt(
-                    art,
+                    art:card,
                     level: 1,
                     targets: action.targets,
                     turnIndex: 0,
@@ -5184,7 +5188,7 @@ Effect.newEntry(
   data : {
     name : 'Critical Reaction',
     id: 'base:critical-reaction',
-    description: 'When the holder lands a critical hit, a random, non-reaction Art is used from their hand at no AP cost.',
+    description: 'When the holder lands a critical hit, a random, equipped Art is used for no AP cost and no charge.',
     stackable: false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
@@ -5197,25 +5201,21 @@ Effect.newEntry(
         when (holder.battle == empty) empty;
 
 
-        @:arts = holder.deck.hand->filter(
-          ::(value) <- Arts.database.find(:value.id).kind != Arts.KIND.REACTION
-        );
+        @:arts = holder.arts;
         
         when(arts->size == 0) empty;
         @:card = random.pickArrayItem(:arts);
-        holder.deck.discardFromHand(:card);
 
 
-        holder.deck.revealArt(
+        card.revealArt(
           prompt: holder.name + '\'s Critical Reaction activated a random Art from their hand!',
-          user:holder,
-          handCard: card
+          user:holder
         );
         
         // hacky! but fun. maybe functional
         if (world.party.leader == holder) ::<= {
           holder.playerUseArt(
-            card:card,
+            art:card,
             canCancel: false,
             commitAction::(action) {            
               holder.battle.entityCommitAction(action, from:holder);
@@ -5243,7 +5243,7 @@ Effect.newEntry(
   data : {
     name : 'Cascading Flash',
     id: 'base:cascading-flash',
-    description: 'At the start of the holder\'s turn, 30% chance to play the Art at the top of the holder\'s deck as long as the Art is not a reaction.',
+    description: 'At the start of the holder\'s turn, 30% chance to play a random equipped Art for no AP cost or charge.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
@@ -5256,23 +5256,17 @@ Effect.newEntry(
         when (holder.battle == empty) empty;
         when (random.try(percentSuccess:70)) empty;
 
-        when (
-          Arts.database.find(:holder.deck.deckPile[holder.deck.deckPile->size-1]).kind == Arts.KIND.REACTION
-        ) empty;
+        @:card = random.pickArrayItem(:holder.arts);
 
-        @:card = holder.deck.draw();
-        holder.deck.discardFromHand(:card);
-
-        holder.deck.revealArt(
+        card.revealArt(
           prompt: holder.name + '\'s Cascading Flash activated the next Art from their deck!',
-          user:holder,
-          handCard: card
+          user:holder
         );
         
         // hacky! but fun. maybe functional
         if (world.party.leader == holder) ::<= {
           holder.playerUseArt(
-            card:card,
+            art:card,
             canCancel: false,
             commitAction::(action) {            
               holder.battle.entityCommitAction(action, from:holder);
@@ -5309,7 +5303,7 @@ Effect.newEntry(
   }
 )  
 
-
+/*
 Effect.newEntry(
   data : {
     name : 'Clairvoyance',
@@ -5345,6 +5339,7 @@ Effect.newEntry(
     }
   }
 )
+*/
 
 
 
@@ -5352,7 +5347,7 @@ Effect.newEntry(
   data : {
     name : 'Scatterbrained',
     id: 'base:scatterbrained',
-    description: 'At the start of the holder\'s turn, 50% chance to play a random non-reaction Art from the holder\'s hand.',
+    description: 'At the start of the holder\'s turn, 50% chance to play a random equipped Art from the holder\'s hand.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
@@ -5364,18 +5359,15 @@ Effect.newEntry(
         // outside of battle?
         when (holder.battle == empty) empty;
 
-        @:cards = holder.deck.hand->filter(::(value) <- Arts.database.find(:value.id).kind != Arts.KIND.REACTION);
+        @:cards = holder.arts;
         when(cards->size == 0) empty;
-
         when (random.flipCoin()) empty;
 
         @:card = random.pickArrayItem(:cards);
-        holder.deck.discardFromHand(:card);
 
-        holder.deck.revealArt(
+        card.revealArt(
           prompt: holder.name + '\'s Scatterbrained activated a random Art from their hand!',
-          user:holder,
-          handCard: card
+          user:holder
         );
         
         // hacky! but fun. maybe functional

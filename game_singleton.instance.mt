@@ -1300,7 +1300,12 @@ return empty;
           );        
           
           if (hasVisitIsland && onReady) ::<= {
-            windowEvent.onResolveAll(onDone:onReady)
+            windowEvent.queueCallback(
+              callback::{
+                onReady();
+                return windowEvent.CALLBACK_DONE
+              }
+            );
           } else
             if (onReady)
               onReady();

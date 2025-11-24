@@ -1139,13 +1139,12 @@ ItemEnchant.database.newEntry(
             when(args.holder.battle == empty) empty;
 
             @:battle = args.holder.battle;
-
-            @:card = args.holder.deck.addHandCardTemporary(
+            @:card = Arts.new(base:Arts.database.find(
               :state.artID
-            );
-            args.holder.deck.revealArt(
-              handCard:card, 
-              prompt:'The Art ' + Arts.database.find(:state.artID).name + ' was added to ' + args.holder.name + '\'s hand.'
+            ))
+            @:card = args.holder.temporaryArts->push(:card);
+            card.revealArt(
+              prompt:'The Art ' + Arts.database.find(:state.artID).name + ' was added to ' + args.holder.name + '\'s available Arts.'
             );
             /*
             // insanity: instant casting

@@ -68,14 +68,9 @@ return ::(
     );   
   }
 
-  if (battle.awkwardControlHack) 
-    windowEvent.onResolveAll(
-      onDone: next
-    )
-  else
-    windowEvent.queueNestedResolve(
-      onEnter: next
-    )
+  windowEvent.queueNestedResolve(
+    onEnter: next
+  )
 
 
 

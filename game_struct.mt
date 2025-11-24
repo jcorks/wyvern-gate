@@ -49,12 +49,12 @@ return ::(
         initialized[name] = true;
       }
          
-      /*
-      foreach(in:initialized, do:::(name, initialized) {
-        if (initialized != true)
+      
+      foreach(initialized) ::(name, initialized) {
+        if (initialized != true && itemTypes[name] != Empty && itemTypes[name] != Nullable)
           error(detail:'"' + name + '" was never initialized in constructor.');
-      });  
-      */
+      }  
+      
       
       @:out = Object.instantiate(type);
       

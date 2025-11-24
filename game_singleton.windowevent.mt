@@ -151,7 +151,6 @@
     @hadInputLast = false;
     
     resolveQueues->push(:{
-      onResolveAll : {},
       queue : {}
     });
     
@@ -165,8 +164,7 @@
     // pass a "queueID" pointing to a resolve queue 
     @:pushResolveQueue:: {
       @:out = {
-        queue : [],
-        onResolveAll : []
+        queue : []
       };
       resolveQueues->push(:out);
     }
@@ -178,7 +176,6 @@
       resolveQueues->pop;
       if (resolveQueues->size == 0)
         resolveQueues->push(:{
-          onResolveAll : {},
           queue : {}
         });        
     }    
@@ -346,6 +343,7 @@
         
       return out;
     }
+
     
     @:commitInput ::(input, level, forceRedraw) {
       canvas.update();
@@ -440,7 +438,6 @@
     @:resolveNext::(noCommit, level) {
       @inst = resolveQueues[resolveQueues->size-1];
       @:queue = inst.queue;
-      @:onResolveAll = inst.onResolveAll;
 
       if (level->type == Number) level += 1;
 
@@ -448,13 +445,6 @@
         @:cbs = queue[0].fns;
         queue->remove(key:0);
         foreach(cbs)::(i, cb) <- cb();
-      } else ::<= {
-        if (onResolveAll->size > 0) ::<= {
-          @:p = onResolveAll[0];
-          onResolveAll->remove(:0);
-          p();
-          resolveNext();
-        }
       }
       if (noCommit == empty)
         commitInput(level);
@@ -1435,7 +1425,6 @@
         requestAutoSkip = false;
         autoSkipIndex = empty;      
         resolveQueues->push(:{
-          onResolveAll : {},
           queue : {}
         });
 
@@ -1756,6 +1745,7 @@
           when (val.rendered != true) true;
           when (val.renderState != empty && val.renderState != RENDER_STATE.DONE) true;
           when (hadInputLast == true) true;
+          when (queuedInputs->size > 0) true;
           return false
         }
       },
@@ -1869,7 +1859,6 @@
             }
           };
         }
-
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
             mode: CHOICE_MODE.CALLBACK,
@@ -1884,8 +1873,19 @@
       },      
       
       
-
-
+      // After a set number of frames pass, the given callback will be run.
+      // Note that while a delayedCallback is waiting, the game will request 
+      // to the environment to keep posting new frames. This can incur a CPU cost.
+      addDelayedCallback::(
+        callback => Function,
+        waitFrames => Number
+      ) {
+        
+        queuedInputs->push(:{
+          callback : callback,
+          waitFrames : waitFrames
+        });        
+      },
       
       
       // Allows for choosing from a list of options.
@@ -2121,21 +2121,7 @@
       },  
 
             
-      
-      
-      // Pushes through all queued actions to the top 
-      // of the window stack in order. This is normally not needed, but 
-      // may be needed in particular contexts and effects.
-      onResolveAll ::(onDone, doResolveNext) {
-        resolveQueues[resolveQueues->size-1].onResolveAll->push(:onDone);
-        if (doResolveNext)
-          resolveNext();        
-      },
-      
-      removeOnResolveAll ::(onDone) {
-        @:rq = resolveQueues[resolveQueues->size-1].onResolveAll;
-        rq->remove(:rq->findIndex(:onDone));
-      },
+
         
       // request to not render or wait for nodisplay and display 
       // events. If auto skip is enabled and any of the other events 

@@ -115,7 +115,6 @@
     @externalRenderable;
     @battleEnd;
     @onEnd_;
-    @awkwardControlHack_ = false;
     @lastNext;
     @onTurnPrep_;
     
@@ -127,8 +126,6 @@
 
     @:finishEnd :: {
       breakpoint();
-      if (awkwardControlHack_)
-        windowEvent.removeOnResolveAll(:lastNext);
       groups = [];
       onEnd_(result);      
       foreach(onFinish) ::(k, v) {
@@ -318,15 +315,9 @@
       lastNext = next;
 
       
-      if (awkwardControlHack_) ::<= {
-        windowEvent.onResolveAll(
-          onDone : next
-        );      
-      } else ::<= {
-        windowEvent.queueNestedResolve(
-          onEnter : next 
-        );
-      }      
+      windowEvent.queueNestedResolve(
+        onEnter : next 
+      );
     }
     
     @:initTurn ::{
@@ -577,18 +568,10 @@
         onTurnPrep,
         skipResults,
         
-        // Hello! Dont use this! This is literally only for the 
-        // battle tutorial to allow overrideable events in battle
-        // in cases where its not usually allowed.
-        // So, please do not use! ...Unless you wanna do something really 
-        // interesting, in that case :amen_emoji:
-        awkwardControlHack, 
-        
         
         onEnd => Function
       ) {
         storage = {};
-        awkwardControlHack_ = awkwardControlHack;
         onEnd_ = onEnd;
         onTurnPrep_ = onTurnPrep;
         @:world = import(module:'game_singleton.world.mt')
@@ -866,9 +849,6 @@
         onFinish->push(:cb);
       },
       
-      awkwardControlHack : {
-        get ::<- awkwardControlHack_
-      },
       
       turnIndex : {
         get ::<- turnIndex

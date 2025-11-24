@@ -23,6 +23,7 @@ return {
   battle : {
     attack : InteractionMenuEntry.new(
       name : 'Attack',
+      keepInteractionMenu : false,
       filter::(user, battle) <- true,
       onSelect::(user, battle, commitAction) {
         @:card = Arts.new(base:Arts.database.find(id:'base:attack'));
@@ -57,6 +58,7 @@ return {
     arts : InteractionMenuEntry.new(
       name : 'Arts',
       filter::(user, battle) <- true,
+      keepInteractionMenu : false,
       onSelect::(user, battle, commitAction) {
         @:choicesColumns = import(module:'game_function.choicescolumns.mt');
         @which;
@@ -68,6 +70,7 @@ return {
           leftWeight: 1,
           prompt: 'Choose an Art type:',
           canCancel: true,
+          keep: true,
           choices : [
             'Abilities',
             'Effects',
@@ -84,6 +87,7 @@ return {
               
             Arts.queuePick(
               arts,
+              keep: true,
               prompt: user.name + '\'s ' + (if (choice == 1) 'Ability' else 'Effect') + ' Arts:',
               onChoice::(art) {
                 @:source = art;
@@ -103,6 +107,7 @@ return {
                   }, 
                   topWeight: 1,
                   canCancel: true,
+                  keep: true,
                   onHover ::(choice) {
                     which = choice-1;
                   },
@@ -191,6 +196,7 @@ return {
     check : InteractionMenuEntry.new(
       name : 'Check',
       filter::(user, battle) <- true,
+      keepInteractionMenu : false,
       onSelect::(user, battle, commitAction) {
 
         @:allies  = battle.getAllies(entity:user);
@@ -216,8 +222,7 @@ return {
               prompt:'Check: ' + whom.name,
               choices: [
                 'Effects',
-                'Describe',
-                'Discarded Arts'
+                'Describe'
               ],
               keep: true,
               canCancel: true,
@@ -232,11 +237,6 @@ return {
 
                 when(choice == 2)
                   whom.describe();              
-
-                when(choice == 3)
-                  whom.deck.chooseDiscardPlayer(
-                    canCancel: true
-                  );
               }
             );
           }
@@ -247,6 +247,7 @@ return {
     wait : InteractionMenuEntry.new(
       name : 'Wait',
       filter::(user, battle) <- true,
+      keepInteractionMenu : false,
       onSelect::(user, battle, commitAction) {
         windowEvent.queueChoices(
           choices : [
@@ -280,6 +281,7 @@ return {
     item : InteractionMenuEntry.new(
       name : 'Item',
       filter::(user, battle) <- true,
+      keepInteractionMenu : false,
       onSelect::(user, battle, commitAction) {
         @:world = import(module:'game_singleton.world.mt');
         @:itemmenu = import(module:'game_function.itemmenu.mt');
@@ -300,6 +302,7 @@ return {
     log : InteractionMenuEntry.new(
       name : 'Log',
       filter::(user, battle) <- true,
+      keepInteractionMenu : false,
       onSelect::(user, battle, commitAction) {        
         windowEvent.queueReader(
             prompt: if (random.flipCoin()) 

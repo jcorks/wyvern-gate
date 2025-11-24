@@ -6998,9 +6998,6 @@ Arts.database.newEntry(
         toput = [...toput, ...v.effectStack.getAll()];
       }
       
-      // technically removes ALL instances, but the others 
-      // wouldnt be usable anyway
-      user.deck.purge(:'base:b178');
       
       // just remove ONE
       @index = user.supportArts->findIndex(:'base:b178');
@@ -9817,7 +9814,7 @@ Arts.database.newEntry(
 */
 
 
-
+/*
 Arts.database.newEntry(
   data: {
     name: 'Clairvoyance',
@@ -9840,7 +9837,7 @@ Arts.database.newEntry(
     }
   }
 )
-
+*/
 
 
 Arts.database.newEntry(
@@ -11409,7 +11406,7 @@ Arts.database.newEntry(
         onEnter :: {
           foreach(
             user.battle.getEnemies(:user)->filter(
-              ::(value) <- value.deck.hand->filter(
+              ::(value) <- value.effectStack.getAll()->filter(
                 ::(value) <- value.id == 'base:banish'
               )->size > 0
             )
