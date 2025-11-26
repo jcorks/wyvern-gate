@@ -377,7 +377,7 @@ Profession.newEntry(data:{
     'base:proceed-with-caution', //X defense buff for team (10 turns)
     'base:mend',         //X heal other, no AP cost!!!! but weak
     'base:defend-other',     //X Defends another for 4 turns
-    'base:retaliate',      //X auto-attack if hit (10 turns)
+    'base:counter',      //X auto-attack if hit (10 turns)
     'base:coordination',     //X stat boost for every other in party with same profession 
     'base:perfect-guard',    //X Nullifies all damage for 3 turns
   ],
@@ -1255,9 +1255,7 @@ Profession.newEntry(data:{
     'base:leg-sweep',
     'base:unarm',
     'base:doublestrike',
-    'base:cancel',
-    'base:cancel',
-    'base:retaliate'
+    'base:counter'
   ],
   passives : [
   ]

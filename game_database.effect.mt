@@ -558,7 +558,7 @@ Effect.newEntry(
           if (holder.effectStack)
             holder.effectStack.emitEvent(
               name: 'onPreBlock',
-              attacker : from, 
+              attacker, 
               damage,
               targetPart
             );          
@@ -594,20 +594,20 @@ Effect.newEntry(
             @:which = idToName(:targetPart);
             
             windowEvent.queueMessage(
-              text: holder.name + ' predicted ' + from.name + '\'s attack to their ' + which + ' and successfully Parried it!'
+              text: holder.name + ' predicted ' + attacker.name + '\'s attack to their ' + which + ' and successfully Parried it!'
             );
             
             if (holder.effectStack)
               holder.effectStack.emitEvent(
                 name : 'onSuccessfulBlock',
-                attacker: from,
+                attacker,
                 damage,
                 targetPart
               );
             damage.amount = 0;
             
-            if (from.effectStack)
-              from.effectStack.emitEvent(
+            if (attacker.effectStack)
+              attacker.effectStack.emitEvent(
                 name: 'onGotBlocked',
                 from
               );
@@ -622,7 +622,7 @@ Effect.newEntry(
         windowEvent.queueNestedResolve(
           onEnter :: {
             @:world = import(module:'game_singleton.world.mt');
-            if (world.party.isMember(:holder)) ::<= {
+            if (world.party.leader == holder) ::<= {
               combatChooseDefend();
             } else ::<= {
               targetDefendPart = Entity.normalizedDamageTarget();
@@ -3834,9 +3834,9 @@ Effect.newEntry(
       },
       
       onRemoveEffect ::(from, item, holder) {
-        windowEvent.queueMessage(text:'The destruction rune fades from ' + holder.name + '.');
-        from.attack(
-          target:holder,
+        holder.damage(
+          attacker:from,
+          dodgeable: false,
           damage: Damage.new(
             amount:from.stats.INT * (1.2),
             damageType : Damage.TYPE.FIRE,

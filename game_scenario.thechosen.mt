@@ -1970,10 +1970,7 @@ return {
           professionHint: 'thechosen:wyvern-of-fire'
         );
         location.ownedBy.supportArts = [
-          'base:cancel',
           'base:bloods-summoning',
-          'base:foresight',
-          'base:mind-games',
           'base:banishing-light'
         ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
         location.ownedBy.name = 'Wyvern of Fire';

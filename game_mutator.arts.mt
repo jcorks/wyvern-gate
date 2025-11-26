@@ -2752,7 +2752,7 @@ Arts.database.newEntry(
     notifCommit : '$1 casts Thunder!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Multi-hit magick that deals 4 random strikes based on INT. Cannot be blocked.',
+    description: 'Multi-hit magick that deals 3 random strikes based on INT. Cannot be blocked.',
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2762,7 +2762,7 @@ Arts.database.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (0.45),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      for(0, 4 + (level-1)*2)::(index) {
+      for(0, 3)::(index) {
         @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
         windowEvent.queueCustom(
           onEnter :: {
@@ -2833,7 +2833,7 @@ Arts.database.newEntry(
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAIT.MAGIC | TRAIT.HEAL,
-    rarity : RARITY.COMMON,
+    rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
@@ -12770,7 +12770,7 @@ Arts = databaseItemMutatorClass.create(
         canvas.renderBarAsString(
           width:art.maxCharge+2,
           fillFraction: art.charge / art.maxCharge,
-          emptyCharacter : '░'
+          emptyCharacter : '|'//'░'
         ),
         '' + art.charge + '/' + art.maxCharge
       ]

@@ -5,12 +5,7 @@ return {
   giveWeapon : false,
   giveArmor : false,
   randomEffectCount : 0,
-  randomAdditionalArtsCount : 0,
+  randomAdditionalArtsCount : 7,
   arts : [
-    'base:parry',
-    'base:parry',
-    'base:parry',
-    'base:parry',
-    'base:parry'
   ]
 }

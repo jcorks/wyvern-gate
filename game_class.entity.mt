@@ -765,6 +765,7 @@
       @:rate = random.number();
       when (rate <= 0.25) DAMAGE_TARGET.HEAD;
       when (rate <  0.75) DAMAGE_TARGET.BODY;
+      return DAMAGE_TARGET.LIMBS
     },
     
     displayedHurt : {
@@ -1299,20 +1300,17 @@
             when(id == empty) empty;
             
             art = Arts.database.find(id);
-            
-            windowEvent.queueChoices(
-              prompt: art.name,
-              choices : [
-                this.name + ' has equipped the Art.'
-              ],
-              canCancel: true,
-              onChoice::(choice) {
-                @:world = import(module:'game_singleton.world.mt');
-                
-                world.party.takeSupportArt(id:art.id);
-                set.supportArts->push(:Arts.new(base:art));
-              }
+            /*
+            windowEvent.queueMessage(
+              speaker: this.name + ':' + which,
+              text: art.name + ' has been equipped.'
             );
+            */
+            @:world = import(module:'game_singleton.world.mt');
+            
+            world.party.takeSupportArt(id:art.id);
+            set.supportArts->push(:Arts.new(base:art));
+
           }
         );
       }
@@ -1376,7 +1374,13 @@
                 onChoice::(choice) {
                   @:world = import(module:'game_singleton.world.mt');
                   world.party.addSupportArt(id:art);
-                  set.supportArts->remove(:set.supportArts->findIndex(:art));
+                  set.supportArts->remove(:
+                    set.supportArts->map(
+                      ::(value) <- value.id
+                    )->findIndex(:
+                      art
+                    )
+                  );
                 
                 }
               )
@@ -1384,7 +1388,7 @@
 
             when(category == 'Weapon:') 
               windowEvent.queueMessage(
-                text: 'Weapon arts come directly from an equipped weapon. These are only viewable here.'
+                text: 'Weapon arts come directly from an equipped weapon.'
               );
 
             
@@ -1403,7 +1407,7 @@
                   when(choice == 0) empty;
                   
                   set.professionArts->remove(:
-                    set.professionArts->findIndex(:art)
+                    set.professionArts->map(::(value) <- value.id)->findIndex(:art)
                   );
                 }
               );
@@ -1455,7 +1459,6 @@
       _.state.ap = 0;               
       _.state.shield = 0;
       _.temporaryArts = [];
-      breakpoint();
     },
     
       
@@ -2340,6 +2343,8 @@
       @:state = _.state;
       @:this = _.this;
   
+      @:arts = [...state.equipArts];
+  
       @:olditem = this.unequip(slot, silent:true);
       this.equip(item, slot, silent:true);
       this.recalculateStats();
@@ -2350,6 +2355,7 @@
         this.equip(item:olditem, slot, silent:true);
       }
       this.recalculateStats();
+      state.equipArts = arts;
             
       return newStats;
     },
@@ -2775,7 +2781,6 @@
         );
         art.charge = 0;
         state.equipArts->push(:art);
-        breakpoint();
       }
 
 
@@ -2874,7 +2879,6 @@
       @:current = state.equips[slot];
       when (current == empty) empty;
       
-
       state.equipArts = [];
       state.equips[slot] = empty;        
       

@@ -38,15 +38,7 @@ return {
           idHint: 'base:none',
           tierHint: 0  
         )
-        
 
-        world.loadIsland(
-          key:keyhome, 
-          skipSave:true,
-          onDone ::(island){
-            startBattle(:island)
-          }
-        ); 
         
 
         @:startBattle ::(island) {
@@ -125,13 +117,13 @@ return {
             
             
             if (data.randomAdditionalArtsCount->type == Number) ::<= {
-              @:Arts = import(module:'game_database.arts.mt');
+              @:Arts = import(module:'game_mutator.arts.mt');
               for(0, data.randomAdditionalArtsCount) ::(i) {
                 ent.supportArts->push(:
-                  Arts.getRandomFiltered(::(value) <- 
+                  Arts.new(base:Arts.database.getRandomFiltered(::(value) <- 
                     ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
                     ((value.traits & Arts.TRAIT.SUPPORT) != 0) 
-                  ).id
+                  ))
                 );
               }
             }
@@ -200,6 +192,14 @@ return {
           );        
         }        
         
+
+        world.loadIsland(
+          key:keyhome, 
+          skipSave:true,
+          onDone ::(island){
+            startBattle(:island)
+          }
+        );         
         
       },
       
