@@ -1028,7 +1028,7 @@ Species.newEntry(data:{
   rarity : 2000000000000,
   description: 'Keepers of the gates',
   growth : StatSet.new(
-    HP : 60,
+    HP : 6,
     AP : 10,
     ATK: 10,
     DEF: 10,
@@ -1056,7 +1056,7 @@ Species.newEntry(data:{
   rarity : 2000000000000,
   description: 'Ancient spirit',
   growth : StatSet.new(
-    HP : 60,
+    HP : 6,
     AP : 10,
     ATK: 10,
     DEF: 10,
@@ -1082,7 +1082,7 @@ Species.newEntry(data:{
   rarity : 2000000000000,
   description: 'Force of nature',
   growth : StatSet.new(
-    HP : 60,
+    HP : 6,
     AP : 10,
     ATK: 10,
     DEF: 10,
@@ -1109,9 +1109,9 @@ Species.newEntry(data:{
   rarity : 2000000000000,
   description: 'Force of nature',
   growth : StatSet.new(
-    HP : 60,
+    HP : 6,
     AP : 10,
-    ATK: 10,
+    ATK: 4,
     DEF: 10,
     INT: 10,
     LUK: 10,
@@ -1135,14 +1135,14 @@ Species.newEntry(data:{
   rarity : 2000000000000,
   description: 'Force of nature',
   growth : StatSet.new(
-    HP : 60,
-    AP : 10,
-    ATK: 10,
-    DEF: 10,
-    INT: 10,
-    LUK: 10,
-    SPD: 10,
-    DEX: 10
+    HP : 10,
+    AP : 1,
+    ATK: 4,
+    DEF: 5,
+    INT: 0,
+    LUK: 0,
+    SPD: 1,
+    DEX: 1
   ),
   qualities : [
   ],
@@ -1160,7 +1160,7 @@ Species.newEntry(data:{
   rarity : 2000000000000,
   description: 'Force of nature',
   growth : StatSet.new(
-    HP : 60,
+    HP : 6,
     AP : 10,
     ATK: 10,
     DEF: 10,
@@ -1187,12 +1187,12 @@ Species.newEntry(data:{
   rarity : 2000000000000,
   description: 'Looks like a chest! Not as friendly though.',
   growth : StatSet.new(
-    HP : 60,
+    HP : 6,
     AP : 10,
-    ATK: 10,
+    ATK: 4,
     DEF: 10,
     INT: 10,
-    LUK: 10,
+    LUK: 0,
     SPD: 10,
     DEX: 10
   ),
@@ -1213,14 +1213,14 @@ Species.newEntry(data:{
   rarity : 2000000000000,
   description: 'Large, wild bat.',
   growth : StatSet.new(
-    HP : 60,
-    AP : 10,
-    ATK: 10,
-    DEF: 10,
-    INT: 10,
-    LUK: 10,
-    SPD: 10,
-    DEX: 10
+    HP : 6,
+    AP : 1,
+    ATK: 1,
+    DEF: 1,
+    INT: 1,
+    LUK: 1,
+    SPD: 1,
+    DEX: 1
   ),
   qualities : [
   ],

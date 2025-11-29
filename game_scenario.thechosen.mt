@@ -828,7 +828,7 @@ return {
 
 
 
-    
+    /*
     @:Arts = import(:'game_mutator.arts.mt');
     @:dump ::(filter, filename) {
       Arts.database.dumpCSV(
@@ -924,7 +924,7 @@ return {
     }
 
     dump(filename: 'arts.csv', filter::(value) <- true);
-    
+    */
     
     
     
@@ -1562,7 +1562,6 @@ return {
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
-          {id: 'base:small-chest', rarity: 16},
           {id: 'base:locked-chest', rarity: 11},
           {id: 'base:magic-chest', rarity: 15},
 
@@ -1650,8 +1649,6 @@ return {
           'base:small-chest',
           'base:enchantment-stand',
           
-          'base:warp-point',
-          'base:warp-point',
           'base:warp-point',
           'base:warp-point'          
         ],

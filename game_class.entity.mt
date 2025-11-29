@@ -44,6 +44,7 @@
 @:MIN_SUPPORT_COUNT = 5;
 @:DAMAGE_RNG_SPREAD = 0.3;
 @:PROF_EXP_PER_KNOCKOUT = 35;
+@:ART_EQUIP_LIMIT = 12;
 @:FEELING_TYPE = {
   PERSON : 1,
   ITEM : 2,
@@ -1308,6 +1309,14 @@
             */
             @:world = import(module:'game_singleton.world.mt');
             
+            
+            when(this.arts->size - (state.equipArts->size) >= ART_EQUIP_LIMIT)
+              windowEvent.queueMessage(
+                speaker: this.name + ': Arts Limit',
+                text: this.name + ' cannot equip any more Arts. Please unequip other Arts and try again.'
+              );
+
+
             world.party.takeSupportArt(id:art.id);
             set.supportArts->push(:Arts.new(base:art));
 
@@ -1329,6 +1338,13 @@
           onGetList ::<- this.getUnequippedProfessionArts(),
           canCancel: true,
           onChoice ::(art, category) {
+            when(this.arts->size - (state.equipArts->size) >= ART_EQUIP_LIMIT)
+              windowEvent.queueMessage(
+                speaker: this.name + ': Arts Limit',
+                text: this.name + ' cannot equip any more Arts. Please unequip other Arts and try again.'
+              );
+
+
             set.professionArts->push(:Arts.new(base:Arts.database.find(:art)));
           }
         );
@@ -1450,7 +1466,8 @@
     battleEnd :: {
       _.battle = empty;
       @:this = _.this;
-      _.this.effectStack.clear(all:true);
+      if (_.this.effectStack != empty)
+        _.this.effectStack.clear(all:true);
       _.effectStack = empty;
       _.abilitiesUsedBattle = empty;        
       

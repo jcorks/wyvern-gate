@@ -30,6 +30,7 @@
 // Matte version works okay, just might be a bit slower
 // when scenes get heavy, like in battle.
 @native = ::? {
+  return empty;
   @:a = getExternalFunction(:'wyvern_gate__native__canvas')();
   
   a.EFFECT_FINISHED = EFFECT_FINISHED;
@@ -126,7 +127,7 @@ return class(
     @peny = 0;
     @onCommit;
     @debugLines = [];
-    @:lines_output = [];
+    
     
     @savestates = [];
     @idStatePool = 0;
@@ -137,7 +138,17 @@ return class(
     
     
     
-
+    @:pushToScreen ::(renderNow) {
+      @lines_output = [];
+      for(0, CANVAS_HEIGHT)::(row) {
+        lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
+      }
+      
+      onCommit(
+        lines:lines_output,
+        renderNow        
+      );     
+    }
     
     this.interface = {
       reset ::{
@@ -388,10 +399,10 @@ return class(
         
         @id = if (idStatePool_dead->size) 
             idStatePool_dead->pop 
-            else ::<= {
+          else ::<= {
             idStatePool += 1;
             return idStatePool;
-            }
+          }
         savestates->push(value:{
           id : id,
           text : canvasCopy
@@ -553,36 +564,25 @@ return class(
         set ::(value => Boolean) <- showEffects = value
       },
       
-      hasEffects ::<- effects->size > 0,
+      hasEffects ::<- effects->keycount > 0,
 
       
       update ::{
-        when(effects->keycount == 0) empty;        
+        when(effects->keycount == 0) empty;  
+        @:canvasReal = [...canvas];      
         foreach(effects) ::(effect, k) {
           @:ret = effect();
           if (ret == EFFECT_FINISHED) 
             effects->remove(:effect);
         }     
 
-        for(0, CANVAS_HEIGHT)::(row) {
-          lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
-        }
-        onCommit(
-          lines:lines_output
-        ); 
+        pushToScreen();
+        canvas = canvasReal;
       },
         
       commit ::(renderNow) {
         when(effects->keycount > 0 && (renderNow != true)) empty;
-
-        for(0, CANVAS_HEIGHT)::(row) {
-          lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
-        }
-        
-        onCommit(
-          lines:lines_output,
-          renderNow        
-        );        
+        pushToScreen(renderNow);       
       }
     }  
   }

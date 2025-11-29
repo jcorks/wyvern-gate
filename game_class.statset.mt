@@ -179,6 +179,7 @@
       foreach(NAMES) ::(k, v) {
         state[v+'mod'] += stats[v];
       }
+      return _.this;
     },
       
     modRate ::(stats) {
@@ -186,6 +187,7 @@
       foreach(NAMES) ::(k, v) {
         state[v+'rate'] += stats[v]/100;
       }    
+      return _.this;
     },
       
     resetMod :: {
@@ -194,6 +196,7 @@
         state[v+'mod'] = 0;
         state[v+'rate'] = 1;
       }
+      return _.this;
     },
       
     add ::(stats) {
@@ -201,6 +204,7 @@
       foreach(NAMES) ::(k, v) {
         state[v] += stats[v];
       }
+      return _.this;
     },
       
     subtract ::(stats) {
@@ -208,6 +212,7 @@
       foreach(NAMES) ::(k, v) {
         state[v] -= stats[v];
       }
+      return _.this;
     },
     
     sum : {

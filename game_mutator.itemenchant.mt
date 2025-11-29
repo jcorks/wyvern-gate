@@ -1142,9 +1142,9 @@ ItemEnchant.database.newEntry(
             @:card = Arts.new(base:Arts.database.find(
               :state.artID
             ))
-            @:card = args.holder.temporaryArts->push(:card);
+            args.holder.temporaryArts->push(:card);
             card.revealArt(
-              prompt:'The Art ' + Arts.database.find(:state.artID).name + ' was added to ' + args.holder.name + '\'s available Arts.'
+              prompt:'The Art ' + card.base.name + ' was temporarily added to ' + args.holder.name + '\'s available Arts.'
             );
             /*
             // insanity: instant casting

@@ -118,6 +118,12 @@
     @lastNext;
     @onTurnPrep_;
     
+    @:requestRedrawBG ::{
+      if (!windowEvent.invalidateCache(:'VisitLandmark')) 
+        windowEvent.invalidateCache(:'VisitIsland');    
+      windowEvent.invalidateCache(:'Battle');
+    }
+    
     @:getAllies::(ent) {
       @:v = ent2group[ent];
       when(v == empty) [];
@@ -258,6 +264,7 @@
     }
     
     @:nextTurn ::{
+    
       when (turnPoppable->keycount == 0) empty;
       if (onTurnPrep_) onTurnPrep_();
       
@@ -285,7 +292,7 @@
         when (!ent.canActThisTurn()) ::<={
           endTurn();
         }
-
+        requestRedrawBG();
         windowEvent.queueMessage(
           text: 'It is now ' + ent.name + '\'s turn.'
         );
@@ -471,6 +478,7 @@
       }
       
       // grouping and display of effects
+      /*
       foreach(groups) ::(k, group) {
         foreach(group)::(index, ally) {
           @:Effect = import(module:'game_database.effect.mt');  
@@ -504,6 +512,7 @@
           
         }
       }
+      */
       
     }
     
@@ -796,7 +805,6 @@
             windowEvent.queueCustom(
               keep: true,
               jumpTag: 'Battle',
-              disableCache : true,
               onEnter :: {
               },
               onLeave ::{
@@ -804,11 +812,13 @@
               
               renderable : {
                 render ::{
-                  canvas.blackout();
+                  ////canvas.blackout();
                   this.render()
                 }
               },
               onUpdate::{
+                requestRedrawBG();
+
                 when(ended) ::<= {
                   if (windowEvent.hasAnyQueued() == false) ::<= {
                     battleEnd();                
@@ -872,6 +882,8 @@
         }
         return false;       
       },
+
+      requestRedrawBG : requestRedrawBG,
 
       
       isActive : {
@@ -964,6 +976,7 @@
         when (!entAct.canActThisTurn())
           endTurn();
           
+        requestRedrawBG();
         this.commitFreeAction(action, from, onDone::{
             windowEvent.queueCustom(
               onEnter ::{
@@ -980,6 +993,7 @@
           name : 'onPreAction',
           action : action
         )->filter(::(value) <- value.ret ==false)->size > 0) empty;
+        requestRedrawBG();
           
         
         @:passesCheck ::{
@@ -1043,6 +1057,7 @@
           
           @:art = Arts.database.find(id:action.card.id);
         
+          requestRedrawBG();
           @:ret = entAct.useArt(
             art:action.card,
             level: 1,
@@ -1051,9 +1066,11 @@
             turnIndex : action.turnIndex,
             extraData : action.extraData
           );
+
           windowEvent.queueCustom(
             onEnter ::{
               finish(:ret);           
+              requestRedrawBG();
             }
           );
         }
@@ -1062,6 +1079,7 @@
         //windowEvent.onResolveAll(
         windowEvent.queueNestedResolve(
           onEnter :: {
+
             // entAct.deck was likely BLASTED due to death
             when (active == false || entAct == empty) 
               empty;
@@ -1073,9 +1091,11 @@
             
             windowEvent.queueCustom(
               onEnter :: {
+                requestRedrawBG();
                 // react here
                 windowEvent.queueCustom(
                   onEnter ::{
+                    requestRedrawBG();
                     when (!entAct.canActThisTurn())
                       endTurn();
                     doAction();

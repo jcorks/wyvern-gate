@@ -53,14 +53,14 @@
 
       beast.stats.load(serialized:StatSet.new(
         HP:   7,
-        AP:   15,
+        AP:   0,
         ATK:  6,
         INT:  5,
         DEF:  3,
         LUK:  6,
         SPD:  10,
         DEX:  5
-      ).save());
+      ).add(:beast.stats).save());
       
       beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
       beast.heal(amount:9999, silent:true); 

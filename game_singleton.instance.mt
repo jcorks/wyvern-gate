@@ -154,8 +154,8 @@ import(module:'game_function.newrecord.mt');
       
       needsDisplay = [...needsDisplay, ...canvas.columnsToLines(
         columns : [
-          artsBar,
           artsStatus,
+          artsBar,
           artsNames
         ],
         leftJustifieds : [
@@ -1532,6 +1532,7 @@ return empty;
             prompt: 'What next?',
             keep:true,
             canCancel:true,
+            jumpTag: 'LANDMARK_TRAVEL',
             onGetChoices ::{
               landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island, landmark));
               

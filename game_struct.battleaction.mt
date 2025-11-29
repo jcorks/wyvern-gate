@@ -24,10 +24,12 @@ return struct(
   name: 'Wyvern.Battle.Action',
   
   items : {
-    card : Nullable,
+    card : Object,
     targets: Object,
     targetParts: Object,
     turnIndex: Number,
     extraData: Object,
-  }
+  },
+  
+  readOnly : true
 );  

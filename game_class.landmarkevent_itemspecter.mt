@@ -48,7 +48,7 @@
         LUK:  6,
         SPD:  100,
         DEX:  10
-      ).save());
+      ).add(:specter.stats).save());
       
       specter.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
       specter.heal(amount:9999, silent:true); 

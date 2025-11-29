@@ -61,6 +61,9 @@ return ::(
       itemsPerRow: 2,
       prompt: 'What will ' + user.name + ' do?',
       canCancel: false,
+      renderable : {
+        render ::<- battle.requestRedrawBG()
+      },
       onChoice::(choice) {
         when(choice == 0) empty;
         options[choice-1].onSelect(user, battle, commitAction);    

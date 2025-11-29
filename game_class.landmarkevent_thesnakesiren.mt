@@ -40,7 +40,7 @@
         LUK:  6,
         SPD:  100,
         DEX:  7
-      ).save());
+      ).add(:beast.stats).save());
       
       beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
       beast.heal(amount:9999, silent:true); 

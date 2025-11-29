@@ -2403,7 +2403,7 @@ Arts.database.newEntry(
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.COMMON_ATTACK_SPELL | TRAIT.IS_ATTACK,
-    rarity : RARITY.UNCOMMON,
+    rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) <- user.stats.INT * (1.2) * (1 + (level-1)*0.15),
@@ -2833,7 +2833,7 @@ Arts.database.newEntry(
     durationTurns: 0,
     kind : KIND.ABILITY,
     traits : TRAIT.MAGIC | TRAIT.HEAL,
-    rarity : RARITY.UNCOMMON,
+    rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},
@@ -5167,28 +5167,6 @@ Arts.database.newEntry(
 */
 
 
-Arts.database.newEntry(
-  data: {
-    name: 'Diversify',
-    id : 'base:diversify',
-    notifCommit : Arts.NO_NOTIF,
-    notifFail : Arts.NO_NOTIF,
-    targetMode : TARGET_MODE.NONE,
-    description: 'Draw 2 Arts cards.',
-    keywords: [],
-    durationTurns: 0,
-    kind : KIND.EFFECT,
-    traits : TRAIT.SUPPORT,
-    rarity : RARITY.UNCOMMON,
-    usageHintAI : USAGE_HINT.BUFF,
-    shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) {},
-    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
-      user.drawArt(count:2);
-    }
-  }
-)   
-
 
 
 
@@ -5241,6 +5219,7 @@ Arts.database.newEntry(
       if (world.party.leader == user) ::<= {
         pickitem(
           canCancel: false,
+          keep: false,
           inventory : world.party.inventory,
           onPick ::(item){
             world.party.inventory.remove(:item);
@@ -6060,7 +6039,7 @@ Arts.database.newEntry(
     notifCommit : '$1 unexpectedly swipes at $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Add the Unbalanced effect on target for 2 turns. Draw an Arts card.",
+    description: "Add the Unbalanced effect on target for 2 turns. Gain 1 AP.",
     keywords: ['base:unbalanced'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.DEBUFF,
@@ -6071,7 +6050,7 @@ Arts.database.newEntry(
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       targets[0].addEffect(from:user, id:'base:unbalanced', durationTurns:2);      
-      user.drawArt(count:1); 
+      user.ap += 1;
     }
   }
 )
@@ -6083,7 +6062,7 @@ Arts.database.newEntry(
     notifCommit : '$1 starts to become desparate!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: "Add the Desparate effect on user for 2 turns. Draw an Arts card.",
+    description: "Add the Desparate effect on user for 2 turns. Gain 1 AP.",
     keywords: ['base:desparate'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -6094,7 +6073,7 @@ Arts.database.newEntry(
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:desparate', durationTurns:2);      
-      user.drawArt(count:1); 
+      user.ap += 1;
     }
   }
 )
@@ -6201,7 +6180,7 @@ Arts.database.newEntry(
     description: "Add 1 Banish stack to target.",
     keywords: ['base:banish'],
     durationTurns: 0,
-    usageHintAI : USAGE_HINT.BUFF,
+    usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.EFFECT,
     traits : TRAIT.SUPPORT,
@@ -6226,7 +6205,7 @@ Arts.database.newEntry(
     description: "Add 2 Banish stacks to target.",
     keywords: ['base:banish'],
     durationTurns: 0,
-    usageHintAI : USAGE_HINT.BUFF,
+    usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.EFFECT,
     traits : TRAIT.SUPPORT,
@@ -6250,7 +6229,7 @@ Arts.database.newEntry(
     description: "Add 3 Banish stacks to target.",
     keywords: ['base:banish'],
     durationTurns: 0,
-    usageHintAI : USAGE_HINT.BUFF,
+    usageHintAI : USAGE_HINT.DEBUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     kind : KIND.EFFECT,
     traits : TRAIT.SUPPORT,
@@ -7000,12 +6979,7 @@ Arts.database.newEntry(
       
       
       // just remove ONE
-      @index = user.supportArts->findIndex(:'base:b178');
-
-      // if it came from someone else's deck, theyre in luck.
-      when(index == -1) empty;
-      
-      user.supportArts->remove(:index);
+      user.supportArts = user.supportArts->filter(::(value) <- value.id != 'base:b178');
     }
   }
 )
@@ -7999,7 +7973,7 @@ Arts.database.newEntry(
     notifCommit : '$1 takes a defensive stance!',
     notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.NONE,
-    description: "Grants the effect Redirect Momentum to the user for a turn. Draw an Arts card.",
+    description: "Grants the effect Redirect Momentum to the user for a turn.",
     keywords: ['base:redirect-momentum', 'base:stunned', 'base:grappled'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -8011,7 +7985,6 @@ Arts.database.newEntry(
     baseDamage::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.addEffect(from:user, id:'base:redirect-momentum', durationTurns:1);
-      user.drawArt(count:1);
     }
   }
 )
@@ -8836,7 +8809,7 @@ Arts.database.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:poisoned', 'base:burned'],
-    description: "Remove all stacks of Poisoned and Burned from target. Draw a card.",
+    description: "Remove all stacks of Poisoned and Burned from target. Gain 1 AP.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -8859,7 +8832,7 @@ Arts.database.newEntry(
         value.id == 'base:poisoned' 
       );
       
-      user.drawArt(count: 1);
+      user.ap += 1;
     }
   }
 )
@@ -8872,7 +8845,7 @@ Arts.database.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:cursed-shifts', 'base:elemental-tag'],
-    description: "Remove Elemental Tag and cursed shifts from target. Draw a card.",
+    description: "Remove Elemental Tag and cursed shifts from target. Gain 1 AP.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -8895,7 +8868,7 @@ Arts.database.newEntry(
         CURSED_SHIFTS->findIndex(:value.id) != -1
       );
       
-      user.drawArt(count: 1);
+      user.ap += 1;
     }
   }
 )
@@ -8909,7 +8882,7 @@ Arts.database.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:seed-effects'],
-    description: "Remove all seed effects from target. Draw a card.",
+    description: "Remove all seed effects from target.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -8934,7 +8907,7 @@ Arts.database.newEntry(
         value.id == 'base:healroot-growing'
       );
       
-      user.drawArt(count: 1);
+      user.ap += 1;
     }
   }
 )
@@ -8948,7 +8921,7 @@ Arts.database.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:banish'],
-    description: "Remove all stacks of Banish from target. Draw a card.",
+    description: "Remove all stacks of Banish from target. Gain 1 AP.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -8969,7 +8942,7 @@ Arts.database.newEntry(
         value.id == 'base:banish'
       );
       
-      user.drawArt(count: 1);
+      user.ap += 1;
     }
   }
 )
@@ -8982,7 +8955,7 @@ Arts.database.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:stunned'],
-    description: "Remove the Stunned effect from target. Draw a card.",
+    description: "Remove the Stunned effect from target.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -9003,7 +8976,7 @@ Arts.database.newEntry(
         value.id == 'base:stunned'
       );
       
-      user.drawArt(count: 1);
+      user.ap += 1;
     }
   }
 )
@@ -9017,7 +8990,7 @@ Arts.database.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     keywords : ['base:ailments'],
-    description: "Remove all ailments from target. Draw a card.",
+    description: "Remove all ailments from target. Gain 1 AP.",
     durationTurns: 0,
     usageHintAI : USAGE_HINT.HEAL,
     shouldAIuse ::(user, reactTo, enemies, allies) {
@@ -9038,7 +9011,7 @@ Arts.database.newEntry(
         AILMENTS->findIndex(:value.id) != -1
       );
       
-      user.drawArt(count: 1);
+      user.ap += 1;
     }
   }
 )
@@ -11846,7 +11819,7 @@ Arts.database.newEntry(
         }
       )
 
-      for(0, 9) ::(i) {
+      for(0, 3) ::(i) {
         user.addEffect(from:user, id: 'base:banish', durationTurns: A_LOT);
       }
 
@@ -12683,7 +12656,7 @@ Arts.database.newEntry(
 @:getCharges::(count) {
   @a = [];
   for(0, count) ::(i) {
-    a->push(:'*');
+    a->push(:'|');
   }
   return String.combine(:a);
 }
@@ -12881,10 +12854,10 @@ Arts = databaseItemMutatorClass.create(
     },
     
     getMaxCharge::(rarity) <- match(rarity) {
-      (RARITY.COMMON): 1,
-      (RARITY.UNCOMMON): 2,
-      (RARITY.RARE): 3,
-      (RARITY.EPIC): 4
+      (RARITY.COMMON): 2,
+      (RARITY.UNCOMMON): 3,
+      (RARITY.RARE): 4,
+      (RARITY.EPIC): 5
     },
 
     viewCards ::(user, cards, onChoice, canCancel) {

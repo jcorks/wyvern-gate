@@ -393,9 +393,8 @@ Landmark.database.newEntry(
       {id: 'base:fountain', rarity:18},
       {id: 'base:potion-shop', rarity: 25},
       {id: 'base:wyvern-statue', rarity: 20},
-      {id: 'base:small-chest', rarity: 16},
-      {id: 'base:locked-chest', rarity: 11},
-      {id: 'base:magic-chest', rarity: 15},
+      {id: 'base:locked-chest', rarity: 40},
+      {id: 'base:magic-chest', rarity: 30},
       {id: 'base:enchantment-stand', rarity: 15},
 
       {id: 'base:healing-circle', rarity:35},
@@ -407,9 +406,8 @@ Landmark.database.newEntry(
     requiredLocations : [
       'base:stairs-down',
       'base:locked-chest',
-      'base:small-chest',
-      'base:small-chest',
-      'base:warp-point',
+      'base:item',
+      'base:item',
       'base:warp-point'
     ],
     mapHint:{

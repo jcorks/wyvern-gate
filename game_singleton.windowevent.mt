@@ -27,6 +27,7 @@
 @:FRAME_COUNT_RENDER_TEXT = 3;
 @:CALLBACK_DONE = {};
 @:ANIMATION_FINISHED = -1;
+@:PERMANENT = -1;
 @errorCount = 0;
 
 @:RENDER_STATE = {
@@ -208,7 +209,7 @@
         if (val.stateID == empty) ::<= {
           if (::? {
             foreach(choiceStack) ::(k, v) {
-              if (v.disableCache)
+              if (v.disableCache != empty)
                 send(:false);
             }
             return true;
@@ -218,6 +219,7 @@
       }
       choiceStack->push(value);
     }
+  
   
   
     /*
@@ -230,63 +232,83 @@
       For animations: isAnim
     
     */
-    @:renderThis ::(data => Object, renderOnly, rerender) {
-      when (requestAutoSkip) empty; 
-      when (data.rendered != empty && rerender == empty) empty;
-
-      if (renderOnly == empty && rerender != true)
-        canvas.clear();
-        
-      if (rerender == empty) ::<= {
+    @:renderThis = ::<= {
+    
+      @:checkCache ::(renderOnly, data) {
         @dorender = false;
-        
         foreach(choiceStack) ::(k, v) {
-          when(v == data) empty;
-          if (v.disableCache) ::<= {
+          if (v.disableCache != empty) ::<= {
+            if (v.disableCache != PERMANENT)
+              v->remove(:'disableCache');
+            for(k, choiceStack->size) ::(i) {
+              @:rm = choiceStack[i];
+              if (rm.stateID != empty)
+                canvas.removeState(id:rm.stateID);
+            }
             dorender = true;
           }
-          if (dorender)
+          if (dorender) ::<= {
+            v.stateID = canvas.pushState();
             renderThis(data:v, rerender:true);
+          }
         }
+        
+        if (dorender) ::<= {
+          if (data.stateID != empty)
+            canvas.removeState(id:data.stateID);
+          data.stateID = canvas.pushState();
+        } else if (renderOnly == empty)
+          canvas.clear();
       }
 
-      if (autoSkipAnimations)
-        data.renderState = RENDER_STATE.DONE;
 
-
-      // animations prevent continuing by using the renderState flag
-      // Once an animation is complete, it defaults to 
-      // thisRender once skipped or complete
-      if (data.renderState == RENDER_STATE.ANIMATING) ::<= {        
-
-        if (data.renderable)
-          data.renderable.render()
-
-        @:output = data.animationFrame();
-        if (output == ANIMATION_FINISHED) ::<= {
-          data.renderState = RENDER_STATE.DONE;
-        }
-
-        commitVisual();
-        
-      } else ::<= {        
-
-        @renderAgain = false;
-        if (data.renderable) ::<= {
-          renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;    
-        }
-        
-        if (data.thisRender) ::<= {
-          renderAgain = (data.thisRender()) == this.RENDER_AGAIN;    
-        }
+      // actual function
+      return ::(data => Object, renderOnly, rerender) {
+        when (requestAutoSkip) empty; 
+        when (data.rendered != empty && rerender == empty) empty;
           
-        if (renderOnly == empty && rerender != true)
+        if (rerender == empty) ::<= {
+          checkCache(renderOnly, data);
+        }
+
+        if (autoSkipAnimations)
+          data.renderState = RENDER_STATE.DONE;
+
+
+        // animations prevent continuing by using the renderState flag
+        // Once an animation is complete, it defaults to 
+        // thisRender once skipped or complete
+        if (data.renderState == RENDER_STATE.ANIMATING) ::<= {        
+
+          if (data.renderable)
+            data.renderable.render()
+
+          @:output = data.animationFrame();
+          if (output == ANIMATION_FINISHED) ::<= {
+            data.renderState = RENDER_STATE.DONE;
+          }
+
           commitVisual();
+          
+        } else ::<= {        
 
-        
-        if (renderAgain == false)
-          data.rendered = true;
+          @renderAgain = false;
+          if (data.renderable) ::<= {
+            renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;    
+          }
+          
+          if (data.thisRender) ::<= {
+            renderAgain = (data.thisRender()) == this.RENDER_AGAIN;    
+          }
+            
+          if (renderOnly == empty && rerender != true)
+            commitVisual();
 
+          
+          if (renderAgain == false)
+            data.rendered = true;
+
+        }
       }
     }
     
@@ -1674,6 +1696,26 @@
         return getResolveQueue()->size-1;
       },
       
+      
+      // triggers redrawing of the given jumptag
+      // Returns true if successful, false otherwise
+      invalidateCache ::(tag) {
+        return ::? {
+          @:cs = [...choiceStack];
+          forever ::{
+            if (cs->keycount == 0)
+              send(:false)
+            @:data = cs[cs->keycount-1];
+            if (data.jumpTag != tag) ::<= {
+              cs->pop;
+            } else ::<= {
+              data.disableCache = true;
+              send(:true)
+            }
+          }
+        }
+      },
+      
       // An empty action. Can be used to make custom inputs.
       // If consistency is required, keep can be true and use forceExit() 
       // when done with the widget.
@@ -1718,7 +1760,7 @@
             animationFrame : animationFrame,
             waitFrames : waitFrames,
             onInput : onInput,
-            disableCache : disableCache
+            disableCache : if (disableCache != empty) PERMANENT else empty
           });
         }]);        
         return getResolveQueue()->size-1;

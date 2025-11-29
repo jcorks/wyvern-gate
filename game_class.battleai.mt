@@ -207,7 +207,16 @@
 
           @:Entity = import(module:'game_class.entity.mt');        
           @:Profession = import(module:'game_database.profession.mt');        
-        
+          // discourage abilities until players get their bearings, please!
+          @:world = import(module:'game_singleton.world.mt');
+          @:party = world.party;
+
+          @tier = world.island.tier;
+          
+          if (world.party.isMember(:user_)) 
+            tier = 99;
+          
+                  
           when(((user_.profession.traits & Profession.TRAIT.PACIFIST) != 0) || enemies->keycount == 0 || enemies->findIndexCondition(::(value) <- !value.isIncapacitated()) == -1)
             
             acts->push(:BattleAction.new(
@@ -228,6 +237,8 @@
                   allies
               ))
           });
+          
+          hand = random.scrambled(:hand);
 
 
           hand = hand->filter(::(value) <- 
@@ -235,9 +246,21 @@
               (!(value.overrideTargets->type == Boolean && value.overrideTargets == false))
           );
                   
+          // limit max action count by tier
+          ::<= {
+            @handOld = [...hand];
+            hand = [];
+            ::? {
+              for(0, tier+1) ::(i) {
+                if (i >= handOld->size) send();
+                hand->push(:handOld[i]);
+              }
+            }
+          }
           
           @projectedAP = user_.ap; 
           foreach(hand) ::(k, full) {
+            when(random.flipCoin()) empty;
             @v = full.card;
             @art = Arts.database.find(id:v.id);
             
@@ -292,11 +315,8 @@
           @:ability = Arts.database.find(id:c.card.id);
           
           
-          @:world = import(module:'game_singleton.world.mt');
-          @:party = world.party;
           
-          // discourage abilities until players get their bearings, please!
-          @:tier = world.island.tier;
+
           
           when (party != empty && [...enemies]->filter(::(value) <- party.isMember(:value))->size > 0 &&
               random.try(percentSuccess:80 - (tier * 30)))

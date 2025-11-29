@@ -2445,7 +2445,7 @@ Effect.newEntry(
                       action.targets
                   );
                 },
-                card,
+                art:card,
                 canCancel : false
               );
             }
@@ -4983,7 +4983,7 @@ Effect.newEntry(
       onAffliction ::(from, item, holder, to) {
         @:stackCount = [...holder.effectStack.getAll()]->filter(::(value) <- value.id == 'base:banish')->size;
 
-        if (stackCount >= 10) ::<= {
+        if (stackCount >= 9) ::<= {
           windowEvent.queueMessage(
             text: holder.name + ' has been banished!'
           );
@@ -5373,7 +5373,7 @@ Effect.newEntry(
         // hacky! but fun. maybe functional
         if (world.party.leader == holder) ::<= {
           holder.playerUseArt(
-            card:card,
+            art:card,
             canCancel: false,
             commitAction::(action) {            
               holder.battle.entityCommitAction(action, from:holder);
