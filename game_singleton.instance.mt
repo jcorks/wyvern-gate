@@ -107,7 +107,7 @@ import(module:'game_mutator.island.mt');
     return '<unknown>';
   }
 }
-@:VERSION = '0.3.0 - ' + GIT_COMMIT;
+@:VERSION = '0.4.0a - ' + GIT_COMMIT;
 @:QUICK_SAVE_SUFFIX = '-qs';
 @world = import(module:'game_singleton.world.mt');
 import(module:'game_function.newrecord.mt');

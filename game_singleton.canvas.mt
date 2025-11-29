@@ -30,7 +30,6 @@
 // Matte version works okay, just might be a bit slower
 // when scenes get heavy, like in battle.
 @native = ::? {
-  return empty;
   @:a = getExternalFunction(:'wyvern_gate__native__canvas')();
   
   a.EFFECT_FINISHED = EFFECT_FINISHED;
