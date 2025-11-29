@@ -23,7 +23,7 @@
 @:itemmenu = import(module:'game_function.itemmenu.mt');
 
 
-return ::(
+@battleMenu = ::(
   party,
   battle,
   user,
@@ -38,8 +38,10 @@ return ::(
       windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true)
       battle.entityCommitAction(action:action);  
     } else ::<= {
-      windowEvent.jumpToTag(name:'BattleMenu', doResolveNext:true);         
-      battle.entityCommitAction(action:action);  
+      windowEvent.jumpToTag(name:'BattleMenu')
+      battle.commitFreeAction(action:action, onDone::{
+        windowEvent.jumpToTag(name:'BattleMenu');
+      });  
     }
 
   }
@@ -52,6 +54,7 @@ return ::(
   @:choices = [...options]->map(to:::(value) <- value.name);
 
   @:next = ::{
+    battle.requestRedrawBG();
     windowEvent.queueChoiceColumns(
       leftWeight: 1,
       topWeight: 1,
@@ -61,9 +64,7 @@ return ::(
       itemsPerRow: 2,
       prompt: 'What will ' + user.name + ' do?',
       canCancel: false,
-      renderable : {
-        render ::<- battle.requestRedrawBG()
-      },
+      onKept ::<-     battle.requestRedrawBG(),
       onChoice::(choice) {
         when(choice == 0) empty;
         options[choice-1].onSelect(user, battle, commitAction);    
@@ -78,3 +79,5 @@ return ::(
 
 
 }
+
+return battleMenu;
