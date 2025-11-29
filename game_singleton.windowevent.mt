@@ -216,6 +216,7 @@
           })
             val.stateID = canvas.pushState();    
         }
+        val.left = true;        
       }
       choiceStack->push(value);
     }
@@ -257,7 +258,7 @@
           if (data.stateID != empty)
             canvas.removeState(id:data.stateID);
           data.stateID = canvas.pushState();
-        } else if (renderOnly == empty)
+        } else if (renderOnly != true)
           canvas.clear();
       }
 
@@ -315,17 +316,17 @@
     
     
     @next ::(toRemove, dontResolveNext, level) {
-      @kept;
       if (choiceStack->keycount > 0) ::<= {
         @:data = if (toRemove == empty) choiceStack[choiceStack->size-1] else toRemove;
         if (data.keep) ::<= {
-          kept = true;
+
         } else ::<= {
+          
           if (toRemove == empty) 
             choiceStack->pop 
           else 
-            choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
 
+            choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
           if (!requestAutoSkip) ::<= {
             if (data.stateID != empty) ::<= {
               //canvas.removeState(id:data.stateID);
@@ -334,8 +335,14 @@
           
           if (data.onLeave)
             data.onLeave();
-          if (choiceStack->keycount > 0)
-            choiceStack[choiceStack->keycount-1].rendered = empty;
+          
+          if (choiceStack->keycount > 0) ::<= {
+            @:nextData = choiceStack[choiceStack->keycount-1];
+            if (nextData.keep && nextData.left) ::<= {
+              if (nextData.onKept) nextData.onKept();
+            }
+            nextData.rendered = empty;
+          }
         }
       }
 
@@ -2104,6 +2111,7 @@
         renderable, 
         jumpTag, 
         onLeave, 
+        onKept,
         onCancel
       ) {
         pushResolveQueueTop(fns:[::{
@@ -2123,6 +2131,7 @@
             onLeave : onLeave,
             keep : keep,
             renderable:renderable,
+            onKept : onKept
           });
         }]);
         return getResolveQueue()->size-1;

@@ -2889,6 +2889,15 @@
         default: error(detail:'Item has an invalid equiptype?')    
       }
     },
+    
+    unequipAll ::(inventory, silent) {
+      @:state = _.state;
+      @:this = _.this;
+      foreach(state.equips) ::(k, item) {
+        when(item == empty) empty;
+        this.unequipItem(item, silent, inventory);
+      }
+    },
       
     unequip ::(slot => Number, silent, inventory) {
       @:state = _.state;

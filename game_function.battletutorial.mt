@@ -17,6 +17,7 @@
 */
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:canvas = import(module:'game_singleton.canvas.mt');
+@:Inventory = import(module:'game_class.inventory.mt');
 
 
 return ::{
@@ -29,6 +30,8 @@ return ::{
     professionHint: 'base:adventurer'
   );
   self.name = 'the Leader';
+  self.removeAllProfessionArts();
+  self.unequipAll(inventory : Inventory.new(), silent:true);
   
   @stats = self.stats.save();
   stats.SPD = 10000;
@@ -41,6 +44,9 @@ return ::{
   @:target = world.island.newInhabitant(
     professionHint: 'base:adventurer'
   );
+  target.unequipAll(inventory : Inventory.new(), silent:true);
+  target.removeAllProfessionArts();
+
   target.name = 'the Enemy';
   stats = self.stats.save();
   stats.SPD = 100;
@@ -84,6 +90,10 @@ return ::{
           {input:empty, waitFrames:20, callback::<- doScene(acts)}
         ]);
       }*/
+      when(next.callback) ::<= {
+        next.callback();
+        doScene(acts);
+      }
       
       when(next.text != empty) ::<= {
         windowEvent.queueMessage(
@@ -91,8 +101,6 @@ return ::{
           topWeight: if (next.topWeight == empty) 1 else next.topWeight,
           onLeave::<- doScene(:acts)
         );
-        when(next.resolve)
-          windowEvent.forceResolveNext();
       }
       when(next.wait != empty) ::<= {
         windowEvent.queueCustom(
@@ -153,7 +161,6 @@ return ::{
   @turn1 = [
     {nested: true,text:"Welcome to the battle tutorial. This will explain the basics of how to engage enemies."},
       {text:"This is the screen that you will see when fighting enemies."},
-      /*
       {wait:true},
       {text:"Fighting is done in turns. The top right box shows the order determined for each combatant to take a turn. "},
       {text:"The higher the SPD of the combatant, the earlier their turn is."},
@@ -162,18 +169,16 @@ return ::{
       {text:"Keep an eye on combatant\'s remaining HP! When a combatant\'s HP reaches 0, they are knocked out."},
       {text:"If a combatant receives damage when their HP is 0, they will begin Dying."},
       {text:"When all allies or all enemies are incapacitated in some way, the battle ends."},
-      */    
     {endNested:true},
 
     // yield back to natural battle menu
     {nested:true, waitFrames:30},
       {text:"When it is the leader's turn, the menu below will appear. These are the actions that you can make as leader on your turn.", topWeight: 0.6},
-      /*
       {text:"Note that you only control the party's leader. All other combatants will act on their own.", topWeight: 0.6},
       {text:"Before we go over these, let's cover some basics.", topWeight: 0.6},
       {wait:true},
       {text:"All actions that a combatant can do are referred to as Arts. Unless they're special, Arts cost 2 AP to use. If an Art is used without enough AP, it will fail.", topWeight: 0.6},
-      {text:"When an Art is used, it will lose its charge. Arts recharge each turn, or after walking around outside battle."},
+      {text:"When an Art is used, it will lose its charge. Arts recharge each turn, or after walking around outside battle.", topWeight: 0.6},
       {wait:true},
       {text:"Note that each combatant gains 1 AP at the start of their turn. When a battle begins, each combatant starts with half of their total AP.", topWeight: 0.6},
       {wait:true},
@@ -181,7 +186,6 @@ return ::{
       {text:"First is the Attack Art command. This Art is special in that it costs no AP and has no needed recharge.", topWeight: 0.6},
       {text:"It simply does physical damage with whatever is in hand.", topWeight: 0.6},
       {text:"Because it's costless, Attack is the most basic Ability Art, but it ends the turn after use.", topWeight: 0.6},
-      */
     {endNested:true},    
     {inputs:[
       {input:windowEvent.CURSOR_ACTIONS.DOWN, waitFrames:20},
@@ -318,10 +322,12 @@ return ::{
       {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:60},
       {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:60},
       {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:60},
-      {input:empty, waitFrames:10}
+      {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:100},
+      {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:60},
     ]},
     {nested:true, waitFrames:10},
       {text:'Now that you know the basics, try to play out the rest of the battle.'},
+      {callback ::<- world.battle.requestRedrawBG()},
     {endNested:true}
 
   ];

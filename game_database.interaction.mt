@@ -345,9 +345,10 @@ Interaction.newEntry(
 
 
           if (location.peaceful == false && !talkee.isIncapacitated()) ::<= {
+            @:Landmark = import(module:'game_mutator.landmark.mt');
 
 
-            if (location.landmark.base.guarded == true) ::<= {
+            if (location.landmark.base.hasTraits(:Landmark.TRAIT.GUARDED)) ::<= {
               windowEvent.queueMessage(speaker:talkee.name, text:'Guards! Guards! Help!');
               Scene.start(id:'base:scene_guards0', onDone::{}, location, landmark:location.landmark);
             } else ::<= {

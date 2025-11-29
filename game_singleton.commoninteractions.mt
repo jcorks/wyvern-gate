@@ -83,7 +83,7 @@ return {
               user.arts->filter(::(value) <- value.base.kind == Arts.KIND.EFFECT)
             
             when(arts->size == 0) 
-              windowEvent.queueMessage(:'There are no Arts equipped of this category.');
+              windowEvent.queueMessage(text:'There are no Arts equipped of this category.');
               
             Arts.queuePick(
               arts,
@@ -183,6 +183,7 @@ return {
                         );
                       source.charge = 0;
                       user.ap += 1;
+                      battle.requestRedrawBG();
                     }
                   }
                 );  
