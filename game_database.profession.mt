@@ -998,6 +998,41 @@ Profession.newEntry(data:{
 })
 
 Profession.newEntry(data:{
+  name: 'Mobile Mushroom',
+  id : 'base:mobile-mushroom',
+  traits : 0,
+  weaponAffinity: 'base:bludgeon',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 1,
+    INT: 1,
+    DEF: 1,
+    SPD: 1,
+    LUK: 10,
+    DEX: 1
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas'
+  ],
+  passives : [
+  ]
+})
+
+Profession.newEntry(data:{
   name: 'Fire Sprite',
   id : 'base:fire-sprite',
   traits : 0,

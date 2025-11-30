@@ -12565,6 +12565,37 @@ Arts.database.newEntry(
   }
 )
 
+
+
+Arts.database.newEntry(
+  data: {
+    name: 'Acidic Gas',
+    id : 'base:acidic-gas',
+    notifCommit : '$1 emits a potent gas!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    keywords : ['base:burned', 'base:poisoned'],
+    description: "70% chance to inflict Burned and Poisoned for 3 turns on all enemies.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.PHYSICAL,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      foreach(targets) ::(k, v) {
+        when (random.try(percentSuccess:30)) 
+          windowEvent.queueMessage(text:v.name + ' avoided breathing the gas!');
+          
+        v.addEffect(durationTurns:3, from:user, id: 'base:poisoned');
+        v.addEffect(durationTurns:3, from:user, id: 'base:burned');
+      }
+    }
+  }
+)
+
 };
 
 

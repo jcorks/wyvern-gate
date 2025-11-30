@@ -85,12 +85,15 @@ import(module:'game_class.party.mt');
 import(module:'game_class.stateflags.mt');
 
 
+
 import(module:'game_class.entity.mt');
 import(module:'game_mutator.island.mt');
 
 @:loading = import(module:'game_function.loading.mt');
 @:random = import(:'game_singleton.random.mt');
 
+
+import(module:'game_class.landmarkevent_mobilemushroom.mt');
 
 
 
@@ -1161,8 +1164,8 @@ return empty;
               ' & Game Consultation   : Baph @lovelyabomination\n' +
               'Additional support     : Adrian "Radscale" Hernik\n' +
               'Playtesting            : Baph @lovelyabomination\n' +
-              '                         Caleb Dron\n' +
-              '                         Cane\n'
+              '                         Ashley Dron\n' +
+              '                         Clover\n'
         );
         
         windowEvent.queueMessage(

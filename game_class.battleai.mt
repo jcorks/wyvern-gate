@@ -200,6 +200,21 @@
       
       takeTurn ::(battle){
         @:acts = {};
+        @:processActs ::(acts){
+          windowEvent.queueCallback(
+            callback ::{
+
+              when(acts->size == 0) windowEvent.CALLBACK_DONE
+              @:act = acts[0]
+              acts->remove(:0)
+              
+
+              
+              battle.entityCommitAction(action:act);
+              
+            }
+          );        
+        }
       
         ::<= {
           @:enemies = battle.getEnemies(:user_);
@@ -210,6 +225,23 @@
           // discourage abilities until players get their bearings, please!
           @:world = import(module:'game_singleton.world.mt');
           @:party = world.party;
+          
+          when (user_.species.overrideBattleAI->type == Function) ::<= {
+            user_.species.overrideBattleAI(
+              entity : user_,
+              battle : battle,
+              commitBattleActions ::(acts => Object) {
+                foreach(acts) ::(k, v) {
+                  if (v->type != BattleAction.type) ::<= {
+                    error(:'overrideBattleAI (for ' + user_.name + ') contains elements within acts that arent BattleActions.');
+                  }
+                }
+                
+                processActs(acts);
+              }
+            );
+          }
+          
 
           @tier = world.island.tier;
           
@@ -363,19 +395,7 @@
             extraData: {}
           ))
               
-        windowEvent.queueCallback(
-          callback ::{
-
-            when(acts->size == 0) windowEvent.CALLBACK_DONE
-            @:act = acts[0]
-            acts->remove(:0)
-            
-
-            
-            battle.entityCommitAction(action:act);
-            
-          }
-        );
+        processActs(acts);
       }
     }
 

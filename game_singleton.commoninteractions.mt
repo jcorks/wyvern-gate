@@ -262,15 +262,10 @@ return {
             }
           },
           onChoice::(choice) {
-            commitAction(action:
-              BattleAction.new(
-                card: Arts.new(base:Arts.database.find(id:'base:wait')),
-                targets: [],
-                extraData: {},
-                turnIndex : 0,
-                targetParts : []
-              )        
-            );     
+            user.playerUseArt(
+              art: Arts.new(base:Arts.database.find(id:'base:wait')),
+              commitAction
+            )       
           }
         );
 

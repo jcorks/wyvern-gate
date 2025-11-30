@@ -27,6 +27,7 @@ return ::(
   @:itemTypes = {...items}
 
   @:int = {
+    type : {get ::<- type},
     new ::(*state) {
       @:initialized = {}
       foreach(itemNames)::(index, value) {

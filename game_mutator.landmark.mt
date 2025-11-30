@@ -386,7 +386,8 @@ Landmark.database.newEntry(
 
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
-      'base:dungeon-encounters'
+      'base:dungeon-encounters',
+      'base:mobile-mushroom',
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
