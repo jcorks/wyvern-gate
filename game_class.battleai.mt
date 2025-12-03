@@ -128,13 +128,17 @@
                   enemies = [...enemies]->filter(:condition);
                 if (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE)
                   enemies = enemies->filter(::(value) <- value.hp != 0);
-                targets->push(value:Random.pickArrayItem(list:enemies))
-                if (art.targetMode == Arts.TARGET_MODE.ONEPART)
-                  targetParts = [Entity.normalizedDamageTarget()];
+                  
+                if (enemies->size > 0) ::<= {
+                  targets->push(value:Random.pickArrayItem(list:enemies))
+                  if (art.targetMode == Arts.TARGET_MODE.ONEPART)
+                    targetParts = [Entity.normalizedDamageTarget()];
+                }
               } else ::<= {
                 if (condition)
                   allies = [...allies]->filter(:condition);
-                targets->push(value:Random.pickArrayItem(list:allies))
+                if (allies->size > 0)
+                  targets->push(value:Random.pickArrayItem(list:allies))
               }
             },
             
@@ -155,11 +159,9 @@
                 allies = [...allies]->filter(:condition);
                 enemies = [...enemies]->filter(:condition);
               }
-              if (random.number() < 0.5) 
-                targets->push(value:Random.pickArrayItem(list:enemies))
-              else 
-                targets->push(value:Random.pickArrayItem(list:allies))
-              ;          
+              @v = Random.pickArrayItem(: if(Random.flipCoin()) enemies else allies);
+              if (v != empty)
+                targets->push(:v);
             }
 
           }

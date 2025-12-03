@@ -168,6 +168,9 @@ completion:
 
     theRogue.context = theRogueClass.new();
     data[DATA_KEY] = theRogue.context;
+
+    instance.gameOver(reason:'This isn\'t ready yet!!!');
+    return empty;
     
   
 

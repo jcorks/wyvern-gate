@@ -1683,7 +1683,7 @@ static matteValue_t wyvern_gate__native__canvas(
         wyvern_gate__native__canvas__blackout,
         cr,
         
-        "width",
+        "with",
         NULL
     );
 

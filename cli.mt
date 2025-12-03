@@ -311,8 +311,11 @@ instance.mainMenu(
         @:out = {};
         foreach(filesystem.directoryContents) ::(k, file) {
           when(!file.name->contains(key:'save_')) empty; // main or junk
-          out->push(value:file.name->split(token:'_')[1]);
+          @:v = file.name->split(token:'_')[1];
+          when (v == empty) empty;
+          out->push(:v);
         }
+        breakpoint();
 
         return out;
       }

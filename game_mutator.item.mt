@@ -3962,7 +3962,7 @@ none.name = 'None';
         materialHint : if ((base.traits & TRAIT.METAL) != 0) Material.getRandom().id,
         apparelHint : if ((base.traits & TRAIT.APPAREL) != 0) ApparelMaterial.getRandom().id
       );
-      item.name = random.pickArrayItem(:keyQualifiers) + ' ' + base.name + (if(random.flipCoin()) '' else random.pickArrayItem(:keyThemes));
+      item.name = random.pickArrayItem(:keyQualifiers) + ' ' + base.name + (if(random.flipCoin()) '' else (' of ' + random.pickArrayItem(:keyThemes)));
       _.state.appraisalCount += 1;
       return item;
     },
