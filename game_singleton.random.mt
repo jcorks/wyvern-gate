@@ -23,8 +23,11 @@ return class(
   
   define:::(this) {
     @frozen = false;
+    /*
     // This example implements a version of the TT800 Random Number Generator 
     // published by Makoto Matsumoto in 1996.
+    //
+    // Theres some concern with whether this is "random enough" so its being retired
     @:tt800 = ::<= {
       @:SEED_COUNT = 25;
       @:END = 7;
@@ -151,40 +154,128 @@ return class(
     // use normal rng to seed the regular rng
     tt800.init();
     tt800.seed(string:'' + Number.random() + '' + Number.random() + '' + Number.random());
+    */
+    
+    
+    // the classic, the champion: mersenne twister
+    @:mt = ::<= {
+      @:n = 624
+      @:m = 397
+      @:w = 32;
+      @:r = 31;
+      @:UMASK = (0xffffffff << r)
+      @:LMASK = (0xffffffff >> (w - r))
+      @:a = 0x9908b0df;
+      @:u = 11;
+      @:s = 7
+      @:t = 15
+      @:l = 18;
+      @:b = 0x9d2c5680
+      @:c = 0xefc60000
+      @:f = 1812433253
+      
+      @array;
+      @index;
+      
+      
+      return {
+        init::(string => String) {
+          array = [];
+          index = 0;
+          @offset = 0;
+          @seed = 0;
+          for(0, string->length)::(i) {
+            offset = (offset + (string->charCodeAt(index:i) << (2*(i%8)))) % 0xffffffff;     
+            seed += string->charCodeAt(index:i);
+          }
+          
+        
+          array[0] = seed;
+          for(1, n) ::(i) {
+            seed = (f * (seed ^ (seed >> (w-2))) + i) % 0xffffffff;
+            array[i] = seed;
+          }
+        },
+        
+        next ::{
+          when (frozen)
+            Number.random()
+          
+          @k = index;
+          @j = k - (n-1);
+          if (j < 0) 
+            j += n
 
+          @x = ((array[k] & UMASK) | (array[j] & LMASK))
+          
+          @xA = (x >> 1) & 0xffffffff;
+          if (x & 0x00000001) 
+            xA ^= a;
+          
+          j = k - (n-m);
+          if (j < 0) 
+            j += n;
+          
+          x = array[j] ^ xA;
+          array[k] = x;
+          k += 1
+          
+          if (k >= n) k = 0;               // modulo n circular indexing
+          index = k;
+          
+          @y = x ^ ((x >> u)%0xffffffff);       // tempering 
+          y = y ^ ((y << s) & b);
+          y = y ^ ((y << t) & c);
+          return (y ^ ((y >> l) % 0xffffffff)) / 0xffffffff;
+        },
+        
+        save ::<- {
+          array : array,
+          index : index
+        },
+        
+        load ::(data) {
+          // carry over from tt800. discard
+          when (data.a != empty)
+            mt.init(:'' + data.state[0]);
+        
+          array = [...data.array]
+          index = data.index
+        }
+      }
+    }
 
+    mt.init(string:'' + Number.random() + '' + Number.random() + '' + Number.random());
   
     this.interface = {
       seed ::(string) {
-        tt800.init();
-        tt800.seed(string);
+        mt.init(:string);
       },
     
       integer::(from, to) {
-        return from + (tt800.next() * ((to+1)-from))->floor;
+        return from + (mt.next() * ((to+1)-from))->floor;
       },
       
       seedRandom::() {
-        tt800.init();
-        tt800.seed(string:'' + Number.random() + '' + Number.random() + '' + Number.random());
+        mt.init(string:'' + Number.random() + '' + Number.random() + '' + Number.random());
       },
       
-      number :: <- tt800.next(),
+      number :: <- mt.next(),
       
       save :: {
-        return tt800.save();
+        return mt.save();
       },
       
       load ::(state) {
-        tt800.load(:state);
+        mt.load(:state);
       },
       
       float:: {
-        return tt800.next();
+        return mt.next();
       },
       
       range::(from, to) {
-        return from + (tt800.next() * ((to+1)-from));
+        return from + (mt.next() * ((to+1)-from));
       },
     
       pickArrayItem::(list) {
@@ -217,9 +308,9 @@ return class(
       freeze ::<- frozen = true,
       thaw ::<- frozen = false,
       
-      flipCoin:: <- tt800.next() < 0.5,
+      flipCoin:: <- mt.next() < 0.5,
       
-      try::(percentSuccess) <- tt800.next() < percentSuccess / 100,
+      try::(percentSuccess) <- mt.next() < percentSuccess / 100,
       
       pickArrayItemWeighted::(list) {
         @:weightTable = [];
@@ -230,7 +321,7 @@ return class(
         }
         weightTable[list->keycount] = totalWeight;
         
-        @:which = tt800.next()*totalWeight;
+        @:which = mt.next()*totalWeight;
 
         return list[ 
           ::?{
