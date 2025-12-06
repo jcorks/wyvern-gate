@@ -29,24 +29,24 @@
     }
 
     canvas.clear();
-    windowEvent.queueMessage(text:'The party falls through a trap door to the next floor.', renderable:{render::{canvas.blackout();}});
+    windowEvent.queueMessage(text:'The party falls through a trap door to the next floor.', renderable:{render::{canvas.fill();}});
 
     @:hurt = random.pickArrayItem(list:party.members);
     (random.pickArrayItem(list: [
       :: {
-        windowEvent.queueMessage(text: hurt.name + ' hurt their head from the fall...', renderable:{render::{canvas.blackout();}});
+        windowEvent.queueMessage(text: hurt.name + ' hurt their head from the fall...', renderable:{render::{canvas.fill();}});
       },
 
       :: {
-        windowEvent.queueMessage(text: hurt.name + ' injured their legs from the fall...', renderable:{render::{canvas.blackout();}});
+        windowEvent.queueMessage(text: hurt.name + ' injured their legs from the fall...', renderable:{render::{canvas.fill();}});
       },
 
       :: {
-        windowEvent.queueMessage(text: hurt.name + ' injured their arms from the fall...', renderable:{render::{canvas.blackout();}});
+        windowEvent.queueMessage(text: hurt.name + ' injured their arms from the fall...', renderable:{render::{canvas.fill();}});
       },
 
       :: {
-        windowEvent.queueMessage(text: hurt.name + ' injured their hands from the fall...', renderable:{render::{canvas.blackout();}});
+        windowEvent.queueMessage(text: hurt.name + ' injured their hands from the fall...', renderable:{render::{canvas.fill();}});
       }
     ]
     ))();
@@ -90,7 +90,7 @@
   ::(location, party, whom) {
     @:landmark = location.landmark;
     landmark.movePointerToRandomArea();
-    windowEvent.queueMessage(text:'The party is teleported to another area of the floor.', renderable:{render::{canvas.blackout();}}); 
+    windowEvent.queueMessage(text:'The party is teleported to another area of the floor.', renderable:{render::{canvas.fill();}}); 
     
   },  
 

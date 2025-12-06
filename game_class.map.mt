@@ -1516,7 +1516,7 @@
       },  
       
       render :: {
-        canvas.blackout();
+        canvas.fill();
         if (paged)
           renderPaged()
         else 

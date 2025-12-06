@@ -812,7 +812,7 @@
               
               renderable : {
                 render ::{
-                  ////canvas.blackout();
+                  ////canvas.fill();
                   this.render()
                 }
               },

@@ -346,7 +346,7 @@ return ::{
   
   windowEvent.queueNestedResolve(
     renderable:{
-      render::<- canvas.blackout()
+      render::<- canvas.fill()
     },
     onEnter ::{    
       world.battle.start(

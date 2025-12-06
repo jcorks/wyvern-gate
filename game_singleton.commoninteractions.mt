@@ -629,7 +629,7 @@ return {
                 text: 'The party waits for some time to pass...',
                 renderable : {
                   render ::{
-                    canvas.blackout();
+                    canvas.fill();
                   }
                 }
               )
@@ -668,7 +668,7 @@ return {
               text: 'The party waits...',
               renderable : {
                 render ::{
-                  canvas.blackout();
+                  canvas.fill();
                 }
               }
             )

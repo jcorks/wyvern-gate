@@ -1274,7 +1274,7 @@ return {
                       text: 'You return to the entrance.',
                       renderable :{
                         render ::{
-                          canvas.blackout();
+                          canvas.fill();
                         }   
                       }
                     );
@@ -1333,7 +1333,7 @@ return {
           }
 
           canvas.clear();
-          windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.blackout();}});
+          windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.fill();}});
           
           
           @:instance = import(module:'game_singleton.instance.mt');
@@ -1390,7 +1390,7 @@ return {
         onVisit ::(landmark, island) {
           @:canvas = import(module:'game_singleton.canvas.mt');
           @:windowEvent = import(module:'game_singleton.windowevent.mt');
-          windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.blackout()});
+          windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.fill()});
         }
         
       }
@@ -3271,7 +3271,7 @@ return {
                   allies: world.party.members,
                   enemies: [location.ownedBy],
                   landmark: landmark,
-                  renderable:{render::{canvas.blackout();}},
+                  renderable:{render::{canvas.fill();}},
                   onEnd::(result) {
                     end(result);
                   }
@@ -3285,7 +3285,7 @@ return {
               allies: world.party.members,
               enemies: [location.ownedBy],
               landmark: landmark,
-              renderable:{render::{canvas.blackout();}},
+              renderable:{render::{canvas.fill();}},
               onEnd::(result) {
                 end(result);
               }
@@ -3336,7 +3336,7 @@ return {
 
 
             windowEvent.queueMessage(
-              renderable:{render::{canvas.blackout();}},
+              renderable:{render::{canvas.fill();}},
               text: 'You are teleported away...'
             );
             @:instance = import(module:'game_singleton.instance.mt');
@@ -3492,7 +3492,7 @@ return {
                   text:'Zaashael kaaluh-lo zohssuh-zodjii shiirr kohggaelaarr...'
                 );                
                 windowEvent.queueMessage(
-                  renderable:{render::{canvas.blackout();}},
+                  renderable:{render::{canvas.fill();}},
                   text: 'You are teleported away...'
                 );
 
@@ -3544,7 +3544,7 @@ return {
                   allies: world.party.members,
                   enemies: [location.ownedBy],
                   landmark: landmark,
-                  renderable:{render::{canvas.blackout();}},
+                  renderable:{render::{canvas.fill();}},
                   onEnd::(result) {
                     end(result);
                   }
@@ -3558,7 +3558,7 @@ return {
               allies: world.party.members,
               enemies: [location.ownedBy],
               landmark: landmark,
-              renderable:{render::{canvas.blackout();}},
+              renderable:{render::{canvas.fill();}},
               onEnd::(result) {
                 end(result);
               }
@@ -3595,7 +3595,7 @@ return {
             );
             world.party.inventory.add(:keyother);
             windowEvent.queueMessage(
-              renderable:{render::{canvas.blackout();}},
+              renderable:{render::{canvas.fill();}},
               text: 'You are teleported away...'
             );
             @:instance = import(module:'game_singleton.instance.mt');
@@ -3712,7 +3712,7 @@ return {
                 );                
 
                 windowEvent.queueMessage(
-                  renderable:{render::{canvas.blackout();}},
+                  renderable:{render::{canvas.fill();}},
                   text: 'You are teleported away...'
                 );
 
@@ -3766,7 +3766,7 @@ return {
                   allies: world.party.members,
                   enemies: [location.ownedBy],
                   landmark: landmark,
-                  renderable:{render::{canvas.blackout();}},
+                  renderable:{render::{canvas.fill();}},
                   onEnd::(result) {
                     end(result);
                   }
@@ -3801,7 +3801,7 @@ return {
                 thunderSpawn()
               ],
               landmark: landmark,
-              renderable:{render::{canvas.blackout();}},
+              renderable:{render::{canvas.fill();}},
               onEnd::(result) {
                 end(result);
               }
@@ -3836,7 +3836,7 @@ return {
             );
             world.party.inventory.add(:keyother);
             windowEvent.queueMessage(
-              renderable:{render::{canvas.blackout();}},
+              renderable:{render::{canvas.fill();}},
               text: 'You are teleported away...'
             );
             @:instance = import(module:'game_singleton.instance.mt');
@@ -4075,7 +4075,7 @@ return {
                 );                
 
                 windowEvent.queueMessage(
-                  renderable:{render::{canvas.blackout();}},
+                  renderable:{render::{canvas.fill();}},
                   text: 'You are teleported away...'
                 );
 
@@ -4132,7 +4132,7 @@ return {
                   allies: world.party.members,
                   enemies: [location.ownedBy],
                   landmark: landmark,
-                  renderable:{render::{canvas.blackout();}},
+                  renderable:{render::{canvas.fill();}},
                   onEnd::(result) {
                     end(result);
                   }
@@ -4167,7 +4167,7 @@ return {
                 lightSpawn()
               ],
               landmark: landmark,
-              renderable:{render::{canvas.blackout();}},
+              renderable:{render::{canvas.fill();}},
               onEnd::(result) {
                 end(result);
               }
@@ -4330,7 +4330,7 @@ return {
 
             @:canvas = import(module:'game_singleton.canvas.mt');
             windowEvent.queueMessage(
-              renderable:{render::{canvas.blackout();}},
+              renderable:{render::{canvas.fill();}},
               text: 'You are whisked away to another island...'
             );
 
@@ -4399,7 +4399,7 @@ return {
 
             @:canvas = import(module:'game_singleton.canvas.mt');
             windowEvent.queueMessage(
-              renderable:{render::{canvas.blackout();}},
+              renderable:{render::{canvas.fill();}},
               text: 'You are whisked away to another island...'
             );
 

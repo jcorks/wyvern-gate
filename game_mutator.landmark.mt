@@ -468,7 +468,7 @@ Landmark.database.newEntry(
     onVisit ::(landmark, island) {
       @:canvas = import(module:'game_singleton.canvas.mt');
       @:windowEvent = import(module:'game_singleton.windowevent.mt');
-      windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.blackout()});
+      windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.fill()});
     }
     
   }

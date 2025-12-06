@@ -29,7 +29,7 @@ return ::{
   @chosen = false;
   @:menuRenderable = {
     render ::{
-      canvas.blackout(:'`');
+      canvas.fill(:'`');
       // Name (species, class)
       // HP, AP,
       // Weapon

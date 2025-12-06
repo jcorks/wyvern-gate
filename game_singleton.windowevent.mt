@@ -118,6 +118,7 @@
 
 
 
+
 // When dealing with kept commitInput handlers that immediately 
 // return, some can get stuck and never give back control.
 // This is most common when commitInput handlers are kept but 
@@ -155,10 +156,11 @@
       queue : {}
     });
     
-    
-    @:commitVisual :: {
+    @:commitVisual ::{
+      canvas.setFramebufferList(:choiceStack->map(::(value) <- value.framebufferID));
       canvas.commit();
     }
+
       
     // Adds a resolve queue.
     // when queueing window events, you may optionally 
@@ -205,18 +207,7 @@
   
     @:choiceStackPush::(value) {
       if (choiceStack->size) ::<= {
-        @:val = choiceStack[choiceStack->size-1];
-        if (val.stateID == empty) ::<= {
-          if (::? {
-            foreach(choiceStack) ::(k, v) {
-              if (v.disableCache != empty)
-                send(:false);
-            }
-            return true;
-          })
-            val.stateID = canvas.pushState();    
-        }
-        val.left = true;        
+        choiceStack[choiceStack->size-1].left = true;        
       }
       choiceStack->push(value);
     }
@@ -241,23 +232,23 @@
           if (v.disableCache != empty) ::<= {
             if (v.disableCache != PERMANENT)
               v->remove(:'disableCache');
-            for(k, choiceStack->size) ::(i) {
-              @:rm = choiceStack[i];
-              if (rm.stateID != empty)
-                canvas.removeState(id:rm.stateID);
-            }
             dorender = true;
           }
           if (dorender) ::<= {
-            v.stateID = canvas.pushState();
-            renderThis(data:v, rerender:true);
+            v.framebufferID = canvas.pushState();
+            canvas.renderToFramebuffer(
+              id: data.framebufferID,
+              render ::{
+                renderThis(data:v, rerender:true);
+              }
+            );
           }
         }
         
         if (dorender) ::<= {
-          if (data.stateID != empty)
-            canvas.removeState(id:data.stateID);
-          data.stateID = canvas.pushState();
+          if (data.framebufferID != empty)
+            canvas.removeState(id:data.framebufferID);
+          data.framebufferID = canvas.pushState();
         } else if (renderOnly != true)
           canvas.clear();
       }
@@ -267,6 +258,10 @@
       return ::(data => Object, renderOnly, rerender) {
         when (requestAutoSkip) empty; 
         when (data.rendered != empty && rerender == empty) empty;
+        canvas.clear();
+
+        if (data.renderMain != empty)
+          data.renderMain();
           
         if (rerender == empty) ::<= {
           checkCache(renderOnly, data);
@@ -327,11 +322,7 @@
           else 
 
             choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
-          if (!requestAutoSkip) ::<= {
-            if (data.stateID != empty) ::<= {
-              //canvas.removeState(id:data.stateID);
-            }
-          }
+          
           
           if (data.onLeave)
             data.onLeave();
@@ -399,10 +390,6 @@
         if (choiceStack->keycount > 0) ::<= {
           val = choiceStack[choiceStack->keycount-1];
             
-          if (val.stateID != empty) ::<= {
-            canvas.removeState(id:val.stateID);
-            val.stateID = empty;
-          }
             
           if (forceRedraw == true)
             val.rendered = empty;
@@ -667,7 +654,7 @@
         if (onHover != empty)
           onHover(choice:cursorPos+1);
         
-        
+
         if (data.hideWindow != true) ::<= {
           if (data.animationFrame == empty) ::<= {
             data.renderState = RENDER_STATE.ANIMATING;
@@ -698,8 +685,15 @@
           }
         }
         data.rendered = empty;
-        renderThis(data);
       }
+
+
+      canvas.renderToFramebuffer(
+        id: data.framebufferID,
+        render ::{
+          renderThis(data)
+        }
+      );
 
 
       when(exitEmpty) ::<= {
@@ -781,7 +775,6 @@
         }
         line = line + ']'
 
-        
         if (data.animationFrame == empty) ::<= {
           data.renderState = RENDER_STATE.ANIMATING
           data.animationFrame = ::<={
@@ -816,12 +809,15 @@
           );             
         }
         data.rendered = empty;
-
-        renderThis(
-          data
-          
-        );
       }
+
+
+      canvas.renderToFramebuffer(
+        id: data.framebufferID,
+        render ::{
+          renderThis(data)
+        }
+      );
       when(exitEmpty) ::<= {
         data.keep = empty;
         return true;      
@@ -901,7 +897,12 @@
       }
       
       if (data.rendered == empty) ::<= {
-          renderThis(data);
+        canvas.renderToFramebuffer(
+          id: data.framebufferID,
+          render ::{
+            renderThis(data)
+          }
+        );
       }      
       
       return false;  
@@ -916,7 +917,12 @@
         data.renderState = RENDER_STATE.ANIMATING;
       
       if (data.rendered == empty) ::<= {
-        renderThis(data);
+        canvas.renderToFramebuffer(
+          id: data.framebufferID,
+          render ::{
+            renderThis(data)
+          }
+        );
       }
       if (data.entered == empty) ::<= {
         if (data.onEnter)
@@ -957,7 +963,12 @@
       //}
       
       if (data.rendered == empty) ::<= {
-        renderThis(data);
+        canvas.renderToFramebuffer(
+          id: data.framebufferID,
+          render ::{
+            renderThis(data)
+          }
+        );
       }
       if (data.entered == empty) ::<= {
         data.entered = true;
@@ -1100,7 +1111,6 @@
       if (onHover != empty)
         onHover(choice:which+1);
 
-
       if (data.animationFrame == empty) ::<= {
         data.renderState = RENDER_STATE.ANIMATING;
         data.animationFrame = renderTextAnimation(
@@ -1130,7 +1140,12 @@
       when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         sound.playSFX(:"confirm");
         onChoice(choice:which + 1);
-        renderThis(data);      
+        canvas.renderToFramebuffer(
+          id: data.framebufferID,
+          render ::{
+            renderThis(data)
+          }
+        );     
         return true;
       }
         
@@ -1141,11 +1156,21 @@
           res = data.onCancel();
         when (res == this.STOP_CANCEL) false;
         data.keep = empty;
-        renderThis(data);      
+        canvas.renderToFramebuffer(
+          id: data.framebufferID,
+          render ::{
+            renderThis(data)
+          }
+        );     
         return true;
       }
       
-      renderThis(data);      
+      canvas.renderToFramebuffer(
+        id: data.framebufferID,
+        render ::{
+          renderThis(data)
+        }
+      );     
 
       return false;
     }
@@ -1274,7 +1299,12 @@
           data.renderState = RENDER_STATE.ANIMATING;
       }
 
-      renderThis(data);
+      canvas.renderToFramebuffer(
+        id: data.framebufferID,
+        render ::{
+          renderThis(data)
+        }
+      );     
       
       if (data.autoSkipAfterFrames->type == Number) ::<= {
         data.autoSkipAfterFrames -= 1;
@@ -1394,7 +1424,12 @@
       }
       
 
-      renderThis(data);
+      canvas.renderToFramebuffer(
+        id: data.framebufferID,
+        render ::{
+          renderThis(data)
+        }
+      );     
       
       return match(input) {
         (CURSOR_ACTIONS.CONFIRM, 
@@ -1614,7 +1649,8 @@
             hasPages : hasPages,
             maxHeight : maxHeight,
             maxWidth : maxWidth,
-            onLeave : onLeave
+            onLeave : onLeave,
+            framebufferID : canvas.newFramebuffer()
           });
         }]); 
       },
@@ -1671,7 +1707,8 @@
               renderable: renderable,
               skipAnimation : skipAnimation,
               setID : setID,
-              autoSkipAfterFrames : autoSkipAfterFrames
+              autoSkipAfterFrames : autoSkipAfterFrames,
+              framebufferID : canvas.newFramebuffer()
             });
           }], setID);
         }
@@ -1767,7 +1804,8 @@
             animationFrame : animationFrame,
             waitFrames : waitFrames,
             onInput : onInput,
-            disableCache : if (disableCache != empty) PERMANENT else empty
+            disableCache : if (disableCache != empty) PERMANENT else empty,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);        
         return getResolveQueue()->size-1;
@@ -1845,7 +1883,8 @@
             isAnimation : isAnimation,
             animationFrame : animationFrame,
             onInput : onInput,
-            resolveStack : true
+            resolveStack : true,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);        
         return getResolveQueue()->size-1;
@@ -1915,7 +1954,8 @@
             renderable:renderable,
             jumpTag: jumpTag,
             isAnimation : isAnimation,
-            animationFrame : animationFrame
+            animationFrame : animationFrame,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);        
         return getResolveQueue()->size-1;
@@ -1997,7 +2037,8 @@
             onInput : onInput,
             onGetMinHeight : onGetMinHeight,
             onGetMinWidth : onGetMinWidth,
-            onGetFooter : onGetFooter
+            onGetFooter : onGetFooter,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);
         return getResolveQueue()->size-1;
@@ -2045,7 +2086,8 @@
             keep: keep,
             onGetPrompt : onGetPrompt,
             renderable:renderable,
-            jumpTag : jumpTag
+            jumpTag : jumpTag,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);
         return getResolveQueue()->size-1;
@@ -2083,8 +2125,8 @@
         }
         if (goBeforeTag != empty) ::<= {
           @:data = choiceStack->pop; 
-          if (data.stateID != empty)
-            canvas.removeState(id:data.stateID);
+          if (data.framebufferID != empty)
+            canvas.removeState(id:data.framebufferID);
 
           if (data.onLeave)
             data.onLeave();          
@@ -2131,7 +2173,8 @@
             onLeave : onLeave,
             keep : keep,
             renderable:renderable,
-            onKept : onKept
+            onKept : onKept,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);
         return getResolveQueue()->size-1;
@@ -2164,7 +2207,8 @@
             renderable:renderable,
             jumpTag: jumpTag,
             trap : trap,
-            onMenu : onMenu
+            onMenu : onMenu,
+            framebufferID : canvas.newFramebuffer()
           });
           canvas.clear();
         }]);

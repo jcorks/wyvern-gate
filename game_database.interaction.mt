@@ -861,7 +861,7 @@ Interaction.newEntry(
       keep : true,
       renderable : {
         render ::{
-          canvas.blackout();
+          canvas.fill();
         } 
       }
     );
@@ -2035,8 +2035,8 @@ Interaction.newEntry(
           when(choice == 0) empty;
           canvas.clear();
           windowEvent.queueMessage(text:'As the key is pushed in, the gate gently whirrs and glows with a blinding light...');
-          windowEvent.queueMessage(text:'As you enter, you feel the world around you fade.', renderable:{render::{canvas.blackout();}});
-          windowEvent.queueMessage(text:'...', renderable:{render::{canvas.blackout();}});
+          windowEvent.queueMessage(text:'As you enter, you feel the world around you fade.', renderable:{render::{canvas.fill();}});
+          windowEvent.queueMessage(text:'...', renderable:{render::{canvas.fill();}});
           
           windowEvent.queueCustom( 
             onEnter::{
@@ -2073,7 +2073,7 @@ Interaction.newEntry(
       windowEvent.queueMessage(
         renderable : {
           render :: {
-            canvas.blackout();
+            canvas.fill();
           }
         },
         text: 'The party was teleported elsewhere on the floor.'
@@ -2131,7 +2131,7 @@ Interaction.newEntry(
       }
 
       canvas.clear();
-      windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.blackout();}});
+      windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.fill();}});
       
       
       @:instance = import(module:'game_singleton.instance.mt');
@@ -2222,7 +2222,7 @@ Interaction.newEntry(
     keepInteractionMenu : false,
     onInteract ::(location, party) {
 
-      windowEvent.queueMessage(text:'The party uses the ladder to climb up to the surface.', renderable:{render::{canvas.blackout();}});
+      windowEvent.queueMessage(text:'The party uses the ladder to climb up to the surface.', renderable:{render::{canvas.fill();}});
       windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});          
     },
   }
@@ -2394,7 +2394,7 @@ Interaction.newEntry(
           windowEvent.queueMessage(
             text: 'A restful slumber is welcomed...',
             renderable : {
-              render::<- canvas.blackout()
+              render::<- canvas.fill()
             }
           );          
 
@@ -2731,7 +2731,7 @@ Interaction.newEntry(
                         landmark: {},
                         renderable : {
                           render:: {
-                            canvas.blackout();                          
+                            canvas.fill();                          
                           }
                         },
                         onTurn ::(landmark, entity, battle) {

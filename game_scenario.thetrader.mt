@@ -678,7 +678,7 @@
         windowEvent.queueCustom(
           renderable : {
             render :: {
-              canvas.blackout();
+              canvas.fill();
             }
           },
           keep:true,
@@ -1047,7 +1047,7 @@
             ],
             renderable : {
               render ::{
-                canvas.blackout(:'`');
+                canvas.fill(:'`');
               }
             },
             keep:true,
@@ -1867,7 +1867,7 @@
           jumpTag: 'dayEnd',
           renderable : {
             render ::{
-              canvas.blackout()
+              canvas.fill()
             }
           }
         );

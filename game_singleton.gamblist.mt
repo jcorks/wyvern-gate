@@ -406,7 +406,7 @@ Playing the Game
     @gamblistCard1;    
     
     @renderable = {render ::{
-      canvas.blackout();
+      canvas.fill();
       @:centerX = canvas.width / 2;
       @:centerY = canvas.height / 2;
 
@@ -784,7 +784,7 @@ Playing the Game
         
     windowEvent.queueCustom(
       renderable : {
-        render::{canvas.blackout();}
+        render::{canvas.fill();}
       },
       keep:true,
       jumpTag: 'Sorcerer',
@@ -971,7 +971,7 @@ Playing the Game
     
     @:boardRenderable = {
       render ::{
-        canvas.blackout();
+        canvas.fill();
         
         
         // draw scoreboard
@@ -1168,7 +1168,7 @@ Playing the Game
   
   windowEvent.queueCustom(
     renderable : {
-      render::{canvas.blackout();}
+      render::{canvas.fill();}
     },
     keep:true,
     jumpTag: 'HighLowButDumb',

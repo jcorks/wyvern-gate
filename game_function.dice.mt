@@ -916,7 +916,7 @@ return ::(onFinish => Function) {
 
   windowEvent.queueCustom(
     renderable : {
-      render::{canvas.blackout();}
+      render::{canvas.fill();}
     },
     keep:true,
     jumpTag: 'Dice',
@@ -932,7 +932,7 @@ return ::(onFinish => Function) {
   @:diceRenderable = {
     rolls : [],
     render::{
-      canvas.blackout();
+      canvas.fill();
       @:rolls = diceRenderable.rolls;
 
       @:space = ((canvas.width - (Die.WIDTH * 5)) / 5)->floor;
