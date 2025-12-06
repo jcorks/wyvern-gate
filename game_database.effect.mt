@@ -78,9 +78,14 @@ Effect.newEntry(
 
         if (item.data.book) ::<= {
           @:w = item.data.book.onGetContents();
-          if (w->type == String)
-            windowEvent.queueReader(lines:w->split(token: '\n'))
-          else 
+          if (w->type == String) ::<= {
+            @:lines = w->split(token: '\n');
+            if (lines->size == 1)
+              windowEvent.queueMessage(text:w)
+            else
+              windowEvent.queueReader(lines:canvas.refitLines(input:lines));
+
+          } else 
             windowEvent.queueReader(lines:canvas.refitLines(input:w));
         }
 

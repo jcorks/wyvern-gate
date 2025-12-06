@@ -228,16 +228,14 @@
     
       @:checkCache ::(renderOnly, data) {
         @dorender = false;
+        @last;
         foreach(choiceStack) ::(k, v) {
           if (v.disableCache != empty) ::<= {
+            breakpoint();
             if (v.disableCache != PERMANENT)
               v->remove(:'disableCache');
-            dorender = true;
-          }
-          if (dorender) ::<= {
-            v.framebufferID = canvas.pushState();
             canvas.renderToFramebuffer(
-              id: data.framebufferID,
+              id: v.framebufferID,
               render ::{
                 renderThis(data:v, rerender:true);
               }
@@ -1746,15 +1744,22 @@
       invalidateCache ::(tag) {
         return ::? {
           @:cs = [...choiceStack];
+          @:popped = [];
+          @found = false;
           forever ::{
             if (cs->keycount == 0)
               send(:false)
             @:data = cs[cs->keycount-1];
             if (data.jumpTag != tag) ::<= {
-              cs->pop;
+              popped->push(:cs->pop);
             } else ::<= {
-              data.disableCache = true;
-              send(:true)
+              breakpoint();
+              popped->push(:data);
+              foreach(popped) ::(k, v) {
+                if (v.disableCache == empty)
+                  v.disableCache = true;
+              }
+              send(:true);
             }
           }
         }

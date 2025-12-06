@@ -131,6 +131,10 @@
           enemies: [this],
           landmark: {},
           onEnd::(result) {
+            when(world.battle.partyWon()) empty;
+              
+            @:instance = import(module:'game_singleton.instance.mt');
+            instance.gameOver(reason:'The party was wiped out.');
           }
         );          
       }

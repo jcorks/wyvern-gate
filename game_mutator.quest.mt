@@ -86,7 +86,7 @@ Quest.database.newEntry(
         landmark: landmark,
         x : loc.x,
         y : loc.y,
-        base: Location.database.find(:'base:lost-item')
+        base: Location.database.find(:'base:lost-item-hostile')
       );
       landmark.addLocation(location:item);
       
