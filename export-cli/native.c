@@ -344,8 +344,12 @@ typedef struct {
     int height;
     
     uint32_t * canvas;
-    matteArray_t * savestates; // full of uint32_t * canvas
-    matteArray_t * savestates_id; // full of uint32_t ids
+    matteArray_t * frames; // full of uint32_t * canvas
+    matteArray_t * frames_id; // full of uint32_t ids
+    
+    uint32_t * noFrame;
+    uint32_t * currentFrame;
+    matteArray_t * currentSet; // full of uint32_t ids
     
     uint32_t idStatePool;
     matteArray_t * idStatePool_dead;
@@ -354,6 +358,39 @@ typedef struct {
     matteArray_t * effects;
 
 } WyvGateCanvas;
+
+static void composite(WyvGateCanvas * cr) {
+    uint32_t i;
+     int32_t n;
+
+    uint32_t * currentSetFound[cr->currentSet->size];
+    for(n = 0; n < cr->currentSet->size; ++n) {
+        currentSetFound[n] = NULL;
+        uint32_t id = matte_array_at(cr->currentSet, uint32_t, n);
+        for(i = 0; i < cr->frames_id->size; ++i) {
+            if (id == matte_array_at(cr->frames_id, uint32_t, i)) {
+                currentSetFound[n] = matte_array_at(cr->frames, uint32_t *, i);
+                break;
+            }
+        }
+    }
+
+    
+    // painter's!
+    uint32_t len = cr->width * cr->height;
+    for(i = 0; i < len; ++i) {
+        for(n = ((int32_t)cr->currentSet->size)-1; n >= 0; --n) {
+            uint32_t * set = currentSetFound[n];
+            if (set && set[i] != 0) {
+                cr->canvas[i] = set[i];
+                goto L_NEXT;
+            }
+        }
+    
+        cr->canvas[i] = ' ';
+      L_NEXT:;
+    }
+}
 
 static matteValue_t wyvern_gate__native__canvas__reset(
     matteVM_t * vm,
@@ -364,11 +401,12 @@ static matteValue_t wyvern_gate__native__canvas__reset(
     WyvGateCanvas * cr = (WyvGateCanvas*)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     uint32_t i;
-    for(i = 0; i < cr->savestates->size; ++i) {
-        char * state = matte_array_at(cr->savestates, char *, i);
+    for(i = 0; i < cr->frames->size; ++i) {
+        char * state = matte_array_at(cr->frames, char *, i);
         free(state);
     }
-    matte_array_set_size(cr->savestates, 0);
+    matte_array_set_size(cr->frames, 0);
+    matte_array_set_size(cr->frames_id, 0);
     cr->idStatePool = 0;
     matte_array_set_size(cr->idStatePool_dead, 0);
     
@@ -395,6 +433,13 @@ static matteValue_t wyvern_gate__native__canvas__resize(
     free(cr->canvas);
     cr->canvas = (uint32_t*)calloc(sizeof(uint32_t), cr->width * cr->height);
     
+    uint32_t i;
+    for(i = 0; i < cr->frames->size; ++i) {
+        uint32_t * frame = matte_array_at(cr->frames, uint32_t *, i);
+        free(frame);
+        frame = (uint32_t*)calloc(sizeof(uint32_t), cr->width * cr->height);
+        matte_array_at(cr->frames, uint32_t *, i) = frame;
+    }
 
     
     matteValue_t w = matte_store_new_value(store);
@@ -450,6 +495,22 @@ static matteValue_t wyvern_gate__native__canvas__movePenRelative(
     cr->penx += matte_value_as_number(store, args[0]);
     cr->peny += matte_value_as_number(store, args[1]);   
     return matte_store_new_value(store);
+}
+
+static void drawChar(WyvGateCanvas * cr, uint32_t ch) {
+    if (cr->penx < 0 || cr->penx >= cr->width || cr->peny < 0 || cr->peny >= cr->height) 
+      return;
+    cr->currentFrame[cr->penx + cr->peny * cr->width] = ch;
+}
+
+static void drawText(WyvGateCanvas * cr, const matteString_t * text) {
+    int left = cr->penx;
+    uint32_t i;
+    for(i = 0; i < matte_string_get_length(text); ++i) {
+        drawChar(cr, matte_string_get_char(text, i));
+        cr->penx += 1;
+    }
+    cr->penx = left;
 }
 
 
@@ -513,21 +574,7 @@ static matteValue_t wyvern_gate__native__canvas__renderBarAsString(
 
 }
 
-static void drawChar(WyvGateCanvas * cr, uint32_t ch) {
-    if (cr->penx < 0 || cr->penx >= cr->width || cr->peny < 0 || cr->peny >= cr->height) 
-      return;
-    cr->canvas[cr->penx + cr->peny * cr->width] = ch;
-}
 
-static void drawText(WyvGateCanvas * cr, const matteString_t * text) {
-    int left = cr->penx;
-    uint32_t i;
-    for(i = 0; i < matte_string_get_length(text); ++i) {
-        drawChar(cr, matte_string_get_char(text, i));
-        cr->penx += 1;
-    }
-    cr->penx = left;
-}
 
 
 static void renderFrame(
@@ -585,6 +632,7 @@ static void renderFrame(
     drawChar(cr, CHAR__CORNER_BOTTOMRIGHT);
 
 }
+
 
 
 static matteValue_t wyvern_gate__native__canvas__renderFrame(
@@ -906,7 +954,11 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
 }
 
 
-static matteValue_t wyvern_gate__native__canvas__pushState(
+
+
+
+
+static matteValue_t wyvern_gate__native__canvas__newFramebuffer(
     matteVM_t * vm,
     matteValue_t fn,
     const matteValue_t * args,
@@ -915,10 +967,7 @@ static matteValue_t wyvern_gate__native__canvas__pushState(
     WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
 
-    uint32_t numBytes = sizeof(uint32_t) * cr->width * cr->height;
-    uint32_t * canvasCopy = (uint32_t *)malloc(numBytes);
-    memcpy(canvasCopy, cr->canvas, numBytes);
-
+    uint32_t * framebuffer = (uint32_t *)calloc(sizeof(uint32_t), cr->width * cr->height);
     uint32_t id;
     if (cr->idStatePool_dead->size) {
         id = matte_array_at(cr->idStatePool_dead, uint32_t, cr->idStatePool_dead->size-1);
@@ -927,36 +976,27 @@ static matteValue_t wyvern_gate__native__canvas__pushState(
         id = cr->idStatePool++;
     }
     
-    matte_array_push(cr->savestates_id, id);
-    matte_array_push(cr->savestates, canvasCopy);
+    matte_array_push(cr->frames_id, id);
+    matte_array_push(cr->frames, framebuffer);
 
     matteValue_t out = matte_store_new_value(store);
     matte_value_into_number(store, &out, id);
     return out;
 }
 
-static void blackout(WyvGateCanvas * cr, uint32_t with) {
+static void fill(WyvGateCanvas * cr, uint32_t with) {
     if (with == 0) with = ' ';
     uint32_t i;
     for(i = 0; i < cr->width * cr->height; ++i) {
-        cr->canvas[i] = with;
+        cr->currentFrame[i] = with;
     }
 }
 
 static void canvasClear(WyvGateCanvas * cr) {
-    if (cr->savestates->size) {
-        memcpy(
-            cr->canvas, 
-            matte_array_at(cr->savestates, uint32_t *, cr->savestates->size-1), 
-            cr->width * cr->height * sizeof(uint32_t)
-        );
-        return;
-    }
-    
-    blackout(cr, 0);
+    memset(cr->currentFrame, 0, cr->width * cr->height * sizeof(uint32_t));
 }
 
-static matteValue_t wyvern_gate__native__canvas__removeState(
+static matteValue_t wyvern_gate__native__canvas__removeFramebuffer(
     matteVM_t * vm,
     matteValue_t fn,
     const matteValue_t * args,
@@ -969,21 +1009,119 @@ static matteValue_t wyvern_gate__native__canvas__removeState(
     uint32_t id = matte_value_as_number(store, args[0]);
     
     uint32_t i;
-    for(i = 0; i < cr->savestates_id->size; ++i) {
-        if (id == matte_array_at(cr->savestates_id, uint32_t, i)) {
-            matte_array_remove(cr->savestates_id, i);
-            uint32_t * buffer = matte_array_at(cr->savestates, uint32_t *, i);
+    for(i = 0; i < cr->frames_id->size; ++i) {
+        if (id == matte_array_at(cr->frames_id, uint32_t, i)) {
+            matte_array_remove(cr->frames_id, i);
+            uint32_t * buffer = matte_array_at(cr->frames, uint32_t *, i);
             free(buffer);
-            matte_array_remove(cr->savestates, i);
-            
-            canvasClear(cr);
+            matte_array_remove(cr->frames, i);
+            matte_array_push(cr->idStatePool_dead, id);            
             return matte_store_new_value(store);
 
         }
     }
     return matte_store_new_value(store);
+}
 
 
+static matteValue_t wyvern_gate__native__canvas__setFramebufferList(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
+    matteStore_t * store = matte_vm_get_store(vm);
+
+    CHECK_ARG(args[0], MATTE_VALUE_TYPE_OBJECT);
+
+    matte_array_set_size(cr->currentSet, 0);
+    
+    uint32_t len = matte_value_object_get_number_key_count(store, args[0]);
+    uint32_t i;
+    for(i = 0; i < len; ++i) {
+        matteValue_t v = matte_value_object_access_index(store, args[0], i);
+        uint32_t vi = matte_value_as_number(store, v);
+        matte_array_push(cr->currentSet, vi);
+    }
+    return matte_store_new_value(store);
+}
+
+
+static matteValue_t wyvern_gate__native__canvas__printFramebuffer(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
+    matteStore_t * store = matte_vm_get_store(vm);
+
+    CHECK_ARG(args[0], MATTE_VALUE_TYPE_NUMBER);
+    uint32_t id = matte_value_as_number(store, args[0]);
+    
+    uint32_t i;
+    for(i = 0; i < cr->frames_id->size; ++i) {
+        if (id == matte_array_at(cr->frames_id, uint32_t, i)) {
+            uint32_t * buffer = matte_array_at(cr->frames, uint32_t *, i);
+            
+            uint32_t x, y;
+            
+            for(y = 0; y < cr->height; ++y) {
+                for(x = 0; x < cr->width; ++x) {
+                    uint32_t c = buffer[x + y * cr->width];
+                    if (c == 0) {
+                        printf("0"); 
+                    } else {
+                        printf("%c", (char)c);                     
+                    }
+                }
+                printf("\n");
+            }
+            
+            return matte_store_new_value(store);
+
+        }
+    }
+    return matte_store_new_value(store);
+}
+
+
+static matteValue_t wyvern_gate__native__canvas__renderToFramebuffer(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
+    matteStore_t * store = matte_vm_get_store(vm);
+
+    CHECK_ARG(args[0], MATTE_VALUE_TYPE_NUMBER);
+    assert(matte_value_is_function(args[1]));
+
+
+    uint32_t id = matte_value_as_number(store, args[0]);
+    
+    uint32_t i;
+    for(i = 0; i < cr->frames_id->size; ++i) {
+        if (id == matte_array_at(cr->frames_id, uint32_t, i)) {
+            uint32_t * buffer = matte_array_at(cr->frames, uint32_t *, i);
+            uint32_t * lastFrame = cr->currentFrame;
+            cr->currentFrame = buffer;
+            
+            matte_call(
+                cr->m,
+                args[1],
+                NULL
+            );                
+            
+            cr->currentFrame = lastFrame;
+            
+            return matte_store_new_value(store);
+        }
+    }
+    assert(!"No such frame.");
+    return matte_store_new_value(store);
 }
 
 static matteValue_t wyvern_gate__native__canvas__drawText(
@@ -1070,7 +1208,7 @@ static matteValue_t wyvern_gate__native__canvas__erase(
 ) {
     WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
-    drawChar(cr, ' ');
+    drawChar(cr, 0);
     return matte_store_new_value(store);
 }
 
@@ -1103,7 +1241,7 @@ static matteValue_t wyvern_gate__native__canvas__writeText(
 }
 
 
-static matteValue_t wyvern_gate__native__canvas__blackout(
+static matteValue_t wyvern_gate__native__canvas__fill(
     matteVM_t * vm,
     matteValue_t fn,
     const matteValue_t * args,
@@ -1117,7 +1255,7 @@ static matteValue_t wyvern_gate__native__canvas__blackout(
     if (matte_value_type(args[0]) == MATTE_VALUE_TYPE_STRING)
         ch = matte_string_get_char(matte_value_string_get_string_unsafe(store, args[0]), 0);
 
-    blackout(cr, ch);
+    fill(cr, ch);
     return matte_store_new_value(store);
 }
 
@@ -1413,35 +1551,31 @@ static matteValue_t wyvern_gate__native__canvas__update(
     if (cr->effects->size == 0)
         return matte_store_new_value(store);
 
-
-    uint32_t nBytes = cr->width * cr->height * sizeof(uint32_t);
-    uint32_t * copy = (uint32_t*)malloc(nBytes);
-    memcpy(copy, cr->canvas, nBytes);
+    composite(cr);
     
-    uint32_t * old = cr->canvas;
-    cr->canvas = copy;
-    
-    
-    
-    uint32_t i;
-    for(i = 0; i < cr->effects->size; ++i) {
-        matteValue_t res = matte_call(
-            cr->m,
-            matte_array_at(cr->effects, matteValue_t, i),
-            NULL
-        );
+    // draw effects on real canvas that has been finalized
+    {
+        uint32_t * oldFrame = cr->currentFrame;
+        cr->currentFrame = cr->canvas;
         
-        if (matte_value_type(res) == MATTE_VALUE_TYPE_NUMBER && matte_value_as_number(store, res) == EFFECT_FINISHED) {
-            matte_value_object_pop_lock(store, matte_array_at(cr->effects, matteValue_t, i));
-            matte_array_remove(cr->effects, i);
-            i--;
+        uint32_t i;
+        for(i = 0; i < cr->effects->size; ++i) {
+            matteValue_t res = matte_call(
+                cr->m,
+                matte_array_at(cr->effects, matteValue_t, i),
+                NULL
+            );
+            
+            if (matte_value_type(res) == MATTE_VALUE_TYPE_NUMBER && matte_value_as_number(store, res) == EFFECT_FINISHED) {
+                matte_value_object_pop_lock(store, matte_array_at(cr->effects, matteValue_t, i));
+                matte_array_remove(cr->effects, i);
+                i--;
+            }
         }
-    }
-    
+        cr->currentFrame = oldFrame;
+    }    
     pushToScreen(cr, vm, store, 0);
     
-    cr->canvas = old;
-    free(copy);
 
 
     return matte_store_new_value(store);
@@ -1466,7 +1600,8 @@ static matteValue_t wyvern_gate__native__canvas__commit(
     
     if (cr->effects->size > 0 && (renderNow != 1))
         return matte_store_new_value(store);
-    
+
+    composite(cr);    
     pushToScreen(cr, vm, store, 0);
 
 
@@ -1496,8 +1631,12 @@ static matteValue_t wyvern_gate__native__canvas(
     cr->m = userData;
     
     cr->canvas = (uint32_t*)calloc(cr->width * cr->height, sizeof(uint32_t));
-    cr->savestates = matte_array_create(sizeof(uint32_t *));
-    cr->savestates_id = matte_array_create(sizeof(uint32_t));
+    cr->frames = matte_array_create(sizeof(uint32_t *));
+    cr->frames_id = matte_array_create(sizeof(uint32_t));
+
+    cr->noFrame = (uint32_t*)calloc(cr->width * cr->height, sizeof(uint32_t));
+    cr->currentFrame = cr->noFrame;
+    cr->currentSet = matte_array_create(sizeof(uint32_t));
 
     cr->idStatePool = 0;
     cr->idStatePool_dead = matte_array_create(sizeof(uint32_t));
@@ -1600,24 +1739,56 @@ static matteValue_t wyvern_gate__native__canvas(
         "notchText",
         NULL
     );
-
     matte_add_external_function(
         userData,
-        "wyvern_gate__native__canvas__pushState",
-        wyvern_gate__native__canvas__pushState,
+        "wyvern_gate__native__canvas__newFramebuffer",
+        wyvern_gate__native__canvas__newFramebuffer,
         cr,
         NULL
     );
 
     matte_add_external_function(
         userData,
-        "wyvern_gate__native__canvas__removeState",
-        wyvern_gate__native__canvas__removeState,
+        "wyvern_gate__native__canvas__removeFramebuffer",
+        wyvern_gate__native__canvas__removeFramebuffer,
         cr,
         
         "id",
         NULL
     );
+    
+    matte_add_external_function(
+        userData,
+        "wyvern_gate__native__canvas__setFramebufferList",
+        wyvern_gate__native__canvas__setFramebufferList,
+        cr,
+        
+        "ids",
+        NULL
+    );    
+
+    matte_add_external_function(
+        userData,
+        "wyvern_gate__native__canvas__printFramebuffer",
+        wyvern_gate__native__canvas__printFramebuffer,
+        cr,
+        
+        "id",
+        NULL
+    );
+
+
+    matte_add_external_function(
+        userData,
+        "wyvern_gate__native__canvas__renderToFramebuffer",
+        wyvern_gate__native__canvas__renderToFramebuffer,
+        cr,
+        
+        "id",
+        "render",
+        NULL
+    );
+
 
     matte_add_external_function(
         userData,
@@ -1679,8 +1850,8 @@ static matteValue_t wyvern_gate__native__canvas(
 
     matte_add_external_function(
         userData,
-        "wyvern_gate__native__canvas__blackout",
-        wyvern_gate__native__canvas__blackout,
+        "wyvern_gate__native__canvas__fill",
+        wyvern_gate__native__canvas__fill,
         cr,
         
         "with",

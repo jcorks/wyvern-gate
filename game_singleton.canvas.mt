@@ -30,7 +30,6 @@
 // Matte version works okay, just might be a bit slower
 // when scenes get heavy, like in battle.
 @native = ::? {
-  return empty;
   @:a = getExternalFunction(:'wyvern_gate__native__canvas')();
   
   a.EFFECT_FINISHED = EFFECT_FINISHED;
@@ -45,15 +44,18 @@
   a.renderFrame = getExternalFunction(:'wyvern_gate__native__canvas__renderFrame');
   a.refitLines = getExternalFunction(:'wyvern_gate__native__canvas__refitLines');
   a.renderTextFrameGeneral = getExternalFunction(:'wyvern_gate__native__canvas__renderTextFrameGeneral');
-  a.pushState = getExternalFunction(:'wyvern_gate__native__canvas__pushState');
-  a.removeState = getExternalFunction(:'wyvern_gate__native__canvas__removeState');
+  a.newFramebuffer = getExternalFunction(:'wyvern_gate__native__canvas__newFramebuffer');
+  a.removeFramebuffer = getExternalFunction(:'wyvern_gate__native__canvas__removeFramebuffer');
+  a.printFramebuffer = getExternalFunction(:'wyvern_gate__native__canvas__printFramebuffer');
+  a.renderToFramebuffer = getExternalFunction(:'wyvern_gate__native__canvas__renderToFramebuffer');
+  a.setFramebufferList = getExternalFunction(:'wyvern_gate__native__canvas__setFramebufferList');
   a.drawText = getExternalFunction(:'wyvern_gate__native__canvas__drawText');
   a.drawChar = getExternalFunction(:'wyvern_gate__native__canvas__drawChar');
   a.drawRectangle = getExternalFunction(:'wyvern_gate__native__canvas__drawRectangle');
   a.erase = getExternalFunction(:'wyvern_gate__native__canvas__erase');
   a.writeText = getExternalFunction(:'wyvern_gate__native__canvas__writeText');
   a.clear = getExternalFunction(:'wyvern_gate__native__canvas__clear');
-  a.blackout = getExternalFunction(:'wyvern_gate__native__canvas__blackout');
+  a.fill = getExternalFunction(:'wyvern_gate__native__canvas__fill');
   a.columnsToLines = getExternalFunction(:'wyvern_gate__native__canvas__columnsToLines');
   a.addEffect = getExternalFunction(:'wyvern_gate__native__canvas__addEffect');
   a.hasEffects = getExternalFunction(:'wyvern_gate__native__canvas__hasEffects');
@@ -140,6 +142,20 @@ return class(
     @currentFrame = noFrame;
     @currentSet;
     
+    @:composite :: {
+      // painter's!
+      for(0, CANVAS_HEIGHT * CANVAS_WIDTH) ::(i) {
+        canvas[i] = ::? {
+          for(currentSet->size-1, -1) ::(n) {
+            @:element = currentSet[n].textArray[i];
+            if (element->type != Number) ::<= {
+              send(:element);
+            }
+          }
+          return ' ';
+        }
+      }
+    }
     
     @:pushToScreen ::(renderNow) {
       @lines_output = [];
@@ -165,21 +181,6 @@ return class(
         CANVAS_WIDTH = width;
       },
 
-      
-      composite :: {
-        // painter's!
-        for(0, CANVAS_HEIGHT * CANVAS_WIDTH) ::(i) {
-          canvas[i] = ::? {
-            for(currentSet->size-1, -1) ::(n) {
-              @:element = currentSet[n].textArray[i];
-              if (element->type != Number) ::<= {
-                send(:element);
-              }
-            }
-            return ' ';
-          }
-        }
-      },
 
 
       movePen ::(x => Number, y => Number) {
@@ -407,52 +408,6 @@ return class(
           height: height
         }
       },
-
-      // creates a new frame and returns its ID
-      newFramebuffer ::{
-        @id = if (idStatePool_dead->size) 
-            idStatePool_dead->pop 
-          else ::<= {
-            idStatePool += 1;
-            return idStatePool;
-          }
-        @:frame = {
-          textArray : ::<= {
-            @:arr = [];
-            for(0, CANVAS_HEIGHT * CANVAS_WIDTH) ::(i) {
-              arr[i] = 0;            
-            }
-            return arr;
-          },
-          id : id
-        }        
-        frames[id] = frame;
-        return id;
-      },
-      
-      renderToFramebuffer ::(id => Number, render => Function) {
-        if (frames[id] == empty) 
-          error(:'No such frame ' + id);
-        @:lastFrame = currentFrame;
-        currentFrame = frames[id].textArray;
-        render();
-        currentFrame = lastFrame;
-      },
-      
-      printFramebuffer ::(id => Number) {
-        for(0, CANVAS_HEIGHT)::(row) {
-          print(:String.combine(strings:frames[id].textArray->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1)));
-        }        
-      },
-
-      removeFramebuffer ::(id) {
-        @w = frames[id]
-        if (w == empty)
-          error(detail:'Tried to removeFramebuffer() on something that isnt a framebuffer!');
-
-        idStatePool_dead->push(value:id);
-        frames[id] = empty;
-      },
             
       drawText ::(text => String) {
         when (penx < 0 || penx >= CANVAS_WIDTH || peny < 0 || peny >= CANVAS_HEIGHT) empty;        
@@ -574,6 +529,53 @@ return class(
       
 
 
+
+      // creates a new frame and returns its ID
+      newFramebuffer ::{
+        @id = if (idStatePool_dead->size) 
+            idStatePool_dead->pop 
+          else ::<= {
+            idStatePool += 1;
+            return idStatePool;
+          }
+        @:frame = {
+          textArray : ::<= {
+            @:arr = [];
+            for(0, CANVAS_HEIGHT * CANVAS_WIDTH) ::(i) {
+              arr[i] = 0;            
+            }
+            return arr;
+          },
+          id : id
+        }        
+        frames[id] = frame;
+        return id;
+      },
+      
+      renderToFramebuffer ::(id => Number, render => Function) {
+        if (frames[id] == empty) 
+          error(:'No such frame ' + id);
+        @:lastFrame = currentFrame;
+        currentFrame = frames[id].textArray;
+        render();
+        currentFrame = lastFrame;
+      },
+      
+      printFramebuffer ::(id => Number) {
+        for(0, CANVAS_HEIGHT)::(row) {
+          print(:String.combine(strings:frames[id].textArray->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1)));
+        }        
+      },
+
+      removeFramebuffer ::(id) {
+        @w = frames[id]
+        if (w == empty)
+          error(detail:'Tried to removeFramebuffer() on something that isnt a framebuffer!');
+
+        idStatePool_dead->push(value:id);
+        frames[id] = empty;
+      },
+
       
       // Adds an effect to be called after rendering the current 
       // window visual. Note that when effects are active, the 
@@ -606,7 +608,7 @@ return class(
       
       update ::{
         when(effects->keycount == 0) empty;  
-        this.composite();
+        composite();
         // draw effects on real canvas after compositing
         ::<= {
           @:oldFrame = currentFrame;
@@ -623,7 +625,7 @@ return class(
         
       commit ::(renderNow) {
         when(effects->keycount > 0 && (renderNow != true)) empty;
-        this.composite();
+        composite();
         pushToScreen(renderNow);       
       }
     }  

@@ -227,8 +227,6 @@
     @:renderThis = ::<= {
     
       @:checkCache ::(renderOnly, data) {
-        @dorender = false;
-        @last;
         foreach(choiceStack) ::(k, v) {
           if (v.disableCache != empty) ::<= {
             breakpoint();
@@ -242,13 +240,6 @@
             );
           }
         }
-        
-        if (dorender) ::<= {
-          if (data.framebufferID != empty)
-            canvas.removeState(id:data.framebufferID);
-          data.framebufferID = canvas.pushState();
-        } else if (renderOnly != true)
-          canvas.clear();
       }
 
 
@@ -317,9 +308,11 @@
           
           if (toRemove == empty) 
             choiceStack->pop 
-          else 
-
+          else ::<= {
+            canvas.removeFramebuffer(:toRemove.framebufferID);
             choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
+            canvas.setFramebufferList(:choiceStack->map(::(value) <- value.framebufferID));
+          }
           
           
           if (data.onLeave)
@@ -2130,8 +2123,10 @@
         }
         if (goBeforeTag != empty) ::<= {
           @:data = choiceStack->pop; 
-          if (data.framebufferID != empty)
-            canvas.removeState(id:data.framebufferID);
+          if (data.framebufferID != empty) ::<= {
+            canvas.removeFramebuffer(id:data.framebufferID);
+            canvas.setFramebufferList(:choiceStack->map(::(value) <- value.framebufferID));
+          }
 
           if (data.onLeave)
             data.onLeave();          
