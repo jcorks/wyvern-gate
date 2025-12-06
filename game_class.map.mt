@@ -29,8 +29,8 @@
     entities : empty,
     compressedItems : empty,
     dataList : empty,
-    legendEntriesCompressed : empty,
     title : '',
+    legendEntriesCompressed : empty, // retired.
 
     pointer : empty,
     width : 0,
@@ -184,7 +184,6 @@
     @itemIndex = [];
     @entities = [];
     @items = [];
-    @legendEntries = [];
     @title;
 
     @pointer = {
@@ -1089,8 +1088,6 @@
         }
         loc->push(value:val);
         items->push(value:val);
-        if (name != empty)
-          legendEntries->push(value:val);
       },
       
       getItem::(data) {
@@ -1111,6 +1108,16 @@
       getAllItems ::{
         return items;
       },
+
+
+      getItemsInView :: {
+        @:which = [];
+        foreach(items) ::(k, item) {
+          if (this.isLocationVisible(x:item.x, y:item.y))
+            which->push(:item);
+        }
+        return which;
+      }, 
       
       itemsAt::(x, y) {
         return itemIndex[x + y*(width)];
@@ -1158,16 +1165,7 @@
             }
           }
         }
-        if (item.name != empty) ::<= {
-          ::? {
-            foreach(legendEntries)::(key, v) {
-              when(v.data == data) ::<= {
-                legendEntries->remove(key);
-                send();
-              }
-            }
-          }
-        }
+
 
 
         if(itemsA->keycount == 0)
@@ -1513,7 +1511,8 @@
       
       getRandomArea :: {
         return random.pickArrayItem(list:areas);
-      },  
+      }, 
+      
       
       render :: {
         canvas.blackout();
@@ -1530,6 +1529,8 @@
         
         // render the legend
         if (drawLegend) ::<= {
+          @:legendEntries = this.getItemsInView();
+          when(legendEntries->size == 0) empty;
           @width = 0;
           @:itemList = [];
           foreach(legendEntries)::(index, item) {
@@ -1616,12 +1617,6 @@
         }
         
         
-        @:legendEntriesCompressed = {};
-        foreach(legendEntries) ::(k, val) {
-          legendEntriesCompressed[k] = itemsUnique[val];
-          if (legendEntriesCompressed[k] == empty)
-            error(detail:'Something went wrong (legend entry was a non-numbered index)')
-        }
 
         // sparse array indexing
         @:itemIndexCompressed = {};
@@ -1665,7 +1660,6 @@
           entities : entities,
           compressedItems : compressedItems,
           dataList : dataList,
-          legendEntriesCompressed : legendEntriesCompressed,
           title : title,
 
           pointer : pointer,
@@ -1700,10 +1694,6 @@
           val.data = v.dataList[val.data];
         }
         
-        legendEntries = [];
-        foreach(v.legendEntriesCompressed) ::(k, val) {
-          legendEntries[k] = items[val];
-        }
         
         itemIndex = [];
         foreach(v.itemIndexCompressed) ::(k, locs) {

@@ -1347,6 +1347,7 @@ Landmark.database.newEntry(
 
       removeLocation ::(location) {
         state.map.removeItem(data:location);
+        windowEvent.invalidateCache(:'VisitLandmark');
       },
 
       addLocation ::(location, width, height, noHalo, discovered) {
@@ -1380,8 +1381,9 @@ Landmark.database.newEntry(
         } else 
           defaultAdd(discovered:false);
 
+        windowEvent.invalidateCache(:'VisitLandmark');
         return loc;      
- 
+
       },
       
       moveLocation ::(location) {

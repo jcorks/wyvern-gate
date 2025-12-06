@@ -2373,6 +2373,64 @@ Location.database.newEntry(data:{
   }
 }) 
 
+
+Location.database.newEntry(data:{
+  name: 'Lost Item',
+  id: 'base:lost-item-hostile',
+  rarity: 1000000000000,
+  ownVerb : 'owned',
+  symbol: 'i',
+  category : CATEGORY.DUNGEON_SPECIAL,
+  minStructureSize : 1,
+  onePerLandmark : false,
+
+  descriptions: [
+    'A lost item.'
+  ],
+  interactions : [
+    'base:take'
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  onFirstInteract::(location){},      
+  onInteract ::(location) {
+    @:world = import(module:'game_singleton.world.mt');
+    when (location.data.alreadyWon == true) empty;
+
+    windowEvent.queueMessage(
+      text:'A shadow leapt in from the darkness!'
+    );
+    world.battle.start(
+      party:world.party,              
+      allies: [...world.party.members],
+      enemies: [location.landmark.island.newHostileCreature(levelHint : location.landmark.island.level/2)],
+      landmark: {},
+      onEnd::(result) {
+        location.data.alreadyWon = true;
+        when(world.battle.partyWon()) empty;
+          
+        @:instance = import(module:'game_singleton.instance.mt');
+        instance.gameOver(reason:'The party was wiped out.');
+      }
+    );      
+  },
+  onStep ::(location, entities) {
+  
+  },  
+  onCreate ::(location) {
+  },
+  
+  onIncrementTime::(location, time) {
+  
+  }
+}) 
+
 }
 
 

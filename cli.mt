@@ -142,7 +142,6 @@ canvas.onCommit = ::(lines, renderNow){
   h = ((Number.parse(:h) / 2)->floor)*2 -2;
 
   when (canvas.width == w && canvas.height == h) empty;
-  breakpoint();
 
 
   canvas.resize(width:w, height:h);
@@ -315,7 +314,6 @@ instance.mainMenu(
           when (v == empty) empty;
           out->push(:v);
         }
-        breakpoint();
 
         return out;
       }
