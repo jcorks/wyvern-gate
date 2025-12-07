@@ -1436,13 +1436,13 @@ Profession.newEntry(data:{
 
   growth: StatSet.new(
     HP:  20,
-    AP:  20,
-    ATK: 20,
+    AP:  3,
+    ATK: 3,
     INT: 20,
-    DEF: 20,
-    SPD: 20,
+    DEF: 7,
+    SPD: 0,
     LUK: 20,
-    DEX: 20
+    DEX: 2
   ),
   minKarma : 0,
   maxKarma : 50,
@@ -1521,6 +1521,35 @@ Profession.newEntry(data:{
     'base:attack',
     'base:attack',
     'base:attack'
+  ],
+  passives : [
+  ]
+}) 
+
+
+Profession.newEntry(data:{
+  name: 'Flaming Skull',
+  id : 'base:flaming-skull',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 6,
+    INT: 1,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 3
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
   ],
   passives : [
   ]

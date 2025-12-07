@@ -21,6 +21,7 @@
 @:windowEvent = import(:'game_singleton.windowevent.mt');
 @:BattleAction = import(module:'game_struct.battleaction.mt');
 @:Arts = import(module:'game_mutator.arts.mt');
+@:random = import(module:'game_singleton.random.mt');
 
 
 @:TRAIT = {
@@ -941,6 +942,15 @@ Species.newEntry(data:{
   overrideBattleAI ::(entity, battle, commitBattleActions) {
     entity.ap += 2;
     windowEvent.queueMessage(speaker: entity.name, text: '...');
+    when(battle.getEnemies(:entity)->size == 0) 
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    
     commitBattleActions(:[
       BattleAction.new(
         card: Arts.new(base:Arts.database.find(id:'base:acidic-gas')),
@@ -1175,6 +1185,76 @@ Species.newEntry(data:{
   traits : TRAIT.SPECIAL,
   passives : [
     'base:the-beast'
+  ]
+})
+
+
+Species.newEntry(data:{
+  name : 'Flaming Skull',
+  id : 'base:flaming-skull',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 6,
+    AP : 10,
+    ATK: 10,
+    DEF: 10,
+    INT: 10,
+    LUK: 10,
+    SPD: 10,
+    DEX: 10
+  ),
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    entity.ap += 2;
+    @:Entity = import(module:'game_class.entity.mt');        
+    
+    @:whosLeft = battle.getEnemies(:entity)->filter(::(value) <- value.isIncapacitated() == false);
+    when (whosLeft->size == empty) ::<= {
+      windowEvent.queueMessage(text: entity.name + ' seems satisfied.');
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    }
+
+    when(random.flipCoin()) 
+      commitBattleActions(:[
+        BattleAction.new(
+          card: Arts.new(base:Arts.database.find(id:'base:fire')),
+          turnIndex : 0,
+
+          targets: [
+            random.pickArrayItem(list:whosLeft)
+          ],
+          targetParts : [
+            Entity.normalizedDamageTarget()
+          ],
+          extraData: {}            
+        )      
+      ]);
+      
+    windowEvent.queueMessage(text: entity.name + ' laughs maniacally!');
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:doom-strike')),
+        targets: battle.getEnemies(:entity),
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )
+    ]);
+  },  
+  traits : TRAIT.SPECIAL,
+  passives : [
+    'base:scorching',
+    'base:aspect-fire'
   ]
 })
 

@@ -387,7 +387,7 @@ Landmark.database.newEntry(
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
       'base:dungeon-encounters',
-      'base:mobile-mushroom',
+      'base:flaming-skull',
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},

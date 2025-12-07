@@ -12596,6 +12596,43 @@ Arts.database.newEntry(
   }
 )
 
+
+Arts.database.newEntry(
+  data: {
+    name: 'Doom Strike',
+    id : 'base:doom-strike',
+    notifCommit : '$1 emits a weird aura!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    keywords : ['base:doom'],
+    description: "Inflicts 1 damage on all enemies. 50% chance to inlfict Doom on each target hit.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.ABILITY,
+    traits : TRAIT.PHYSICAL,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      foreach(targets) ::(k, v) {
+        if (v.damage(
+          attacker : user,
+          damage : Damage.new(
+            amount: 1,
+            damageClass : Damage.CLASS.HP,
+            damageType : Damage.TYPE.DARK
+          ),
+          dodgeable : true,
+          exact : true
+        ) && random.flipCoin())
+          v.addEffect(durationTurns:A_LOT, from:user, id: 'base:doom');
+      }
+    }
+  }
+)
+
+
 };
 
 

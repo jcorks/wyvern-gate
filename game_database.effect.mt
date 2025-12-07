@@ -26,7 +26,7 @@
   DEBUFF : 4,
   SPECIAL : 8,
   
-  // Means the holder will always go first. Ties are randomly decided
+  // Means the affected will always go first. Ties are randomly decided
   ALWAYS_FIRST : 16,
   REVIVAL : 32,
   
@@ -100,7 +100,7 @@ Effect.newEntry(
   data : {
     name : 'Dying',
     id: 'base:dying',
-    description: 'The holder is dying. When this effect\'s duration is reached and HP of the holder is 0, the combatant will die.',
+    description: 'The affected is dying. When this effect\'s duration is reached and HP of the affected is 0, the combatant will die.',
     stackable: false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -226,7 +226,7 @@ Effect.newEntry(
   data : {
     name : 'Splinter',
     id : 'base:splinter',
-    description: 'Attacks by the holder now damage all other enemies for 20% of the original attack\'s damage.',
+    description: 'Attacks by the affected now damage all other enemies for 20% of the original attack\'s damage.',
     stackable : true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -418,7 +418,7 @@ Effect.newEntry(
   data : {
     name : 'Conductive Block',
     id : 'base:conductive-block',
-    description: 'Next incoming attack\'s damage is negated and gives the holder the effect 2x Damage. This counts as blocking. This effect is removed afterward.',
+    description: 'Next incoming attack\'s damage is negated and gives the affected the effect 2x Damage. This counts as blocking. This effect is removed afterward.',
     stackable : true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -457,7 +457,7 @@ Effect.newEntry(
   data : {
     name : 'Parry',
     id : 'base:parry',
-    description: 'The next incoming blockable attack has a chance to be negated. Upon attack, The holder will have a chance to pick a location of their body to defend. If this matches the incoming attack\'s location, the attack is blocked.',
+    description: 'The next incoming blockable attack has a chance to be negated. Upon attack, The affected will have a chance to pick a location of their body to defend. If this matches the incoming attack\'s location, the attack is blocked.',
     stackable : true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -830,7 +830,7 @@ Effect.newEntry(
   data : {
     name : 'Mirrored',
     id : 'base:mirrored',
-    description: 'Attacks by the holder now damage a random enemy for the same damage amount.',
+    description: 'Attacks by the affected now damage a random enemy for the same damage amount.',
     stackable : true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -860,7 +860,7 @@ Effect.newEntry(
   data : {
     name : 'Banishing Light',
     id : 'base:banishing-light',
-    description: 'Next attack received is translated instead to 4 Banish stacks. When an attack is translated in this way, the holder loses a stack of Banishing Light.',
+    description: 'Next attack received is translated instead to 4 Banish stacks. When an attack is translated in this way, the affected loses a stack of Banishing Light.',
     stackable : true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -894,7 +894,7 @@ Effect.newEntry(
   data : {
     name : 'Agile',
     id: 'base:agile',
-    description: '+2 base DEX. The holder may now dodge attacks. If the holder has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
+    description: '+2 base DEX. The affected may now dodge attacks. If the affected has more DEX than the attacker, the chance of dodging increases if the holder\'s DEX is greater than the attacker\'s.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
@@ -1529,7 +1529,7 @@ Effect.newEntry(
   data : {
     name : 'Cursed Binding',
     id : 'base:cursed-binding',
-    description: 'The holder attacking causes 1 damage to the original caster.',
+    description: 'The affected attacking causes 1 damage to the original caster.',
     stackable: false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
@@ -1607,7 +1607,7 @@ Effect.newEntry(
   data : {
     name : 'Trigger Status Ailment',
     id : 'base:trigger-random-ailment',
-    description: '50% chance to give a random status ailment to the holder for 2 turns.',
+    description: '50% chance to give a random status ailment to the affected for 2 turns.',
     stackable: false,
     traits : TRAIT.SPECIAL | TRAIT.INSTANTANEOUS ,
     stats: StatSet.new(
@@ -2802,7 +2802,7 @@ Effect.newEntry(
   data : {
     name : 'Poisonroot',
     id : 'base:poisonroot',
-    description: 'Every turn, holder takes 1 to 4 poison damage. SPD base -2',
+    description: 'Every turn, affected takes 1 to 4 poison damage. SPD base -2',
     stackable: true,
     stats: StatSet.new(SPD:-2),
     traits : TRAIT.DEBUFF,
@@ -2894,9 +2894,47 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Doom',
+    id : 'base:doom',
+    description: 'If this effect is present for 4 turns, the affected receives damage equal to their HP. Afterwards, the effect is removed.',
+    stackable: true,
+    traits : 0,
+    stats: StatSet.new(),
+    events : {    
+      onAffliction ::(data, from, item, holder) {
+        data.turnsLeft = 4;
+      },
+      
+      onNextTurn ::(from, item, holder, duration, data) {
+        if (data.turnsLeft == 0) ::<= {
+          windowEvent.queueMessage(text: holder.name + '\'s Doom comes into fruition!');
+          holder.removeEffectsByFilter(::(value) <- value.data == data);
+          holder.damage(
+            attacker: holder,
+            exact: true,
+            damage: Damage.new(
+              amount:holder.hp,
+              damageType : Damage.TYPE.NEUTRAL,
+              damageClass: Damage.CLASS.HP
+            ),dodgeable: false
+          );          
+        } else ::<= {
+          windowEvent.queueMessage(text: 'Doom befalls ' + holder.name + ' in: ' + data.turnsLeft + ' turns!');    
+          data.turnsLeft -= 1;      
+        }
+      }
+    }
+  }
+)
+
+
+
+
+Effect.newEntry(
+  data : {
     name : 'Healroot',
     id : 'base:healroot',
-    description: 'Every turn heals the holder by 2 HP. SPD base -2',
+    description: 'Every turn heals the affected by 2 HP. SPD base -2',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(SPD:-2),
@@ -3082,7 +3120,7 @@ Effect.newEntry(
   data : {
     name : 'Perfect Guard',
     id : 'base:perfect-guard',
-    description: 'All damage from others to the holder is nullified.',
+    description: 'All damage from others to the affected is nullified.',
     stackable: false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -3105,7 +3143,7 @@ Effect.newEntry(
   data : {
     name : 'Convinced',
     id : 'base:convinced',
-    description: 'Convinced by someone or something: the holder is unable to use Abilities.',
+    description: 'Convinced by someone or something: the affected is unable to use Abilities.',
     stackable: false,
     stats: StatSet.new(),
     traits : TRAIT.CANT_USE_ABILITIES,
@@ -3127,7 +3165,7 @@ Effect.newEntry(
   data : {
     name : 'Unbalanced',
     id : 'base:unbalanced',
-    description: 'The holder is not properly balanced. ATK base -6',
+    description: 'The affected is not properly balanced. ATK base -6',
     stackable: false,
     stats: StatSet.new(
       ATK: -6
@@ -3150,7 +3188,7 @@ Effect.newEntry(
   data : {
     name : 'Dampen Multi-hit',
     id : 'base:dampen-multi-hit',
-    description: 'All multi-hit attack damage from the holder are nullified.',
+    description: 'All multi-hit attack damage from the affected are nullified.',
     stackable: false,
     stats: StatSet.new(
     ),
@@ -3170,7 +3208,7 @@ Effect.newEntry(
   data : {
     name : 'Multi-hit Guard',
     id : 'base:multi-hit-guard',
-    description: 'All multi-hit attack damage targetting the holder are nullified.',
+    description: 'All multi-hit attack damage targetting the affected are nullified.',
     stackable: false,
     stats: StatSet.new(
     ),
@@ -3192,7 +3230,7 @@ Effect.newEntry(
   data : {
     name : 'Desparate',
     id : 'base:desparate',
-    description: 'The holder is desparate. HP base -4, DEF base -5. Attacks to others are 2.5 times more damaging.',
+    description: 'The affected is desparate. HP base -4, DEF base -5. Attacks to others are 2.5 times more damaging.',
     stackable: false,
     stats: StatSet.new(
       DEF: -5,
@@ -3220,7 +3258,7 @@ Effect.newEntry(
   data : {
     name : 'Primally Desparate',
     id : 'base:primally-desparate',
-    description: 'The holder is primally desparate. On affliction and every turn, HP is reduced to 1. x4 damage for all attacks.',
+    description: 'The affected is primally desparate. On affliction and every turn, HP is reduced to 1. x4 damage for all attacks.',
     stackable: false,
     stats: StatSet.new(
     ),
@@ -3274,7 +3312,7 @@ Effect.newEntry(
   data : {
     name : 'Enlarged',
     id : 'base:enlarged',
-    description: 'The holder is is magically enlarged. HP base +3, DEF base +3',
+    description: 'The affected is magically enlarged. HP base +3, DEF base +3',
     stackable: false,
     stats: StatSet.new(
       DEF: 3,
@@ -3687,7 +3725,7 @@ Effect.newEntry(
   data : {
     name : 'Dueled',
     id : 'base:dueled',
-    description: 'If attacked by the original caster, the holder receives 1.5x damage.',
+    description: 'If attacked by the original caster, the affected receives 1.5x damage.',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -3856,7 +3894,7 @@ Effect.newEntry(
   data : {
     name : 'Regeneration Rune',
     id : 'base:regeneration-rune',
-    description: 'Heals holder every turn by 1 HP.',
+    description: 'Heals affected every turn by 1 HP.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -3905,7 +3943,7 @@ Effect.newEntry(
   data : {
     name : 'Cure Rune',
     id : 'base:cure-rune',
-    description: 'Cures the holder by 3 HP when the rune is released.',
+    description: 'Cures the affected by 3 HP when the rune is released.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
@@ -4351,7 +4389,7 @@ Effect.newEntry(
   data : {
     name : 'Fire Curse',
     id : 'base:fire-curse',
-    description: 'Deals 1 to 2 fire damage to holder every turn. If the holder gains Burning, all instances of this are removed.',
+    description: 'Deals 1 to 2 fire damage to affected every turn. If the affected gains Burning, all instances of this are removed.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -4387,7 +4425,7 @@ Effect.newEntry(
   data : {
     name : 'Ice Curse',
     id : 'base:ice-curse',
-    description: 'Deals 1 to 2 fire damage to holder every turn. If the holder gains Icy, all instances of this are removed.',
+    description: 'Deals 1 to 2 fire damage to affected every turn. If the affected gains Icy, all instances of this are removed.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -4426,7 +4464,7 @@ Effect.newEntry(
   data : {
     name : 'Thunder Curse',
     id : 'base:thunder-curse',
-    description: 'Deals 1 to 2 thunder damage to holder every turn. If the holder gains Shock, all instances of this are removed.',
+    description: 'Deals 1 to 2 thunder damage to affected every turn. If the affected gains Shock, all instances of this are removed.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -4464,7 +4502,7 @@ Effect.newEntry(
   data : {
     name : 'Dark Curse',
     id : 'base:dark-curse',
-    description: 'Deals 1 to 2 dark damage to holder every turn. If the holder gains Dark, all instances of this are removed.',
+    description: 'Deals 1 to 2 dark damage to affected every turn. If the affected gains Dark, all instances of this are removed.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -4500,7 +4538,7 @@ Effect.newEntry(
   data : {
     name : 'Light Curse',
     id : 'base:light-curse',
-    description: 'Deals 1 to 2 light damage to holder every turn. If the holder gains Shimmering, all instances of this are removed.',
+    description: 'Deals 1 to 2 light damage to affected every turn. If the affected gains Shimmering, all instances of this are removed.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -4537,7 +4575,7 @@ Effect.newEntry(
   data : {
     name : 'Poison Curse',
     id : 'base:poison-curse',
-    description: 'Deals 1 to 2 poison damage to holder every turn. If the holder gains Toxic, all instances of this are removed.',
+    description: 'Deals 1 to 2 poison damage to affected every turn. If the affected gains Toxic, all instances of this are removed.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -4977,7 +5015,7 @@ Effect.newEntry(
   data : {
     name : 'Banish',
     id : 'base:banish',
-    description: 'ATK, SPD base -1. At 10 stacks, the holder is removed from battle.',
+    description: 'ATK, SPD base -1. At 10 stacks, the affected is removed from battle.',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
@@ -5045,7 +5083,7 @@ Effect.newEntry(
   data : {
     name : 'Redirect Momentum',
     id : 'base:redirect-momentum',
-    description: 'If the holder is to be afflicted with Grappled, instead the holder inflicts 1/3 of the source\'s DEF in damage to the source of the Grappled effect and Stuns them for a turn.',
+    description: 'If the affected is to be afflicted with Grappled, instead the affected inflicts 1/3 of the source\'s DEF in damage to the source of the Grappled effect and Stuns them for a turn.',
     stackable: false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -5193,7 +5231,7 @@ Effect.newEntry(
   data : {
     name : 'Critical Reaction',
     id: 'base:critical-reaction',
-    description: 'When the holder lands a critical hit, a random, equipped Art is used for no AP cost and no charge.',
+    description: 'When the affected lands a critical hit, a random, equipped Art is used for no AP cost and no charge.',
     stackable: false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
@@ -5299,7 +5337,7 @@ Effect.newEntry(
   data : {
     name : 'First Strike',
     id : 'base:first-strike',
-    description: 'The holder always goes first. If another combatant also always goes first, the order is decided randomly.',
+    description: 'The affected always goes first. If another combatant also always goes first, the order is decided randomly.',
     stackable: false,
     traits : TRAIT.DEBUFF | TRAIT.ALWAYS_FIRST,
     stats: StatSet.new(),
@@ -5405,7 +5443,7 @@ Effect.newEntry(
   data : {
     name : 'Half Guard',
     id : 'base:half-guard',
-    description: '50% of the time, damage from others to the holder is reduced by half.',
+    description: '50% of the time, damage from others to the affected is reduced by half.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -5425,7 +5463,7 @@ Effect.newEntry(
   data : {
     name : 'Multi Guard',
     id : 'base:multi-guard',
-    description: 'Multi-hit damage from others to the holder is reduced to 1.',
+    description: 'Multi-hit damage from others to the affected is reduced to 1.',
     stackable: false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -5560,7 +5598,7 @@ Effect.newEntry(
   data : {
     name : 'Procrastinate Death',
     id : 'base:procrastinate-death',
-    description: 'The next time the holder would die, their HP is set to 1 and this effect is removed. If this effect is never triggered prior to removal, the holder receives Dark damage equal to their total health.',
+    description: 'The next time the affected would die, their HP is set to 1 and this effect is removed. If this effect is never triggered prior to removal, the affected receives Dark damage equal to their total health.',
     stackable: false,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
@@ -5603,7 +5641,7 @@ Effect.newEntry(
   data : {
     name : 'Cheat Death',
     id : 'base:cheat-death',
-    description: 'Avoids death, but when avoided stuns the holder for 2 turns.',
+    description: 'Avoids death, but when avoided stuns the affected for 2 turns.',
     stackable: false,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
@@ -5660,7 +5698,7 @@ Effect.newEntry(
   data : {
     name : 'Limit Break',
     id : 'base:limit-break',
-    description: 'If damage would cause the holder to get knocked out, the holder gains 50% of their HP and inflicts the Limit Reached effect.',
+    description: 'If damage would cause the affected to get knocked out, the affected gains 50% of their HP and inflicts the Limit Reached effect.',
     stackable: false,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
@@ -5684,7 +5722,7 @@ Effect.newEntry(
   data : {
     name : 'Limit Reached',
     id : 'base:limit-reached',
-    description: 'The holder getting knocked out will also kill the holder.',
+    description: 'The affected getting knocked out will also kill the holder.',
     stackable: false,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -5799,7 +5837,7 @@ Effect.newEntry(
   data : {
     name : 'Deathless Overflow',
     id : 'base:deathless-overflow',
-    description: 'If damage would cause the holder to get knocked out, the holder gains 50% of their HP. Holder gain 5 Banish stacks.',
+    description: 'If damage would cause the affected to get knocked out, the affected gains 50% of their HP. affected gain 5 Banish stacks.',
     stackable: false,
     traits : TRAIT.BUFF | TRAIT.REVIVAL,
     stats: StatSet.new(),
@@ -6151,7 +6189,7 @@ Effect.newEntry(
   data : {
     name : 'Soul Guard',
     id : 'base:soul-guard',
-    description: '1/4th chance that the caster nullifies damage done to the holder if the caster is conscious. Upon successful blocking, has a 1/4th chance to cause Paralysis indefinitely.',
+    description: '1/4th chance that the caster nullifies damage done to the affected if the caster is conscious. Upon successful blocking, has a 1/4th chance to cause Paralysis indefinitely.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -6177,7 +6215,7 @@ Effect.newEntry(
   data : {
     name : 'Soul Split',
     id : 'base:soul-split',
-    description: 'Redistributes incoming damage between the holder and caster evenly.',
+    description: 'Redistributes incoming damage between the affected and caster evenly.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -6203,7 +6241,7 @@ Effect.newEntry(
   data : {
     name : 'Soul Projection',
     id : 'base:soul-projection',
-    description: 'Original caster receives damage instead of the holder. If the holder is the caster, nothing happens.',
+    description: 'Original caster receives damage instead of the holder. If the affected is the caster, nothing happens.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -6243,7 +6281,7 @@ Effect.newEntry(
   data : {
     name : 'Charmed',
     id : 'base:charmed',
-    description: 'Attacks from the holder that target the original caster is reduced by 50%',
+    description: 'Attacks from the affected that target the original caster is reduced by 50%',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -6390,7 +6428,7 @@ Effect.newEntry(
   data : {
     name : 'Acid Dust',
     id : 'base:acid-dust',
-    description: 'Upon recieving fire-based damage or receiving the Burning effect, the holder and any allies take 4 - 6 fire damage.',
+    description: 'Upon recieving fire-based damage or receiving the Burning effect, the affected and any allies take 4 - 6 fire damage.',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -6442,7 +6480,7 @@ Effect.newEntry(
   data : {
     name : 'Conduction Dust',
     id : 'base:conduction-dust',
-    description: 'Upon recieving thunder-based damage or receiving the Shock effect, the holder and any allies take 4 - 6 thunder damage.',
+    description: 'Upon recieving thunder-based damage or receiving the Shock effect, the affected and any allies take 4 - 6 thunder damage.',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -6491,7 +6529,7 @@ Effect.newEntry(
   data : {
     name : 'Conduction Dust',
     id : 'base:conduction-dust',
-    description: 'Upon recieving thunder-based damage or receiving the Shock effect, the holder and any allies take 4 - 6 thunder damage.',
+    description: 'Upon recieving thunder-based damage or receiving the Shock effect, the affected and any allies take 4 - 6 thunder damage.',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -6539,7 +6577,7 @@ Effect.newEntry(
   data : {
     name : 'Crystalized Dust',
     id : 'base:crystalized-dust',
-    description: 'Upon recieving ice-based damage or receiving the Icy effect, the holder and any allies take 4 - 6 ice damage.',
+    description: 'Upon recieving ice-based damage or receiving the Icy effect, the affected and any allies take 4 - 6 ice damage.',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -6567,7 +6605,7 @@ Effect.newEntry(
   data : {
     name : 'Embarrassed',
     id : 'base:embarrassed',
-    description: 'When the holder attacks the original caster, 50% chance to miss.',
+    description: 'When the affected attacks the original caster, 50% chance to miss.',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -6591,7 +6629,7 @@ Effect.newEntry(
   data : {
     name : 'Enraged',
     id : 'base:enraged',
-    description: 'When the holder attacks the original caster, 33% of damage is inflicted to the holder as well.',
+    description: 'When the affected attacks the original caster, 33% of damage is inflicted to the affected as well.',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -6634,7 +6672,7 @@ Effect.newEntry(
   data : {
     name : 'Self-Illusion',
     id : 'base:self-illusion',
-    description: 'When the holder attacks the original caster, it is inflicted on their self instead.',
+    description: 'When the affected attacks the original caster, it is inflicted on their self instead.',
     stackable: true,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(),
@@ -6691,7 +6729,7 @@ Effect.newEntry(
   data : {
     name : '@b307',
     id : 'base:b307',
-    description: 'Successful blocks add a stack of Empowered to the holder for 3 turns.',
+    description: 'Successful blocks add a stack of Empowered to the affected for 3 turns.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -6707,7 +6745,7 @@ Effect.newEntry(
   data : {
     name : 'Empowered',
     id : 'base:empowered',
-    description: 'Next attack from the holder is 1.5x more damaging. This effect is removed after.',
+    description: 'Next attack from the affected is 1.5x more damaging. This effect is removed after.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -6802,7 +6840,7 @@ Effect.newEntry(
   data : {
     name : 'Corrupted Empowerment',
     id : 'base:corrupted-empowerment',
-    description: 'Attacks against a target are 1.3x more effective for each stack of Banish the holder has.',
+    description: 'Attacks against a target are 1.3x more effective for each stack of Banish the affected has.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -6862,7 +6900,7 @@ Effect.newEntry(
   data : {
     name : 'Corrupted Inspiration',
     id : 'base:corrupted-inspiration',
-    description: 'At the start of the holder\'s turn, if the holder has a Banish stack, remove the Banish stack and grant Minor Aura to all allies for the duration of the battle.',
+    description: 'At the start of the holder\'s turn, if the affected has a Banish stack, remove the Banish stack and grant Minor Aura to all allies for the duration of the battle.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -6892,7 +6930,7 @@ Effect.newEntry(
   data : {
     name : 'Corrupted Corruption',
     id : 'base:corrupted-corruption',
-    description: 'At the start of the holder\'s turn, if the holder has a Banish stack, remove the Banish stack and grant Minor Curse to all allies for the duration of the battle.',
+    description: 'At the start of the holder\'s turn, if the affected has a Banish stack, remove the Banish stack and grant Minor Curse to all allies for the duration of the battle.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
@@ -7195,7 +7233,7 @@ Effect.newEntry(
   data : {
     name : 'Starsign Alignment',
     id : 'base:starsign-alignment',
-    description: 'All attacks made by the holder will shift to the damage type corresponding to the holder\'s starsign.',
+    description: 'All attacks made by the affected will shift to the damage type corresponding to the holder\'s starsign.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),

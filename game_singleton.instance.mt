@@ -94,7 +94,7 @@ import(module:'game_mutator.island.mt');
 
 
 import(module:'game_class.landmarkevent_mobilemushroom.mt');
-
+import(module:'game_class.landmarkevent_flamingskull.mt')
 
 
 @:distance::(x0, y0, x1, y1) {
