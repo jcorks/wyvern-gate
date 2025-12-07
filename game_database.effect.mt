@@ -5469,7 +5469,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
-        if (attacker != holder && ((damage.traits & Damage.TRAIT.MULTIHIT) != 0)) ::<= {
+        if (attacker != affected && ((damage.traits & Damage.TRAIT.MULTIHIT) != 0)) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from the damage thanks to Light Guard!');
           damage.amount = 1;            
         }
@@ -5489,7 +5489,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
-        if (attacker != holder && ((damage.traits & Damage.TRAIT.IS_CRIT) != 0)) ::<= {
+        if (attacker != affected && ((damage.traits & Damage.TRAIT.IS_CRIT) != 0)) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from critical hit damage thanks to Premonition!');
           damage.amount = 1;            
         }
