@@ -932,6 +932,34 @@
         scenery[x + y*(width)] &= (~IS_WALLED_MASK);
       },
       
+      mapCoordinatesToScreen ::(x, y) {
+        if (paged) ::<= {
+          @:regionX = ((pointer.x+0) / mapSizeW)->floor;
+          @:regionY = ((pointer.y+0) / mapSizeH)->floor;
+
+          x = x - regionX*mapSizeW;
+          y = y - regionY*mapSizeH;
+        
+        } else ::<= {
+          @camX = pointer.x;
+          @camY = pointer.y;
+          
+          @camLeft   = camX - mapSizeW/2;
+          @camTop    = camY - mapSizeH/2;
+          @camRight  = camX + mapSizeW/2;
+          @camBottom = camY + mapSizeH/2;
+          
+          
+          x -= camLeft;
+          y -= camTop;
+        }
+        
+        return {
+          x: x,
+          y: y
+        }
+      },
+      
       addScenerySymbol ::(character) {
         @:preIndex = sceneryValues->findIndex(value:character);
         when(preIndex != -1) preIndex;

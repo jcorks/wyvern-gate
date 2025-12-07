@@ -11,6 +11,8 @@
 @:AGGRESSIVE_DISTANCE = 5;
 
 
+
+
 @:TheBeast = LoadableClass.create(
   name: 'Wyvern.LandmarkEvent.FlamingSkull',
   
@@ -40,7 +42,7 @@
         DEX:  20
       ).add(:beast.stats).save());
       
-      beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+      beast.unequipAll(silent:true);
       beast.heal(amount:9999, silent:true); 
       beast.healAP(amount:9999, silent:true);   
       return beast;    
@@ -90,6 +92,25 @@
         entities : ents,
         tag : 'theflamingskull'
       );
+      ref.data.emitter = import(:'game_class.particle.mt').new(
+        directionMin : -135,
+        directionMax : -45,
+
+        directionDeltaMin : -1,
+        directionDeltaMax : 2,
+    
+        speedMin : 0.3,
+        speedMax : 1,
+        
+        speedDeltaMin : 0.03,
+        speedDeltaMax : 0.05,
+
+        characters : ['▓', '▓', '▒', '░', '▒', '░', '░'],
+        charactersRepeat : false,
+        
+        lifeMax : 4,
+        lifeMin : 1    
+      );
       ref.addUpkeepTask(id:'base:thebeast-roam');
       ref.addUpkeepTask(id:'base:aggressive');
       ref.addDeathTask(id:'base:to-body');
@@ -120,7 +141,15 @@
       
       
       step::{
-        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'thebeast');
+        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'theflamingskull');
+        
+        foreach(entities) ::(k, v) {
+          @mapPos = v.position;
+          @:pos = landmark_.map.mapCoordinatesToScreen(*mapPos);
+          v.data.emitter.move(x:pos.x, y:pos.y);
+          v.data.emitter.start(emitCount:1);
+          v.data.emitter.stop();
+        }
       
         // add additional entities out of spawn points (stairs)
         //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {

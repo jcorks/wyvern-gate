@@ -1555,6 +1555,34 @@ Profession.newEntry(data:{
   ]
 }) 
 
+Profession.newEntry(data:{
+  name: 'Skeleton',
+  id : 'base:skeleton',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 6,
+    INT: 1,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 3
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+  ],
+  passives : [
+  ]
+}) 
+
 
 Profession.newEntry(data:{
   name: 'Runic Beast',

@@ -311,13 +311,12 @@ Landmark.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.POINT_OF_NO_RETURN |
       TRAIT.EPHEMERAL,
-    minEvents : 1,
+    minEvents : 2,
     maxEvents : 7,
     eventPreference : LandmarkEvent.KIND.HOSTILE,
 
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
-      'base:dungeon-encounters',
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
@@ -380,14 +379,12 @@ Landmark.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.POINT_OF_NO_RETURN |
       TRAIT.EPHEMERAL,
-    minEvents : 1,
+    minEvents : 2,
     maxEvents : 7,
     eventPreference : LandmarkEvent.KIND.HOSTILE,
 
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
-      'base:dungeon-encounters',
-      'base:flaming-skull',
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},

@@ -1244,7 +1244,7 @@ Species.newEntry(data:{
     commitBattleActions(:[
       BattleAction.new(
         card: Arts.new(base:Arts.database.find(id:'base:doom-strike')),
-        targets: battle.getEnemies(:entity),
+        targets: [...battle.getEnemies(:entity)],
         turnIndex : 0,
         targetParts : [],
         extraData: {}
@@ -1338,7 +1338,63 @@ Species.newEntry(data:{
   ]
 })
 
+Species.newEntry(data:{
+  name : 'Skeleton',
+  id : 'base:skeleton',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 6,
+    AP : 5,
+    ATK: 3,
+    DEF: 4,
+    INT: 7,
+    LUK: 1,
+    SPD: 7,
+    DEX: 10
+  ),
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    @:Entity = import(module:'game_class.entity.mt');        
 
+    when (entity.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).base.id == 'base:none') ::<= {
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:b198')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    }
+    
+    @:targets = battle.getEnemies(:entity);
+  
+    when(targets->size == 0) 
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:attack')),
+        targets: [random.pickArrayItem(:targets)],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )
+    ]);
+  },  
+  traits : TRAIT.SPECIAL,
+  passives : [
+  ]
+})
 
 Species.newEntry(data:{
   name : 'Treasure Golem',
