@@ -160,6 +160,16 @@
       canvas.setFramebufferList(:choiceStack->map(::(value) <- value.framebufferID));
       canvas.commit();
     }
+    
+    @:renderAction ::(data) {
+      when(data.framebufferID == empty) empty;
+      canvas.renderToFramebuffer(
+        id: data.framebufferID,
+        render ::{
+          renderThis(data)
+        }
+      );    
+    }
 
       
     // Adds a resolve queue.
@@ -232,12 +242,7 @@
             breakpoint();
             if (v.disableCache != PERMANENT)
               v->remove(:'disableCache');
-            canvas.renderToFramebuffer(
-              id: v.framebufferID,
-              render ::{
-                renderThis(data:v, rerender:true);
-              }
-            );
+            renderAction(:v);
           }
         }
       }
@@ -310,6 +315,7 @@
             choiceStack->pop 
           else ::<= {
             canvas.removeFramebuffer(:toRemove.framebufferID);
+            toRemove.framebufferID = empty;
             choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
             canvas.setFramebufferList(:choiceStack->map(::(value) <- value.framebufferID));
           }
@@ -679,12 +685,7 @@
       }
 
 
-      canvas.renderToFramebuffer(
-        id: data.framebufferID,
-        render ::{
-          renderThis(data)
-        }
-      );
+      renderAction(:data);
 
 
       when(exitEmpty) ::<= {
@@ -803,12 +804,7 @@
       }
 
 
-      canvas.renderToFramebuffer(
-        id: data.framebufferID,
-        render ::{
-          renderThis(data)
-        }
-      );
+      renderAction(:data);
       when(exitEmpty) ::<= {
         data.keep = empty;
         return true;      
@@ -888,12 +884,7 @@
       }
       
       if (data.rendered == empty) ::<= {
-        canvas.renderToFramebuffer(
-          id: data.framebufferID,
-          render ::{
-            renderThis(data)
-          }
-        );
+        renderAction(:data);
       }      
       
       return false;  
@@ -908,12 +899,7 @@
         data.renderState = RENDER_STATE.ANIMATING;
       
       if (data.rendered == empty) ::<= {
-        canvas.renderToFramebuffer(
-          id: data.framebufferID,
-          render ::{
-            renderThis(data)
-          }
-        );
+          renderAction(:data);
       }
       if (data.entered == empty) ::<= {
         if (data.onEnter)
@@ -954,12 +940,7 @@
       //}
       
       if (data.rendered == empty) ::<= {
-        canvas.renderToFramebuffer(
-          id: data.framebufferID,
-          render ::{
-            renderThis(data)
-          }
-        );
+        renderAction(:data);
       }
       if (data.entered == empty) ::<= {
         data.entered = true;
@@ -1131,12 +1112,7 @@
       when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         sound.playSFX(:"confirm");
         onChoice(choice:which + 1);
-        canvas.renderToFramebuffer(
-          id: data.framebufferID,
-          render ::{
-            renderThis(data)
-          }
-        );     
+        renderAction(:data);    
         return true;
       }
         
@@ -1147,21 +1123,11 @@
           res = data.onCancel();
         when (res == this.STOP_CANCEL) false;
         data.keep = empty;
-        canvas.renderToFramebuffer(
-          id: data.framebufferID,
-          render ::{
-            renderThis(data)
-          }
-        );     
+        renderAction(:data);   
         return true;
       }
       
-      canvas.renderToFramebuffer(
-        id: data.framebufferID,
-        render ::{
-          renderThis(data)
-        }
-      );     
+      renderAction(:data);   
 
       return false;
     }
@@ -1290,12 +1256,7 @@
           data.renderState = RENDER_STATE.ANIMATING;
       }
 
-      canvas.renderToFramebuffer(
-        id: data.framebufferID,
-        render ::{
-          renderThis(data)
-        }
-      );     
+      renderAction(:data);     
       
       if (data.autoSkipAfterFrames->type == Number) ::<= {
         data.autoSkipAfterFrames -= 1;
@@ -1415,12 +1376,7 @@
       }
       
 
-      canvas.renderToFramebuffer(
-        id: data.framebufferID,
-        render ::{
-          renderThis(data)
-        }
-      );     
+      renderAction(:data);   
       
       return match(input) {
         (CURSOR_ACTIONS.CONFIRM, 
@@ -2125,6 +2081,7 @@
           @:data = choiceStack->pop; 
           if (data.framebufferID != empty) ::<= {
             canvas.removeFramebuffer(id:data.framebufferID);
+            data.framebufferID = empty;
             canvas.setFramebufferList(:choiceStack->map(::(value) <- value.framebufferID));
           }
 
