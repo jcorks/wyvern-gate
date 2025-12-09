@@ -5,26 +5,25 @@
 @:Profession = import(module:'game_database.profession.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
+@:Item = import(module:'game_mutator.item.mt');
 
 @:ROOM_MAX_ENTITY = 6;
 @:REACHED_DISTANCE = 1.5;
 @:AGGRESSIVE_DISTANCE = 5;
 
 
-
-
 @:TheBeast = LoadableClass.create(
-  name: 'Wyvern.LandmarkEvent.FlamingSkull',
+  name: 'Wyvern.LandmarkEvent.GoldSlime',
   
   statics : {
     createEntity ::{
       @:Entity = import(module:'game_class.entity.mt');
       @world = import(module:'game_singleton.world.mt');
       @:beast = world.island.newInhabitant(
-        speciesHint : 'base:flaming-skull',
-        professionHint : 'base:flaming-skull'
+        speciesHint : 'base:gold-slime',
+        professionHint : 'base:gold-slime'
       );
-      beast.name = 'the Flaming Skull';
+      beast.name = 'the Gold Slime';
       beast.supportArts = [];      
       for(0, 20) ::(i) {
         beast.autoLevelProfession(:beast.profession);
@@ -32,19 +31,28 @@
       beast.equipAllProfessionArts();  
 
       beast.stats.load(serialized:StatSet.new(
-        HP:   30,
+        HP:   13,
         AP:   999,
-        ATK:  14,
+        ATK:  1,
         INT:  30,
         DEF:  3,
         LUK:  6,
         SPD:  100,
-        DEX:  20
-      ).add(:beast.stats).save());
+        DEX:  200
+      ).save());
       
       beast.unequipAll(silent:true);
       beast.heal(amount:9999, silent:true); 
       beast.healAP(amount:9999, silent:true);   
+      beast.inventory.clear();
+      beast.inventory.add(:
+        Item.new(
+          base : Item.database.getRandomFiltered(::(value) <- 
+            value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)
+          ),
+          forceNeedsAppraisal : true 
+        )
+      );
       return beast;    
     }
   },
@@ -88,33 +96,33 @@
       @:ref = landmark_.mapEntityController.add(
         x:tileX, 
         y:tileY, 
-        symbol:'@',
+        symbol:'s',
         entities : ents,
-        tag : 'theflamingskull'
+        tag : 'goldslime'
       );
       ref.data.emitter = import(:'game_class.particle.mt').new(
-        directionMin : -110,
-        directionMax : -80,
+        directionMin : 0,
+        directionMax : 360,
 
-        directionDeltaMin : -1,
-        directionDeltaMax : 2,
+        directionDeltaMin : -5,
+        directionDeltaMax : 10,
     
-        speedMin : 0.3,
-        speedMax : 1,
+        speedMin : 0.02,
+        speedMax : 0.09,
         
         speedDeltaMin : 0.03,
         speedDeltaMax : 0.05,
 
-        characters : ['▓', '▓', '▒', '░', '▒', '░', '░'],
+        characters : ['$', '$', '$', '*', '.'],
         charactersRepeat : false,
         
-        lifeMax : 4,
-        lifeMin : 1    
+        lifeMax : 5,
+        lifeMin : 3    
       );
-      ref.addUpkeepTask(id:'base:thebeast-roam');
-      ref.addUpkeepTask(id:'base:aggressive');
+      ref.addUpkeepTask(id:'base:dungeonencounters-roam');
+      ref.addUpkeepTask(id:'base:exit');
+      ref.addUpkeepTask(id:'base:defensive');
       ref.addDeathTask(id:'base:to-body');
-
 
     }
     
@@ -130,7 +138,7 @@
       },
       
       defaultLoad ::{
-        state.hasBeast = if (landmark_.floor > 1)
+        state.hasBeast = if (landmark_.floor >= 0)
           true
         else 
           false
@@ -141,8 +149,8 @@
       
       
       step::{
-        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'theflamingskull');
-        
+        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'goldslime');
+
         foreach(entities) ::(k, v) {
           @mapPos = v.position;
           @:pos = landmark_.map.mapCoordinatesToScreen(*mapPos);
@@ -153,7 +161,7 @@
       
         // add additional entities out of spawn points (stairs)
         //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
-        if (entities->keycount < 3 && state.hasBeast) ::<= {
+        if (entities->keycount < 1 && state.hasBeast) ::<= {
           addEntity();
           state.hasBeast = false;
         }

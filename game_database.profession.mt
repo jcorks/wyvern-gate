@@ -1426,6 +1426,36 @@ Profession.newEntry(data:{
 }) 
 
 
+
+Profession.newEntry(data:{
+  name: 'Gold Slime',
+  id : 'base:gold-slime',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  20,
+    AP:  20,
+    ATK: 20,
+    INT: 20,
+    DEF: 20,
+    SPD: 20,
+    LUK: 20,
+    DEX: 20
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:flash'
+  ],
+  passives : [
+  ]
+})
+
 Profession.newEntry(data:{
   name: 'Slime Queen',
   id : 'base:slimequeen',
@@ -1518,9 +1548,6 @@ Profession.newEntry(data:{
   arts : [
     'base:doublestrike',
     'base:attack',
-    'base:attack',
-    'base:attack',
-    'base:attack'
   ],
   passives : [
   ]
@@ -1550,6 +1577,38 @@ Profession.newEntry(data:{
   learnable : false,
   
   arts : [
+    'base:fire',
+    'base:doom-strike'
+  ],
+  passives : [
+  ]
+}) 
+
+Profession.newEntry(data:{
+  name: 'Skeleton',
+  id : 'base:skeleton',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 6,
+    INT: 1,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 3
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:b198',
+    'base:cursed-summoning'
   ],
   passives : [
   ]

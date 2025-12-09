@@ -1240,6 +1240,7 @@ Species.newEntry(data:{
         )      
       ]);
       
+    // "hey i do that" - Roxy
     windowEvent.queueMessage(text: entity.name + ' laughs maniacally!');
     commitBattleActions(:[
       BattleAction.new(
@@ -1395,6 +1396,83 @@ Species.newEntry(data:{
   passives : [
   ]
 })
+
+
+
+
+Species.newEntry(data:{
+  name : 'Gold Slime',
+  id : 'base:gold-slime',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 6,
+    AP : 5,
+    ATK: 3,
+    DEF: 4,
+    INT: 7,
+    LUK: 1,
+    SPD: 7,
+    DEX: 20
+  ),
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    @:Entity = import(module:'game_class.entity.mt');  
+    
+    when(random.try(percentSuccess:10)) ::<= {
+      windowEvent.queueMessage(text:'The gold slime melted into a puddle and ran away!');
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:see-ya')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    }      
+    
+    
+    @:targets = battle.getEnemies(:entity);
+  
+    when(targets->size == 0) 
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+
+
+    when((entity.ap >= 2) && random.try(percentSuccess:30))
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:flash')),
+        targets: [...targets],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+
+    
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:attack')),
+        targets: [random.pickArrayItem(:targets)],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )
+    ]);
+  },  
+  traits : TRAIT.SPECIAL,
+  passives : [
+    'base:metal-body'
+  ]
+})
+
+
 
 Species.newEntry(data:{
   name : 'Treasure Golem',

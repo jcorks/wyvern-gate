@@ -239,7 +239,6 @@
       @:checkCache ::(renderOnly, data) {
         foreach(choiceStack) ::(k, v) {
           if (v.disableCache != empty) ::<= {
-            breakpoint();
             if (v.disableCache != PERMANENT)
               v->remove(:'disableCache');
             renderAction(:v);
@@ -1702,7 +1701,6 @@
             if (data.jumpTag != tag) ::<= {
               popped->push(:cs->pop);
             } else ::<= {
-              breakpoint();
               popped->push(:data);
               foreach(popped) ::(k, v) {
                 if (v.disableCache == empty)

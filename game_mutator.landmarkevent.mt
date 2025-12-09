@@ -203,6 +203,32 @@ LandmarkEvent.database.newEntry(
 
 LandmarkEvent.database.newEntry(
   data : {
+    id: 'base:gold-slime',
+    tier : 0,
+    kind : KIND.HOSTILE,
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_goldslime.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+
+    onIncrementTime ::(data, landmark) {
+    
+    },
+
+    
+    onStep ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
+LandmarkEvent.database.newEntry(
+  data : {
     id: 'base:mimic',
     kind : KIND.HOSTILE,
     tier : 1,

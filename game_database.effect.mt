@@ -987,6 +987,25 @@ Effect.newEntry(
 )
 
 
+Effect.newEntry(
+  data : {
+    name : 'Metal Body',
+    id : 'base:metal-body',
+    description: 'All incoming damage is reduced to 1. DEX -20.',
+    stackable: false,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(
+      DEX: -20
+    ),
+    events : {
+      onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
+        damage.amount = 1;
+      }
+    }
+  }
+)
+
+
 
 Effect.newEntry(
   data : {
@@ -5390,7 +5409,7 @@ Effect.newEntry(
   data : {
     name : 'Scatterbrained',
     id: 'base:scatterbrained',
-    description: 'At the start of the holder\'s turn, 50% chance to play a random equipped Art from the holder\'s hand.',
+    description: 'At the start of the holder\'s turn, 50% chance to play a random equipped Art.',
     stackable: true,
     traits : TRAIT.BUFF,
     stats: StatSet.new(
@@ -5409,7 +5428,7 @@ Effect.newEntry(
         @:card = random.pickArrayItem(:cards);
 
         card.revealArt(
-          prompt: holder.name + '\'s Scatterbrained activated a random Art from their hand!',
+          prompt: holder.name + '\'s Scatterbrained activated a random Art!',
           user:holder
         );
         
@@ -5469,7 +5488,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
-        if (attacker != affected && ((damage.traits & Damage.TRAIT.MULTIHIT) != 0)) ::<= {
+        if (attacker != holder && ((damage.traits & Damage.TRAIT.MULTIHIT) != 0)) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from the damage thanks to Light Guard!');
           damage.amount = 1;            
         }
@@ -5489,7 +5508,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {      
       onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
-        if (attacker != affected && ((damage.traits & Damage.TRAIT.IS_CRIT) != 0)) ::<= {
+        if (attacker != holder && ((damage.traits & Damage.TRAIT.IS_CRIT) != 0)) ::<= {
           windowEvent.queueMessage(text:holder.name + ' is protected from critical hit damage thanks to Premonition!');
           damage.amount = 1;            
         }
