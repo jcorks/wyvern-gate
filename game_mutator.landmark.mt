@@ -385,7 +385,6 @@ Landmark.database.newEntry(
 
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
-      'base:gold-slime'
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},

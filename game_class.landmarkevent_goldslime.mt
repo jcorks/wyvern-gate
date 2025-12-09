@@ -138,7 +138,7 @@
       },
       
       defaultLoad ::{
-        state.hasBeast = if (landmark_.floor >= 0)
+        state.hasBeast = if (landmark_.floor > 1)
           true
         else 
           false
