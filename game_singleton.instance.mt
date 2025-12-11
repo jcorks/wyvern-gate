@@ -97,6 +97,7 @@ import(module:'game_class.landmarkevent_mobilemushroom.mt');
 import(module:'game_class.landmarkevent_flamingskull.mt')
 import(module:'game_class.landmarkevent_skeleton.mt')
 import(module:'game_class.landmarkevent_goldslime.mt')
+import(module:'game_class.landmarkevent_creatureencounters.mt')
 
 
 @:distance::(x0, y0, x1, y1) {

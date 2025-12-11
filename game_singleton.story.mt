@@ -34,7 +34,7 @@
   
   
   // base level hint. If this changes... well....
-  levelHint : 6,
+  levelHint : 4,
   
   // Number of discovered locations
   data_locationsDiscovered : 0,

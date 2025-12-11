@@ -442,10 +442,6 @@ Interaction.newEntry(
             @:talkee = location.landmark.island.newInhabitant();
             talkee.adventurous = true;
             
-            // Here is the wild-west of stats. You could find someone stronger than normal here 
-            // but its up in the air whether theyll join you.
-            if (random.flipCoin())
-              talkee.normalizeStats();
             
             
             talkee.interactPerson(
@@ -2467,6 +2463,12 @@ Interaction.newEntry(
                 else
                   ((whom.level + whom.stats.sum/30)*10)->ceil
                 ;
+                
+              // unlearnable professions are normally permanent
+              when(whom.profession.learnable == false)
+                windowEvent.queueMessage(
+                  text: whom.name + ' can\'t learn this profession.'
+                );
 
               when(whom.professions->findIndex(:profession) != -1)
                 windowEvent.queueMessage(

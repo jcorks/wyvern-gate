@@ -52,10 +52,14 @@ return ::{
             text: '     >>'
           );
         }
-          
+        
+        @tag = if (member.species.name == member.profession.name)
+            member.species.name 
+          else  
+            member.species.name + ' ' + member.profession.name
         
         canvas.movePen(x: x+3, y: top + 2);
-        canvas.drawText(text: member.name + ' - (' + member.species.name + ' ' + member.profession.name + ')' + (if (party.leader == member) ' - Leader' else ''));
+        canvas.drawText(text: member.name + ' - (' + tag + ')' + (if (party.leader == member) ' - Leader' else ''));
         canvas.movePen(x: x+3, y: top + 3);
         canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '  AP: ' + member.stats.AP);
         canvas.movePen(x: x+3, y: top + 4);

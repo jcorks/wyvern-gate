@@ -2192,7 +2192,7 @@
     heal ::(amount => Number, isShield, silent) {
       @:state = _.state;
       @:this = _.this;
-
+      if (state.hp > state.stats.HP) state.hp = state.stats.HP;
       when(isShield == empty && state.hp >= state.stats.HP) empty;
 
       @healingData = {

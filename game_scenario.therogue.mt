@@ -102,6 +102,7 @@ completion:
   onDeath ::(data, entity){},
 
   skipName : false,
+  everyoneIsAFriend : true,
 
   // List of interactions available when talking to an Entity.  
   // This is specifically when at a location owned by an Entity.

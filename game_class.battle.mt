@@ -688,6 +688,41 @@
           }
         );
  
+        @:queueFriends ::{
+          @chance = 0;
+          if (world.party.members->size == 1) chance = 40;
+          if (world.party.members->size == 2) chance = 5;
+          
+          when (!random.try(percentSuccess:chance)) empty;        
+          @enemies = getEnemiesDefeated(ent:party.members[0])->filter(::(value) <- party.isMember(:value) == false);
+          when(enemies->size == 0) empty;
+          @:potentialFriend = random.pickArrayItem(:enemies);
+          @:drawn = random.pickArrayItem(:world.party.members);
+          windowEvent.queueNestedResolve(
+            onEnter ::{
+              potentialFriend.heal(amount:potentialFriend.stats.HP, silent:true);
+              windowEvent.queueMessage(text:potentialFriend.name + ' gets back up...');
+              windowEvent.queueMessage(text:potentialFriend.name + ' and ' + drawn.name + '\'s auras feel drawn to each other.');
+              windowEvent.queueAskBoolean(
+                prompt:'Invite ' + potentialFriend.name + ' to join the party?',
+                defaultChoice: false,
+                
+                onChoice::(which) {
+                  when(which == true) ::<= {
+                    @:anonName = potentialFriend.name;
+                    potentialFriend.nickname = '';
+                    windowEvent.queueMessage(text:potentialFriend.name + ' joins the party!');
+                    
+                    party.add(:potentialFriend);
+                  }
+                  
+                  windowEvent.queueMessage(text:potentialFriend.name + ' quietly walks away into the distance.');
+                }
+              );
+            }
+          );
+        }
+ 
         battleEnd = ::{
           @:startEnd ::(message) {
             breakpoint();
@@ -719,6 +754,10 @@
             startEnd(
               message: 'The battle is won.'
             );
+            
+            if (world.scenario.base.everyoneIsAFriend)
+              queueFriends();
+            
             
             party.queueCollectSupportArt();
             party.gainProfessionExp(

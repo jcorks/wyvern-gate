@@ -272,6 +272,7 @@ return {
   name : 'The Chosen',
   id : 'rasa:thechosen',
   skipName : false,
+  everyoneIsAFriend : true,
   onBegin ::(data) {
     @:instance = import(module:'game_singleton.instance.mt');
     @:story = import(module:'game_singleton.story.mt');
@@ -388,20 +389,22 @@ return {
         
         chosenProfs[prof] = true;
         @:p0 = island.newInhabitant(
-          levelHint:story.levelHint-1,
+          levelHint:story.levelHint+2,
           professionHint: prof
         );
+        p0.stats.load(:p0.stats.add(:StatSet.new(
+          HP : 4
+        )).save());
 
 
 
-        p0.normalizeStats();
         
         if (p0.stats.HP < 6) ::<= {
           @:stats = p0.stats.save();
           stats.HP = 6;
           p0.stats.load(:stats);
-          p0.heal(amount:999999, silent:true);
         }
+        p0.heal(amount:999999, silent:true);
         choices->push(value:p0);
       }
 
@@ -494,7 +497,7 @@ return {
       )
 
       windowEvent.queueMessage(
-        text: 'Who will it be? You may pick 2.'
+        text: 'Who will it be?'
       );
       
 
@@ -552,8 +555,7 @@ return {
                 lines : [
                   'Current party:',
                   '',              
-                  extendedName(entity:p0),
-                  if (p1) extendedName(entity:p1) else ''
+                  extendedName(entity:p0)
                 ]
               )
             }
@@ -564,13 +566,11 @@ return {
           onChoice::(which) {
             when(which == false) ::<= {
               p0 = empty;
-              p1 = empty;
               chooseMember();
               windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
             }
                       
             party.add(member:p0);
-            if (p1) party.add(member:p1);
             finish();
             windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
           }
@@ -583,7 +583,6 @@ return {
       // choose party members
       @hovered;
       @p0;
-      @p1;
       
       @whatDoStatsMean ::{
         windowEvent.queueReader(
@@ -701,12 +700,7 @@ return {
                   prompt: 'Add ' + next.name + ' to the party?',
                   onChoice::(which) {
                     when(which == false) empty;
-                    when (p0 == empty) ::<= {
-                      p0 = next;
-                      chooseMember();
-                      windowEvent.jumpToTag(name:'ChooseMember', goBeforeTag:true, doResolveNext:true);
-                    }
-                    p1 = next;
+                    p0 = next;
                     confirmParty();
                   }
                 );
@@ -1422,8 +1416,7 @@ return {
         eventPreference : LandmarkEvent.KIND.HOSTILE,
 
         requiredEvents : [
-          'base:dungeon-encounters',
-          'base:item-specter'
+          'base:creature-encounters'
         ],
         possibleLocations : [
     //          {id: 'Stairs Down', rarity:1},

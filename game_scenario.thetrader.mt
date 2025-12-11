@@ -3412,6 +3412,7 @@ return {
     data.trader.removeHireeEntity(entity);
   },
   skipName : false,
+  everyoneIsAFriend : true,
 
   interactionsLandmark : [],
   interactionsWalk : [

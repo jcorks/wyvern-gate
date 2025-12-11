@@ -57,6 +57,10 @@
         // the file name is the empty string.
         skipName : Boolean,
         
+        // Whether the scenario allows the "friend" mechanic, where after battle 
+        // theres a chance your former enemy will become a friend.
+        everyoneIsAFriend : Boolean,
+        
         
         
         

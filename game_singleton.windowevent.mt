@@ -2195,8 +2195,9 @@
       },
 
       // ask yes or no immediately.
-      queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt) {
+      queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt, defaultChoice) {
         return this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave, topWeight, leftWeight,
+          defaultChoice: if (defaultChoice == true) 0 else 1,
           onChoice::(choice){
             onChoice(which: choice == 1);
           },

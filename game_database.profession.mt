@@ -945,14 +945,14 @@ Profession.newEntry(data:{
   levelMinimum : 100,
 
   growth: StatSet.new(
-    HP:  7,
+    HP:  0,
     AP:  7,
     ATK: 2,
     INT: 7,
-    DEF: 7,
+    DEF: 2,
     SPD: 7,
     LUK: 10,
-    DEX: 7
+    DEX: 2
   ),
   minKarma : 0,
   maxKarma : 50,

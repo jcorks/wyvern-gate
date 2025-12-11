@@ -872,7 +872,7 @@ Species.newEntry(data:{
   rarity : 200000000000,
   description: '',
   growth : StatSet.new(
-    HP : 7,
+    HP : 0,
     AP : 1,
     ATK: 4,
     DEF: 4,

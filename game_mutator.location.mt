@@ -127,7 +127,6 @@ Location.database.newEntry(data:{
     location.ownedBy = location.landmark.island.newInhabitant();
     @:Profession = import(module:'game_database.profession.mt');
     location.ownedBy.profession = Profession.find(id:'base:farmer');  
-    location.ownedBy.normalizeStats();        
     @:story = import(module:'game_singleton.story.mt');
     
     for(0, 2+(random.number()*4)->ceil)::(i) {
@@ -200,7 +199,6 @@ Location.database.newEntry(data:{
   maxOccupants : 0,
   onFirstInteract ::(location) {
     location.ownedBy = location.landmark.island.newInhabitant();
-    location.ownedBy.normalizeStats();        
     @:story = import(module:'game_singleton.story.mt');
   
     for(0, 2+(random.number()*4)->ceil)::(i) {
@@ -435,7 +433,6 @@ Location.database.newEntry(data:{
       @:Profession = import(module:'game_database.profession.mt');
       location.ownedBy = location.landmark.island.newInhabitant();      
       location.ownedBy.profession = Profession.find(id:'base:trader');
-      location.ownedBy.normalizeStats();        
       location.name = 'Shop';
       location.inventory.maxItems = 100;
 
@@ -605,7 +602,6 @@ Location.database.newEntry(data:{
     @:Profession = import(module:'game_database.profession.mt');
     location.ownedBy = location.landmark.island.newInhabitant();      
     location.ownedBy.profession = Profession.find(id:'base:arcanist');
-    location.ownedBy.normalizeStats();        
     location.name = 'Arts Tecker';
     location.inventory.maxItems = 50;
 
@@ -763,7 +759,6 @@ Location.database.newEntry(data:{
     location.ownedBy = location.landmark.island.newInhabitant();      
     location.ownedBy.profession = Profession.find(id:'base:blacksmith');
     location.name = 'Blacksmith';
-    location.ownedBy.normalizeStats();
     @:story = import(module:'game_singleton.story.mt');
     for(0, 1 + (location.ownedBy.level / 4)->ceil)::(i) {
 
@@ -876,7 +871,6 @@ Location.database.newEntry(data:{
   maxOccupants : 0,
   onFirstInteract ::(location) {
     location.ownedBy = location.landmark.island.newInhabitant();      
-    location.ownedBy.normalizeStats();        
   },
   
   onInteract ::(location) {
@@ -924,7 +918,6 @@ Location.database.newEntry(data:{
   maxOccupants : 0,
   onFirstInteract ::(location) {
     location.ownedBy = location.landmark.island.newInhabitant();      
-    location.ownedBy.normalizeStats();          
   },
   
   onInteract ::(location) {
@@ -972,7 +965,6 @@ Location.database.newEntry(data:{
   maxOccupants : 0,
   onFirstInteract ::(location) {
     location.ownedBy = location.landmark.island.newInhabitant();      
-    location.ownedBy.normalizeStats();          
   },
   
   onInteract ::(location) {
@@ -1031,7 +1023,6 @@ Location.database.newEntry(data:{
     @:Profession = import(:'game_database.profession.mt');
     location.ownedBy = location.landmark.island.newInhabitant();
     location.name = 'Profession school';
-    location.ownedBy.normalizeStats();        
     location.data.professionSet = Profession.getRandomSet(count:3, filter::(value) <- value.learnable)->map(::(value) <- value.id);
 
   },

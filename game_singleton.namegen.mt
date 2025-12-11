@@ -345,7 +345,7 @@ return class(
             when (sec != first) send(message:sec);
           }
         }
-        return mod + first + '-' + second;
+        return [mod, first, second];
       }
     }
   }
