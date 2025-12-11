@@ -2130,12 +2130,16 @@ Interaction.newEntry(
         location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();      
       }
 
-      canvas.clear();
-      windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.fill();}});
+      windowEvent.queueMessage(
+        text:'The party travels to the next floor.'
+      );
       
-      
-      @:instance = import(module:'game_singleton.instance.mt');
-      instance.visitLandmark(landmark:location.targetLandmark, where::(landmark) <- location.targetLandmarkEntry);
+      windowEvent.queueCustom(
+        onEnter:: {
+          @:instance = import(module:'game_singleton.instance.mt');
+          instance.visitLandmark(landmark:location.targetLandmark, where::(landmark) <- location.targetLandmarkEntry);
+        }
+      )
     },
   }
 )  

@@ -161,12 +161,12 @@
       canvas.commit();
     }
     
-    @:renderAction ::(data) {
+    @:renderAction ::(data, rerender) {
       when(data.framebufferID == empty) empty;
       canvas.renderToFramebuffer(
         id: data.framebufferID,
         render ::{
-          renderThis(data)
+          renderThis(data, rerender)
         }
       );    
     }
@@ -239,10 +239,10 @@
       @:checkCache ::(renderOnly, data) {
         foreach(choiceStack) ::(k, v) {
           if (v.disableCache != empty) ::<= {
-            breakpoint();
             if (v.disableCache != PERMANENT)
               v->remove(:'disableCache');
-            renderAction(:v);
+            breakpoint();
+            renderAction(data:v, rerender:true);
           }
         }
       }
@@ -685,7 +685,7 @@
       }
 
 
-      renderAction(:data);
+      renderAction(data);
 
 
       when(exitEmpty) ::<= {
@@ -804,7 +804,7 @@
       }
 
 
-      renderAction(:data);
+      renderAction(data);
       when(exitEmpty) ::<= {
         data.keep = empty;
         return true;      
@@ -884,7 +884,7 @@
       }
       
       if (data.rendered == empty) ::<= {
-        renderAction(:data);
+        renderAction(data);
       }      
       
       return false;  
@@ -899,7 +899,7 @@
         data.renderState = RENDER_STATE.ANIMATING;
       
       if (data.rendered == empty) ::<= {
-          renderAction(:data);
+          renderAction(data);
       }
       if (data.entered == empty) ::<= {
         if (data.onEnter)
@@ -940,7 +940,7 @@
       //}
       
       if (data.rendered == empty) ::<= {
-        renderAction(:data);
+        renderAction(data);
       }
       if (data.entered == empty) ::<= {
         data.entered = true;
@@ -1112,7 +1112,7 @@
       when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         sound.playSFX(:"confirm");
         onChoice(choice:which + 1);
-        renderAction(:data);    
+        renderAction(data);    
         return true;
       }
         
@@ -1123,11 +1123,11 @@
           res = data.onCancel();
         when (res == this.STOP_CANCEL) false;
         data.keep = empty;
-        renderAction(:data);   
+        renderAction(data);   
         return true;
       }
       
-      renderAction(:data);   
+      renderAction(data);   
 
       return false;
     }
@@ -1256,7 +1256,7 @@
           data.renderState = RENDER_STATE.ANIMATING;
       }
 
-      renderAction(:data);     
+      renderAction(data);     
       
       if (data.autoSkipAfterFrames->type == Number) ::<= {
         data.autoSkipAfterFrames -= 1;
@@ -1376,7 +1376,7 @@
       }
       
 
-      renderAction(:data);   
+      renderAction(data);   
       
       return match(input) {
         (CURSOR_ACTIONS.CONFIRM, 
@@ -1702,7 +1702,6 @@
             if (data.jumpTag != tag) ::<= {
               popped->push(:cs->pop);
             } else ::<= {
-              breakpoint();
               popped->push(:data);
               foreach(popped) ::(k, v) {
                 if (v.disableCache == empty)
@@ -2197,8 +2196,9 @@
       },
 
       // ask yes or no immediately.
-      queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt) {
+      queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt, defaultChoice) {
         return this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave, topWeight, leftWeight,
+          defaultChoice: if (defaultChoice == true) 0 else 1,
           onChoice::(choice){
             onChoice(which: choice == 1);
           },
