@@ -161,12 +161,12 @@
       canvas.commit();
     }
     
-    @:renderAction ::(data) {
+    @:renderAction ::(data, rerender) {
       when(data.framebufferID == empty) empty;
       canvas.renderToFramebuffer(
         id: data.framebufferID,
         render ::{
-          renderThis(data)
+          renderThis(data, rerender)
         }
       );    
     }
@@ -241,7 +241,8 @@
           if (v.disableCache != empty) ::<= {
             if (v.disableCache != PERMANENT)
               v->remove(:'disableCache');
-            renderAction(:v);
+            breakpoint();
+            renderAction(data:v, rerender:true);
           }
         }
       }
@@ -684,7 +685,7 @@
       }
 
 
-      renderAction(:data);
+      renderAction(data);
 
 
       when(exitEmpty) ::<= {
@@ -803,7 +804,7 @@
       }
 
 
-      renderAction(:data);
+      renderAction(data);
       when(exitEmpty) ::<= {
         data.keep = empty;
         return true;      
@@ -883,7 +884,7 @@
       }
       
       if (data.rendered == empty) ::<= {
-        renderAction(:data);
+        renderAction(data);
       }      
       
       return false;  
@@ -898,7 +899,7 @@
         data.renderState = RENDER_STATE.ANIMATING;
       
       if (data.rendered == empty) ::<= {
-          renderAction(:data);
+          renderAction(data);
       }
       if (data.entered == empty) ::<= {
         if (data.onEnter)
@@ -939,7 +940,7 @@
       //}
       
       if (data.rendered == empty) ::<= {
-        renderAction(:data);
+        renderAction(data);
       }
       if (data.entered == empty) ::<= {
         data.entered = true;
@@ -1111,7 +1112,7 @@
       when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         sound.playSFX(:"confirm");
         onChoice(choice:which + 1);
-        renderAction(:data);    
+        renderAction(data);    
         return true;
       }
         
@@ -1122,11 +1123,11 @@
           res = data.onCancel();
         when (res == this.STOP_CANCEL) false;
         data.keep = empty;
-        renderAction(:data);   
+        renderAction(data);   
         return true;
       }
       
-      renderAction(:data);   
+      renderAction(data);   
 
       return false;
     }
@@ -1255,7 +1256,7 @@
           data.renderState = RENDER_STATE.ANIMATING;
       }
 
-      renderAction(:data);     
+      renderAction(data);     
       
       if (data.autoSkipAfterFrames->type == Number) ::<= {
         data.autoSkipAfterFrames -= 1;
@@ -1375,7 +1376,7 @@
       }
       
 
-      renderAction(:data);   
+      renderAction(data);   
       
       return match(input) {
         (CURSOR_ACTIONS.CONFIRM, 

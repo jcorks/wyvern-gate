@@ -1601,6 +1601,7 @@ return empty;
           },
           renderable:{
             render :: {
+              when(landmark.map == empty) canvas.fill();
               landmark.map.render();
 
               renderArtsStatus();
