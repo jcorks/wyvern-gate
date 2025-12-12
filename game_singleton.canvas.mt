@@ -399,7 +399,6 @@ return class(
           this.drawText(text:notchText);
         }        
         
-        breakpoint();
         
         return {
           left : left,
@@ -432,8 +431,21 @@ return class(
             currentFrame[penx+x + (offsety)*CANVAS_WIDTH] = ch
           }
         }
-        breakpoint();
       },
+      
+      /*
+      // not needed yet, but for when it is:
+      drawAroundRectangle ::(text => String, width => Number, height => Number) {
+        @ch = text->charAt(index:0);
+        for(0, CANVAS_HEIGHT)::(y) {
+          for(0, CANVAS_WIDTH)::(x) {
+            when(y >= peny && y <= (peny + height) &&
+                 x >= penx && x <= (penx + width)) empty;
+            currentFrame[x + (y)*CANVAS_WIDTH] = ch
+          }
+        }      
+      },
+      */
       
       erase :: {
         currentFrame[penx+peny*CANVAS_WIDTH] = 0;
@@ -491,7 +503,6 @@ return class(
 
 
         @:parts = [];
-        breakpoint();
 
         @:formatColumn::(column, text) {
           if (!leftJustifieds[column]) ::<= {
@@ -583,7 +594,6 @@ return class(
       //
       // When the effect is done, it should 
       addEffect ::(effect => Function) {  
-        breakpoint();
         when(showEffects == false) empty;
         effects[effect] = true;
       },

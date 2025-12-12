@@ -35,6 +35,11 @@
   DONE : 3
 };
 
+@:TRANSITION = {
+  FADE_TO_WHITE : 0,
+  FADE_TO_BLACK : 1
+}
+
 @:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth) <- 
     canvas.renderTextFrameGeneral(
       leftWeight, 
@@ -157,7 +162,7 @@
     });
     
     @:commitVisual ::{
-      canvas.setFramebufferList(:choiceStack->map(::(value) <- value.framebufferID));
+      setFramebufferList();
       canvas.commit();
     }
     
@@ -302,7 +307,31 @@
       }
     }
     
+    @:setFramebufferList :: {
+      @:list = [];
+      foreach(choiceStack) ::(k, v) {
+        if (v.framebufferAux)
+          list->push(:v.framebufferAux);
+        list->push(:v.framebufferID);
+      }
+      canvas.setFramebufferList(:list);
     
+    }
+
+    
+    @:removeChoiceStackItem ::(toRemove) {
+      if (toRemove.framebufferAux)
+        canvas.removeFramebuffer(:toRemove.framebufferAux);
+      canvas.removeFramebuffer(:toRemove.framebufferID);
+      toRemove.framebufferID = empty;
+      toRemove.framebufferAux = empty;
+      @:id = choiceStack->findIndex(value:toRemove);
+      if (id >= 0)
+        choiceStack->remove(key:id);
+      
+      setFramebufferList();
+    }
+
     
     @next ::(toRemove, dontResolveNext, level) {
       if (choiceStack->keycount > 0) ::<= {
@@ -314,10 +343,7 @@
           if (toRemove == empty) 
             choiceStack->pop 
           else ::<= {
-            canvas.removeFramebuffer(:toRemove.framebufferID);
-            toRemove.framebufferID = empty;
-            choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
-            canvas.setFramebufferList(:choiceStack->map(::(value) <- value.framebufferID));
+            removeChoiceStackItem(toRemove);
           }
           
           
@@ -402,7 +428,8 @@
             (CHOICE_MODE.CUSTOM):         commitInput_custom(data:val, input),
             (CHOICE_MODE.SLIDER):         commitInput_slider(data:val, input),
             (CHOICE_MODE.CALLBACK):       commitInput_callback(data:val, input),
-            (CHOICE_MODE.READER):         commitInput_reader(data:val, input)
+            (CHOICE_MODE.READER):         commitInput_reader(data:val, input),
+            (CHOICE_MODE.TRANSITION):     commitInput_transition(data:val, input)
           }    
          
           
@@ -931,6 +958,92 @@
       
       return true;  
     }
+
+  
+    @:commitInput_transition ::(data => Object, input) {
+      if (data.phase == empty) data.phase = -1;
+      
+      return match(data.phase) {
+
+        (-1): ::<= {
+          if (data.renderableStart != empty) ::<= {
+            if(data.framebufferAux == empty)
+              data.framebufferAux = canvas.newFramebuffer();
+            canvas.renderToFramebuffer(
+              id: data.framebufferAux,
+              render ::{
+                data.renderableStart.render()
+              }
+            );            
+          }
+          data.phase += 1
+        },
+        (0): ::<= {
+          data.animationFrame = data.renderBefore;
+          data.renderState = RENDER_STATE.ANIMATING
+          data.phase += 1;
+          return false;
+        },
+        
+        (1): ::<= {
+          renderAction(data);
+          
+          if (data.renderState == RENDER_STATE.DONE) ::<= {
+            if (data.framebufferAux != empty) ::<= {
+              canvas.removeFramebuffer(:data.framebufferAux);
+              data.framebufferAux = empty;
+            }
+            data.phase += 1;
+          }
+          return false;
+        },
+        
+        // animation 1 done
+        (2): ::<= {
+          data.animationFrame = data.renderAfter;
+          data.renderState = RENDER_STATE.ANIMATING
+          data.phase += 1
+          return false;
+        },
+        
+        (3): ::<= {
+          if (data.renderableMiddle != empty) ::<= {
+            if(data.framebufferAux == empty)
+              data.framebufferAux = canvas.newFramebuffer();
+            canvas.renderToFramebuffer(
+              id: data.framebufferAux,
+              render ::{
+                data.renderableMiddle.render()
+              }
+            );
+          }
+          
+          data.phase += 1
+          breakpoint();
+        } ,
+        
+        // animate 2
+        (4): ::<= {
+          renderAction(data);
+          
+          if (data.renderState == RENDER_STATE.DONE)
+            data.phase += 1;
+          return false;
+        },
+        
+        (5): ::<= {
+          // reset just in case.
+          if (data.framebufferAux != empty) ::<= {
+            canvas.removeFramebuffer(:data.framebufferAux);
+            data.framebufferAux = empty;
+          }
+
+          data.phase = -1;
+          return true;
+        }
+      }
+      return true;  
+    }
     
     
     @:commitInput_callback ::(data => Object, input) {
@@ -1408,7 +1521,8 @@
       DISPLAY: 5,
       CUSTOM: 6,
       SLIDER : 7,
-      CALLBACK : 8
+      TRANSITION : 8,
+      CALLBACK : 9
     }
     
     
@@ -1419,6 +1533,8 @@
       ANIMATION_FINISHED : {
         get ::<- ANIMATION_FINISHED
       },
+      
+      TRANSITION : {get ::<- TRANSITION},
       
       RENDER_AGAIN : {
         get ::<- 1
@@ -2079,9 +2195,7 @@
         if (goBeforeTag != empty) ::<= {
           @:data = choiceStack->pop; 
           if (data.framebufferID != empty) ::<= {
-            canvas.removeFramebuffer(id:data.framebufferID);
-            data.framebufferID = empty;
-            canvas.setFramebufferList(:choiceStack->map(::(value) <- value.framebufferID));
+            removeChoiceStackItem(:data);
           }
 
           if (data.onLeave)
@@ -2170,7 +2284,68 @@
         }]);
         return getResolveQueue()->size-1;
       },  
+      
+      queueTransition ::(
+        kind => Number,
+        renderableMiddle,
+        renderableStart
+      ) {
+      
+        when(kind == TRANSITION.FADE_TO_BLACK) ::<= {
+          this.queueCustomTransition(
+            renderableStart : renderableStart,
 
+            animationFrameBefore ::<= {
+              @t = 0.1;
+              return ::{
+                @counter = (canvas.width*(t**4.8))->floor
+                canvas.clear();
+                canvas.movePen(x:0, y:0);
+                canvas.drawRectangle(text: ' ', width:counter, height: canvas.height);
+                t += 0.08;
+                when(t < 1) empty;
+                return ANIMATION_FINISHED;
+              }
+            },
+            
+            renderableMiddle : renderableMiddle,
+            
+            animationFrameAfter ::<= {
+              @t = 0;
+              return ::{
+                @counter = (canvas.width*(t**4.8))->floor
+                canvas.clear();
+                canvas.movePen(x:counter, y:0);
+                canvas.drawRectangle(text: ' ', width:canvas.width - counter, height: canvas.height);
+                t += 0.08;
+                when(t < 1) empty;
+                return ANIMATION_FINISHED;
+              }
+            }
+            
+          );
+        }
+      },
+
+      queueCustomTransition ::(
+        animationFrameBefore => Function,
+        animationFrameAfter => Function,
+        renderableMiddle,
+        renderableStart,
+        jumpTag
+      ) {
+        pushResolveQueueTop(fns:[::{
+          choiceStackPush(value:{
+            mode:if (isCursor) CHOICE_MODE.TRANSITION,
+            renderBefore : animationFrameBefore,
+            renderAfter : animationFrameAfter,            
+            renderableMiddle : renderableMiddle,
+            renderableStart : renderableStart,
+            framebufferID : canvas.newFramebuffer()
+          });
+        }]);
+        return getResolveQueue()->size-1;
+      },
             
 
         
