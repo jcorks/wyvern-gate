@@ -2026,7 +2026,6 @@ Item.database.newEntry(data : {
   possibleArts : [
     'base:fire',
     'base:ice',
-    'base:thunder',
     'base:flash',
     'base:cure',
   ],
