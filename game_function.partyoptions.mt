@@ -319,12 +319,26 @@ return ::{
   }
   
   
+  
+  windowEvent.queueTransition(
+    kind:windowEvent.TRANSITION.FADE_TO_BLACK,
+    renderableMiddle : menuRenderable
+  );
+  
+  
   windowEvent.queueCursorMove(
     leftWeight: 1,
     topWeight: 1,
     prompt: 'Choose a member.',
     renderable : menuRenderable,
     canCancel: true,
+    onLeave ::{
+      windowEvent.queueTransition(
+        renderableStart : menuRenderable,
+        kind:windowEvent.TRANSITION.FADE_TO_BLACK
+      );        
+    },
+
     onMove ::(choice) {
       chosen = false;
       when(choice == windowEvent.CURSOR_ACTIONS.LEFT ||

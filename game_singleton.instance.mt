@@ -1523,7 +1523,8 @@ return empty;
         @:landmark = world.landmark;
         landmark.updateTitle();
         @:island = world.island;
-
+        
+        
 
         
         @stepCount = 0;
@@ -1591,34 +1592,38 @@ return empty;
             }
           );
         }
-        
+
         @nearby;
+        @cursorMoveRenderable = {
+          render::{
+            when(landmark.map == empty) canvas.fill();
+            landmark.map.render();
+
+            renderArtsStatus();
+            when(nearby == empty || nearby->size == 0) empty;
+            
+            @:lines = [];
+            foreach(nearby)::(index, arr) {
+              lines->push(value:arr.name);
+            }
+            canvas.renderTextFrameGeneral(
+              leftWeight: 1,
+              topWeight: 1,
+              lines,
+              title: 'Arrived at:'
+            );
+          }
+        };
+        windowEvent.queueTransition(kind:windowEvent.TRANSITION.FADE_TO_BLACK, renderableMiddle:cursorMoveRenderable);
+        
+
+        
         windowEvent.queueCursorMove(
           jumpTag: 'VisitLandmark',
           onMenu ::{
             landmarkChoices()
           },
-          renderable:{
-            render :: {
-              landmark.map.render();
-
-              renderArtsStatus();
-              when(nearby == empty || nearby->size == 0) empty;
-              
-              @:lines = [];
-              foreach(nearby)::(index, arr) {
-                lines->push(value:arr.name);
-              }
-              canvas.renderTextFrameGeneral(
-                leftWeight: 1,
-                topWeight: 1,
-                lines,
-                title: 'Arrived at:'
-              );
-              
-
-            }
-          },
+          renderable: cursorMoveRenderable,
           onMove ::(choice) {
           
             // move by one unit in that direction

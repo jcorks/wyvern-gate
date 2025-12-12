@@ -77,7 +77,21 @@ Interaction.newEntry(
       }
 
       // jumps to the prev menu lock
-      windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true, clearResolve:true);
+      windowEvent.queueTransition(
+        kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+        renderableStart : location.landmark.map,
+        renderableMiddle: location.landmark.island.map
+      );
+      windowEvent.queueCustom(
+        renderable : { render::{
+          canvas.fill();
+        }},
+        onEnter::{
+          //invaidate a cache
+          windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true);
+        }
+      );
+
     }
   }
 )
@@ -2130,12 +2144,16 @@ Interaction.newEntry(
         location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();      
       }
 
-      canvas.clear();
-      windowEvent.queueMessage(text:'The party travels to the next floor.', renderable:{render::{canvas.fill();}});
+      windowEvent.queueMessage(
+        text:'The party travels to the next floor.'
+      );
       
-      
-      @:instance = import(module:'game_singleton.instance.mt');
-      instance.visitLandmark(landmark:location.targetLandmark, where::(landmark) <- location.targetLandmarkEntry);
+      windowEvent.queueCustom(
+        onEnter:: {
+          @:instance = import(module:'game_singleton.instance.mt');
+          instance.visitLandmark(landmark:location.targetLandmark, where::(landmark) <- location.targetLandmarkEntry);
+        }
+      )
     },
   }
 )  
