@@ -961,8 +961,8 @@
 
   
     @:commitInput_transition ::(data => Object, input) {
+      when (autoSkipAnimations) true; 
       if (data.phase == empty) data.phase = -1;
-      
       return match(data.phase) {
 
         (-1): ::<= {
