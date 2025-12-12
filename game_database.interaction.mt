@@ -77,7 +77,21 @@ Interaction.newEntry(
       }
 
       // jumps to the prev menu lock
-      windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true, clearResolve:true);
+      windowEvent.queueTransition(
+        kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+        renderableStart : location.landmark.map,
+        renderableMiddle: location.landmark.island.map
+      );
+      windowEvent.queueCustom(
+        renderable : { render::{
+          canvas.fill();
+        }},
+        onEnter::{
+          //invaidate a cache
+          windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true);
+        }
+      );
+
     }
   }
 )
