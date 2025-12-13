@@ -1040,24 +1040,10 @@
         @:doStart :: {
           windowEvent.queueChoices(
             prompt:'Today I will:',
-            choices : [
-              'Open shop...',
-              'Explore...',
-              'Wait until tomorrow'
-            ],
-            renderable : {
-              render ::{
-                canvas.fill(:'`');
-              }
-            },
-            keep:true,
-            jumpTag: 'day-start',
-            onChoice::(choice) {
-              when(choice == 2) ::<={
-                this.explore();
-              }    
-              
-              when(choice == 3) ::<= {
+            choicesMatch : {
+              ('Open shop...') ::<- this.openShop(),
+              ('Explore...') ::<- this.explore(),
+              ('Wait until tomorrow') ::<-
                 windowEvent.queueAskBoolean(
                   prompt: 'Wait until tomorrow?',
                   onChoice::(which) {
@@ -1066,10 +1052,15 @@
                         this.finishDay();                      
                       });
                   }
-                );
+                )
+            },
+            renderable : {
+              render ::{
+                canvas.fill(:'`');
               }
-              this.openShop();
-            }
+            },
+            keep:true,
+            jumpTag: 'day-start'
           );        
         }        
         
@@ -2130,25 +2121,14 @@
               prompt: "Hiree: " + hiree.entity.name,
               leftWeight: 1,
               topWeight: 0.5,
-              choices : [
-                'Describe',
-                'Set title',
-                'Financial report',
-                'Change role',
-                'Fire'
-              ],
-              canCancel : true,
-              onChoice::(choice) {
-                when(choice == 0) empty;
-                
-                match(choice) {
-                  (1): hiree.entity.describe(),
-                  (2): hiree.setTitle(),
-                  (3): hiree.report(),
-                  (4): this.changeRole(hiree),
-                  (5): this.fire(hiree)
-                }
-              }
+              choicesMatch : {
+                ('Describe') ::<- hiree.entity.describe(),
+                ('Set title') ::<- hiree.setTitle(),
+                ('Financial report') ::<- hiree.report(),
+                ('Change role') ::<- this.changeRole(hiree),
+                ('Fire') ::<- this.fire(hiree)
+              },
+              canCancel : true
             );
           }
         );
@@ -2245,50 +2225,41 @@
       explore ::{
         windowEvent.queueChoices(
           prompt: 'What next?',
-          choices : [
-            'Manage...',
-            'Start exploring!'
-          ],
+          choicesMatch : {
+            ('Manage...') ::<- this.manage(),
+            ('Start exploring!') ::<-
+              this.preflightCheckStart(
+                onDone :: {
+                  @world = import(module:'game_singleton.world.mt');
+                  @:instance = import(module:'game_singleton.instance.mt');
+                  world.loadIslandID(id:state.islandID, onDone::(island) {
+                    instance.islandTravel();
+
+                    foreach(state.hirees) ::(k, hiree) {
+                      if (hiree.role == ROLES.IN_PARTY)
+                        hiree.addToParty();
+                    }
+
+                    
+                    @:landmarks = world.island.landmarks;
+                    @:city = landmarks[landmarks->findIndexCondition(::(value) <- value.worldID == state.cityID)];
+                    
+                    @:locations = city.locations;
+                    @:shop = locations[locations->findIndexCondition(::(value) <- value.worldID == state.shopID)]
+
+                    
+                    instance.visitLandmark(
+                      landmark:city,
+                      where: ::(landmark)<- shop
+                    );        
+
+                    windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
+                  });
+                }
+              )
+          },
           keep:true,
-          canCancel: true,
-          onChoice::(choice) {
-            when(choice == 0) empty;
-            match(choice) {
-              (1): this.manage(),
-              
-              (2): ::<= {
-                this.preflightCheckStart(
-                  onDone :: {
-                    @world = import(module:'game_singleton.world.mt');
-                    @:instance = import(module:'game_singleton.instance.mt');
-                    world.loadIslandID(id:state.islandID, onDone::(island) {
-                      instance.islandTravel();
-
-                      foreach(state.hirees) ::(k, hiree) {
-                        if (hiree.role == ROLES.IN_PARTY)
-                          hiree.addToParty();
-                      }
-
-                      
-                      @:landmarks = world.island.landmarks;
-                      @:city = landmarks[landmarks->findIndexCondition(::(value) <- value.worldID == state.cityID)];
-                      
-                      @:locations = city.locations;
-                      @:shop = locations[locations->findIndexCondition(::(value) <- value.worldID == state.shopID)]
-
-                      
-                      instance.visitLandmark(
-                        landmark:city,
-                        where: ::(landmark)<- shop
-                      );        
-
-                      windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
-                    });
-                  }
-                )
-              }
-            }
-          }
+          canCancel: true
         );      
       },
       
@@ -2410,19 +2381,11 @@
         windowEvent.queueChoices(
           prompt: 'Shop stocking',
           keep: true,
-          choices : [
-            "Check shop stock",
-            "Stock from inventory"
-          ],
-          canCancel : true,
-          onChoice::(choice) {
-            when(choice == 0) empty;
-            
-            match(choice) {
-              (1): shopInventory(),
-              (2): ownInventory()
-            }
-          }
+          choicesMatch : {
+            ("Check shop stock") ::<- shopInventory(),
+            ("Stock from inventory") ::<- ownInventory()
+          },
+          canCancel : true
         );
       },
       
@@ -2959,33 +2922,22 @@
       
       openShop :: {
       
-        @:choiceNames = [];
-        @:choices = [];
-        
-        choiceNames->push(value:'Manage...');
-        choices->push(value:this.manage);
-        
-        choiceNames->push(value:'Stock shop');
-        choices->push(value: this.stockShop);
-        
-        if (state.sellingLevel >= LEVEL_UPGRADE_SHOP0) ::<= {
-          choiceNames->push(value: 'Upgrade shop');
-          choices->push(value: this.upgradeShop);
-        } else ::<= {
-          choiceNames->push(value: '????');
-          choices->push(
-            value:::{
-              windowEvent.queueMessage(
-                text: 'This option isn\'t available yet. You feel that you need to gain more experience as a salesperson before this is relevant.'
-              ); 
-            }           
-          )
+        @:choices = {
+          ('Manage...') ::<- this.manage(),
+          ('Stock shop') ::<- this.stockShop()
         }
         
-        choiceNames->push(value:'Start the day!');
-        choices->push(value: ::{
+        if (state.sellingLevel >= LEVEL_UPGRADE_SHOP0) ::<= {
+          choices['Upgrade shop'] = ::<- this.upgradeShop()
+        } else ::<= {
+          choices['????'] = ::<- 
+            windowEvent.queueMessage(
+              text: 'This option isn\'t available yet. You feel that you need to gain more experience as a salesperson before this is relevant.'
+            )
+        }
+        
+        choices['Start the day!'] = ::<-
           this.preflightCheckStart(onDone::{this.startShopDay();}, isShopkeeping:true)        
-        });
 
         
 
@@ -2993,13 +2945,9 @@
       
         windowEvent.queueChoices(
           prompt: 'Shop options:',
-          choices : choiceNames,
+          choicesMatch : choices,
           keep:true,
-          canCancel: true,
-          onChoice::(choice) {
-            when(choice == 0) empty;
-            choices[choice-1]();
-          }
+          canCancel: true
         );
       }            
     }

@@ -6135,15 +6135,33 @@ Effect.newEntry(
               prompt: 'Banking...',
               jumpTag : 'BANKING',
               keep : true,
-              choices : [
-                'Take from Bank...',
-                'Put in Bank...',
-                'Done'
-              ],
-              canCancel : false,
-              
-              onChoice::(choice) {
-                when(choice == 3)
+              choicesMatch : {
+                ('Take from Bank...') ::<- 
+                  windowEvent.queueChoices(
+                    prompt : 'Take from Bank...',
+                    choicesMatch : {
+                      ('Items') ::<- bankedItems(),
+                      ('Gold') ::<- bankedGold()
+                    },
+                    canCancel: true,
+                    keep : true
+                  ),
+
+
+                ('Put in Bank...') ::<-
+
+                  windowEvent.queueChoices(
+                    prompt : 'Put in Bank...',
+                    choicesMatch : {
+                      ('Items') ::<- inventoryItems(),
+                      ('Gold') ::<- inventoryGold()
+                    },
+                    canCancel: true,
+                    keep : true
+                  ),         
+                
+                
+                ('Done') ::<-
                   windowEvent.queueAskBoolean(
                     prompt: 'Done banking?',
                     onChoice::(which) {
@@ -6160,36 +6178,10 @@ Effect.newEntry(
                         windowEvent.jumpToTag(name: 'BANKING', goBeforeTag:true);
                       }
                     }
-                  );              
-              
-                @takeFromBank = choice == 1;
-                windowEvent.queueChoices(
-                  prompt : if (takeFromBank)
-                    'Take from Bank...'
-                   else 
-                    'Put in Bank...',
-                  choices : [
-                    'Items',
-                    'Gold'
-                  ],
-                  canCancel: true,
-                  keep : true,
-                  onChoice::(choice) {
-                    when(choice == 1)
-                      if (takeFromBank)
-                        bankedItems()
-                      else 
-                        inventoryItems()
-                        
-                      if (takeFromBank)
-                        bankedGold()
-                      else 
-                        inventoryGold()
-                    
-                    
-                  }
-                );
-              }
+                  )
+
+              },
+              canCancel : false
             );
           }
         );

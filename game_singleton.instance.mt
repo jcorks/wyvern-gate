@@ -358,54 +358,44 @@ return class(
         settings = JSON.decode(string:onLoadSettings_());
 
 
-        @:opts = ['Reset to default'];
-        @:optActs = [::{
-          windowEvent.queueAskBoolean(
-            prompt: 'Reset all settings?',
-            onChoice::(which) {
-              if (which == true)
-                this.defaultSettings();
-            }
-          );
-        }];
-        
-
-
-
-        opts->push(:'Animations');
-        optActs->push(::{
-          windowEvent.queueAskBoolean(
-            onGetPrompt::<- 'Toggle Animations? (currently: ' + (if(settings.animations) 'Enabled' else 'Disabled') + ')',
-            onChoice::(which) {
-              when(which == false) empty;
-              settings.animations = !settings.animations;
-              windowEvent.autoSkipAnimations = !settings.animations;
-              this.updateSettings();
-            }
-          );
-        });
-
-
-        opts->push(:'Effects');
-        optActs->push(::{
-          windowEvent.queueAskBoolean(
-            onGetPrompt::<- 'Toggle Effects? (currently: ' + (if(settings.effects) 'Enabled' else 'Disabled') + ')',
-            onChoice::(which) {
-              when(which == false) empty;
-              settings.effects = !settings.effects;
-              canvas.showEffects = settings.effects;
-              this.updateSettings();
-            }
-          );
-        });
+        @:opts = {
+          ('Reset to default') ::<-
+            windowEvent.queueAskBoolean(
+              prompt: 'Reset all settings?',
+              onChoice::(which) {
+                if (which == true)
+                  this.defaultSettings();
+              }
+            ),
+          ('Animations') ::<-          
+            windowEvent.queueAskBoolean(
+              onGetPrompt::<- 'Toggle Animations? (currently: ' + (if(settings.animations) 'Enabled' else 'Disabled') + ')',
+              onChoice::(which) {
+                when(which == false) empty;
+                settings.animations = !settings.animations;
+                windowEvent.autoSkipAnimations = !settings.animations;
+                this.updateSettings();
+              }
+            ),
+          
+          ('Effects') ::<-
+            windowEvent.queueAskBoolean(
+              onGetPrompt::<- 'Toggle Effects? (currently: ' + (if(settings.effects) 'Enabled' else 'Disabled') + ')',
+              onChoice::(which) {
+                when(which == false) empty;
+                settings.effects = !settings.effects;
+                canvas.showEffects = settings.effects;
+                this.updateSettings();
+              }
+            )
+        }
 
         foreach(FEATURES) ::(k, i) <-
           if ((features_ & i) != 0)
             match(i) {
 
               (FEATURES.DEBUGGING): ::<={
-                opts->push(:'Debug Mode');
-                optActs->push(::{
+                opts['Debug Mode'] = ::<-
                   windowEvent.queueAskBoolean(
                     onGetPrompt::<- 'Toggle Debug Mode? (currently: ' + (if(settings.debugMode) 'Enabled' else 'Disabled') + ')',
                     onChoice::(which) {
@@ -417,14 +407,12 @@ return class(
                         text: 'A restart of the program is required for this to take effect. We recommend disabling fullscreen and running a console mode for debugging.'
                       )
                     }
-                  );
-                });
+                  )
               },
 
 
               (FEATURES.FULLSCREEN): ::<={
-                opts->push(:'Fullscreen');
-                optActs->push(::{
+                opts['Fullscreen'] = ::<-
                   windowEvent.queueAskBoolean(
                     onGetPrompt::<- 'Toggle fullscreen? (currently: ' + (if(settings.fullscreen) 'Enabled' else 'Disabled') + ')',
                     onChoice::(which) {
@@ -432,14 +420,12 @@ return class(
                       settings.fullscreen = !settings.fullscreen;
                       this.updateSettings();
                     }
-                  );
-                });
+                  )
               },
 
 
               (FEATURES.CRT_SHADER): ::<={
-                opts->push(:'CRT Effect');
-                optActs->push(::{
+                opts['CRT Effect'] = ::<-
                   windowEvent.queueAskBoolean(
                     onGetPrompt::<- 'Toggle CRT? (currently: ' + (if(settings.crtShader) 'Enabled' else 'Disabled') + ')',
                     onChoice::(which) {
@@ -447,26 +433,20 @@ return class(
                       settings.crtShader = !settings.crtShader;
                       this.updateSettings();
                     }
-                  );
-                });
+                  )
               },
               
               (FEATURES.BGFG): ::<={
-                opts->push(:'Background color');
-                optActs->push(::{
-                  colorMenu(prompt: 'BG Color', onChange::<- this.updateSettings(), value:settings.bgColor);
-                });
+                opts['Background color'] = ::<-
+                  colorMenu(prompt: 'BG Color', onChange::<- this.updateSettings(), value:settings.bgColor)
 
-                opts->push(:'Foreground color');
-                optActs->push(::{
+                opts['Foreground color'] = ::<-
                   colorMenu(prompt: 'FG Color', onChange::<- this.updateSettings(), value:settings.fgColor);
-                });
 
               },              
 
               (FEATURES.AUDIO): ::<={
-                opts->push(:'Volume: Game');
-                optActs->push(::{
+                opts['Volume: Game'] = ::{
                   @frac = settings.volume;
                   windowEvent.queueSlider(
                     onGetPrompt ::<- 'Game Volume :' + (frac * 100)->floor,
@@ -482,10 +462,9 @@ return class(
                     },
                     canCancel : true
                   )
-                });
+                };
 
-                opts->push(:'Volume: SFX');
-                optActs->push(::{
+                opts['Volume: SFX'] = ::{
                   @frac = settings.volumeSFX;
                   windowEvent.queueSlider(
                     onGetPrompt ::<- 'SFX Volume :' + (frac * 100)->floor,
@@ -501,10 +480,9 @@ return class(
                     },
                     canCancel : true
                   )
-                });
+                }
 
-                opts->push(:'Volume: BGM');
-                optActs->push(::{
+                opts['Volume: BGM'] = ::{
                   @frac = settings.volumeBGM;
                   windowEvent.queueSlider(
                     onGetPrompt ::<- 'BGM Volume :' + (frac * 100)->floor,
@@ -520,15 +498,12 @@ return class(
                     },
                     canCancel : true
                   )
-                });
+                }
               }
             }
         windowEvent.queueChoices(
           prompt: 'Settings',
-          choices : opts,
-          onChoice::(choice) {
-            optActs[choice-1]();
-          },
+          choicesMatch : opts,
           keep : true,
           canCancel: true
         );
@@ -912,46 +887,35 @@ return empty;
                           keep: true,
                           canCancel : false,
                           jumpTag : 'SEEDSETTING',
-                          choices : [
-                            'Begin',
-                            'Set world seed...'
-                          ],
-                          
-                          onChoice::(choice) {
-                            when(choice-1 == 0) ::<= {
+                          choicesMatch : {
+                            ('Begin') ::{
                               windowEvent.jumpToTag(name:'SEEDSETTING', goBeforeTag:true);
                               this.startNew(name, scenario, seed);
-                            }
+                            },
                             
-                            // choose seed.
                             
-                            @:enterName = import(module:'game_function.name.mt');
+                            ('Set world seed...') ::{
+                              @:enterName = import(module:'game_function.name.mt');
 
-                            windowEvent.queueChoices(
-                              onGetPrompt::<- 'Current seed: ' + if (
-                                seed == empty) 'set to random.' else 
-                                '"' + seed + '"',
-                              
-                              choices : [
-                                'Enter seed',
-                                'Clear seed',
-                              ],
-                              canCancel: true,
-                              keep : true,
-                              onChoice::(choice) {
-                                when(choice-1 == 0) enterName(
-                                  prompt: 'Enter a seed.',
-                                  canCancel: true,
-                                  onDone::(name) {
-                                    seed = name;
-                                  }
-                                );
+                              windowEvent.queueChoices(
+                                onGetPrompt::<- 'Current seed: ' + if (
+                                  seed == empty) 'set to random.' else 
+                                  '"' + seed + '"',
                                 
-                                when(choice-1 == 1) 
-                                  seed = empty;
-                              }
-                            );  
-
+                                choicesMatch : {
+                                  ('Enter seed') ::<- enterName(
+                                    prompt: 'Enter a seed.',
+                                    canCancel: true,
+                                    onDone::(name) {
+                                      seed = name;
+                                    }
+                                  ),
+                                  ('Clear seed') ::<- seed = empty
+                                },
+                                canCancel: true,
+                                keep : true
+                              );                              
+                            }
                           }
                         );
                       }

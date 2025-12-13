@@ -212,19 +212,15 @@ return ::{
     windowEvent.queueChoices(
       prompt: member.name + 's Arts',
 
-      choices : [
-        'Check',
-        'Loadouts...'
-      ],
+      choices : {
+        ('Check') ::<- quickViewArts(),
+        ('Loadouts...') ::<- loadouts()
+      },
       leftWeight: 1,
       topWeight : 1,
       keep: true,
-      canCancel: true,
-      onChoice::(choice) {
-        when(choice == 1) quickViewArts();
-        when(choice == 2) loadouts();
-      }
-    );
+      canCancel: true
+    )
   }
   
   @:professionMenu ::(member) {
@@ -266,15 +262,8 @@ return ::{
       onChoice ::(choice) {
         @:prof = member.professions[choice-1];
         windowEvent.queueChoices(
-          choices : [
-            'Info...',
-            'Set as profession'
-          ],
-          canCancel: true,
-          
-          onChoice ::(choice) {
-            // info
-            when(choice == 1) ::<= {
+          choicesMatch : {
+            ('Info...') ::{
               windowEvent.queueDisplay(
                 lines : canvas.columnsToLines(
                   columns : [
@@ -297,22 +286,21 @@ return ::{
                   ]
                 )
               );
-            
-            }
-          
-          
-            when (prof == member.profession) 
+            },
+            ('Set as profession') :: {
+              when (prof == member.profession) 
+                windowEvent.queueMessage(
+                  text: member.name + '\'s current profession is already set to a ' + member.profession.name + '.'
+                );
+                
+                
+              member.profession = prof;
               windowEvent.queueMessage(
-                text: member.name + '\'s current profession is already set to a ' + member.profession.name + '.'
-              );
-              
-              
-            member.profession = prof;
-            windowEvent.queueMessage(
-              text: member.name + ' is now a ' + member.profession.name + '.'
-            );
-
-          }
+                text: member.name + ' is now a ' + member.profession.name + '.'
+              );            
+            }
+          },
+          canCancel: true
         );  
       }
     );

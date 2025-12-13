@@ -47,36 +47,27 @@ return ::(onDone) {
     Arts.database.getRandomFiltered(::(value) <- (value.traits & Arts.TRAIT.SPECIAL) == 0)  
   ];
 
-  @:choiceActions = [
-    // name 
-    :: {
+  @:choiceActions = {
+    ('Choose Name') :: {
       windowEvent.queueMessage(
         text:'Please choose a name.'
       );
       
       windowEvent.queueChoices(
         onGetPrompt::<- 'Name: ' + name,
-        choices : [
-          'Choose one for me',
-          'Enter name...'
-        ],
-        canCancel : true,
-        
-        onChoice ::(choice) {
-          when(choice == 1) ::<= {
-            name = namegen.person();
-          }
-          
-          when(choice == 2) ::<= {
-            name = (import(:'game_function.name.mt'))();
-          }
-        }
+        choicesMatch : {
+          ('Choose one for me') ::<- name = namegen.person(),
+          ('Enter name...') ::<- name = (import(:'game_function.name.mt'))()
+        },
+        canCancel : true
+
       );
     
     },
+
+
     
-    // species
-    :: {
+    ('Choose Species'):: {
       windowEvent.queueMessage(
         text:'Please choose a species.'
       );
@@ -106,7 +97,7 @@ return ::(onDone) {
     },
 
     // Profession
-    :: {
+    ('Choose Profession') :: {
       windowEvent.queueMessage(
         text:'Please choose a profession.'
       );
@@ -155,7 +146,7 @@ return ::(onDone) {
     }
     */
     
-    ::{
+    ('Proceed')::{
       windowEvent.queueAskBoolean(
         prompt: 'Are you ready, ' + name + ', the ' + species.name + ' ' + profession.name + '?',
         onChoice::(which) {
@@ -201,23 +192,13 @@ return ::(onDone) {
     }
 
     
-  ]
+  }
   
   windowEvent.queueChoices(
     onGetPrompt ::<-  name + ', the ' + species.name + ' ' + profession.name,
-    choices : [
-      'Choose Name',
-      'Choose Species',
-      'Choose Profession',
-      //'Choose 3 Starter Arts',
-      'Proceed'
-    ],
+    choicesMatch : choiceActions,
     canCancel : false,
     keep:true,
-    jumpTag: 'THEROGUESETUP',
-    
-    onChoice::(choice) {
-      choiceActions[choice-1]();
-    }
+    jumpTag: 'THEROGUESETUP'
   );
 }
