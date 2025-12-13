@@ -520,9 +520,16 @@
       if (data.onInput != empty && input != empty) 
         data.onInput(:input);
       
-      
+
+      @:choicesMatch = if (data.onGetChoicesMatch) data.onGetChoicesMatch() else data.choicesMatch;
+      @:choices = if (choicesMatch == empty)
+          if (data.onGetChoices) data.onGetChoices() else data.choices
+        else
+          choicesMatch->keys;      
       if (choice != empty || data.rendered == empty) ::<= {
-        @:choices = if (data.onGetChoices) data.onGetChoices() else data.choices;
+
+            
+            
         if (data.onGetHeader) 
           header = data.onGetHeader();
           
@@ -732,7 +739,10 @@
       }
       
       when(choice == CURSOR_ACTIONS.CONFIRM) ::<= {
-        onChoice(choice:cursorPos + 1);
+        if (choicesMatch != empty)
+          choicesMatch[choices[cursorPos]]()
+        else
+          onChoice(choice:cursorPos + 1);
         sound.playSFX(:"confirm");
         data.rendered = empty;
         return true;
@@ -2061,7 +2071,9 @@
         onGetMinHeight,       
         canCancel, 
         defaultChoice, 
-        onChoice => Function, 
+        onChoice,
+        choicesMatch,
+        onGetChoicesMatch, 
         onHover, 
         renderable, 
         keep, 
@@ -2083,6 +2095,7 @@
             onCancel : onCancel,
             mode: CHOICE_MODE.CURSOR,
             choices: choices,
+            choicesMatch : choicesMatch,
             prompt: prompt,
             pageAfter: pageAfter,
             leftWeight: leftWeight,
@@ -2107,6 +2120,8 @@
             onGetMinHeight : onGetMinHeight,
             onGetMinWidth : onGetMinWidth,
             onGetFooter : onGetFooter,
+            onGetChoices : onGetChoices,
+            onGetChoicesMatch : onGetChoicesMatch,
             framebufferID : canvas.newFramebuffer()
           });
         }]);

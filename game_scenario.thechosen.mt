@@ -683,20 +683,10 @@ return {
             @:next = choicesMod[choice-1];
             windowEvent.queueChoices(
               prompt: extendedName(entity:next),
-              choices : [
-                'Describe',
-                'What do the stats mean?',
-                'Choose',
-              ],
-              canCancel:true,
-              onChoice::(choice) {
-                when(choice-1 == 0)
-                  next.describe(excludeStats:true);
-                  
-                when(choice-1 == 1)
-                  whatDoStatsMean();
-                // choose
-                windowEvent.queueAskBoolean(
+              choicesMatch : {
+                ('Describe') ::<- next.describe(excludeStats:true),
+                ('What do the stats mean?') ::<- whatDoStatsMean(),
+                ('Choose') ::<- windowEvent.queueAskBoolean(
                   prompt: 'Add ' + next.name + ' to the party?',
                   onChoice::(which) {
                     when(which == false) empty;
@@ -704,7 +694,8 @@ return {
                     confirmParty();
                   }
                 );
-              }
+              },
+              canCancel:true
             );
           }    
         )
@@ -1258,37 +1249,29 @@ return {
 
             windowEvent.queueChoices(
               prompt: 'Do which?',
-              choices : [
-                'Proceed, unaware of what lies ahead',
-                'Go back to entrance',
-                'Wait for now'
-              ],
-              
-              onChoice::(choice) <-
-                match(choice) {
-                  (1): proceed(),
-                  (2)::<= {
-                    windowEvent.queueMessage(
-                      text: 'You return to the entrance.',
-                      renderable :{
-                        render ::{
-                          canvas.fill();
-                        }   
-                      }
-                    );
-                    
-                    windowEvent.queueCustom(
-                      onEnter::{
-                        @:instance = import(module:'game_singleton.instance.mt');
-                        instance.visitCurrentIsland();             
-                      }
-                    )
-                  },
+              canCancel: true,
+              choicesMatch : {
+                ('Proceed, unaware of what lies ahead') ::<- proceed(),
+                ('Go back to entrance') ::<= {
+                  windowEvent.queueMessage(
+                    text: 'You return to the entrance.',
+                    renderable :{
+                      render ::{
+                        canvas.fill();
+                      }   
+                    }
+                  );
                   
-                  (3): empty
-                }
+                  windowEvent.queueCustom(
+                    onEnter::{
+                      @:instance = import(module:'game_singleton.instance.mt');
+                      instance.visitCurrentIsland();             
+                    }
+                  )
+                },
+                ('Wait for now') ::<- empty
+              }
             );
-
           }
         }
       }

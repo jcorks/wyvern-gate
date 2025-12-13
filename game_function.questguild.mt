@@ -297,27 +297,15 @@
 
 
 @:mainMenu::(location, party) {
-  @:choices = [
-    ::<- teamInfo(:party),
-    ::<- guildShop(:location),
-    ::<- guildQuests(:location),
-    ::<- turnInQuests(:location)
-  ];
-  
-  
-  
   windowEvent.queueChoices(
     prompt: 'Guild menu',
     canCancel : true,
     keep : true,
-    choices : [
-      'Team info',
-      'Guild Shop',
-      'Available quests',
-      'Turn in quests',
-    ],
-    onChoice::(choice) {
-      choices[choice-1]();
+    choicesMatch : {
+      ('Team info') ::<- teamInfo(:party),
+      ('Guild Shop') ::<- guildShop(:location),
+      ('Available quests') ::<- guildQuests(:location),
+      ('Turn in quests') ::<- turnInQuests(:location)
     }
   );
 }

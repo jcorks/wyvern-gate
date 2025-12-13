@@ -1036,71 +1036,62 @@ Interaction.newEntry(
         @:playerBid = ::{          
           windowEvent.queueChoices(
             prompt: 'Bid at : ' + g(:price),
-            choices : [
-              "Examine item",
-              "Bid"
-            ],
+            choicesMatch : {
+              ("Examine item") ::{
+                item.describe();
+                playerBid();
+              },
+              
+              ("Bid") ::{
+                @val = 0.0;
+                
+                @:currentBid ::<- ((price + val * price) / 100)->ceil * 100
+                
+                windowEvent.queueSlider(
+                  defaultValue: 0.5,
+                  increments : 100,
+                  
+                  onHover ::(fraction) {
+                    val = fraction;
+                  },
+                  
+                  onChoice ::(fraction) {
+                    @bid = currentBid();
+                    
+                    when(bid > world.party.inventory.gold) ::<= {
+                      windowEvent.queueMessage(
+                        text: 'The party cannot afford this bid.'
+                      );
+                      playerBid();
+                    }
+                    
+                    bidders->push(:{
+                      bidder : {
+                        entity : world.party.members[0]
+                      },
+                      amount : bid
+                    })  
+                    auctionApply(:bidders)                  
+                  },
+                  
+                  renderable : {
+                    render ::{
+                      canvas.renderTextFrameGeneral(
+                        topWeight : 0,
+                        leftWeight : 0.5,
+                        lines : [
+                          'Current bid :  ' + g(:price),
+                          'Your bid    :  ' + g(:currentBid())
+                        ]
+                      );
+                    } 
+                  }
+                );
+              }
+            },
             canCancel : true,
             onCancel ::{
               auctionApply(:bidders);
-            },
-            
-            onChoice::(choice) {
-              match(choice) {
-                (1)::<= { 
-                  item.describe();
-                  playerBid();
-                },
-                (3)::<= {
-                  playerEnabled = false;
-                },
-                (2)::<= {
-                  @val = 0.0;
-                  
-                  @:currentBid ::<- ((price + val * price) / 100)->ceil * 100
-                  
-                  windowEvent.queueSlider(
-                    defaultValue: 0.5,
-                    increments : 100,
-                    
-                    onHover ::(fraction) {
-                      val = fraction;
-                    },
-                    
-                    onChoice ::(fraction) {
-                      @bid = currentBid();
-                      
-                      when(bid > world.party.inventory.gold) ::<= {
-                        windowEvent.queueMessage(
-                          text: 'The party cannot afford this bid.'
-                        );
-                        playerBid();
-                      }
-                      
-                      bidders->push(:{
-                        bidder : {
-                          entity : world.party.members[0]
-                        },
-                        amount : bid
-                      })  
-                      auctionApply(:bidders)                  
-                    },
-                    
-                    renderable : {
-                      render ::{
-                        canvas.renderTextFrameGeneral(
-                          topWeight : 0,
-                          leftWeight : 0.5,
-                          lines : [
-                            'Current bid :  ' + g(:price),
-                            'Your bid    :  ' + g(:currentBid())
-                          ]
-                        );
-                      } 
-                    }
-                  );
-                }
-              }
             }
           );
         }

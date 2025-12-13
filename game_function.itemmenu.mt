@@ -40,17 +40,11 @@ return ::(
     onAct(action);  
   }
   
-  @choiceNames = [];
-  @choices = [];
-  @choiceItem;
   @:world = import(:'game_singleton.world.mt');
   
-  @:generateChoices :: {
-    choices = [];
-    choiceNames = [];
-
-    choiceNames->push(value:'Use');
-    choices->push(value::{
+  @:generateChoices ::(choiceItem) {
+    @:choices = {}
+    choices['Use'] = ::<-
       match(choiceItem.base.useTargetHint) {
         (Item.USE_TARGET_HINT.ONE): ::<={
           @:commit ::(who) {
@@ -205,21 +199,17 @@ return ::(
 
 
 
-      }  
-    });
+      }
 
   
-    choiceNames->push(value:'Check');
-    choices->push(value::{
+    choices['Check'] = ::<- 
       choiceItem.describe(
         by:user
-      );  
-    });
+      )
     
     
     if (limitedMenu != true) ::<= {
-      choiceNames->push(value:'Equip');
-      choices->push(value::{
+      choices['Equip'] = ::{
         commitAction(action:BattleAction.new(
           card : Arts.new(base:Arts.database.find(id:'base:equip-item')),
           targets: [user],
@@ -229,11 +219,10 @@ return ::(
         ));       
         if (windowEvent.canJumpToTag(name:'Item'))
           windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);      
-      });  
+      }  
       
       
-      choiceNames->push(value:'Compare');
-      choices->push(value::{
+      choices['Compare'] = ::{
         @slot = user.getSlotsForItem(item:choiceItem)[0];
         @currentEquip = user.getEquipped(slot);
         
@@ -241,12 +230,11 @@ return ::(
           prompt: '(Equip) ' + currentEquip.name + ' -> ' + choiceItem.name,
           other:choiceItem.equipMod
         );     
-      });
+      }
     }
 
 
-    choiceNames->push(value:'Mark Favorite');
-    choices->push(value::{
+    choices['Mark Favorite'] = ::{
       @:symbols = [
         'None',
         '&',
@@ -271,11 +259,10 @@ return ::(
           choiceItem.faveMark = symbols[choice-1];
         }
       );
-    });
+    }
     
     
-    choiceNames->push(value:'Rename');
-    choices->push(value::{
+    choices['Rename'] = ::{
       when (!choiceItem.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
         windowEvent.queueMessage(text:choiceItem.name + ' cannot be renamed.');
       
@@ -289,25 +276,22 @@ return ::(
             windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
         }
       );  
-    });
+    }
     
     
     
-    choiceNames->push(value:'Improve');
-    choices->push(value::{
+    choices['Improve'] = ::{
       (import(module:'game_function.itemimprove.mt'))(user, item:choiceItem, inBattle);   
-    });
+    }
 
     
     if (choiceItem.inletSlotSet != empty) ::<= {
-      choiceNames->push(value:'Gems...');
-      choices->push(value::{
+      choices['Gems...'] = ::{
         choiceItem.inletSlotSet.equip(user, item:choiceItem);   
-      });
+      }
     }
     
-    choiceNames->push(value:'Toss');
-    choices->push(value::{
+    choices['Toss'] = ::{
       windowEvent.queueAskBoolean(
         prompt:'Are you sure you wish to throw away the ' + choiceItem.name + '?',
         onChoice::(which) {
@@ -331,7 +315,9 @@ return ::(
             windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
         }
       );  
-    });  
+    }
+    
+    return choices;  
   }
   
   
@@ -350,23 +336,17 @@ return ::(
     prompt: if (limitedMenu) 'Inventory...' else (user.name + ' - Choosing...'),
     onGetFooter ::<- '(Party has: ' + g(:party.inventory.gold)+')',
     onPick::(item) {
-      choiceItem = item;
-      when(choiceItem == empty) empty;
+      when(item == empty) empty;
       
-      generateChoices();
       windowEvent.queueChoices(
         leftWeight: if (leftWeight == empty) 1 else leftWeight,
         topWeight: if (topWeight == empty) 1 else topWeight,
-        prompt: choiceItem.name,
+        prompt: item.name,
         canCancel : true,
         keep:true,
         jumpTag: 'Item',
         renderable,
-        choices: choiceNames,
-        onChoice::(choice) {
-          when (choice == 0) empty;        
-          choices[choice-1]();       
-        }
+        choicesMatch : generateChoices(:item)
       );
     }
   );  

@@ -546,18 +546,13 @@ return {
               );
             };
           
-            @:choiceActions = [
-              ::<- quest.whereAmI(),
-              ::<- giveUp()
-            ]
             windowEvent.queueChoices(
-              choices : [
-                'More details...',
-                'Give up'
-              ],
+              choicesMatch : {
+                ('More details...') ::<- quest.whereAmI(),
+                ('Give up') ::<- giveUp()
+              },
               keep: true,
-              canCancel: true,
-              onChoice::(choice) <- choiceActions[choice-1]()
+              canCancel: true
             );
           }
         );
