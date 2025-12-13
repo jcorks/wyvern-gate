@@ -128,13 +128,17 @@
                   enemies = [...enemies]->filter(:condition);
                 if (art.usageHintAI == Arts.USAGE_HINT.OFFENSIVE)
                   enemies = enemies->filter(::(value) <- value.hp != 0);
-                targets->push(value:Random.pickArrayItem(list:enemies))
-                if (art.targetMode == Arts.TARGET_MODE.ONEPART)
-                  targetParts = [Entity.normalizedDamageTarget()];
+                  
+                if (enemies->size > 0) ::<= {
+                  targets->push(value:Random.pickArrayItem(list:enemies))
+                  if (art.targetMode == Arts.TARGET_MODE.ONEPART)
+                    targetParts = [Entity.normalizedDamageTarget()];
+                }
               } else ::<= {
                 if (condition)
                   allies = [...allies]->filter(:condition);
-                targets->push(value:Random.pickArrayItem(list:allies))
+                if (allies->size > 0)
+                  targets->push(value:Random.pickArrayItem(list:allies))
               }
             },
             
@@ -155,11 +159,9 @@
                 allies = [...allies]->filter(:condition);
                 enemies = [...enemies]->filter(:condition);
               }
-              if (random.number() < 0.5) 
-                targets->push(value:Random.pickArrayItem(list:enemies))
-              else 
-                targets->push(value:Random.pickArrayItem(list:allies))
-              ;          
+              @v = Random.pickArrayItem(: if(Random.flipCoin()) enemies else allies);
+              if (v != empty)
+                targets->push(:v);
             }
 
           }
@@ -200,6 +202,21 @@
       
       takeTurn ::(battle){
         @:acts = {};
+        @:processActs ::(acts){
+          windowEvent.queueCallback(
+            callback ::{
+
+              when(acts->size == 0) windowEvent.CALLBACK_DONE
+              @:act = acts[0]
+              acts->remove(:0)
+              
+
+              
+              battle.entityCommitAction(action:act);
+              
+            }
+          );        
+        }
       
         ::<= {
           @:enemies = battle.getEnemies(:user_);
@@ -210,6 +227,23 @@
           // discourage abilities until players get their bearings, please!
           @:world = import(module:'game_singleton.world.mt');
           @:party = world.party;
+          
+          when (user_.species.overrideBattleAI->type == Function) ::<= {
+            user_.species.overrideBattleAI(
+              entity : user_,
+              battle : battle,
+              commitBattleActions ::(acts => Object) {
+                foreach(acts) ::(k, v) {
+                  if (v->type != BattleAction.type) ::<= {
+                    error(:'overrideBattleAI (for ' + user_.name + ') contains elements within acts that arent BattleActions.');
+                  }
+                }
+                
+                processActs(acts);
+              }
+            );
+          }
+          
 
           @tier = world.island.tier;
           
@@ -363,19 +397,7 @@
             extraData: {}
           ))
               
-        windowEvent.queueCallback(
-          callback ::{
-
-            when(acts->size == 0) windowEvent.CALLBACK_DONE
-            @:act = acts[0]
-            acts->remove(:0)
-            
-
-            
-            battle.entityCommitAction(action:act);
-            
-          }
-        );
+        processActs(acts);
       }
     }
 

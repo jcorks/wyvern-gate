@@ -23,6 +23,7 @@
 @:Item = import(module:'game_mutator.item.mt');
 @:StatSet = import(module:'game_class.statset.mt');
 @:InletSet = import(:'game_class.inletset.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
 
 
 return ::(inventory, shopkeep, onDone) {
@@ -65,11 +66,44 @@ return ::(inventory, shopkeep, onDone) {
           )
         }
         
+        @:getArtDesc ::(id1, id2) {
+          @:toParts = ::(id) {
+            when(id == empty) ['[None]', '']
+            @:art = Arts.new(base:Arts.database.find(:id));
+            art.charge = 0;
+            @:list = Arts.renderListItem(:art);
+            return [' ' + list[0], list[1]];
+          }
+          
+          @:parts0 = toParts(:id1);
+          @:parts1 = toParts(:id2);
+          
+          return canvas.columnsToLines(
+            columns : [
+              [
+                parts0[0],
+                parts1[0]
+              ],
+              [
+                parts0[1],
+                parts1[1]              
+              ]
+            ],
+            
+            leftJustifieds : [true, true]
+          );
+        }
         canvas.renderTextFrameGeneral(
           title: 'Summary:',
           lines: [
             'Stat boosts:',
-            ...hoveredItem.stats.descriptionRateLines,
+            ...(hoveredItem.stats.descriptionRateLines->map(::(value) <- ' ' + value)),
+
+            '',
+            'Arts:',
+            ...getArtDesc(id1:hoveredItem.arts[0],
+                          id2:hoveredItem.arts[1]),
+            
             ...([if (hoveredItem.inletSlotSet != empty)
               '' + hoveredItem.inletSlotSet.size + ' gem slot' + if (hoveredItem.inletSlotSet.size == 1) '.' else 's.'
             else 

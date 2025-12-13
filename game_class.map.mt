@@ -29,8 +29,8 @@
     entities : empty,
     compressedItems : empty,
     dataList : empty,
-    legendEntriesCompressed : empty,
     title : '',
+    legendEntriesCompressed : empty, // retired.
 
     pointer : empty,
     width : 0,
@@ -184,7 +184,6 @@
     @itemIndex = [];
     @entities = [];
     @items = [];
-    @legendEntries = [];
     @title;
 
     @pointer = {
@@ -933,6 +932,34 @@
         scenery[x + y*(width)] &= (~IS_WALLED_MASK);
       },
       
+      mapCoordinatesToScreen ::(x, y) {
+        if (paged) ::<= {
+          @:regionX = ((pointer.x+0) / mapSizeW)->floor;
+          @:regionY = ((pointer.y+0) / mapSizeH)->floor;
+
+          x = x - regionX*mapSizeW;
+          y = y - regionY*mapSizeH;
+        
+        } else ::<= {
+          @camX = pointer.x;
+          @camY = pointer.y;
+          
+          @camLeft   = camX - mapSizeW/2;
+          @camTop    = camY - mapSizeH/2;
+          @camRight  = camX + mapSizeW/2;
+          @camBottom = camY + mapSizeH/2;
+          
+          
+          x -= camLeft;
+          y -= camTop;
+        }
+        
+        return {
+          x: x,
+          y: y
+        }
+      },
+      
       addScenerySymbol ::(character) {
         @:preIndex = sceneryValues->findIndex(value:character);
         when(preIndex != -1) preIndex;
@@ -1089,8 +1116,6 @@
         }
         loc->push(value:val);
         items->push(value:val);
-        if (name != empty)
-          legendEntries->push(value:val);
       },
       
       getItem::(data) {
@@ -1111,6 +1136,16 @@
       getAllItems ::{
         return items;
       },
+
+
+      getItemsInView :: {
+        @:which = [];
+        foreach(items) ::(k, item) {
+          if (this.isLocationVisible(x:item.x, y:item.y))
+            which->push(:item);
+        }
+        return which;
+      }, 
       
       itemsAt::(x, y) {
         return itemIndex[x + y*(width)];
@@ -1158,16 +1193,7 @@
             }
           }
         }
-        if (item.name != empty) ::<= {
-          ::? {
-            foreach(legendEntries)::(key, v) {
-              when(v.data == data) ::<= {
-                legendEntries->remove(key);
-                send();
-              }
-            }
-          }
-        }
+
 
 
         if(itemsA->keycount == 0)
@@ -1513,10 +1539,11 @@
       
       getRandomArea :: {
         return random.pickArrayItem(list:areas);
-      },  
+      }, 
+      
       
       render :: {
-        canvas.blackout();
+        canvas.fill();
         if (paged)
           renderPaged()
         else 
@@ -1530,6 +1557,8 @@
         
         // render the legend
         if (drawLegend) ::<= {
+          @:legendEntries = this.getItemsInView();
+          when(legendEntries->size == 0) empty;
           @width = 0;
           @:itemList = [];
           foreach(legendEntries)::(index, item) {
@@ -1616,12 +1645,6 @@
         }
         
         
-        @:legendEntriesCompressed = {};
-        foreach(legendEntries) ::(k, val) {
-          legendEntriesCompressed[k] = itemsUnique[val];
-          if (legendEntriesCompressed[k] == empty)
-            error(detail:'Something went wrong (legend entry was a non-numbered index)')
-        }
 
         // sparse array indexing
         @:itemIndexCompressed = {};
@@ -1665,7 +1688,6 @@
           entities : entities,
           compressedItems : compressedItems,
           dataList : dataList,
-          legendEntriesCompressed : legendEntriesCompressed,
           title : title,
 
           pointer : pointer,
@@ -1700,10 +1722,6 @@
           val.data = v.dataList[val.data];
         }
         
-        legendEntries = [];
-        foreach(v.legendEntriesCompressed) ::(k, val) {
-          legendEntries[k] = items[val];
-        }
         
         itemIndex = [];
         foreach(v.itemIndexCompressed) ::(k, locs) {

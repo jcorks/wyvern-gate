@@ -50,7 +50,7 @@
         DEX:  10
       ).add(:specter.stats).save());
       
-      specter.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+      specter.unequipAll(silent:true);
       specter.heal(amount:9999, silent:true); 
       specter.healAP(amount:9999, silent:true);   
       return specter;

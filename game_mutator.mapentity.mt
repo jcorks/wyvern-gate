@@ -68,6 +68,7 @@ MapEntity.Task.database.newEntry(
     do ::(data, mapEntity) {
       @:Location = import(module:'game_mutator.location.mt');
       foreach(mapEntity.entities) ::(k, ent) {
+        when(ent.isIncapacitated() == false) empty;
         mapEntity.controller.landmark.addLocation(
           location : Location.new(
             landmark: mapEntity.controller.landmark,
@@ -193,6 +194,7 @@ MapEntity.Task.database.newEntry(
   }
 
   @:aggressive = ::(speed, data, mapEntity, noAttackParty, onDeath) {
+  
     if (mapEntity.data.caresAboutParty == empty) ::<= {
       mapEntity.data.caresAboutParty = random.try(percentSuccess:80); 
     }
@@ -302,6 +304,8 @@ MapEntity.Task.database.newEntry(
     when(squabbled)
       mapEntity.clearPath();
     
+    when(world.battle.isActive && world.battle.isMember(:mapEntity.entities[0]))
+      mapEntity.clearPath()
 
     when (closestDist < INTEREST_DISTANCE) ::<= {
       mapEntity.newPathTo(
@@ -324,6 +328,20 @@ MapEntity.Task.database.newEntry(
       }
     }
   );
+
+  MapEntity.Task.database.newEntry(
+    data : {
+      id: 'base:defensive',
+      startup ::{
+      },
+      
+      do ::(data, mapEntity) {
+        mapEntity.data.caresAboutParty = false;
+        aggressive(speed:1, data, mapEntity);    
+      }
+    }
+  );
+
   
   MapEntity.Task.database.newEntry(
     data : {

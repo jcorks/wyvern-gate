@@ -998,6 +998,41 @@ Profession.newEntry(data:{
 })
 
 Profession.newEntry(data:{
+  name: 'Mobile Mushroom',
+  id : 'base:mobile-mushroom',
+  traits : 0,
+  weaponAffinity: 'base:bludgeon',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 1,
+    INT: 1,
+    DEF: 1,
+    SPD: 1,
+    LUK: 10,
+    DEX: 1
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas',
+    'base:acidic-gas'
+  ],
+  passives : [
+  ]
+})
+
+Profession.newEntry(data:{
   name: 'Fire Sprite',
   id : 'base:fire-sprite',
   traits : 0,
@@ -1391,9 +1426,10 @@ Profession.newEntry(data:{
 }) 
 
 
+
 Profession.newEntry(data:{
-  name: 'Slime Queen',
-  id : 'base:slimequeen',
+  name: 'Gold Slime',
+  id : 'base:gold-slime',
   traits : 0,
   weaponAffinity: 'base:none',
   description : "", 
@@ -1408,6 +1444,35 @@ Profession.newEntry(data:{
     SPD: 20,
     LUK: 20,
     DEX: 20
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:flash'
+  ],
+  passives : [
+  ]
+})
+
+Profession.newEntry(data:{
+  name: 'Slime Queen',
+  id : 'base:slimequeen',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  20,
+    AP:  3,
+    ATK: 3,
+    INT: 20,
+    DEF: 7,
+    SPD: 0,
+    LUK: 20,
+    DEX: 2
   ),
   minKarma : 0,
   maxKarma : 50,
@@ -1483,9 +1548,95 @@ Profession.newEntry(data:{
   arts : [
     'base:doublestrike',
     'base:attack',
-    'base:attack',
-    'base:attack',
-    'base:attack'
+  ],
+  passives : [
+  ]
+}) 
+
+
+Profession.newEntry(data:{
+  name: 'Flaming Skull',
+  id : 'base:flaming-skull',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 6,
+    INT: 1,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 3
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:fire',
+    'base:doom-strike'
+  ],
+  passives : [
+  ]
+}) 
+
+Profession.newEntry(data:{
+  name: 'Skeleton',
+  id : 'base:skeleton',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 6,
+    INT: 1,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 3
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:b198',
+    'base:cursed-summoning'
+  ],
+  passives : [
+  ]
+}) 
+
+Profession.newEntry(data:{
+  name: 'Skeleton',
+  id : 'base:skeleton',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 6,
+    INT: 1,
+    DEF: 7,
+    SPD: 7,
+    LUK: 10,
+    DEX: 3
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
   ],
   passives : [
   ]

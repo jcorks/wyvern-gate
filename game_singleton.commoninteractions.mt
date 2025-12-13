@@ -262,15 +262,10 @@ return {
             }
           },
           onChoice::(choice) {
-            commitAction(action:
-              BattleAction.new(
-                card: Arts.new(base:Arts.database.find(id:'base:wait')),
-                targets: [],
-                extraData: {},
-                turnIndex : 0,
-                targetParts : []
-              )        
-            );     
+            user.playerUseArt(
+              art: Arts.new(base:Arts.database.find(id:'base:wait')),
+              commitAction
+            )       
           }
         );
 
@@ -634,7 +629,7 @@ return {
                 text: 'The party waits for some time to pass...',
                 renderable : {
                   render ::{
-                    canvas.blackout();
+                    canvas.fill();
                   }
                 }
               )
@@ -673,7 +668,7 @@ return {
               text: 'The party waits...',
               renderable : {
                 render ::{
-                  canvas.blackout();
+                  canvas.fill();
                 }
               }
             )

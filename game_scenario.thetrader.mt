@@ -678,7 +678,7 @@
         windowEvent.queueCustom(
           renderable : {
             render :: {
-              canvas.blackout();
+              canvas.fill();
             }
           },
           keep:true,
@@ -765,7 +765,7 @@
               if (world.island.tier < 5) ::<= {
                 windowEvent.queueMessage(
                   speaker: 'Courier',
-                  text: '"I have received news that the Mysterious Shrine has shifted. I am told this means the quality of items from exploration will increase."'
+                  text: '"I have received news that the Eternal Shrine has shifted. I am told this means the quality of items from exploration will increase."'
                 );
                 hasNews = true;
                 world.island.tier += 1;
@@ -1047,7 +1047,7 @@
             ],
             renderable : {
               render ::{
-                canvas.blackout(with:'`');
+                canvas.fill(:'`');
               }
             },
             keep:true,
@@ -1867,7 +1867,7 @@
           jumpTag: 'dayEnd',
           renderable : {
             render ::{
-              canvas.blackout()
+              canvas.fill()
             }
           }
         );
@@ -3225,7 +3225,7 @@ return {
       @:basicArts = [
         'base:pebble',
         'base:agility',
-        'base:foresight',
+        'base:quick-shield',
         'base:wyvern-prayer'
       ];
 

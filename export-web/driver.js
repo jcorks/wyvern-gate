@@ -53,6 +53,7 @@
         "game_class.landmarkevent_themirror.mt",
         "game_class.landmarkevent_thesnakesiren.mt",
         "game_class.landmarkevent_treasuregolem.mt",
+        "game_class.landmarkevent_mobilemushroom.mt",
         "game_class.logtimer.mt",
         "game_class.map.mt",
         "game_class.particle.mt",

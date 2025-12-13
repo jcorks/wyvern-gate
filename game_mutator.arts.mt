@@ -2183,7 +2183,7 @@ Arts.database.newEntry(
         island : world.island,
         speciesHint: 'base:fire-sprite',
         professionHint: 'base:fire-sprite',
-        levelHint:4 + level
+        levelHint:world.island.level - 2
       );
       sprite.name = 'the Fire Sprite';
             
@@ -2232,7 +2232,7 @@ Arts.database.newEntry(
         island: world.island,
         speciesHint: 'base:ice-elemental',
         professionHint: 'base:ice-elemental',
-        levelHint:4 + level
+        levelHint:world.island.level - 2
       );
       sprite.name = 'the Ice Elemental';
       
@@ -2279,7 +2279,7 @@ Arts.database.newEntry(
         island: world.island,
         speciesHint: 'base:thunder-spawn',
         professionHint: 'base:thunder-spawn',
-        levelHint:4 + level
+        levelHint:world.island.level - 2
       );
       sprite.name = 'the Thunder Spawn';
       
@@ -2327,7 +2327,7 @@ Arts.database.newEntry(
         island: world.island,
         speciesHint: 'base:guiding-light',
         professionHint: 'base:guiding-light',
-        levelHint:6 + level
+        levelHint:world.island.level  
       );
       sprite.name = 'the Guiding Light';
       
@@ -3975,6 +3975,31 @@ Arts.database.newEntry(
 
 Arts.database.newEntry(
   data: {
+    name: 'See ya!',
+    id : 'base:see-ya',
+    notifCommit : Arts.NO_NOTIF,
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.NONE,
+    description: 'Does nothing.',
+    keywords : [],
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.BUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    traits : TRAIT.SPECIAL | TRAIT.COSTLESS,
+    kind : KIND.SPECIAL,
+    rarity : RARITY.EPIC,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
+      @:world = import(module:'game_singleton.world.mt');
+      world.battle.evict(:user);
+    }
+  }
+)
+
+
+
+Arts.database.newEntry(
+  data: {
     name: 'Plant Poisonroot',
     id : 'base:plant-poisonroot',
     notifCommit : '$2 was covered in poisonroot seeds!',
@@ -5259,7 +5284,7 @@ Arts.database.newEntry(
           island : world.island,
           speciesHint: 'base:spirit',
           professionHint: 'base:spirit',
-          levelHint:4
+          levelHint:world.island.level - 2
         );
         sprite.name = 'the Spirit';
               
@@ -5918,7 +5943,7 @@ Arts.database.newEntry(
         island: world.island,
         speciesHint: 'base:guiding-light',
         professionHint: 'base:guiding-light',
-        levelHint:14
+        levelHint:8 + world.island.level
       );
       sprite.name = 'the Cursed Light';
       
@@ -12564,6 +12589,74 @@ Arts.database.newEntry(
     }
   }
 )
+
+
+
+Arts.database.newEntry(
+  data: {
+    name: 'Acidic Gas',
+    id : 'base:acidic-gas',
+    notifCommit : '$1 emits a potent gas!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    keywords : ['base:burned', 'base:poisoned'],
+    description: "70% chance to inflict Burned and Poisoned for 3 turns on all enemies.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.DEBUFF,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.EFFECT,
+    traits : TRAIT.PHYSICAL,
+    rarity : RARITY.UNCOMMON,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      foreach(targets) ::(k, v) {
+        when (random.try(percentSuccess:30)) 
+          windowEvent.queueMessage(text:v.name + ' avoided breathing the gas!');
+          
+        v.addEffect(durationTurns:3, from:user, id: 'base:poisoned');
+        v.addEffect(durationTurns:3, from:user, id: 'base:burned');
+      }
+    }
+  }
+)
+
+
+Arts.database.newEntry(
+  data: {
+    name: 'Doom Strike',
+    id : 'base:doom-strike',
+    notifCommit : '$1 emits a weird aura!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ALLENEMY,
+    keywords : ['base:doom'],
+    description: "Inflicts 1 damage on all enemies. 50% chance to inlfict Doom on each target hit.",
+    durationTurns: 0,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {
+    },
+    kind : KIND.ABILITY,
+    traits : TRAIT.PHYSICAL,
+    rarity : RARITY.RARE,
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      foreach(targets) ::(k, v) {
+        if (v.damage(
+          attacker : user,
+          damage : Damage.new(
+            amount: 1,
+            damageClass : Damage.CLASS.HP,
+            damageType : Damage.TYPE.DARK
+          ),
+          dodgeable : true,
+          exact : true
+        ) && random.flipCoin())
+          v.addEffect(durationTurns:A_LOT, from:user, id: 'base:doom');
+      }
+    }
+  }
+)
+
 
 };
 

@@ -95,6 +95,60 @@ LandmarkEvent.database.newEntry(
   }
 );
 
+
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:flaming-skull',
+    kind : KIND.HOSTILE,
+    tier : 1,
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_flamingskull.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+
+    onIncrementTime ::(data, landmark) {
+    
+    },
+
+    
+    onStep ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
+
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:skeleton',
+    kind : KIND.HOSTILE,
+    tier : 0,
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_skeleton.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+
+    onIncrementTime ::(data, landmark) {
+    
+    },
+
+    
+    onStep ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:the-mirror',
@@ -128,6 +182,32 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     startup ::(parent) {
       @:b = import(module:'game_class.landmarkevent_treasuregolem.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+
+    onIncrementTime ::(data, landmark) {
+    
+    },
+
+    
+    onStep ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:gold-slime',
+    tier : 0,
+    kind : KIND.HOSTILE,
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_goldslime.mt');
       @:a = b.new(parent);
       return a;
     },
@@ -284,6 +364,32 @@ LandmarkEvent.database.newEntry(
   }
 );
 
+
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:mobile-mushroom',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_mobilemushroom.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+    kind : KIND.HOSTILE,
+    tier : 0,
+
+
+    onIncrementTime ::(data, landmark) {
+    
+    },
+    
+    onStep ::(data, landmark) {
+      data.step();
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
 
 LandmarkEvent.database.newEntry(
   data : {

@@ -88,7 +88,7 @@ return ::(wish) {
     },
     renderable : {
       render ::{
-        canvas.blackout()
+        canvas.fill()
       }
     }
   );

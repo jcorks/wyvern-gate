@@ -8,7 +8,7 @@ return ::(do, message) {
     
   @frames = 0;
   @:onRender = ::{
-    canvas.blackout();
+    canvas.fill();
     canvas.movePen(
       x: (canvas.width / 2 - message->length / 2)->floor,
       y: (canvas.height/2)->floor

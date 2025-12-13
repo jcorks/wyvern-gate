@@ -35,6 +35,11 @@
   DONE : 3
 };
 
+@:TRANSITION = {
+  FADE_TO_WHITE : 0,
+  FADE_TO_BLACK : 1
+}
+
 @:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth) <- 
     canvas.renderTextFrameGeneral(
       leftWeight, 
@@ -118,6 +123,7 @@
 
 
 
+
 // When dealing with kept commitInput handlers that immediately 
 // return, some can get stuck and never give back control.
 // This is most common when commitInput handlers are kept but 
@@ -155,10 +161,21 @@
       queue : {}
     });
     
-    
-    @:commitVisual :: {
+    @:commitVisual ::{
+      setFramebufferList();
       canvas.commit();
     }
+    
+    @:renderAction ::(data, rerender) {
+      when(data.framebufferID == empty) empty;
+      canvas.renderToFramebuffer(
+        id: data.framebufferID,
+        render ::{
+          renderThis(data, rerender)
+        }
+      );    
+    }
+
       
     // Adds a resolve queue.
     // when queueing window events, you may optionally 
@@ -205,18 +222,7 @@
   
     @:choiceStackPush::(value) {
       if (choiceStack->size) ::<= {
-        @:val = choiceStack[choiceStack->size-1];
-        if (val.stateID == empty) ::<= {
-          if (::? {
-            foreach(choiceStack) ::(k, v) {
-              if (v.disableCache != empty)
-                send(:false);
-            }
-            return true;
-          })
-            val.stateID = canvas.pushState();    
-        }
-        val.left = true;        
+        choiceStack[choiceStack->size-1].left = true;        
       }
       choiceStack->push(value);
     }
@@ -236,30 +242,14 @@
     @:renderThis = ::<= {
     
       @:checkCache ::(renderOnly, data) {
-        @dorender = false;
         foreach(choiceStack) ::(k, v) {
           if (v.disableCache != empty) ::<= {
             if (v.disableCache != PERMANENT)
               v->remove(:'disableCache');
-            for(k, choiceStack->size) ::(i) {
-              @:rm = choiceStack[i];
-              if (rm.stateID != empty)
-                canvas.removeState(id:rm.stateID);
-            }
-            dorender = true;
-          }
-          if (dorender) ::<= {
-            v.stateID = canvas.pushState();
-            renderThis(data:v, rerender:true);
+            breakpoint();
+            renderAction(data:v, rerender:true);
           }
         }
-        
-        if (dorender) ::<= {
-          if (data.stateID != empty)
-            canvas.removeState(id:data.stateID);
-          data.stateID = canvas.pushState();
-        } else if (renderOnly != true)
-          canvas.clear();
       }
 
 
@@ -267,6 +257,10 @@
       return ::(data => Object, renderOnly, rerender) {
         when (requestAutoSkip) empty; 
         when (data.rendered != empty && rerender == empty) empty;
+        canvas.clear();
+
+        if (data.renderMain != empty)
+          data.renderMain();
           
         if (rerender == empty) ::<= {
           checkCache(renderOnly, data);
@@ -313,7 +307,31 @@
       }
     }
     
+    @:setFramebufferList :: {
+      @:list = [];
+      foreach(choiceStack) ::(k, v) {
+        if (v.framebufferAux)
+          list->push(:v.framebufferAux);
+        list->push(:v.framebufferID);
+      }
+      canvas.setFramebufferList(:list);
     
+    }
+
+    
+    @:removeChoiceStackItem ::(toRemove) {
+      if (toRemove.framebufferAux)
+        canvas.removeFramebuffer(:toRemove.framebufferAux);
+      canvas.removeFramebuffer(:toRemove.framebufferID);
+      toRemove.framebufferID = empty;
+      toRemove.framebufferAux = empty;
+      @:id = choiceStack->findIndex(value:toRemove);
+      if (id >= 0)
+        choiceStack->remove(key:id);
+      
+      setFramebufferList();
+    }
+
     
     @next ::(toRemove, dontResolveNext, level) {
       if (choiceStack->keycount > 0) ::<= {
@@ -324,14 +342,10 @@
           
           if (toRemove == empty) 
             choiceStack->pop 
-          else 
-
-            choiceStack->remove(key:choiceStack->findIndex(value:toRemove));
-          if (!requestAutoSkip) ::<= {
-            if (data.stateID != empty) ::<= {
-              //canvas.removeState(id:data.stateID);
-            }
+          else ::<= {
+            removeChoiceStackItem(toRemove);
           }
+          
           
           if (data.onLeave)
             data.onLeave();
@@ -399,10 +413,6 @@
         if (choiceStack->keycount > 0) ::<= {
           val = choiceStack[choiceStack->keycount-1];
             
-          if (val.stateID != empty) ::<= {
-            canvas.removeState(id:val.stateID);
-            val.stateID = empty;
-          }
             
           if (forceRedraw == true)
             val.rendered = empty;
@@ -418,7 +428,8 @@
             (CHOICE_MODE.CUSTOM):         commitInput_custom(data:val, input),
             (CHOICE_MODE.SLIDER):         commitInput_slider(data:val, input),
             (CHOICE_MODE.CALLBACK):       commitInput_callback(data:val, input),
-            (CHOICE_MODE.READER):         commitInput_reader(data:val, input)
+            (CHOICE_MODE.READER):         commitInput_reader(data:val, input),
+            (CHOICE_MODE.TRANSITION):     commitInput_transition(data:val, input)
           }    
          
           
@@ -667,7 +678,7 @@
         if (onHover != empty)
           onHover(choice:cursorPos+1);
         
-        
+
         if (data.hideWindow != true) ::<= {
           if (data.animationFrame == empty) ::<= {
             data.renderState = RENDER_STATE.ANIMATING;
@@ -698,8 +709,10 @@
           }
         }
         data.rendered = empty;
-        renderThis(data);
       }
+
+
+      renderAction(data);
 
 
       when(exitEmpty) ::<= {
@@ -781,7 +794,6 @@
         }
         line = line + ']'
 
-        
         if (data.animationFrame == empty) ::<= {
           data.renderState = RENDER_STATE.ANIMATING
           data.animationFrame = ::<={
@@ -816,12 +828,10 @@
           );             
         }
         data.rendered = empty;
-
-        renderThis(
-          data
-          
-        );
       }
+
+
+      renderAction(data);
       when(exitEmpty) ::<= {
         data.keep = empty;
         return true;      
@@ -901,7 +911,7 @@
       }
       
       if (data.rendered == empty) ::<= {
-          renderThis(data);
+        renderAction(data);
       }      
       
       return false;  
@@ -916,7 +926,7 @@
         data.renderState = RENDER_STATE.ANIMATING;
       
       if (data.rendered == empty) ::<= {
-        renderThis(data);
+          renderAction(data);
       }
       if (data.entered == empty) ::<= {
         if (data.onEnter)
@@ -948,6 +958,92 @@
       
       return true;  
     }
+
+  
+    @:commitInput_transition ::(data => Object, input) {
+      when (autoSkipAnimations) true; 
+      if (data.phase == empty) data.phase = -1;
+      return match(data.phase) {
+
+        (-1): ::<= {
+          if (data.renderableStart != empty) ::<= {
+            if(data.framebufferAux == empty)
+              data.framebufferAux = canvas.newFramebuffer();
+            canvas.renderToFramebuffer(
+              id: data.framebufferAux,
+              render ::{
+                data.renderableStart.render()
+              }
+            );            
+          }
+          data.phase += 1
+        },
+        (0): ::<= {
+          data.animationFrame = data.renderBefore;
+          data.renderState = RENDER_STATE.ANIMATING
+          data.phase += 1;
+          return false;
+        },
+        
+        (1): ::<= {
+          renderAction(data);
+          
+          if (data.renderState == RENDER_STATE.DONE) ::<= {
+            if (data.framebufferAux != empty) ::<= {
+              canvas.removeFramebuffer(:data.framebufferAux);
+              data.framebufferAux = empty;
+            }
+            data.phase += 1;
+          }
+          return false;
+        },
+        
+        // animation 1 done
+        (2): ::<= {
+          data.animationFrame = data.renderAfter;
+          data.renderState = RENDER_STATE.ANIMATING
+          data.phase += 1
+          return false;
+        },
+        
+        (3): ::<= {
+          if (data.renderableMiddle != empty) ::<= {
+            if(data.framebufferAux == empty)
+              data.framebufferAux = canvas.newFramebuffer();
+            canvas.renderToFramebuffer(
+              id: data.framebufferAux,
+              render ::{
+                data.renderableMiddle.render()
+              }
+            );
+          }
+          
+          data.phase += 1
+          breakpoint();
+        } ,
+        
+        // animate 2
+        (4): ::<= {
+          renderAction(data);
+          
+          if (data.renderState == RENDER_STATE.DONE)
+            data.phase += 1;
+          return false;
+        },
+        
+        (5): ::<= {
+          // reset just in case.
+          if (data.framebufferAux != empty) ::<= {
+            canvas.removeFramebuffer(:data.framebufferAux);
+            data.framebufferAux = empty;
+          }
+
+          data.phase = -1;
+          return true;
+        }
+      }
+      return true;  
+    }
     
     
     @:commitInput_callback ::(data => Object, input) {
@@ -957,7 +1053,7 @@
       //}
       
       if (data.rendered == empty) ::<= {
-        renderThis(data);
+        renderAction(data);
       }
       if (data.entered == empty) ::<= {
         data.entered = true;
@@ -1100,7 +1196,6 @@
       if (onHover != empty)
         onHover(choice:which+1);
 
-
       if (data.animationFrame == empty) ::<= {
         data.renderState = RENDER_STATE.ANIMATING;
         data.animationFrame = renderTextAnimation(
@@ -1130,7 +1225,7 @@
       when (choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         sound.playSFX(:"confirm");
         onChoice(choice:which + 1);
-        renderThis(data);      
+        renderAction(data);    
         return true;
       }
         
@@ -1141,11 +1236,11 @@
           res = data.onCancel();
         when (res == this.STOP_CANCEL) false;
         data.keep = empty;
-        renderThis(data);      
+        renderAction(data);   
         return true;
       }
       
-      renderThis(data);      
+      renderAction(data);   
 
       return false;
     }
@@ -1274,7 +1369,7 @@
           data.renderState = RENDER_STATE.ANIMATING;
       }
 
-      renderThis(data);
+      renderAction(data);     
       
       if (data.autoSkipAfterFrames->type == Number) ::<= {
         data.autoSkipAfterFrames -= 1;
@@ -1394,7 +1489,7 @@
       }
       
 
-      renderThis(data);
+      renderAction(data);   
       
       return match(input) {
         (CURSOR_ACTIONS.CONFIRM, 
@@ -1426,7 +1521,8 @@
       DISPLAY: 5,
       CUSTOM: 6,
       SLIDER : 7,
-      CALLBACK : 8
+      TRANSITION : 8,
+      CALLBACK : 9
     }
     
     
@@ -1437,6 +1533,8 @@
       ANIMATION_FINISHED : {
         get ::<- ANIMATION_FINISHED
       },
+      
+      TRANSITION : {get ::<- TRANSITION},
       
       RENDER_AGAIN : {
         get ::<- 1
@@ -1614,7 +1712,8 @@
             hasPages : hasPages,
             maxHeight : maxHeight,
             maxWidth : maxWidth,
-            onLeave : onLeave
+            onLeave : onLeave,
+            framebufferID : canvas.newFramebuffer()
           });
         }]); 
       },
@@ -1671,7 +1770,8 @@
               renderable: renderable,
               skipAnimation : skipAnimation,
               setID : setID,
-              autoSkipAfterFrames : autoSkipAfterFrames
+              autoSkipAfterFrames : autoSkipAfterFrames,
+              framebufferID : canvas.newFramebuffer()
             });
           }], setID);
         }
@@ -1709,15 +1809,21 @@
       invalidateCache ::(tag) {
         return ::? {
           @:cs = [...choiceStack];
+          @:popped = [];
+          @found = false;
           forever ::{
             if (cs->keycount == 0)
               send(:false)
             @:data = cs[cs->keycount-1];
             if (data.jumpTag != tag) ::<= {
-              cs->pop;
+              popped->push(:cs->pop);
             } else ::<= {
-              data.disableCache = true;
-              send(:true)
+              popped->push(:data);
+              foreach(popped) ::(k, v) {
+                if (v.disableCache == empty)
+                  v.disableCache = true;
+              }
+              send(:true);
             }
           }
         }
@@ -1767,7 +1873,8 @@
             animationFrame : animationFrame,
             waitFrames : waitFrames,
             onInput : onInput,
-            disableCache : if (disableCache != empty) PERMANENT else empty
+            disableCache : if (disableCache != empty) PERMANENT else empty,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);        
         return getResolveQueue()->size-1;
@@ -1845,7 +1952,8 @@
             isAnimation : isAnimation,
             animationFrame : animationFrame,
             onInput : onInput,
-            resolveStack : true
+            resolveStack : true,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);        
         return getResolveQueue()->size-1;
@@ -1915,7 +2023,8 @@
             renderable:renderable,
             jumpTag: jumpTag,
             isAnimation : isAnimation,
-            animationFrame : animationFrame
+            animationFrame : animationFrame,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);        
         return getResolveQueue()->size-1;
@@ -1997,7 +2106,8 @@
             onInput : onInput,
             onGetMinHeight : onGetMinHeight,
             onGetMinWidth : onGetMinWidth,
-            onGetFooter : onGetFooter
+            onGetFooter : onGetFooter,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);
         return getResolveQueue()->size-1;
@@ -2045,7 +2155,8 @@
             keep: keep,
             onGetPrompt : onGetPrompt,
             renderable:renderable,
-            jumpTag : jumpTag
+            jumpTag : jumpTag,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);
         return getResolveQueue()->size-1;
@@ -2083,8 +2194,9 @@
         }
         if (goBeforeTag != empty) ::<= {
           @:data = choiceStack->pop; 
-          if (data.stateID != empty)
-            canvas.removeState(id:data.stateID);
+          if (data.framebufferID != empty) ::<= {
+            removeChoiceStackItem(:data);
+          }
 
           if (data.onLeave)
             data.onLeave();          
@@ -2131,7 +2243,8 @@
             onLeave : onLeave,
             keep : keep,
             renderable:renderable,
-            onKept : onKept
+            onKept : onKept,
+            framebufferID : canvas.newFramebuffer()
           });
         }]);
         return getResolveQueue()->size-1;
@@ -2164,13 +2277,75 @@
             renderable:renderable,
             jumpTag: jumpTag,
             trap : trap,
-            onMenu : onMenu
+            onMenu : onMenu,
+            framebufferID : canvas.newFramebuffer()
           });
           canvas.clear();
         }]);
         return getResolveQueue()->size-1;
       },  
+      
+      queueTransition ::(
+        kind => Number,
+        renderableMiddle,
+        renderableStart
+      ) {
+      
+        when(kind == TRANSITION.FADE_TO_BLACK) ::<= {
+          this.queueCustomTransition(
+            renderableStart : renderableStart,
 
+            animationFrameBefore ::<= {
+              @t = 0.1;
+              return ::{
+                @counter = (canvas.width*(t**4.8))->floor
+                canvas.clear();
+                canvas.movePen(x:0, y:0);
+                canvas.drawRectangle(text: ' ', width:counter, height: canvas.height);
+                t += 0.08;
+                when(t < 1) empty;
+                return ANIMATION_FINISHED;
+              }
+            },
+            
+            renderableMiddle : renderableMiddle,
+            
+            animationFrameAfter ::<= {
+              @t = 0;
+              return ::{
+                @counter = (canvas.width*(t**4.8))->floor
+                canvas.clear();
+                canvas.movePen(x:counter, y:0);
+                canvas.drawRectangle(text: ' ', width:canvas.width - counter, height: canvas.height);
+                t += 0.08;
+                when(t < 1) empty;
+                return ANIMATION_FINISHED;
+              }
+            }
+            
+          );
+        }
+      },
+
+      queueCustomTransition ::(
+        animationFrameBefore => Function,
+        animationFrameAfter => Function,
+        renderableMiddle,
+        renderableStart,
+        jumpTag
+      ) {
+        pushResolveQueueTop(fns:[::{
+          choiceStackPush(value:{
+            mode:if (isCursor) CHOICE_MODE.TRANSITION,
+            renderBefore : animationFrameBefore,
+            renderAfter : animationFrameAfter,            
+            renderableMiddle : renderableMiddle,
+            renderableStart : renderableStart,
+            framebufferID : canvas.newFramebuffer()
+          });
+        }]);
+        return getResolveQueue()->size-1;
+      },
             
 
         
@@ -2196,8 +2371,9 @@
       },
 
       // ask yes or no immediately.
-      queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt) {
+      queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt, defaultChoice) {
         return this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave, topWeight, leftWeight,
+          defaultChoice: if (defaultChoice == true) 0 else 1,
           onChoice::(choice){
             onChoice(which: choice == 1);
           },

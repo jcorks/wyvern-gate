@@ -403,7 +403,7 @@
         windowEvent.queueNestedResolve(
           renderable : {
             render ::{
-              canvas.blackout();
+              canvas.fill();
             }
           },
           

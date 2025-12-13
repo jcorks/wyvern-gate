@@ -18,7 +18,10 @@
 @:Database = import(module:'game_class.database.mt');
 @:class = import(module:'Matte.Core.Class');
 @:StatSet = import(module:'game_class.statset.mt');
-
+@:windowEvent = import(:'game_singleton.windowevent.mt');
+@:BattleAction = import(module:'game_struct.battleaction.mt');
+@:Arts = import(module:'game_mutator.arts.mt');
+@:random = import(module:'game_singleton.random.mt');
 
 
 @:TRAIT = {
@@ -60,7 +63,8 @@ Species.newEntry(data:{
   canBlock : true,
   passives : [
   ],
-  swarms : false
+  swarms : false,
+  overrideBattleAI : empty
 })
 
 Species.newEntry(data:{
@@ -89,6 +93,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -122,6 +127,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -155,6 +161,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -186,6 +193,7 @@ Species.newEntry(data:{
     'base:body'
   ],
   swarms : false,
+  overrideBattleAI : empty,
   
   canBlock : true,
   traits : 0,
@@ -219,6 +227,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -251,6 +260,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -285,6 +295,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -319,6 +330,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -383,6 +395,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -416,6 +429,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -448,6 +462,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -481,6 +496,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -513,6 +529,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -544,6 +561,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -576,6 +594,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -606,6 +625,8 @@ Species.newEntry(data:{
   swarms : false,
   canBlock : true,
   traits : 0,
+  overrideBattleAI : empty,
+
   passives : [
   ]
 })
@@ -634,6 +655,7 @@ Species.newEntry(data:{
   ],    
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -668,6 +690,7 @@ Species.newEntry(data:{
   ],
   // OKAY HEAR ME OUT... THIS COULD BE FUNNY....
   swarms : true,
+  overrideBattleAI : empty,
     
   canBlock : true,
   traits : 0,
@@ -701,6 +724,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -733,6 +757,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -766,6 +791,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -799,6 +825,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   passives : [
   ]
@@ -831,6 +858,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : 0,
   passives : [
@@ -857,6 +885,7 @@ Species.newEntry(data:{
   ],
   swarms : true,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL,
   passives : [
@@ -883,6 +912,55 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : false,
+  overrideBattleAI : empty,
+  
+  traits : TRAIT.SPECIAL,
+  passives : [
+  ]
+})
+
+Species.newEntry(data:{
+  name : 'Mobile Mushroom',
+  id : 'base:mobile-mushroom',
+  rarity : 2000000000000,
+  description: 'A moving mushroom.',
+  growth : StatSet.new(
+    HP : 10,
+    AP : 1,
+    ATK: 1,
+    DEF: 4,
+    INT: 1,
+    LUK: 1,
+    SPD: 1,
+    DEX: 1
+  ),
+  qualities : [
+
+  ],
+  swarms : false,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    entity.ap += 2;
+    windowEvent.queueMessage(speaker: entity.name, text: '...');
+    when(battle.getEnemies(:entity)->size == 0) 
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:acidic-gas')),
+        targets: battle.getEnemies(:entity),
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )
+    ]);
+  },
   
   traits : TRAIT.SPECIAL,
   passives : [
@@ -909,6 +987,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL  | TRAIT.SUMMON,
   passives : [
@@ -935,6 +1014,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL  | TRAIT.SUMMON,
   passives : [
@@ -961,6 +1041,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL | TRAIT.SUMMON,
   passives : [
@@ -987,6 +1068,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL | TRAIT.SUMMON,
   passives : [
@@ -1014,6 +1096,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL | TRAIT.SUMMON,
   passives : [
@@ -1041,6 +1124,7 @@ Species.newEntry(data:{
   ],
   swarms : false,
   canBlock : true,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL,
   passives : [
@@ -1070,6 +1154,7 @@ Species.newEntry(data:{
   swarms: true,
   traits : TRAIT.SPECIAL | TRAIT.ETHEREAL,
   canBlock : false,
+  overrideBattleAI : empty,
   passives : [
     'base:apparition'
   ]
@@ -1095,10 +1180,82 @@ Species.newEntry(data:{
   ],
   swarms : true,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL,
   passives : [
     'base:the-beast'
+  ]
+})
+
+
+Species.newEntry(data:{
+  name : 'Flaming Skull',
+  id : 'base:flaming-skull',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 6,
+    AP : 10,
+    ATK: 10,
+    DEF: 10,
+    INT: 10,
+    LUK: 10,
+    SPD: 10,
+    DEX: 10
+  ),
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    entity.ap += 2;
+    @:Entity = import(module:'game_class.entity.mt');        
+    
+    @:whosLeft = battle.getEnemies(:entity)->filter(::(value) <- value.isIncapacitated() == false);
+    when (whosLeft->size == empty) ::<= {
+      windowEvent.queueMessage(text: entity.name + ' seems satisfied.');
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    }
+
+    when(random.flipCoin()) 
+      commitBattleActions(:[
+        BattleAction.new(
+          card: Arts.new(base:Arts.database.find(id:'base:fire')),
+          turnIndex : 0,
+
+          targets: [
+            random.pickArrayItem(list:whosLeft)
+          ],
+          targetParts : [
+            Entity.normalizedDamageTarget()
+          ],
+          extraData: {}            
+        )      
+      ]);
+      
+    // "hey i do that" - Roxy
+    windowEvent.queueMessage(text: entity.name + ' laughs maniacally!');
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:doom-strike')),
+        targets: [...battle.getEnemies(:entity)],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )
+    ]);
+  },  
+  traits : TRAIT.SPECIAL,
+  passives : [
+    'base:scorching',
+    'base:aspect-fire'
   ]
 })
 
@@ -1122,6 +1279,7 @@ Species.newEntry(data:{
   ],
   swarms : true,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL,
   passives : [
@@ -1148,6 +1306,7 @@ Species.newEntry(data:{
   ],
   swarms : true,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL,
   passives : [
@@ -1173,9 +1332,143 @@ Species.newEntry(data:{
   ],
   swarms : true,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL,
   passives : [
+  ]
+})
+
+Species.newEntry(data:{
+  name : 'Skeleton',
+  id : 'base:skeleton',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 6,
+    AP : 5,
+    ATK: 3,
+    DEF: 4,
+    INT: 7,
+    LUK: 1,
+    SPD: 7,
+    DEX: 10
+  ),
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    @:Entity = import(module:'game_class.entity.mt');        
+
+    when (entity.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).base.id == 'base:none') ::<= {
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:b198')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    }
+    
+    @:targets = battle.getEnemies(:entity);
+  
+    when(targets->size == 0) 
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:attack')),
+        targets: [random.pickArrayItem(:targets)],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )
+    ]);
+  },  
+  traits : TRAIT.SPECIAL,
+  passives : [
+  ]
+})
+
+
+
+
+Species.newEntry(data:{
+  name : 'Gold Slime',
+  id : 'base:gold-slime',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 6,
+    AP : 5,
+    ATK: 3,
+    DEF: 4,
+    INT: 7,
+    LUK: 1,
+    SPD: 7,
+    DEX: 20
+  ),
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    @:Entity = import(module:'game_class.entity.mt');  
+    
+    when(random.try(percentSuccess:10)) ::<= {
+      windowEvent.queueMessage(text:'The gold slime melted into a puddle and ran away!');
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:see-ya')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    }      
+    
+    
+    @:targets = battle.getEnemies(:entity);
+  
+    when(targets->size == 0) 
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+
+
+    when((entity.ap >= 2) && random.try(percentSuccess:30))
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:flash')),
+        targets: [...targets],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+
+    
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:attack')),
+        targets: [random.pickArrayItem(:targets)],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )
+    ]);
+  },  
+  traits : TRAIT.SPECIAL,
+  passives : [
+    'base:metal-body'
   ]
 })
 
@@ -1200,6 +1493,7 @@ Species.newEntry(data:{
   ],
   swarms : true,
   canBlock : false,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL,
   passives : [
@@ -1225,6 +1519,7 @@ Species.newEntry(data:{
   qualities : [
   ],
   swarms : true,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL,
   canBlock : false,
@@ -1251,6 +1546,7 @@ Species.newEntry(data:{
   qualities : [
   ],
   swarms : true,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL | TRAIT.SUMMON,
   canBlock : false,
@@ -1277,6 +1573,7 @@ Species.newEntry(data:{
   qualities : [
   ],
   swarms : true,
+  overrideBattleAI : empty,
   
   traits : TRAIT.SPECIAL | TRAIT.SUMMON,
   canBlock : false,
@@ -1309,7 +1606,8 @@ Species.newEntry(data:{
     passives : Object,
     traits : Number,
     swarms : Boolean,
-    canBlock : Boolean
+    canBlock : Boolean,
+    overrideBattleAI : Nullable
   },
   reset 
 );

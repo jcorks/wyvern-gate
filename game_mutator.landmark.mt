@@ -311,13 +311,12 @@ Landmark.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.POINT_OF_NO_RETURN |
       TRAIT.EPHEMERAL,
-    minEvents : 1,
+    minEvents : 2,
     maxEvents : 7,
     eventPreference : LandmarkEvent.KIND.HOSTILE,
 
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
-      'base:dungeon-encounters',
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
@@ -380,13 +379,12 @@ Landmark.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.POINT_OF_NO_RETURN |
       TRAIT.EPHEMERAL,
-    minEvents : 1,
+    minEvents : 2,
     maxEvents : 7,
     eventPreference : LandmarkEvent.KIND.HOSTILE,
 
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
-      'base:dungeon-encounters'
     ],
     possibleLocations : [
 //          {id: 'Stairs Down', rarity:1},
@@ -467,7 +465,7 @@ Landmark.database.newEntry(
     onVisit ::(landmark, island) {
       @:canvas = import(module:'game_singleton.canvas.mt');
       @:windowEvent = import(module:'game_singleton.windowevent.mt');
-      windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.blackout()});
+      windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.fill()});
     }
     
   }
@@ -1346,6 +1344,7 @@ Landmark.database.newEntry(
 
       removeLocation ::(location) {
         state.map.removeItem(data:location);
+        windowEvent.invalidateCache(:'VisitLandmark');
       },
 
       addLocation ::(location, width, height, noHalo, discovered) {
@@ -1379,8 +1378,9 @@ Landmark.database.newEntry(
         } else 
           defaultAdd(discovered:false);
 
+        windowEvent.invalidateCache(:'VisitLandmark');
         return loc;      
- 
+
       },
       
       moveLocation ::(location) {

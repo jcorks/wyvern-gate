@@ -34,7 +34,10 @@
   @:world = import(module:'game_singleton.world.mt');
 
   @:commitAction ::(action => BattleAction->type) {
-    if (Arts.database.find(id:action.card.id).kind == Arts.KIND.ABILITY) ::<= {
+    if (
+      Arts.database.find(id:action.card.id).kind == Arts.KIND.ABILITY ||
+      Arts.database.find(id:action.card.id).kind == Arts.KIND.SPECIAL
+    ) ::<= {
       windowEvent.jumpToTag(name:'BattleMenu', goBeforeTag:true)
       battle.entityCommitAction(action:action);  
     } else ::<= {

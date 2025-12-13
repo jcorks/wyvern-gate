@@ -11,18 +11,20 @@
 @:AGGRESSIVE_DISTANCE = 5;
 
 
+
+
 @:TheBeast = LoadableClass.create(
-  name: 'Wyvern.LandmarkEvent.TheBeast',
+  name: 'Wyvern.LandmarkEvent.FlamingSkull',
   
   statics : {
     createEntity ::{
       @:Entity = import(module:'game_class.entity.mt');
       @world = import(module:'game_singleton.world.mt');
       @:beast = world.island.newInhabitant(
-        speciesHint : 'base:beast',
-        professionHint : 'base:beast'
+        speciesHint : 'base:flaming-skull',
+        professionHint : 'base:flaming-skull'
       );
-      beast.name = 'the Dungeon Beast';
+      beast.name = 'the Flaming Skull';
       beast.supportArts = [];      
       for(0, 20) ::(i) {
         beast.autoLevelProfession(:beast.profession);
@@ -30,14 +32,14 @@
       beast.equipAllProfessionArts();  
 
       beast.stats.load(serialized:StatSet.new(
-        HP:   75,
+        HP:   30,
         AP:   999,
         ATK:  14,
         INT:  30,
         DEF:  3,
         LUK:  6,
         SPD:  100,
-        DEX:  10
+        DEX:  20
       ).add(:beast.stats).save());
       
       beast.unequipAll(silent:true);
@@ -86,21 +88,33 @@
       @:ref = landmark_.mapEntityController.add(
         x:tileX, 
         y:tileY, 
-        symbol:'B',
+        symbol:'@',
         entities : ents,
-        tag : 'thebeast'
+        tag : 'theflamingskull'
+      );
+      ref.data.emitter = import(:'game_class.particle.mt').new(
+        directionMin : -110,
+        directionMax : -80,
+
+        directionDeltaMin : -1,
+        directionDeltaMax : 2,
+    
+        speedMin : 0.3,
+        speedMax : 1,
+        
+        speedDeltaMin : 0.03,
+        speedDeltaMax : 0.05,
+
+        characters : ['▓', '▓', '▒', '░', '▒', '░', '░'],
+        charactersRepeat : false,
+        
+        lifeMax : 4,
+        lifeMin : 1    
       );
       ref.addUpkeepTask(id:'base:thebeast-roam');
       ref.addUpkeepTask(id:'base:aggressive');
       ref.addDeathTask(id:'base:to-body');
 
-      if (state.encountersOnFloor == 1)
-        windowEvent.queueMessage(
-          text:random.pickArrayItem(list:[
-            'That was definitely a roar or snarl just now. Something\'s near.',
-            'Something heavy is stomping nearby.',
-          ])
-        );      
 
     }
     
@@ -127,11 +141,19 @@
       
       
       step::{
-        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'thebeast');
+        @:entities = landmark_.mapEntityController.mapEntities->filter(by::(value) <- value.tag == 'theflamingskull');
+        
+        foreach(entities) ::(k, v) {
+          @mapPos = v.position;
+          @:pos = landmark_.map.mapCoordinatesToScreen(*mapPos);
+          v.data.emitter.move(x:pos.x, y:pos.y);
+          v.data.emitter.start(emitCount:1);
+          v.data.emitter.stop();
+        }
       
         // add additional entities out of spawn points (stairs)
         //if ((entities->keycount < (if (landmark_.floor == 0) 0 else (2+(landmark_.floor/4)->ceil))) && landmark_.base.peaceful == false && random.number() < 0.1 / (encountersOnFloor*(10 / (island_.tier+1))+1)) ::<= {
-        if (entities->keycount < 1 && state.hasBeast) ::<= {
+        if (entities->keycount < 3 && state.hasBeast) ::<= {
           addEntity();
           state.hasBeast = false;
         }

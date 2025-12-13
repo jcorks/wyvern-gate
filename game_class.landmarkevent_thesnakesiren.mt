@@ -42,7 +42,7 @@
         DEX:  7
       ).add(:beast.stats).save());
       
-      beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+      beast.unequipAll(silent:true);
       beast.heal(amount:9999, silent:true); 
       beast.healAP(amount:9999, silent:true);
       beast.aiAbilityChance = 75;
