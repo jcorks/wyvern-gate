@@ -547,10 +547,10 @@ return {
             };
           
             windowEvent.queueChoices(
-              choicesMatch : {
-                ('More details...') ::<- quest.whereAmI(),
-                ('Give up') ::<- giveUp()
-              },
+              choicesMatch : [
+                'More details...', ::<- quest.whereAmI(),
+                'Give up', ::<- giveUp()
+              ],
               keep: true,
               canCancel: true
             );

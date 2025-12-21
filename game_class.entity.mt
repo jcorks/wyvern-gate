@@ -255,27 +255,71 @@
     ));  
   */
       
-  @:stat = ::(name) {
-    when (random.flipCoin()) 0;
+  @:stat ::(name) {
     @:base = growthPotential[name];
     @val =  (0.5 * (random.number()/2) * (base / 4) + base/5)->floor
-    when(val < 1) 1;
+    val += random.integer(from:0, to:1);
+    when(val < 0) 0;
     return val;
   }
+  
+  
+  @:statNormalize::(stats) {
+    @:TOTAL_PER_LEVEL = 9;
+    
+    @min = 1;
+    @max = 1.1;
+
+    // inefficient way!
+    
+    @:potential = {};
+    ::?{
+
+      @aMin = 999999999;
+      @aMax =-999999999;
+      foreach(StatSet.NAMES) ::(index, name) {
+        when(name == 'AP' || name == 'LUK') empty;
+        @val = stats[name];
+        if (val < aMin) aMin = val;
+        if (val > aMax) aMax = val;
+      }
+      
+      forever ::{
+        foreach(StatSet.NAMES) ::(index, name) {
+          when(name == 'AP' || name == 'LUK') empty;
+          @val = stats[name];
+          
+          if (aMin == aMax) 
+            potential[name] = ((max - min)*0.5)->ceil
+          else
+            potential[name] = (((val - aMin) / (aMax - aMin)) * (max - min) + min)->floor;
+        }  
+
+        @sum = potential->values->reduce(::(value, previous) <- if (previous == empty) value else previous + value);
+        if (sum > TOTAL_PER_LEVEL)
+          send();
+        max += 0.2;
+        if (max >= 15)
+          error();
+      }
+    }  
+    potential.HP += random.integer(from:1, to:2);
+    potential.LUK = if (random.try(percentSuccess:20)) 1 else 0;
+    return StatSet.new(*potential);
+  }
   @:story = import(:'game_singleton.story.mt');
-  stats.add(stats:StatSet.new(
-    HP  : if (level <= story.levelHint)
-        (if(random.flipCoin()) 1 else 2) + (stat(name:'HP'))
-      else 
-        ((random.integer(from:3, to:5)) + (stat(name:'HP')) * (1+(level)*0.1))->floor,
-    AP  : 0,
+  
+  
+  
+  stats.add(stats:statNormalize(:{
+    HP  : stat(name:'HP'),
     ATK : stat(name:'ATK'),
     INT : stat(name:'INT'),
     DEF : stat(name:'DEF'),
     SPD : stat(name:'SPD'),
-    LUK : stat(name:'LUK'),
     DEX : stat(name:'DEX')
-  ));
+  }));
+
   
   return (50 + (level*level * 0.1056) * 1000)->floor;
 }	
@@ -574,6 +618,12 @@
     if (onDone) onDone();
 
 
+  @:applyHPbonus ::{
+    @:newState = this.stats.save();
+    newState['HP'] += random.integer(from:6, to:8);
+    this.stats.load(serialized:newState);
+  }
+
   if (set == empty) ::<= {
     levelUpProfession(this, state, profession);
     set = state.professionProgress[profession.id];
@@ -626,9 +676,8 @@
             
             @:oldStats = StatSet.new();
             oldStats.load(serialized:this.stats.save());
-            @:newState = this.stats.save();
-            newState['HP'] += if (random.try(percentSuccess:20)) 3 else 2;
-            this.stats.load(serialized:newState);
+            
+            applyHPbonus();
             
             oldStats.printDiff(
               other:this.stats,
@@ -663,15 +712,19 @@
   } else ::<= {
     ::? {
       forever ::{
-        when(exp == 0) send();
+        when(exp <= 0) send();
         if (set.level >= profession.arts->size) send();
         
-        if (exp > set.expToNext) ::<= {
+        if (exp >= set.expToNext) ::<= {
           exp -= set.expToNext;
           levelUpProfession(this, state, profession);
+          applyHPbonus();
+          breakpoint();
         } else ::<= {
           set.exp += exp
           set.expToNext -= exp
+          exp = 0;
+          breakpoint();
         }
       }
     }
@@ -767,6 +820,18 @@
       when (rate <= 0.25) DAMAGE_TARGET.HEAD;
       when (rate <  0.75) DAMAGE_TARGET.BODY;
       return DAMAGE_TARGET.LIMBS
+    },
+    
+    equipTypeToSlots ::(equipType) {
+      return match(equipType) {
+          (Item.TYPE.HAND)   :  [EQUIP_SLOTS.HAND_LR],
+          (Item.TYPE.ARMOR)  :  [EQUIP_SLOTS.ARMOR],
+          (Item.TYPE.AMULET)   :  [EQUIP_SLOTS.AMULET],
+          (Item.TYPE.RING)   :  [EQUIP_SLOTS.RING_L, EQUIP_SLOTS.RING_R],
+          (Item.TYPE.TRINKET)  :  [EQUIP_SLOTS.TRINKET],
+          (Item.TYPE.TWOHANDED):  [EQUIP_SLOTS.HAND_LR],
+          default: error(detail:'Item has an invalid equiptype?')    
+        }    
     },
     
     displayedHurt : {
@@ -922,12 +987,7 @@
 
       state.professionProgress = [];
 
-      if (state.profession.traits & Profession.TRAIT.NON_COMBAT) ::<= {
-        for(0, 21) ::(i) {
-          this.autoLevelProfession();
-        }
-      } else 
-        this.autoLevelProfession();
+      this.autoLevelProfession();
       
 
       
@@ -940,7 +1000,7 @@
 
       
       state.growth.mod(stats:state.species.growth);
-      state.growth.mod(stats:state.personality.growth);
+      state.growth.mod(stats:state.personality.growth.scale(:0.2));
       state.growth.mod(stats:state.profession.growth);
       for(0, levelHint)::(i) {
         this.autoLevel();        
@@ -2440,6 +2500,20 @@
       );
     },
     
+    autoLevelProfessionPlayer ::(profession, onDone) {
+      @:state = _.state;
+      @:this = _.this;
+      
+      profession = if (profession == empty) this.profession else profession
+      
+
+      this.gainProfessionExp(
+        profession,
+        exp: state.professionProgress[profession.id].expToNext,
+        silent : true
+      );
+    },
+    
     
     removeAllProfessionArts ::{
       @:state = _.state;
@@ -2879,15 +2953,7 @@
       
     // returns an array of equip slots that the item can fit in.
     getSlotsForItem ::(item => Item.type) {
-      return match(item.base.equipType) {
-        (Item.TYPE.HAND)   :  [EQUIP_SLOTS.HAND_LR],
-        (Item.TYPE.ARMOR)  :  [EQUIP_SLOTS.ARMOR],
-        (Item.TYPE.AMULET)   :  [EQUIP_SLOTS.AMULET],
-        (Item.TYPE.RING)   :  [EQUIP_SLOTS.RING_L, EQUIP_SLOTS.RING_R],
-        (Item.TYPE.TRINKET)  :  [EQUIP_SLOTS.TRINKET],
-        (Item.TYPE.TWOHANDED):  [EQUIP_SLOTS.HAND_LR],
-        default: error(detail:'Item has an invalid equiptype?')    
-      }
+      return Entity.equipTypeToSlots(:item.base.equipType);
     },
     
     unequipAll ::(inventory, silent) {
@@ -3349,6 +3415,20 @@
       return out;
     },
    
+    statModComparisonToLines ::{
+      @:state = _.state;
+      @:this = _.this;
+      @:plainStatsState = this.stats.save();
+      @:plainStats = StatSet.new();
+      plainStats.load(serialized:plainStatsState);
+      plainStats.resetMod();
+
+      return StatSet.diffToLines(
+        stats:plainStats, 
+        other:state.stats
+      );    
+    },
+    
       
     describe::(excludeStats, showFeelings)  {
       @:state = _.state;

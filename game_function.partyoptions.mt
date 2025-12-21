@@ -266,8 +266,8 @@ return ::{
       onChoice ::(choice) {
         @:prof = member.professions[choice-1];
         windowEvent.queueChoices(
-          choicesMatch : {
-            ('Info...') ::{
+          choicesMatch : [
+            'Info...', ::{
               windowEvent.queueDisplay(
                 lines : canvas.columnsToLines(
                   columns : [
@@ -291,7 +291,7 @@ return ::{
                 )
               );
             },
-            ('Set as profession') :: {
+            'Set as profession', :: {
               when (prof == member.profession) 
                 windowEvent.queueMessage(
                   text: member.name + '\'s current profession is already set to a ' + member.profession.name + '.'
@@ -303,7 +303,7 @@ return ::{
                 text: member.name + ' is now a ' + member.profession.name + '.'
               );            
             }
-          },
+          ],
           canCancel: true
         );  
       }

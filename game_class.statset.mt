@@ -181,6 +181,14 @@
       }
       return _.this;
     },
+    
+    scale ::(amount) {
+      @:state = _.state;
+      foreach(NAMES) ::(k, v) {
+        state[v] = (state[v]*amount)->floor;
+      }            
+      return _.this;
+    },
       
     modRate ::(stats) {
       @:state = _.state;

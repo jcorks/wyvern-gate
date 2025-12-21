@@ -142,7 +142,7 @@ Arts.database.newEntry(
     kind : KIND.ABILITY,
     traits : TRAIT.PHYSICAL | TRAIT.SPECIAL | TRAIT.COSTLESS | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.COMMON,
-    baseDamage ::(level, user) <- user.stats.ATK * (0.5) * level,
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       breakpoint();
       windowEvent.queueCustom(
@@ -256,7 +256,7 @@ Arts.database.newEntry(
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
-    baseDamage ::(level, user) <- (user.stats.ATK * (0.2) + user.stats.DEX * (0.5)) * (1 + 0.1*(level-1)),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user)*0.5 + user.stats.DEX * 1.3,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -292,7 +292,7 @@ Arts.database.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.DEX * (0.5),
+    baseDamage ::(level, user) <- user.stats.DEX * (1.5),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       user.attack(
         target:targets[0],
@@ -364,7 +364,7 @@ Arts.database.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user)<- user.stats.ATK * (0.5 + 0.15 * level),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -413,7 +413,7 @@ Arts.database.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.1),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user) * 0.6,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -469,7 +469,7 @@ Arts.database.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage::(level, user) <- user.stats.ATK * (0.4 + (level-1)*0.07),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user) * 0.4,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       windowEvent.queueCustom(
@@ -670,7 +670,7 @@ Arts.database.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {
       @:world = import(module:'game_singleton.world.mt');
-      return user.stats.INT * (if (world.time >= world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);
+      return Arts.baseINTmoveDamage(:user) * (if (world.time >= world.TIME.EVENING) 1.4 else 0.8);
     },
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -717,7 +717,7 @@ Arts.database.newEntry(
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {
       @:world = import(module:'game_singleton.world.mt');
-      return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.4 else 0.8) * (1 + (level-1)*0.05);    
+      return Arts.baseINTmoveDamage(:user)  * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.4 else 0.8);    
     },
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -765,7 +765,7 @@ Arts.database.newEntry(
     traits : TRAIT.MAGIC | TRAIT.FIRE | TRAIT.IS_ATTACK,
     baseDamage ::(level, user) {
       @:world = import(module:'game_singleton.world.mt');
-      return user.stats.INT * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.7 else 0.4) * (1 + (level-1)*.08);
+      return Arts.baseINTmoveDamage(:user) * (if (world.time >= world.TIME.MORNING && world.time < world.TIME.EVENING) 1.9 else 0.4);
     },
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:world = import(module:'game_singleton.world.mt');
@@ -1229,7 +1229,7 @@ Arts.database.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*.05),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user) * 0.4,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach(targets)::(index, target) {
         windowEvent.queueCustom(
@@ -1267,7 +1267,7 @@ Arts.database.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.1),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user) * 1.2,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
 
       windowEvent.queueCustom(
@@ -1307,7 +1307,7 @@ Arts.database.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     usageHintAI : USAGE_HINT.DONTUSE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.ATK * (0.7) * (1 + (level-1)*0.2),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user) * 0.8,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:pickItem = import(module:'game_function.pickitem.mt');
       @:world = import(module:'game_singleton.world.mt');
@@ -1393,7 +1393,7 @@ Arts.database.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.ATK * (0.4) * (1 + (level-1)*0.07),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user) * 0.25,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
 
       user.attack(
@@ -1530,7 +1530,7 @@ Arts.database.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.ATK * (0.35) * (1 + (level-1)*0.05),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user) * 0.6,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       windowEvent.queueCustom(
@@ -1786,7 +1786,7 @@ Arts.database.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user)<- user.stats.ATK * (0.3) * (1 + (level-1)*0.05) + (level-1),
+    baseDamage ::(level, user)<- Arts.baseATKmoveDamage(:user) * 0.3,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
 
       user.attack(
@@ -2406,7 +2406,7 @@ Arts.database.newEntry(
     rarity : RARITY.COMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.INT * (1.2) * (1 + (level-1)*0.15),
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -2434,7 +2434,7 @@ Arts.database.newEntry(
     notifCommit : '$1 generates a great amount of heat!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ALLENEMY,
-    description: 'Using great amount of heat, gives targets the Burned effect. Damage is based on INT.',
+    description: 'Using a great amount of heat, gives targets the Burned effect. Damage is based on INT.',
     keywords : ['base:burned'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2442,7 +2442,7 @@ Arts.database.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.INT * (0.6) * (1 + (level-1)*0.08),
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user) * 0.6,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       
       foreach(targets)::(i, target) {
@@ -2485,7 +2485,7 @@ Arts.database.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.INT * (2.0) * (1 + (level-1) * 0.15),
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user) * 1.5,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
@@ -2580,7 +2580,7 @@ Arts.database.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.INT * (0.6 + (0.2)*(level-1)),
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user) * 0.8,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         windowEvent.queueCustom(
@@ -2617,7 +2617,7 @@ Arts.database.newEntry(
     rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.INT * (0.75) * (1 + (level-1)* 0.15),
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user) * 0.85,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         windowEvent.queueCustom(
@@ -2686,7 +2686,7 @@ Arts.database.newEntry(
     rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.INT * (0.85) * (1 + (level-1)*0.1),
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user) * 1.3,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       foreach((user.battle.getEnemies(:user)))::(index, enemy) {
         windowEvent.queueCustom(
@@ -2760,7 +2760,7 @@ Arts.database.newEntry(
     rarity : RARITY.RARE,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
-    baseDamage ::(level, user) <- user.stats.INT * (0.45),
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user) * 0.45,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       for(0, 3)::(index) {
         @:target = random.pickArrayItem(list:(user.battle.getEnemies(:user)));
@@ -5636,7 +5636,7 @@ Arts.database.newEntry(
     kind : KIND.EFFECT,
     traits : TRAIT.SUPPORT | TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
-    baseDamage ::(level, user) <- user.stats.ATK * (0.3),
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user) * 0.3,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       windowEvent.queueCustom(
         onEnter :: {
@@ -8261,7 +8261,7 @@ Arts.database.newEntry(
     kind : KIND.ABILITY,
     traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
-    baseDamage ::(level, user) <- user.stats.ATK * (0.3) * level,
+    baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user) * 0.3,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
       @:baseDamage = Arts.database.find(:'base:b205').baseDamage(level, user);
@@ -8299,7 +8299,7 @@ Arts.database.newEntry(
     kind : KIND.ABILITY,
     traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.UNCOMMON,
-    baseDamage ::(level, user) <- user.stats.INT * (0.3) * level,
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user) *0.3 ,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
       @:baseDamage = Arts.database.find(:'base:b205').baseDamage(level, user);
@@ -8492,6 +8492,7 @@ Arts.database.newEntry(
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {
+
       when (user.effectStack.getAllByFilter(::(value) <-
          ATTACK_SHIFTS->findIndex(:value.id) != -1
       )->size == 0) false;
@@ -8502,7 +8503,7 @@ Arts.database.newEntry(
     traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
     baseDamage ::(level, user) {
-      @:baseDamage = user.stats.INT * (0.1 + 0.2*level)
+      @:baseDamage = Arts.baseINTmoveDamage(:user) * 0.3;
       @:count = user.effectStack.getAllByFilter(::(value) <-
          ATTACK_SHIFTS->findIndex(:value.id) != -1
       )->size;
@@ -8601,7 +8602,7 @@ Arts.database.newEntry(
     kind : KIND.ABILITY,
     traits : TRAIT.PHYSICAL | TRAIT.MAGIC | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
     rarity : RARITY.EPIC,
-    baseDamage ::(level, user) <- user.stats.INT * (0.3 * level),
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user) * 0.3,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
 
 
@@ -9878,7 +9879,7 @@ Arts.database.newEntry(
     kind : KIND.ABILITY,
     traits : TRAIT.MAGIC | TRAIT.IS_ATTACK,
     rarity : RARITY.RARE,
-    baseDamage ::(level, user) <- user.stats.INT * (0.5) * level,
+    baseDamage ::(level, user) <- Arts.baseINTmoveDamage(:user) * 1.1,
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
       @effCount = 0;
       foreach( user.battle.getAllies(:user)) ::(k, v) {
@@ -12829,6 +12830,9 @@ Arts = databaseItemMutatorClass.create(
     TRAIT : {get::<- TRAIT},
     CANCEL_MULTITURN : {get::<- -1},
     A_LOT : {get ::<- A_LOT},
+    
+    baseATKmoveDamage::(user) <- user.stats.ATK * 1.13,
+    baseINTmoveDamage::(user) <- user.stats.INT * 1.37,
     
     renderListItem::(art) {
       return [

@@ -1,0 +1,11 @@
+{
+  "id": "mod.dev.rasa.stat-sim",
+  "name": "Stat Sim",
+  "description": "Simulate stats of various species, professions, and levels.",
+  "author": "Rasa",
+  "website": "https://github.com/jcorks/wyvern-gate",
+  "files" : [
+    "main.mt"
+  ],
+  "loadFirst" : []
+}

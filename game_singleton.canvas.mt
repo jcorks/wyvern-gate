@@ -341,7 +341,9 @@ return class(
         maxWidth,
         maxHeight,
         minWidth,
-        notchText
+        notchText,
+        x,
+        y
       ) {
         @:WINDOW_BUFFER = 4;
       
@@ -371,9 +373,9 @@ return class(
             width = v->length;
         }
         
-        @left   = ((this.width - (width+WINDOW_BUFFER))*leftWeight)->floor;
+        @left   = if (x == empty) x else ((this.width - (width+WINDOW_BUFFER))*leftWeight)->floor;
         width   = width + WINDOW_BUFFER;
-        @top  = ((this.height - (lines->keycount + WINDOW_BUFFER)) * topWeight)->floor;
+        @top    = if (y == empty) y else ((this.height - (lines->keycount + WINDOW_BUFFER)) * topWeight)->floor;
         @height = lines->keycount + WINDOW_BUFFER;
         
         if (top < 0) top = 0;

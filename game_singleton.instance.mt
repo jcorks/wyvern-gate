@@ -359,8 +359,8 @@ return class(
         settings = JSON.decode(string:onLoadSettings_());
 
 
-        @:opts = {
-          ('Reset to default') ::<-
+        @:opts = [
+          'Reset to default', ::<-
             windowEvent.queueAskBoolean(
               prompt: 'Reset all settings?',
               onChoice::(which) {
@@ -368,7 +368,7 @@ return class(
                   this.defaultSettings();
               }
             ),
-          ('Animations') ::<-          
+          'Animations', ::<-          
             windowEvent.queueAskBoolean(
               onGetPrompt::<- 'Toggle Animations? (currently: ' + (if(settings.animations) 'Enabled' else 'Disabled') + ')',
               onChoice::(which) {
@@ -379,7 +379,7 @@ return class(
               }
             ),
           
-          ('Effects') ::<-
+          'Effects', ::<-
             windowEvent.queueAskBoolean(
               onGetPrompt::<- 'Toggle Effects? (currently: ' + (if(settings.effects) 'Enabled' else 'Disabled') + ')',
               onChoice::(which) {
@@ -389,14 +389,15 @@ return class(
                 this.updateSettings();
               }
             )
-        }
+        ]
 
         foreach(FEATURES) ::(k, i) <-
           if ((features_ & i) != 0)
             match(i) {
 
               (FEATURES.DEBUGGING): ::<={
-                opts['Debug Mode'] = ::<-
+                opts->push(:'Debug Mode');
+                opts->push(::<-
                   windowEvent.queueAskBoolean(
                     onGetPrompt::<- 'Toggle Debug Mode? (currently: ' + (if(settings.debugMode) 'Enabled' else 'Disabled') + ')',
                     onChoice::(which) {
@@ -409,11 +410,13 @@ return class(
                       )
                     }
                   )
+                )
               },
 
 
               (FEATURES.FULLSCREEN): ::<={
-                opts['Fullscreen'] = ::<-
+                opts->push(:'Fullscreen')
+                opts->push(::<-
                   windowEvent.queueAskBoolean(
                     onGetPrompt::<- 'Toggle fullscreen? (currently: ' + (if(settings.fullscreen) 'Enabled' else 'Disabled') + ')',
                     onChoice::(which) {
@@ -422,11 +425,13 @@ return class(
                       this.updateSettings();
                     }
                   )
+                )
               },
 
 
               (FEATURES.CRT_SHADER): ::<={
-                opts['CRT Effect'] = ::<-
+                opts->push(:'CRT Effect');
+                opts->push(::<-
                   windowEvent.queueAskBoolean(
                     onGetPrompt::<- 'Toggle CRT? (currently: ' + (if(settings.crtShader) 'Enabled' else 'Disabled') + ')',
                     onChoice::(which) {
@@ -435,19 +440,26 @@ return class(
                       this.updateSettings();
                     }
                   )
+                )
               },
               
               (FEATURES.BGFG): ::<={
-                opts['Background color'] = ::<-
+                opts->push(:'Background color');
+                opts->push(:::<-
                   colorMenu(prompt: 'BG Color', onChange::<- this.updateSettings(), value:settings.bgColor)
+                );
+                
+                opts->push(:'Foreground color');
+                opts->push(::<-
+                  colorMenu(prompt: 'FG Color', onChange::<- this.updateSettings(), value:settings.fgColor)
+                )
 
-                opts['Foreground color'] = ::<-
-                  colorMenu(prompt: 'FG Color', onChange::<- this.updateSettings(), value:settings.fgColor);
 
               },              
 
               (FEATURES.AUDIO): ::<={
-                opts['Volume: Game'] = ::{
+                opts->push(:'Volume: Game')
+                opts->push(::{
                   @frac = settings.volume;
                   windowEvent.queueSlider(
                     onGetPrompt ::<- 'Game Volume :' + (frac * 100)->floor,
@@ -463,9 +475,10 @@ return class(
                     },
                     canCancel : true
                   )
-                };
+                });
 
-                opts['Volume: SFX'] = ::{
+                opts->push(:'Volume: SFX')
+                opts->push(::{
                   @frac = settings.volumeSFX;
                   windowEvent.queueSlider(
                     onGetPrompt ::<- 'SFX Volume :' + (frac * 100)->floor,
@@ -481,9 +494,10 @@ return class(
                     },
                     canCancel : true
                   )
-                }
+                });
 
-                opts['Volume: BGM'] = ::{
+                opts->push(:'Volume: BGM');
+                opts->push(::{
                   @frac = settings.volumeBGM;
                   windowEvent.queueSlider(
                     onGetPrompt ::<- 'BGM Volume :' + (frac * 100)->floor,
@@ -500,8 +514,10 @@ return class(
                     canCancel : true
                   )
                 }
-              }
+              );
             }
+          }
+          
         windowEvent.queueChoices(
           prompt: 'Settings',
           choicesMatch : opts,
@@ -888,14 +904,14 @@ return empty;
                           keep: true,
                           canCancel : false,
                           jumpTag : 'SEEDSETTING',
-                          choicesMatch : {
-                            ('Begin') ::{
+                          choicesMatch : [
+                            'Begin', ::{
                               windowEvent.jumpToTag(name:'SEEDSETTING', goBeforeTag:true);
                               this.startNew(name, scenario, seed);
                             },
                             
                             
-                            ('Set world seed...') ::{
+                            'Set world seed...', ::{
                               @:enterName = import(module:'game_function.name.mt');
 
                               windowEvent.queueChoices(
@@ -903,21 +919,21 @@ return empty;
                                   seed == empty) 'set to random.' else 
                                   '"' + seed + '"',
                                 
-                                choicesMatch : {
-                                  ('Enter seed') ::<- enterName(
+                                choicesMatch : [
+                                  'Enter seed', ::<- enterName(
                                     prompt: 'Enter a seed.',
                                     canCancel: true,
                                     onDone::(name) {
                                       seed = name;
                                     }
                                   ),
-                                  ('Clear seed') ::<- seed = empty
-                                },
+                                  'Clear seed', ::<- seed = empty
+                                ],
                                 canCancel: true,
                                 keep : true
                               );                              
                             }
-                          }
+                          ]
                         );
                       }
                       this.startNew(name, scenario);

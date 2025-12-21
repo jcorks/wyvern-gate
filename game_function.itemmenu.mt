@@ -42,10 +42,9 @@ return ::(
   
   @:world = import(:'game_singleton.world.mt');
   
-  @:generateChoices ::(choiceItem) {
-    @:choices = {}
-    choices['Use'] = ::<-
-      match(choiceItem.base.useTargetHint) {
+  @:generateChoices ::(choiceItem) <-
+    [
+      'Use', ::<- match(choiceItem.base.useTargetHint) {
         (Item.USE_TARGET_HINT.ONE): ::<={
           @:commit ::(who) {
             commitAction(action:BattleAction.new(
@@ -199,126 +198,128 @@ return ::(
 
 
 
-      }
+      },
 
   
-    choices['Check'] = ::<- 
-      choiceItem.describe(
-        by:user
-      )
+      'Check', ::<- 
+        choiceItem.describe(
+          by:user
+        ),
     
     
-    if (limitedMenu != true) ::<= {
-      choices['Equip'] = ::{
-        commitAction(action:BattleAction.new(
-          card : Arts.new(base:Arts.database.find(id:'base:equip-item')),
-          targets: [user],
-          extraData : [choiceItem, party.inventory],
-          turnIndex : 0,
-          targetParts : []
-        ));       
-        if (windowEvent.canJumpToTag(name:'Item'))
-          windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);      
-      }  
-      
-      
-      choices['Compare'] = ::{
-        @slot = user.getSlotsForItem(item:choiceItem)[0];
-        @currentEquip = user.getEquipped(slot);
-        
-        currentEquip.equipMod.printDiffRate(
-          prompt: '(Equip) ' + currentEquip.name + ' -> ' + choiceItem.name,
-          other:choiceItem.equipMod
-        );     
-      }
-    }
-
-
-    choices['Mark Favorite'] = ::{
-      @:symbols = [
-        'None',
-        '&',
-        '@',
-        '!',
-        '#',
-        '$',
-        '%',
-        '^',
-        '*',
-        '+',
-        '-'
-      ]
-      windowEvent.queueChoices(
-        prompt: 'Mark with which symbol?',
-        choices : symbols,
-        canCancel : true,
-        onChoice ::(choice) {
-          when(choice == 1)
-            choiceItem.faveMark = '';
+      ...if (limitedMenu != true) 
+        [
+          'Equip', ::{
+            commitAction(action:BattleAction.new(
+              card : Arts.new(base:Arts.database.find(id:'base:equip-item')),
+              targets: [user],
+              extraData : [choiceItem, party.inventory],
+              turnIndex : 0,
+              targetParts : []
+            ));       
+            if (windowEvent.canJumpToTag(name:'Item'))
+              windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);      
+          },
             
-          choiceItem.faveMark = symbols[choice-1];
-        }
-      );
-    }
-    
-    
-    choices['Rename'] = ::{
-      when (!choiceItem.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
-        windowEvent.queueMessage(text:choiceItem.name + ' cannot be renamed.');
       
-      @:name = import(module:"game_function.name.mt");
-      name(
-        prompt: 'Item name:',
-        canCancel : true,
-        onDone::(name) {
-          choiceItem.name = name;
-          if (windowEvent.canJumpToTag(name:'Item'))
-            windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
-        }
-      );  
-    }
+      
+          'Compare', ::{
+            @slot = user.getSlotsForItem(item:choiceItem)[0];
+            @currentEquip = user.getEquipped(slot);
+            
+            currentEquip.equipMod.printDiffRate(
+              prompt: '(Equip) ' + currentEquip.name + ' -> ' + choiceItem.name,
+              other:choiceItem.equipMod
+            );     
+          }
+        ] else [],
+    
+
+
+      'Mark Favorite', ::{
+        @:symbols = [
+          'None',
+          '&',
+          '@',
+          '!',
+          '#',
+          '$',
+          '%',
+          '^',
+          '*',
+          '+',
+          '-'
+        ]
+        windowEvent.queueChoices(
+          prompt: 'Mark with which symbol?',
+          choices : symbols,
+          canCancel : true,
+          onChoice ::(choice) {
+            when(choice == 1)
+              choiceItem.faveMark = '';
+              
+            choiceItem.faveMark = symbols[choice-1];
+          }
+        );
+      },
+    
+    
+      'Rename', ::{
+        when (!choiceItem.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
+          windowEvent.queueMessage(text:choiceItem.name + ' cannot be renamed.');
+        
+        @:name = import(module:"game_function.name.mt");
+        name(
+          prompt: 'Item name:',
+          canCancel : true,
+          onDone::(name) {
+            choiceItem.name = name;
+            if (windowEvent.canJumpToTag(name:'Item'))
+              windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+          }
+        );  
+      },
     
     
     
-    choices['Improve'] = ::{
-      (import(module:'game_function.itemimprove.mt'))(user, item:choiceItem, inBattle);   
-    }
+      'Improve', ::{
+        (import(module:'game_function.itemimprove.mt'))(user, item:choiceItem, inBattle);   
+      },
 
     
-    if (choiceItem.inletSlotSet != empty) ::<= {
-      choices['Gems...'] = ::{
-        choiceItem.inletSlotSet.equip(user, item:choiceItem);   
-      }
-    }
-    
-    choices['Toss'] = ::{
-      windowEvent.queueAskBoolean(
-        prompt:'Are you sure you wish to throw away the ' + choiceItem.name + '?',
-        onChoice::(which) {
-          when ((choiceItem.base.traits & Item.TRAIT.KEY_ITEM) != 0)
-            windowEvent.queueMessage(
-              text:'You feel unable to throw this away.'
-            )
-        
-        
-        
-          when(which == false) empty;
-          party.inventory.remove(item:choiceItem);
-          
-          if (choiceItem.name->contains(key:'Wyvern Key of')) ::<= {
-            @:world = import(module:'game_singleton.world.mt')
-            world.accoladeEnable(name:'gotRidOfWyvernKey');    
-          }
-                        
-          windowEvent.queueMessage(text:'The ' + choiceItem.name + ' was thrown away.');
-          if (windowEvent.canJumpToTag(name:'Item'))
-            windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+      ...if (choiceItem.inletSlotSet != empty) [
+        'Gems...', ::{
+          choiceItem.inletSlotSet.equip(user, item:choiceItem);   
         }
-      );  
-    }
+      ] else [],
     
-    return choices;  
-  }
+      'Toss', ::{
+        windowEvent.queueAskBoolean(
+          prompt:'Are you sure you wish to throw away the ' + choiceItem.name + '?',
+          onChoice::(which) {
+            when ((choiceItem.base.traits & Item.TRAIT.KEY_ITEM) != 0)
+              windowEvent.queueMessage(
+                text:'You feel unable to throw this away.'
+              )
+          
+          
+          
+            when(which == false) empty;
+            party.inventory.remove(item:choiceItem);
+            
+            if (choiceItem.name->contains(key:'Wyvern Key of')) ::<= {
+              @:world = import(module:'game_singleton.world.mt')
+              world.accoladeEnable(name:'gotRidOfWyvernKey');    
+            }
+                          
+            windowEvent.queueMessage(text:'The ' + choiceItem.name + ' was thrown away.');
+            if (windowEvent.canJumpToTag(name:'Item'))
+              windowEvent.jumpToTag(name:'Item', goBeforeTag:true, doResolveNext:true);
+          }
+        );  
+      }
+    ]
+  ;
   
   
 

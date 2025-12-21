@@ -246,7 +246,6 @@
           if (v.disableCache != empty) ::<= {
             if (v.disableCache != PERMANENT)
               v->remove(:'disableCache');
-            breakpoint();
             renderAction(data:v, rerender:true);
           }
         }
@@ -525,7 +524,13 @@
       @:choices = if (choicesMatch == empty)
           if (data.onGetChoices) data.onGetChoices() else data.choices
         else
-          choicesMatch->keys;      
+          ::<= {
+            @:names = [];
+            for(0, (choicesMatch->size/2)->floor) ::(i) {
+              names->push(:choicesMatch[2*i]);
+            }
+            return names;
+          };      
       if (choice != empty || data.rendered == empty) ::<= {
 
             
@@ -740,7 +745,7 @@
       
       when(choice == CURSOR_ACTIONS.CONFIRM) ::<= {
         if (choicesMatch != empty)
-          choicesMatch[choices[cursorPos]]()
+          choicesMatch[(cursorPos)*2+1]()
         else
           onChoice(choice:cursorPos + 1);
         sound.playSFX(:"confirm");

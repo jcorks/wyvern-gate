@@ -301,12 +301,12 @@
     prompt: 'Guild menu',
     canCancel : true,
     keep : true,
-    choicesMatch : {
-      ('Team info') ::<- teamInfo(:party),
-      ('Guild Shop') ::<- guildShop(:location),
-      ('Available quests') ::<- guildQuests(:location),
-      ('Turn in quests') ::<- turnInQuests(:location)
-    }
+    choicesMatch : [
+      'Team info', ::<- teamInfo(:party),
+      'Guild Shop', ::<- guildShop(:location),
+      'Available quests', ::<- guildQuests(:location),
+      'Turn in quests', ::<- turnInQuests(:location)
+    ]
   );
 }
 

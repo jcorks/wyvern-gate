@@ -683,18 +683,18 @@ return {
             @:next = choicesMod[choice-1];
             windowEvent.queueChoices(
               prompt: extendedName(entity:next),
-              choicesMatch : {
-                ('Describe') ::<- next.describe(excludeStats:true),
-                ('What do the stats mean?') ::<- whatDoStatsMean(),
-                ('Choose') ::<- windowEvent.queueAskBoolean(
+              choicesMatch : [
+                'Describe', ::<- next.describe(excludeStats:true),
+                'What do the stats mean?', ::<- whatDoStatsMean(),
+                'Choose', ::<- windowEvent.queueAskBoolean(
                   prompt: 'Add ' + next.name + ' to the party?',
                   onChoice::(which) {
                     when(which == false) empty;
                     p0 = next;
                     confirmParty();
                   }
-                );
-              },
+                )
+              ],
               canCancel:true
             );
           }    
@@ -1250,9 +1250,9 @@ return {
             windowEvent.queueChoices(
               prompt: 'Do which?',
               canCancel: true,
-              choicesMatch : {
-                ('Proceed, unaware of what lies ahead') ::<- proceed(),
-                ('Go back to entrance') ::<= {
+              choicesMatch : [
+                'Proceed, unaware of what lies ahead', ::<- proceed(),
+                'Go back to entrance', ::<= {
                   windowEvent.queueMessage(
                     text: 'You return to the entrance.',
                     renderable :{
@@ -1269,8 +1269,8 @@ return {
                     }
                   )
                 },
-                ('Wait for now') ::<- empty
-              }
+                'Wait for now', ::<- empty
+              ]
             );
           }
         }

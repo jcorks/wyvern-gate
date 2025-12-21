@@ -1040,10 +1040,10 @@
         @:doStart :: {
           windowEvent.queueChoices(
             prompt:'Today I will:',
-            choicesMatch : {
-              ('Open shop...') ::<- this.openShop(),
-              ('Explore...') ::<- this.explore(),
-              ('Wait until tomorrow') ::<-
+            choicesMatch : [
+              'Open shop...', ::<- this.openShop(),
+              'Explore...', ::<- this.explore(),
+              'Wait until tomorrow', ::<-
                 windowEvent.queueAskBoolean(
                   prompt: 'Wait until tomorrow?',
                   onChoice::(which) {
@@ -1053,7 +1053,7 @@
                       });
                   }
                 )
-            },
+            ],
             renderable : {
               render ::{
                 canvas.fill(:'`');
@@ -2121,13 +2121,13 @@
               prompt: "Hiree: " + hiree.entity.name,
               leftWeight: 1,
               topWeight: 0.5,
-              choicesMatch : {
-                ('Describe') ::<- hiree.entity.describe(),
-                ('Set title') ::<- hiree.setTitle(),
-                ('Financial report') ::<- hiree.report(),
-                ('Change role') ::<- this.changeRole(hiree),
-                ('Fire') ::<- this.fire(hiree)
-              },
+              choicesMatch : [
+                'Describe', ::<- hiree.entity.describe(),
+                'Set title', ::<- hiree.setTitle(),
+                'Financial report', ::<- hiree.report(),
+                'Change role', ::<- this.changeRole(hiree),
+                'Fire', ::<- this.fire(hiree)
+              ],
               canCancel : true
             );
           }
@@ -2225,9 +2225,9 @@
       explore ::{
         windowEvent.queueChoices(
           prompt: 'What next?',
-          choicesMatch : {
-            ('Manage...') ::<- this.manage(),
-            ('Start exploring!') ::<-
+          choicesMatch : [
+            'Manage...', ::<- this.manage(),
+            'Start exploring!', ::<-
               this.preflightCheckStart(
                 onDone :: {
                   @world = import(module:'game_singleton.world.mt');
@@ -2257,7 +2257,7 @@
                   });
                 }
               )
-          },
+          ],
           keep:true,
           canCancel: true
         );      
@@ -2381,10 +2381,10 @@
         windowEvent.queueChoices(
           prompt: 'Shop stocking',
           keep: true,
-          choicesMatch : {
-            ("Check shop stock") ::<- shopInventory(),
-            ("Stock from inventory") ::<- ownInventory()
-          },
+          choicesMatch : [
+            "Check shop stock", ::<- shopInventory(),
+            "Stock from inventory", ::<- ownInventory()
+          ],
           canCancel : true
         );
       },
@@ -2921,31 +2921,25 @@
       },
       
       openShop :: {
-      
-        @:choices = {
-          ('Manage...') ::<- this.manage(),
-          ('Stock shop') ::<- this.stockShop()
-        }
-        
-        if (state.sellingLevel >= LEVEL_UPGRADE_SHOP0) ::<= {
-          choices['Upgrade shop'] = ::<- this.upgradeShop()
-        } else ::<= {
-          choices['????'] = ::<- 
-            windowEvent.queueMessage(
-              text: 'This option isn\'t available yet. You feel that you need to gain more experience as a salesperson before this is relevant.'
-            )
-        }
-        
-        choices['Start the day!'] = ::<-
-          this.preflightCheckStart(onDone::{this.startShopDay();}, isShopkeeping:true)        
-
-        
-
-
-      
         windowEvent.queueChoices(
           prompt: 'Shop options:',
-          choicesMatch : choices,
+          choicesMatch : [
+            'Manage...', ::<- this.manage(),
+            'Stock shop', ::<- this.stockShop(),
+          
+            ...if (state.sellingLevel >= LEVEL_UPGRADE_SHOP0)
+              ['Upgrade shop', ::<- this.upgradeShop()]
+            else 
+              ['????', ::<- 
+                windowEvent.queueMessage(
+                  text: 'This option isn\'t available yet. You feel that you need to gain more experience as a salesperson before this is relevant.'
+                )
+              ]
+            ,
+            
+            'Start the day!', ::<-
+              this.preflightCheckStart(onDone::{this.startShopDay();}, isShopkeeping:true)        
+          ],
           keep:true,
           canCancel: true
         );

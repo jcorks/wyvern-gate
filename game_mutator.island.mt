@@ -74,6 +74,8 @@
 }
 
 @:levelGen ::(level) {
+  when(level <= 8) level;
+  when(level < 16) (level + random.integer(from:-1, to:1));
   @:dev = level * 0.2;
   @min = level-dev;
   @max = level+dev;
@@ -363,10 +365,10 @@ Island.database.newEntry(
         }
         
         // for each professional art, a support art is replaced
-        for(0, professionLevel) ::(i) {
+        /*for(0, professionLevel) ::(i) {
           entity.autoLevelProfession(:entity.profession);
         }
-        entity.equipAllProfessionArts();  
+        entity.equipAllProfessionArts();  */
         foreach(entity.professionArts) ::(k, v) {
           entity.supportArts->pop;
         }
@@ -401,7 +403,6 @@ Island.database.newEntry(
         instance.x = true;
       match(tier) {
         (0):::<= {
-          entity.capHP(max:random.integer(from:7, to:9));
           assignSupportArts(
             entity,
             professionLevel : 1,
@@ -606,7 +607,7 @@ Island.database.newEntry(
       
         state.tier = tierHint;
 
-        state.level = (levelHint - random.number() * (levelHint * 0.2))->round;
+        state.level = levelHint; //(levelHint - random.number() * (levelHint * 0.2))->round;
         if (state.level < 1) state.leven = 1;
         if (nameHint != empty || nameHint == '')
           state.name = (nameHint) => String;
@@ -852,7 +853,7 @@ Island.database.newEntry(
         get :: <- state.events
       },
                   
-      newInhabitant ::(professionHint, levelHint, speciesHint) {
+      newInhabitant ::(professionHint, levelHint, speciesHint, raw) {
         @species = 
           if (((state.base.traits & TRAIT.DIVERSE) == 0) && random.try(percentSuccess:95))
             random.pickArrayItemWeighted(list:state.species).species
@@ -870,7 +871,8 @@ Island.database.newEntry(
           professionHint: if (professionHint == empty) Profession.getRandomFiltered(filter::(value)<-value.learnable).id else professionHint
         );
         
-        augmentTiered(entity:out);
+        if (raw != true)
+          augmentTiered(entity:out);
         
         return out;
       },

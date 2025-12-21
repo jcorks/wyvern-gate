@@ -47,18 +47,18 @@ return ::(onDone) {
     Arts.database.getRandomFiltered(::(value) <- (value.traits & Arts.TRAIT.SPECIAL) == 0)  
   ];
 
-  @:choiceActions = {
-    ('Choose Name') :: {
+  @:choiceActions = [
+    'Choose Name', :: {
       windowEvent.queueMessage(
         text:'Please choose a name.'
       );
       
       windowEvent.queueChoices(
         onGetPrompt::<- 'Name: ' + name,
-        choicesMatch : {
-          ('Choose one for me') ::<- name = namegen.person(),
-          ('Enter name...') ::<- name = (import(:'game_function.name.mt'))()
-        },
+        choicesMatch : [
+          'Choose one for me', ::<- name = namegen.person(),
+          'Enter name...', ::<- name = (import(:'game_function.name.mt'))()
+        ],
         canCancel : true
 
       );
@@ -67,7 +67,7 @@ return ::(onDone) {
 
 
     
-    ('Choose Species'):: {
+    'Choose Species', :: {
       windowEvent.queueMessage(
         text:'Please choose a species.'
       );
@@ -97,7 +97,7 @@ return ::(onDone) {
     },
 
     // Profession
-    ('Choose Profession') :: {
+    'Choose Profession', :: {
       windowEvent.queueMessage(
         text:'Please choose a profession.'
       );
@@ -146,7 +146,7 @@ return ::(onDone) {
     }
     */
     
-    ('Proceed')::{
+    'Proceed', ::{
       windowEvent.queueAskBoolean(
         prompt: 'Are you ready, ' + name + ', the ' + species.name + ' ' + profession.name + '?',
         onChoice::(which) {
@@ -192,7 +192,7 @@ return ::(onDone) {
     }
 
     
-  }
+  ]
   
   windowEvent.queueChoices(
     onGetPrompt ::<-  name + ', the ' + species.name + ' ' + profession.name,

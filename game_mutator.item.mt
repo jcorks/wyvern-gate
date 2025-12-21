@@ -3002,7 +3002,7 @@ Item.database.newEntry(data : {
   name : "Seed",
   id : 'base:seed',
   sortType : SORT_TYPE.USABLES,
-  description: "Permanently increases a base stat.",
+  description: "Permanently unlocks a bit of the user's power.",
   examine : 'Its abilities are unknown.',
   equipType: TYPE.TWOHANDED,
   rarity : 500,
@@ -3027,20 +3027,6 @@ Item.database.newEntry(data : {
     TRAIT.STRANGE_TO_EQUIP
   ,
   onCreate ::(item, creationHint) {
-    @:stats = {
-      "HP" : 2,
-      "AP" : 2,
-      "ATK" : 3,
-      "DEF" : 3,
-      "SPD" : 3,
-      "INT" : 3,
-      "LUK" : 3,
-      "DEX" : 3
-    }
-    
-    item.data.statIncreaseType = random.pickArrayItem(:stats->keys);
-    item.data.statIncrease = stats[item.data.statIncreaseType];
-    item.name = item.data.statIncreaseType + ' Seed';
   }
 }) 
 

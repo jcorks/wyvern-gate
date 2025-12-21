@@ -1036,13 +1036,13 @@ Interaction.newEntry(
         @:playerBid = ::{          
           windowEvent.queueChoices(
             prompt: 'Bid at : ' + g(:price),
-            choicesMatch : {
-              ("Examine item") ::{
+            choicesMatch : [
+              "Examine item", ::{
                 item.describe();
                 playerBid();
               },
               
-              ("Bid") ::{
+              "Bid", ::{
                 @val = 0.0;
                 
                 @:currentBid ::<- ((price + val * price) / 100)->ceil * 100
@@ -1088,7 +1088,7 @@ Interaction.newEntry(
                   }
                 );
               }
-            },
+            ],
             canCancel : true,
             onCancel ::{
               auctionApply(:bidders);

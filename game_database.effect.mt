@@ -1424,9 +1424,7 @@ Effect.newEntry(
 
         @:oldStats = StatSet.new();
         oldStats.load(serialized:holder.stats.save());
-        @:newState = holder.stats.save();
-        newState[item.data.statIncreaseType] += item.data.statIncrease;
-        holder.stats.load(serialized:newState);
+        holder.autoLevel();
         
         oldStats.printDiff(
           other:holder.stats,
@@ -6135,33 +6133,33 @@ Effect.newEntry(
               prompt: 'Banking...',
               jumpTag : 'BANKING',
               keep : true,
-              choicesMatch : {
-                ('Take from Bank...') ::<- 
+              choicesMatch : [
+                'Take from Bank...', ::<- 
                   windowEvent.queueChoices(
                     prompt : 'Take from Bank...',
-                    choicesMatch : {
-                      ('Items') ::<- bankedItems(),
-                      ('Gold') ::<- bankedGold()
-                    },
+                    choicesMatch : [
+                      'Items', ::<- bankedItems(),
+                      'Gold', ::<- bankedGold()
+                    ],
                     canCancel: true,
                     keep : true
                   ),
 
 
-                ('Put in Bank...') ::<-
+                'Put in Bank...', ::<-
 
                   windowEvent.queueChoices(
                     prompt : 'Put in Bank...',
-                    choicesMatch : {
-                      ('Items') ::<- inventoryItems(),
-                      ('Gold') ::<- inventoryGold()
-                    },
+                    choicesMatch : [
+                      'Items', ::<- inventoryItems(),
+                      'Gold', ::<- inventoryGold()
+                    ],
                     canCancel: true,
                     keep : true
                   ),         
                 
                 
-                ('Done') ::<-
+                'Done', ::<-
                   windowEvent.queueAskBoolean(
                     prompt: 'Done banking?',
                     onChoice::(which) {
@@ -6180,7 +6178,7 @@ Effect.newEntry(
                     }
                   )
 
-              },
+              ],
               canCancel : false
             );
           }

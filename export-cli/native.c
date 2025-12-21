@@ -828,7 +828,8 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_OBJECT);
     float topWeight  = matte_value_type(args[2]) == MATTE_VALUE_TYPE_EMPTY ? 0.5 : matte_value_as_number(store, args[2]);
     float leftWeight = matte_value_type(args[3]) == MATTE_VALUE_TYPE_EMPTY ? 0.5 : matte_value_as_number(store, args[3]);
-
+    float hasX = matte_value_type(args[8]) != MATTE_VALUE_TYPE_EMPTY;
+    float hasY = matte_value_type(args[9]) != MATTE_VALUE_TYPE_EMPTY;
     matteArray_t * lines;
 
     // maxWidth
@@ -875,9 +876,9 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
     }
     
     
-    int left = (cr->width - (width + WINDOW_BUFFER)) * leftWeight;
+    int left = hasX ? matte_value_as_number(store, args[8]) : (cr->width - (width + WINDOW_BUFFER)) * leftWeight;
     width = width + WINDOW_BUFFER;
-    int top = (cr->height - (lines->size + WINDOW_BUFFER)) * topWeight;
+    int top = hasY ? matte_value_as_number(store, args[9]) : (cr->height - (lines->size + WINDOW_BUFFER)) * topWeight;
     int height = lines->size + WINDOW_BUFFER;
     
     if (top < 0) top = 0;
@@ -1744,6 +1745,8 @@ static matteValue_t wyvern_gate__native__canvas(
         "maxHeight",
         "minWidth",
         "notchText",
+        "x",
+        "y",
         NULL
     );
     matte_add_external_function(
