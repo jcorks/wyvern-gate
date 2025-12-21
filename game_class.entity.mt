@@ -320,8 +320,6 @@
     DEX : stat(name:'DEX')
   }));
 
-  
-  return (50 + (level*level * 0.1056) * 1000)->floor;
 }	
 
 
@@ -881,7 +879,9 @@
     opinions : empty,
     recentOpinions : empty,
     affinity : -1,
-    equipArts : empty
+    equipArts : empty,
+    levelPenalty : 0
+
   },
   
   private : {
@@ -927,17 +927,7 @@
       };
       state.professionArts = [];
 
-      // starting supports
-      state.stats = StatSet.new(
-        HP:1,
-        AP:random.integer(from:8, to:14),
-        ATK:1,
-        DEX:1,
-        INT:1,
-        DEF:1,
-        // LUK can be zero. some people are just unlucky!
-        SPD:1  
-      );
+
 
       @:Location = import(module:'game_mutator.location.mt');
 
@@ -998,6 +988,21 @@
       } else 
         error(detail: 'No species was specified when creating this entity. Please specify a species id!!!');
 
+      state.levelPenalty = state.species.levelPenalty;
+
+      // starting supports
+      state.stats = StatSet.new(
+        HP : state.species.baseStats.HP,
+        AP:random.integer(from:7, to:13) + state.species.baseStats.AP,
+        
+        ATK : state.species.baseStats.ATK,
+        DEF : state.species.baseStats.DEF,
+        DEX : state.species.baseStats.DEX,
+        SPD : state.species.baseStats.SPD,
+        INT : state.species.baseStats.INT,
+        LUK : state.species.baseStats.LUK
+      );
+      
       
       state.growth.mod(stats:state.species.growth);
       state.growth.mod(stats:state.personality.growth.scale(:0.2));
@@ -2351,11 +2356,19 @@
           }
           
           amount -= state.expNext;
-          state.expNext = levelUp(
+          @level = state.level;
+          state.expNext = (50 + (level*level * 0.1056) * 1000)->floor;
+
+          when(state.levelPenalty > 0) state.levelPenalty-=1;
+          
+          
+          levelUp(
             level:state.level,
             stats:state.stats,
             growthPotential : state.growth
           );
+          
+          
           
           /*
           if (chooseStat == empty) ::<={ 

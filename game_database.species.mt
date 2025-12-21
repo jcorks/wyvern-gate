@@ -27,7 +27,8 @@
 @:TRAIT = {
   SPECIAL : 1,
   SUMMON : 2,
-  ETHEREAL : 4
+  ETHEREAL : 4,
+  NO_DEFAULT_EQUIPS : 8
 };
 
 
@@ -49,7 +50,18 @@ Species.newEntry(data:{
     LUK: 1,
     SPD: 7,
     DEX: 8
-  ),    
+  ),  
+  levelPenalty : 0,  
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
   qualities : [
     'base:snout',
     'base:fur',
@@ -82,6 +94,18 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 4
   ),
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+  levelPenalty : 0,  
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -116,6 +140,20 @@ Species.newEntry(data:{
     SPD: 7,
     DEX: 8
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -150,6 +188,20 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 4
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -183,6 +235,20 @@ Species.newEntry(data:{
     SPD: 7,
     DEX: 8
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -216,6 +282,20 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 7
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -249,6 +329,19 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 6
   ),
+  levelPenalty : 0,  
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -283,6 +376,19 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 8
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -318,6 +424,20 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 4
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -351,6 +471,20 @@ Species.newEntry(data:{
     SPD: 8,
     DEX: 3
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -384,6 +518,20 @@ Species.newEntry(data:{
     SPD: 8,
     DEX: 8
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:scales',
@@ -418,6 +566,20 @@ Species.newEntry(data:{
     SPD: 1,
     DEX: 6
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -451,6 +613,21 @@ Species.newEntry(data:{
     SPD: 8,
     DEX: 7
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -485,6 +662,20 @@ Species.newEntry(data:{
     SPD: 5,
     DEX: 6
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -518,6 +709,21 @@ Species.newEntry(data:{
     SPD: 3,
     DEX: 3
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+  levelPenalty : 0,  
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -551,6 +757,20 @@ Species.newEntry(data:{
     SPD: 1,
     DEX: 2
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -583,6 +803,20 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 3
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -616,6 +850,20 @@ Species.newEntry(data:{
     SPD: 5,
     DEX: 4
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:feathers',
     'base:eyes',
@@ -647,6 +895,20 @@ Species.newEntry(data:{
     SPD: 10,
     DEX: 1
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:feathers',
     'base:eyes',
@@ -679,6 +941,20 @@ Species.newEntry(data:{
     SPD: 5,
     DEX: 5
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -713,6 +989,20 @@ Species.newEntry(data:{
     SPD: 7,
     DEX: 3
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -746,6 +1036,20 @@ Species.newEntry(data:{
     SPD: 3,
     DEX: 6
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -780,6 +1084,20 @@ Species.newEntry(data:{
     SPD: 10,
     DEX: 2
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -813,6 +1131,20 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 7
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   traits : 0,
   qualities : [
     'base:snout',
@@ -847,6 +1179,20 @@ Species.newEntry(data:{
     SPD: 7,
     DEX: 6
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
     'base:snout',
     'base:fur',
@@ -881,13 +1227,27 @@ Species.newEntry(data:{
     SPD: 7,
     DEX: 4
   ),
+  levelPenalty : 4,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
   ],
   swarms : true,
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -907,6 +1267,20 @@ Species.newEntry(data:{
     SPD: 2,
     DEX: 4
   ),
+  levelPenalty : 3,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
 
   ],
@@ -914,7 +1288,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -934,6 +1308,20 @@ Species.newEntry(data:{
     SPD: 1,
     DEX: 1
   ),
+  levelPenalty : 4,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
 
   ],
@@ -962,7 +1350,7 @@ Species.newEntry(data:{
     ]);
   },
   
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -982,6 +1370,20 @@ Species.newEntry(data:{
     SPD: 2,
     DEX: 4
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
 
   ],
@@ -989,7 +1391,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL  | TRAIT.SUMMON,
+  traits : TRAIT.SPECIAL  | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -1009,6 +1411,17 @@ Species.newEntry(data:{
     SPD: 2,
     DEX: 4
   ),
+  levelPenalty : 0,  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
   qualities : [
 
   ],
@@ -1016,7 +1429,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL  | TRAIT.SUMMON,
+  traits : TRAIT.SPECIAL  | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -1036,6 +1449,20 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 4
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
 
   ],
@@ -1043,7 +1470,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -1063,6 +1490,20 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 4
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
 
   ],
@@ -1070,7 +1511,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })  
@@ -1091,6 +1532,21 @@ Species.newEntry(data:{
     SPD: 6,
     DEX: 8
   ),
+  levelPenalty : 0,  
+
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
 
   ],
@@ -1098,7 +1554,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })  
@@ -1120,6 +1576,20 @@ Species.newEntry(data:{
     SPD: 10,
     DEX: 10
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
   ],
   swarms : false,
@@ -1149,10 +1619,25 @@ Species.newEntry(data:{
     SPD: 10,
     DEX: 10
   ),
+  levelPenalty : 0,  
+
+  
+  baseStats : StatSet.new(
+    HP:   120,
+    AP:   999,
+    ATK:  25,
+    INT:  30,
+    DEF:  3,
+    LUK:  6,
+    SPD:  100,
+    DEX:  10
+  ),
+
+
   qualities : [
   ],
   swarms: true,
-  traits : TRAIT.SPECIAL | TRAIT.ETHEREAL,
+  traits : TRAIT.SPECIAL | TRAIT.ETHEREAL | TRAIT.NO_DEFAULT_EQUIPS,
   canBlock : false,
   overrideBattleAI : empty,
   passives : [
@@ -1176,13 +1661,28 @@ Species.newEntry(data:{
     SPD: 10,
     DEX: 10
   ),
+
+  levelPenalty : 4,  
+  
+  baseStats : StatSet.new(
+    HP:   75,
+    AP:   999,
+    ATK:  14,
+    INT:  30,
+    DEF:  3,
+    LUK:  6,
+    SPD:  100,
+    DEX:  10
+  ),
+
+
   qualities : [
   ],
   swarms : true,
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
     'base:the-beast'
   ]
@@ -1204,6 +1704,21 @@ Species.newEntry(data:{
     SPD: 10,
     DEX: 10
   ),
+  levelPenalty : 4,  
+
+  
+  baseStats : StatSet.new(
+    HP:   30,
+    AP:   999,
+    ATK:  14,
+    INT:  30,
+    DEF:  3,
+    LUK:  6,
+    SPD:  100,
+    DEX:  20
+  ),
+
+
   qualities : [
   ],
   swarms : true,
@@ -1252,7 +1767,7 @@ Species.newEntry(data:{
       )
     ]);
   },  
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
     'base:scorching',
     'base:aspect-fire'
@@ -1275,13 +1790,28 @@ Species.newEntry(data:{
     SPD: 10,
     DEX: 10
   ),
+
+  
+  baseStats : StatSet.new(
+    HP:   80,
+    AP:   20,
+    ATK:  60,
+    INT:  5,
+    DEF:  2,
+    LUK:  6,
+    SPD:  1,
+    DEX:  1
+  ),
+  levelPenalty : 4,  
+
+
   qualities : [
   ],
   swarms : true,
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
     'base:the-beast'
   ]
@@ -1302,13 +1832,28 @@ Species.newEntry(data:{
     SPD: 1,
     DEX: 1
   ),
+  levelPenalty : 4,  
+
+  
+  baseStats : StatSet.new(
+    HP:   100,
+    AP:   2,
+    ATK:  4,
+    INT:  5,
+    DEF:  2,
+    LUK:  6,
+    SPD:  1,
+    DEX:  1
+  ),
+
+
   qualities : [
   ],
   swarms : true,
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -1328,13 +1873,27 @@ Species.newEntry(data:{
     SPD: 10,
     DEX: 10
   ),
+  levelPenalty : 5,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
   ],
   swarms : true,
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -1356,6 +1915,21 @@ Species.newEntry(data:{
   ),
   qualities : [
   ],
+  levelPenalty : 4,  
+
+  
+  baseStats : StatSet.new(
+    HP:   7,
+    AP:   0,
+    ATK:  6,
+    INT:  5,
+    DEF:  3,
+    LUK:  6,
+    SPD:  10,
+    DEX:  5
+  ),
+
+
   swarms : true,
   canBlock : false,
   overrideBattleAI ::(entity, battle, commitBattleActions) {
@@ -1392,7 +1966,7 @@ Species.newEntry(data:{
       )
     ]);
   },  
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -1415,6 +1989,21 @@ Species.newEntry(data:{
     SPD: 7,
     DEX: 20
   ),
+  levelPenalty : 4,  
+
+  
+  baseStats : StatSet.new(
+    HP:   13,
+    AP:   999,
+    ATK:  1,
+    INT:  30,
+    DEF:  3,
+    LUK:  6,
+    SPD:  100,
+    DEX:  200
+  ),
+
+
   qualities : [
   ],
   swarms : true,
@@ -1466,7 +2055,7 @@ Species.newEntry(data:{
       )
     ]);
   },  
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
     'base:metal-body'
   ]
@@ -1489,13 +2078,27 @@ Species.newEntry(data:{
     SPD: 10,
     DEX: 10
   ),
+  levelPenalty : 4,  
+  
+  baseStats : StatSet.new(
+    HP:   60,
+    AP:   20,
+    ATK:  24,
+    INT:  5,
+    DEF:  20,
+    LUK:  6,
+    SPD:  1,
+    DEX:  1
+  ),
+
+
   qualities : [
   ],
   swarms : true,
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   passives : [
   ]
 })
@@ -1516,12 +2119,26 @@ Species.newEntry(data:{
     SPD: 1,
     DEX: 1
   ),
+  levelPenalty : 7,
+  
+  baseStats : StatSet.new(
+    HP:   7,
+    AP:   0,
+    ATK:  6,
+    INT:  5,
+    DEF:  3,
+    LUK:  6,
+    SPD:  10,
+    DEX:  5
+  ),
+
+
   qualities : [
   ],
   swarms : true,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
   canBlock : false,
   passives : [
   ]
@@ -1543,12 +2160,26 @@ Species.newEntry(data:{
     SPD: 5,
     DEX: 5
   ),
+  levelPenalty : 0,
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
   ],
   swarms : true,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS,
   canBlock : false,
   passives : [
   ]
@@ -1570,12 +2201,26 @@ Species.newEntry(data:{
     SPD: 5,
     DEX: 5
   ),
+  levelPenalty : 0,
+
+  
+  baseStats : StatSet.new(
+    HP  : 1,
+    AP  : 1,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
   qualities : [
   ],
   swarms : true,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.SUMMON,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS,
   canBlock : false,
   passives : [
     'base:banishing-touch'
@@ -1603,6 +2248,8 @@ Species.newEntry(data:{
     qualities : Object,
     description : String,
     growth : StatSet.type,
+    baseStats : StatSet.type,
+    levelPenalty : Number,
     passives : Object,
     traits : Number,
     swarms : Boolean,

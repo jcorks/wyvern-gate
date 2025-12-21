@@ -28,17 +28,6 @@
         beast.autoLevelProfession(:beast.profession);
       }
       beast.equipAllProfessionArts();  
-
-      beast.stats.load(serialized:StatSet.new(
-        HP:   75,
-        AP:   999,
-        ATK:  14,
-        INT:  30,
-        DEF:  3,
-        LUK:  6,
-        SPD:  100,
-        DEX:  10
-      ).add(:beast.stats).save());
       
       beast.unequipAll(silent:true);
       beast.heal(amount:9999, silent:true); 

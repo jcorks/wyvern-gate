@@ -60,16 +60,6 @@
       inv.addGold(amount:900 + (random.number()*200)->floor);
       beast.forceDrop = inv;
 
-      beast.stats.load(serialized:StatSet.new(
-        HP:   60,
-        AP:   20,
-        ATK:  24,
-        INT:  5,
-        DEF:  20,
-        LUK:  6,
-        SPD:  1,
-        DEX:  1
-      ).add(:beast.stats).save());
       
       beast.unequipAll(silent:true);
       beast.heal(amount:9999, silent:true); 

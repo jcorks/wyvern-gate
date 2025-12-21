@@ -39,16 +39,6 @@
       )));      
       specter.forceDrop = inv;
 
-      specter.stats.load(serialized:StatSet.new(
-        HP:   120,
-        AP:   999,
-        ATK:  25,
-        INT:  30,
-        DEF:  3,
-        LUK:  6,
-        SPD:  100,
-        DEX:  10
-      ).add(:specter.stats).save());
       
       specter.unequipAll(silent:true);
       specter.heal(amount:9999, silent:true); 

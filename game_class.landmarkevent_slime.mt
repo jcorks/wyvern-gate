@@ -43,16 +43,6 @@
       beast.name = 'the Slimeling';
       beast.supportArts = [];      
 
-      beast.stats.load(serialized:StatSet.new(
-        HP:   1,
-        AP:   1,
-        ATK:  1,
-        INT:  1,
-        DEF:  1,
-        LUK:  1,
-        SPD:  1,
-        DEX:  1
-      ).save());
       
       beast.unequipAll(silent:true);
       beast.heal(amount:9999, silent:true); 
@@ -105,17 +95,6 @@
 
 
 
-
-      beast.stats.load(serialized:StatSet.new(
-        HP:   100,
-        AP:   2,
-        ATK:  4,
-        INT:  5,
-        DEF:  2,
-        LUK:  6,
-        SPD:  1,
-        DEX:  1
-      ).add(:beast.stats).save());
       
       beast.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
       beast.heal(amount:9999, silent:true); 

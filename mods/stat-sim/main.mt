@@ -167,6 +167,25 @@ import(:'game_function.descriptivelist.mt');
   );
 }
 
+@:statSim_Entities_New_GenerateMonster ::(data) {
+  @:list = Species.getAll()->filter(::(value) <- Profession.findSoft(:value.id) != empty);
+  
+  windowEvent.queueChoices(
+    prompt: 'Add which?',
+    canCancel: true,
+    keep : true,
+    choices: list->map(::(value) <- value.name),
+    onChoice::(choice) {
+      @:ent = world.island.newInhabitant(
+        professionHint : list[choice-1].id,
+        speciesHint : list[choice-1].id
+      )
+      addEntity(ent, data);
+      windowEvent.queueMessage(text:'Added ' + ent.name);
+    }  
+  );
+}
+
 @:statSim_Entities_New ::(data) {
   windowEvent.queueChoices(
     prompt: 'Entity',
@@ -174,13 +193,8 @@ import(:'game_function.descriptivelist.mt');
     keep: true,
     
     choicesMatch : [
-      'Non-creature', ::<- statSim_Entities_New_GenerateFromIsland(data),
-      'Creature', ::{ 
-        @:cr = world.island.newHostileCreature();
-        addEntity(ent:cr, data);
-        windowEvent.queueMessage(text:'Added ' + cr.name);
-
-      }
+      'Standard',  ::<- statSim_Entities_New_GenerateFromIsland(data),
+      'Special',   ::<- statSim_Entities_New_GenerateMonster(data)
       //('Custom...') ::<- statSim_Entities_New_Custom(:data);
     ]
   );
