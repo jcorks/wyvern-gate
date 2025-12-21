@@ -389,7 +389,7 @@ return {
         
         chosenProfs[prof] = true;
         @:p0 = island.newInhabitant(
-          levelHint:story.levelHint+2,
+          levelHint:story.levelHint,
           professionHint: prof
         );
         p0.stats.load(:p0.stats.add(:StatSet.new(
@@ -1970,16 +1970,6 @@ return {
             Scene.start(id:'thechosen:scene_wyvernfire1', onDone::{}, location, landmark:location.landmark);            
           }
         }
-        location.ownedBy.stats.load(serialized:StatSet.new(
-          HP:   120,
-          AP:   999,
-          ATK:  6,
-          INT:  5,
-          DEF:  11,
-          LUK:  8,
-          SPD:  25,
-          DEX:  11
-        ).save());
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
 
@@ -2111,16 +2101,6 @@ return {
             Scene.start(id:'thechosen:scene_wyvernice1', onDone::{}, location, landmark:location.landmark);            
           }
         }
-        location.ownedBy.stats.load(serialized:StatSet.new(
-          HP:   230,
-          AP:   999,
-          ATK:  16,
-          INT:  8,
-          DEF:  7,
-          LUK:  6,
-          SPD:  60,
-          DEX:  14
-        ).save());
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
 
@@ -2207,16 +2187,6 @@ return {
             Scene.start(id:'thechosen:scene_wyvernthunder1', onDone::{}, location, landmark:location.landmark);            
           }
         }
-        location.ownedBy.stats.load(serialized:StatSet.new(
-          HP:   400,
-          AP:   999,
-          ATK:  20,
-          INT:  10,
-          DEF:  10,
-          LUK:  9,
-          SPD:  100,
-          DEX:  16
-        ).save());
         location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
@@ -2300,16 +2270,6 @@ return {
             Scene.start(id:'thechosen:scene_wyvernlight1', onDone::{}, location, landmark:location.landmark);            
           }
         }
-        location.ownedBy.stats.load(serialized:StatSet.new(
-          HP:   650,
-          AP:   999,
-          ATK:  30,
-          INT:  17,
-          DEF:  3,
-          LUK:  6,
-          SPD:  100,
-          DEX:  20
-        ).save());
         
         location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
         location.ownedBy.heal(amount:9999, silent:true); 
@@ -4715,12 +4675,26 @@ return {
         SPD: 10,
         DEX: 10
       ),
+
+      levelPenalty : 10,
+      
+      baseStats : StatSet.new(
+        HP:   120,
+        AP:   999,
+        ATK:  6,
+        INT:  5,
+        DEF:  11,
+        LUK:  8,
+        SPD:  25,
+        DEX:  11      
+      ),
+      
       qualities : [
       ],
       swarms : false,
       canBlock : true,
       
-      traits : Species.TRAIT.SPECIAL,
+      traits : Species.TRAIT.SPECIAL | Species.TRAIT.NO_DEFAULT_EQUIPS,
       passives : [
         'base:the-wyvern'
       ]
@@ -4741,12 +4715,25 @@ return {
         SPD: 10,
         DEX: 10
       ),
+      levelPenalty : 10,
+      
+      baseStats: StatSet.new(
+        HP:   230,
+        AP:   999,
+        ATK:  13,
+        INT:  8,
+        DEF:  7,
+        LUK:  6,
+        SPD:  60,
+        DEX:  14      
+      ),
+      
       qualities : [
       ],
       swarms : false,
       canBlock : true,
       
-      traits : Species.TRAIT.SPECIAL,
+      traits : Species.TRAIT.SPECIAL | Species.TRAIT.NO_DEFAULT_EQUIPS,
       passives : [
         'base:icy',
         'base:the-wyvern'
@@ -4769,6 +4756,19 @@ return {
         SPD: 10,
         DEX: 10
       ),
+      
+      baseStats : StatSet.new(
+        HP:   400,
+        AP:   999,
+        ATK:  20,
+        INT:  10,
+        DEF:  10,
+        LUK:  9,
+        SPD:  100,
+        DEX:  16      
+      ),
+      
+      levelPenalty : 10,
       qualities : [
       ],
       swarms : false,
@@ -4797,12 +4797,26 @@ return {
         SPD: 10,
         DEX: 10
       ),
+      
+      baseStats : StatSet.new(
+        HP:   650,
+        AP:   999,
+        ATK:  30,
+        INT:  17,
+        DEF:  3,
+        LUK:  6,
+        SPD:  100,
+        DEX:  20      
+      ),
+      levelPenalty : 10,
+      
+      
       qualities : [
       ],
       swarms : false,
       canBlock : true,
       
-      traits : Species.TRAIT.SPECIAL,
+      traits : Species.TRAIT.SPECIAL | Species.TRAIT.NO_DEFAULT_EQUIPS,
       passives : [
         'base:shimmering',
         'base:the-wyvern'

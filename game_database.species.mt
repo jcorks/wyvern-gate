@@ -1227,7 +1227,7 @@ Species.newEntry(data:{
     SPD: 7,
     DEX: 4
   ),
-  levelPenalty : 4,  
+  levelPenalty : 2,  
 
   
   baseStats : StatSet.new(

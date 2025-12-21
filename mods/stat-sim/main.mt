@@ -15,6 +15,7 @@
 @:EnterNumber = import(module:'game_function.number.mt');
 
 @:canvas = import(module:'game_singleton.canvas.mt');
+@:StatSet = import(module:'game_class.statset.mt');
 
 
 
@@ -373,7 +374,12 @@ return {
 
       // Function reserved for overriding database options. Good for database 
       // items that are specific to this scenario.
-      databaseOverrides ::(){},
+      databaseOverrides ::(){
+
+      
+      
+      
+      },
       
       // List of accolades (achievements) available when beating this scenario.
       accolades : [],

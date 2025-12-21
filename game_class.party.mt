@@ -35,6 +35,7 @@
     members : empty,
     karma : 5500,
     arts : [],
+    denyJoinPartyCount : 0,
     queuedArts : [],
     leader : 0,
     inDungeon : false,
@@ -51,6 +52,7 @@
         
     this.interface = {  
       initialize :: {
+        state.denyJoinPartyCount = 0
       },
       defaultLoad ::{      
         state.members = [];
@@ -171,6 +173,9 @@
                   core:true
                 )
               }
+              
+              state.denyJoinPartyCount = 0;
+
                 
               send();
             }            
@@ -549,6 +554,11 @@
       clear :: {
         state.inventory.clear();
         state.members = [];      
+      },
+      
+      denyJoinPartyCount : {
+        get ::<- state.denyJoinPartyCount,
+        set ::(value) <- state.denyJoinPartyCount = value
       },
       
       karma : {

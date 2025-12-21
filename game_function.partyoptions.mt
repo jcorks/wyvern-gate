@@ -39,9 +39,11 @@ return ::{
       @top = 1;
       @:height = 7;
       @:width = canvas.width*(2/3);
+      if (whom >= party.members->size) whom -= 1;
       foreach(party.members)::(index, member) {
         @x = (canvas.width - width) / 4;
         canvas.renderFrame(top, left: x, width, height);
+        
         
         if (whom == index) ::<= {
           canvas.movePen(
@@ -77,6 +79,7 @@ return ::{
 
       when(!chosen) empty;
       @:member = party.members[whom]
+      when(member == empty) empty;
 
       @:plainStatsState = member.stats.save();
       @:plainStats = StatSet.new();
@@ -322,6 +325,7 @@ return ::{
     leftWeight: 1,
     topWeight: 1,
     prompt: 'Choose a member.',
+    jumpTag : 'CHOOSE_MEMBER',
     renderable : menuRenderable,
     canCancel: true,
     onLeave ::{
@@ -354,7 +358,7 @@ return ::{
         leftWeight: 1,
         topWeight: 1,
         choices: [
-          'Make Leader',
+          'Team...',
           'Describe',
           'Equip',
           'Profession...',
@@ -375,12 +379,53 @@ return ::{
 
             // make leader 
             (1): ::<= {
-              if (member == party.leader) ::<= {
-                windowEvent.queueMessage(text: member.name + ' is already the leader.');
-              } else ::<= {
-                party.leader = member;
-                windowEvent.queueMessage(text: member.name + ' is now the leader.');
-              }
+              windowEvent.queueChoices(
+                leftWeight: 1,
+                topWeight: 1,
+                choicesMatch : [
+                  'Make Leader', ::{
+                    if (member == party.leader) ::<= {
+                      windowEvent.queueMessage(text: member.name + ' is already the leader.');
+                    } else ::<= {
+                      party.leader = member;
+                      windowEvent.queueMessage(text: member.name + ' is now the leader.');
+                    }
+                  },
+                  
+                  
+                  'Part Ways', ::{
+                    when(party.members->size == 1)
+                      windowEvent.queueMessage(
+                        text: member.name + ' is the only member of the team.'
+                      );
+                  
+                    windowEvent.queueMessage(
+                      text: 'Should ' + member.name + ' leave the party? Should they leave, they will never return.'
+                    )
+                    
+                    windowEvent.queueAskBoolean(
+                      prompt: 'Part ways with ' + member.name + '?',
+                      onChoice::(which) {
+                        when(which == false) empty;
+                        party.remove(member, silent: true);
+
+                        windowEvent.queueMessage(
+                          text: member.name + ' walked away quietly, never to be seen again.'
+                        )
+                        
+                        windowEvent.jumpToTag(
+                          name : 'CHOOSE_MEMBER'
+                        );
+                          
+                      }
+                    );
+                  }
+                   
+                ],
+                prompt: names[whom] + ': Team',
+                keep: true,
+                canCancel: true            
+              )
             },
 
             // describe

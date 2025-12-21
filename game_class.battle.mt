@@ -690,7 +690,10 @@
  
         @:queueFriends ::{
           @chance = 0;
-          if (world.party.members->size == 1) chance = 40;
+          if (world.party.members->size == 1) ::<= {
+            chance = 70 - (party.denyJoinPartyCount*15);
+            if (choice < 5) chance = 5;
+          }
           if (world.party.members->size == 2) chance = 5;
           
           when (!random.try(percentSuccess:chance)) empty;        
@@ -714,9 +717,11 @@
                     windowEvent.queueMessage(text:potentialFriend.name + ' joins the party!');
                     
                     party.add(:potentialFriend);
+                    party.denyJoinPartyCount = 0;
                   }
                   
                   windowEvent.queueMessage(text:potentialFriend.name + ' quietly walks away into the distance.');
+                  party.denyJoinPartyCount += 1;
                 }
               );
             }
