@@ -64,6 +64,7 @@
   return a;  
 } => {
   onError::(message) {
+    breakpoint();
     //fallback on Matte implementation  
   }
 }

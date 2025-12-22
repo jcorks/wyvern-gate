@@ -692,7 +692,7 @@
           @chance = 0;
           if (world.party.members->size == 1) ::<= {
             chance = 70 - (party.denyJoinPartyCount*15);
-            if (choice < 5) chance = 5;
+            if (chance < 5) chance = 5;
           }
           if (world.party.members->size == 2) chance = 5;
           
