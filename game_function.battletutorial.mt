@@ -250,7 +250,7 @@ return ::{
       {input:empty, waitFrames:10},
     ]},
     {nested:true, waitFrames:10},
-      {text:"Before choosing an Art, the category much be chosen.", topWeight: 0.6},
+      {text:"Before choosing an Art, the category must be chosen.", topWeight: 0.6},
       {text:"Arts come in 2 varieties.", topWeight: 0.6},
       {text:"Ability Arts are generally more influential and potent, but will end the turn after use.", topWeight: 0.6},
     {endNested:true},

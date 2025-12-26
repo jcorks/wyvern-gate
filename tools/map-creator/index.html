@@ -5,14 +5,32 @@
   <title></title>
   <link href="style.css" rel="stylesheet" />
   
-  <div id = "anchor"></div>
-  
+  <div style="overflow:auto">
+    <div>
+      <div id = "canvas-anchor" style="float:left;"></div>
+      <div style="float:left;">
+        <input 
+          orient="vertical" 
+          type="range" min="0" max="512" step="1" value="0" id = "y-range" style="writing-mode: bt-lr; writing-mode: vertical-lr;">
+        </input>
+      </div>
+      <div id = "settings-anchor" style="float:left;"></div>
+    </div>
+  </div>
+  <input 
+    type="range" min="0" max="512" step="1" value="0" id = "x-range">
+  </input>
+  <div id = "palette-anchor"></div>
+
+
 </head>
 <body>
-
-  <script src="creator.js"></script>
-  <script>
-    document.getElementById('anchor').appendChild(canvas.getMain());
-  </script>
+  <script src="constants.js"></script>
+  <script src="events.js"></script>
+  <script src="line.js"></script>
+  <script src="canvas.js"></script>
+  <script src="palette.js"></script>
+  <script src="settings.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
