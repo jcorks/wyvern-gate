@@ -1309,6 +1309,9 @@ return empty;
         @enteredChoices = false;
         @underFoot;
         @steps = 0;
+        island.map.title = island.name + ' : ' + world.timeString;
+
+
         @islandTravel = ::{
           windowEvent.queueCursorMove(
             leftWeight: 1,

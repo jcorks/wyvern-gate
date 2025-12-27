@@ -2702,7 +2702,7 @@ return {
         stackable: true,
         blockPoints : 0,
         stats: StatSet.new(),
-        traits : 0,
+        traits : Effect.TRAIT.SPECIAL,
         
         events : {
           onAffliction ::(user, item, holder) {

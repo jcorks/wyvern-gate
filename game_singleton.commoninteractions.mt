@@ -66,9 +66,9 @@ return {
         @arts
         
         windowEvent.queueChoices(
-          topWeight: 1,
-          leftWeight: 1,
           prompt: 'Choose an Art type:',
+          topWeight: 1,
+          leftWeight : 1,
           canCancel: true,
           keep: true,
           choices : [
@@ -88,6 +88,8 @@ return {
             Arts.queuePick(
               arts,
               keep: true,
+              topWeight : 1,
+              leftWeight : 1,
               prompt: user.name + '\'s ' + (if (choice == 1) 'Ability' else 'Effect') + ' Arts:',
               onChoice::(art) {
                 @:source = art;
@@ -392,104 +394,84 @@ return {
       keepInteractionMenu : true,
       filter::(island, landmark) <- landmark == empty,
       onSelect::(island, landmark) {
-        @:choices = [
-          ::{
-            windowEvent.queueMessage(speaker: 'About ' + island.name, text: island.description)          
-          },
+        island.incrementTime();
+        @:world = import(module:'game_singleton.world.mt');
+        
+        when(random.try(percentSuccess:80) || world.data.base_interaction_check_chest_last == world.day)
+          windowEvent.queueMessage(text:'You look around, but fail to find anything of note.');   
+
+        
+        world.data.base_interaction_check_chest_last = world.day;
+        @:openChest = ::(opener){
+
+          windowEvent.queueMessage(text:'The party opens the chest...'); 
+          @:Damage = import(module:'game_class.damage.mt');
           
-          ::{
-            island.incrementTime();
-            @:world = import(module:'game_singleton.world.mt');
-            
-            when(random.try(percentSuccess:80))
-              windowEvent.queueMessage(text:'You look around, but fail to find anything of note.');   
-  
-
-
-            @:openChest = ::(opener){
-
-              windowEvent.queueMessage(text:'The party opens the chest...'); 
-              @:Damage = import(module:'game_class.damage.mt');
-              
-              when(random.number() < 0.5) ::<= {
-                windowEvent.queueMessage(text:'A trap is triggered, and a volley of arrows springs form the chest!'); 
-                if (random.number() < 0.5) ::<= {
-                  windowEvent.queueMessage(text:opener.name + ' narrowly dodges the trap.');             
-                } else ::<= {
-                  opener.damage(
-                    attacker: opener,
-                    damage: Damage.new(
-                      amount:opener.stats.HP * (0.7),
-                      damageType : Damage.TYPE.PHYS,
-                      damageClass: Damage.CLASS.HP
-                    ),
-                    dodgeable: false
-                  );
-                }
-              } 
-              
-              
-              @:itemCount = (2+random.number()*3)->floor;
-              
-              windowEvent.queueMessage(text:'The chest contained ' + itemCount + ' items!'); 
-              
-            
-              when(itemCount > party.inventory.slotsLeft) ::<= {
-                windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
-              }        
-              for(0, itemCount)::(index) {
-                @:item = Item.new(
-                  base:Item.database.getRandomFiltered(
-                    filter:::(value) <- 
-                      value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
-                      value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
-                      && value.tier <= island.tier
-                  ),
-                  rngEnchantHint:true
-                );
-                @message = 'The party found ' + correctA(word:item.name);
-                windowEvent.queueMessage(text: message);
-
-
-                party.inventory.add(item);
-                
-              }
-
+          when(random.number() < 0.5) ::<= {
+            windowEvent.queueMessage(text:'A trap is triggered, and a volley of arrows springs form the chest!'); 
+            if (random.number() < 0.5) ::<= {
+              windowEvent.queueMessage(text:opener.name + ' narrowly dodges the trap.');             
+            } else ::<= {
+              opener.damage(
+                attacker: opener,
+                damage: Damage.new(
+                  amount:opener.stats.HP * (0.7),
+                  damageType : Damage.TYPE.PHYS,
+                  damageClass: Damage.CLASS.HP
+                ),
+                dodgeable: false
+              );
             }
+          } 
+          
+          
+          @:itemCount = (2+random.number()*3)->floor;
+          
+          windowEvent.queueMessage(text:'The chest contained ' + itemCount + ' items!'); 
+          
+        
+          when(itemCount > party.inventory.slotsLeft) ::<= {
+            windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
+          }        
+          for(0, itemCount)::(index) {
+            @:item = Item.new(
+              base:Item.database.getRandomFiltered(
+                filter:::(value) <- 
+                  value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                  value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                  && value.tier <= island.tier
+              ),
+              rngEnchantHint:true
+            );
+            @message = 'The party found ' + correctA(word:item.name);
+            windowEvent.queueMessage(text: message);
 
 
+            party.inventory.add(item);
             
-            @:party = world.party;
-            windowEvent.queueMessage(text:'What\'s this?');
-            windowEvent.queueMessage(text:'The party trips over a hidden chest!');
-            windowEvent.queueAskBoolean(
-              prompt: 'Open the chest?',
-              onChoice ::(which) {
-                when(which == false) empty;
-                          
-                windowEvent.queueChoices(
-                  prompt: 'Who opens up the chest?',
-                  choices : [...party.members]->map(to:::(value) <- value.name),
-                  canCancel: false,
-                  onChoice::(choice) {
-                    openChest(opener:party.members[choice-1]);
-                  }
-                );
+          }
+        }
+            
+        @:party = world.party;
+        windowEvent.queueMessage(text:'What\'s this?');
+        windowEvent.queueMessage(text:'The party trips over a hidden chest!');
+        windowEvent.queueAskBoolean(
+          prompt: 'Open the chest?',
+          onChoice ::(which) {
+            when(which == false) empty;
+                      
+            windowEvent.queueChoices(
+              prompt: 'Who opens up the chest?',
+              choices : [...party.members]->map(to:::(value) <- value.name),
+              canCancel: false,
+              onChoice::(choice) {
+                openChest(opener:party.members[choice-1]);
               }
             );
           }
-        ]
-        windowEvent.queueChoices(
-          choices: [
-            'Island',
-            'Immediate area...'
-          ],
-          keep:true,
-          canCancel:true,
-          onChoice::(choice) {
-            choices[choice-1]();
-          }
         );
+          
+        
         
       }
     ),

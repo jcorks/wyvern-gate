@@ -5629,7 +5629,7 @@ Arts.database.newEntry(
     notifCommit : '$1 casts Blood\'s Pain on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONEPART,
-    description: "Sacrifice 2 HP. Deal damage to target based on ATK.",
+    description: "Sacrifice 5% HP. Deal damage to target based on ATK.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -5644,7 +5644,7 @@ Arts.database.newEntry(
           user.damage(
             attacker: user,
             damage : Damage.new(
-              amount : 2,
+              amount : (user.stats.HP * 0.05)->ceil,
               damageType : Damage.TYPE.NEUTRAL,
               damageClass: Damage.CLASS.HP
             ),
@@ -5657,7 +5657,7 @@ Arts.database.newEntry(
           user.attack(
             target:targets[0],
             damage: Damage.new(
-              amount:user.stats.ATK * (0.3),
+              amount:Arts.baseATKmoveDamage(:user) * 0.3,
               damageType : Damage.TYPE.PHYS,
               damageClass: Damage.CLASS.HP
             ),
@@ -5676,7 +5676,7 @@ Arts.database.newEntry(
     targetMode : TARGET_MODE.ONE,
     notifCommit : '$1 casts Blood\'s Shield on $2!',
     notifFail : Arts.NO_NOTIF,
-    description: "Sacrifice 1 HP. Target receives 2 Shield HP. This counts as healing.",
+    description: "Sacrifice 5% HP. Target receives 2 Shield HP. This counts as healing.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -5691,7 +5691,7 @@ Arts.database.newEntry(
           user.damage(
             attacker: user,
             damage : Damage.new(
-              amount : 1,
+              amount : (user.stats.HP * 0.05)->ceil,
               damageType : Damage.TYPE.NEUTRAL,
               damageClass: Damage.CLASS.HP
             ),
@@ -5715,7 +5715,7 @@ Arts.database.newEntry(
     notifCommit : '$1 casts Blood\'s Exaltation on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Sacrifice 2 HP. Target does x2 damage on next attack.",
+    description: "Sacrifice 10% HP. Target does x2 damage on next attack.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -5730,7 +5730,7 @@ Arts.database.newEntry(
           user.damage(
             attacker: user,
             damage : Damage.new(
-              amount : 2,
+              amount : (user.stats.HP * 0.1)->ceil,
               damageType : Damage.TYPE.NEUTRAL,
               damageClass: Damage.CLASS.HP
             ),
@@ -5886,7 +5886,7 @@ Arts.database.newEntry(
     notifCommit : '$1 casts Blood\'s Wind on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Sacrifice 2 HP. The target receives the Evade effect for 2 turns.",
+    description: "Sacrifice 10% HP. The target receives the Evade effect for 2 turns.",
     keywords: ['base:evade'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
@@ -5901,7 +5901,7 @@ Arts.database.newEntry(
           user.damage(
             attacker: user,
             damage : Damage.new(
-              amount : 2,
+              amount : (user.stats.HP * 0.1)->ceil,
               damageType : Damage.TYPE.NEUTRAL,
               damageClass: Damage.CLASS.HP
             ),
@@ -5998,7 +5998,7 @@ Arts.database.newEntry(
     notifCommit : '$1 casts Blood\'s Summoning!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: "Sacrifice 2 HP. Summons a small spirit to fight on your side.",
+    description: "Sacrifice 5% HP. Summons a small spirit to fight on your side.",
     keywords: [],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.OFFENSIVE,
@@ -6013,7 +6013,7 @@ Arts.database.newEntry(
           user.damage(
             attacker: user,
             damage : Damage.new(
-              amount : 2,
+              amount : (user.stats.HP * 0.05)->ceil,
               damageType : Damage.TYPE.NEUTRAL,
               damageClass: Damage.CLASS.HP
             ),
@@ -12435,7 +12435,7 @@ Arts.database.newEntry(
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
     description: "Grants Starsign Alignment to a target for 3 turns.",
-    keywords: [],
+    keywords: ['base:starsign-alignment'],
     durationTurns: 0,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {

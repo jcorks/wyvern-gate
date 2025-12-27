@@ -609,7 +609,7 @@ Island.database.newEntry(
 
         state.level = levelHint; //(levelHint - random.number() * (levelHint * 0.2))->round;
         if (state.level < 1) state.leven = 1;
-        if (nameHint != empty || nameHint == '')
+        if (nameHint != empty)
           state.name = (nameHint) => String;
 
         @rarity = 1;

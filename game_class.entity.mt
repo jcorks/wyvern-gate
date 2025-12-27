@@ -2445,6 +2445,8 @@
 
       if (olditem) ::<= {
         this.equip(item:olditem, slot, silent:true);
+      } else ::<= {
+        this.unequip(slot, silent:true)
       }
       this.recalculateStats();
       state.equipArts = arts;
