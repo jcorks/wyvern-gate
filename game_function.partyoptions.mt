@@ -219,10 +219,10 @@ return ::{
     windowEvent.queueChoices(
       prompt: member.name + 's Arts',
 
-      choices : {
-        ('Check') ::<- quickViewArts(),
-        ('Loadouts...') ::<- loadouts()
-      },
+      choicesMatch : [
+        'Check', ::<- quickViewArts(),
+        'Loadouts...', ::<- loadouts()
+      ],
       leftWeight: 1,
       topWeight : 1,
       keep: true,
@@ -314,11 +314,12 @@ return ::{
   }
   
   
-  
+  /*
   windowEvent.queueTransition(
     kind:windowEvent.TRANSITION.FADE_TO_BLACK,
     renderableMiddle : menuRenderable
   );
+  */
   
   
   windowEvent.queueCursorMove(
@@ -329,10 +330,10 @@ return ::{
     renderable : menuRenderable,
     canCancel: true,
     onLeave ::{
-      windowEvent.queueTransition(
+      /*windowEvent.queueTransition(
         renderableStart : menuRenderable,
         kind:windowEvent.TRANSITION.FADE_TO_BLACK
-      );        
+      );*/        
     },
 
     onMove ::(choice) {

@@ -393,15 +393,14 @@ return {
           professionHint: prof
         );
         p0.stats.load(:p0.stats.add(:StatSet.new(
-          HP : 4
         )).save());
 
 
 
         
-        if (p0.stats.HP < 6) ::<= {
+        if (p0.stats.HP < 10) ::<= {
           @:stats = p0.stats.save();
-          stats.HP = 6;
+          stats.HP = 10;
           p0.stats.load(:stats);
         }
         p0.heal(amount:999999, silent:true);
@@ -1252,7 +1251,7 @@ return {
               canCancel: true,
               choicesMatch : [
                 'Proceed, unaware of what lies ahead', ::<- proceed(),
-                'Go back to entrance', ::<= {
+                'Go back to entrance', :: {
                   windowEvent.queueMessage(
                     text: 'You return to the entrance.',
                     renderable :{
@@ -3082,32 +3081,9 @@ return {
     )   
 
     @:perfectLearning ::{
-      @:ArtsDeck = import(:'game_class.artsdeck.mt');
       @:world = import(module:'game_singleton.world.mt');
 
-      @ARTS_COUNT = 4;
-      @:arts = [];
-      for(0, ARTS_COUNT) ::(i) {
-        @:art = Arts.database.getRandomFiltered(::(value) <- 
-          (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
-          ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
-          (value.rarity >= Arts.RARITY.RARE)
-        );
-        arts->push(:art.id);
-        world.party.addSupportArt(:art.id);
-      }
-      
-      windowEvent.queueMessage(
-        text: 'New Arts have been revealed!'
-      );
-      
-      ArtsDeck.viewCards(
-        cards: arts->map(::(value) <- ArtsDeck.synthesizeHandCard(id:value))
-      );
-
-      windowEvent.queueMessage(
-        text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'
-      );        
+      world.party.members[0].addEffect(from:world.party.members[0], id: 'base:learn-arts-perfect', durationTurns:1);
     }
 
 
@@ -3125,7 +3101,11 @@ return {
             @enemies = [];
             
             
-            for(0, if (island.tier <= 1) 2 else 3)::(i) {
+            for(0, match(island.tier) {
+              (0): 1,
+              (1): 2,
+              default: 3
+            })::(i) {
               @:enemy = island.newAggressor();
               enemy.inventory.clear();
               enemy.anonymize();

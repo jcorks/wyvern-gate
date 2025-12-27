@@ -45,6 +45,7 @@
     guildTeamName : '',
     activeQuests : [],
     completedQuests : [],
+    firstEncounter : true,
     bank : empty
   },
 
@@ -53,6 +54,7 @@
     this.interface = {  
       initialize :: {
         state.denyJoinPartyCount = 0
+        state.firstEncounter = true
       },
       defaultLoad ::{      
         state.members = [];
@@ -560,6 +562,11 @@
         get ::<- state.denyJoinPartyCount,
         set ::(value) <- state.denyJoinPartyCount = value
       },
+      firstEncounter : {
+        get ::<- state.firstEncounter,
+        set ::(value) <- state.firstEncounter = value
+      },
+
       
       karma : {
         get ::<- state.karma,

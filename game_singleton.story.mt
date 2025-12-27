@@ -24,7 +24,7 @@
 
 @:ITEM_SOURCE = {
   
-
+  firstEncounter : false,
   
   // whether the player has seen the wandering gamblist
   skieEncountered : false,

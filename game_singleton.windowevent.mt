@@ -2322,7 +2322,7 @@
                 canvas.clear();
                 canvas.movePen(x:0, y:0);
                 canvas.drawRectangle(text: ' ', width:counter, height: canvas.height);
-                t += 0.08;
+                t += 0.09;
                 when(t < 1) empty;
                 return ANIMATION_FINISHED;
               }
@@ -2337,7 +2337,7 @@
                 canvas.clear();
                 canvas.movePen(x:counter, y:0);
                 canvas.drawRectangle(text: ' ', width:canvas.width - counter, height: canvas.height);
-                t += 0.08;
+                t += 0.09;
                 when(t < 1) empty;
                 return ANIMATION_FINISHED;
               }

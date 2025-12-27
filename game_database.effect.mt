@@ -3005,7 +3005,7 @@ Effect.newEntry(
           arts: choiceActs,
           renderable : {
             render :: {
-              @:id = choiceActs[which].id;
+              @:id = which.base.id;
               when(id == empty) empty;
               Arts.renderArt(
                 user:holder,
@@ -3017,9 +3017,10 @@ Effect.newEntry(
             }
           }, 
           topWeight: 1,
+          leftWeight : 0.5,
           canCancel: true,
           onHover ::(choice) {
-            which = choice-1;
+            which = choice
           }
         );
 
@@ -3069,8 +3070,9 @@ Effect.newEntry(
           arts: choiceActs,
           renderable : {
             render :: {
-              @:id = choiceActs[which].id;
+              @:id = which.base.id;
               when(id == empty) empty;
+              breakpoint();
               Arts.renderArt(
                 user:holder,
                 id,
@@ -3080,10 +3082,11 @@ Effect.newEntry(
               );          
             }
           }, 
+          leftWeight : 0.5,
           topWeight: 1,
           canCancel: true,
           onHover ::(choice) {
-            which = choice-1;
+            which = choice;
           }
         );
 

@@ -618,8 +618,10 @@
 
   @:applyHPbonus ::{
     @:newState = this.stats.save();
-    newState['HP'] += random.integer(from:6, to:8);
+    @amount = random.integer(from:6, to:8);
+    newState['HP'] += amount;
     this.stats.load(serialized:newState);
+    this.heal(amount, silent:true);
   }
 
   if (set == empty) ::<= {
@@ -903,7 +905,8 @@
       @:this = _.this;
       _.state.battleAI = BattleAI.new(user:this); 
       @:state = _.state;
-      state.equipArts = [];
+      if (state.equipArts == empty)
+        state.equipArts = [];
       _.temporaryArts = [];
     },
       
@@ -2440,7 +2443,6 @@
       this.recalculateStats();
       @:newStats = this.stats.clone();
 
-      this.unequip(slot);      
       if (olditem) ::<= {
         this.equip(item:olditem, slot, silent:true);
       }
@@ -2881,7 +2883,8 @@
       
       foreach(item.arts) ::(k, v) {
         @:art = Arts.new(base:
-          Arts.database.find(:v)
+          Arts.database.find(:v),
+          source: item.worldID
         );
         art.charge = 0;
         state.equipArts->push(:art);
@@ -2984,7 +2987,8 @@
       @:current = state.equips[slot];
       when (current == empty) empty;
       
-      state.equipArts = [];
+      breakpoint();
+      state.equipArts = state.equipArts->filter(::(value) <- value.source != current.worldID);
       state.equips[slot] = empty;        
       
 

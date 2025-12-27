@@ -1312,7 +1312,7 @@ Species.newEntry(data:{
 
   
   baseStats : StatSet.new(
-    HP  : 1,
+    HP  : 35,
     AP  : 1,
     ATK : 1,
     DEF : 1,

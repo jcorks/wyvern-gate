@@ -691,8 +691,14 @@
         @:queueFriends ::{
           @chance = 0;
           if (world.party.members->size == 1) ::<= {
-            chance = 70 - (party.denyJoinPartyCount*15);
-            if (chance < 5) chance = 5;
+            breakpoint();
+            if (world.party.firstEncounter) ::<= {
+              chance = 100;
+              world.party.firstEncounter = false;
+            } else ::<= {
+              chance = 70 - (party.denyJoinPartyCount*15);
+              if (chance < 5) chance = 5;
+            }
           }
           if (world.party.members->size == 2) chance = 5;
           

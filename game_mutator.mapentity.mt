@@ -1079,7 +1079,7 @@ MapEntity.Task.database.newEntry(
               ally.attack(
                 target,
                 damage: Damage.new(
-                  amount:ally.stats.ATK * (0.5),
+                  amount:1 + ally.stats.ATK * (0.5),
                   damageType : Damage.TYPE.PHYS,
                   damageClass: Damage.CLASS.HP
                 )

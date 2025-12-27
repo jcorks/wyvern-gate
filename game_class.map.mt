@@ -1231,6 +1231,8 @@
       
       getDistanceFromItem ::(data) {
         @:item = retrieveItem(data);
+        // todo: error?
+        when (item == empty) 0xffffffff
         return distance(x0:pointer.x, y0:pointer.y, x1:item.x, y1:item.y);
       },
       

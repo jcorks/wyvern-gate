@@ -2453,12 +2453,12 @@ Arts.database.newEntry(
               damage: Damage.new(
                 amount: Arts.database.find(:'base:backdraft').baseDamage(level, user),
                 damageType : Damage.TYPE.FIRE,
-                damageClass: Damage.CLASS.HP,
-                onFinish ::(value) {
-                  when(value != true) empty;
-                  targets[0].addEffect(from:user, id:'base:burned', durationTurns:5);
-                }
-              )
+                damageClass: Damage.CLASS.HP
+              ),
+              onFinish ::(value) {
+                when(value != true) empty;
+                targets[0].addEffect(from:user, id:'base:burned', durationTurns:5);
+              }
             )
           }
         );
@@ -5493,7 +5493,7 @@ Arts.database.newEntry(
   }
 )
 
-
+/*
 Arts.database.newEntry(
   data: {
     name: 'Cancel',
@@ -5517,6 +5517,7 @@ Arts.database.newEntry(
     }
   }
 )
+*/
 
 Arts.database.newEntry(
   data: {
@@ -12861,8 +12862,8 @@ Arts = databaseItemMutatorClass.create(
       @which;
       @choiceActs = [...arts];
       choicesColumns(
-        leftWeight: 1,
-        topWeight : 1,
+        leftWeight,
+        topWeight,
         leftJustified : [
           false, true, true
         ],
@@ -12876,7 +12877,8 @@ Arts = databaseItemMutatorClass.create(
 
           if (onGetArts) choiceActs = onGetArts();
           if (onHover) onHover(:choiceActs[which]);
-        },        
+        },   
+        renderable,     
 
         onGetChoices ::{
           @:bars   = [];
@@ -12995,7 +12997,8 @@ Arts = databaseItemMutatorClass.create(
   },
   
   items : {
-    charge : 99
+    charge : 99,
+    source : -1
   },
 
   database : Database.new(
@@ -13042,14 +13045,20 @@ Arts = databaseItemMutatorClass.create(
 
       },
 
-      defaultLoad::(base) {
+      defaultLoad::(base, source) {
         state.base = base;
         state.charge = this.maxCharge;
+        if (source != empty)
+          state.source = source;
       },
 
       charge : {
         get ::<- state.charge,
         set ::(value) <- state.charge = value
+      },
+      
+      source : {
+        get ::<- state.source
       },
       
       canUse : {

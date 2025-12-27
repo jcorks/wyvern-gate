@@ -337,7 +337,7 @@ return class(
       },
       
       creature :: {
-        @:mod = if (random.number() > 0.8) random.pickArrayItem(list:creatureMod)+' ' else '';
+        @:mod = if (random.number() > 0.8) random.pickArrayItem(list:creatureMod) else '';
         @:first = random.pickArrayItem(list:creatureBaseNames);
         @second = ::? { 
           forever ::{
