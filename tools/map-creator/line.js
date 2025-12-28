@@ -7,24 +7,47 @@
 */
 
 const Line = {
+  ATTRIBUTES : [
+    WALL : 1,
+    SELECTION : 2,
+    AREA : 4
+  ];
   new : function() {
     var self;
     const v = document.createElement('div');
     const events = EventSystem.new([
       'onClick'
     ]);
+    
+    const attributeToColor = function(attribute) {
+      if (attribute == 0)
+        return TEXT_COLOR_ACTIVE;
+        
+      var color = {r:64, g:64, b:64};
+      if (attribute & (Line.ATTRIBUTES.WALL)) 
+        color.g+=180
+
+      if (attribute & (Line.ATTRIBUTES.SELECTION)) { 
+        color.g+=120
+        color.b+=120
+      }
+        
+        
+      return "rgb(" + color.r + ", " + color.g + ", " + color.b + ")";
+    }
+    
 
     v.style.fontFamily = 'Monospace';
 
-    const setChar = function(c, ch) {
-      if (typeof(ch) != "string") {
+    const setChar = function(c, ch, state) {
+      if (typeof(ch) != "string" || ch.length == 0) {
         c.active = false;
         c.innerText = '`';
         c.style.color = TEXT_COLOR_INACTIVE
       } else {
         c.active = true;
         c.innerText = ch;
-        c.style.color = TEXT_COLOR_ACTIVE   
+        c.style.color = attributeToColor(state);
       }
     }
     
@@ -107,8 +130,8 @@ const Line = {
 
       
       // 
-      editChar : function(index, ch) {
-        setChar(chars[index], ch[0]);
+      editChar : function(index, ch, state) {
+        setChar(chars[index], ch[0], state);
       }
     }
     

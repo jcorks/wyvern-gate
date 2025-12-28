@@ -30,7 +30,7 @@ const Canvas = {
         const x = data.index 
         const s = palette.getSelected();
         line.editChar(x, s);
-        canvasChars[iterX + x + MAX_WIDTH*(iterY + y)] = s;
+        canvasChars[iterX + x + MAX_LENGTH*(iterY + y)] = s;
         
       });
 
@@ -48,12 +48,16 @@ const Canvas = {
         line.setState(function() {
           const list = [];
           for(var x = iterX; x < iterX + VIEW_WIDTH; ++x) {
-            list.push(canvasChars[x + (iterY+y) * MAX_WIDTH]);
+            list.push(canvasChars[x + (iterY+y) * MAX_LENGTH]);
           }
           return list;
         }());
       }
 
+    }
+    
+    for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
+      canvasChars[i] = 0;
     }
     
     self = {

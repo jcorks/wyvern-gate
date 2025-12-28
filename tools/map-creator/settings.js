@@ -7,6 +7,19 @@ const Settings = {
       out.innerText = str;
       return out;
     }
+    
+    const hideSet = function(set) { 
+      for(var i = 0; i < set.length; ++i) {
+        set[i].style.display = 'none'
+      }
+    }
+
+    const showSet = function(set) { 
+      for(var i = 0; i < set.length; ++i) {
+        set[i].style.display = 'block'
+      }
+    }
+
 
     const makeRow = function(items) {
       var row = document.createElement('tr');
@@ -20,9 +33,20 @@ const Settings = {
         
         next.appendChild(items[i]);
       }
+      
+      return items;
     }
-
     
+    const addDropDownOptions = function(dropDown, options) {
+      for(var i = 0; i < options.length; ++i) {
+        const opt = document.createElement("option");
+        opt.text = options[i];
+        dropDown.add(opt);
+      }
+    }
+    
+
+    var cursorOptions_isWall_set;
     
     // ROW 1: View
         const locationX_element = document.createElement('input');
@@ -54,6 +78,40 @@ const Settings = {
           yRange.value = locationY_element.value;
           yRange.dispatchEvent(new Event("change"));
         });
+        
+        
+    // Cursor Mode
+        const cursorMode_element = document.createElement('select');
+        addDropDownOptions(cursorMode_element, ['Pen', 'Selector', 'Area Editor']);
+
+        // make ui elements
+        makeRow([
+          makeLabel('Cursor Mode:'),
+          cursorMode_element,
+        ]);
+
+        // make connections
+        cursorMode_element.addEventListener('change', function() {
+          hideSet(cursorOptions_isWall_set);
+          switch(cursorMode_element.value) {
+            case 'Pen':
+              showSet(cursorOptions_isWall_set);
+          }
+        });
+
+
+
+    // Cursor options: wall
+        const isWall_element = document.createElement('input');
+        isWall_element.type = 'checkbox';
+
+        // make ui elements
+        cursorOptions_isWall_set = makeRow([
+          makeLabel(''),
+          makeLabel('Is Wall?:'),
+          isWall_element
+        ]);
+        
 
 
     return {
