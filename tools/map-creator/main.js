@@ -41,7 +41,7 @@ document.body.style.fontFamily = 'Monospace';
     yRange
   );
   document.getElementById('settings-anchor').appendChild(settings.getElement());
-  
+  canvas.setSettings(settings);
   
   
 })();

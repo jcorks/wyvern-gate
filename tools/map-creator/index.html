@@ -7,19 +7,25 @@
   
   <div style="overflow:auto">
     <div>
-      <div id = "canvas-anchor" style="float:left;"></div>
+      <div  style="float:left;">
+        <div id = "canvas-anchor">
+
+        </div>
+        <input  
+          type="range" min="0" max="512" step="1" value="0" id = "x-range">
+        </input>      
+      </div>
       <div style="float:left;">
         <input 
           orient="vertical" 
           type="range" min="0" max="512" step="1" value="0" id = "y-range" style="writing-mode: bt-lr; writing-mode: vertical-lr;">
         </input>
       </div>
+
       <div id = "settings-anchor" style="float:left;"></div>
     </div>
   </div>
-  <input 
-    type="range" min="0" max="512" step="1" value="0" id = "x-range">
-  </input>
+
   <div id = "palette-anchor"></div>
 
 

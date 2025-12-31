@@ -1,4 +1,11 @@
 const Settings = {
+  MODE : {
+    PEN : 0,
+    WALL : 1,
+    SELECTOR : 2,
+    AREA_EDITOR : 3
+  },
+
   new : function(canvas, xRange, yRange) {
     const table = document.createElement('table');
 
@@ -81,35 +88,46 @@ const Settings = {
         
         
     // Cursor Mode
+        const modes = [
+          'Pen',
+          'Wall',
+          'Selector', 
+          'Area Editor'
+        ];
         const cursorMode_element = document.createElement('select');
-        addDropDownOptions(cursorMode_element, ['Pen', 'Selector', 'Area Editor']);
+        addDropDownOptions(cursorMode_element, modes);
 
         // make ui elements
         makeRow([
-          makeLabel('Cursor Mode:'),
+          makeLabel('Mode:'),
           cursorMode_element,
         ]);
 
         // make connections
         cursorMode_element.addEventListener('change', function() {
-          hideSet(cursorOptions_isWall_set);
+          hideSet(cursorOptions_isErase_set);
           switch(cursorMode_element.value) {
             case 'Pen':
-              showSet(cursorOptions_isWall_set);
+              showSet(cursorOptions_isErase_set);
+
+            case 'Wall':
+              showSet(cursorOptions_isErase_set);
           }
+          
+          canvas.refresh();
         });
 
 
 
-    // Cursor options: wall
-        const isWall_element = document.createElement('input');
-        isWall_element.type = 'checkbox';
+    // Cursor options: erase
+        const isErase_element = document.createElement('input');
+        isErase_element.type = 'checkbox';
 
         // make ui elements
-        cursorOptions_isWall_set = makeRow([
+        cursorOptions_isErase_set = makeRow([
           makeLabel(''),
-          makeLabel('Is Wall?:'),
-          isWall_element
+          makeLabel('Erase?:'),
+          isErase_element
         ]);
         
 
@@ -117,6 +135,14 @@ const Settings = {
     return {
       getElement : function() {
         return table;
+      },
+      
+      getMode : function() {
+        return modes.indexOf(cursorMode_element.value)
+      },
+            
+      isErase : function() {
+        return isErase_element.checked
       }
     
     }

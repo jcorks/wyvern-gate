@@ -7,48 +7,30 @@
 */
 
 const Line = {
-  ATTRIBUTES : [
-    WALL : 1,
-    SELECTION : 2,
-    AREA : 4
-  ];
-  new : function() {
+  new : function(zIndex) {
     var self;
+
     const v = document.createElement('div');
     const events = EventSystem.new([
       'onClick'
     ]);
     
-    const attributeToColor = function(attribute) {
-      if (attribute == 0)
-        return TEXT_COLOR_ACTIVE;
-        
-      var color = {r:64, g:64, b:64};
-      if (attribute & (Line.ATTRIBUTES.WALL)) 
-        color.g+=180
 
-      if (attribute & (Line.ATTRIBUTES.SELECTION)) { 
-        color.g+=120
-        color.b+=120
-      }
-        
-        
-      return "rgb(" + color.r + ", " + color.g + ", " + color.b + ")";
-    }
     
 
-    v.style.fontFamily = 'Monospace';
+    v.style.fontFamily = 'gamefont';
+    v.style.zIndex = 100-zIndex;
+    v.style.position = "relative";
+    //v.style.top = "-2px";
+    v.style.top = '-' + (zIndex*2) + 'px'
 
-    const setChar = function(c, ch, state) {
-      if (typeof(ch) != "string" || ch.length == 0) {
-        c.active = false;
-        c.innerText = '`';
-        c.style.color = TEXT_COLOR_INACTIVE
-      } else {
-        c.active = true;
-        c.innerText = ch;
-        c.style.color = attributeToColor(state);
-      }
+    const setChar = function(index, ch, color) {
+      const c = chars[index];
+
+      c.active = true;
+      c.innerText = ch;
+      c.style.color = color;
+      c.colorStore = c.style.color;
     }
     
     const getChar = function(c) {
@@ -66,14 +48,18 @@ const Line = {
     var lastHovered;
     var displayLine;
     for(var i = 0; i < VIEW_WIDTH; ++i) {
-      const c = document.createElement('code');
+      const c = document.createElement('h');
       c.style.margin = '0px';
       c.style.whiteSpace = 'pre';
+      c.style.fontFamily = 'gamefont';
+      c.style.fontSize = '19px'
 
       c.index = i;
-      setChar(c, 0);
       v.appendChild(c);
       chars[i] = c;
+      setChar(i, '`', TEXT_COLOR_INACTIVE);
+      
+      
       c.addEventListener("mouseenter", function(evt) {
         lastHovered = chars[i];
         
@@ -84,8 +70,7 @@ const Line = {
       c.addEventListener("mouseleave", function(evt) {
 
         c.style.backgroundColor = BACKGROUND_COLOR;
-        c.style.color = (c.active) ? TEXT_COLOR_ACTIVE : TEXT_COLOR_INACTIVE;
-
+        c.style.color = c.colorStore;;
         lastHovered = null;
       })
 
@@ -108,30 +93,23 @@ const Line = {
       getElement : function() {
         return v;
       },
-      // returns the raw character array
-      setState : function(
-        lineArray
-      ) {
-        for(var i = 0; i < lineArray.length; ++i) {
-          setChar(chars[i], lineArray[i]);
-        }
+      getChar : function(x) {
+        return chars[x];
       },
-      
-      // returns an array of the elements of the line.
-      // for characters unset
-      fetchState : function() {
-        const out = [];
-        for(var i = 0; i < chars.length; ++i) {
-          out[i] = chars[i].innerText
-        }
-      },
-      
+
       events : events,
 
+      editChar : function(index, ch, color) {
+        if (ch == null)
+          ch = chars[index]
+        if (ch == 0) {
+          ch = '`';
+        }
+        setChar(index, ch[0], color);
+      },
       
-      // 
-      editChar : function(index, ch, state) {
-        setChar(chars[index], ch[0], state);
+      erase : function(index) {
+        setChar(index, '`', TEXT_COLOR_INACTIVE);      
       }
     }
     

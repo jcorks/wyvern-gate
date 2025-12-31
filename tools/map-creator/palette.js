@@ -19,6 +19,7 @@ const Palette = {
       button.style.float = 'left';
       button.style.border = '2px';
       button.style.borderColor = 'white';
+      button.style.fontFamily = 'gamefont';
       //button.style.whiteSpace = 'pre';
       buttonTextHolder.innerText = c;
       button.style.backgroundColor = BUTTON_COLOR_INACTIVE
@@ -45,8 +46,7 @@ const Palette = {
     
     
     const buttons = [];
-    
-    createButton(div, "");
+   
     
     for(var i = 32; i <= 126; ++i) {
       var c = String.fromCharCode(i);

@@ -9,6 +9,8 @@ const SELECTION_MODE__RECTANGLE = 1;
 const BACKGROUND_COLOR = "#303030";
 const TEXT_COLOR_ACTIVE = "#afafaf";
 const TEXT_COLOR_INACTIVE = "#505050";
+const TEXT_COLOR_WALL = "#90ff90";
+
 const MAX_LENGTH = 512;
 
 const BUTTON_COLOR_ACTIVE   = "#b0b0b0"
