@@ -54,6 +54,7 @@ const Settings = {
     
 
     var cursorOptions_isWall_set;
+    var undoRedo_set;
     
     // ROW 1: View
         const locationX_element = document.createElement('input');
@@ -85,6 +86,31 @@ const Settings = {
           yRange.value = locationY_element.value;
           yRange.dispatchEvent(new Event("change"));
         });
+        
+    // UNDO/REDO
+        const undo_element = document.createElement('button');
+        const redo_element = document.createElement('button');
+        
+        
+        undo_element.innerText = 'Undo';
+        redo_element.innerText = 'Redo';
+
+
+        // make ui elements
+        makeRow([
+          makeLabel('Undo/Redo'),
+          undo_element,
+          redo_element
+        ]);
+        
+        undo_element.addEventListener('click', function() {
+          canvas.undo(); 
+        })
+
+        redo_element.addEventListener('click', function() {
+          canvas.redo(); 
+        })
+
         
         
     // Cursor Mode

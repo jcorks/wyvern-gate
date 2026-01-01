@@ -4,9 +4,22 @@ const Canvas = {
     var self;
     var selectionMode = SELECTION_MODE__PEN;
     var settings;
+    const undoController = UndoContext.new();
+    
+    var canvasChars = [];
+    var canvasWall = [];
+    var canvasAreas = [];
 
     const palette = Palette.new();
+    
+    var commitChangeCounter = 0;
+    const commitChange = function() {
+      if (commitChangeCounter % 3 == 0) {
+        undoController.commitState([canvasChars, canvasWall, canvasAreas]);
+      }
+      commitChangeCounter++;
 
+    }
     
 
     const attributeToColor = function(attribute) {
@@ -55,8 +68,7 @@ const Canvas = {
     
 
 
-    var canvasChars = [];
-    var canvasWall = [];
+
     const lines = [];
     const main = document.createElement('div');
     const events = EventSystem.new(['onMove']);
@@ -76,23 +88,36 @@ const Canvas = {
         const s = palette.getSelected();
         const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;        
         
+        var old;
+        var newVal;
         switch(settings.getMode()) {
           case Settings.MODE.PEN:
+            old = canvasChars[atlasIndex];
             if (settings.isErase())
-              canvasChars[atlasIndex] = 0;
+              newVal = 0;
             else
-              canvasChars[atlasIndex] = s;
+              newVal = s;
 
-            refreshCanvas();
+            if (old != newVal) {
+              canvasChars[atlasIndex] = newVal;
+              commitChange();
+              refreshCanvas();
+            }
             break;
 
           case Settings.MODE.WALL:
+            old = canvasWall[atlasIndex]
             if (settings.isErase()) {
-              canvasWall[atlasIndex] = false;            
+              newVal = false;            
             } else {
-              canvasWall[atlasIndex] = true;
+              newVal = true;
             }
-            refreshCanvas();
+            if (old != newVal) {
+              canvasWall[atlasIndex] = newVal;
+              commitChange();
+              refreshCanvas();
+            }
+
             break;
             
         }
@@ -113,6 +138,7 @@ const Canvas = {
       canvasChars[i] = 0;
       canvasWall[i] = false;
     }
+    commitChange();
     
     self = {
       getElement : function() {
@@ -151,6 +177,27 @@ const Canvas = {
       setSettings : function(e) {
         settings = e;
       },
+      
+      undo : function() {
+        const state = undoController.undo();
+        if (state == false) return;
+        canvasChars = state[0];
+        canvasWall  = state[1];
+        canvasAreas = state[2];
+        refreshCanvas();
+      },
+
+
+      redo : function() {
+        const state = undoController.redo();
+        if (state == false) return;
+        canvasChars = state[0];
+        canvasWall  = state[1];
+        canvasAreas = state[2];
+        refreshCanvas();
+      },
+
+
       
       moveRelative : function(x, y) {
         self.move(x + iterX, y + iterY);
