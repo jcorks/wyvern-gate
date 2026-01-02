@@ -2,12 +2,13 @@ const Settings = {
   MODE : {
     PEN : 0,
     WALL : 1,
-    SELECTOR : 2,
-    AREA_EDITOR : 3
+    PATTERN : 2,
+    AREA_EDITOR : 4
   },
 
   new : function(canvas, xRange, yRange) {
     const table = document.createElement('table');
+    const patterns = {};
 
     const makeLabel = function(str) {
       const out = document.createElement('div');
@@ -45,6 +46,11 @@ const Settings = {
     }
     
     const addDropDownOptions = function(dropDown, options) {
+      const children = [...dropDown.children];
+      for(var i = 0; i < children.length; ++i) {
+        dropDown.removeChild(children[i]);
+      }
+      
       for(var i = 0; i < options.length; ++i) {
         const opt = document.createElement("option");
         opt.text = options[i];
@@ -54,6 +60,7 @@ const Settings = {
     
 
     var cursorOptions_isWall_set;
+    var patternOptions_pattern_set;
     var undoRedo_set;
     
     // ROW 1: View
@@ -63,6 +70,8 @@ const Settings = {
         locationY_element.type = 'number';
         locationX_element.value = 0;
         locationY_element.value = 0;
+        locationX_element.style.width = "70px";
+        locationY_element.style.width = "70px";
 
 
         // make ui elements
@@ -117,7 +126,7 @@ const Settings = {
         const modes = [
           'Pen',
           'Wall',
-          'Selector', 
+          'Pattern', 
           'Area Editor'
         ];
         const cursorMode_element = document.createElement('select');
@@ -132,14 +141,23 @@ const Settings = {
         // make connections
         cursorMode_element.addEventListener('change', function() {
           hideSet(cursorOptions_isErase_set);
+          hideSet(patternOptions_pattern_set);
+          canvas.disablePatternContextMenu();
           switch(cursorMode_element.value) {
             case 'Pen':
               showSet(cursorOptions_isErase_set);
+              break;
 
             case 'Wall':
               showSet(cursorOptions_isErase_set);
+              break;
+              
+            case 'Pattern':
+              canvas.enablePatternContextMenu();
+              showSet(patternOptions_pattern_set);
+              break;
+
           }
-          
           canvas.refresh();
         });
 
@@ -156,11 +174,67 @@ const Settings = {
           isErase_element
         ]);
         
+        
+        
+        
+    // SelectorOptions source
+        const patternOptions_patternStore_element = document.createElement('button');
+        const patternOptions_patternLoad_element  = document.createElement('button');
+        const patternOptions_patternNew_element   = document.createElement('button');
+
+        const patternOptions_patternList_element = document.createElement('select');
+        addDropDownOptions(patternOptions_patternList_element, ['Default']);
+        
+
+
+        
+        patternOptions_patternStore_element.innerText = 'Store';
+        patternOptions_patternLoad_element.innerText = 'Load';
+        patternOptions_patternNew_element.innerText = 'New';
+        
+        patternOptions_pattern_set = makeRow([
+          makeLabel(''),
+          patternOptions_patternStore_element,
+          patternOptions_patternLoad_element,
+          patternOptions_patternList_element,
+          patternOptions_patternNew_element
+        ]);
+
+        patternOptions_patternStore_element.addEventListener(
+          "click",
+          function(event) {
+            const selection = canvas.getSelectionSet();
+            if (selection.width == 0 || selection.height == 0)
+              window.alert('Theres no pattern to save! Highlight the canvas by dragging first.');
+              
+            patterns[patternOptions_patternList_element.value] = selection;
+          }
+        );
+
+
+
+        patternOptions_patternNew_element.addEventListener(
+          "click",
+          function(event) {
+            const ch = window.prompt("Enter a name for the new pattern:");
+            
+            if (Object.hasOwnProperty(patterns, ch)) {
+              window.alert('The name of this pattern already exists!');
+            }
+            
+            patterns[ch] = canvas.getSelectionSet();
+            
+          }
+        );
 
 
     return {
       getElement : function() {
         return table;
+      },
+      
+      getPatterns : function() {
+        return patterns;
       },
       
       getMode : function() {
