@@ -6,9 +6,52 @@ const Canvas = {
     var settings;
     const undoController = UndoContext.new();
     
+    
+    /// STATE SAVE
     var canvasChars = [];
     var canvasWall = [];
     var canvasAreas = [];
+    /// STATE SAVE 
+    
+    
+    
+    
+    var selectedSet = [];
+    const resetSelectionSet = function() {
+      for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
+        selectedSet[i] = false;
+      }
+    }
+    
+    
+    const setSelectionSet = function(x, y, x1, y1) {
+      if (x1 < x) {
+        const temp = x1;
+        x1 = x;
+        x = temp;
+      }
+
+      if (y1 < y) {
+        const temp = y1;
+        y1 = y;
+        y = temp;
+      }
+      
+
+
+      selectedSet.length = MAX_LENGTH*MAX_LENGTH;;
+
+      resetSelectionSet();
+      
+      for(var yi = y; yi < y1; ++yi) {
+        for(var xi = x; xi < x1; ++xi) {
+          selectedSet[xi + yi*(MAX_LENGTH)] = true;
+        }
+      }
+    }
+    
+    
+    
 
     const palette = Palette.new();
     
@@ -22,26 +65,7 @@ const Canvas = {
     }
     
 
-    const attributeToColor = function(attribute) {
-      if (attribute == 0)
-        return TEXT_COLOR_ACTIVE;
 
-      if (attribute & (Line.ATTRIBUTES.INACTIVE))
-        return TEXT_COLOR_INACTIVE;
-
-        
-      var color = {r:64, g:64, b:64};
-      if (attribute & (Line.ATTRIBUTES.WALL)) 
-        color.g+=180
-
-      if (attribute & (Line.ATTRIBUTES.SELECTION)) { 
-        color.g+=120
-        color.b+=120
-      }
-        
-        
-      return "rgb(" + color.r + ", " + color.g + ", " + color.b + ")";
-    }
 
     const refreshCanvas = function() {
       for(var y = 0; y < VIEW_HEIGHT; ++y) {
@@ -57,6 +81,20 @@ const Canvas = {
             case Settings.MODE.WALL:
               if (canvasWall[atlasIndex])
                 color = TEXT_COLOR_WALL;
+              else
+                color = TEXT_COLOR_INACTIVE;
+              break;
+              
+            case Settings.MODE.SELECTOR:
+              if (selectedSet[atlasIndex] == true) {
+                if (ch == 0) {
+                  color = TEXT_COLOR_SELECT_INACTIVE;
+                } else {
+                  color = TEXT_COLOR_SELECT;
+                }
+              } else
+                color = TEXT_COLOR_INACTIVE;
+
           }
           line.editChar(
             x, ch, color
@@ -64,8 +102,6 @@ const Canvas = {
         }
       }
     }
- 
-    
 
 
 
@@ -77,21 +113,97 @@ const Canvas = {
     main.style.fontSize = ''+CHAR_FONT_WIDTH_PX+'px';  
     var iterX = 0;
     var iterY = 0;
+    
+    // only used for initial creation
+    var activeOverlay = Overlay.new([255, 255, 255]);
+    activeOverlay.disablePointer();
+    activeOverlay.hide();
 
     for(var i = 0; i < VIEW_HEIGHT; ++i) {
       const line = Line.new(i);
       const v = line.getElement();
       const y = i;
+      
+      line.events.addCallback('onRelease', function(data) {
+        if (activeOverlay.isShown()) {
+          const endIterX = data.index;
+          const endIterY = y;
+          
+          const startIterX = activeOverlay.getData().iterX;
+          const startIterY = activeOverlay.getData().iterY;
+          
+          activeOverlay.setP1(data.x, data.y);
+          activeOverlay.hide();
+          
+          
+          
+          // do overlay action here.          
+          switch(settings.getMode()) {
+            case Settings.MODE.SELECTOR:
+              setSelectionSet(
+                startIterX,
+                startIterY,
+                endIterX,
+                endIterY
+              );
+              refreshCanvas();
+              break;
+              
+              
+          }
+        } else {
+          activeOverlay.hide();          
+        }
+      });
+      
+
+      line.events.addCallback('onDown', function(data) {
+        const x = data.index 
+        const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;        
+        switch(settings.getMode()) {
+          case Settings.MODE.AREA_EDITOR:
+          case Settings.MODE.SELECTOR:
+            if (activeOverlay.isShown()) {
+              activeOverlay.setP1(data.x, data.y);
+            } else {
+              resetSelectionSet();
+              refreshCanvas();
+              activeOverlay.reset();
+              activeOverlay.show();
+              activeOverlay.setP0(data.x, data.y);
+              activeOverlay.setP1(data.x, data.y);
+              
+              activeOverlay.getData().iterX = x;
+              activeOverlay.getData().iterY = y;
+            }
+            break;
+        }
+      });
+
+
+      line.events.addCallback('onEnter', function(data) {
+        const x = data.index 
+        const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;        
+
+        switch(settings.getMode()) {
+          case Settings.MODE.AREA_EDITOR:
+          case Settings.MODE.SELECTOR:
+            if (activeOverlay.isShown()) {
+              activeOverlay.setP1(data.x, data.y);
+            }
+        }
+      });
+
 
       line.events.addCallback('onClick', function(data) {
         const x = data.index 
-        const s = palette.getSelected();
         const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;        
         
         var old;
         var newVal;
         switch(settings.getMode()) {
           case Settings.MODE.PEN:
+            const s = palette.getSelected();
             old = canvasChars[atlasIndex];
             if (settings.isErase())
               newVal = 0;
@@ -117,8 +229,9 @@ const Canvas = {
               commitChange();
               refreshCanvas();
             }
-
+            
             break;
+
             
         }
         

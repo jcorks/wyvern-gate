@@ -10,9 +10,13 @@ const BACKGROUND_COLOR = "#303030";
 const TEXT_COLOR_ACTIVE = "#afafaf";
 const TEXT_COLOR_INACTIVE = "#505050";
 const TEXT_COLOR_WALL = "#90ff90";
+const TEXT_COLOR_SELECT = "#afafff";
+const TEXT_COLOR_SELECT_INACTIVE = "#5f5faf";
 
 const MAX_LENGTH = 512;
 
 const BUTTON_COLOR_ACTIVE   = "#b0b0b0"
 const BUTTON_COLOR_INACTIVE = "#606060";
+
+
 

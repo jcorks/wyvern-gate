@@ -21,6 +21,9 @@ const Palette = {
       button.style.borderColor = 'white';
       button.style.fontFamily = 'gamefont';
       //button.style.whiteSpace = 'pre';
+      buttonTextHolder.style.border = '1px';
+      buttonTextHolder.style.borderColor = 'black';
+      buttonTextHolder.style.borderStyle = 'solid';
       buttonTextHolder.innerText = c;
       button.style.backgroundColor = BUTTON_COLOR_INACTIVE
       button.appendChild(buttonTextHolder);

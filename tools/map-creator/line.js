@@ -12,7 +12,11 @@ const Line = {
 
     const v = document.createElement('div');
     const events = EventSystem.new([
-      'onClick'
+      'onClick',
+      'onEnter',
+      'onLeave',
+      'onRelease',
+      'onDown'
     ]);
     
 
@@ -21,8 +25,9 @@ const Line = {
     v.style.fontFamily = 'gamefont';
     v.style.zIndex = 100-zIndex;
     v.style.position = "relative";
+    v.style.height = "19px";
     //v.style.top = "-2px";
-    v.style.top = '-' + (zIndex*2) + 'px'
+    //v.style.top = '-' + (zIndex*2) + 'px'
 
     const setChar = function(index, ch, color) {
       const c = chars[index];
@@ -47,12 +52,25 @@ const Line = {
     const chars = [];
     var lastHovered;
     var displayLine;
+    
+    const packArgument = function(c) {
+      return {
+        index:c.index, 
+        line:self, 
+        x:c.offsetLeft+ v.offsetLeft, 
+        y:c.offsetTop + v.offsetTop     
+      }
+    }
+    
     for(var i = 0; i < VIEW_WIDTH; ++i) {
       const c = document.createElement('h');
       c.style.margin = '0px';
       c.style.whiteSpace = 'pre';
       c.style.fontFamily = 'gamefont';
-      c.style.fontSize = '19px'
+      c.style.fontSize = '20px'
+      c.style.position = 'relative';
+      c.style.display = 'inline-block';
+      c.style.width = '9px';
 
       c.index = i;
       v.appendChild(c);
@@ -65,6 +83,7 @@ const Line = {
         
         c.style.backgroundColor = TEXT_COLOR_ACTIVE;
         c.style.color = BACKGROUND_COLOR;
+        events.emit('onEnter', packArgument(c));
       })
 
       c.addEventListener("mouseleave", function(evt) {
@@ -72,16 +91,27 @@ const Line = {
         c.style.backgroundColor = BACKGROUND_COLOR;
         c.style.color = c.colorStore;;
         lastHovered = null;
+        events.emit('onLeave', packArgument(c));
       })
 
       c.addEventListener("mousemove", function(evt) {
         if (evt.buttons != 0) {
-          events.emit('onClick', {index:c.index, line:self});
+          events.emit('onClick', packArgument(c));
         }
       })
 
+      c.addEventListener("mouseup", function(evt) {
+        events.emit('onRelease', packArgument(c));
+      })
+
+      c.addEventListener("mousedown", function(evt) {
+        events.emit('onDown', packArgument(c));
+      })
+      
+
+
       c.addEventListener("click", function(evt) {
-        events.emit('onClick', {index:c.index, line:self});
+        events.emit('onClick', packArgument(c));
       })
 
 

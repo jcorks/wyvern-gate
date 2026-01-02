@@ -7,8 +7,6 @@ document.body.style.fontFamily = 'Monospace';
 
 
 
-
-
 // init
 (function() {
   const canvas = Canvas.new();
