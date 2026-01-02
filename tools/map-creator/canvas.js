@@ -40,13 +40,15 @@ const Canvas = {
     // where the selection last was
     var moveSetX;
     var moveSetY;
+    
+    // for right click menus
+    var contextHandler;
+    var contextMenu;
+    
+    
+    // fake clipboard
+    var clipboard;
 
-    
-    
-    
-    const enableSelectorContextMenu = function() {
-    
-    }
     
     
     
@@ -128,8 +130,7 @@ const Canvas = {
                 } else {
                   color = TEXT_COLOR_SELECT;
                 }
-              } else
-                color = TEXT_COLOR_INACTIVE;
+              }
 
           }
           
@@ -155,6 +156,14 @@ const Canvas = {
       const line = Line.new(i);
       const v = line.getElement();
       const y = i;
+      
+      
+      line.events.addCallback('onContext', function(data) {
+        if (contextHandler == null) return;
+        
+        contextHandler(data.index, y, data.x, data.y);
+      });
+      
       
       line.events.addCallback('onRelease', function(data) {
         if (activeOverlay.isShown()) {
@@ -219,6 +228,9 @@ const Canvas = {
       });
       
       line.events.addCallback('onDown', function(data) {
+        if (contextMenu)
+          contextMenu.style.display = 'none';
+
         const x = data.index 
         const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;        
         
@@ -454,7 +466,73 @@ const Canvas = {
       },
 
       enablePatternContextMenu : function() {
-      
+        contextHandler = function(x, y, xpos, ypos) {
+        
+          if (contextMenu == null) {
+          
+            const div = document.createElement("div");
+            div.style.position = 'absolute';
+            div.style.fontSize = '14px';
+            div.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            div.style.color = 'rgb(200, 200, 200)';
+            div.style.zIndex = 2000;
+            
+            const createButton = function(name, callback) {
+              const d = document.createElement("div");
+              d.style.margin = '4px';
+              d.innerText = name;
+              div.appendChild(d);
+              d.addEventListener("click", callback);
+              
+              d.addEventListener("mouseenter", function() {
+                d.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'
+              });
+
+              d.addEventListener("mouseleave", function() {
+                d.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+              });
+
+            }
+            
+            createButton("Copy", function() {
+              if (!hasSelection())
+                window.alert('No selection present. Drag the pointer to make a selection');
+              clipboard = JSON.stringify(self.getSelectionSet());
+              div.style.display = 'none';
+              resetSelectionSet();
+              refreshCanvas();
+            });
+
+            createButton("Paste", function() {
+              div.style.display = 'none';              
+              if (clipboard == null) {
+                window.alert('No selection to paste.');
+                return;
+              }
+
+              var selectionSet = JSON.parse(clipboard);
+              
+              for(var yi = y; yi < y + selectionSet.height; ++yi) {
+                for(var xi = x; xi < x + selectionSet.width; ++xi) {
+                  const selIter = xi - x + (yi - y)*selectionSet.width
+                  canvasChars[xi + yi*MAX_LENGTH] = selectionSet.chars[selIter];
+                  canvasWall [xi + yi*MAX_LENGTH] = selectionSet.wall [selIter];
+                }
+              }
+              
+              refreshCanvas();
+              
+            });
+
+            
+            document.body.appendChild(div);
+            contextMenu = div;
+          }
+          contextMenu.style.display = 'initial';
+          contextMenu.style.left = ''+xpos+'px';
+          contextMenu.style.top = ''+ypos+'px';
+          
+        }
       },
       
       disablePatternContextMenu : function() {

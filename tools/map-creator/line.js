@@ -16,7 +16,8 @@ const Line = {
       'onEnter',
       'onLeave',
       'onRelease',
-      'onDown'
+      'onDown',
+      'onContext'
     ]);
     
 
@@ -95,16 +96,18 @@ const Line = {
       })
 
       c.addEventListener("mousemove", function(evt) {
-        if (evt.buttons != 0) {
+        if (evt.buttons & 0x1) {
           events.emit('onClick', packArgument(c));
         }
       })
 
       c.addEventListener("mouseup", function(evt) {
+        if (evt.button != 0) return;
         events.emit('onRelease', packArgument(c));
       })
 
       c.addEventListener("mousedown", function(evt) {
+        if (evt.button != 0) return;
         events.emit('onDown', packArgument(c));
       })
       
@@ -114,7 +117,11 @@ const Line = {
         events.emit('onClick', packArgument(c));
       })
 
-
+      c.addEventListener("contextmenu", function(evt) {
+        evt.preventDefault();
+        events.emit('onContext', packArgument(c));
+        return true;
+      });
     }
 
 
