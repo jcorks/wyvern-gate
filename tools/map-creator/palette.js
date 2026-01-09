@@ -5,6 +5,9 @@ const Palette = {
     div.style.fontSize = ''+CHAR_FONT_WIDTH_PX+'px';  
     div.style.overflow = 'scroll';
     
+    const events = EventSystem.new(['onSelect']);
+    
+    
     const createButton = function(div, c) {
       const button = document.createElement('div');
       const buttonTextHolder = document.createElement('div');
@@ -36,6 +39,7 @@ const Palette = {
         button.style.backgroundColor = BUTTON_COLOR_ACTIVE;
         button.style.color = TEXT_COLOR_INACTIVE;
         lastPicked = button;
+        events.emit('onSelect');
       });
       div.appendChild(button);
 
@@ -62,11 +66,19 @@ const Palette = {
       const b = createButton(div, c);
     }
 
+    for(var i = 0x2500; i <= 0x257f; ++i) {
+      var c = String.fromCharCode(i);
+      const b = createButton(div, c);
+    }
     
 
     return {
       getElement : function() {
         return div;
+      },
+      
+      getEvents : function() {
+        return events;
       },
     
       getSelected : function() {

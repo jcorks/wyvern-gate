@@ -139,7 +139,7 @@ const Line = {
       editChar : function(index, ch, color) {
         if (ch == null)
           ch = chars[index]
-        if (ch == 0) {
+        if (ch === 0) {
           ch = '`';
         }
         setChar(index, ch[0], color);

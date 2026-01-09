@@ -237,6 +237,10 @@ const Settings = {
         return patterns;
       },
       
+      setMode : function(i) {
+        cursorMode_element.value = modes[i];
+      },
+      
       getMode : function() {
         return modes.indexOf(cursorMode_element.value)
       },

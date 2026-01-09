@@ -40,6 +40,8 @@ document.body.style.fontFamily = 'Monospace';
   );
   document.getElementById('settings-anchor').appendChild(settings.getElement());
   canvas.setSettings(settings);
-  
+  canvas.getPalette().getEvents().addCallback('onSelect', function() {
+    settings.setMode(Settings.MODE.PEN);
+  });
   
 })();

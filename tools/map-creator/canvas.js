@@ -48,6 +48,9 @@ const Canvas = {
     
     // fake clipboard
     var clipboard;
+    
+    // whether a pen stroke is active
+    var inStroke = false;
 
     
     
@@ -94,12 +97,16 @@ const Canvas = {
 
 
     
-    const commitChange = function() {
+    const commitChangeSoft = function() {
       if (commitChangeCounter % 3 == 0) {
         undoController.commitState([canvasChars, canvasWall, canvasAreas]);
       }
       commitChangeCounter++;
+    }
 
+    const commitChange = function() {
+      undoController.commitState([canvasChars, canvasWall, canvasAreas]);
+      commitChangeCounter++;
     }
     
 
@@ -112,7 +119,12 @@ const Canvas = {
         for(var x = 0; x < VIEW_WIDTH; ++x) {
           const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;
           var ch = canvasChars[atlasIndex];
-          var color = ch == 0 ? TEXT_COLOR_INACTIVE : TEXT_COLOR_ACTIVE;
+          
+          if (typeof ch == 'String') {
+            console.log('hi');
+          }
+          
+          var color = ch === 0 ? TEXT_COLOR_INACTIVE : TEXT_COLOR_ACTIVE;
           
           
           switch(settings.getMode()) {
@@ -125,7 +137,7 @@ const Canvas = {
               
             case Settings.MODE.PATTERN:
               if (isSelected(iterX + x, iterY + y) == true) {
-                if (ch == 0) {
+                if (ch === 0) {
                   color = TEXT_COLOR_SELECT_INACTIVE;
                 } else {
                   color = TEXT_COLOR_SELECT;
@@ -149,7 +161,35 @@ const Canvas = {
 
 
 
+    
+    // whatever is selected, transfers it to the "move" set
+    const selectionSetToMoveSet = function(selSet, offsetX, offsetY, x, y, yank) {
+      moveSet = selSet;
+      
 
+      moveOffsetX = offsetX;
+      moveOffsetY = offsetY;
+      moveSetX = iterX + x + moveOffsetX;
+      moveSetY = iterY + y + moveOffsetY; 
+
+
+      for(var yi = 0; yi < moveSet.height; ++yi) {
+        for(var xi = 0; xi < moveSet.width; ++xi) {
+          const atlasIndex = (moveSetX + xi) + (moveSetY+yi)*MAX_LENGTH;
+          if (yank) {
+            canvasChars[atlasIndex] = 0;
+            canvasWall[atlasIndex]  = false;
+          }
+
+          overlayChars[atlasIndex] = moveSet.chars[xi + (yi)*moveSet.width];
+        }
+      }
+      
+      
+      
+      refreshCanvas();
+      resetSelectionSet();
+    }
 
 
     for(var i = 0; i < VIEW_HEIGHT; ++i) {
@@ -166,6 +206,12 @@ const Canvas = {
       
       
       line.events.addCallback('onRelease', function(data) {
+        if (inStroke == true) {
+          commitChange();
+          inStroke = false;
+        }
+
+
         if (activeOverlay.isShown()) {
           const endIterX = data.index;
           const endIterY = y;
@@ -217,8 +263,9 @@ const Canvas = {
                 }
               }
               moveSet = null;
+              commitChange();
               refreshCanvas();
-
+  
             }
             break;
             
@@ -226,6 +273,8 @@ const Canvas = {
           
         } 
       });
+      
+
       
       line.events.addCallback('onDown', function(data) {
         if (contextMenu)
@@ -238,30 +287,28 @@ const Canvas = {
         if (settings.getMode() == Settings.MODE.PATTERN && isSelected(iterX + x, iterY + y) == true) {
           // yank the current selection set 
           if (moveSet == null) {
-            moveSet = self.getSelectionSet();
-
-            moveOffsetX = selectionX0 - x;
-            moveOffsetY = selectionY0 - y;
-            moveSetX = iterX + x + moveOffsetX;
-            moveSetY = iterY + y + moveOffsetY; 
-
-            
-            for(var yi = selectionY0; yi < selectionY1; ++yi) {
-              for(var xi = selectionX0; xi < selectionX1; ++xi) {
-                canvasChars[xi + yi*MAX_LENGTH] = 0;
-                canvasWall[xi + yi*MAX_LENGTH] = false;
-
-                overlayChars[xi + yi*MAX_LENGTH] = moveSet.chars[xi - selectionX0 + (yi - selectionY0)*moveSet.width];
-              }
-            }
-            refreshCanvas();
-            resetSelectionSet();
+            selectionSetToMoveSet(
+              self.getSelectionSet(), 
+              selectionX0 - (iterX + x), 
+              selectionY0 - (iterY + y), 
+              x, 
+              y, 
+              true
+            );
           } 
           
           return;
         }
         
         switch(settings.getMode()) {
+          case Settings.MODE.WALL:
+          case Settings.MODE.PEN:
+            if (inStroke == false) {
+              inStroke = true;
+            }
+            break;
+
+        
           case Settings.MODE.AREA_EDITOR:
           case Settings.MODE.PATTERN:
             if (activeOverlay.isShown()) {
@@ -334,9 +381,8 @@ const Canvas = {
             else
               newVal = s;
 
-            if (old != newVal) {
+            if (old !== newVal) {
               canvasChars[atlasIndex] = newVal;
-              commitChange();
               refreshCanvas();
             }
             break;
@@ -350,7 +396,6 @@ const Canvas = {
             }
             if (old != newVal) {
               canvasWall[atlasIndex] = newVal;
-              commitChange();
               refreshCanvas();
             }
             
@@ -383,6 +428,10 @@ const Canvas = {
     // only used for initial creation
     activeOverlay.disablePointer();
     activeOverlay.hide();
+
+    
+    
+    
     
     
         
@@ -391,7 +440,11 @@ const Canvas = {
         return main;
       },
       
-      getSelectionSet : function() {
+      getPalette : function() {
+        return palette;
+      },
+      
+      getSelectionSet : function(pointerX, pointerY, yank) {
         const set = [];
         const setW = [];
         const w = selectionX1 - selectionX0;
@@ -402,15 +455,56 @@ const Canvas = {
             
             set[xSet + ySet*w] = canvasChars[x + y * MAX_LENGTH];
             setW[xSet + ySet*w] = canvasWall[x + y * MAX_LENGTH];
+            
+            if (yank) {
+              canvasChars[x + y * MAX_LENGTH] = 0;
+              canvasWall[x + y * MAX_LENGTH] = false;
+            }
           }
         }
         
+        if (pointerX != null) 
+          pointerX = selectionX0 - pointerX;
+
+        if (pointerY != null) 
+          pointerY = selectionY0 - pointerY;
+        
+        if (yank);
+          refreshCanvas();
+        
         return {
+          offsetX : pointerX,
+          offsetY : pointerY,
           chars : set,
           wall : setW,
           width : w,
           height : selectionY1 - selectionY0
         }
+      },
+      
+      // sets the current selection set from the output 
+      // of a selectionSet object returned from getSelectionSet()
+      //
+      // This can also paste the original selection characters and wall 
+      // state at a given x y
+      restoreSelectionSet : function(set, pasteToo, x, y) {
+
+        if (pasteToo) {
+          for(var yi = y; yi < y + set.height; ++yi) {
+            for(var xi = x; xi < x + set.width; ++xi) {
+              const selIter = xi - x + (yi - y)*set.width
+              canvasChars[xi + yi*MAX_LENGTH] = set.chars[selIter];
+              canvasWall [xi + yi*MAX_LENGTH] = set.wall [selIter];
+            }
+          }
+        }
+
+        setSelectionSet(
+          x,
+          y,
+          x + set.width,
+          y + set.height
+        );
       },
       
       refresh : refreshCanvas,
@@ -445,6 +539,7 @@ const Canvas = {
       setSettings : function(e) {
         settings = e;
       },
+      
       
       undo : function() {
         const state = undoController.undo();
@@ -497,7 +592,18 @@ const Canvas = {
             createButton("Copy", function() {
               if (!hasSelection())
                 window.alert('No selection present. Drag the pointer to make a selection');
-              clipboard = JSON.stringify(self.getSelectionSet());
+              clipboard = JSON.stringify(self.getSelectionSet(iterX + contextMenu.x, iterY + contextMenu.y));
+              div.style.display = 'none';
+              resetSelectionSet();
+              refreshCanvas();
+            });
+
+
+
+            createButton("Cut", function() {
+              if (!hasSelection())
+                window.alert('No selection present. Drag the pointer to make a selection');
+              clipboard = JSON.stringify(self.getSelectionSet(iterX + contextMenu.x, iterY + contextMenu.y, true));
               div.style.display = 'none';
               resetSelectionSet();
               refreshCanvas();
@@ -510,16 +616,15 @@ const Canvas = {
                 return;
               }
 
-              var selectionSet = JSON.parse(clipboard);
-              
-              for(var yi = y; yi < y + selectionSet.height; ++yi) {
-                for(var xi = x; xi < x + selectionSet.width; ++xi) {
-                  const selIter = xi - x + (yi - y)*selectionSet.width
-                  canvasChars[xi + yi*MAX_LENGTH] = selectionSet.chars[selIter];
-                  canvasWall [xi + yi*MAX_LENGTH] = selectionSet.wall [selIter];
-                }
-              }
-              
+              const set = JSON.parse(clipboard);
+              selectionSetToMoveSet(
+                set, 
+                set.offsetX, 
+                set.offsetY, 
+                contextMenu.x, 
+                contextMenu.y, 
+                false
+              );
               refreshCanvas();
               
             });
@@ -528,6 +633,8 @@ const Canvas = {
             document.body.appendChild(div);
             contextMenu = div;
           }
+          contextMenu.x = x;
+          contextMenu.y = y;
           contextMenu.style.display = 'initial';
           contextMenu.style.left = ''+xpos+'px';
           contextMenu.style.top = ''+ypos+'px';
