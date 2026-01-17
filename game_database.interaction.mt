@@ -227,6 +227,92 @@ Interaction.newEntry(
   }
 )
 
+Interaction.newEntry(
+  data : {
+    id :  'base:break-door',
+    name : 'Break Door',
+    keepInteractionMenu : false,
+    onInteract ::(location, party) {
+      @:Entity = import(module:'game_class.entity.mt');
+      @:Damage = import(module:'game_class.damage.mt');
+      windowEvent.queueChoices(
+        prompt: 'The door seems breakable. Who breaks it open?',
+        canCancel: true,
+        
+        choices: [...party.members]->map(to:::(value) <- value.name),
+        onChoice::(choice) {
+          when(choice == 0) empty;
+          @whom = party.members[choice-1];
+          @:ent = Entity.new(
+            professionHint: 'base:blacksmith',
+            speciesHint: 'base:cave-bat'
+          );
+          
+          ent.name = "The Door";
+          ent.stats.HP = 10;
+          ent.hp = 10;
+          
+          windowEvent.queueMessage(text:whom.name + ' attempts to break the door.');
+          
+          if (random.flipCoin()) ::<= {
+            
+            ent.damage(
+              attacker:whom, 
+              damage: Damage.new(
+                amount:10, 
+                damageType:Damage.TYPE.PHYS, 
+                damageClass:Damage.CLASS.HP,
+                traits : Damage.TRAIT.UNBLOCKABLE
+              ), 
+              dodgeable: false, 
+              exact: true
+            );
+        
+          
+          } else ::<= {
+            
+            ent.damage(
+              attacker:whom, 
+              damage: Damage.new(
+                amount:5, 
+                damageType:Damage.TYPE.PHYS, 
+                damageClass:Damage.CLASS.HP,
+                traits : Damage.TRAIT.UNBLOCKABLE
+              ), 
+              dodgeable: false, 
+              exact: true
+            );
+
+
+            windowEvent.queueMessage(text:whom.name + ' swings again.');
+
+            ent.damage(
+              attacker:whom, 
+              damage: Damage.new(
+                amount:5, 
+                damageType:Damage.TYPE.PHYS, 
+                damageClass:Damage.CLASS.HP,
+                traits : Damage.TRAIT.UNBLOCKABLE
+              ), 
+              dodgeable: false, 
+              exact: true
+            );
+          }
+        
+          windowEvent.queueMessage(text: 'The way is now clear.');
+          windowEvent.queueCallback(::{
+            @:map = location.landmark.map;
+            map.disableWall(x:location.x, y:location.y)
+            map.removeIem(:location);
+          });
+          
+        }
+      )
+    }    
+  }
+
+)
+
 
 Interaction.newEntry(
   data : {
@@ -2892,7 +2978,58 @@ Interaction.newEntry(
     keepInteractionMenu : true,
     onInteract ::(location, party) {
       @:world = import(module:'game_singleton.world.mt');
+      @:items = [...location.inventory.items];
+      when(items->keycount == 0)
+        windowEvent.queueMessage(text:'The chest was empty.');
+      
+      @:keys = world.party.inventory.items->filter(::(value) <- value.base.id == 'base:tiny-key');
+      
+      @:getStuff = ::{
+        windowEvent.queueMessage(text:'The party opened the chest...');
+        windowEvent.queueMessage(text:'The magic chest billows out a murky mist as its opened.');
+        
+        when(items->size > world.party.inventory.slotsLeft) ::<= {
+          windowEvent.queueMessage(text: '...but the party\'s inventory was too full.');
+        }
 
+        lootget(items);      
+        foreach(items)::(i, item) {
+          world.party.inventory.add(item);
+        }
+        location.inventory.clear();
+            
+      }
+
+      when(location.data.unlocked) getStuff();
+      
+      windowEvent.queueMessage(text:'The ornate chest appears to be magically locked. It has a tiny keyhole on the front.');
+      
+
+      when(keys->size == 0) ::<= {
+        windowEvent.queueMessage(text:'The party does not have a proper key to open it.');
+      }
+
+
+
+      windowEvent.queueAskBoolean(
+        prompt: 'Use a Tiny Key to open?',
+        onChoice::(which) {
+          when(which == false) empty;
+          location.data.unlocked = true;
+          
+          windowEvent.queueMessage(text: 'The Tiny Key disappears with use.');
+          world.party.inventory.removeByID(:'base:tiny-key');
+        
+          world.accoladeIncrement(name:'chestsOpened');      
+          getStuff();
+        }
+      )
+
+
+
+
+
+      /*
       windowEvent.queueMessage(text:'The magic chest billows out a murky mist as its opened.');
       windowEvent.queueMessage(text:'The mist is so thick, its hard to see inside of it.');
       windowEvent.queueMessage(text:'It appears to beckon for items to be placed inside. It looks as if theres enough room for 3 items.');
@@ -2900,7 +3037,7 @@ Interaction.newEntry(
       when (party.inventory.items->size < 3)
         windowEvent.queueMessage(text:'The party hasn\'t 3 items to place inside...');
 
-      
+      e
       windowEvent.queueAskBoolean(
         prompt: 'Place items inside?',
         onChoice::(which) {
@@ -2967,67 +3104,14 @@ Interaction.newEntry(
               return out;
             }
             
-            @:item = random.pickArrayItemWeighted(:[
-              {
-                rarity: 10,
-                item : Item.new(
-                  base:Item.database.find(:'base:tablet')                
-                )
-              },
-              
-              {
-                rarity: 42,
-                item : Item.new(
-                  base:Item.database.getRandomFiltered(::(value) <- 
-                    value.equipType == Item.TYPE.HAND &&
-                    value.hasTraits(:
-                      Item.TRAIT.METAL |
-                      Item.TRAIT.CAN_HAVE_ENCHANTMENTS
-                    ) && value.hasNoTrait(:Item.TRAIT.FRAGILE)             
-                  ),
-                  
-                  enchantHint : get5positiveEffects()
-                )
-              },
-                        
-              {
-                rarity: 42,
-                item : Item.new(
-                  base:Item.database.getRandomFiltered(::(value) <- 
-                    value.equipType == Item.TYPE.ARMOR &&
-                    value.hasTraits(:
-                      Item.TRAIT.CAN_HAVE_ENCHANTMENTS
-                    ) && value.hasNoTrait(:Item.TRAIT.FRAGILE)             
-                  ),
-                  
-                  enchantHint : get5positiveEffects()
-                )
-              },
-
-              {
-                rarity: 5,
-                item : Item.new(
-                  base:Item.database.find(:'base:ring'),
-                  enchantHint : get5positiveEffects()
-                )
-              },
-
-              {
-                rarity: 1,
-                item : Item.new(
-                  base:Item.database.find(:'base:life-crystal'),
-                  enchantHint : get5positiveEffects()
-                )
-              },
             
-            ]);
             @message = 'The party received ' + correctA(word:item.item.name);
             windowEvent.queueMessage(text: message);
 
             party.inventory.add(item:item.item);            
           });
         }                 
-      );
+      );*/
     }
   }
 )  

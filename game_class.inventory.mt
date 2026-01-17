@@ -166,6 +166,7 @@
         return item;
       },
       
+      // Only removes 1
       removeByID::(id) {
         ::? {
           foreach(state.items)::(i, item) {

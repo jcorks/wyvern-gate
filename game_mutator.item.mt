@@ -3304,6 +3304,43 @@ Item.database.newEntry(
 )
 
 
+
+Item.database.newEntry(data : {
+  name : "Tiny Key",
+  id : 'base:tiny-key',
+  description: 'A small, magical key. Can be used to unlock various things.',
+  examine : '',
+  sortType : SORT_TYPE.KEYS,
+  equipType: TYPE.TWOHANDED,
+  rarity : 100,
+  weight : 0.4,
+  basePrice: 10000,
+  tier: 0,
+  levelMinimum : 1000000000,
+  enchantLimit : 20,
+  useTargetHint : USE_TARGET_HINT.ONE,
+  possibleArts : [
+  ],
+
+  // fatigued
+    equipMod : StatSet.new(
+    ATK: -5,
+    SPD: 5,
+    DEX: 5
+  ),
+  useEffects : [
+  ],
+  equipEffects : [],
+  traits : 
+    TRAIT.SHARP  |
+    TRAIT.HAS_COLOR |
+    TRAIT.STRANGE_TO_EQUIP
+  ,
+  onCreate ::(item, user, creationHint) {
+
+  }
+})  
+
   
   
 ::<= {
@@ -4198,6 +4235,8 @@ none.name = 'None';
           this.description + '\n\nValue: ' + starsToString(:this),
         ]
       );
+      
+      when (state.needsAppraisal) empty;
       
       if (this.enchantLimit > 0 && ((this.base.traits & Item.TRAIT.CAN_HAVE_ENCHANTMENTS) != 0))    
         windowEvent.queueReader(

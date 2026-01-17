@@ -1417,6 +1417,97 @@ Location.database.newEntry(data:{
 }) 
 
 
+
+    
+Location.database.newEntry(data:{
+  name: 'Barred Door',
+  id: 'base:barred-door-vertical',
+  rarity: 1000000000000,
+  ownVerb : '',
+  symbol: '|',
+  category : CATEGORY.UTILITY,
+  onePerLandmark : false,
+  minStructureSize : 1,
+
+  descriptions: [
+  ],
+  interactions : [
+    'base:break-door'
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  onFirstInteract ::(location) {},
+  
+  onInteract ::(location) {
+  },
+  onStep ::(location, entities) {
+  
+  },
+  
+  onCreate ::(location) {
+    location.landmark.map.enableWall(
+      x : location.x,
+      y : location.y
+    );
+  },
+  
+  onIncrementTime::(location, time) {
+  
+  }
+}) 
+
+
+Location.database.newEntry(data:{
+  name: 'Barred Door',
+  id: 'base:barred-door-horizontal',
+  rarity: 1000000000000,
+  ownVerb : '',
+  symbol: '▆',
+  category : CATEGORY.UTILITY,
+  onePerLandmark : false,
+  minStructureSize : 1,
+
+  descriptions: [
+  ],
+  interactions : [
+    'base:break-door'
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  minOccupants : 0,
+  maxOccupants : 0,
+  onFirstInteract ::(location) {},
+  
+  onInteract ::(location) {
+  },
+  onStep ::(location, entities) {
+  
+  },
+  
+  onCreate ::(location) {
+    location.landmark.map.enableWall(
+      x : location.x,
+      y : location.y
+    );
+
+  },
+  
+  onIncrementTime::(location, time) {
+  
+  }
+}) 
+
+
 Location.database.newEntry(data:{
   name: 'Item',
   id: 'base:item',
@@ -1500,6 +1591,42 @@ Location.database.newEntry(data:{
   },
   
   onCreate ::(location) {
+    @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+
+
+    @:possibilities = [
+      {
+        rarity: 10,
+        item : Item.new(
+          base:Item.database.find(:'base:tablet')                
+        )
+      },
+      
+      {
+        rarity: 50,
+        item: Item.new(
+          base:Item.database.getRandomFiltered(
+            filter:::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)          
+          ),
+          forceNeedsAppraisal : true
+        )
+      },
+      
+      {
+        rarity : 40,
+        item: Item.new(
+          base:Item.database.find(id:'base:seed')
+        )
+      }
+      
+    ] 
+  
+    location.inventory.add(:random.pickArrayItemWeighted(:possibilities).item);
+    location.inventory.add(:random.pickArrayItemWeighted(:possibilities).item);
+  
+  
   },
   onStep ::(location, entities) {
   
