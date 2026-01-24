@@ -27,6 +27,9 @@
 @:JSON = import(module:'Matte.Core.JSON');
 @:time = import(module:'Matte.System.Time');
 @:Filesystem = import(module:'Matte.System.Filesystem');
+@:renderLines = getExternalFunction(:'wyvern_gate__native__canvas__renderLines');
+
+
 
 @:getchWait = ::? {
   return getExternalFunction(:'wyvern_gate__native__getchWait');
@@ -85,9 +88,13 @@ windowEvent.errorHandler = ::<= {
 @:rerender = ::{
   console.clear();
   @:lines = currentCanvas;
+  
+  renderLines(:lines)
+  /*
   foreach(lines) ::(index, line) {
     console.println(message:line);
   }
+  */
   canvasChanged = false;   
   //time.sleep(milliseconds:1000 * (1 / 40.0));
 }

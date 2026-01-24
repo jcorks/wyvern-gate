@@ -28,6 +28,15 @@
 
 
 
+
+#ifdef WYVERN_NCURSES
+#include <ncurses.h>
+#include <locale.h>
+WINDOW * nc = NULL;
+#endif
+
+
+
 // represents the external map
 typedef struct {
     // width of the map;
@@ -1094,6 +1103,44 @@ static matteValue_t wyvern_gate__native__canvas__printFramebuffer(
     return matte_store_new_value(store);
 }
 
+static matteValue_t wyvern_gate__native__canvas__renderLines(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
+    matteStore_t * store = matte_vm_get_store(vm);
+
+    CHECK_ARG(args[0], MATTE_VALUE_TYPE_OBJECT);
+
+
+
+    uint32_t size = matte_value_object_get_number_key_count(store, args[0]);
+    
+    uint32_t i;
+    for(i = 0; i < size; ++i) { 
+        matteValue_t line = matte_value_object_access_index(store, args[0], i);
+        if (matte_value_type(line) != MATTE_VALUE_TYPE_STRING) continue;
+        
+        const matteString_t * lineS = matte_value_string_get_string_unsafe(store, line);
+        
+        #ifdef WYVERN_NCURSES
+            mvaddstr(i, 0, matte_string_get_c_str(lineS));        
+        #else
+            printf("%s\n", matte_string_get_c_str(lineS));
+        #endif
+    }
+    #ifdef WYVERN_NCURSES
+        refresh();
+    #endif
+
+    return matte_store_new_value(store);
+}
+
+
+
 
 static matteValue_t wyvern_gate__native__canvas__renderToFramebuffer(
     matteVM_t * vm,
@@ -1790,6 +1837,17 @@ static matteValue_t wyvern_gate__native__canvas(
 
     matte_add_external_function(
         userData,
+        "wyvern_gate__native__canvas__renderLines",
+        wyvern_gate__native__canvas__renderLines,
+        cr,
+        
+        "lines",
+        NULL
+    );
+
+
+    matte_add_external_function(
+        userData,
         "wyvern_gate__native__canvas__renderToFramebuffer",
         wyvern_gate__native__canvas__renderToFramebuffer,
         cr,
@@ -1918,6 +1976,12 @@ static matteValue_t wyvern_gate__native__canvas(
         
         NULL
     );
+    
+    #ifdef WYVERN_NCURSES
+        setlocale(LC_ALL, "");
+        nc = initscr();
+        curs_set(0);
+    #endif
 
     return a;
 }

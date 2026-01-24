@@ -99,8 +99,18 @@
 
 
 
-@:windowEvent = import(module:'game_singleton.windowevent.mt');
 
+
+@:windowEvent = import(module:'game_singleton.windowevent.mt');
+windowEvent.errorHandler = ::<= {
+  @count = 0;
+  return ::(message) {
+    count += 1;
+    if (count == 20)
+      error(detail:'Too many errors encountered on the web version of the game. Displaying last error:' + message.summary);
+    
+  }
+}
 
 
 @currentCanvas;
