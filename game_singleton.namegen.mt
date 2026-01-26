@@ -138,7 +138,7 @@
     djaal         fire / flame
     luhl          reality
     kaarrjuhzaal  groveler
-    ziikkael      fang
+    ziikael      fang
     ttaal         ice / cold / snow
     kaal          thunder / lighting
     juhriil       claw / talon
@@ -159,7 +159,7 @@
     zaaluh        to choose
     zohkuh        to fight
     djiirohshuh   to apologize
-    kkiikkohluh   to curse
+    kiikohluh   to curse
     
     // adjectives / adverbs, always end in rr
     shiirr        swift
@@ -194,7 +194,7 @@
     - The World (zaashael) is a way to refer to the world but also the creator of things. Not in an explicit sense 
       but a incorporeal spiritual sense, whatever that may be to the individual.
       A common way to do well wishings upon another is to tell them "The world wishes xxx", i.e. "the world wishes you swift and prosperous travels" is a common phrase to wish one on a journey
-      . Related: a common swear to someone is "Kkiikkohluh zaashael kaajiin" ("earth curse you")
+      . Related: a common swear to someone is "Kiikohluh zaashael kaajiin" ("earth curse you")
 */
 
 @:dragonish_hardConsonant = ::<= {

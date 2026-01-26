@@ -3439,17 +3439,17 @@ return {
           ['???', 'But with me, your journey may end here. I will not let you pass unless you earn it.'],
           ['???', 'I will not be as easy-going as Kaedjaal.'],
           ['???', 'Through the unforgiving cold and ice, you will understand the power which you challenge.'],
-          ['Ziikkaettaal', 'I, Ziikkaettaal will halt your path now, Chosen!'],
+          ['Ziikaettaal', 'I, Ziikaettaal will halt your path now, Chosen!'],
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
             @:Battle = import(module:'game_class.battle.mt');
             @:canvas = import(module:'game_singleton.canvas.mt');
-            location.ownedBy.name = 'Ziikkaettaal, Wyvern of Ice';
+            location.ownedBy.name = 'Ziikaettaal, Wyvern of Ice';
             @:end = ::(result){
 
               when(world.battle.partyWon() == false) ::<= {
                 windowEvent.queueMessage(
-                  speaker:'Ziikkaettaal',
+                  speaker:'Ziikaettaal',
                   text:'Hm. As expected.'
                 );
                 
@@ -3488,16 +3488,16 @@ return {
               }
             );             
           },
-          ['Ziikkaettaal', 'I... I see. Kaedjaal was perhaps right to let you continue.'],
-          ['Ziikkaettaal', 'It has been some time since I have let another Chosen pass.'],
-          ['Ziikkaettaal', 'You have handled yourself well.'],
-          ['Ziikkaettaal', 'The special Keys you have been receiving... I will give you another where you may find the next shrine.'],
+          ['Ziikaettaal', 'I... I see. Kaedjaal was perhaps right to let you continue.'],
+          ['Ziikaettaal', 'It has been some time since I have let another Chosen pass.'],
+          ['Ziikaettaal', 'You have handled yourself well.'],
+          ['Ziikaettaal', 'The special Keys you have been receiving... I will give you another where you may find the next shrine.'],
           ['', 'The party received The Wyvern Key of Thunder.'],          
-          ['Ziikkaettaal', 'Ah, of course. Maybe it is only fair to give you something in return for getting this far.'],
+          ['Ziikaettaal', 'Ah, of course. Maybe it is only fair to give you something in return for getting this far.'],
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
             windowEvent.queueMessage(
-              text: 'Ziikkaettaal gently taps ' + world.party.members[0].name + ' on the head.'
+              text: 'Ziikaettaal gently taps ' + world.party.members[0].name + ' on the head.'
             );
             perfectLearning();
             
@@ -3507,11 +3507,11 @@ return {
               }
             );
           },
-          ['Ziikkaettaal', 'I suppose it is now time to return you. '],
-          ['', 'Ziikkaettaal glows.'],
-          ['Ziikkaettaal', 'Chosen, the road ahead is still dangerous. Remember: seek the shrines with this new Key. We\'ll be waiting.'],
+          ['Ziikaettaal', 'I suppose it is now time to return you. '],
+          ['', 'Ziikaettaal glows.'],
+          ['Ziikaettaal', 'Chosen, the road ahead is still dangerous. Remember: seek the shrines with this new Key. We\'ll be waiting.'],
           ::(location, landmark, doNext) {
-            location.ownedBy.name = 'Ziikkaettaal, Wyvern of Ice';
+            location.ownedBy.name = 'Ziikaettaal, Wyvern of Ice';
             @:world = import(module:'game_singleton.world.mt');
             world.scenario.data.fireWyvernDefeated = true;
             @:keyother = Item.new(
@@ -3533,23 +3533,23 @@ return {
       data : {
         id : 'thechosen:scene_wyvernice1',
         script: [
-          ['Ziikkaettaal', 'You.. You have returned.'],
-          ['Ziikkaettaal', 'Seeing as you have so much time on your hands, how about a little game.'],
-          ['Ziikkaettaal', 'You see, I have a bit of a penchant for... gambling.'],
-          ['Ziikkaettaal', 'Wager against me. If you lose, you hand me 500G. If you win, you get a weapon from my hoard.'],
-          ['Ziikkaettaal', 'I assure you, my weapons are well worth it.'],
+          ['Ziikaettaal', 'You.. You have returned.'],
+          ['Ziikaettaal', 'Seeing as you have so much time on your hands, how about a little game.'],
+          ['Ziikaettaal', 'You see, I have a bit of a penchant for... gambling.'],
+          ['Ziikaettaal', 'Wager against me. If you lose, you hand me 500G. If you win, you get a weapon from my hoard.'],
+          ['Ziikaettaal', 'I assure you, my weapons are well worth it.'],
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
             world.accoladeEnable(name:'wyvernsRevisited');
             @:party = world.party;
             windowEvent.queueAskBoolean(
-              prompt: 'Play dice with Ziikkaettaal?',
+              prompt: 'Play dice with Ziikaettaal?',
               onChoice::(which) {
                 when(which == false) doNext();
                 
                 when (party.inventory.gold < 500) ::<= {
                   windowEvent.queueMessage(
-                    speaker: 'Ziikkaettaal',
+                    speaker: 'Ziikaettaal',
                     text: 'You do not have enough to bet with me. Come back when you are... blessed with more riches.',
                     onLeave:doNext
                   );
@@ -3557,7 +3557,7 @@ return {
                 
                 
                 windowEvent.queueMessage(
-                  speaker: 'Ziikkaettaal',
+                  speaker: 'Ziikaettaal',
                   text: 'Prepare yourself.',
                   onLeave::{
                     @:dice = import(module:'game_function.dice.mt');
@@ -3565,18 +3565,18 @@ return {
                       onFinish::(partyWins) {
                       
                         windowEvent.queueMessage(
-                          text:(if (partyWins) 'The party' else 'Ziikkaettaal') + ' wins!'
+                          text:(if (partyWins) 'The party' else 'Ziikaettaal') + ' wins!'
                         );
                       
                         if (partyWins) ::<= {
                           world.accoladeEnable(name:'wonGamblingGame');
                           windowEvent.queueMessage(
-                            speaker: 'Ziikkaettaal',
+                            speaker: 'Ziikaettaal',
                                //Curse     earth  you     -> **** you
-                            text: '"Kkiikkohluh zaashael kaajiin..."'
+                            text: '"kiikohluh zaashael kaajiin..."'
                           );                        
                           windowEvent.queueMessage(
-                            speaker: 'Ziikkaettaal',
+                            speaker: 'Ziikaettaal',
                             text: 'You win. Well played.'
                           );                
                           
@@ -3602,7 +3602,7 @@ return {
                           
                         } else ::<= {
                           windowEvent.queueMessage(
-                            speaker: 'Ziikkaettaal',
+                            speaker: 'Ziikaettaal',
                             text: 'Too bad! Maybe another time. Ha ha...'
                           );                
                           party.inventory.subtractGold(amount:500);
@@ -3624,7 +3624,7 @@ return {
           ::(location, landmark, doNext) {
             @:world = import(module:'game_singleton.world.mt');
             windowEvent.queueMessage(
-              speaker:'Ziikkaettaal', 
+              speaker:'Ziikaettaal', 
               text:'Now, would you like me to teleport you back?'
             );
             
@@ -3632,7 +3632,7 @@ return {
               prompt: 'Leave?',
               onChoice::(which) {
                 windowEvent.queueMessage(
-                  text: 'Ziikkaettaal glows.'
+                  text: 'Ziikaettaal glows.'
                 );                
 
                 windowEvent.queueMessage(
@@ -3749,7 +3749,7 @@ return {
               }
             );
           },
-          ['', 'Ziikkaettaal glows.'],
+          ['', 'Juhriikaal glows.'],
           ['Juhriikaal', 'Until next time, Chosen. Remember: seek the shrines with this new Key. We\'ll be waiting.'],
           ::(location, landmark, doNext) {
             location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
