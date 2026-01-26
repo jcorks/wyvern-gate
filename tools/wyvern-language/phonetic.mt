@@ -66,7 +66,20 @@
 }
 
 
-
+@:getChunk ::(chunk) {
+  
+  @:ch0 = if (chunk->length < 1) empty else chunk->charAt(:0);
+  @:ch1 = if (chunk->length < 2) empty else chunk->charAt(:1);
+  @:chunkE = if (chunk->length < 2) empty else ch0+ch1;
+  
+  
+  
+  return {
+    c0: ch0,
+    c1: ch1,
+    c01 : chunkE
+  }
+}
 
 
 @:convert::(str) {
@@ -74,42 +87,39 @@
 
   @:biteSyllable ::(chunk) {
     @chunkCharCount = 0;
-    @:ch0 = chunk->charAt(:0);
-    @:ch1 = chunk->charAt(:1);
-    @:chunk = chunk->substr(from:0, to:1);
+    
+    @c = getChunk(:chunk);
     
     // first try the double chars 
-    @:consIndex = consonant_double_char->findIndex(:chunk)
-    @:cons0Index = consonant_single_char->findIndex(:ch0);
+    @:consIndex = consonant_double_char->findIndex(:c.c01)
+    @:cons0Index = consonant_single_char->findIndex(:c.c0);
     
-    @:consOffset;
+    @consOffset;
     if (consIndex != -1) ::<= {
-      consOffset = dragonish_consonant->findIndex(:chunk);
+      consOffset = dragonish_consonant->findIndex(:c.c01);
       chunkCharCount = 2;
     } else if (cons0Index != -1) ::<= {
-      consOffset = dragonish_consonant->findIndex(:ch0);    
+      consOffset = dragonish_consonant->findIndex(:c.c0);    
       chunkCharCount = 1;
     } else ::<= {
-      error(:'Unknown consonant : ' + chunk);
     }
     
     
     
     // okay! Next, get the vowel
+    breakpoint();
     chunk = chunk->substr(from:chunkCharCount, to:chunk->length-1);
-    @:ch0v = chunk->charAt(:0);
-    @:ch1v = chunk->charAt(:1);
-    @:chunkv = chunk->substr(from:0, to:1);
+    @c = getChunk(:chunk);
 
-    @:vowIndex = vowel_double_char->findIndex(:chunkv)
-    @:vow0Index = vowel_single_char->findIndex(:ch0v);
+    @:vowIndex = vowel_double_char->findIndex(:c.c01)
+    @:vow0Index = vowel_single_char->findIndex(:c.c);
 
     @vowOffset;
     if (vowIndex != -1) ::<= {
-      vowOffset = dragonish_vowel->findIndex(:chunk);
+      vowOffset = dragonish_vowel->findIndex(:c.c01);
       chunkCharCount += 2;
     } else if (vow0Index != -1) ::<= {
-      vowOffset = dragonish_vowel->findIndex(:ch0);    
+      vowOffset = dragonish_vowel->findIndex(:c.c0);    
       chunkCharCount += 1;
     } else ::<= {
       // no vowel
@@ -117,8 +127,9 @@
     }
     
     
+    breakpoint();
     syllables->push(:'[' + dragonish_consonant[consOffset] + '-' + dragonish_vowel[vowOffset] + ']');
-    return chunk->substr(from:chunkCharCount, to:chunk->length);
+    return chunk->substr(from:chunkCharCount, to:chunk->length-1);
   }
   
   
@@ -138,7 +149,7 @@
 
 
 
-
+convert(:'aenjaal');
 
 
 
