@@ -43,5 +43,7 @@ document.body.style.fontFamily = 'Monospace';
   canvas.getPalette().getEvents().addCallback('onSelect', function() {
     settings.setMode(Settings.MODE.PEN);
   });
+  settings.setMode(Settings.MODE.WALL);
+  settings.setMode(Settings.MODE.PEN);
   
 })();

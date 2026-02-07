@@ -135,6 +135,24 @@ const Line = {
       },
 
       events : events,
+      
+      aliasPoint : function(x, y) {
+
+        for(var i = 0; i < chars.length; ++i) {
+          let c = chars[i];
+          let cRect = c.getBoundingClientRect();
+          
+          
+          if (x >= cRect.x && x < cRect.x + cRect.width &&
+              y >= cRect.y && y < cRect.y + cRect.height) {
+            return {
+              x : cRect.x,
+              y : cRect.y,
+              index : i
+            };
+          }
+        }
+      },
 
       editChar : function(index, ch, color) {
         if (ch == null)

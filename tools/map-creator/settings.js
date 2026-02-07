@@ -3,7 +3,8 @@ const Settings = {
     PEN : 0,
     WALL : 1,
     PATTERN : 2,
-    AREA_EDITOR : 4
+    AREA_EDITOR : 3,
+    CONNECTIONS : 4
   },
 
   new : function(canvas, xRange, yRange) {
@@ -61,7 +62,43 @@ const Settings = {
 
     var cursorOptions_isWall_set;
     var patternOptions_pattern_set;
+    var cursorOptions_connections_set;
     var undoRedo_set;
+    
+    const updateLayout = function() {
+      hideSet(cursorOptions_isErase_set);
+      hideSet(patternOptions_pattern_set);
+      hideSet(cursorOptions_connections_set);
+      canvas.disablePatternContextMenu();
+      canvas.disableAreas();
+      switch(cursorMode_element.value) {
+        case 'Pen':
+          showSet(cursorOptions_isErase_set);
+          break;
+
+        case 'Wall':
+          showSet(cursorOptions_isErase_set);
+          break;
+          
+        case 'Pattern':
+          canvas.enablePatternContextMenu();
+          showSet(patternOptions_pattern_set);
+          break;
+          
+        case 'Area Editor':
+          showSet(cursorOptions_isErase_set);
+          canvas.enableAreas();
+          break;
+          
+        case 'Connectors': 
+          showSet(cursorOptions_connections_set);
+        
+          break;
+
+      }
+      canvas.refresh();
+    }
+    
     
     // ROW 1: View
         const locationX_element = document.createElement('input');
@@ -127,7 +164,8 @@ const Settings = {
           'Pen',
           'Wall',
           'Pattern', 
-          'Area Editor'
+          'Area Editor',
+          'Connectors',
         ];
         const cursorMode_element = document.createElement('select');
         addDropDownOptions(cursorMode_element, modes);
@@ -139,27 +177,7 @@ const Settings = {
         ]);
 
         // make connections
-        cursorMode_element.addEventListener('change', function() {
-          hideSet(cursorOptions_isErase_set);
-          hideSet(patternOptions_pattern_set);
-          canvas.disablePatternContextMenu();
-          switch(cursorMode_element.value) {
-            case 'Pen':
-              showSet(cursorOptions_isErase_set);
-              break;
-
-            case 'Wall':
-              showSet(cursorOptions_isErase_set);
-              break;
-              
-            case 'Pattern':
-              canvas.enablePatternContextMenu();
-              showSet(patternOptions_pattern_set);
-              break;
-
-          }
-          canvas.refresh();
-        });
+        cursorMode_element.addEventListener('change', updateLayout);
 
 
 
@@ -174,8 +192,18 @@ const Settings = {
           isErase_element
         ]);
         
+    // connection id (connections)
+        const connectionID_element = document.createElement('select');
+        addDropDownOptions(connectionID_element, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z']);
+
+        // make ui elements
+        cursorOptions_connections_set = makeRow([
+          makeLabel(''),
+          makeLabel('ID:'),
+          connectionID_element
+        ]);
         
-        
+
         
     // SelectorOptions source
         const patternOptions_patternStore_element = document.createElement('button');
@@ -239,10 +267,15 @@ const Settings = {
       
       setMode : function(i) {
         cursorMode_element.value = modes[i];
+        updateLayout();
       },
       
       getMode : function() {
         return modes.indexOf(cursorMode_element.value)
+      },
+            
+      getConnectionID : function() {
+        return connectionID_element.value;
       },
             
       isErase : function() {

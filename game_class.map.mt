@@ -618,10 +618,6 @@
           @symbol = this.sceneryAt(x:itemX, y:itemY);
 
           canvas.movePen(x:left + x, y:top + y);  
-
-          when(symbol == 1) ::<= {
-            canvas.drawChar(text:wallCharacter);
-          }
           
 
           when(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0) ::<= {

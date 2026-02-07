@@ -2,21 +2,61 @@
 const Canvas = {
   new : function() {
     var self;
-    var selectionMode = SELECTION_MODE__PEN;
     var settings;
     const undoController = UndoContext.new();
     var iterX = 0;
     var iterY = 0;
+    var patternContext = false;
     const palette = Palette.new();
     
     const lines = [];
     const main = document.createElement('div');
     const events = EventSystem.new(['onMove']);    
     var activeOverlay = Overlay.new([255, 255, 255]);
+
+
+
+    /*
+    var testOverlay = Overlay.new([255, 205, 205]);
+    testOverlay.setP0(0, 0);
+    testOverlay.setP1(200, 200);
+    testOverlay.events.addCallback('onRelease', function() {
+      // reverse order! the lines slightly overlap, so less-accurate
+      // lines get prioritized if the order is increasing
+      for(var i = lines.length-1; i >= 0 ; --i) {
+        let r = lines[i].aliasPoint(testOverlay.getX(), testOverlay.getY());
+        
+        if (r != undefined) {
+          let w = testOverlay.getWidth();
+          let h = testOverlay.getHeight();
+          testOverlay.setP0(r.x, r.y);
+          break;
+        }
+      }
+      
+      for(var i = lines.length-1; i >= 0 ; --i) {
+        let r = lines[i].aliasPoint(
+          testOverlay.getX()+testOverlay.getWidth(), 
+          testOverlay.getY()+testOverlay.getHeight()
+        );
+        
+        if (r != undefined) {
+          testOverlay.setP1(r.x, r.y);
+          break;
+        }
+      }
+      
+      
+    });
+    testOverlay.enablePointer();
+    */
+
+
     
     /// STATE SAVE
     var canvasChars = [];
     var canvasWall = [];
+    var canvasConnections = [];
     var canvasAreas = [];
     /// STATE SAVE 
     
@@ -41,9 +81,8 @@ const Canvas = {
     var moveSetX;
     var moveSetY;
     
-    // for right click menus
-    var contextHandler;
-    var contextMenu;
+    var areaSet;
+    
     
     
     // fake clipboard
@@ -99,13 +138,13 @@ const Canvas = {
     
     const commitChangeSoft = function() {
       if (commitChangeCounter % 3 == 0) {
-        undoController.commitState([canvasChars, canvasWall, canvasAreas]);
+        undoController.commitState([canvasChars, canvasWall, canvasAreas, canvasConnections]);
       }
       commitChangeCounter++;
     }
 
     const commitChange = function() {
-      undoController.commitState([canvasChars, canvasWall, canvasAreas]);
+      undoController.commitState([canvasChars, canvasWall, canvasAreas, canvasConnections]);
       commitChangeCounter++;
     }
     
@@ -143,6 +182,14 @@ const Canvas = {
                   color = TEXT_COLOR_SELECT;
                 }
               }
+              break;
+              
+            case Settings.MODE.CONNECTIONS:
+              if (canvasConnections[atlasIndex] != null) {
+                color = TEXT_COLOR_CONNECTION;
+                ch = canvasConnections[atlasIndex][0];
+              }
+              break;
 
           }
           
@@ -179,6 +226,7 @@ const Canvas = {
           if (yank) {
             canvasChars[atlasIndex] = 0;
             canvasWall[atlasIndex]  = false;
+            canvasConnections[atlasIndex] = null;
           }
 
           overlayChars[atlasIndex] = moveSet.chars[xi + (yi)*moveSet.width];
@@ -198,10 +246,49 @@ const Canvas = {
       const y = i;
       
       
-      line.events.addCallback('onContext', function(data) {
-        if (contextHandler == null) return;
-        
-        contextHandler(data.index, y, data.x, data.y);
+      line.events.addCallback('onContext', function(data) {    
+        if (patternContext == false) return;    
+        const x = data.index;
+        ContextMenu(data.x, data.y,
+          [
+            "Copy", function() {
+              if (!hasSelection())
+                window.alert('No selection present. Drag the pointer to make a selection');
+              
+              clipboard = JSON.stringify(self.getSelectionSet(iterX + x, iterY + y));
+              resetSelectionSet();
+              refreshCanvas();            
+            },
+            
+            
+            "Cut", function() {
+              if (!hasSelection())
+                window.alert('No selection present. Drag the pointer to make a selection');
+              clipboard = JSON.stringify(self.getSelectionSet(iterX + x, iterY + y, true));
+              resetSelectionSet();
+              refreshCanvas();
+            },
+            
+            
+            "Paste", function() {
+              if (clipboard == null) {
+                window.alert('No selection to paste.');
+                return;
+              }
+
+              const set = JSON.parse(clipboard);
+              selectionSetToMoveSet(
+                set, 
+                set.offsetX, 
+                set.offsetY, 
+                x, 
+                y, 
+                false
+              );
+              refreshCanvas();            
+            }
+          ]
+        );
       });
       
       
@@ -223,6 +310,13 @@ const Canvas = {
           activeOverlay.hide();
 
           switch(settings.getMode()) {
+            case Settings.MODE.AREA_EDITOR:
+              const area = areaSet.addArea(0, 0);
+              area.overlay.setP0(activeOverlay.getX(), activeOverlay.getY());
+              area.overlay.setP1(activeOverlay.getX()+activeOverlay.getWidth(), activeOverlay.getY()+activeOverlay.getHeight());
+              area.updateFromOverlay();
+              break;
+          
             case Settings.MODE.PATTERN:
               if (moveSet == null) {
                 setSelectionSet(
@@ -259,7 +353,8 @@ const Canvas = {
                   const selIter = xi - moveSetX + (yi - moveSetY)*moveSet.width
                   if (moveSet.chars[selIter] != 0)
                     canvasChars[xi + yi*MAX_LENGTH] = moveSet.chars[selIter];
-                  canvasWall [xi + yi*MAX_LENGTH] = moveSet.wall [selIter];
+                    canvasWall [xi + yi*MAX_LENGTH] = moveSet.wall [selIter];
+                    connectionsWall [xi + yi*MAX_LENGTH] = moveSet.connections[selIter];
                 }
               }
               moveSet = null;
@@ -277,8 +372,6 @@ const Canvas = {
 
       
       line.events.addCallback('onDown', function(data) {
-        if (contextMenu)
-          contextMenu.style.display = 'none';
 
         const x = data.index 
         const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;        
@@ -303,6 +396,7 @@ const Canvas = {
         switch(settings.getMode()) {
           case Settings.MODE.WALL:
           case Settings.MODE.PEN:
+          case Settings.MODE.CONNECTIONS:
             if (inStroke == false) {
               inStroke = true;
             }
@@ -401,6 +495,20 @@ const Canvas = {
             
             break;
 
+          case Settings.MODE.CONNECTIONS:
+            old = canvasConnections[atlasIndex]
+            if (settings.isErase()) { 
+              newVal = null;            
+            } else {
+              newVal = settings.getConnectionID();
+            }
+            if (old != newVal) {
+              canvasConnections[atlasIndex] = newVal;
+              refreshCanvas();
+            }
+            
+            break;
+
             
         }
         
@@ -419,6 +527,7 @@ const Canvas = {
     for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
       canvasChars[i] = 0;
       canvasWall[i] = false;
+      canvasConnections[i] = null;
       overlayChars[i] = 0;
     }
     commitChange();
@@ -447,6 +556,7 @@ const Canvas = {
       getSelectionSet : function(pointerX, pointerY, yank) {
         const set = [];
         const setW = [];
+        const setC = [];
         const w = selectionX1 - selectionX0;
         for(var y = selectionY0; y < selectionY1; ++y) {
           var ySet = y - selectionY0;
@@ -455,10 +565,12 @@ const Canvas = {
             
             set[xSet + ySet*w] = canvasChars[x + y * MAX_LENGTH];
             setW[xSet + ySet*w] = canvasWall[x + y * MAX_LENGTH];
+            setC[xSet + ySet*w] = canvasConnections[x + y * MAX_LENGTH];
             
             if (yank) {
               canvasChars[x + y * MAX_LENGTH] = 0;
               canvasWall[x + y * MAX_LENGTH] = false;
+              canvasConnections[x + y * MAX_LENGTH] = null;
             }
           }
         }
@@ -477,6 +589,7 @@ const Canvas = {
           offsetY : pointerY,
           chars : set,
           wall : setW,
+          connections : setW,
           width : w,
           height : selectionY1 - selectionY0
         }
@@ -495,6 +608,7 @@ const Canvas = {
               const selIter = xi - x + (yi - y)*set.width
               canvasChars[xi + yi*MAX_LENGTH] = set.chars[selIter];
               canvasWall [xi + yi*MAX_LENGTH] = set.wall [selIter];
+              canvasConnections[xi + yi*MAX_LENGTH] = set.connections[selIter];
             }
           }
         }
@@ -540,6 +654,32 @@ const Canvas = {
         settings = e;
       },
       
+      clientPositionToMap : function(x, y) {
+        // reverse order! the lines slightly overlap, so less-accurate
+        // lines get prioritized if the order is increasing
+        for(var i = lines.length-1; i >= 0 ; --i) {
+          let r = lines[i].aliasPoint(x, y);
+          
+          if (r != undefined) {
+            return {
+              x : r.index + iterX,
+              y : i + iterY
+            }
+          }
+        }        
+      },
+      
+      mapPositionToClient : function(x, y) {
+        x -= iterX;
+        y -= iterY;
+        
+        let c = lines[y].getChar(x).getBoundingClientRect();
+        return {
+          x : c.left,
+          y : c.top
+        }
+      },
+      
       
       undo : function() {
         const state = undoController.undo();
@@ -547,6 +687,7 @@ const Canvas = {
         canvasChars = state[0];
         canvasWall  = state[1];
         canvasAreas = state[2];
+        canvasConnections = state[3];
         refreshCanvas();
       },
 
@@ -557,100 +698,32 @@ const Canvas = {
         canvasChars = state[0];
         canvasWall  = state[1];
         canvasAreas = state[2];
+        canvasConnections = state[3];
         refreshCanvas();
       },
 
       enablePatternContextMenu : function() {
-        contextHandler = function(x, y, xpos, ypos) {
-        
-          if (contextMenu == null) {
-          
-            const div = document.createElement("div");
-            div.style.position = 'absolute';
-            div.style.fontSize = '14px';
-            div.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-            div.style.color = 'rgb(200, 200, 200)';
-            div.style.zIndex = 2000;
-            
-            const createButton = function(name, callback) {
-              const d = document.createElement("div");
-              d.style.margin = '4px';
-              d.innerText = name;
-              div.appendChild(d);
-              d.addEventListener("click", callback);
-              
-              d.addEventListener("mouseenter", function() {
-                d.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'
-              });
-
-              d.addEventListener("mouseleave", function() {
-                d.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
-              });
-
-            }
-            
-            createButton("Copy", function() {
-              if (!hasSelection())
-                window.alert('No selection present. Drag the pointer to make a selection');
-              clipboard = JSON.stringify(self.getSelectionSet(iterX + contextMenu.x, iterY + contextMenu.y));
-              div.style.display = 'none';
-              resetSelectionSet();
-              refreshCanvas();
-            });
-
-
-
-            createButton("Cut", function() {
-              if (!hasSelection())
-                window.alert('No selection present. Drag the pointer to make a selection');
-              clipboard = JSON.stringify(self.getSelectionSet(iterX + contextMenu.x, iterY + contextMenu.y, true));
-              div.style.display = 'none';
-              resetSelectionSet();
-              refreshCanvas();
-            });
-
-            createButton("Paste", function() {
-              div.style.display = 'none';              
-              if (clipboard == null) {
-                window.alert('No selection to paste.');
-                return;
-              }
-
-              const set = JSON.parse(clipboard);
-              selectionSetToMoveSet(
-                set, 
-                set.offsetX, 
-                set.offsetY, 
-                contextMenu.x, 
-                contextMenu.y, 
-                false
-              );
-              refreshCanvas();
-              
-            });
-
-            
-            document.body.appendChild(div);
-            contextMenu = div;
-          }
-          contextMenu.x = x;
-          contextMenu.y = y;
-          contextMenu.style.display = 'initial';
-          contextMenu.style.left = ''+xpos+'px';
-          contextMenu.style.top = ''+ypos+'px';
-          
-        }
+        patternContext = true;
       },
       
       disablePatternContextMenu : function() {
+        patternContext = false;
+      },
       
+      enableAreas : function() {
+        areaSet.show()
       },
 
+      disableAreas : function() {
+        areaSet.hide()
+      },
       
       moveRelative : function(x, y) {
         self.move(x + iterX, y + iterY);
       }
     }
+    
+    areaSet = AreaSet.new(self);
     
     return self;
   }
