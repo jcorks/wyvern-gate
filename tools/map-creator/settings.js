@@ -2,14 +2,16 @@ const Settings = {
   MODE : {
     PEN : 0,
     WALL : 1,
-    PATTERN : 2,
+    SELECTOR : 2,
     AREA_EDITOR : 3,
     CONNECTIONS : 4
   },
 
   new : function(canvas, xRange, yRange) {
     const table = document.createElement('table');
-    const patterns = {};
+    const patterns = {
+      Default : Pattern.new()
+    };
 
     const makeLabel = function(str) {
       const out = document.createElement('div');
@@ -46,7 +48,7 @@ const Settings = {
       return items;
     }
     
-    const addDropDownOptions = function(dropDown, options) {
+    const setDropDownOptions = function(dropDown, options) {
       const children = [...dropDown.children];
       for(var i = 0; i < children.length; ++i) {
         dropDown.removeChild(children[i]);
@@ -67,7 +69,6 @@ const Settings = {
     
     const updateLayout = function() {
       hideSet(cursorOptions_isErase_set);
-      hideSet(patternOptions_pattern_set);
       hideSet(cursorOptions_connections_set);
       canvas.disablePatternContextMenu();
       canvas.disableAreas();
@@ -80,9 +81,8 @@ const Settings = {
           showSet(cursorOptions_isErase_set);
           break;
           
-        case 'Pattern':
+        case 'Selector':
           canvas.enablePatternContextMenu();
-          showSet(patternOptions_pattern_set);
           break;
           
         case 'Area Editor':
@@ -92,12 +92,126 @@ const Settings = {
           
         case 'Connectors': 
           showSet(cursorOptions_connections_set);
+          showSet(cursorOptions_isErase_set);
         
           break;
 
       }
       canvas.refresh();
     }
+    
+    // row 0
+        const patternOptions_patternClone_element = document.createElement('button');
+        const patternOptions_patternNew_element   = document.createElement('button');
+        const patternOptions_patternRemove_element   = document.createElement('button');
+
+        const patternOptions_patternList_element = document.createElement('select');
+        setDropDownOptions(patternOptions_patternList_element, ['Default']);
+        
+        const rebuildPatternPulldown = function() {
+          const pattern = canvas.getPattern();
+          const keys = Object.keys(patterns);
+          setDropDownOptions(patternOptions_patternList_element, keys);
+          for(var i = 0; i < keys.length; ++i) {
+            if (patterns[keys[i]] == pattern) {
+              patternOptions_patternList_element.value = keys[i];
+              break;
+            }
+          }
+        }
+
+        
+        patternOptions_patternClone_element.innerText = 'Clone';
+        patternOptions_patternNew_element.innerText = 'New';
+        patternOptions_patternRemove_element.innerText = 'Remove';
+        
+        patternOptions_pattern_set = makeRow([
+          makeLabel('Patterns:'),
+          patternOptions_patternList_element,
+          patternOptions_patternNew_element,
+          patternOptions_patternClone_element,
+          patternOptions_patternRemove_element,
+        ]);
+
+        patternOptions_patternList_element.addEventListener(
+          "change",
+          function() {
+            const newPattern = patterns[patternOptions_patternList_element.value];
+            canvas.setPattern(newPattern);
+          }
+        );
+
+
+        patternOptions_patternNew_element.addEventListener(
+          "click",
+          function(event) {
+            const ch = window.prompt("Enter a name for the new pattern:");
+            
+            if (Object.hasOwnProperty(patterns, ch)) {
+              window.alert('The name of this pattern already exists!');
+              return;
+            }
+            patterns[ch] = Pattern.new();
+            canvas.setPattern(patterns[ch]);
+            rebuildPatternPulldown();
+          }
+        );  
+
+
+        patternOptions_patternClone_element.addEventListener(
+          "click",
+          function(event) {
+            const ch = window.prompt("Enter a name for the cloned pattern:");
+            
+            if (Object.hasOwnProperty(patterns, ch)) {
+              window.alert('The name of this pattern already exists!');
+              return;
+            }
+            
+            const newP = Pattern.new();
+            newP.load(canvas.getPattern().save());
+            patterns[ch] = newP;
+            canvas.setPattern(patterns[ch]);
+            rebuildPatternPulldown();
+          }
+        );    
+
+        patternOptions_patternRemove_element.addEventListener(
+          "click",
+          function(event) {
+          
+            const patternT = canvas.getPattern();
+            const keys = Object.keys(patterns);
+            var whoami = '[Error]'
+            
+            for(var i = 0; i < keys.length; ++i) {
+              if (patterns[keys[i]] == patternT) {
+                whoami = keys[i];
+                break;
+              }
+            }
+            f
+            
+            if (window.confirm("Really remove the pattern " + whoami + '?')) { 
+              delete patterns[whoami];
+              
+              const keys = Object.keys(patterns);
+              
+              var pattern;
+              if (keys.length == 0) {
+                pattern = Pattern.new();
+                patterns['Default'] = pattern;
+              } else {
+                pattern = patterns[Object.keys(patterns)[0]];
+              }
+              
+              canvas.setPattern(pattern);
+            }
+            rebuildPatternPulldown();
+          }
+        );    
+
+
     
     
     // ROW 1: View
@@ -163,12 +277,12 @@ const Settings = {
         const modes = [
           'Pen',
           'Wall',
-          'Pattern', 
+          'Selector', 
           'Area Editor',
           'Connectors',
         ];
         const cursorMode_element = document.createElement('select');
-        addDropDownOptions(cursorMode_element, modes);
+        setDropDownOptions(cursorMode_element, modes);
 
         // make ui elements
         makeRow([
@@ -194,7 +308,7 @@ const Settings = {
         
     // connection id (connections)
         const connectionID_element = document.createElement('select');
-        addDropDownOptions(connectionID_element, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z']);
+        setDropDownOptions(connectionID_element, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z']);
 
         // make ui elements
         cursorOptions_connections_set = makeRow([
@@ -206,64 +320,14 @@ const Settings = {
 
         
     // SelectorOptions source
-        const patternOptions_patternStore_element = document.createElement('button');
-        const patternOptions_patternLoad_element  = document.createElement('button');
-        const patternOptions_patternNew_element   = document.createElement('button');
-
-        const patternOptions_patternList_element = document.createElement('select');
-        addDropDownOptions(patternOptions_patternList_element, ['Default']);
-        
 
 
-        
-        patternOptions_patternStore_element.innerText = 'Store';
-        patternOptions_patternLoad_element.innerText = 'Load';
-        patternOptions_patternNew_element.innerText = 'New';
-        
-        patternOptions_pattern_set = makeRow([
-          makeLabel(''),
-          patternOptions_patternStore_element,
-          patternOptions_patternLoad_element,
-          patternOptions_patternList_element,
-          patternOptions_patternNew_element
-        ]);
-
-        patternOptions_patternStore_element.addEventListener(
-          "click",
-          function(event) {
-            const selection = canvas.getSelectionSet();
-            if (selection.width == 0 || selection.height == 0)
-              window.alert('Theres no pattern to save! Highlight the canvas by dragging first.');
-              
-            patterns[patternOptions_patternList_element.value] = selection;
-          }
-        );
-
-
-
-        patternOptions_patternNew_element.addEventListener(
-          "click",
-          function(event) {
-            const ch = window.prompt("Enter a name for the new pattern:");
-            
-            if (Object.hasOwnProperty(patterns, ch)) {
-              window.alert('The name of this pattern already exists!');
-            }
-            
-            patterns[ch] = canvas.getSelectionSet();
-            
-          }
-        );
-
-
+    canvas.setPattern(patterns.Default);
     return {
       getElement : function() {
         return table;
       },
       
-      getPatterns : function() {
-        return patterns;
-      },
       
       setMode : function(i) {
         cursorMode_element.value = modes[i];

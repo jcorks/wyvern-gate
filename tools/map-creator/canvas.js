@@ -3,10 +3,9 @@ const Canvas = {
   new : function() {
     var self;
     var settings;
-    const undoController = UndoContext.new();
     var iterX = 0;
     var iterY = 0;
-    var patternContext = false;
+    var selectorContext = false;
     const palette = Palette.new();
     
     const lines = [];
@@ -53,12 +52,7 @@ const Canvas = {
 
 
     
-    /// STATE SAVE
-    var canvasChars = [];
-    var canvasWall = [];
-    var canvasConnections = [];
-    var canvasAreas = [];
-    /// STATE SAVE 
+    var pattern;
     
     // a layer over the real chars. Used for moving structures and pasting patterns.
     var overlayChars = [];
@@ -135,16 +129,9 @@ const Canvas = {
     
 
 
-    
-    const commitChangeSoft = function() {
-      if (commitChangeCounter % 3 == 0) {
-        undoController.commitState([canvasChars, canvasWall, canvasAreas, canvasConnections]);
-      }
-      commitChangeCounter++;
-    }
 
     const commitChange = function() {
-      undoController.commitState([canvasChars, canvasWall, canvasAreas, canvasConnections]);
+      pattern.undoController.commitState(pattern.save());
       commitChangeCounter++;
     }
     
@@ -157,24 +144,20 @@ const Canvas = {
         
         for(var x = 0; x < VIEW_WIDTH; ++x) {
           const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;
-          var ch = canvasChars[atlasIndex];
-          
-          if (typeof ch == 'String') {
-            console.log('hi');
-          }
-          
+          var ch = pattern.chars[atlasIndex];
+                    
           var color = ch === 0 ? TEXT_COLOR_INACTIVE : TEXT_COLOR_ACTIVE;
           
-          
-          switch(settings.getMode()) {
+          var mode = settings == undefined ? Settings.MODE.WALL : settings.getMode()
+          switch(mode) {
             case Settings.MODE.WALL:
-              if (canvasWall[atlasIndex])
+              if (pattern.wall[atlasIndex])
                 color = TEXT_COLOR_WALL;
               else
                 color = TEXT_COLOR_INACTIVE;
               break;
               
-            case Settings.MODE.PATTERN:
+            case Settings.MODE.SELECTOR:
               if (isSelected(iterX + x, iterY + y) == true) {
                 if (ch === 0) {
                   color = TEXT_COLOR_SELECT_INACTIVE;
@@ -185,9 +168,9 @@ const Canvas = {
               break;
               
             case Settings.MODE.CONNECTIONS:
-              if (canvasConnections[atlasIndex] != null) {
+              if (pattern.connections[atlasIndex] != null) {
                 color = TEXT_COLOR_CONNECTION;
-                ch = canvasConnections[atlasIndex][0];
+                ch = pattern.connections[atlasIndex][0];
               }
               break;
 
@@ -224,9 +207,9 @@ const Canvas = {
         for(var xi = 0; xi < moveSet.width; ++xi) {
           const atlasIndex = (moveSetX + xi) + (moveSetY+yi)*MAX_LENGTH;
           if (yank) {
-            canvasChars[atlasIndex] = 0;
-            canvasWall[atlasIndex]  = false;
-            canvasConnections[atlasIndex] = null;
+            pattern.chars[atlasIndex] = 0;
+            pattern.wall[atlasIndex]  = false;
+            pattern.Connections[atlasIndex] = null;
           }
 
           overlayChars[atlasIndex] = moveSet.chars[xi + (yi)*moveSet.width];
@@ -247,7 +230,7 @@ const Canvas = {
       
       
       line.events.addCallback('onContext', function(data) {    
-        if (patternContext == false) return;    
+        if (selectorContext == false) return;    
         const x = data.index;
         ContextMenu(data.x, data.y,
           [
@@ -317,7 +300,7 @@ const Canvas = {
               area.updateFromOverlay();
               break;
           
-            case Settings.MODE.PATTERN:
+            case Settings.MODE.SELECTOR:
               if (moveSet == null) {
                 setSelectionSet(
                   startIterX,
@@ -337,7 +320,7 @@ const Canvas = {
         
         // do overlay action here.          
         switch(settings.getMode()) {
-          case Settings.MODE.PATTERN:
+          case Settings.MODE.SELECTOR:
             if (moveSet != null) {
 
               // reset overlay
@@ -352,9 +335,9 @@ const Canvas = {
                 for(var xi = moveSetX; xi < moveSetX + moveSet.width; ++xi) {
                   const selIter = xi - moveSetX + (yi - moveSetY)*moveSet.width
                   if (moveSet.chars[selIter] != 0)
-                    canvasChars[xi + yi*MAX_LENGTH] = moveSet.chars[selIter];
-                    canvasWall [xi + yi*MAX_LENGTH] = moveSet.wall [selIter];
-                    connectionsWall [xi + yi*MAX_LENGTH] = moveSet.connections[selIter];
+                    pattern.chars[xi + yi*MAX_LENGTH] = moveSet.chars[selIter];
+                    pattern.wall [xi + yi*MAX_LENGTH] = moveSet.wall [selIter];
+                    pattern.connections [xi + yi*MAX_LENGTH] = moveSet.connections[selIter];
                 }
               }
               moveSet = null;
@@ -377,7 +360,7 @@ const Canvas = {
         const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;        
         
         // special selection mode for moving stuff
-        if (settings.getMode() == Settings.MODE.PATTERN && isSelected(iterX + x, iterY + y) == true) {
+        if (settings.getMode() == Settings.MODE.SELECTOR && isSelected(iterX + x, iterY + y) == true) {
           // yank the current selection set 
           if (moveSet == null) {
             selectionSetToMoveSet(
@@ -396,6 +379,9 @@ const Canvas = {
         switch(settings.getMode()) {
           case Settings.MODE.WALL:
           case Settings.MODE.PEN:
+            if (inStroke == false) {
+              //commitChange();
+            }
           case Settings.MODE.CONNECTIONS:
             if (inStroke == false) {
               inStroke = true;
@@ -404,7 +390,7 @@ const Canvas = {
 
         
           case Settings.MODE.AREA_EDITOR:
-          case Settings.MODE.PATTERN:
+          case Settings.MODE.SELECTOR:
             if (activeOverlay.isShown()) {
               activeOverlay.setP1(data.x, data.y);
             } else {
@@ -452,7 +438,7 @@ const Canvas = {
 
         switch(settings.getMode()) {
           case Settings.MODE.AREA_EDITOR:
-          case Settings.MODE.PATTERN:
+          case Settings.MODE.SELECTOR:
             if (activeOverlay.isShown()) {
               activeOverlay.setP1(data.x, data.y);
             }
@@ -469,41 +455,41 @@ const Canvas = {
         switch(settings.getMode()) {
           case Settings.MODE.PEN:
             const s = palette.getSelected();
-            old = canvasChars[atlasIndex];
+            old = pattern.chars[atlasIndex];
             if (settings.isErase())
               newVal = 0;
             else
               newVal = s;
 
             if (old !== newVal) {
-              canvasChars[atlasIndex] = newVal;
+              pattern.chars[atlasIndex] = newVal;
               refreshCanvas();
             }
             break;
 
           case Settings.MODE.WALL:
-            old = canvasWall[atlasIndex]
+            old = pattern.wall[atlasIndex]
             if (settings.isErase()) {
               newVal = false;            
             } else {
               newVal = true;
             }
             if (old != newVal) {
-              canvasWall[atlasIndex] = newVal;
+              pattern.wall[atlasIndex] = newVal;
               refreshCanvas();
             }
             
             break;
 
           case Settings.MODE.CONNECTIONS:
-            old = canvasConnections[atlasIndex]
+            old = pattern.connections[atlasIndex]
             if (settings.isErase()) { 
               newVal = null;            
             } else {
               newVal = settings.getConnectionID();
             }
             if (old != newVal) {
-              canvasConnections[atlasIndex] = newVal;
+              pattern.connections[atlasIndex] = newVal;
               refreshCanvas();
             }
             
@@ -524,13 +510,6 @@ const Canvas = {
     
 
     
-    for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
-      canvasChars[i] = 0;
-      canvasWall[i] = false;
-      canvasConnections[i] = null;
-      overlayChars[i] = 0;
-    }
-    commitChange();
     main.style.userSelect = "none";
     main.style.fontSize = ''+CHAR_FONT_WIDTH_PX+'px';  
     
@@ -540,8 +519,9 @@ const Canvas = {
 
     
     
-    
-    
+    for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
+      overlayChars[i] = 0;
+    }
     
         
     self = {
@@ -563,14 +543,14 @@ const Canvas = {
           for(var x = selectionX0; x < selectionX1; ++x) {
             var xSet = x - selectionX0;
             
-            set[xSet + ySet*w] = canvasChars[x + y * MAX_LENGTH];
-            setW[xSet + ySet*w] = canvasWall[x + y * MAX_LENGTH];
-            setC[xSet + ySet*w] = canvasConnections[x + y * MAX_LENGTH];
+            set[xSet + ySet*w] = pattern.chars[x + y * MAX_LENGTH];
+            setW[xSet + ySet*w] = pattern.wall[x + y * MAX_LENGTH];
+            setC[xSet + ySet*w] = pattern.connections[x + y * MAX_LENGTH];
             
             if (yank) {
-              canvasChars[x + y * MAX_LENGTH] = 0;
-              canvasWall[x + y * MAX_LENGTH] = false;
-              canvasConnections[x + y * MAX_LENGTH] = null;
+              pattern.chars[x + y * MAX_LENGTH] = 0;
+              pattern.wall[x + y * MAX_LENGTH] = false;
+              pattern.connections[x + y * MAX_LENGTH] = null;
             }
           }
         }
@@ -606,9 +586,9 @@ const Canvas = {
           for(var yi = y; yi < y + set.height; ++yi) {
             for(var xi = x; xi < x + set.width; ++xi) {
               const selIter = xi - x + (yi - y)*set.width
-              canvasChars[xi + yi*MAX_LENGTH] = set.chars[selIter];
-              canvasWall [xi + yi*MAX_LENGTH] = set.wall [selIter];
-              canvasConnections[xi + yi*MAX_LENGTH] = set.connections[selIter];
+              pattern.chars[xi + yi*MAX_LENGTH] = set.chars[selIter];
+              pattern.wall [xi + yi*MAX_LENGTH] = set.wall [selIter];
+              pattern.connections[xi + yi*MAX_LENGTH] = set.connections[selIter];
             }
           }
         }
@@ -682,32 +662,26 @@ const Canvas = {
       
       
       undo : function() {
-        const state = undoController.undo();
+        const state = pattern.undoController.undo();
         if (state == false) return;
-        canvasChars = state[0];
-        canvasWall  = state[1];
-        canvasAreas = state[2];
-        canvasConnections = state[3];
+        pattern.load(state);
         refreshCanvas();
       },
 
 
       redo : function() {
-        const state = undoController.redo();
+        const state = pattern.undoController.redo();
         if (state == false) return;
-        canvasChars = state[0];
-        canvasWall  = state[1];
-        canvasAreas = state[2];
-        canvasConnections = state[3];
+        pattern.load(state);
         refreshCanvas();
       },
 
       enablePatternContextMenu : function() {
-        patternContext = true;
+        selectorContext = true;
       },
       
       disablePatternContextMenu : function() {
-        patternContext = false;
+        selectorContext = false;
       },
       
       enableAreas : function() {
@@ -716,6 +690,15 @@ const Canvas = {
 
       disableAreas : function() {
         areaSet.hide()
+      },
+      
+      setPattern : function(p) {
+        pattern = p;
+        refreshCanvas();
+      },
+      
+      getPattern : function(p) {
+        return pattern;
       },
       
       moveRelative : function(x, y) {
