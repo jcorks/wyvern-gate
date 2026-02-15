@@ -703,6 +703,27 @@ const Canvas = {
       
       moveRelative : function(x, y) {
         self.move(x + iterX, y + iterY);
+      },
+      
+      
+      save : function() {
+        const patternsOut = [];
+        for(var i = 0; i < patterns.length; ++i) {
+            patternsOut.push(patterns[i].save());
+        }
+      
+        return {
+          settings : {
+            flags : [
+            
+            ],
+            outOfBoundsCharacter : ' ',
+            wallCharacter : ' ',
+            patternMode : 'random'
+          },
+          
+          patterns : patternsOut
+        }
       }
     }
     

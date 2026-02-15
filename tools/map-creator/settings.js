@@ -48,6 +48,17 @@ const Settings = {
       return items;
     }
     
+    const makeButton = function(text, onClick) {
+      const b = document.createElement('button')
+      b.innerText = text;
+      b.style.width = "100%";
+      b.addEventListener(
+        "click",
+        onClick 
+      )
+      return b;
+    }
+    
     const setDropDownOptions = function(dropDown, options) {
       const children = [...dropDown.children];
       for(var i = 0; i < children.length; ++i) {
@@ -100,66 +111,69 @@ const Settings = {
       canvas.refresh();
     }
     
-    // row 0
-        const patternOptions_patternClone_element = document.createElement('button');
-        const patternOptions_patternNew_element   = document.createElement('button');
-        const patternOptions_patternRemove_element   = document.createElement('button');
-
-        const patternOptions_patternList_element = document.createElement('select');
-        setDropDownOptions(patternOptions_patternList_element, ['Default']);
-        
-        const rebuildPatternPulldown = function() {
-          const pattern = canvas.getPattern();
-          const keys = Object.keys(patterns);
-          setDropDownOptions(patternOptions_patternList_element, keys);
-          for(var i = 0; i < keys.length; ++i) {
-            if (patterns[keys[i]] == pattern) {
-              patternOptions_patternList_element.value = keys[i];
-              break;
-            }
+    // row -1 
+        const projectOptions_projectNew_element = makeButton(
+          "New",
+          function() {
+          
           }
-        }
+        )
 
-        
-        patternOptions_patternClone_element.innerText = 'Clone';
-        patternOptions_patternNew_element.innerText = 'New';
-        patternOptions_patternRemove_element.innerText = 'Remove';
-        
-        patternOptions_pattern_set = makeRow([
-          makeLabel('Patterns:'),
-          patternOptions_patternList_element,
-          patternOptions_patternNew_element,
-          patternOptions_patternClone_element,
-          patternOptions_patternRemove_element,
+
+
+        const projectOptions_projectSave_element  = makeButton(
+          "Save",
+          function() {
+          
+          }
+        )
+
+        const projectOptions_projectExport_element  = makeButton(
+          "Export",
+          function() {
+          
+          }
+        )
+
+
+        const projectOptions_projectImport_element  = makeButton(
+          "Import",
+          function() {
+          
+          }
+        )
+
+        const projectOptions_projectList_element = document.createElement('select');
+        setDropDownOptions(projectOptions_projectList_element, ['Default']);
+        projectOptions_project_set = makeRow([
+          makeLabel('Project:'),
+          projectOptions_projectList_element
         ]);
 
-        patternOptions_patternList_element.addEventListener(
-          "change",
-          function() {
-            const newPattern = patterns[patternOptions_patternList_element.value];
-            canvas.setPattern(newPattern);
-          }
-        );
 
 
-        patternOptions_patternNew_element.addEventListener(
-          "click",
-          function(event) {
-            const ch = window.prompt("Enter a name for the new pattern:");
-            
-            if (Object.hasOwnProperty(patterns, ch)) {
-              window.alert('The name of this pattern already exists!');
-              return;
-            }
-            patterns[ch] = Pattern.new();
-            canvas.setPattern(patterns[ch]);
-            rebuildPatternPulldown();
-          }
-        );  
+        projectOptions_project_set = makeRow([
+          makeLabel('|'),
+          projectOptions_projectNew_element,
+          projectOptions_projectSave_element,
+        ]);
+        
+        makeRow([
+          makeLabel('|'),
+          projectOptions_projectExport_element,
+          projectOptions_projectImport_element
+        
+        ])
 
+        makeRow([
+          makeLabel('|')
+        ]);
 
-        patternOptions_patternClone_element.addEventListener(
-          "click",
+        
+    
+    // row 0
+        const patternOptions_patternClone_element = makeButton(
+          "Clone",
           function(event) {
             const ch = window.prompt("Enter a name for the cloned pattern:");
             
@@ -174,10 +188,23 @@ const Settings = {
             canvas.setPattern(patterns[ch]);
             rebuildPatternPulldown();
           }
-        );    
-
-        patternOptions_patternRemove_element.addEventListener(
-          "click",
+        )
+        const patternOptions_patternNew_element = makeButton(
+          "New",
+          function(event) {
+            const ch = window.prompt("Enter a name for the new pattern:");
+            
+            if (Object.hasOwnProperty(patterns, ch)) {
+              window.alert('The name of this pattern already exists!');
+              return;
+            }
+            patterns[ch] = Pattern.new();
+            canvas.setPattern(patterns[ch]);
+            rebuildPatternPulldown();
+          }
+        )
+        const patternOptions_patternRemove_element = makeButton(
+          "Remove",
           function(event) {
           
             const patternT = canvas.getPattern();
@@ -190,7 +217,7 @@ const Settings = {
                 break;
               }
             }
-            f
+            
             
             if (window.confirm("Really remove the pattern " + whoami + '?')) { 
               delete patterns[whoami];
@@ -209,9 +236,87 @@ const Settings = {
             }
             rebuildPatternPulldown();
           }
-        );    
+        )
+
+        const patternOptions_patternList_element = document.createElement('select');
+        setDropDownOptions(patternOptions_patternList_element, ['Default']);
+        
+        const rebuildPatternPulldown = function() {
+          const pattern = canvas.getPattern();
+          const keys = Object.keys(patterns);
+          setDropDownOptions(patternOptions_patternList_element, keys);
+          for(var i = 0; i < keys.length; ++i) {
+            if (patterns[keys[i]] == pattern) {
+              patternOptions_patternList_element.value = keys[i];
+              break;
+            }
+          }
+        }
+
+        
+        
+        patternOptions_pattern_set = makeRow([
+          makeLabel('Patterns:'),
+          patternOptions_patternList_element,
+        ]);
 
 
+        patternOptions_pattern_set = makeRow([
+          makeLabel('|'),
+          patternOptions_patternNew_element,
+          patternOptions_patternClone_element,
+          patternOptions_patternRemove_element
+        ]);
+        
+        makeRow([
+          makeLabel('|')
+        ])
+
+
+
+
+        patternOptions_patternList_element.addEventListener(
+          "change",
+          function() {
+            const newPattern = patterns[patternOptions_patternList_element.value];
+            canvas.setPattern(newPattern);
+          }
+        );
+
+
+
+
+
+
+        
+    // UNDO/REDO
+        const undo_element = document.createElement('button');
+        const redo_element = document.createElement('button');
+        
+        
+        undo_element.innerText = 'Undo';
+        redo_element.innerText = 'Redo';
+
+
+        // make ui elements
+        makeRow([
+          makeLabel('Undo/Redo'),
+          undo_element,
+          redo_element
+        ]);
+        
+        undo_element.addEventListener('click', function() {
+          canvas.undo(); 
+        })
+
+        redo_element.addEventListener('click', function() {
+          canvas.redo(); 
+        })
+
+        makeRow([
+          makeLabel('|'),
+        ]);
+       
     
     
     // ROW 1: View
@@ -246,32 +351,7 @@ const Settings = {
           yRange.value = locationY_element.value;
           yRange.dispatchEvent(new Event("change"));
         });
-        
-    // UNDO/REDO
-        const undo_element = document.createElement('button');
-        const redo_element = document.createElement('button');
-        
-        
-        undo_element.innerText = 'Undo';
-        redo_element.innerText = 'Redo';
-
-
-        // make ui elements
-        makeRow([
-          makeLabel('Undo/Redo'),
-          undo_element,
-          redo_element
-        ]);
-        
-        undo_element.addEventListener('click', function() {
-          canvas.undo(); 
-        })
-
-        redo_element.addEventListener('click', function() {
-          canvas.redo(); 
-        })
-
-        
+ 
         
     // Cursor Mode
         const modes = [
