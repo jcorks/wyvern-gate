@@ -13,16 +13,26 @@ const UndoContext = {
         stack.length = pointer;
         stack.push(JSON.stringify(state));
         pointer ++;
+        
+        console.log('UNDO COMMIT: ' + stack.length + '-' + pointer);
       },
+      
+      reset : function() {
+        stack.length = 0;
+        pointer = 0;
+      },
+      
       undo : function() {
-        if (pointer == 0) return false;
+        if (pointer == 1) return false;
         pointer --;
-        return JSON.parse(stack[pointer]);
+        console.log('UNDO UNDO: ' + stack.length + '-' + pointer);
+        return JSON.parse(stack[pointer-1]);
       },
       redo : function() {
         if (pointer == stack.length) return false;
         const output = stack[pointer];
         pointer++;
+        console.log('UNDO REDO: ' + stack.length + '-' + pointer);
         return JSON.parse(output);
       }
     }

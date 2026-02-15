@@ -130,10 +130,6 @@ const Canvas = {
 
 
 
-    const commitChange = function() {
-      pattern.undoController.commitState(pattern.save());
-      commitChangeCounter++;
-    }
     
 
 
@@ -209,7 +205,7 @@ const Canvas = {
           if (yank) {
             pattern.chars[atlasIndex] = 0;
             pattern.wall[atlasIndex]  = false;
-            pattern.Connections[atlasIndex] = null;
+            pattern.connections[atlasIndex] = null;
           }
 
           overlayChars[atlasIndex] = moveSet.chars[xi + (yi)*moveSet.width];
@@ -277,7 +273,7 @@ const Canvas = {
       
       line.events.addCallback('onRelease', function(data) {
         if (inStroke == true) {
-          commitChange();
+          pattern.commitChange();
           inStroke = false;
         }
 
@@ -341,7 +337,7 @@ const Canvas = {
                 }
               }
               moveSet = null;
-              commitChange();
+              pattern.commitChange();
               refreshCanvas();
   
             }
@@ -662,17 +658,13 @@ const Canvas = {
       
       
       undo : function() {
-        const state = pattern.undoController.undo();
-        if (state == false) return;
-        pattern.load(state);
+        pattern.undo();
         refreshCanvas();
       },
 
 
       redo : function() {
-        const state = pattern.undoController.redo();
-        if (state == false) return;
-        pattern.load(state);
+        pattern.redo();
         refreshCanvas();
       },
 
@@ -699,6 +691,10 @@ const Canvas = {
       
       getPattern : function(p) {
         return pattern;
+      },
+      
+      save : function(obj) {
+        
       },
       
       moveRelative : function(x, y) {
