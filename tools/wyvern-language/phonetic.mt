@@ -10,11 +10,13 @@
   'k',
   'dj',
   'ss',
-  'tt'
+  'tt',
+  '',
 ]
 
 
 @:consonant_single_char = [
+  'z',
   'j',
   'l',
   'n',
@@ -32,18 +34,17 @@
 
 
 @:dragonish_vowel = [
+  '',
   'ae',
   'aa',
   'oh',
   'o',
   'uh',
-  'ii',
-  ''
+  'ii'
 ];
 
 @:vowel_single_char = [
-  'o',
-  ''
+  'o'
 ];
 
 @:vowel_double_char = [
@@ -57,12 +58,13 @@
 
 
 @:roots = {
-  ('ae'): 0x6c,
-  ('aa'): 0x61,
-  ('oh'): 0xa1,
-  ('o') : 0xac,
-  ('uh'): 0xb7,
-  ('ii'): 0xc2
+  (''):   0xa0,
+  ('ae'): 0xac,
+  ('aa'): 0xb8,
+  ('oh'): 0xc4,
+  ('o') : 0xd0,
+  ('uh'): 0xdc,
+  ('ii'): 0xe8
 }
 
 
@@ -84,12 +86,25 @@
 
 @:convert::(str) {
   @:syllables = [];
+  @codepoints = '';
+
+  @:addCodepoint::(cons, vowel) {
+    codepoints = codepoints + ' '->setCharCodeAt(index:0, value:roots[dragonish_vowel[vowel]] + cons);
+  }
 
   @:biteSyllable ::(chunk) {
+    when(chunk->charAt(index:0) == ' ') ::<= {
+      syllables->push(:' ');
+      codepoints = codepoints + ' ';
+      return chunk->substr(from:1, to:chunk->length-1);
+    }
+  
     @chunkCharCount = 0;
+    @:origChunk = chunk;
     
     @c = getChunk(:chunk);
-    
+    @cCons = c;
+    @hasChars = false;
     // first try the double chars 
     @:consIndex = consonant_double_char->findIndex(:c.c01)
     @:cons0Index = consonant_single_char->findIndex(:c.c0);
@@ -98,37 +113,44 @@
     if (consIndex != -1) ::<= {
       consOffset = dragonish_consonant->findIndex(:c.c01);
       chunkCharCount = 2;
+      hasChars = true;
     } else if (cons0Index != -1) ::<= {
       consOffset = dragonish_consonant->findIndex(:c.c0);    
       chunkCharCount = 1;
+      hasChars = true;
     } else ::<= {
+      consOffset = dragonish_consonant->findIndex(:'');
     }
     
     
     
     // okay! Next, get the vowel
-    breakpoint();
     chunk = chunk->substr(from:chunkCharCount, to:chunk->length-1);
+    chunkCharCount = 0;
     @c = getChunk(:chunk);
 
     @:vowIndex = vowel_double_char->findIndex(:c.c01)
-    @:vow0Index = vowel_single_char->findIndex(:c.c);
+    @:vow0Index = vowel_single_char->findIndex(:c.c0);
 
     @vowOffset;
     if (vowIndex != -1) ::<= {
       vowOffset = dragonish_vowel->findIndex(:c.c01);
       chunkCharCount += 2;
+      hasChars = true;
     } else if (vow0Index != -1) ::<= {
       vowOffset = dragonish_vowel->findIndex(:c.c0);    
       chunkCharCount += 1;
+      hasChars = true;
     } else ::<= {
       // no vowel
       vowOffset = dragonish_vowel->findIndex(:'');
     }
     
-    
-    breakpoint();
+    if (!hasChars)
+      error(:'Unable to parse at >' + origChunk);
+
     syllables->push(:'[' + dragonish_consonant[consOffset] + '-' + dragonish_vowel[vowOffset] + ']');
+    addCodepoint(cons:consOffset, vowel:vowOffset);
     return chunk->substr(from:chunkCharCount, to:chunk->length-1);
   }
   
@@ -140,16 +162,15 @@
     }
   }
   
-  foreach(syllables) ::(k, v) {
-    print(:v);
-  }
-  
+  print(:String.combine(:syllables));
+  print(:'Codepoint String: "' + codepoints +'"');
 }
 
 
 
 
-convert(:'aenjaal');
+convert(:parameters.string);
+//convert(:'naanshaazohkiizaal');
 
 
 

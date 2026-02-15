@@ -171,7 +171,13 @@ const Settings = {
             const newP = Pattern.new();
             newP.load(canvas.getPattern().save());
             patterns[ch] = newP;
-            canvas.setPattern(patterns[ch]);
+            
+            
+            // clear undo 
+            newP.undo();
+            newP.commitChange();
+            
+            canvas.setPattern(newP);
             rebuildPatternPulldown();
           }
         );    
@@ -328,6 +334,30 @@ const Settings = {
         return table;
       },
       
+      save : function() {
+        const p = {};
+        const keys = Object.keys(patterns);
+      
+        for(var i = 0; i < keys.length; ++i) {
+          p[keys[i]] = patterns.save();
+        }
+      
+        return {
+          patterns : p
+        }
+      },
+      
+      load : function(obj) {
+        patterns = [];
+        const keys = Object.keys(patterns);
+        
+        for(var i = 0; i < keys.length; ++i) {
+          const p = Pattern.new();
+          p.load(obj[keys]);
+          patterns.push(p);
+        }
+        rebuildPatternPulldown();
+      },
       
       setMode : function(i) {
         cursorMode_element.value = modes[i];
