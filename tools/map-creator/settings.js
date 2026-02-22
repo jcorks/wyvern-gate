@@ -396,11 +396,20 @@ const Settings = {
         const connectionID_element = document.createElement('select');
         setDropDownOptions(connectionID_element, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z']);
 
+
+        const connectionNeededID_element = document.createElement('select');
+        setDropDownOptions(connectionNeededID_element, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z']);
+
+
         // make ui elements
         cursorOptions_connections_set = makeRow([
           makeLabel(''),
           makeLabel('ID:'),
-          connectionID_element
+          connectionID_element,
+
+          makeLabel('Requires:'),
+          connectionNeededID_element
+
         ]);
         
 
@@ -450,6 +459,9 @@ const Settings = {
             
       getConnectionID : function() {
         return connectionID_element.value;
+      },
+      getConnectionNeededID : function() {
+        return connectionNeededID_element.value;
       },
             
       isErase : function() {

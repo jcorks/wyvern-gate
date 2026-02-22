@@ -18,12 +18,14 @@ const ContextMenu = (function() {
     div.style.color = 'rgb(200, 200, 200)';
     div.style.zIndex = 2000;
     
+    var entered = true
+    
     const createButton = function(name, callback) {
       const d = document.createElement("div");
       d.style.margin = '4px';
       d.innerText = name;
       div.appendChild(d);
-      d.addEventListener("click", function() {
+      d.addEventListener("mousedown", function() {
         callback();
         document.body.removeChild(div);
         div = null;
@@ -31,13 +33,25 @@ const ContextMenu = (function() {
       
       d.addEventListener("mouseenter", function() {
         d.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'
+        entered = true
       });
 
       d.addEventListener("mouseleave", function() {
         d.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+        entered = false
       });
 
     }
+    const reset = function() {
+      if (entered == false) return;
+      if (div == null) {
+        window.removeEventListener('mousedown', reset);
+        return;
+      }
+      document.body.removeChild(div);
+      div = null;    
+    }
+    window.addEventListener("mousedown", reset);
     
     for(var i = 0; i < options.length; i+=2) {
       createButton(options[i], options[i+1]);

@@ -3329,7 +3329,8 @@
     },
       
     step :: {
-      foreach(state.equips->values) ::(k, v) {
+      foreach(_.state.equips->values) ::(k, v) {
+        when(v == empty) empty;
         v.step();
       }
     },

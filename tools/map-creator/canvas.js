@@ -74,9 +74,7 @@ const Canvas = {
     // where the selection last was
     var moveSetX;
     var moveSetY;
-    
-    var areaSet;
-    
+        
     
     
     // fake clipboard
@@ -290,7 +288,10 @@ const Canvas = {
 
           switch(settings.getMode()) {
             case Settings.MODE.AREA_EDITOR:
-              const area = areaSet.addArea(0, 0);
+              if (activeOverlay.getWidth() == 0 || activeOverlay.getHeight() == 0)
+                break;
+            
+              const area = pattern.areaSet.addArea(0, 0);
               area.overlay.setP0(activeOverlay.getX(), activeOverlay.getY());
               area.overlay.setP1(activeOverlay.getX()+activeOverlay.getWidth(), activeOverlay.getY()+activeOverlay.getHeight());
               area.updateFromOverlay();
@@ -677,11 +678,11 @@ const Canvas = {
       },
       
       enableAreas : function() {
-        areaSet.show()
+        pattern.areaSet.show()
       },
 
       disableAreas : function() {
-        areaSet.hide()
+        pattern.areaSet.hide()
       },
       
       setPattern : function(p) {
@@ -692,11 +693,7 @@ const Canvas = {
       getPattern : function(p) {
         return pattern;
       },
-      
-      save : function(obj) {
-        
-      },
-      
+            
       moveRelative : function(x, y) {
         self.move(x + iterX, y + iterY);
       },
@@ -723,7 +720,6 @@ const Canvas = {
       }
     }
     
-    areaSet = AreaSet.new(self);
     
     return self;
   }

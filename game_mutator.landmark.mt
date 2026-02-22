@@ -1244,15 +1244,6 @@ Landmark.database.newEntry(
         }
 
 
-
-        when(state.base.landmarkType == TYPE.STRUCTURE) ::<= {
-          if (this.peaceful == false) ::<= {
-            if (((state.steps != 0) && state.steps % 30 == 0) && random.number() > 0.7) ::<= {
-              @:Scene = import(module:'game_database.scene.mt');            
-              Scene.start(id:'base:scene_guards0', onDone::{}, location:empty, landmark:this);
-            }
-          }
-        }
         
         foreach(state.events) ::(k, event) {
           event.step();
@@ -1266,10 +1257,18 @@ Landmark.database.newEntry(
             }
           }
         }
-        foreach(world.party.members) ::(k, v) {
-          v.step();
-        }
+        world.party.step();
         state.steps += 1;                
+
+
+        when(state.base.landmarkType == TYPE.STRUCTURE) ::<= {
+          if (this.peaceful == false) ::<= {
+            if (((state.steps != 0) && state.steps % 30 == 0) && random.number() > 0.7) ::<= {
+              @:Scene = import(module:'game_database.scene.mt');            
+              Scene.start(id:'base:scene_guards0', onDone::{}, location:empty, landmark:this);
+            }
+          }
+        }
         
       },
       

@@ -1,6 +1,6 @@
 const AreaSet = {
   new : function(canvas) {
-    const areas = [];
+    var areas = [];
     var self;
     
     
@@ -19,21 +19,32 @@ const AreaSet = {
       }
     });
 
-
+	
     
     self = {
       hide : function() {
-          for(var i = 0; i < areas.length; ++i) {
-              areas[i].overlay.hide();
-          }
+        for(var i = 0; i < areas.length; ++i) {
+            areas[i].overlay.hide();
+        }
       },
       
       show : function() {
-          for(var i = 0; i < areas.length; ++i) {
-              areas[i].overlay.show();
-          }
+        for(var i = 0; i < areas.length; ++i) {
+            areas[i].overlay.show();
+        }
           
       },
+      
+      removeAll : function() {
+        for(var i = 0; i < areas.length; ++i) {
+            areas[i].overlay.remove();
+        }
+        
+        areas = [];
+        self.areas = areas;
+      },
+      
+      areas : areas,
     
       addArea : function(x, y, w, h) {
         const area = {
@@ -43,6 +54,16 @@ const AreaSet = {
           h: 10,
           
           overlay : Overlay.new([255, 205, 205]),
+                    
+          remove : function() {
+            area.overlay.remove();
+            for(var i = 0; i < areas.length; ++i) {
+              if (areas[i] == area) {
+                areas.splice(i, 1)
+                return;
+              }
+            }
+          },
           
           updateOverlay : function() {
             const p0 = canvas.mapPositionToClient(area.x, area.y);
@@ -75,6 +96,17 @@ const AreaSet = {
             area.updateOverlay(); // rematch just in case.          
           }
         }
+        
+        area.overlay.events.addCallback('onContext', function(data) {
+          ContextMenu(data.x, data.y,
+            [
+              "Delete", function() {
+                area.remove();
+              }
+            ]
+          );
+        
+        });
         
         
         // response to move + resize by user

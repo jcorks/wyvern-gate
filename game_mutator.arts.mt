@@ -12850,7 +12850,7 @@ Arts = databaseItemMutatorClass.create(
     },
     
     queuePick ::(
-      arts => Object,
+      arts => Object, // full Arts object instances (not base ones)
       onGetArts,
       topWeight,
       leftWeight,

@@ -541,6 +541,15 @@
 
       },  
       
+      step :: {
+        foreach(state.members) ::(k, v) {
+          v.step();
+        }
+        foreach(state.inventory.items) ::(k, v) {
+          v.step();
+        }
+      
+      },
       
       
       setGuildTeamName ::(name) {

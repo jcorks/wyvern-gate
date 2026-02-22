@@ -135,7 +135,31 @@ import(module:'game_function.newrecord.mt');
   );
 }
 
+@:renderKnowledgeStone ::{
+  @:stone = world.party.getItem(condition::(value) <- value.base.id == 'base:knowledge-stone');
+  when(stone == empty) empty;
+  when(stone.data.steps == empty) stone.data.steps = 0;
+  if (stone.data.steps < 105) ::<= {  
+    @:fraction = if (stone.data.steps >= 100) 1 else (stone.data.steps / 100);
+    @:bar = canvas.renderBarAsString(
+      width:13,
+      fillFraction: fraction,
+      emptyCharacter : '|'//'░'
+    )
 
+    
+    canvas.renderTextFrameGeneral(
+      leftWeight: 1,
+      topWeight: 0,
+      lines: [if (stone.data.steps >= 100) 
+        'Steps: 100 / 100 ' + '[Ready!]'
+       else 
+        'Steps: ' + stone.data.steps + ' / 100 ' + bar
+       ],
+      title: 'Knowledge Stone:'
+    );
+  }
+}
 
 @:renderArtsStatus ::{
   @needsDisplay = [];
@@ -1583,8 +1607,14 @@ return empty;
             when(landmark.map == empty) canvas.fill();
             landmark.map.render();
 
-            renderArtsStatus();
+            // stop hardcoding!
+                renderKnowledgeStone();
+                renderArtsStatus();
+            //
+            
+            
             when(nearby == empty || nearby->size == 0) empty;
+            
             
             @:lines = [];
             foreach(nearby)::(index, arr) {

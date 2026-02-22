@@ -251,8 +251,7 @@ Item.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.KEY_ITEM |
       TRAIT.STACKABLE,
-    onCreate::(item) {},
-    onStep ::(item) {},
+    events : {},
 
     possibleArts : [],
   }
@@ -282,12 +281,48 @@ Item.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.KEY_ITEM |
       TRAIT.STACKABLE,
-    onCreate::(item) {},
-    onStep ::(item) {},
+    events : {},
 
     possibleArts : [],
   }
 )
+
+Item.database.newEntry(
+  data : {
+    name : 'Knowledge Stone',
+    id : 'base:knowledge-stone',
+    description : 'A stone that passively converts magickal resonance to knowledge.',
+    examine : '',
+    sortType : SORT_TYPE.MISC,
+    equipType : TYPE.HAND,
+    equipMod : StatSet.new(),
+    weight: 2,
+    rarity: 300,
+    levelMinimum : 1,
+    tier: 0,
+    enchantLimit : 0,
+    basePrice: 1000,
+    enchantLimit : 0,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    useEffects : [
+      'base:fling',
+      'base:break-item'
+    ],
+    equipEffects : [],
+    traits : 0,
+    events : {
+      onStep ::(item) {
+        if (item.data.steps == empty)
+          item.data.steps = 0;
+          
+        item.data.steps += 1;
+      }
+    },
+
+    possibleArts : [],
+  }
+)
+
 
 Item.database.newEntry(data : {
   name : "Mei\'s Bow",
@@ -303,8 +338,7 @@ Item.database.newEntry(data : {
   tier: 0,
   enchantLimit : 0,
   useTargetHint : USE_TARGET_HINT.ONE,
-  onCreate::(item) {},
-  onStep ::(item) {},
+  events : {},
 
   possibleArts : [],
   
@@ -340,8 +374,7 @@ Item.database.newEntry(data : {
   tier: 0,
   enchantLimit : 10,
   useTargetHint : USE_TARGET_HINT.ONE,
-  onCreate::(item) {},
-  onStep ::(item) {},
+  events : {},
 
   possibleArts : [],
   
@@ -455,53 +488,55 @@ Item.database.newEntry(data : {
       TRAIT.MEANT_TO_BE_USED |
       TRAIT.STRANGE_TO_EQUIP
     ,
-    onCreate ::(item, creationHint) {
-      @:Effect = import(module:'game_database.effect.mt');
-      @kind = if (creationHint->type == Number)
-        creationHint 
-      else
-        random.pickArrayItem(:[0, 1, 2]);
+    events : {
+      onCreate ::(item, creationHint) {
+        @:Effect = import(module:'game_database.effect.mt');
+        @kind = if (creationHint->type == Number)
+          creationHint 
+        else
+          random.pickArrayItem(:[0, 1, 2]);
+          
+          
+        @:supply = ::(which)<-
+          match(which) {
+            (0): random.pickArrayItem(:healEffects),
+            (1):random.pickArrayItem(:buffEffects),
+            (2):random.pickArrayItem(:debuffEffects)
+          }
+        ;
         
-        
-      @:supply = ::(which)<-
-        match(which) {
-          (0): random.pickArrayItem(:healEffects),
-          (1):random.pickArrayItem(:buffEffects),
-          (2):random.pickArrayItem(:debuffEffects)
-        }
-      ;
-      
-      ::<= { 
-        // rare potion   
-        when (random.try(percentSuccess:10) && creationHint->type != Number) ::<= {
-          item.name = random.pickArrayItem(:keyQualifiers) + ' Potion' + (if(random.flipCoin()) '' else (" of " + random.pickArrayItem(:keyThemes)));
-        
-          // FULL random
-          when(random.flipCoin()) ::<= {
-            @:rollRandom = ::<- supply(:random.integer(from:0, to:2));
+        ::<= { 
+          // rare potion   
+          when (random.try(percentSuccess:10) && creationHint->type != Number) ::<= {
+            item.name = random.pickArrayItem(:keyQualifiers) + ' Potion' + (if(random.flipCoin()) '' else (" of " + random.pickArrayItem(:keyThemes)));
+          
+            // FULL random
+            when(random.flipCoin()) ::<= {
+              @:rollRandom = ::<- supply(:random.integer(from:0, to:2));
+              
+              for(0, random.integer(from:2, to:6)) ::(i) {
+                item.useEffects->push(:rollRandom());
+              }
+            }
             
-            for(0, random.integer(from:2, to:6)) ::(i) {
-              item.useEffects->push(:rollRandom());
+            
+            // fortified random
+            for(0, random.integer(from:2, to:3)) ::(i) {
+              item.useEffects->push(:supply(:kind));
             }
           }
           
-          
-          // fortified random
-          for(0, random.integer(from:2, to:3)) ::(i) {
-            item.useEffects->push(:supply(:kind));
-          }
+          // normal potion
+          @:eff = supply(:kind);
+          item.name = 'Potion of ' + (if (overridePotionNames[eff] != empty) 
+              overridePotionNames[eff] 
+            else 
+              Effect.find(:eff).name
+          );
+          item.useEffects->push(:eff);
         }
-        
-        // normal potion
-        @:eff = supply(:kind);
-        item.name = 'Potion of ' + (if (overridePotionNames[eff] != empty) 
-            overridePotionNames[eff] 
-          else 
-            Effect.find(:eff).name
-        );
-        item.useEffects->push(:eff);
+        item.price += item.base.basePrice * item.useEffects->size;
       }
-      item.price += item.base.basePrice * item.useEffects->size;
     }
 
   })
@@ -537,11 +572,13 @@ Item.database.newEntry(data : {
     TRAIT.MEANT_TO_BE_USED |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-    @:Effect = import(module:'game_database.effect.mt');
-    @:effect = Effect.getRandomFiltered(::(value) <- value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL));
-    item.name = 'Essence of ' + effect.name;
-    item.useEffects->push(:effect.id);
+  events : {
+    onCreate ::(item, creationHint) {
+      @:Effect = import(module:'game_database.effect.mt');
+      @:effect = Effect.getRandomFiltered(::(value) <- value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL));
+      item.name = 'Essence of ' + effect.name;
+      item.useEffects->push(:effect.id);
+    }
   }
 
 })
@@ -576,11 +613,14 @@ Item.database.newEntry(data : {
     TRAIT.MEANT_TO_BE_USED |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-    @:Arts = import(module:'game_mutator.arts.mt');
-    @:art = Arts.database.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAIT.COMMON_ATTACK_SPELL));
-    item.data.spell = art.id;
-    item.name = 'Scroll of ' + art.name;
+  
+  events : {
+    onCreate ::(item, creationHint) {
+      @:Arts = import(module:'game_mutator.arts.mt');
+      @:art = Arts.database.getRandomFiltered(::(value) <- value.hasTraits(:Arts.TRAIT.COMMON_ATTACK_SPELL));
+      item.data.spell = art.id;
+      item.name = 'Scroll of ' + art.name;
+    }
   }
 
 })
@@ -630,7 +670,7 @@ Item.database.newEntry(data : {
   traits : 
     TRAIT.FRAGILE
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 
 })
@@ -675,7 +715,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -718,7 +758,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -763,7 +803,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -806,7 +846,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_QUALITY |
     TRAIT.HAS_SIZE
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -853,7 +893,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_INLET_SLOTS
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -903,7 +943,7 @@ Item.database.newEntry(data : {
 
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -952,7 +992,7 @@ Item.database.newEntry(data : {
 
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -1004,7 +1044,7 @@ Item.database.newEntry(data : {
 
     
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -1056,7 +1096,7 @@ Item.database.newEntry(data : {
 
     
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -1105,7 +1145,7 @@ Item.database.newEntry(data : {
 
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -1154,7 +1194,7 @@ Item.database.newEntry(data : {
 
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 }) 
 
@@ -1204,7 +1244,7 @@ Item.database.newEntry(data : {
 
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -1254,7 +1294,7 @@ Item.database.newEntry(data : {
 
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })   
 
@@ -1302,7 +1342,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 }) 
 
@@ -1350,7 +1390,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -1399,7 +1439,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_INLET_SLOTS
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -1446,7 +1486,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_INLET_SLOTS
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -1493,7 +1533,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_INLET_SLOTS
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -1538,7 +1578,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_INLET_SLOTS
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -1583,7 +1623,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_INLET_SLOTS
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -1624,7 +1664,7 @@ Item.database.newEntry(data : {
 
 
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -1671,7 +1711,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -1717,7 +1757,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -1763,7 +1803,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -1809,7 +1849,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -1864,7 +1904,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 }) 
 
@@ -1916,7 +1956,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -1964,7 +2004,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -2011,7 +2051,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -2058,7 +2098,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })
 
@@ -2094,7 +2134,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS  
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })
 
@@ -2131,7 +2171,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR  |
     TRAIT.HAS_INLET_SLOTS  
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })
 
@@ -2166,7 +2206,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR  
   
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })  
 
@@ -2201,7 +2241,7 @@ Item.database.newEntry(data : {
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR    
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })    
 Item.database.newEntry(data : {
@@ -2239,7 +2279,7 @@ Item.database.newEntry(data : {
     TRAIT.CAN_HAVE_TRIGGER_ENCHANTMENTS |
     TRAIT.HAS_COLOR  
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 
@@ -2273,7 +2313,7 @@ Item.database.newEntry(data : {
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR    
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })  
 
@@ -2310,7 +2350,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR    
   
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })   
 
@@ -2345,7 +2385,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR    
   
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })       
 
@@ -2379,7 +2419,7 @@ Item.database.newEntry(data : {
     TRAIT.CAN_BE_APPRAISED |
     TRAIT.HAS_COLOR      
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })   
 
@@ -2416,7 +2456,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS  
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })  
 
@@ -2453,7 +2493,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS  
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })
 
@@ -2492,7 +2532,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR|
     TRAIT.HAS_INLET_SLOTS  
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })
   
@@ -2531,7 +2571,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.HAS_INLET_SLOTS  
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })  
 /*
@@ -2573,7 +2613,7 @@ Item.database.newEntry(data : {
     TRAIT.SHARP |
     TRAIT.METAL
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
   
 })*/
 
@@ -2611,17 +2651,18 @@ Item.database.newEntry(data : {
     TRAIT.STACKABLE |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-    @:Material = import(:'game_database.material.mt');
-    @:world = import(module:'game_singleton.world.mt');
+  events : {
+    onCreate ::(item, creationHint) {
+      @:Material = import(:'game_database.material.mt');
+      @:world = import(module:'game_singleton.world.mt');
 
 
-    @:mat = Material.getRandomFiltered(::(value) <- value.tier <= world.island.tier);
-    item.name = mat.name + ' Ingot';
-    item.data.RAW_MATERIAL = mat.id;
-    item.price += (((mat.tier)**1.4) * 240)->ceil;
+      @:mat = Material.getRandomFiltered(::(value) <- value.tier <= world.island.tier);
+      item.name = mat.name + ' Ingot';
+      item.data.RAW_MATERIAL = mat.id;
+      item.price += (((mat.tier)**1.4) * 240)->ceil;
+    }
   }
-
 })    
 
 Item.database.newEntry(data : {
@@ -2655,9 +2696,7 @@ Item.database.newEntry(data : {
     TRAIT.STACKABLE |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-  }
-
+  events : {}
 })  
 
 
@@ -2693,9 +2732,7 @@ Item.database.newEntry(data : {
     TRAIT.STACKABLE |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-  }
-
+  events : {}
 })   
 
 
@@ -2731,7 +2768,7 @@ Item.database.newEntry(data : {
     TRAIT.UNIQUE |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 }) 
 
@@ -2768,7 +2805,7 @@ Item.database.newEntry(data : {
     TRAIT.MEANT_TO_BE_USED |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -2806,7 +2843,7 @@ Item.database.newEntry(data : {
     TRAIT.MEANT_TO_BE_USED |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
 
@@ -2845,7 +2882,7 @@ Item.database.newEntry(data : {
     TRAIT.MEANT_TO_BE_USED |  
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })
   
@@ -2887,7 +2924,7 @@ Item.database.newEntry(data : {
   traits : 
     TRAIT.SHARP
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 })  
 */
@@ -2925,7 +2962,7 @@ Item.database.newEntry(data : {
     TRAIT.STACKABLE |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 }) 
 
@@ -2962,7 +2999,7 @@ Item.database.newEntry(data : {
     TRAIT.UNIQUE |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {}
+  events : {}
 
 }) 
 
@@ -2997,10 +3034,12 @@ Item.database.newEntry(data : {
     TRAIT.MEANT_TO_BE_USED |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-    @:Book = import(:'game_database.book.mt');
-    item.data.book = if (creationHint == empty) Book.getRandom() else Book.find(:creationHint);
-    item.name = 'Book: ' + item.data.book.name;
+  events : {
+    onCreate ::(item, creationHint) {
+      @:Book = import(:'game_database.book.mt');
+      item.data.book = if (creationHint == empty) Book.getRandom() else Book.find(:creationHint);
+      item.name = 'Book: ' + item.data.book.name;
+    }
   }
 
 }) 
@@ -3034,9 +3073,7 @@ Item.database.newEntry(data : {
     TRAIT.UNIQUE |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-  }
-}) 
+  events : {}}) 
 
 
 Item.database.newEntry(data : {
@@ -3068,9 +3105,7 @@ Item.database.newEntry(data : {
     TRAIT.PRICELESS |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-  }
-}) 
+  events : {}}) 
 
 
 Item.database.newEntry(data : {
@@ -3098,9 +3133,7 @@ Item.database.newEntry(data : {
     TRAIT.UNIQUE |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-  }
-}) 
+  events : {}}) 
 
 
 ::<= {
@@ -3140,38 +3173,40 @@ Item.database.newEntry(data : {
   traits : 
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, creationHint) {
-    @:kind = random.pickArrayItem(:crystals->keys);
-    
-    @:statsA = {
-      ATK: -1,
-      DEX: -1,
-      SPD: -1,
-      DEF: -1,
-      INT: -1      
+  events : {
+    onCreate ::(item, creationHint) {
+      @:kind = random.pickArrayItem(:crystals->keys);
+      
+      @:statsA = {
+        ATK: -1,
+        DEX: -1,
+        SPD: -1,
+        DEF: -1,
+        INT: -1      
+      }
+      foreach(crystals[kind]) ::(k, v) {
+        statsA[v] = 2;
+      }
+      @desc = item.base.description + ": ";
+      foreach(statsA) ::(k, v) {
+        when (k == crystals[kind][0]) empty;
+        when (k == crystals[kind][1]) empty;
+        desc = desc + k + ',';
+      }      
+      desc = desc + ' base -1, ' + crystals[kind][0] + ',' + crystals[kind][1] + ' base +2';
+      //item.setOverrideDescription(:desc);
+      item.setUpInlet(
+        stats : StatSet.new(*statsA)
+      );
+      @:InletSet = import(:'game_class.inletset.mt');  
+      item.name = kind + ' Crystal '/*(' +
+        (match(item.inletShape) {
+          (InletSet.SLOTS.ROUND) : 'round',
+          (InletSet.SLOTS.TRIANGLE) : 'triangular',
+          (InletSet.SLOTS.SQUARE) : 'square'
+        }) + ')'*/
+      
     }
-    foreach(crystals[kind]) ::(k, v) {
-      statsA[v] = 2;
-    }
-    @desc = item.base.description + ": ";
-    foreach(statsA) ::(k, v) {
-      when (k == crystals[kind][0]) empty;
-      when (k == crystals[kind][1]) empty;
-      desc = desc + k + ',';
-    }      
-    desc = desc + ' base -1, ' + crystals[kind][0] + ',' + crystals[kind][1] + ' base +2';
-    //item.setOverrideDescription(:desc);
-    item.setUpInlet(
-      stats : StatSet.new(*statsA)
-    );
-    @:InletSet = import(:'game_class.inletset.mt');  
-    item.name = kind + ' Crystal '/*(' +
-      (match(item.inletShape) {
-        (InletSet.SLOTS.ROUND) : 'round',
-        (InletSet.SLOTS.TRIANGLE) : 'triangular',
-        (InletSet.SLOTS.SQUARE) : 'square'
-      }) + ')'*/
-    
   }
 })   
 }
@@ -3222,42 +3257,44 @@ Item.database.newEntry(
     traits : 
       TRAIT.STRANGE_TO_EQUIP
     ,
-    onCreate ::(item, creationHint) {
-      @:kind = random.pickArrayItem(:gems->keys);
-      
-      @:statsA = {
-        ATK: -2,
-        DEX: -2,
-        SPD: -2,
-        DEF: -2,
-        INT: -2      
-      }
-      foreach(gems[kind]) ::(k, v) {
-        statsA[v] = 5;
-      }
-      @desc = item.base.description + ": ";
-      foreach(statsA) ::(k, v) {
-        when (k == gems[kind][0]) empty;
-        when (k == gems[kind][1]) empty;
-        desc = desc + k + ',';
-      }      
-      desc = desc + ' base -2, ' + gems[kind][0] + ',' + gems[kind][1] + ' base +5';
-      //item.setOverrideDescription(:desc);
-      
-      item.setUpInlet(
-        stats : StatSet.new(*statsA)
-      );
+    events : {
+      onCreate ::(item, creationHint) {
+        @:kind = random.pickArrayItem(:gems->keys);
+        
+        @:statsA = {
+          ATK: -2,
+          DEX: -2,
+          SPD: -2,
+          DEF: -2,
+          INT: -2      
+        }
+        foreach(gems[kind]) ::(k, v) {
+          statsA[v] = 5;
+        }
+        @desc = item.base.description + ": ";
+        foreach(statsA) ::(k, v) {
+          when (k == gems[kind][0]) empty;
+          when (k == gems[kind][1]) empty;
+          desc = desc + k + ',';
+        }      
+        desc = desc + ' base -2, ' + gems[kind][0] + ',' + gems[kind][1] + ' base +5';
+        //item.setOverrideDescription(:desc);
+        
+        item.setUpInlet(
+          stats : StatSet.new(*statsA)
+        );
 
-      @:InletSet = import(:'game_class.inletset.mt');
-      item.name = kind /*+ ' (' +
-        (match(item.inletShape) {
-          (InletSet.SLOTS.ROUND) : 'round',
-          (InletSet.SLOTS.TRIANGLE) : 'triangular',
-          (InletSet.SLOTS.SQUARE) : 'square'
-        }) + ')';*/
-      item.setUpInlet(
-        stats : StatSet.new(*statsA)
-      );
+        @:InletSet = import(:'game_class.inletset.mt');
+        item.name = kind /*+ ' (' +
+          (match(item.inletShape) {
+            (InletSet.SLOTS.ROUND) : 'round',
+            (InletSet.SLOTS.TRIANGLE) : 'triangular',
+            (InletSet.SLOTS.SQUARE) : 'square'
+          }) + ')';*/
+        item.setUpInlet(
+          stats : StatSet.new(*statsA)
+        );
+      }
     }
   }
 )
@@ -3289,24 +3326,26 @@ Item.database.newEntry(
     traits : 
       TRAIT.STRANGE_TO_EQUIP
     ,
-    onCreate ::(item, creationHint) {
-      @:Effect = import(module:'game_database.effect.mt');
-      @:effect = Effect.getRandomFiltered(::(value) <- value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL));
-      item.setUpInlet(
-        effect : effect.id
-      );
-      
-      item.setOverrideDescription(
-        : "A soul gem which grants the effect " + effect.name + ":" + effect.description
-      )
+    events : {
+      onCreate ::(item, creationHint) {
+        @:Effect = import(module:'game_database.effect.mt');
+        @:effect = Effect.getRandomFiltered(::(value) <- value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL));
+        item.setUpInlet(
+          effect : effect.id
+        );
+        
+        item.setOverrideDescription(
+          : "A soul gem which grants the effect " + effect.name + ":" + effect.description
+        )
 
-      @:InletSet = import(:'game_class.inletset.mt');
-      item.name = effect.name + ' Soul Gem ' /*(' +
-        (match(item.inletShape) {
-          (InletSet.SLOTS.ROUND) : 'round',
-          (InletSet.SLOTS.TRIANGLE) : 'triangular',
-          (InletSet.SLOTS.SQUARE) : 'square'
-        }) + ')';*/
+        @:InletSet = import(:'game_class.inletset.mt');
+        item.name = effect.name + ' Soul Gem ' /*(' +
+          (match(item.inletShape) {
+            (InletSet.SLOTS.ROUND) : 'round',
+            (InletSet.SLOTS.TRIANGLE) : 'triangular',
+            (InletSet.SLOTS.SQUARE) : 'square'
+          }) + ')';*/
+      }
     }
   }
 )
@@ -3344,9 +3383,7 @@ Item.database.newEntry(data : {
     TRAIT.HAS_COLOR |
     TRAIT.STRANGE_TO_EQUIP
   ,
-  onCreate ::(item, user, creationHint) {
-
-  }
+  events : {}
 })  
 
   
@@ -3385,25 +3422,27 @@ Item.database.newEntry(data : {
       TRAIT.HAS_COLOR |
       TRAIT.STRANGE_TO_EQUIP
     ,
-    onCreate ::(item, user, creationHint) {
-      @:world = import(module:'game_singleton.world.mt');
-      @:Island = import(:'game_mutator.island.mt');
-      @tier = if (world != empty && world.island != empty) world.island.tier + random.integer(from:1, to:4) else 0;
+    events : {
+      onCreate ::(item, user, creationHint) {
+        @:world = import(module:'game_singleton.world.mt');
+        @:Island = import(:'game_mutator.island.mt');
+        @tier = if (world != empty && world.island != empty) world.island.tier + random.integer(from:1, to:4) else 0;
 
-      if (creationHint->type == Object) ::<= {
-        if (creationHint.tier->type == Number) 
-          tier = creationHint.tier
+        if (creationHint->type == Object) ::<= {
+          if (creationHint.tier->type == Number) 
+            tier = creationHint.tier
+        }
+
+        @:story = import(:'game_singleton.story.mt');
+        @:capitalize = import(:'game_function.capitalize.mt');
+        item.name = random.pickArrayItem(:keyQualifiers) + ' Key (Tier '+ tier + ')';
+        item.price += 4420 * tier;
+        item.setIslandGenTraits(
+          levelHint : story.levelHint + (tier * 1.4),
+          tierHint : tier,
+          idHint : Island.database.getRandomFiltered(::(value) <- (value.traits & Island.TRAIT.SPECIAL) == 0).id
+        );
       }
-
-      @:story = import(:'game_singleton.story.mt');
-      @:capitalize = import(:'game_function.capitalize.mt');
-      item.name = random.pickArrayItem(:keyQualifiers) + ' Key (Tier '+ tier + ')';
-      item.price += 4420 * tier;
-      item.setIslandGenTraits(
-        levelHint : story.levelHint + (tier * 1.4),
-        tierHint : tier,
-        idHint : Island.database.getRandomFiltered(::(value) <- (value.traits & Island.TRAIT.SPECIAL) == 0).id
-      );
     }
   })  
 }
@@ -3687,8 +3726,7 @@ none.name = 'None';
       useEffects : Object,
       traits : Number,
       useTargetHint : Number,
-      onCreate : Function,
-      onStep : Function,
+      events : Object,
       basePrice : Number,
       tier : Number,
       possibleArts : Object,
@@ -3902,8 +3940,8 @@ none.name = 'None';
           state.inletSlotData = import(:'game_class.inletset.mt').new(size:slotCount);          
         }
       }
-      
-      base.onCreate(item:this, creationHint);
+      if (base.events.onCreate != empty)
+        base.events.onCreate(item:this, creationHint);
       recalculateName(*_);
 
       
@@ -3947,7 +3985,8 @@ none.name = 'None';
     },
     
     step :: {
-      _.state.base.onStep();
+      if (_.state.base.events.onStep != empty)
+        _.state.base.events.onStep(:_.this);
     },
       
     name : {

@@ -735,6 +735,38 @@
         }
  
         battleEnd = ::{
+          @:queueKnowledgeStone ::{
+            @:stone = party.getItem(condition ::(value) <- value.base.id == 'base:knowledge-stone');
+            when(stone == empty) empty;
+            when(stone.data.steps < 100) empty;
+            
+            stone.data.steps = 0;
+            
+            windowEvent.queueMessage(text: 'The Knowledge Stone releases its power!');
+            
+            
+            @:arts = []
+            for(0, 3) ::(i) {
+              arts->push(:Arts.new(base:Arts.database.getRandomFiltered(::(value) <- 
+                (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
+                ((value.traits & Arts.TRAIT.SPECIAL) == 0)         
+              )));
+            }
+            
+            Arts.queuePick(
+              arts,
+              keep : false,
+              canCancel : false,
+              onChoice ::(art) {
+                party.queueCollectSupportArt(
+                  arts : [art.base]
+                );                
+              },
+              prompt : 'Pick a new Art to keep!'
+            );
+          }
+        
+        
           @:startEnd ::(message) {
             breakpoint();
             active = false;
@@ -770,7 +802,7 @@
               queueFriends();
             
             
-            party.queueCollectSupportArt();
+            queueKnowledgeStone();
             party.gainProfessionExp(
               exp:getEnemiesDefeated(ent:party.members[0])->size * Entity.PROF_EXP_PER_KNOCKOUT,
               onDone::{
@@ -785,7 +817,7 @@
 
 
 
-                if (hasWeapon && random.try(percentSuccess:50)) ::<= {
+                if (hasWeapon && random.try(percentSuccess:10)) ::<= {
                 
                   @:ally = random.pickArrayItem(:party_.members);
                   @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
@@ -813,14 +845,14 @@
                   @:oldStats = StatSet.new();
                   oldStats.add(stats);
                   stats.add(stats:StatSet.new(
-                    HP: if (choice == 0) 7 else 0,
-                    AP: if (choice == 1) 7 else 0,
-                    ATK: if (choice == 2) 7 else 0,
-                    DEF: if (choice == 3) 7 else 0,
-                    INT: if (choice == 4) 7 else 0,
-                    LUK: if (choice == 5) 7 else 0,
-                    DEX: if (choice == 6) 7 else 0,
-                    SPD: if (choice == 7) 7 else 0
+                    HP: if (choice == 0) 25 else 0,
+                    AP: if (choice == 1) 25 else 0,
+                    ATK: if (choice == 2) 25 else 0,
+                    DEF: if (choice == 3) 25 else 0,
+                    INT: if (choice == 4) 25 else 0,
+                    LUK: if (choice == 5) 25 else 0,
+                    DEX: if (choice == 6) 25 else 0,
+                    SPD: if (choice == 7) 25 else 0
                   ));
                     
                   oldStats.printDiffRate(other:stats, prompt:wep.name);

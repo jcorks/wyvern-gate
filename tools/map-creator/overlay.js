@@ -81,7 +81,7 @@ const Overlay = (function() {
 
       
       var data = {};
-      var events = EventSystem.new(['onRelease']);
+      var events = EventSystem.new(['onRelease', 'onContext']);
 
       var entered = false;
       var pressed = false;
@@ -121,7 +121,7 @@ const Overlay = (function() {
 
       el.addEventListener("contextmenu", function(evt) {
         evt.preventDefault();
-        events.emit('onContext', packArgument(c));
+        events.emit('onContext', evt);
         return true;
       });
       

@@ -414,6 +414,11 @@ return {
 
 
       // debug
+        party.inventory.add(item:Item.new(
+          base:Item.database.find(id:'base:knowledge-stone')
+        ));
+
+
         /*
         //party.inventory.add(item:Item.database.find(id:'Pickaxe'
         //).new(from:island.newInhabitant(),rngEnchantHint:true));
@@ -2752,9 +2757,7 @@ return {
         Item.TRAIT.SHARP  |
         Item.TRAIT.UNIQUE
       ,
-      onCreate ::(item, user, creationHint) {   
-
-      }
+      events : {}
       
     })  
 
@@ -2797,25 +2800,26 @@ return {
         Item.TRAIT.KEY_ITEM |
         Item.TRAIT.UNIQUE
       ,
-      onCreate ::(item, user, creationHint) {   
-      
-        @:world = import(module:'game_singleton.world.mt');    
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:story = import(module:'game_singleton.story.mt');
-        @:island = {
-          island : empty
+      events : {
+        onCreate ::(item, user, creationHint) {   
+        
+          @:world = import(module:'game_singleton.world.mt');    
+          @:nameGen = import(module:'game_singleton.namegen.mt');
+          @:story = import(module:'game_singleton.story.mt');
+          @:island = {
+            island : empty
+          }
+          
+          item.setIslandGenTraits(
+            levelHint:  story.levelHint,
+            nameHint:   'Island of Fire',
+            tierHint : 0,
+            idHint : 'thechosen:island-of-fire'
+          );
+          
+          item.price = 1;
         }
-        
-        item.setIslandGenTraits(
-          levelHint:  story.levelHint,
-          nameHint:   'Island of Fire',
-          tierHint : 0,
-          idHint : 'thechosen:island-of-fire'
-        );
-        
-        item.price = 1;
       }
-      
     })
 
     Item.database.newEntry(data : {
@@ -2855,23 +2859,25 @@ return {
         Item.TRAIT.KEY_ITEM |
         Item.TRAIT.UNIQUE
       ,
-      onCreate ::(item, user, creationHint) {   
-      
-        @:world = import(module:'game_singleton.world.mt');    
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:story = import(module:'game_singleton.story.mt');
-        @:island = {
-          island : empty
-        }
-
-        item.setIslandGenTraits(
-          levelHint:  story.levelHint+2,
-          nameHint:   'Island of Ice',
-          tierHint : 1,
-          idHint : 'thechosen:island-of-ice'
-        );
+      events : {
+        onCreate ::(item, user, creationHint) {   
         
-        item.price = 1;
+          @:world = import(module:'game_singleton.world.mt');    
+          @:nameGen = import(module:'game_singleton.namegen.mt');
+          @:story = import(module:'game_singleton.story.mt');
+          @:island = {
+            island : empty
+          }
+
+          item.setIslandGenTraits(
+            levelHint:  story.levelHint+2,
+            nameHint:   'Island of Ice',
+            tierHint : 1,
+            idHint : 'thechosen:island-of-ice'
+          );
+          
+          item.price = 1;
+        }
       }
       
     })  
@@ -2914,23 +2920,25 @@ return {
 
 
       ,
-      onCreate ::(item, user, creationHint) {   
-      
-        @:world = import(module:'game_singleton.world.mt');    
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:story = import(module:'game_singleton.story.mt');
-        @:island = {
-          island : empty
-        }
-
-        item.setIslandGenTraits(
-          levelHint:  story.levelHint+4,
-          nameHint:   'Island of Thunder',
-          tierHint : 2,
-          idHint : 'thechosen:island-of-thunder'
-        );
+      events : {
+        onCreate ::(item, user, creationHint) {   
         
-        item.price = 1;
+          @:world = import(module:'game_singleton.world.mt');    
+          @:nameGen = import(module:'game_singleton.namegen.mt');
+          @:story = import(module:'game_singleton.story.mt');
+          @:island = {
+            island : empty
+          }
+
+          item.setIslandGenTraits(
+            levelHint:  story.levelHint+4,
+            nameHint:   'Island of Thunder',
+            tierHint : 2,
+            idHint : 'thechosen:island-of-thunder'
+          );
+          
+          item.price = 1;
+        }
       }
       
     })  
@@ -2972,23 +2980,25 @@ return {
         Item.TRAIT.UNIQUE
 
       ,
-      onCreate ::(item, user, creationHint) {   
-      
-        @:world = import(module:'game_singleton.world.mt');    
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:story = import(module:'game_singleton.story.mt');
-        @:island = {
-          island : empty
-        }
-
-        item.setIslandGenTraits(
-          levelHint:  story.levelHint+7,
-          nameHint:   'Island of Light',
-          tierHint : 3,
-          idHint : 'thechosen:island-of-light'
-        );
+      events : {
+        onCreate ::(item, user, creationHint) {   
         
-        item.price = 1;
+          @:world = import(module:'game_singleton.world.mt');    
+          @:nameGen = import(module:'game_singleton.namegen.mt');
+          @:story = import(module:'game_singleton.story.mt');
+          @:island = {
+            island : empty
+          }
+
+          item.setIslandGenTraits(
+            levelHint:  story.levelHint+7,
+            nameHint:   'Island of Light',
+            tierHint : 3,
+            idHint : 'thechosen:island-of-light'
+          );
+          
+          item.price = 1;
+        }
       }
       
     })   
