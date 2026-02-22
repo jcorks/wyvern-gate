@@ -495,6 +495,7 @@ Effect.newEntry(
           @:renderFrame ::{
             @:lines = [
               attacker.name + ' is preparing to attack ' + holder.name + '.',
+              'The Parry effect has allowed ' + holder.name + ' to react.',
               'How will ' + holder.name + ' respond?',
               
               ... ::<= {
@@ -647,7 +648,7 @@ Effect.newEntry(
     name : 'Block',
     id : 'base:block',
     description: 'Next incoming attack\'s damage is negated. This counts as blocking. This effect is removed afterward.',
-    stackable : true,
+    stackable : false,
     traits : TRAIT.BUFF,
     stats: StatSet.new(),
     events : {

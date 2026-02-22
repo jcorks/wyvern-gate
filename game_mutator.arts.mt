@@ -3471,10 +3471,10 @@ Arts.database.newEntry(
   data: {
     name: 'Block',
     id : 'base:block',
-    notifCommit : '$1 begins to focus!',
+    notifCommit : '$1 is prepared for an attack!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.NONE,
-    description: 'Grants the Block status to the user.',
+    description: 'Grants the Block status to the user for 2 turns.',
     keywords : ['base:block'],
     durationTurns: 0,
     kind : KIND.EFFECT,
@@ -3486,7 +3486,7 @@ Arts.database.newEntry(
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       windowEvent.queueCustom(
         onEnter :: {
-          user.addEffect(from:user, id: 'base:block', durationTurns: A_LOT);
+          user.addEffect(from:user, id: 'base:block', durationTurns: 2);
         }
       )
     }
@@ -12658,6 +12658,8 @@ Arts.database.newEntry(
     }
   }
 )
+
+
 
 
 };

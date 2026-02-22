@@ -251,7 +251,9 @@ Item.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.KEY_ITEM |
       TRAIT.STACKABLE,
-    onCreate ::(item, creationHint) {},
+    onCreate::(item) {},
+    onStep ::(item) {},
+
     possibleArts : [],
   }
 )
@@ -280,7 +282,9 @@ Item.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.KEY_ITEM |
       TRAIT.STACKABLE,
-    onCreate ::(item, creationHint) {},
+    onCreate::(item) {},
+    onStep ::(item) {},
+
     possibleArts : [],
   }
 )
@@ -299,7 +303,9 @@ Item.database.newEntry(data : {
   tier: 0,
   enchantLimit : 0,
   useTargetHint : USE_TARGET_HINT.ONE,
-  onCreate ::(item, creationHint) {},
+  onCreate::(item) {},
+  onStep ::(item) {},
+
   possibleArts : [],
   
   equipMod : StatSet.new(
@@ -334,7 +340,9 @@ Item.database.newEntry(data : {
   tier: 0,
   enchantLimit : 10,
   useTargetHint : USE_TARGET_HINT.ONE,
-  onCreate ::(item, creationHint) {},
+  onCreate::(item) {},
+  onStep ::(item) {},
+
   possibleArts : [],
   
   equipMod : StatSet.new(
@@ -3680,6 +3688,7 @@ none.name = 'None';
       traits : Number,
       useTargetHint : Number,
       onCreate : Function,
+      onStep : Function,
       basePrice : Number,
       tier : Number,
       possibleArts : Object,
@@ -3937,6 +3946,9 @@ none.name = 'None';
       }
     },
     
+    step :: {
+      _.state.base.onStep();
+    },
       
     name : {
       get :: {

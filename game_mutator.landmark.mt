@@ -1266,7 +1266,9 @@ Landmark.database.newEntry(
             }
           }
         }
-
+        foreach(world.party.members) ::(k, v) {
+          v.step();
+        }
         state.steps += 1;                
         
       },

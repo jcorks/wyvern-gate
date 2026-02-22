@@ -517,7 +517,7 @@ return {
             @:basicArts = [
               'base:pebble',
               'base:parry',
-              'base:agility'
+              'base:block'
               
               //////////////
 
