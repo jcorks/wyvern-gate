@@ -354,7 +354,7 @@ Island.database.newEntry(
         // basic arts: 10 + 12 = 22
         entity.supportArts = [
           'base:pebble',    //5
-          'base:parry',     //3
+          'base:block',     //3
           'base:prismatic-wisp' //3
         ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
         

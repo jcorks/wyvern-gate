@@ -3328,7 +3328,11 @@
       get ::<- true
     },
       
-
+    step :: {
+      foreach(state.equips->values) ::(k, v) {
+        v.step();
+      }
+    },
     
     // when set, this overrides the default interaction menu
     onInteract : {
