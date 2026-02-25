@@ -28,7 +28,8 @@
   SPECIAL : 1,
   SUMMON : 2,
   ETHEREAL : 4,
-  NO_DEFAULT_EQUIPS : 8
+  NO_DEFAULT_EQUIPS : 8,
+  NO_COMMON_SPEAK : 16
 };
 
 
@@ -1247,7 +1248,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -1288,7 +1289,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -1350,7 +1351,7 @@ Species.newEntry(data:{
     ]);
   },
   
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -1429,7 +1430,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL  | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL  | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -1682,7 +1683,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
     'base:the-beast'
   ]
@@ -1811,7 +1812,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
     'base:the-beast'
   ]
@@ -1853,7 +1854,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -1893,7 +1894,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -1966,7 +1967,7 @@ Species.newEntry(data:{
       )
     ]);
   },  
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -2055,7 +2056,7 @@ Species.newEntry(data:{
       )
     ]);
   },  
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
     'base:metal-body'
   ]
@@ -2098,7 +2099,7 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -2138,7 +2139,7 @@ Species.newEntry(data:{
   swarms : true,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   canBlock : false,
   passives : [
   ]
@@ -2220,7 +2221,7 @@ Species.newEntry(data:{
   swarms : true,
   overrideBattleAI : empty,
   
-  traits : TRAIT.SPECIAL | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.SUMMON | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   canBlock : false,
   passives : [
     'base:banishing-touch'

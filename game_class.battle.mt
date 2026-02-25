@@ -700,7 +700,7 @@
               if (chance < 5) chance = 5;
             }
           }
-          if (world.party.members->size == 2) chance = 5;
+          if (world.party.members->size == 2) chance = 2;
           
           when (!random.try(percentSuccess:chance)) empty;        
           @enemies = getEnemiesDefeated(ent:party.members[0])->filter(::(value) <- party.isMember(:value) == false);
@@ -738,12 +738,11 @@
           @:queueKnowledgeStone ::{
             @:stone = party.getItem(condition ::(value) <- value.base.id == 'base:knowledge-stone');
             when(stone == empty) empty;
-            when(stone.data.steps < 100) empty;
+            when(stone.data.steps < 150) empty;
             
-            stone.data.steps = 0;
             
             windowEvent.queueMessage(text: 'The Knowledge Stone releases its power!');
-            
+            windowEvent.queueMessage(text: 'Pick a new Art to keep!');
             
             @:arts = []
             for(0, 3) ::(i) {
@@ -753,19 +752,26 @@
               )));
             }
             
-            Arts.queuePick(
-              arts,
-              keep : false,
-              canCancel : false,
-              onChoice ::(art) {
-                party.queueCollectSupportArt(
-                  arts : [art.base]
-                );                
-              },
-              prompt : 'Pick a new Art to keep!'
+
+            windowEvent.queueNestedResolve(
+              onEnter :: {
+                Arts.viewCards(
+                  ids: arts->map(::(value) <- value.base.id),
+                  canCancel : false,
+                  keep: false,
+                  onChoice ::(art) {
+                    party.queueCollectSupportArt(
+                      arts : [Arts.database.find(:art)]
+                    );                
+                    
+                    windowEvent.queueCustom(
+                      onEnter ::<-stone.data.steps = 0
+                    );
+                  }
+                );
+              }
             );
           }
-        
         
           @:startEnd ::(message) {
             breakpoint();

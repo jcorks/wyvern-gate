@@ -12701,6 +12701,7 @@ Arts.database.newEntry(
     canvas.movePen(x:x+width-1, y:y); canvas.drawChar(text:'┐');
     for(1, width-1)::(i) {
       canvas.movePen(x:x+i, y:y);      canvas.drawChar(text:'─');
+      canvas.movePen(x:x+i, y:y+height-1);      canvas.drawChar(text:'─');
     }
 
     canvas.movePen(x:x, y:y+height-1); canvas.drawChar(text:'└');
@@ -12961,36 +12962,26 @@ Arts = databaseItemMutatorClass.create(
       (RARITY.EPIC): 5
     },
 
-    viewCards ::(user, cards, onChoice, canCancel) {
-      when(cards->size == 0) ::<= {
-        if (user == empty) 
-          windowEvent.queueMessage(
-            text: 'There were no Arts in hand.'
-          )
-        else 
-          windowEvent.queueMessage(
-            text: user.name + ' has no Arts in their hand.'
-          );
-      }
-    
+    viewCards ::(user, ids, onChoice, canCancel, showEnergy, keep) {
+      when(ids->size == 0) empty;    
 
       windowEvent.queueChoices(
         hideWindow : true,
-        keep : true,
-        choices : cards->map(::(value) <- value.id),
+        keep,
+        choices : ids,
         onHover::(choice) {
           selected = choice-1;
         },
         renderable : {
           render ::{
-            renderCards(user, cards, showEnergy:true);          
+            renderCards(user, ids, showEnergy:true);          
           }
         },
         canCancel:if (canCancel == empty) true else canCancel,
         
         onChoice ::(choice) {          
           if (onChoice)
-            onChoice(choice);
+            onChoice(:ids[choice-1]);
         }        
       );      
     },    

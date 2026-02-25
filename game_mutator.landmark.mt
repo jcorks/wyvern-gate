@@ -1237,7 +1237,7 @@ Landmark.database.newEntry(
           event.step();
         }
         
-        if (state.steps > 0 && (state.steps % 25) == 0) ::<= {
+        if (state.steps > 0 && (state.steps % 70) == 0) ::<= {
           foreach(world.party.members) ::(k, member) {
             member.recharge()
           }

@@ -139,8 +139,8 @@ import(module:'game_function.newrecord.mt');
   @:stone = world.party.getItem(condition::(value) <- value.base.id == 'base:knowledge-stone');
   when(stone == empty) empty;
   when(stone.data.steps == empty) stone.data.steps = 0;
-  if (stone.data.steps < 105) ::<= {  
-    @:fraction = if (stone.data.steps >= 100) 1 else (stone.data.steps / 100);
+  if (stone.data.steps < 155) ::<= {  
+    @:fraction = if (stone.data.steps >= 150) 1 else (stone.data.steps / 150);
     @:bar = canvas.renderBarAsString(
       width:13,
       fillFraction: fraction,
@@ -151,10 +151,10 @@ import(module:'game_function.newrecord.mt');
     canvas.renderTextFrameGeneral(
       leftWeight: 1,
       topWeight: 0,
-      lines: [if (stone.data.steps >= 100) 
-        'Steps: 100 / 100 ' + '[Ready!]'
+      lines: [if (stone.data.steps >= 150) 
+        'Steps: 150 / 150 ' + '[Ready!]'
        else 
-        'Steps: ' + stone.data.steps + ' / 100 ' + bar
+        'Steps: ' + stone.data.steps + ' / 150 ' + bar
        ],
       title: 'Knowledge Stone:'
     );

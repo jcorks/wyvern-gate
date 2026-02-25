@@ -209,13 +209,18 @@
     
     @:plural = if (set.plural == empty || set.plural == false) false else true;
     
-    @:statement = statements[((statements->size-1) * set.statement)->round]
+    @statement  = statements[((statements->size-1) * set.statement)->round]
     @:emotion   = emotions  [((emotions->size-1)   * set.emotion)->round]
     @:judgement = judgements[((judgements->size-1) * set.judgement)->round]
     
     
     
+    if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
+      statement = '"..."'
+
+    
     return if (plural) 
+
       statement + '\n' +
       '\n' +
       this.name + ' feels ' + emotion + '.\n' +
@@ -2157,7 +2162,11 @@
         if (world.party != empty && world.party.isMember(entity:this) && state.hp != 0 && damage.amount > state.stats.HP * 0.2 && random.number() > 0.7)
           windowEvent.queueMessage(
             speaker: this.name,
-            text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.HURT]) + '"'
+            text: 
+              if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
+                '"...!"'
+              else            
+                '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.HURT]) + '"'
           );
           
 
@@ -2190,7 +2199,11 @@
         if (world.party != empty && !alreadyKnockedOut && world.party.isMember(entity:this) && state.hp == 0 && random.number() > 0.7 && world.party.members->size > 1) ::<= {
           windowEvent.queueMessage(
             speaker: this.name,
-            text: '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
+            text: 
+              if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
+                '"..."'
+              else
+                '"' + random.pickArrayItem(list:state.personality.phrases[Personality.SPEECH_EVENT.DEATH]) + '"'
           );
         }
         
@@ -2904,14 +2917,22 @@
           if (silent != true) ::<= {
             windowEvent.queueMessage(
               speaker: this.name,
-              text: '"This ' + item.base.name + ' really works for me as ' + correctA(word:this.profession.name) + '"'
+              text: 
+                if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
+                  '"...!"'
+                else
+                  '"This ' + item.base.name + ' really works for me as ' + correctA(word:this.profession.name) + '"'
             );
           }
         } else if ((slot == EQUIP_SLOTS.HAND_LR) && state.faveWeapon.id == state.equips[EQUIP_SLOTS.HAND_LR].base.id) ::<= {
           if (silent != true) ::<= {
             windowEvent.queueMessage(
               speaker: this.name,
-              text: '"This ' + item.base.name + ' is my favorite kind of weapon!"'
+              text: 
+                if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
+                  '"...!"'
+                else
+                  '"This ' + item.base.name + ' is my favorite kind of weapon!"'
             );
           }        
         }        

@@ -280,9 +280,9 @@
 
         }
 
-        /*windowEvent.queueMessage(
+        windowEvent.queueMessage(
           text: 'The Arts were added to the Trunk. They are now available when editing any party member\'s Arts in the Party menu.'
-        );*/      
+        ); 
 
       },
       

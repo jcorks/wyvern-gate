@@ -911,7 +911,7 @@ Island.database.newEntry(
         );     
         
         @:nameBase = random.pickArrayItem(list:state.nativeCreatures)
-        angy.name = 'Friendly ' + nameBase[1] + '-' + nameBase[2];
+        angy.name = nameBase[1] + '-' + nameBase[2];
         angy.nickname = 'the ' + (if (nameBase[0] == '') nameBase[0] else nameBase[0] + ' ') + nameBase[1] + '-' + nameBase[2];
         return angy;  
       },
