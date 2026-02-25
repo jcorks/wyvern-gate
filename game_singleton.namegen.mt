@@ -240,16 +240,6 @@
   }
 }
 
-@:creatureMod = [
-  'Dire',
-  'Giant',
-  'Spotted',
-  'Shrieking',
-  'Skulking',
-  'Menacing',
-  'Grotesque'
-];
-
 
 @:creatureBaseNames = [
   'Frog',
@@ -337,7 +327,6 @@ return class(
       },
       
       creature :: {
-        @:mod = if (random.number() > 0.8) random.pickArrayItem(list:creatureMod) else '';
         @:first = random.pickArrayItem(list:creatureBaseNames);
         @second = ::? { 
           forever ::{
@@ -345,7 +334,7 @@ return class(
             when (sec != first) send(message:sec);
           }
         }
-        return [mod, first, second];
+        return [first, second];
       }
     }
   }

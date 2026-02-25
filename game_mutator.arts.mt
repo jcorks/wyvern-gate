@@ -144,10 +144,8 @@ Arts.database.newEntry(
     rarity : RARITY.COMMON,
     baseDamage ::(level, user) <- Arts.baseATKmoveDamage(:user),
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
-      breakpoint();
       windowEvent.queueCustom(
         onEnter :: {
-          breakpoint();
           user.attack(
             target:targets[0],
             damage: Damage.new(
@@ -252,7 +250,7 @@ Arts.database.newEntry(
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
-    rarity : RARITY.COMMON,
+    rarity : RARITY.UNCOMMON,
     usageHintAI : USAGE_HINT.OFFENSIVE,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     traits : TRAIT.PHYSICAL | TRAIT.CAN_BLOCK | TRAIT.IS_ATTACK,
@@ -3479,7 +3477,7 @@ Arts.database.newEntry(
     durationTurns: 0,
     kind : KIND.EFFECT,
     traits : 0,
-    rarity : RARITY.UNCOMMON,
+    rarity : RARITY.EPIC,
     usageHintAI : USAGE_HINT.BUFF,
     shouldAIuse ::(user, reactTo, enemies, allies) {},
     baseDamage ::(level, user) {},

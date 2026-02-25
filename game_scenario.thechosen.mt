@@ -414,12 +414,11 @@ return {
 
 
       // debug
+        /*
         party.inventory.add(item:Item.new(
           base:Item.database.find(id:'base:knowledge-stone')
         ));
 
-
-        /*
         //party.inventory.add(item:Item.database.find(id:'Pickaxe'
         //).new(from:island.newInhabitant(),rngEnchantHint:true));
         
@@ -1379,7 +1378,7 @@ return {
         onVisit ::(landmark, island) {
           @:canvas = import(module:'game_singleton.canvas.mt');
           @:windowEvent = import(module:'game_singleton.windowevent.mt');
-          windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.fill()});
+          windowEvent.queueMessage(text:'It seems this area has been long forgotten...');
         }
         
       }
@@ -3197,7 +3196,9 @@ return {
                   }
                 );
               }
-              
+              when(world.party.isMember(:location.ownedBy)) ::<= {
+                location.ownedBy = empty;
+              }
             
               when (!location.ownedBy.isIncapacitated()) ::<= {
                 world.battle.start(
@@ -3233,20 +3234,10 @@ return {
           ['Kaedjaal', 'Oh! Actually, I\'d like you to have this other key as well, as a thanks for agreeing to start this journey.'],
           ['', 'The party received a normal key.'],     
           ['Kaedjaal', 'Visiting other mortal islands can help you find more to help you along your journey... But, it may be treacherous. Be prepared.'],
-          ['Kaedjaal', 'Ah, one more thing. Let me impart some knowledge to you, as a prize for getting this far'],
-          ::(location, landmark, doNext) {
-            @:world = import(module:'game_singleton.world.mt');
-            windowEvent.queueMessage(
-              text: 'Kaedjaal gently taps ' + world.party.members[0].name + ' on the head.'
-            );
-            perfectLearning();
-            
-            windowEvent.queueCustom(
-              onLeave ::{
-                doNext();
-              }
-            );
-          },
+          ['Kaedjaal', 'Ah, one more thing. Let me impart this to you, as a prize for getting this far'],
+          ['', 'The party received a Knowledge Stone.'],     
+          ['Kaedjaal', 'You may find this useful for learning new Arts through combat.'],
+          ['Kaedjaal', '...'],
           ['Kaedjaal', 'I suppose it is now time to return you. '],
           ['Kaedjaal', 'I hope you enjoyed this little visit. Come and see me any time.'],
           ['', 'Kaedjaal glows.'],
@@ -3265,6 +3256,12 @@ return {
               creationHint : {
                 tier : 1
               }
+            );
+            world.party.inventory.add(:keyother);
+
+
+            keyother = Item.new(
+              base: Item.database.find(id:'base:knowledge-stone')
             );
             world.party.inventory.add(:keyother);
 
@@ -3469,6 +3466,10 @@ return {
                     instance.gameOver(reason:'The party was wiped out.');
                   }
                 );
+              }
+
+              when(world.party.isMember(:location.ownedBy)) ::<= {
+                location.ownedBy = empty;
               }
               
             
@@ -3691,6 +3692,10 @@ return {
                     instance.gameOver(reason:'The party was wiped out.');
                   }
                 );
+              }
+
+              when(world.party.isMember(:location.ownedBy)) ::<= {
+                location.ownedBy = empty;
               }
               
             
@@ -4059,6 +4064,10 @@ return {
                 );
               }
               
+              when(world.party.isMember(:location.ownedBy)) ::<= {
+                location.ownedBy = empty;
+              }
+
             
               when (!location.ownedBy.isIncapacitated()) ::<= {
                 world.battle.start(

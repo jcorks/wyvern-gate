@@ -1223,6 +1223,9 @@ Landmark.database.newEntry(
         }
       },
 
+      steps : {
+        get ::<- state.steps
+      },
 
       // represents a step made within the landmark.
       step :: {
@@ -1237,11 +1240,7 @@ Landmark.database.newEntry(
           event.step();
         }
         
-        if (state.steps > 0 && (state.steps % 70) == 0) ::<= {
-          foreach(world.party.members) ::(k, member) {
-            member.recharge()
-          }
-        }
+
 
 
         

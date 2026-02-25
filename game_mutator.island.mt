@@ -901,6 +901,16 @@ Island.database.newEntry(
       },
 
       newHostileCreature ::(levelHint) {
+
+        @:creatureMod = [
+          'Small',
+          'Giant',
+          'Spotted',
+          'Shrieking',
+          'Skulking',
+          'Menacing',
+          'Grotesque'
+        ];
         if (levelHint == empty)
           levelHint = levelGen(:state.level);;
         @:angy =  Entity.new(
@@ -911,8 +921,11 @@ Island.database.newEntry(
         );     
         
         @:nameBase = random.pickArrayItem(list:state.nativeCreatures)
-        angy.name = nameBase[1] + '-' + nameBase[2];
-        angy.nickname = 'the ' + (if (nameBase[0] == '') nameBase[0] else nameBase[0] + ' ') + nameBase[1] + '-' + nameBase[2];
+        angy.name = nameBase[0] + '-' + nameBase[1];
+        angy.nickname = 
+          'the ' + 
+          (if (random.flipCoin()) '' else random.pickArrayItem(:creatureMod) + ' ') + 
+          nameBase[0] + '-' + nameBase[1];
         return angy;  
       },
 

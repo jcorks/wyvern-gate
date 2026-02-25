@@ -1041,9 +1041,9 @@ Effect.newEntry(
       onPreAttacked ::(from, item, holder, attacker, damage, targetPart) {
         when (!holder.isIncapacitated() && random.try(percentSuccess:15)) ::<= {
           windowEvent.queueMessage(text:random.pickArrayItem(list:[
-            'You will have to try harder than that, Chosen!',
+            'You will have to try harder than that!',
             'Come at me; do not hold back, Chosen!',
-            'You disrespect me with such a weak attack, Chosen!',
+            'You disrespect me with such a weak attack!',
             'Nice try, but it is not enough!'
           ]));
           windowEvent.queueMessage(text:holder.name + ' reflected the attack, making it cause 1 damage instead!');
@@ -1242,7 +1242,7 @@ Effect.newEntry(
   data : {
     name : 'Counter',
     id : 'base:counter',
-    description: 'Negates incoming attacks and redirects a portion of the would-be damage back at the attacker. Unable to use Ability or Reaction Arts.',
+    description: 'Negates incoming attacks and redirects a portion of the would-be damage back at the attacker. Unable to use Ability arts',
     stackable: false,
     traits : TRAIT.BUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
@@ -3356,7 +3356,7 @@ Effect.newEntry(
   data : {
     name : 'Grappled',
     id : 'base:grappled',
-    description: 'Unable to use Ability or Reaction Arts.',
+    description: 'Unable to use Ability Arts.',
     stackable: false,
     stats: StatSet.new(),
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
@@ -3374,7 +3374,7 @@ Effect.newEntry(
   data : {
     name : 'Ensnared',
     id : 'base:ensnared',
-    description: 'Unable to use Ability or Reaction Arts.',
+    description: 'Unable to use Ability Arts.',
     stackable: false,
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
@@ -3389,7 +3389,7 @@ Effect.newEntry(
   data : {
     name : 'Grappling',
     id : 'base:grappling',
-    description: 'Unable to use Ability or Reaction Arts.',
+    description: 'Unable to use Ability Arts.',
     stackable: false,
     traits : TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
@@ -3404,7 +3404,7 @@ Effect.newEntry(
   data : {
     name : 'Ensnaring',
     id : 'base:ensnaring',
-    description: 'Unable to use Ability or Reaction Arts.',
+    description: 'Unable to use Ability Arts.',
     stackable: false,
     traits : TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
@@ -3437,7 +3437,7 @@ Effect.newEntry(
   data : {
     name : 'Stunned',
     id : 'base:stunned',
-    description: 'Unable to use Ability or Reaction Arts.',
+    description: 'Unable to use Ability Arts.',
     stackable: false,
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
@@ -4112,7 +4112,7 @@ Effect.newEntry(
   data : {
     name : 'Frozen',
     id : 'base:frozen',
-    description: 'Unable to use Ability or Reaction Arts.',
+    description: 'Unable to use Ability Arts.',
     stackable: false,
     traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
@@ -4137,7 +4137,7 @@ Effect.newEntry(
   data : {
     name : 'Paralyzed',
     id : 'base:paralyzed',
-    description: 'SPD base -10. Unable to use Ability or Reaction Arts.',
+    description: 'SPD base -10. Unable to use Ability Arts.',
     stackable: false,
     traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
@@ -4165,7 +4165,7 @@ Effect.newEntry(
   data : {
     name : 'Mesmerized',
     id : 'base:mesmerized',
-    description: 'SPD,DEF base -4. Unable to use Ability or Reaction Arts.',
+    description: 'SPD,DEF base -4. Unable to use Ability Arts.',
     stackable: false,
     traits : TRAIT.DEBUFF,
     stats: StatSet.new(
@@ -4219,7 +4219,7 @@ Effect.newEntry(
   data : {
     name : 'Petrified',
     id : 'base:petrified',
-    description: 'Unable to use Ability or Reaction Arts. DEF base -4',
+    description: 'Unable to use Ability Arts. DEF base -4',
     stackable: false,
     traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
@@ -5524,7 +5524,7 @@ Effect.newEntry(
   data : {
     name : 'Crustacean Maneuver',
     id : 'base:crustacean-maneuver',
-    description: 'All incoming attacks are nullified. Unable to use Ability or Reaction Arts.',
+    description: 'All incoming attacks are nullified. Unable to use Ability Arts.',
     stackable: false,
     traits : TRAIT.BUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
@@ -6279,7 +6279,7 @@ Effect.newEntry(
   data : {
     name : 'Concentrating',
     id : 'base:concentrating',
-    description: 'Unable to use Ability or Reaction Arts.',
+    description: 'Unable to use Ability Arts.',
     stackable: false,
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
@@ -6670,7 +6670,7 @@ Effect.newEntry(
   data : {
     name : 'Berserk',
     id : 'base:berserk',
-    description: 'Unable to use Effect and Reaction Arts.',
+    description: 'Unable to use Effect Arts.',
     stackable: true,
     traits : TRAIT.DEBUFF | TRAIT.CANT_USE_EFFECTS | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),

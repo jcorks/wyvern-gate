@@ -155,7 +155,7 @@
     leftWeight: 1,
     topWeight: 1,
     prompt: 'Quests to turn in:',
-    keep: true,
+    keep: false, // TODO: fancier here. keep:true but need to handle no-quests-left case
     canCancel: true,
     onGetChoices :: {
       quests = world.party.quests->filter(::(value) <- value.isComplete);

@@ -41,6 +41,81 @@
     ''+s
 }
 
+@:grades = [
+  'E-', 10,
+  'E ', 15,
+  'E+', 20,
+  'D-', 25,
+  'D ', 30,
+  'D+', 40,
+  'C-', 45,
+  'C ', 50,
+  'C+', 60,
+  'B-', 70,
+  'B ', 80,
+  'B+', 85,
+  'A-', 90,
+  'A ', 100,
+  'A+', 110,
+  'S-', 130,
+  'S ', 150,
+  'S+', 170,
+  'S++',200,
+  'SS-',220,
+  'SS ',240,
+  'SS+',260,
+  'SS++',300,
+  'X-', 350,
+  'X',  400,
+  'X+', 500,
+  'X++',600,
+  '??', 998,
+  '[]', 1000000
+];
+
+@:valueToGrade::(value) 
+  <- ::? { 
+    for(0, (grades->size/2)->floor) ::(i) {
+      if (value < grades[i*2+1])
+        send(:grades[i*2])
+    }
+    
+    return grades[grades->size-2]
+  }
+
+
+@:gradeLimit = [
+  10,
+  15,
+  20,
+  25,
+  30,
+  50,
+]
+
+@:rateToMult ::(value) {
+  when(value == 0) '..';
+  // basic percents
+  // return (if (value > 0) + '+' else value)+'%'
+
+
+
+  // simplified?
+  return if (value < 0) 
+    ('!('+value) + '%)'
+  else
+    valueToGrade(:value);
+    
+
+
+  // mult
+  /*
+  @:multRaw = (if (value > 0)
+      1+((value->ceil / 100))
+
+  return 'x' + ((multRaw / 0.1)->ceil) * 0.1
+  */
+}
 
 
 @:StatSet = LoadableClass.createLight(
@@ -88,10 +163,10 @@
     diffRateToLines::(stats, other) {
       return canvas.columnsToLines(columns:[
         NAMES->map(::(value) <- value + ': '),
-        NAMES->map(::(value) <- if(stats[value]>0)'+'+stats[value]+'%' else if (stats[value]==0)'--' else ''+stats[value]+'%'),
+        NAMES->map(::(value) <- rateToMult(:stats[value])),
         NAMES->map(::(value) <- ' -> '),
-        NAMES->map(::(value) <- if(other[value]>0)'+'+other[value]+'%' else if (other[value]==0)'--' else ''+other[value]+'%'),
-        NAMES->map(::(value) <- if (other[value] - stats[value]  != 0) (if (other[value] > stats[value]) '(+' else '(') + (other[value]  - stats[value])  + '%)' else ''),          
+        NAMES->map(::(value) <- rateToMult(:other[value])),
+        NAMES->map(::(value) <- '(' + rateToMult(:other[value] - stats[value]) + ')')
       ]);    
     }
   },
@@ -211,6 +286,14 @@
       @:state = _.state;
       foreach(NAMES) ::(k, v) {
         state[v] += stats[v];
+      }
+      return _.this;
+    },
+    
+    simplify :: {
+      @:state = _.state;
+      foreach(NAMES) ::(k, v) {
+        state[v] = (state[v] / 5)->ceil * 5;
       }
       return _.this;
     },
@@ -337,7 +420,7 @@
         @:columns = [
           NAMES->map(::(value) <- value + ': '),
           NAMES->map(::(value) {
-            return (if(this[value] > 0) '+' + this[value] + '%' else if (this[value] == 0) '--' else ''+this[value]+ '%')
+            return rateToMult(:this[value])
           })
         ];
         return canvas.columnsToLines(columns);
@@ -350,7 +433,7 @@
       @:columns = [
         NAMES->map(::(value) <- value + ': '),
         NAMES->map(::(value) {
-          return (if(this[value] > 0) '+' + this[value] + '%' else if (this[value] == 0) '--' else ''+this[value]+ '%')
+          return rateToMult(:this[value])
         }),
         NAMES->map(::(value) <- 
           if (baseMod[value] == 0) 

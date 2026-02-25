@@ -291,7 +291,7 @@ Item.database.newEntry(
   data : {
     name : 'Knowledge Stone',
     id : 'base:knowledge-stone',
-    description : 'A stone that passively converts magickal resonance to knowledge.',
+    description : 'A stone that passively converts magickal resonance to knowledge. Within shrines, it can be charged. Once charged, combat victories can release its power.',
     examine : '',
     sortType : SORT_TYPE.MISC,
     equipType : TYPE.HAND,
@@ -3877,6 +3877,10 @@ none.name = 'None';
           });
           
           
+          if (world.island.tier == 0 && random.try(percentSuccess:80))
+            enchantCount = 0;
+            
+          
           
           for(0, enchantCount)::(i) {
             @mod = ItemEnchant.new(
@@ -3943,7 +3947,7 @@ none.name = 'None';
       if (base.events.onCreate != empty)
         base.events.onCreate(item:this, creationHint);
       recalculateName(*_);
-
+      state.stats.simplify();
       
       return this;
       

@@ -161,15 +161,28 @@ import(module:'game_function.newrecord.mt');
   }
 }
 
-@:renderArtsStatus ::{
+@:renderArtsStatus ::(landmark) {
+  when(world.battle.isActive) empty;
+
   @needsDisplay = [];
   @bars;
+  @LIMIT = 3;
   foreach(world.party.members) ::(k, member) {
     @:artsNames = [];
     @:artsBar = [];
     @:artsStatus = [];
-    @:arts = [];
-    foreach(member.arts->filter(::(value) <- value.canUse == false)) ::(k, art) {
+    @arts = [];
+    
+    @preArts = member.arts->filter(::(value) <- value.canUse == false);
+    @truncated = false;
+    if (preArts->size > LIMIT) ::<= {
+      arts = preArts->subset(from:0, to:LIMIT-1);
+      truncated = true;
+    } else 
+      arts = preArts
+      
+      
+    foreach(preArts) ::(k, art) {
       @data = Arts.renderListItem(
         art
       );
@@ -178,6 +191,7 @@ import(module:'game_function.newrecord.mt');
       artsBar->push(:data[1]);
       artsStatus->push(:data[2]);
     }
+    
     
     when(artsNames->size > 0) ::<= {
       needsDisplay->push(:member.name + ':');
@@ -195,6 +209,10 @@ import(module:'game_function.newrecord.mt');
         ]
       )];
     }
+    
+    if (truncated == true)
+      needsDisplay->push(:'...and ' + (preArts->size - LIMIT) + ' others');
+    
   }
   
   if (needsDisplay->size > 0)
@@ -202,7 +220,7 @@ import(module:'game_function.newrecord.mt');
       leftWeight: 1,
       topWeight: 1,
       lines: needsDisplay,
-      title: 'Arts recharging:'
+      title: 'Charging: ' + (70 - world.party.steps % 70) + ' steps left'
     );
 }
 return class(
@@ -1609,7 +1627,7 @@ return empty;
 
             // stop hardcoding!
                 renderKnowledgeStone();
-                renderArtsStatus();
+                renderArtsStatus(landmark);
             //
             
             

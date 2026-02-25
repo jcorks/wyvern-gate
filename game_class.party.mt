@@ -46,7 +46,8 @@
     activeQuests : [],
     completedQuests : [],
     firstEncounter : true,
-    bank : empty
+    bank : empty,
+    steps : 0
   },
 
   define:::(this, state) {   
@@ -74,6 +75,10 @@
         }
       },
       
+      steps : {
+        get ::<- state.steps
+      },
+      
       inDungeon : {
         get ::<- state.inDungeon,
         set ::(value) <- state.inDungeon = value
@@ -88,7 +93,11 @@
         });
         member.inventory.clear();
         */
-
+        
+        // cant talk to us, BUT. is friendly :)
+        @:Species = import(module:'game_database.species.mt');
+        if (member.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
+          member.nickname = 'Friendly ' + member.name
         
         foreach(state.members) ::(k, v) {
           v.addOpinion(
@@ -495,8 +504,9 @@
         @:Quest = import(:'game_mutator.quest.mt');
 
         @:level:: {
-          @val = state.guildEXP;
           @remainingForLevel = state.guildEXPtoNext - state.guildEXP;
+          @val = state.guildEXP;
+          breakpoint();
           animateBar(
             from: state.guildEXP,
             to:   state.guildEXP + exp,
@@ -506,7 +516,7 @@
             
             onFinish:: {
               when(state.guildEXP+exp >= state.guildEXPtoNext) ::<= {
-                exp -= state.guildEXPtoNext;
+                exp -= (state.guildEXPtoNext - state.guildEXP);
                 
                 state.guildRank += 1;
                 state.guildEXP = 0;
@@ -523,16 +533,17 @@
                 level();            
               }
               
-              state.guildEXP -= exp;
+              state.guildEXP += exp;
+              if (onDone != empty) onDone();
             },
             onGetCaption       ::<- ' - Team ' + state.guildTeamName + ' - ', 
             onGetCoCaption     ::<- 'Guild rank: ' + Quest.RANK2NAME[state.guildRank],
-            onGetSubcaption    ::<- 'Exp to next rank: ' + (remainingForLevel - val)->ceil,
+            onGetSubcaption    ::<- 'Exp to next rank: ' + (remainingForLevel - (val - state.guildEXP))->ceil,
             onGetSubsubcaption ::<- '                + ' + (exp - (val - state.guildEXP))->ceil,
             
             onGetLeftWeight::<- 0.5,
             onGetTopWeight::<- 0.5,
-            onNewValue ::(value) <- val = value
+            onNewValue ::(value) <- val = value->ceil
           );
         }
 
@@ -542,13 +553,18 @@
       },  
       
       step :: {
+        state.steps += 1;
         foreach(state.members) ::(k, v) {
           v.step();
         }
         foreach(state.inventory.items) ::(k, v) {
           v.step();
         }
-      
+        if (state.steps > 0 && (state.steps % 70) == 0) ::<= {
+          foreach(state.members) ::(k, member) {
+            member.recharge()
+          }
+        }
       },
       
       
