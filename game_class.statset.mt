@@ -165,8 +165,10 @@
         NAMES->map(::(value) <- value + ': '),
         NAMES->map(::(value) <- rateToMult(:stats[value])),
         NAMES->map(::(value) <- ' -> '),
-        NAMES->map(::(value) <- rateToMult(:other[value])),
+        NAMES->map(::(value) <- rateToMult(:other[value]))
+        /*
         NAMES->map(::(value) <- '(' + rateToMult(:other[value] - stats[value]) + ')')
+        */
       ]);    
     }
   },
@@ -440,7 +442,7 @@
             '' 
           else
             if (baseMod[value] > 0)
-              ' +' + baseMod[value] + ' base'
+              '+' + baseMod[value] + ' base'
             else
               '' + baseMod[value] + ' base' 
         )

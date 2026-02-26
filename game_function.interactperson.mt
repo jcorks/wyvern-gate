@@ -24,7 +24,7 @@
 @:Damage = import(module:'game_class.damage.mt');
 
 // interacts with this entity
-return ::(this, party, location, onDone, overrideChat, skipIntro) {
+return ::(this, party, location, onDone, skipIntro) {
   @:world = import(module:'game_singleton.world.mt');
   
   @:finish ::{

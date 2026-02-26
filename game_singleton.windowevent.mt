@@ -2328,7 +2328,7 @@
               }
             },
             
-            renderableMiddle : renderableMiddle,
+            renderableMiddle,
             
             animationFrameAfter ::<= {
               @t = 0;

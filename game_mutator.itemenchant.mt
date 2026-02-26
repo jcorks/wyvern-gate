@@ -54,6 +54,7 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
 // The art is special. All itemenchants have a flat 15% chance to arts.
+/*
 ItemEnchant.database.newEntry(
   data : {
     name : 'Art',
@@ -77,6 +78,7 @@ ItemEnchant.database.newEntry(
     onCreate ::(this){}
   }
 )
+*/
 /*
 ItemEnchant.database.newEntry(
   data : {

@@ -1042,7 +1042,7 @@ Effect.newEntry(
         when (!holder.isIncapacitated() && random.try(percentSuccess:15)) ::<= {
           windowEvent.queueMessage(text:random.pickArrayItem(list:[
             'You will have to try harder than that!',
-            'Come at me; do not hold back, Chosen!',
+            'Come at me; do not hold back!',
             'You disrespect me with such a weak attack!',
             'Nice try, but it is not enough!'
           ]));

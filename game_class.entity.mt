@@ -887,14 +887,13 @@
     recentOpinions : empty,
     affinity : -1,
     equipArts : empty,
-    levelPenalty : 0
-
+    levelPenalty : 0,
+    overrideInteractID : '',
   },
   
   private : {
     effectStack : Nullable,
     battle : Nullable,
-    overrideInteract : Nullable,
     requestsRemove : Boolean,
     onInteract : Function,
     abilitiesUsedBattle : Nullable,
@@ -1797,9 +1796,9 @@
       get ::<- _.effectStack
     },
     
-    overrideInteract : {
-      set ::(value) {
-        _.overrideInteract = value;
+    overrideInteractID : {
+      set ::(value => String) {
+        _.state.overrideInteractID = value;
       }
     },
       
@@ -3335,12 +3334,16 @@
     
       
     // interacts with this entity
-    interactPerson ::(party, location, onDone, overrideChat, skipIntro) {
-      when(_.overrideInteract) _.overrideInteract(party, location, onDone);
+    interactPerson ::(party, location, onDone, skipIntro) {
       @:this = _.this;
+      @:state = _.state;
+      when(_.state.overrideInteractID != '') ::<= {
+        @:Interaction = import(module:'game_database.interaction.mt');
+        Interaction.find(:state.overrideInteractID).onInteract(location, party);
+      };
       
       (import(module:'game_function.interactperson.mt'))(
-        this, party, location, onDone, overrideChat, skipIntro
+        this, party, location, onDone, skipIntro
       );
     },
       

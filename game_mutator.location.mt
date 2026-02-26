@@ -2569,7 +2569,8 @@ Location.database.newEntry(data:{
     name : '',
     data : empty, // simple table
     visited : false,
-    data : empty
+    data : empty,
+    overrideInteractID : ''
   },
   statics : {
     CATEGORY : {get ::<- CATEGORY}
@@ -2683,6 +2684,10 @@ Location.database.newEntry(data:{
 
       worldID : {
         get ::<- state.worldID
+      },
+      
+      overrideInteractID : {
+        set ::(value => String) <- state.overrideInteractID = value
       },
       
       targetLandmark : {
@@ -2809,7 +2814,6 @@ Location.database.newEntry(data:{
         @world = import(module:'game_singleton.world.mt');
         @party = world.party;      
         @:Interaction = import(module:'game_database.interaction.mt');
-        
 
       
         @:aggress::(location, party) {
@@ -2873,6 +2877,10 @@ Location.database.newEntry(data:{
         }
           
         when(canInteract == false) empty;
+        
+        when (state.overrideInteractID != '') 
+          Interaction.find(:state.overrideInteractID).onInteract(party, location:this);
+
         
         @:interactionNames = [...this.base.interactions]->map(to:::(value) {
           return Interaction.find(id:value).name;

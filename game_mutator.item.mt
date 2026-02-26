@@ -1419,7 +1419,8 @@ Item.database.newEntry(data : {
   // fatigued
   equipMod : StatSet.new(
     ATK: 55,
-    SPD: -10,
+    SPD: -20,
+    DEF: -50,
     DEX: 95
   ),
   useEffects : [
@@ -1447,7 +1448,7 @@ Item.database.newEntry(data : {
 Item.database.newEntry(data : {
   name : "Crossbow",
   id : 'base:crossbow',
-  description: 'A mechanical device that launches bolts. It features a $color$, $design$ design design.',
+  description: 'A mechanical device that launches bolts. It features a $color$, $design$ design.',
   sortType : SORT_TYPE.WEAPON,
   examine : '',
   equipType: TYPE.TWOHANDED,

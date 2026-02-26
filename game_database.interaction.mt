@@ -43,6 +43,21 @@ Interaction.newEntry(
     name : 'Exit',
     keepInteractionMenu : false,
     onInteract ::(location, party) {
+      @:go ::{
+        // jumps to the prev menu lock
+        windowEvent.queueTransition(
+          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+          renderableStart : location.landmark.map,
+          renderableMiddle: location.landmark.island.map
+        );
+        windowEvent.queueCustom(
+          onEnter::{
+            //invaidate a cache
+            windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true);
+          }
+        );
+      }
+    
       when (location.peaceful == false && 
         (location.landmark.base.id == 'base:town' || location.landmark.base.id == 'base:city')) ::<= {
         windowEvent.queueMessage(
@@ -76,21 +91,7 @@ Interaction.newEntry(
          
       }
 
-      // jumps to the prev menu lock
-      windowEvent.queueTransition(
-        kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-        renderableStart : location.landmark.map,
-        renderableMiddle: location.landmark.island.map
-      );
-      windowEvent.queueCustom(
-        renderable : { render::{
-          canvas.fill();
-        }},
-        onEnter::{
-          //invaidate a cache
-          windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true);
-        }
-      );
+      go();
 
     }
   }
@@ -2120,7 +2121,12 @@ Interaction.newEntry(
         canCancel: true,
         onChoice:::(choice) {
           when(choice == 0) empty;
-          canvas.clear();
+          @:key = keys[choice-1];
+          @:world = import(module:'game_singleton.world.mt');
+
+          when (key.islandID == world.island.worldID)
+            windowEvent.queueMessage(text:'You\'re already on the island that this Key accesses. Try a different Key.');
+
           windowEvent.queueMessage(text:'As the key is pushed in, the gate gently whirrs and glows with a blinding light...');
           windowEvent.queueMessage(text:'As you enter, you feel the world around you fade.', renderable:{render::{canvas.fill();}});
           windowEvent.queueMessage(text:'...', renderable:{render::{canvas.fill();}});
@@ -2128,11 +2134,9 @@ Interaction.newEntry(
           windowEvent.queueCustom( 
             onEnter::{
             @:Landmark = import(module:'game_mutator.landmark.mt');
-            @:world = import(module:'game_singleton.world.mt');
             @:instance = import(module:'game_singleton.instance.mt');
 
 
-            @:key = keys[choice-1];
             world.loadIsland(key, onDone::(island) {
               
               instance.visitCurrentIsland(

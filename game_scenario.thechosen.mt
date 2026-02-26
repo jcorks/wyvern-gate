@@ -289,7 +289,7 @@ return {
   
     // Whether the initial box has been opened.
     world.scenario.data.openedSentimentalBox = false;
-  
+
     // Whether the wyvern of fire was defeated in combat
     world.scenario.data.fireWyvernDefeated = false;
 
@@ -406,10 +406,6 @@ return {
         p0.heal(amount:999999, silent:true);
         choices->push(value:p0);
       }
-
-      party.inventory.add(item:Item.new(
-        base:Item.database.find(id:'thechosen:sentimental-box')
-      ));
 
 
 
@@ -531,18 +527,61 @@ return {
             party.members->foreach(::(k, v) {
               v.supportArts = basicArts->map(::(value) <- Arts.new(base:Arts.database.find(:value)))
             });
-          
+            @town
+            foreach(island.landmarks) ::(k, v) {
+              if (v.base.id == 'base:town')
+                town = v;
+            }
           
             @somewhere = LargeMap.getAPosition(map:island.map);
             island.map.setPointer(
-              x: somewhere.x,
-              y: somewhere.y
+              x: town.x,
+              y: town.y
             );         
+            
+            ::? {
+              foreach(town.locations) ::(k, v) {
+                if (v.base.id == 'base:shop') ::<= {
+                  v.overrideInteractID = 'thechosen:box-shopkeep';
+                  send();
+                }
+              }
+            }
+            
             instance.savestate();
+
             @:Scene = import(module:'game_database.scene.mt');
             Scene.start(id:'thechosen:scene_intro', onDone::{          
             //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
-              instance.visitCurrentIsland();            
+
+              instance.visitCurrentIsland(onReady :: {
+                windowEvent.queueMessage(
+                  speaker: party.members[0].name,
+                  text: '"..."'
+                );
+
+                windowEvent.queueMessage(
+                  speaker: party.members[0].name,
+                  text: '"I must have dozed off... What a strange dream..."'
+                );
+
+                windowEvent.queueMessage(
+                  speaker: party.members[0].name,
+                  text: '"..."'
+                );
+
+                windowEvent.queueMessage(
+                  speaker: party.members[0].name,
+                  text: '"...Huh? A Key? Maybe it wasn\'t a dream..."'
+                );
+
+
+                windowEvent.queueMessage(
+                  speaker: party.members[0].name,
+                  text: '"Ah, right! I should go into town. The shopkeeper had something for me."'
+                );
+              
+              });            
             });    
           }
         )
@@ -1182,8 +1221,100 @@ return {
   databaseOverrides ::{
     @:Interaction = import(module:'game_database.interaction.mt');
     
-    
+    Interaction.newEntry(:{
+      name : 'Sentimental Box',
+      id : 'thechosen:box-shopkeep',
+      keepInteractionMenu : false,
+      onInteract ::(location, party) {
+        @:world = import(module:'game_singleton.world.mt');
+        
+        @:shopkeep = location.ownedBy;
+        
+        windowEvent.queueMessage(
+          speaker : shopkeep.name,
+          text: '"Oh! Hey, ' + party.members[0].name + '! I was told to give you this."'
+        );
+        
+        windowEvent.queueMessage(
+          text: 'The party received a box. It can be used from the inventory.'
+        );
 
+        party.inventory.add(item:Item.new(
+          base:Item.database.find(id:'thechosen:sentimental-box')
+        ));
+        
+        location.overrideInteractID = '';
+
+        windowEvent.queueMessage(
+          speaker : shopkeep.name,
+          text: '"Come by any time if you need anything."'
+        );
+
+        
+      }
+    });
+
+    
+    Interaction.newEntry(:{
+      name : 'Wyvern of Fire',
+      id : 'thechosen:wyvern-of-fire',
+      keepInteractionMenu : false,
+      onInteract ::(location, party) {
+        @:world = import(module:'game_singleton.world.mt');              
+        if (world.scenario.data.fireWyvernDefeated == false) ::<= {
+          Scene.start(id:'thechosen:scene_wyvernfire0', onDone::{}, location, landmark:location.landmark);
+        } else ::<= {
+          // just visiting!
+          Scene.start(id:'thechosen:scene_wyvernfire1', onDone::{}, location, landmark:location.landmark);            
+        }
+      }
+    });
+    
+    Interaction.newEntry(:{
+      name : 'Wyvern of Ice',
+      id : 'thechosen:wyvern-of-ice',
+      keepInteractionMenu : false,
+      onInteract ::(location, party) {
+        @:world = import(module:'game_singleton.world.mt');              
+        if (world.scenario.data.iceWyvernDefeated == false) ::<= {
+          Scene.start(id:'thechosen:scene_wyvernice0', onDone::{}, location, landmark:location.landmark);
+        } else ::<= {
+          // just visiting!
+          Scene.start(id:'thechosen:scene_wyvernice1', onDone::{}, location, landmark:location.landmark);            
+        }
+      }
+    });
+        
+
+    Interaction.newEntry(:{
+      name : 'Wyvern of Thunder',
+      id : 'thechosen:wyvern-of-thunder',
+      keepInteractionMenu : false,
+      onInteract ::(location, party) {
+        @:world = import(module:'game_singleton.world.mt');              
+        if (world.scenario.data.thunderWyvernDefeated == false) ::<= {
+          Scene.start(id:'thechosen:scene_wyvernthunder0', onDone::{}, location, landmark:location.landmark);
+        } else ::<= {
+          // just visiting!
+          Scene.start(id:'thechosen:scene_wyvernthunder1', onDone::{}, location, landmark:location.landmark);            
+        }
+      }
+    });
+
+    Interaction.newEntry(:{
+      name : 'Wyvern of Light',
+      id : 'thechosen:wyvern-of-light',
+      keepInteractionMenu : false,
+      onInteract ::(location, party) {
+        @:world = import(module:'game_singleton.world.mt');              
+        if (world.scenario.data.lightWyvernDefeated == false) ::<= {
+          Scene.start(id:'thechosen:scene_wyvernlight0', onDone::{}, location, landmark:location.landmark);
+        } else ::<= {
+          // just visiting!
+          Scene.start(id:'thechosen:scene_wyvernlight1', onDone::{}, location, landmark:location.landmark);            
+        }
+      }
+    });
     Interaction.newEntry(
       data : {
         name : 'Final Floor',
@@ -1965,14 +2096,7 @@ return {
         location.ownedBy.equipAllProfessionArts();
 
 
-        location.ownedBy.overrideInteract = ::(party, location, onDone) {
-          if (world.scenario.data.fireWyvernDefeated == false) ::<= {
-            Scene.start(id:'thechosen:scene_wyvernfire0', onDone::{}, location, landmark:location.landmark);
-          } else ::<= {
-            // just visiting!
-            Scene.start(id:'thechosen:scene_wyvernfire1', onDone::{}, location, landmark:location.landmark);            
-          }
-        }
+        location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-fire';
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
 
@@ -2096,14 +2220,7 @@ return {
         location.ownedBy.equipAllProfessionArts();
 
         
-        location.ownedBy.overrideInteract = ::(party, location, onDone) {
-          if (world.scenario.data.iceWyvernDefeated == false) ::<= {
-            Scene.start(id:'thechosen:scene_wyvernice0', onDone::{}, location, landmark:location.landmark);
-          } else ::<= {
-            // just visiting!
-            Scene.start(id:'thechosen:scene_wyvernice1', onDone::{}, location, landmark:location.landmark);            
-          }
-        }
+        location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-ice';
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
 
@@ -2181,15 +2298,7 @@ return {
         location.ownedBy.equipAllProfessionArts();
 
         
-        location.ownedBy.overrideInteract = ::(party, location, onDone) {
-          @:world = import(module:'game_singleton.world.mt');              
-          if (world.scenario.data.thunderWyvernDefeated == false) ::<= {
-            Scene.start(id:'thechosen:scene_wyvernthunder0', onDone::{}, location, landmark:location.landmark);
-          } else ::<= {
-            // just visiting!
-            Scene.start(id:'thechosen:scene_wyvernthunder1', onDone::{}, location, landmark:location.landmark);            
-          }
-        }
+        location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-thunder';
         location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
         location.ownedBy.heal(amount:9999, silent:true); 
         location.ownedBy.healAP(amount:9999, silent:true); 
@@ -2265,14 +2374,7 @@ return {
         location.ownedBy.equipAllProfessionArts();
 
         
-        location.ownedBy.overrideInteract = ::(party, location, onDone) {
-          if (world.scenario.data.lightWyvernDefeated == false) ::<= {
-            Scene.start(id:'thechosen:scene_wyvernlight0', onDone::{}, location, landmark:location.landmark);
-          } else ::<= {
-            // just visiting!
-            Scene.start(id:'thechosen:scene_wyvernlight1', onDone::{}, location, landmark:location.landmark);            
-          }
-        }
+        location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-light'
         
         location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
         location.ownedBy.heal(amount:9999, silent:true); 
@@ -3198,6 +3300,7 @@ return {
               }
               when(world.party.isMember(:location.ownedBy)) ::<= {
                 location.ownedBy = empty;
+                doNext();
               }
             
               when (!location.ownedBy.isIncapacitated()) ::<= {
@@ -3243,7 +3346,8 @@ return {
           ['', 'Kaedjaal glows.'],
           ['Kaedjaal', 'May you find peace and prosperity in your heart. Remember: seek the shrines with this new Key. We\'ll be waiting.'],
           ::(location, landmark, doNext) {
-            location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
+            if (location.ownedBy)
+              location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
             @:world = import(module:'game_singleton.world.mt');
             world.scenario.data.fireWyvernDefeated = true;
             @keyother = Item.new(
@@ -3470,6 +3574,8 @@ return {
 
               when(world.party.isMember(:location.ownedBy)) ::<= {
                 location.ownedBy = empty;
+                doNext();
+                
               }
               
             
@@ -3522,7 +3628,8 @@ return {
           ['', 'Ziikaettaal glows.'],
           ['Ziikaettaal', 'Chosen, the road ahead is still dangerous. Remember: seek the shrines with this new Key. We\'ll be waiting.'],
           ::(location, landmark, doNext) {
-            location.ownedBy.name = 'Ziikaettaal, Wyvern of Ice';
+            if (location.ownedBy)
+              location.ownedBy.name = 'Ziikaettaal, Wyvern of Ice';
             @:world = import(module:'game_singleton.world.mt');
             world.scenario.data.fireWyvernDefeated = true;
             @:keyother = Item.new(
@@ -3683,7 +3790,7 @@ return {
               when(world.battle.partyWon() == false) ::<= {
                 windowEvent.queueMessage(
                   speaker:'Juhriikaal',
-                  text:'Djiirohshuhlo jiin.'
+                  text:'"Djiirohshuhlo jiin."'
                 );
                 
                 windowEvent.queueCustom(
@@ -3696,6 +3803,7 @@ return {
 
               when(world.party.isMember(:location.ownedBy)) ::<= {
                 location.ownedBy = empty;
+                doNext();
               }
               
             
@@ -3767,7 +3875,8 @@ return {
           ['', 'Juhriikaal glows.'],
           ['Juhriikaal', 'Until next time, Chosen. Remember: seek the shrines with this new Key. We\'ll be waiting.'],
           ::(location, landmark, doNext) {
-            location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
+            if (location.ownedBy)
+              location.ownedBy.name = 'Juhriikaal, Wyvern of Thunder';
             @:world = import(module:'game_singleton.world.mt');
             world.scenario.data.fireWyvernDefeated = true;
             @:keyother = Item.new(
@@ -4066,6 +4175,7 @@ return {
               
               when(world.party.isMember(:location.ownedBy)) ::<= {
                 location.ownedBy = empty;
+                doNext();
               }
 
             

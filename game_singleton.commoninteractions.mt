@@ -94,6 +94,7 @@ return {
               onChoice::(art) {
                 @:source = art;
                 windowEvent.queueChoices(
+                  jumpTag : 'ARTS_PICK',
                   renderable : {
                     render :: {
                       @:id = source.id;
@@ -108,8 +109,8 @@ return {
                     }
                   }, 
                   topWeight: 1,
+                  keep:true,
                   canCancel: true,
-                  keep: true,
                   onHover ::(choice) {
                     which = choice-1;
                   },
@@ -173,6 +174,7 @@ return {
                             
                           other.charge += source.charge;
                           source.charge = 0;
+                          windowEvent.jumpToTag(name:'ARTS_PICK', goBeforeTag:true);
                         } 
                       );
                     }
@@ -185,6 +187,7 @@ return {
                         );
                       source.charge = 0;
                       user.ap += 1;
+                      windowEvent.jumpToTag(name:'ARTS_PICK', goBeforeTag:true);
                       battle.requestRedrawBG();
                     }
                   }
@@ -516,7 +519,6 @@ return {
             @:giveUp ::{
               windowEvent.queueAskBoolean(
                 prompt: 'Give up on ' + quest.name + '?',
-                canCancel : true,
                 onChoice::(which) {
                   when(which == false) empty;
                   

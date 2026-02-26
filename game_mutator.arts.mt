@@ -12858,6 +12858,7 @@ Arts = databaseItemMutatorClass.create(
       keep,
       canCancel,
       onChoice,
+      jumpTag,
       prompt
     ) {
       @which;
@@ -12865,6 +12866,7 @@ Arts = databaseItemMutatorClass.create(
       choicesColumns(
         leftWeight,
         topWeight,
+        jumpTag,
         leftJustified : [
           false, true, true
         ],

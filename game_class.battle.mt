@@ -702,7 +702,7 @@
           }
           if (world.party.members->size == 2) chance = 2;
           
-          when (!random.try(percentSuccess:chance)) empty;        
+          when (random.try(percentSuccess:chance) == false) empty;        
           @enemies = getEnemiesDefeated(ent:party.members[0])->filter(::(value) <- party.isMember(:value) == false);
           when(enemies->size == 0) empty;
           @:potentialFriend = random.pickArrayItem(:enemies);
