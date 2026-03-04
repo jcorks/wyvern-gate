@@ -502,6 +502,12 @@
       getAllByFilter::(filter) {
         return state.effects->filter(:filter);
       },
+      
+      hasEffectID ::(id) {
+        @set = this.getAllByFilter(::(value) <- value.id == id);
+        when(set == empty || set->size == 0) false;
+        return true;
+      },
 
       removeAllByID::(id) {
         this.removeByFilter(

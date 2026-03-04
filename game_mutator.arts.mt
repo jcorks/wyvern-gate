@@ -1089,7 +1089,7 @@ Arts.database.newEntry(
     notifCommit : '$1 makes an eerie call!',
     notifFail : '...But nothing happened!',
     targetMode : TARGET_MODE.NONE,
-    description: "Calls a creature to come and join the fight.",
+    description: "Calls a creature to come and join the fight on the user\'s side.",
     keywords : [],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -1119,6 +1119,60 @@ Arts.database.newEntry(
     }
   }
 ) 
+
+Arts.database.newEntry(
+  data: {
+    name: 'Gnome Call',
+    id : 'base:gnome-call',
+    notifCommit : '$1 makes an eerie call!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.NONE,
+    description: "Calls a Gnome to come and join the fight on the user\'s side.",
+    keywords : [],
+    durationTurns: 0,
+    kind : KIND.ABILITY,
+    traits : 0,
+    rarity : RARITY.EPIC,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      when (!random.try(percentSuccess:30)) Arts.FAIL;
+      
+      @:world = import(module:'game_singleton.world.mt');
+    
+      @:beast = world.island.newInhabitant(
+        speciesHint : 'base:gnome',
+        professionHint : 'base:gnome'
+      );
+      beast.name = 'the Gnome';
+      beast.supportArts = [];      
+      for(0, 20) ::(i) {
+        beast.autoLevelProfession(:beast.profession);
+      }
+      beast.equipAllProfessionArts();  
+
+      
+      beast.unequipAll(silent:true);
+      beast.heal(amount:9999, silent:true); 
+      beast.healAP(amount:9999, silent:true);   
+      @battle = user.battle;
+      
+      windowEvent.queueCustom(
+        onEnter :: {
+
+          battle.join(
+            group: [beast],
+            sameGroupAs:user
+          );
+        }
+      )
+                    
+    }
+  }
+) 
+
+
 
 
 
@@ -5137,6 +5191,63 @@ Arts.database.newEntry(
         )
         
       }
+    }
+  }
+)   
+
+
+
+Arts.database.newEntry(
+  data: {
+    name: 'Latch On',
+    id : 'base:latch-on',
+    notifCommit : '$1 leaps on top of $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: 'Latches onto an enemy for 4 turns.',
+    keywords: ['base:latching', 'base:latched'],
+    durationTurns: 0,
+    kind : KIND.ABILITY,
+    traits : TRAIT.PHYSICAL | TRAIT.SPECIAL,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
+      windowEvent.queueMessage(text:user.name + ' suddenly leaps upon ' + targets[0].name + '!');
+      user.addEffect(from:targets[0], id: 'base:latching', durationTurns: 4);
+    }
+  }
+)   
+
+Arts.database.newEntry(
+  data: {
+    name: 'Gravity',
+    id : 'base:gravity',
+    notifCommit : '$1 generates a dark aura above $2!',
+    notifFail : Arts.NO_NOTIF,
+    targetMode : TARGET_MODE.ONE,
+    description: 'Flattens a target, reducing their remaining HP by 30%.',
+    keywords: [],
+    durationTurns: 0,
+    kind : KIND.ABILITY,
+    traits : TRAIT.MAGIC,
+    rarity : RARITY.RARE,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
+      targets[0].damage(
+        attacker: user,
+        damage : Damage.new(
+          amount : (targets[0].stats.HP * 0.3)->ceil,
+          damageType : Damage.TYPE.NEUTRAL,
+          damageClass: Damage.CLASS.HP
+        ),
+        dodgeable : false,
+        critical : false,
+        exact : true
+      );
     }
   }
 )   

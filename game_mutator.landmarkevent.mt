@@ -14,8 +14,6 @@
 }
 
 
-
-
 @:reset ::{
 LandmarkEvent.database.newEntry(
   data : {
@@ -27,13 +25,11 @@ LandmarkEvent.database.newEntry(
       @:a = ItemSpecter.new(parent);
       return a;
     },
-
-    onIncrementTime ::(data, landmark) {
     
-    },
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -54,13 +50,10 @@ LandmarkEvent.database.newEntry(
       return a;
     },
     
-    onIncrementTime ::(data, landmark) {
-    
-    },
-    
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -79,14 +72,11 @@ LandmarkEvent.database.newEntry(
       @:a = b.new(parent);
       return a;
     },
-
-    onIncrementTime ::(data, landmark) {
     
-    },
-
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {      
+      onStep ::(data, landmark) {
+        data.step();
+      },
     },
     
     isActive ::(data) {
@@ -107,15 +97,35 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
-    onIncrementTime ::(data, landmark) {
-    
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
+    },
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
+
+
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:gnome',
+    kind : KIND.HOSTILE,
+    tier : 1,
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_gnome.mt');
+      @:a = b.new(parent);
+      return a;
     },
 
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
-    
     isActive ::(data) {
       return data.isActive()
     }
@@ -133,14 +143,10 @@ LandmarkEvent.database.newEntry(
       @:a = b.new(parent);
       return a;
     },
-
-    onIncrementTime ::(data, landmark) {
-    
-    },
-
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -159,13 +165,11 @@ LandmarkEvent.database.newEntry(
       @:a = b.new(parent);
       return a;
     },
-    onIncrementTime ::(data, landmark) {
     
-    },
-
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -186,13 +190,10 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -212,13 +213,10 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -239,13 +237,10 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -265,13 +260,10 @@ LandmarkEvent.database.newEntry(
       return a;
     },
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -293,13 +285,10 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 1,
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -323,12 +312,10 @@ LandmarkEvent.database.newEntry(
     tier : 0,
 
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -349,13 +336,10 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 2,
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -377,12 +361,10 @@ LandmarkEvent.database.newEntry(
     tier : 0,
 
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -404,12 +386,10 @@ LandmarkEvent.database.newEntry(
     tier : 0,
 
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -417,6 +397,51 @@ LandmarkEvent.database.newEntry(
     }
   }
 );
+
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:giant-flea',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_giantflea.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+    kind : KIND.HOSTILE,
+    tier : 0,
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:monolith',
+    startup ::(parent) {
+      @:b = import(module:'game_class.landmarkevent_monolith.mt');
+      @:a = b.new(parent);
+      return a;
+    },
+    kind : KIND.HOSTILE,
+    tier : 1,
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
+    },
+    
+    isActive ::(data) {
+      return data.isActive()
+    }
+  }
+);
+
 
 LandmarkEvent.database.newEntry(
   data : {
@@ -430,12 +455,10 @@ LandmarkEvent.database.newEntry(
     tier : 0,
 
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-    
-    onStep ::(data, landmark) {
-      data.step();
+    events : {
+      onStep ::(data, landmark) {
+        data.step();
+      }
     },
     
     isActive ::(data) {
@@ -488,12 +511,7 @@ LandmarkEvent.database.newEntry(
     },
 
 
-    onIncrementTime ::(data, landmark) {
-    
-    },
-    
-    onStep ::(data, landmark) {
-    },
+    events : {},
     
     isActive ::(data) {
       return false;
@@ -522,10 +540,9 @@ LandmarkEvent.database.newEntry(
     attributes : {
       id : String,
       startup : Function,
-      onStep : Function,
       tier : Number,
       kind : Number,
-      onIncrementTime : Function,
+      events : Object,
       isActive : Function
     },
     reset
@@ -550,17 +567,19 @@ LandmarkEvent.database.newEntry(
       },
       
       step::{
-        state.base.onStep(
-          landmark:landmark_,
-          data:state.data
-        );
+        if (state.base.events.onStep)
+          state.base.events.onStep(
+            landmark:landmark_,
+            data:state.data
+          );
       },
 
       incrementTime::{
-        state.base.onIncrementTime(
-          landmark:landmark_,
-          data:state.data
-        );
+        if (state.base.events.onIncrementTime)
+          state.base.events.onIncrementTime(
+            landmark:landmark_,
+            data:state.data
+          );
       },
 
       

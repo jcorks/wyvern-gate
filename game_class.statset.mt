@@ -75,9 +75,11 @@
 
 @:valueToGrade::(value) 
   <- ::? { 
+    @last = grades[0];
     for(0, (grades->size/2)->floor) ::(i) {
       if (value < grades[i*2+1])
-        send(:grades[i*2])
+        send(:last)
+      last = grades[i*2]
     }
     
     return grades[grades->size-2]

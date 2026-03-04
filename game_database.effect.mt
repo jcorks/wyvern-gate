@@ -4215,6 +4215,74 @@ Effect.newEntry(
 ) 
 
 
+
+Effect.newEntry(
+  data : {
+    name : 'Latching',
+    id : 'base:latching',
+    description: 'Every turn, drains 15% of max HP from the target. The user gains max HP and heals by that same amount. Target also receives the Latched effect.',
+    stackable: false,
+    traits : TRAIT.SPECIAL,
+    stats: StatSet.new(
+    ),
+    events : {
+      onAffliction ::(from, item, holder) {
+        @:target = from;
+        target.addEffect(id:'base:latched', from:holder, durationTurns:1);      
+      },
+
+
+      onNextTurn ::(from, item, holder, duration) {        
+        @:target = from;
+        
+
+        windowEvent.queueMessage(text: holder.name + ' continues to drain ' + target.name + '\'s blood!');
+        @:health = (target.stats.HP * 0.15)->ceil;
+        
+        target.damage(
+          attacker: from,
+          damage : Damage.new(
+            amount: health,
+            damageType : Damage.TYPE.PHYS,
+            damageClass : Damage.CLASS.HP,
+            traits : Damage.TRAIT.UNBLOCKABLE | Damage.TRAIT.FORCE_DEF_BYPASS
+          ),
+          dodgeable : false,
+          exact : true
+        );
+        target.addEffect(id:'base:latched', from:holder, durationTurns:1);
+        holder.stats.HP += health;
+        holder.heal(amount:health);
+        
+        return false;
+      },
+
+      
+      onRemoveEffect ::(from, item, holder) {
+        windowEvent.queueMessage(text:holder.name + " is no longer latching onto " + from.name + ".");
+      }
+    }
+  }
+) 
+
+Effect.newEntry(
+  data : {
+    name : 'Latched',
+    id : 'base:latched',
+    description: 'Unable to act.',
+    stackable: false,
+    traits : TRAIT.SPECIAL,
+    stats: StatSet.new(
+    ),
+    events : {
+      onNextTurn ::(from, item, holder, duration) {        
+        return false;
+      }
+    }
+  }
+) 
+
+
 Effect.newEntry(
   data : {
     name : 'Petrified',

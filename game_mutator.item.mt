@@ -3526,11 +3526,11 @@ none.name = 'None';
 }
 
 @:sizeToString ::(state) <- match(state.size) {
-  (SIZE.SMALL)   : 'smaller than expected',
-  (SIZE.TINY)  : 'quite small',
-  (SIZE.AVERAGE) : 'normally sized',
-  (SIZE.LARGE)   : 'larger than expected',
-  (SIZE.BIG)   : 'quite large' 
+  (SIZE.SMALL)   : 'small',
+  (SIZE.TINY)    : 'tiny',
+  (SIZE.AVERAGE) : 'average-sized',
+  (SIZE.LARGE)   : 'large',
+  (SIZE.BIG)     : 'quite large' 
 }
 
 @:assignSize = ::(state){
@@ -3912,6 +3912,10 @@ none.name = 'None';
 
       if (state.material != empty) 
         state.price += state.price * (state.material.pricePercentMod / 100);
+
+      if (state.apparel != empty) 
+        state.price += state.price * (state.apparel.pricePercentMod / 100);
+
         
       state.price = (state.price)->ceil;
       

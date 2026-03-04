@@ -1584,6 +1584,97 @@ Profession.newEntry(data:{
   ]
 }) 
 
+
+Profession.newEntry(data:{
+  name: 'Gnome',
+  id : 'base:gnome',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 1,
+    INT: 20,
+    DEF: 1,
+    SPD: 20,
+    LUK: 1,
+    DEX: 20
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:explosion',
+    'base:flare'
+  ],
+  passives : [
+  ]
+}) 
+
+Profession.newEntry(data:{
+  name: 'Giant Flea',
+  id : 'base:giant-flea',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  12,
+    AP:  10,
+    ATK: 1,
+    INT: 1,
+    DEF: 1,
+    SPD: 20,
+    LUK: 1,
+    DEX: 20
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:latch-on'
+  ],
+  passives : [
+  ]
+}) 
+
+
+Profession.newEntry(data:{
+  name: 'Monolith',
+  id : 'base:monolith',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  20,
+    AP:  10,
+    ATK: 1,
+    INT: 1,
+    DEF: 1,
+    SPD: 10,
+    LUK: 1,
+    DEX: 20
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:greater-banish',
+    'base:gravity'
+  ],
+  passives : [
+  ]
+}) 
+
 Profession.newEntry(data:{
   name: 'Skeleton',
   id : 'base:skeleton',

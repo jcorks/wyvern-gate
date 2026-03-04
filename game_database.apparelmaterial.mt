@@ -126,7 +126,7 @@ ApparelMaterial.newEntry(
       ATK: 25
     ),
     enchantLimit : 2,
-    pricePercentMod: 30
+    pricePercentMod: 300
   }
 )
 

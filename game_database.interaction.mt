@@ -45,16 +45,17 @@ Interaction.newEntry(
     onInteract ::(location, party) {
       @:go ::{
         // jumps to the prev menu lock
-        windowEvent.queueTransition(
-          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-          renderableStart : location.landmark.map,
-          renderableMiddle: location.landmark.island.map
-        );
         windowEvent.queueCustom(
           onEnter::{
             //invaidate a cache
             windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true);
           }
+        );
+
+        windowEvent.queueTransition(
+          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+          renderableStart : location.landmark.map,
+          renderableMiddle: location.landmark.island.map
         );
       }
     

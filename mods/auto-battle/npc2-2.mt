@@ -1,6 +1,8 @@
 return {
-  name : 'B-2',
-  profession : empty,
+  profession : 'base:monolith',
+  species : 'base:monolith',
+  name : 'Enemy 2',
+
   level : 6, // not default
   giveWeapon : false,
   giveArmor : false,

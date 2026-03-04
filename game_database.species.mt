@@ -1729,7 +1729,7 @@ Species.newEntry(data:{
     @:Entity = import(module:'game_class.entity.mt');        
     
     @:whosLeft = battle.getEnemies(:entity)->filter(::(value) <- value.isIncapacitated() == false);
-    when (whosLeft->size == empty) ::<= {
+    when (whosLeft->size == 0) ::<= {
       windowEvent.queueMessage(text: entity.name + ' seems satisfied.');
       commitBattleActions(:[BattleAction.new(
         card: Arts.new(base:Arts.database.find(id:'base:wait')),
@@ -1774,6 +1774,259 @@ Species.newEntry(data:{
     'base:aspect-fire'
   ]
 })
+
+
+Species.newEntry(data:{
+  name : 'Gnome',
+  id : 'base:gnome',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 6,
+    AP : 10,
+    ATK: 10,
+    DEF: 10,
+    INT: 10,
+    LUK: 10,
+    SPD: 10,
+    DEX: 10
+  ),
+  levelPenalty : 4,  
+
+  
+  baseStats : StatSet.new(
+    HP:   40,
+    AP:   20,
+    ATK:  1,
+    INT:  300,
+    DEF:  1,
+    LUK:  6,
+    SPD:  100,
+    DEX:  100
+  ),
+
+
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    @:Entity = import(module:'game_class.entity.mt');        
+
+    if (entity.data.turn == empty)
+      entity.data.turn = 1;
+
+    windowEvent.queueMessage(
+      speaker: entity.name,
+      text:[
+        '...',
+        '...Ho hOo!',
+        '...Hah!! Ho..'
+      ][entity.data.turn%3]
+    );
+
+
+    @:whosLeft = battle.getEnemies(:entity)->filter(::(value) <- value.isIncapacitated() == false);
+
+      
+    if (entity.data.turn % 3 == 0) ::<= {
+      if (random.try(percentSuccess:33)) ::<= {
+
+        commitBattleActions(:[
+          BattleAction.new(
+            card: Arts.new(base:Arts.database.find(id:'base:gnome-call')),
+            turnIndex : 0,
+
+            targets: [
+              random.pickArrayItem(list:whosLeft)
+            ],
+            targetParts : [
+              Entity.normalizedDamageTarget()
+            ],
+            extraData: {}            
+          )      
+        ]);
+      
+      } else ::<= {
+        commitBattleActions(:[
+          BattleAction.new(
+            card: Arts.new(base:Arts.database.find(id:'base:flare')),
+            turnIndex : 0,
+
+            targets: [
+              random.pickArrayItem(list:whosLeft)
+            ],
+            targetParts : [
+              Entity.normalizedDamageTarget()
+            ],
+            extraData: {}            
+          )      
+        ]);      
+      }
+    } else ::<= {
+
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    }
+      
+      
+    entity.data.turn += 1;
+    entity.ap += 2;
+  },  
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  passives : [
+  ]
+})
+
+
+
+
+Species.newEntry(data:{
+  name : 'Giant Flea',
+  id : 'base:giant-flea',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 10,
+    AP : 3,
+    ATK: 10,
+    DEF: 10,
+    INT: 10,
+    LUK: 10,
+    SPD: 10,
+    DEX: 10
+  ),
+  levelPenalty : 4,  
+
+  
+  baseStats : StatSet.new(
+    HP:   20,
+    AP:   20,
+    ATK:  1,
+    INT:  1,
+    DEF:  1,
+    LUK:  6,
+    SPD:  100,
+    DEX:  100
+  ),
+
+
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    @:Entity = import(module:'game_class.entity.mt');        
+    @:whosLeft = battle.getEnemies(:entity)->filter(::(value) <- value.isIncapacitated() == false);
+
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:latch-on')),
+        turnIndex : 0,
+
+        targets: [
+          random.pickArrayItem(list:whosLeft)
+        ],
+        targetParts : [
+          Entity.normalizedDamageTarget()
+        ],
+        extraData: {}            
+      )      
+    ]);
+
+    
+    entity.ap += 2;
+  },  
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  passives : [
+  ]
+})
+
+
+Species.newEntry(data:{
+  name : 'Monolith',
+  id : 'base:monolith',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 10,
+    AP : 3,
+    ATK: 10,
+    DEF: 10,
+    INT: 10,
+    LUK: 10,
+    SPD: 10,
+    DEX: 10
+  ),
+  levelPenalty : 4,  
+
+  
+  baseStats : StatSet.new(
+    HP:   99,
+    AP:   99,
+    ATK:  30,
+    INT:  1,
+    DEF:  10,
+    LUK:  6,
+    SPD:  1,
+    DEX:  100
+  ),
+
+
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    @:Entity = import(module:'game_class.entity.mt');        
+    @:whosLeft = battle.getEnemies(:entity)->filter(::(value) <- value.isIncapacitated() == false);
+
+    if (random.try(percentSuccess:40)) ::<= {
+
+      commitBattleActions(:[
+        BattleAction.new(
+          card: Arts.new(base:Arts.database.find(id:'base:greater-banish')),
+          turnIndex : 0,
+
+          targets: [
+            random.pickArrayItem(list:whosLeft)
+          ],
+          targetParts : [
+            Entity.normalizedDamageTarget()
+          ],
+          extraData: {}            
+        )      
+      ]);
+    }
+  
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:gravity')),
+        turnIndex : 0,
+
+        targets: [
+          random.pickArrayItem(list:whosLeft)
+        ],
+        targetParts : [
+          Entity.normalizedDamageTarget()
+        ],
+        extraData: {}            
+      )      
+    ]);
+
+
+    entity.ap += 2;
+  },  
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  passives : [
+  ]
+})
+
 
 
 Species.newEntry(data:{
