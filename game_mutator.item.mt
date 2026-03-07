@@ -1015,8 +1015,8 @@ Item.database.newEntry(data : {
   // fatigued
   equipMod : StatSet.new(
     ATK: 25,
-    DEF: 35,
-    SPD: -15,
+    DEF: 45,
+    SPD: -35,
     DEX: 10
   ),
   useEffects : [
@@ -1028,7 +1028,9 @@ Item.database.newEntry(data : {
     'base:leg-sweep'
   ],
 
-  equipEffects : [],
+  equipEffects : [
+    'base:shielding',
+  ],
   traits : 
     TRAIT.SHARP  |
     TRAIT.METAL  |
@@ -1060,7 +1062,7 @@ Item.database.newEntry(data : {
   weight : 17,
   basePrice: 350,
   levelMinimum : 1,
-  tier: 2,
+  tier: 3,
   enchantLimit : 15,
   useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1068,8 +1070,8 @@ Item.database.newEntry(data : {
   equipMod : StatSet.new(
     ATK: 15,
     DEF: 55,
-    SPD: -15,
-    DEX: -10
+    SPD: -55,
+    DEX: -20
   ),
   useEffects : [
     'base:fling',
@@ -1080,7 +1082,9 @@ Item.database.newEntry(data : {
     'base:leg-sweep'
   ],
 
-  equipEffects : [],
+  equipEffects : [
+    'base:strong-shielding',
+  ],
   traits : 
     TRAIT.BLUNT  |
     TRAIT.METAL  |

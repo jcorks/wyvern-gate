@@ -2221,7 +2221,7 @@
           if (data.onLeave)
             data.onLeave();          
         }
-        canvas.commit();        
+        //canvas.commit();        
         choiceStack[choiceStack->keycount-1].rendered = empty;
         if (clearResolve) ::<= {
           getResolveQueue()->setSize(:0);
@@ -2310,7 +2310,7 @@
         renderableMiddle,
         renderableStart
       ) {
-      
+        breakpoint();
         when(kind == TRANSITION.FADE_TO_BLACK) ::<= {
           this.queueCustomTransition(
             renderableStart : renderableStart,

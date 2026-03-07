@@ -98,6 +98,9 @@ import(module:'game_class.landmarkevent_flamingskull.mt')
 import(module:'game_class.landmarkevent_skeleton.mt')
 import(module:'game_class.landmarkevent_goldslime.mt')
 import(module:'game_class.landmarkevent_creatureencounters.mt')
+import(module:'game_class.landmarkevent_gnome.mt')
+import(module:'game_class.landmarkevent_giantflea.mt')
+import(module:'game_class.landmarkevent_monolith.mt')
 
 
 @:distance::(x0, y0, x1, y1) {
@@ -1646,7 +1649,10 @@ return empty;
             );
           }
         };
-        windowEvent.queueTransition(kind:windowEvent.TRANSITION.FADE_TO_BLACK, renderableMiddle:cursorMoveRenderable);
+        windowEvent.queueTransition(
+          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+          renderableMiddle:cursorMoveRenderable
+        );
         
 
         

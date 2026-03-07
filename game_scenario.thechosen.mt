@@ -3375,7 +3375,11 @@ return {
               text: 'You are teleported away...'
             );
             @:instance = import(module:'game_singleton.instance.mt');
-            windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
+            windowEvent.queueCustom(onEnter::{
+              windowEvent.jumpToTag(name:'VisitIsland');
+              instance.unlockScenarios();
+              instance.unlockSeeds();
+            });            
           }
         ]
       }
@@ -4723,7 +4727,7 @@ return {
           
         ],
         possibleSceneryCharacters : [
-          '▒', '▒', '▒', '▒', '▒'
+          '.', '.', '.', '.', '.'
         ],
         
         traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,

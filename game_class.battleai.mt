@@ -277,7 +277,10 @@
 
           hand = hand->filter(::(value) <- 
               (Arts.database.find(id:value.card.id).usageHintAI != Arts.USAGE_HINT.DONTUSE) &&
-              (!(value.overrideTargets->type == Boolean && value.overrideTargets == false))
+              (!(value.overrideTargets->type == Boolean && value.overrideTargets == false)) &&
+              
+              // only party members are beholden to this limit
+              (world.party.isMember(:user_) == false || value.card.canUse)
           );
                   
           // limit max action count by tier

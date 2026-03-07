@@ -969,6 +969,49 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Shielding',
+    id : 'base:shielding',
+    description: 'Reduces incoming damage from attacks by 20%.',
+    stackable: false,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onAffliction ::(from, item, holder) {
+        windowEvent.queueMessage(
+          text: holder.name + ' takes a guarding stance!'
+        );
+      
+      },
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
+        windowEvent.queueMessage(text:holder.name + "'s defending stance reduces damage significantly!");
+        damage.amount *= 0.8;
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Strong Shielding',
+    id : 'base:strong-shielding',
+    description: '30% chance to reduce an incoming attack\'s power to 0 damage.',
+    stackable: false,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
+        if (random.try(percentSuccess:30)) ::<= {
+          windowEvent.queueMessage(text:holder.name + "'s shielding reduced damage by 30%!");
+          damage.amount = 0;
+        }
+      }
+    }
+  }
+)
+
+
+Effect.newEntry(
+  data : {
     name : 'Apparition',
     id : 'base:apparition',
     description: 'Ghostly apparition makes it particularly hard to hit.',

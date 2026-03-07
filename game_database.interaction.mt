@@ -2139,10 +2139,16 @@ Interaction.newEntry(
 
 
             world.loadIsland(key, onDone::(island) {
-              
-              instance.visitCurrentIsland(
-                atGate:true
-              );
+              windowEvent.queueCustom(
+                renderable : {
+                  render ::<- canvas.fill()
+                },
+                onLeave :: {
+                  instance.visitCurrentIsland(
+                    atGate:true
+                  );
+                }
+              )
             });
           });
         }
