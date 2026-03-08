@@ -378,7 +378,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:scroll', minCount:3);
     addMissing(id:'base:inlet-crystal', minCount:2);
     addMissing(id:'base:inlet-gem', minCount:2);
-    addMissing(id:'base:inlet-soulgem', minCount:2);
+    addMissing(id:'base:inlet-soulgem', minCount:4);
     addMissing(id:'base:wyvern-flower', minCount:1);
     
     for(location.inventory.items->size, 60 + (location.ownedBy.level / 4)->ceil)::(i) {
@@ -724,6 +724,29 @@ Location.database.newEntry(data:{
   }
 })
 
+
+::<= {
+
+@:restockShop ::(location){
+    for(0, 15 + random.integer(from:4, to:6))::(i) {
+
+      location.inventory.add(
+        item:Item.new(
+          forceNeedsAppraisal : false,
+          base: Item.database.getRandomFiltered(
+            filter::(value) <- (
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+              location.ownedBy.level >= value.levelMinimum &&
+              (value.traits & Item.TRAIT.METAL) &&
+              (value.traits & Item.TRAIT.HAS_QUALITY)
+            )
+          )
+        )
+      );
+
+    }
+}
+
 Location.database.newEntry(data:{
   name: 'Blacksmith',
   id: 'base:blacksmith',
@@ -760,23 +783,7 @@ Location.database.newEntry(data:{
     location.ownedBy.profession = Profession.find(id:'base:blacksmith');
     location.name = 'Blacksmith';
     @:story = import(module:'game_singleton.story.mt');
-    for(0, 1 + (location.ownedBy.level / 4)->ceil)::(i) {
-
-      location.inventory.add(
-        item:Item.new(
-          forceNeedsAppraisal : false,
-          base: Item.database.getRandomFiltered(
-            filter::(value) <- (
-              value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
-              location.ownedBy.level >= value.levelMinimum &&
-              (value.traits & Item.TRAIT.METAL) &&
-              (value.traits & Item.TRAIT.HAS_QUALITY)
-            )
-          )
-        )
-      );
-
-    }
+    restockShop(location);
   },      
   onInteract ::(location) {
     
@@ -792,9 +799,22 @@ Location.database.newEntry(data:{
   },
   
   onIncrementTime::(location, time) {
-  
+    @:world = import(module:'game_singleton.world.mt');
+    if (world.time == world.TIME.MIDNIGHT) ::<= {
+      @:items = random.scrambled(:location.inventory.items);
+      
+      foreach(items) ::(k, v) <- location.inventory.remove(:v)
+      
+      if (items->size > 1)
+        items->setSize(:(items->size/2)->floor);
+      
+      restockShop(location);
+      
+     
+    }
   }
-})    
+})   
+} 
 
 
 Location.database.newEntry(data:{

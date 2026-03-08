@@ -328,6 +328,7 @@
     }
     
     @holder;
+    @events = true;
   
     this.interface = {
       defaultLoad ::(parent) {
@@ -343,6 +344,10 @@
       
       subscribe ::(callback) {
         subscribers->push(:callback);
+      },
+      
+      events : {
+        set ::(value) <- events = value
       },
       
       save :: {
@@ -527,6 +532,7 @@
       
       
       emitEvent::(*args) {
+        when(events == false) empty;
         @:name = args.name => String;
         @:emitCondition = args.emitCondition;
       

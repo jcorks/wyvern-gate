@@ -50,9 +50,9 @@ return {
     /// The database class upon which this Mutator is based on.
     database  
   ) {
-    @:staticsOut = if (statics) {
+    @:staticsOut = if (statics) ({
       ...statics
-    } else {}
+    }) else ({})
     
     staticsOut.database = {
       get ::<- database
@@ -106,9 +106,9 @@ return {
     database
     
   ) {
-    @:staticsOut = if (statics) {
+    @:staticsOut = if (statics) ({
       ...statics
-    } else {}
+    }) else ({})
     
     staticsOut.database = {
       get ::<- database

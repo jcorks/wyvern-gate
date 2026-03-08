@@ -205,7 +205,7 @@ Island.database.newEntry(
 
   return ::(map, island, base) {
     @:loc = if (map.areas->size == 0)
-      {x:0, y:0}
+      ({x:0, y:0})
     else
       random.scrambled(:map.areas)[0];
       

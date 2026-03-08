@@ -22,25 +22,23 @@
 
 return ::(canCancel => Boolean, onPick => Function, keep, onCancel, leftWeight, topWeight, prompt, onGetPrompt, filter) {
   @:world = import(module:'game_singleton.world.mt');
+
+
   @:inv = world.party.inventory.clone();
-  @:altNames = {};
-  @:equippedBy = {};
-  
+  @:all = world.party.getAllItems();
+  @:items = all[0]
+  @:equippedBy = all[1];
+  @:altNames = [];
 
-  foreach(world.party.members) ::(k, member) {
-    @:prefix = member.name + ": ";
-    foreach(Entity.EQUIP_SLOTS) ::(k, slot) {
-      when(slot == Entity.EQUIP_SLOTS.HAND_R) empty;
-      @:item = member.getEquipped(slot);
-      when(item == empty) empty;
-      when(item.base.id == 'base:none') empty;
+  @:inv = Inventory.new();
+  foreach(items) ::(i, v) {
+      @prefix = '';
       
-      when(filter != empty && ! filter(value:item)) empty;
-
-      inv.add(:item);
-      altNames[item] = prefix + item.name;
-      equippedBy[item] = member;
-    }
+      if (equippedBy[i] != empty) ::<= {
+        prefix = equippedBy[i].name + ': ';
+      }
+      inv.add(:v);
+      altNames[i] = prefix + v.name;
   }
   
   @:pickItem = import(:'game_function.pickitem.mt');

@@ -372,7 +372,7 @@ Item.database.newEntry(data : {
   weight : 2,
   levelMinimum : 1,
   tier: 0,
-  enchantLimit : 10,
+  enchantLimit : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   events : {},
 
@@ -862,7 +862,7 @@ Item.database.newEntry(data : {
   basePrice: 70,
   levelMinimum : 1,
   tier: 0,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -909,7 +909,7 @@ Item.database.newEntry(data : {
   basePrice: 90,
   levelMinimum : 1,
   tier: 0,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -960,7 +960,7 @@ Item.database.newEntry(data : {
   basePrice: 110,
   levelMinimum : 1,
   tier: 0,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -1009,7 +1009,7 @@ Item.database.newEntry(data : {
   basePrice: 250,
   levelMinimum : 1,
   tier: 1,
-  enchantLimit : 15,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -1063,7 +1063,7 @@ Item.database.newEntry(data : {
   basePrice: 350,
   levelMinimum : 1,
   tier: 3,
-  enchantLimit : 15,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
 
   // fatigued
@@ -1116,7 +1116,7 @@ Item.database.newEntry(data : {
   tier: 3,
   basePrice: 200,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1165,7 +1165,7 @@ Item.database.newEntry(data : {
   tier: 3,
   basePrice: 350,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1214,7 +1214,7 @@ Item.database.newEntry(data : {
   basePrice: 150,
   levelMinimum : 1,
   tier: 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1265,7 +1265,7 @@ Item.database.newEntry(data : {
   basePrice: 150,
   levelMinimum : 1,
   tier: 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1314,7 +1314,7 @@ Item.database.newEntry(data : {
   basePrice: 150,
   levelMinimum : 1,
   tier: 2,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1363,7 +1363,7 @@ Item.database.newEntry(data : {
   basePrice: 120,
   tier: 2,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stab',
@@ -1411,7 +1411,7 @@ Item.database.newEntry(data : {
   basePrice: 76,
   levelMinimum : 1,
   tier: 0,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     //'base:doublestrike',
@@ -1461,7 +1461,7 @@ Item.database.newEntry(data : {
   basePrice: 76,
   levelMinimum : 1,
   tier: 3,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:precise-strike',
@@ -1506,7 +1506,7 @@ Item.database.newEntry(data : {
   weight : 12,
   tier: 1,
   basePrice: 87,
-  enchantLimit : 10,
+  enchantLimit : 4,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
@@ -1553,7 +1553,7 @@ Item.database.newEntry(data : {
   weight : 1,
   tier: 0,
   basePrice: 35,
-  enchantLimit : 10,
+  enchantLimit : 4,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1598,7 +1598,7 @@ Item.database.newEntry(data : {
   weight : 0.5,
   tier: 0,
   basePrice: 35,
-  enchantLimit : 10,
+  enchantLimit : 4,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -1686,7 +1686,7 @@ Item.database.newEntry(data : {
   basePrice: 105,
   tier: 2,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stun',
@@ -1732,7 +1732,7 @@ Item.database.newEntry(data : {
   basePrice: 105,
   tier: 0,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stun',
@@ -1778,7 +1778,7 @@ Item.database.newEntry(data : {
   basePrice: 105,
   tier: 1,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stun',
@@ -1825,7 +1825,7 @@ Item.database.newEntry(data : {
   basePrice: 40,
   levelMinimum : 1,
   tier: 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:stun',
@@ -1871,7 +1871,7 @@ Item.database.newEntry(data : {
   basePrice: 100,
   levelMinimum : 1,
   tier: 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
     'base:fire',
@@ -1924,7 +1924,7 @@ Item.database.newEntry(data : {
   weight : 8,
   basePrice: 100,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   tier: 2,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
@@ -1977,7 +1977,7 @@ Item.database.newEntry(data : {
   rarity : 350,
   weight : 10,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   basePrice: 200,
   useTargetHint : USE_TARGET_HINT.ONE,
   tier: 2,
@@ -2024,7 +2024,7 @@ Item.database.newEntry(data : {
   rarity : 350,
   weight : 10,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   basePrice: 250,
   useTargetHint : USE_TARGET_HINT.ONE,
   tier: 2,
@@ -2073,7 +2073,7 @@ Item.database.newEntry(data : {
   weight : 1,
   levelMinimum : 1,
   tier: 0,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 220,
   possibleArts : [
@@ -2118,7 +2118,7 @@ Item.database.newEntry(data : {
   weight : 1,
   levelMinimum : 1,
   tier: 0,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 100,
   possibleArts : [],
@@ -2155,7 +2155,7 @@ Item.database.newEntry(data : {
   weight : 1,
   tier: 0,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 100,
   possibleArts : [],
@@ -2191,7 +2191,7 @@ Item.database.newEntry(data : {
   weight : 1,
   tier: 2,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 40,
   possibleArts : [],
@@ -2227,7 +2227,7 @@ Item.database.newEntry(data : {
   weight : 1,
   levelMinimum : 1,
   tier: 2,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 40,
   possibleArts : [],
@@ -2260,7 +2260,7 @@ Item.database.newEntry(data : {
   tier: 2,
   sortType : SORT_TYPE.ACCESSORIES,
   basePrice: 3000,
-  enchantLimit : 10,
+  enchantLimit : 3,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
 
@@ -2299,7 +2299,7 @@ Item.database.newEntry(data : {
   weight : 5,
   levelMinimum : 1,
   tier: 2,
-  enchantLimit : 10,
+  enchantLimit : 2,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 105,
   possibleArts : [],
@@ -2334,7 +2334,7 @@ Item.database.newEntry(data : {
   weight : 1,
   levelMinimum : 1,
   tier: 2,
-  enchantLimit : 10,
+  enchantLimit : 2,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 55,
   possibleArts : [],
@@ -2370,7 +2370,7 @@ Item.database.newEntry(data : {
   weight : 1,
   levelMinimum : 1,
   tier: 2,
-  enchantLimit : 10,
+  enchantLimit : 2,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 10,
   possibleArts : [],
@@ -2405,7 +2405,7 @@ Item.database.newEntry(data : {
   weight : 10,
   tier: 3,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 3,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 200,
   possibleArts : [],
@@ -2440,7 +2440,7 @@ Item.database.newEntry(data : {
   weight : 1,
   tier: 1,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 350,
   possibleArts : [],
@@ -2477,7 +2477,7 @@ Item.database.newEntry(data : {
   weight : 3,
   levelMinimum : 1,
   tier: 1,
-  enchantLimit : 10,
+  enchantLimit : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 200,
   possibleArts : [],
@@ -2512,7 +2512,7 @@ Item.database.newEntry(data : {
   rarity : 500,
   weight : 5,
   levelMinimum : 1,
-  enchantLimit : 10,
+  enchantLimit : 2,
   tier: 2,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 350,
@@ -2552,7 +2552,7 @@ Item.database.newEntry(data : {
   weight : 9,
   levelMinimum : 1,
   tier: 3,
-  enchantLimit : 10,
+  enchantLimit : 2,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 400,
   possibleArts : [],
@@ -3019,7 +3019,7 @@ Item.database.newEntry(data : {
   rarity : 39,
   weight : 2,
   tier: 0,
-  enchantLimit : 40,
+  enchantLimit : 4,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 30,
@@ -3060,7 +3060,7 @@ Item.database.newEntry(data : {
   rarity : 500,
   weight : 1,
   tier: 4,
-  enchantLimit : 40,
+  enchantLimit : 0,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 10000,
@@ -3091,7 +3091,7 @@ Item.database.newEntry(data : {
   rarity : 500,
   weight : 1,
   tier: 4,
-  enchantLimit : 40,
+  enchantLimit : 4,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 10,
@@ -3123,7 +3123,7 @@ Item.database.newEntry(data : {
   rarity : 500,
   weight : 0,
   tier: 999,
-  enchantLimit : 40,
+  enchantLimit : 4,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 10,
@@ -3164,7 +3164,7 @@ Item.database.newEntry(data : {
   rarity : 500,
   weight : 0.1,
   tier: 0,
-  enchantLimit : 40,
+  enchantLimit : 4,
   levelMinimum : 1,
   useTargetHint : USE_TARGET_HINT.ONE,
   basePrice: 10000,
@@ -3248,7 +3248,7 @@ Item.database.newEntry(
     rarity : 500,
     weight : 0.1,
     tier: 2,
-    enchantLimit : 40,
+    enchantLimit : 4,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 30000,
@@ -3317,7 +3317,7 @@ Item.database.newEntry(
     rarity : 500,
     weight : 0.1,
     tier: 4,
-    enchantLimit : 40,
+    enchantLimit : 4,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
     basePrice: 70000,
@@ -3362,14 +3362,14 @@ Item.database.newEntry(data : {
   id : 'base:tiny-key',
   description: 'A small, magical key. Can be used to unlock various things.',
   examine : '',
-  sortType : SORT_TYPE.KEYS,
+  sortType : SORT_TYPE.MISC,
   equipType: TYPE.TWOHANDED,
   rarity : 100,
   weight : 0.4,
   basePrice: 10000,
   tier: 0,
   levelMinimum : 1000000000,
-  enchantLimit : 20,
+  enchantLimit : 4,
   useTargetHint : USE_TARGET_HINT.ONE,
   possibleArts : [
   ],
@@ -3407,7 +3407,7 @@ Item.database.newEntry(data : {
     basePrice: 1000,
     tier: 0,
     levelMinimum : 1000000000,
-    enchantLimit : 20,
+    enchantLimit : 4,
     useTargetHint : USE_TARGET_HINT.ONE,
     possibleArts : [
     ],
@@ -3874,11 +3874,10 @@ none.name = 'None';
         
         if (state.needsAppraisal == false && rngEnchantHint != empty && (random.try(percentSuccess:25) || forceEnchant)) ::<= {
           @enchantCount = if (forceEnchantCount) forceEnchantCount else random.integer(from:1, to:match(world.island.tier) {
-            (6, 7, 8, 9, 10):  8,
             (3,4,5):  4,
             (1, 2):  2,
             (0): 1,
-            default: ((world.island.tier**0.5) * 3.3)->floor
+            default: 4
           });
           
           
@@ -3890,7 +3889,7 @@ none.name = 'None';
           for(0, enchantCount)::(i) {
             @mod = ItemEnchant.new(
               base:
-              if (world.island.tier > 0 && random.try(percentSuccess:25)) 
+              if (world.island.tier > 0 && random.try(percentSuccess:30)) 
                 ItemEnchant.database.find(id:'base:soul')
               else
                 ItemEnchant.database.getRandomFiltered(
@@ -3944,12 +3943,14 @@ none.name = 'None';
             ]),
             
           (2): random.integer(from:0, to:4),
-          (3): random.integer(from:1, to:5),
-          default: random.integer(from:2, to:7)
+          (3): random.integer(from:1, to:4),
+          default: random.integer(from:3, to:4)
         }
         
+        
+        
         if (slotCount > 0) ::<= {
-          state.price += 400**(1+0.1*slotCount);
+          state.price += 400**(1+0.15*slotCount);
           state.inletSlotData = import(:'game_class.inletset.mt').new(size:slotCount);          
         }
       }
@@ -4035,7 +4036,7 @@ none.name = 'None';
       @:base = _.state.base;
       @:item = Item.new(
         base,
-        forceEnchantCount: random.integer(from:3, to:7),
+        forceEnchantCount: random.integer(from:5, to:7),
         forceEnchant : true,
         rngEnchantHint : true,
         forceNeedsAppraisal : false,
@@ -4291,6 +4292,14 @@ none.name = 'None';
       @:state = _.state;
       @:this = _.this;
       @:Effect = import(module:'game_database.effect.mt');
+      
+      when (state.needsAppraisal)
+        windowEvent.queueMessage(
+          speaker : this.name + ': Description',
+          text : this.description
+        );
+            
+      
       windowEvent.queueMessageSet(
         speakers : [
           this.name + ': Description'
@@ -4300,7 +4309,6 @@ none.name = 'None';
         ]
       );
       
-      when (state.needsAppraisal) empty;
       
       if (this.enchantLimit > 0 && ((this.base.traits & Item.TRAIT.CAN_HAVE_ENCHANTMENTS) != 0))    
         windowEvent.queueReader(
@@ -4356,47 +4364,51 @@ none.name = 'None';
 
         );
         
-        
-      windowEvent.queueMessageSet(
-        speakers : [
-          this.name + if (this.inletStats != empty) ': Gem stats' else ': Equip Stats',
-          this.name + ': Use Effects'
-        ],
-        set : [
-          
-          String.combine(:
-            if (this.inletStats != empty)
-              [
-                'Gem shape: ' + InletSet.SLOT_NAMES[this.inletShape] + '\n', 
-                ...this.inletStats.descriptionAugmentLines->map(::(value) <- value + '\n')
-              ]
-            else
-              state.stats.descriptionRateLinesBase(:this.equipModBase)->map(::(value) <- value + '\n')
-          ),
-          
-          if (state.useEffects->size > 0) ::<= {
-            @out = '';
-            when (state.useEffects->keycount == 0) 'None.';
-            foreach(state.useEffects)::(i, effect) {
-              @:eff = Effect.find(id:effect);
-              out = out + ' - ' + eff.name + ': ' + eff.description + '\n';
-            }
-            return out;
-          } else '',
+      if (state.useEffects->filter(::(value) <- value != 'base:fling' && value != 'base:break-item')->size > 0)
+        windowEvent.queueReader(
+          prompt: this.name + ': Use Effects',
+          lines : [
+
             
-        ]
-      )
+            if (state.useEffects->size > 0) ::<= {
+              @out = '';
+              when (state.useEffects->keycount == 0) 'None.';
+              foreach(state.useEffects)::(i, effect) {
+                @:eff = Effect.find(id:effect);
+                out = out + ' - ' + eff.name + ': ' + eff.description;
+              }
+              return out;
+            } else '',
+              
+          ]
+        )
+      if ((state.base.traits & Item.TRAIT.STRANGE_TO_EQUIP) == 0) 
+        windowEvent.queueReader(
+          prompt :
+            this.name + ': Equip Stats'
+          ,
+          lines : 
+            state.stats.descriptionRateLinesBase(:this.equipModBase)
+          
+        )
+
+      if (this.inletStats != empty)
+        windowEvent.queueReader(
+          prompt : [
+            this.name + ': Gem stats'
+          ],
+          lines : [
+            'Gem shape: ' + InletSet.SLOT_NAMES[this.inletShape], 
+            ...this.inletStats.descriptionAugmentLines
+          ]
+        )
+
       
       if (state.inletSlotData)
         state.inletSlotData.queueShowBasic();
       
       if (by != empty) ::<= {
-        when(by.profession.weaponAffinity != state.base.name) empty;
-        windowEvent.queueMessage(
-          speaker:by.name,
-          pageAfter:canvas.height-4,
-          text:'Oh! This weapon type really works for me as ' + correctA(word:by.profession.name) + '.'
-        );  
+        by.exclaimAGoodWeapon(:this);
       }
     },
     

@@ -104,7 +104,7 @@ ApparelMaterial.newEntry(
       DEX: 5,
       DEF: 5
     ),
-    enchantLimit : 5,
+    enchantLimit : 2,
     pricePercentMod: 100
   }
 )
@@ -142,7 +142,7 @@ ApparelMaterial.newEntry(
       ATK: 70,
       SPD: 30
     ),
-    enchantLimit : 5,
+    enchantLimit : 4,
     pricePercentMod: 1200
   }
 )
@@ -163,7 +163,7 @@ ApparelMaterial.newEntry(
       ATK: 35,
       SPD: 35
     ),
-    enchantLimit : 7,
+    enchantLimit : 4,
     pricePercentMod: 3000
   }
 )
@@ -184,7 +184,7 @@ ApparelMaterial.newEntry(
       SPD: 105,
       ATK: 105
     ),
-    enchantLimit : 10,
+    enchantLimit : 4,
     pricePercentMod: 10000
   }
 )

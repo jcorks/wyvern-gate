@@ -2102,15 +2102,10 @@ Interaction.newEntry(
     keepInteractionMenu : false,
     onInteract ::(location, party) {
 
-      @:keys = [];
-      @:keynames = [];
-      foreach(party.inventory.items)::(index, item) {
-        if (item.base.name->contains(key:'Key')) ::<= {
-          keys->push(value: item);
-          keynames->push(value: item.name);
-        }
-          
-      }
+
+
+      @:keys = party.getAllItems(::(value) <- value.base.sortType == Item.SORT_TYPE.KEYS)[0];
+      @:keynames = keys->map(::(value) <- value.name);
       when(keys->keycount == 0)
         windowEvent.queueMessage(text:'Entering a gate requires a key. The party has none.');
         

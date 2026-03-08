@@ -2287,7 +2287,6 @@ return {
         location.ownedBy.supportArts = [
           'base:bloods-shield',                  
           'base:bloods-exaltation',                  
-          'base:bloods-ward',                  
           'base:bloods-summoning',
           'base:banishing-light'
         ]->map(::(value) <- Arts.new(base:Arts.database.find(:value))); 
@@ -2364,7 +2363,6 @@ return {
         location.ownedBy.supportArts = [
           'base:bloods-shield',                  
           'base:bloods-exaltation',                  
-          'base:bloods-ward',                  
         ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));  
         location.ownedBy.name = 'Wyvern of Light';
         location.ownedBy.removeAllProfessionArts();

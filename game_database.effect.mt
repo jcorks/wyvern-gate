@@ -1001,7 +1001,7 @@ Effect.newEntry(
     events : {
       onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         if (random.try(percentSuccess:30)) ::<= {
-          windowEvent.queueMessage(text:holder.name + "'s shielding reduced damage by 30%!");
+          windowEvent.queueMessage(text:holder.name + "'s shielding negated the damage!");
           damage.amount = 0;
         }
       }
@@ -2558,6 +2558,8 @@ Effect.newEntry(
         windowEvent.queueMessage(
           text: from.name + ' flung the ' + item.name + ' at ' + holder.name + '!'
         );
+
+        item.throwOut();
         
         windowEvent.queueCustom(
           onEnter::{
@@ -2580,7 +2582,6 @@ Effect.newEntry(
           }
         );
 
-        item.throwOut();
       }
     }
   }
@@ -6836,8 +6837,9 @@ Effect.newEntry(
       onPreDamage ::(from, item, holder, attacker, damage, targetPart) {
         when(damage.amount == 0) empty;
         
-        when(random.try(percentSuccess:33))
+        when(random.try(percentSuccess:33)) ::<= {
           damage.amount = 0
+        }
         
         damage.amount += 1;
         windowEvent.queueMessage(

@@ -25,18 +25,14 @@
 @:Damage = import(module:'game_class.damage.mt');
 
 @:CONDITION_CHANCES = [
-  10,
-  33,
+  20,
   60,
-  80,
   95
 ];
 
 @:CONDITION_CHANCE_NAMES = [
   'rarely',
-  'sometimes',
   'often',
-  'very often',
   'almost always'
 ];
 

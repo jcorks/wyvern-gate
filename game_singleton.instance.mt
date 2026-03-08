@@ -50,6 +50,7 @@ import(module:'game_function.trap.mt');
 import(module:'game_singleton.commoninteractions.mt');
 import(module:'game_function.questguild.mt');
 import(:'game_class.inletset.mt');
+@:hud = import(:'game_singleton.hud.mt');
 @:choicesColumns = import(:'game_function.choicescolumns.mt');
 
 
@@ -138,6 +139,7 @@ import(module:'game_function.newrecord.mt');
   );
 }
 
+
 @:renderKnowledgeStone ::{
   @:stone = world.party.getItem(condition::(value) <- value.base.id == 'base:knowledge-stone');
   when(stone == empty) empty;
@@ -225,6 +227,26 @@ import(module:'game_function.newrecord.mt');
       lines: needsDisplay,
       title: 'Charging: ' + (70 - world.party.steps % 70) + ' steps left'
     );
+}
+
+
+@:setupDefaultHud ::{
+  hud.clear();
+  hud.addRenderer(
+    name: 'Wyvern.HUD.knowledgeStone',
+    onLandmarkStep ::(landmark, island) {
+      breakpoint();
+      renderKnowledgeStone();
+    }
+  );        
+
+  hud.addRenderer(
+    name: 'Wyvern.HUD.artsStatus',
+    onLandmarkStep ::(landmark, island) {
+      renderArtsStatus(landmark);          
+    }
+  );        
+  breakpoint();
 }
 return class(
   name: 'Wyvern.Instance',
@@ -345,6 +367,8 @@ return class(
     @features_ = 0;
     @onLoadSettings_;
     
+
+    
     @:colorMenu::(onChange, prompt, value)  {
       windowEvent.queueChoices(
         prompt,
@@ -377,8 +401,22 @@ return class(
         }
       );
     }
-    
-    
+
+    @:init :: {
+      settings.fullscreen = true;
+      settings.crtShader = true;
+      settings.volume = 0.7;
+      settings.volumeBGM = 0.3;
+      settings.volumeSFX = 0.5;
+      settings.bgColor = [33, 33, 58];
+      settings.fgColor = [186, 240, 228];
+      settings.debugMode = false;
+      settings.animations = true;
+      settings.effects = true;
+      settings.hud = true    
+    }    
+
+
     this.interface = {
       FEATURES : {
         get :: <- FEATURES
@@ -387,21 +425,15 @@ return class(
       hasFeatures ::<- features_ != 0,
       
       defaultSettings ::{
-        settings.fullscreen = true;
-        settings.crtShader = true;
-        settings.volume = 0.7;
-        settings.volumeBGM = 0.3;
-        settings.volumeSFX = 0.5;
-        settings.bgColor = [33, 33, 58];
-        settings.fgColor = [186, 240, 228];
-        settings.debugMode = false;
-        settings.animations = true;
-        settings.effects = true;
+        init();
         this.updateSettings();
       },
       
       optionsMenu:: {
-        settings = JSON.decode(string:onLoadSettings_());
+        init();
+        foreach(JSON.decode(string:onLoadSettings_())) ::(k, v) {
+          settings[k] = v;
+        }
 
 
         @:opts = [
@@ -423,6 +455,16 @@ return class(
                 this.updateSettings();
               }
             ),
+          'HUD', ::<-          
+            windowEvent.queueAskBoolean(
+              onGetPrompt::<- 'Toggle HUD? (currently: ' + (if(settings.hud) 'Enabled' else 'Disabled') + ')',
+              onChoice::(which) {
+                when(which == false) empty;
+                settings.hud = !settings.hud;
+                hud.enable = settings.hud;
+              }
+            ),
+
           
           'Effects', ::<-
             windowEvent.queueAskBoolean(
@@ -576,8 +618,12 @@ return class(
           settings.animations = true;
         if (settings.effects == empty)
           settings.effects = true;
+        if (settings.hud == empty)
+          settings.hud = true;
+
         windowEvent.autoSkipAnimations = !settings.animations;
         canvas.showEffects = settings.effects;
+        hud.enable = settings.hud;
         onSaveSettings_(data:JSON.encode(object:settings));      
       },
 
@@ -806,6 +852,7 @@ return empty;
                       do :: {
                         @:data = this.getSaveDataRaw(:name);
                         world.load(serialized:data);
+                        setupDefaultHud();
                         
                         if (save > 0) ::<= {
                           world.disgruntled = true;
@@ -1216,7 +1263,9 @@ return empty;
       startResume ::{        
         when (world.finished)
           (import(module:'game_function.newrecord.mt'))(wish:world.wish);
-          
+        setupDefaultHud();
+
+
         world.scenario.onResume();
       },
     
@@ -1224,6 +1273,7 @@ return empty;
         loading(
           message: 'Creating world...',
           do ::{
+            setupDefaultHud();
             this.savestate(saveOverride:{}, nameOverride:name); // overwrite any current iteration and dont use the data
             world.start(name, scenario, seed);
           }
@@ -1371,6 +1421,7 @@ return empty;
               render ::{
                 world.landmark = empty;
                 island.map.render();
+                hud.render(island);
                 when(underFoot == empty || underFoot->size == 0) empty;
 
 
@@ -1387,6 +1438,9 @@ return empty;
                   //);
                 
                 }
+                
+                
+                
                 canvas.renderTextFrameGeneral(
                   title: 'Nearby:',
                   topWeight : 1,
@@ -1628,10 +1682,7 @@ return empty;
             when(landmark.map == empty) canvas.fill();
             landmark.map.render();
 
-            // stop hardcoding!
-                renderKnowledgeStone();
-                renderArtsStatus(landmark);
-            //
+            hud.render(island, landmark);
             
             
             when(nearby == empty || nearby->size == 0) empty;

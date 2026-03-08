@@ -737,7 +737,12 @@
 }
 
 
-@initializeEffectStackProper ::(this, state) {
+@initializeEffectStackProper ::(this, state, notify) {
+
+  foreach(this.species.passives)::(index, passiveName) {
+    this.effectStack.addInnate(id:passiveName);
+  }      
+
   
   @:items = [];
   if (state.innateEffects != empty) ::<= {
@@ -760,6 +765,7 @@
 
   foreach(state.equips) ::(i, item) {
     when(item == empty) empty;
+    breakpoint();
     foreach(item.equipEffects)::(index, effect) {
       items->push(:effect);
       this.effectStack.add(
@@ -772,7 +778,7 @@
     }
   }
   
-  if (items->size > 0)
+  if (items->size > 0 && notify != empty)
     this.notifyEffect(
       isAdding: true,
       effectIDs : items
@@ -1158,11 +1164,9 @@
       _.effectStack = EffectStack.new(parent:this);
       _.canActThisTurn = true;
       _.temporaryArts = [];
-      foreach(this.species.passives)::(index, passiveName) {
-        this.effectStack.addInnate(id:passiveName);
-      }      
       _.battle = battle;
-      initializeEffectStackProper(*_);
+      _.notify = true;
+      initializeEffectStackProper(this, state);
       state.ap = (state.stats.AP / 2)->floor
 
       //resetEffects(priv:_, this:_.this, state:_.state);        
@@ -2871,6 +2875,30 @@
       */
       
     },
+    
+    exclaimAGoodWeapon ::(item) {
+      @:this = _.this;
+      @:state = _.state;
+      if (this.profession.weaponAffinity == item.base.id) ::<= {
+        windowEvent.queueMessage(
+          speaker: this.name,
+          text: 
+            if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
+              '"...!"'
+            else
+              '"This ' + item.base.name + ' really works for me as ' + correctA(word:this.profession.name) + '"'
+        );
+      } else if (state.faveWeapon.id == item.base.id) ::<= {
+        windowEvent.queueMessage(
+          speaker: this.name,
+          text: 
+            if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
+              '"...!"'
+            else
+              '"This ' + item.base.name + ' is my favorite kind of weapon!"'
+        );
+      }      
+    },
       
     equip ::(item => Item.type, slot, silent, inventory) {
       @:state = _.state;
@@ -2912,29 +2940,7 @@
       }
       
       if (silent != true) ::<= {
-        if ((slot == EQUIP_SLOTS.HAND_LR) && this.profession.weaponAffinity == state.equips[EQUIP_SLOTS.HAND_LR].base.id) ::<= {
-          if (silent != true) ::<= {
-            windowEvent.queueMessage(
-              speaker: this.name,
-              text: 
-                if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
-                  '"...!"'
-                else
-                  '"This ' + item.base.name + ' really works for me as ' + correctA(word:this.profession.name) + '"'
-            );
-          }
-        } else if ((slot == EQUIP_SLOTS.HAND_LR) && state.faveWeapon.id == state.equips[EQUIP_SLOTS.HAND_LR].base.id) ::<= {
-          if (silent != true) ::<= {
-            windowEvent.queueMessage(
-              speaker: this.name,
-              text: 
-                if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
-                  '"...!"'
-                else
-                  '"This ' + item.base.name + ' is my favorite kind of weapon!"'
-            );
-          }        
-        }        
+        this.exclaimAGoodWeapon(item);
       }
       
       
@@ -3563,7 +3569,33 @@
            }
            
          ]                   
-      );           
+      );  
+      
+      // try to display effects 
+      @fake = _.effectStack == empty;
+      @:self = _;
+      
+      if (fake) ::<= {
+        self.effectStack = EffectStack.new(parent:this);
+        self.effectStack.events = false;
+        initializeEffectStackProper(this, state);      
+      }
+      
+      if (_.effectStack.getAll()->size)
+        _.effectStack.queueList(
+          prompt : 'Battle Effects',
+          canCancel: true,
+          keep : false,
+          onChoice ::(which) {
+            if (fake) self.effectStack = empty;
+          },
+          onCancel ::(which) {
+            if (fake) self.effectStack = empty;
+          }
+        )
+      else 
+        if (fake) _.effectStack = empty;
+               
     }
   }
 );

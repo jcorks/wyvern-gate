@@ -145,6 +145,41 @@
         return which;
       },
       
+      // returns an array of 2:
+      // [0] -> array of items (Item) 
+      // [1] -> array of equippers (Entity, or empty);
+      getAllItems ::(filter) {
+        @:items = {};
+        @:equippedBy = {};
+        
+        foreach(this.inventory.items) ::(k, v) {
+          when(filter != empty && ! filter(value:v)) empty;
+          items->push(:v);
+          equippedBy->push(:empty);
+        }
+
+        foreach(this.members) ::(k, member) {
+          foreach(Entity.EQUIP_SLOTS) ::(k, slot) {
+            when(slot == Entity.EQUIP_SLOTS.HAND_R) empty;
+            @:item = member.getEquipped(slot);
+            when(item == empty) empty;
+            when(item.base.id == 'base:none') empty;
+            
+            when(filter != empty && ! filter(value:item)) empty;
+
+            items->push(:item);
+            equippedBy->push(:member);
+
+          }
+        }      
+        
+        
+        return [
+          items,
+          equippedBy
+        ]
+      },
+      
       inventory : {
         get :: <- state.inventory
       },
