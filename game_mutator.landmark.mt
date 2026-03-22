@@ -1327,9 +1327,7 @@ Landmark.database.newEntry(
       },
       
       getRandomEmptyPosition ::{
-        // shouldnt do this!
-        when (state.base.landmarkType != TYPE.DUNGEON) empty;
-
+        when (state.map.areas->size == 0) empty;
         @:area = state.map.getRandomEmptyArea();
         return { 
           x:area.x + (area.width/2)->floor,

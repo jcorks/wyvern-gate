@@ -233,7 +233,6 @@
             qualityHint: 'base:masterwork',
             materialHint: 'base:mythril',
             colorHint: 'base:gold',
-            enchantHint: ['base:aura-gold'],
             forceEnchant: true
           );
           fausWeapon.maxOut();

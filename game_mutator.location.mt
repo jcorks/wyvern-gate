@@ -800,6 +800,7 @@ Location.database.newEntry(data:{
   
   onIncrementTime::(location, time) {
     @:world = import(module:'game_singleton.world.mt');
+    when(location.ownedBy == empty) empty;
     if (world.time == world.TIME.MIDNIGHT) ::<= {
       @:items = random.scrambled(:location.inventory.items);
       
@@ -1928,16 +1929,7 @@ Location.database.newEntry(data:{
   
   onCreate ::(location) { 
     @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
-    location.data.enchant = ItemEnchant.new(
-      base:
-        if (random.try(percentSuccess:25)) 
-          ItemEnchant.database.find(id:'base:soul')
-        else
-          ItemEnchant.database.getRandomFiltered(::(value) <- 
-            ((value.traits & ItemEnchant.TRAIT.SPECIAL) == 0) &&
-            ((value.traits & ItemEnchant.TRAIT.HARMFUL) == 0)
-          )
-    )
+    location.data.enchant = ItemEnchant.new()
   },
   onStep ::(location, entities) {
   

@@ -37,7 +37,7 @@ Material.newEntry(
       ATK: 7,
       SPD: -5
     ),
-    enchantLimit : 2,
+    enchantLimit : 4,
     pricePercentMod: 20
   }
 )
@@ -53,7 +53,7 @@ Material.newEntry(
       DEF: 5,
       ATK: 6
     ),
-    enchantLimit : 3,
+    enchantLimit : 4,
     pricePercentMod: 20
   }
 )
@@ -69,7 +69,7 @@ Material.newEntry(
       DEF: 30,
       ATK: 30
     ),
-    enchantLimit : 4,
+    enchantLimit : 6,
     pricePercentMod: 100
   }
 )
@@ -123,7 +123,7 @@ Material.newEntry(
       INT: 30,
       SPD: 10
     ),
-    enchantLimit : 5,
+    enchantLimit : 6,
     pricePercentMod: 500
   }
 )

@@ -2802,6 +2802,7 @@ return {
         name : 'Sentimental Box',
         id : 'thechosen:sentimental-box',
         description: 'Opens the box.',
+        tier: 99,
         skipTurn : false,
         stackable: true,
         blockPoints : 0,
@@ -3462,8 +3463,13 @@ return {
                           colorHint:'base:red', 
                           materialHint: 'base:gold'
                         );
+                        item.enchantLimit = 10;
                         @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
-                        item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:heart-of-flame')));
+                        item.addEnchant(mod:ItemEnchant.new(), force:true);
+                        item.addEnchant(mod:ItemEnchant.new(), force:true);
+                        item.addEnchant(mod:ItemEnchant.new(), force:true);
+                        item.addEnchant(mod:ItemEnchant.new(), force:true);
+                        item.addEnchant(mod:ItemEnchant.new(), force:true);
 
                         windowEvent.queueMessage(text:'In exchange, the party was given ' + correctA(word:item.name) + '.');
                         world.party.inventory.add(item);
@@ -3712,8 +3718,15 @@ return {
                             qualityHint:'base:masterwork'
                           );
                           @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
-                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:soul-of-ice')));
-                          prize.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:soul-of-ice')));
+                          prize.enchantLimit = 12;
+                          prize.addEnchant(mod:ItemEnchant.new(), force:true);
+                          prize.addEnchant(mod:ItemEnchant.new(), force:true);
+                          prize.addEnchant(mod:ItemEnchant.new(), force:true);
+                          prize.addEnchant(mod:ItemEnchant.new(), force:true);
+                          prize.addEnchant(mod:ItemEnchant.new(), force:true);
+                          prize.addEnchant(mod:ItemEnchant.new(), force:true);
+                          prize.addEnchant(mod:ItemEnchant.new(), force:true);
+
 
                           party.inventory.add(item:prize);
                           windowEvent.queueMessage(text:'The party was given a ' + prize.name + '.',
@@ -4341,9 +4354,7 @@ return {
               abilityHint: 'base:greater-cure'
             );
             @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
-            item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:blessing-of-light')));
-            item.addEnchant(mod:ItemEnchant.new(base:ItemEnchant.database.find(id:'base:blessing-of-light')));
-
+            item.enchantLimit = 13;
 
             item.name = 'Wyvern\'s Hope';
             @:world = import(module:'game_singleton.world.mt');

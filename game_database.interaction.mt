@@ -3329,14 +3329,6 @@ Interaction.newEntry(
       windowEvent.queueMessage(text:'The stand grants the enchantment: ' + location.data.enchant.name + ', which will add the following description to an item: "' + location.data.enchant.description +'"');        
 
 
-      @:isStatBased = !location.data.enchant.base.equipModBase.isEmpty;
-
-      if (isStatBased)
-        windowEvent.queueMessage(
-          speaker:location.data.enchant.name + ' - Enchant Stats',
-          text:String.combine(:location.data.enchant.base.equipModBase.descriptionAugmentLines->map(::(value) <- value + '\n')),
-          pageAfter:canvas.height-4
-        );
         
         
       windowEvent.queueAskBoolean(

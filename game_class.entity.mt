@@ -724,12 +724,10 @@
           exp -= set.expToNext;
           levelUpProfession(this, state, profession);
           applyHPbonus();
-          breakpoint();
         } else ::<= {
           set.exp += exp
           set.expToNext -= exp
           exp = 0;
-          breakpoint();
         }
       }
     }
@@ -765,7 +763,6 @@
 
   foreach(state.equips) ::(i, item) {
     when(item == empty) empty;
-    breakpoint();
     foreach(item.equipEffects)::(index, effect) {
       items->push(:effect);
       this.effectStack.add(
@@ -1165,8 +1162,7 @@
       _.canActThisTurn = true;
       _.temporaryArts = [];
       _.battle = battle;
-      _.notify = true;
-      initializeEffectStackProper(this, state);
+      initializeEffectStackProper(this, state, notify:true);
       state.ap = (state.stats.AP / 2)->floor
 
       //resetEffects(priv:_, this:_.this, state:_.state);        
@@ -1924,13 +1920,37 @@
 
         // Def / Dex hit chance
         ::{
-          when (target.isIncapacitated() || ((dmg.traits & Damage.TRAIT.FORCE_DEF_BYPASS) == 0)) empty;
-
+          when (target.isIncapacitated()) empty;
           @:ratioDiff = this.getChanceOfAttackSuccessDEXvDEF(:target);
           if (random.try(percentSuccess:(1-ratioDiff)*100)) ::<= {       
-            windowEvent.queueMessage(
-              text: target.name + ' avoided the incoming attack!'
-            );
+
+            if ((dmg.traits & Damage.TRAIT.UNBLOCKABLE) != 0) ::<= {
+              windowEvent.queueMessage(
+                text: this.name + '\'s attack missed!'
+              );
+            
+            } else ::<= {
+
+              windowEvent.queueMessage(
+                text: target.name + ' blocked the incoming attack!'
+              );
+              
+              if (target.effectStack) ::<= {
+
+                target.effectStack.emitEvent(
+                  name: 'onSuccessfulBlock',
+                  attacker : this, 
+                  damage : dmg,
+                  targetPart : targetPart
+                );
+
+                this.effectStack.emitEvent(
+                  name: 'onGotBlocked',
+                  from : target
+                );
+              }
+            }
+
             dmg.amount = 0;
           }
           when(dmg.amount <= 0) false;
@@ -2011,11 +2031,25 @@
           }
           
           
-          if (missHead) ::<= {
-            windowEvent.queueMessage(text: 'The hit missed the head, but still managed to hit ' + target.name +' for minimal damage!');            
-          }
-          if (missLimb) ::<= {
-            windowEvent.queueMessage(text: 'The hit missed the limbs, but still managed to hit ' + target.name +' for minimal damage!');            
+          if (missHead || missLimb) ::<= {
+            if ((dmg.traits & Damage.TRAIT.UNBLOCKABLE) == 0) ::<= {
+
+              windowEvent.queueMessage(text: target.name + ' blocked the hit, but was still dealt minimal damage!');            
+              target.effectStack.emitEvent(
+                name: 'onSuccessfulBlock',
+                attacker : this, 
+                damage : dmg,
+                targetPart : targetPart
+              );
+
+              this.effectStack.emitEvent(
+                name: 'onGotBlocked',
+                from : target
+              );
+            } else ::<= {
+              windowEvent.queueMessage(text: this.name + '\'s attack barely missed, causing minimal damage!');            
+
+            }
           }
 
           this.flags.add(flag:StateFlags.ATTACKED);
@@ -2099,7 +2133,7 @@
 
 
         this.effectStack.emitEvent(
-          name : 'onPreDamage',
+          name : 'onPreDamaged',
           attacker,
           damage,
           emitCondition ::(v) <- (damage.amount > 0 || exact != empty)
@@ -2192,7 +2226,7 @@
         
 
         this.effectStack.emitEvent(
-          name : 'onPostDamage',
+          name : 'onPostDamaged',
           attacker,
           damage
         );
@@ -3015,7 +3049,6 @@
       @:current = state.equips[slot];
       when (current == empty) empty;
       
-      breakpoint();
       state.equipArts = state.equipArts->filter(::(value) <- value.source != current.worldID);
       state.equips[slot] = empty;        
       

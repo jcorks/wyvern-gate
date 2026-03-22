@@ -12945,7 +12945,7 @@ Arts = databaseItemMutatorClass.create(
     A_LOT : {get ::<- A_LOT},
     
     baseATKmoveDamage::(user) <- user.stats.ATK * 1.13,
-    baseINTmoveDamage::(user) <- user.stats.INT * 1.37,
+    baseINTmoveDamage::(user) <- user.stats.INT * 1.27,
     
     renderListItem::(art) {
       return [

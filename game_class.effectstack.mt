@@ -18,297 +18,235 @@
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:Effect = import(module:'game_database.effect.mt');
 
-/*
-
-  Known Events:
-
-  Event:    onAffliction
-  About:    called after an effect has first been added.
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
 
 
-  Event:    onPreAttackOther
-  About:    called before user is giving damage. set damage amount to 0 to cancel the attack.
-            Propogation stops if damage.amount <= 0
-  returns:  ignored 
-  args:
-    - to:      The one being attacked.
-    - damage:  the damage information from the attack (Damage.type)
-    - targets: the intended target
-    - data:   Generic data per-effect.
-  
+@:EVENTS = [
+  // About:    called after an effect has first been added.
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  "onAffliction",
 
-    
-  Event:    onPostAttackOther
-  About:    Called AFTER the user has explicitly damaged a target 
-  returns:  ignored 
-  args:
-    - to: the one being attacked 
-    - damage: the damage information from the attack. (Damage.type)
-    - data:   Generic data per-effect.
+  // About:    called before user is giving damage. set damage amount to 0 to cancel the attack.
+  //           Propogation stops if damage.amount <= 0
+  // returns:  ignored 
+  // args:
+  //   - to:      The one being attacked.
+  //   - damage:  the damage information from the attack (Damage.type)
+  //   - targets: the intended target
+  //   - data:   Generic data per-effect.
+  "onPreAttackOther",
 
-  
-  Event:    onPreAttacked
-  About:    called when user is attacked, before being damaged. set damage amount to 0 to cancel attack
-            Propogation stops if damage.amount <= 0
-  returns:  ignored 
-  args:     
-    - attacker: the one attacking 
-    - damage: the damage information from the attack. (Damage.type);
-    - data:   Generic data per-effect.
+  // About:    Called AFTER the user has explicitly damaged a target 
+  // returns:  ignored 
+  // args:
+  //   - to: the one being attacked 
+  //   - damage: the damage information from the attack. (Damage.type)
+  //   - data:   Generic data per-effect.
+  "onPostAttackOther",
 
-  
-  Event:    onPostAttacked
-  About:    called when user is attacked after damage is successful and non-zero
-  returns:  ignored 
-  args:     
-    - attacker: the one attacking
-    - damage: the damage information from the attack. (Damage.type)
-    - data:   Generic data per-effect.
+  // About:    called when user is attacked, before being damaged. set damage amount to 0 to cancel attack
+  //           Propogation stops if damage.amount <= 0
+  // returns:  ignored 
+  // args:     
+  //   - attacker: the one attacking 
+  //   - damage: the damage information from the attack. (Damage.type);
+  //   - data:   Generic data per-effect.
+  "onPreAttacked",
 
 
-  Event:    onRemoveEffect
-  About:    Called once when removed. All effects will be removed at some point.
-  returns:  ignored
-  args:
-    - data:   Generic data per-effect.
-    
-  Event:    onEffectRemoveForced
-  About:    Called when an effect is forcibly removed, that is, not from reaching its duration 
-            and not from a battle ending.
-  returns:  false prevents removal of the effect
-  args:
-    - data:   Generic data per-effect.
-    - effectData 
-      - id: the effect being given 
-      - duration: the duration in turns
+  // Event:    
+  // About:    called when user is attacked after damage is successful and non-zero
+  // returns:  ignored 
+  // args:     
+  //   - attacker: the one attacking
+  //   - damage: the damage information from the attack. (Damage.type)
+  //   - data:   Generic data per-effect.
+  "onPostAttacked",
+
+  // About:    Called once when removed. All effects will be removed at some point.
+  // returns:  ignored
+  // args:
+  //   - data:   Generic data per-effect.
+  "onRemoveEffect",
+
+  // About:    Called when an effect is forcibly removed, that is, not from reaching its duration 
+  //           and not from a battle ending.
+  // returns:  false prevents removal of the effect
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - effectData 
+  //     - id: the effect being given 
+  //     - duration: the duration in turns
+  "onEffectRemoveForced",
 
   
+  // About:    Called before damaging something. Can cancel by setting damage amount to 0. This also cancels propogation
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - attacker: the one attacking 
+  //   - damage: the damage information from the attack. (Damage.type);
+  "onPreDamaged",
+
+
+  // About:    Called after damaging something. 
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - attacker: the one attacking 
+  //   - damage: the damage information from the attack. (Damage.type);
+  "onPostDamaged",
+
+  // About:    Called on the turn of the holder.
+  // returns:  Cancels holders turn if any return false
+  //           returning false does not stop propogation
+  // args:
+  //   - data:   Generic data per-effect.
+  "onNextTurn",
+
+  // Events:   
+  // About:    when stats are recalculated for the holder.
+  // returns:  ignored
+  // args:
+  //   - data:   Generic data per-effect.
+  "onStatRecalculate",
+
+  // About:    Called before healing is applied. amount can be set to 0 to cancel healing 
+  // returns:  ignored
+  // args
+  //   - data:   Generic data per-effect.
+  //   - healingData
+  //     - amount: healing which is applied. propogation is cancelled if amount is 0 or below.
+  "onPreHeal",
+
+  // About:    Called after healing is applied. amount can be set to 0 to cancel healing 
+  // returns:  ignored
+  // args
+  //   - data:   Generic data per-effect.
+  //   - healingData
+  //     - amount: healing which is applied. propogation is cancelled if amount is 0 or below.
+  "onPostHeal",
+
+
+  // About:    Called when this entity blocks an attack
+  //           Most commonly from the Def V Dex calc or part matching
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - attacker: the one attacking
+  //   - damage: the info about the damaged
+  //   - blockData
+  //     - targetDefendPart: the part chosen by the holder to block 
+  //     - targetPart: the part chosen by the attacker to attack
+  "onSuccessfulBlock",
+
+  // About:    Called when the holder's attack got blocked 
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - from: the one being attacked
+  "onGotBlocked",
   
-  Event:    onPreDamage
-  About:    Called before damaging. Can cancel by setting damage amount to 0. This also cancels propogation
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - attacker: the one attacking 
-    - damage: the damage information from the attack. (Damage.type);
+  // About:    called before committing an action (art)
+  // returns:  return false to prevent effect from being added
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - action: The battle action
+  "onPreAction",
 
+  // About:    called after committing an action (art).  
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - action: The battle action
+  "onPostAction",
 
-  Event:    onPostDamage
-  About:    Called after damaging. 
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - attacker: the one attacking 
-    - damage: the damage information from the attack. (Damage.type);
+  // About:    called before adding an effect. EffectData is editable
+  // returns:  return false to prevent effect from being added
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - from: the entity giving the effect     
+  //   - item: the item involved with the effect 
+  //   - effectData 
+  //     - id: the effect being given 
+  //     - duration: the duration in turns
+  "onPreAddEffect",
 
-    
-    
-  Event:    onNextTurn
-  About:    on end phase of turn once added as an effect. Not called if duration is 0. 
-  returns:  Cancels holders turn if any return false
-            returning false does not stop propogation
-  args:
-    - data:   Generic data per-effect.
-    
-  Events:   onStatRecalculate
-  About:    when stats are recalculated for the holder.
-  returns:  ignored
-  args:
-    - data:   Generic data per-effect.
+  // About:    called after adding an effect.
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - from: the entity giving the effect
+  //   - item: the item involved with the effect
+  //   - id: the art id of the effect
+  //   - duration: the number of turns that the effect will be added for
+  "onPostAddEffect",
+
+  // About:    called after getting critical hit 
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - attacker: the one performing the crit.
+  "onCritted",
+
+  // About:    called after getting critical hit on a target
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - to: the one receiving the critical hit
+  "onCrit",
+
+  // About:    called after killing a target
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - to: the one getting killed
+  "onKill",
+
+  // About:    called after knocking out a target
+  // returns:  ignored 
+  // args:
+  //   - data:   Generic data per-effect.
+  //   - to: the one getting knocked out
+  "onKnockout",
+
+  // About:    called before removal of the effect due to its duration being 0
+  // returns:  ignored 
+  // args:
+  //  - data:   Generic data per-effect.
+  "onDurationEnd", 
   
+  // About:    called after the holder gets knocked out.
+  // returns:  ignored 
+  // args:
+  //  - data:   Generic data per-effect.
+  //  - from: the one who caused it.      
+  "onKnockedOut",
 
-  
-  Event:    onDraw
-  About:    when a new card is drawn by the holder
-  returns:  ignored
-  args:
-    - card: the card being drawn 
-    - data:   Generic data per-effect.
-    
-    
-    
-  Event:    onShuffle
-  About:    when the deck is shuffled
-  returns:  ignored
-  args:
-    - data:   Generic data per-effect.
-    
-  Event:    onDiscard
-  About:    when a card is discarded, including usage
-  returns:  ignored
-  args:
-    - data:   Generic data per-effect.
-    - card: the card being discarded (hand card)
-    
-  Event:    onLevel
-  About:    ability upgraded
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - card: the card being leveled (hand card)
-  
+  // About:    called before removal of the effect due to its duration being 0
+  // returns:  ignored 
+  // args:
+  //  - data:   Generic data per-effect.
+  "onDurationEnd"
+]
 
-  Event:    onPreHeal 
-  About:    Called before healing is applied. amount can be set to 0 to cancel healing 
-  returns:  ignored
-  args
-    - data:   Generic data per-effect.
-    - healingData
-      - amount: healing which is applied. propogation is cancelled if amount is 0 or below.
+@:eventLookup = {};
+foreach(EVENTS) ::(k, v) {
+    eventLookup[v] = true;
+}
 
-
-      
-  Event:    onPostHeal
-  About:    After healing is applied
-  returns:  ignored
-  args
-    - data:   Generic data per-effect.
-    - amount: amount being healed
-
-
-  Event:    onPreReact
-  About:    Called before reacting
-  returns:  Return false from a callback to cancel the reaction.
-  args:
-    - data:   Generic data per-effect.
-    - card: The card being used to react
-    
-    
-  Event:    onPostReact 
-  About:    Called after reacting is applied.
-  returns:  ignored
-  args:
-    - data:   Generic data per-effect.
-    - card: The card reacted with.
-    
-    
-  Event:    onPreBlock 
-  About:    Called before blocking is calculated
-  returns:  ignored
-  args:
-    - data:   Generic data per-effect.
-    - attacker: the one attacking
-    - damage: the damage data. damage has not been applied so the amount is still editable.
-    - blockData
-      - targetDefendPart: the part chosen by the holder to block 
-      - targetPart: the part chosen by the attacker to attack
-      
-  Event:    onSuccessfulBlock
-  About:    Called when a targetted body part is blocked by the receiver.
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - attacker: the one attacking
-    - damage: the info about the damaged
-    - blockData
-      - targetDefendPart: the part chosen by the holder to block 
-      - targetPart: the part chosen by the attacker to attack
-
-  Event:    onGotBlocked
-  About:    Called when the holder's attack got blocked 
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - from: the one being attacked
-
-
-
-  Event:    onPreAction
-  About:    called before committing an action (art)
-  returns:  return false to prevent effect from being added
-  args:
-    - data:   Generic data per-effect.
-    - action: The battle action
-
-
-  Event:    onPostAction
-  About:    called after committing an action (art).  
-  args:
-    - data:   Generic data per-effect.
-    - action: The battle action
-
-
-
-
-  Event:    onPreAddEffect
-  About:    called before adding an effect. EffectData is editable
-  returns:  return false to prevent effect from being added
-  args:
-    - data:   Generic data per-effect.
-    - from: the entity giving the effect     
-    - item: the item involved with the effect 
-    - effectData 
-      - id: the effect being given 
-      - duration: the duration in turns
-
-
-  Event:    onPostAddEffect 
-  About:    called after adding an effect.
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - from: the entity giving the effect
-    - item: the item involved with the effect
-    - id: the art id of the effect
-    - duration: the number of turns that the effect will be added for
-
-  Event:    onCritted 
-  About:    called after getting critical hit 
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - attacker: the one performing the crit.
-
-  Event:    onCrit 
-  About:    called after getting critical hit on a target
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - to: the one receiving the critical hit
-
-
-  Event:    onKill 
-  About:    called after killing a target
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - to: the one getting killed
-
-
-  Event:    onKnockout 
-  About:    called after knocking out a target
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - to: the one getting knocked out
-
-  Event:    onDurationEnd 
-  About:    called before removal of the effect due to its duration being 0
-  returns:  ignored 
-    - data:   Generic data per-effect.
-
-  Event:    onKnockedOut 
-  About:    called after the holder gets knocked out.
-  returns:  ignored 
-  args:
-    - data:   Generic data per-effect.
-    - from: the one who caused it.
-
-  Event:    onDurationEnd 
-  About:    called before removal of the effect due to its duration being 0
-  returns:  ignored 
-    - data:   Generic data per-effect.
-
-
-*/
 
 @:EffectStack = LoadableClass.create(
   name: 'Wyvern.EffectStack',
   statics : {
-    CANCEL_PROPOGATION : {get::<-'you-can-(Not)-advance'}
+    CANCEL_PROPOGATION : {get::<-'you-can-(Not)-advance'},
+    EVENTS : EVENTS,
+    
+    // for custom stuff! mods, do your best!
+    addRecognizedEvent ::(event) {
+      EVENTS->push(:event);
+      eventLookup[event] = true;
+    }
   },
   items : {
     innateEffects : empty,
@@ -534,6 +472,8 @@
       emitEvent::(*args) {
         when(events == false) empty;
         @:name = args.name => String;
+        when(eventLookup[name] == empty)
+          error(:'Tried to emit an unrecognized event. What the heck is this thing?? (' + name + '?)');
         @:emitCondition = args.emitCondition;
       
 

@@ -1034,7 +1034,6 @@
           }
           
           data.phase += 1
-          breakpoint();
         } ,
         
         // animate 2
@@ -2310,7 +2309,6 @@
         renderableMiddle,
         renderableStart
       ) {
-        breakpoint();
         when(kind == TRANSITION.FADE_TO_BLACK) ::<= {
           this.queueCustomTransition(
             renderableStart : renderableStart,

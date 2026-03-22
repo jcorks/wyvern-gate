@@ -24,7 +24,6 @@ return ::(canCancel => Boolean, onPick => Function, keep, onCancel, leftWeight, 
   @:world = import(module:'game_singleton.world.mt');
 
 
-  @:inv = world.party.inventory.clone();
   @:all = world.party.getAllItems();
   @:items = all[0]
   @:equippedBy = all[1];

@@ -25,7 +25,6 @@ import(module:'game_database.effect.mt');
 import(module:'game_database.interaction.mt');
 import(module:'game_database.itemcolor.mt');
 import(module:'game_database.itemdesign.mt');
-import(module:'game_database.itemenchantcondition.mt');
 import(module:'game_database.itemquality.mt');
 import(module:'game_database.material.mt');
 import(module:'game_database.personality.mt');
@@ -235,7 +234,6 @@ import(module:'game_function.newrecord.mt');
   hud.addRenderer(
     name: 'Wyvern.HUD.knowledgeStone',
     onLandmarkStep ::(landmark, island) {
-      breakpoint();
       renderKnowledgeStone();
     }
   );        
@@ -246,7 +244,6 @@ import(module:'game_function.newrecord.mt');
       renderArtsStatus(landmark);          
     }
   );        
-  breakpoint();
 }
 return class(
   name: 'Wyvern.Instance',
@@ -1318,7 +1315,6 @@ return empty;
       },
       
       unlockScenarios :: {
-        breakpoint();
         if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
           settings.unlockedScenarios = true;
           onSaveSettings_(data:JSON.encode(object:settings));

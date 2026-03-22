@@ -23,1082 +23,120 @@
 @:Arts = import(:'game_mutator.arts.mt');
 @:ArtsDeck = import(:'game_class.artsdeck.mt');
 @:Damage = import(module:'game_class.damage.mt');
-
-@:CONDITION_CHANCES = [
-  20,
-  60,
-  95
-];
-
-@:CONDITION_CHANCE_NAMES = [
-  'rarely',
-  'often',
-  'almost always'
-];
-
-@:TRAIT = {
-  SPECIAL : 1,
-  HARMFUL : 2
-}
-
-
-
-
-@:reset ::{
-
-@:State = import(module:'game_class.state.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
-// The art is special. All itemenchants have a flat 15% chance to arts.
-/*
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Art',
-    id : 'base:art',
-    description : ', will $1 add the Art "$2" to the wielder\'s hand: $3',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 1000,
-    tier : 3,
-    
-    triggerConditionEffects : [
-      'base:trigger-itemart',
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : TRAIT.SPECIAL,
-    onCreate ::(this){}
-  }
-)
-*/
-/*
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Evade',
-    id : 'base:evade',
-    description : ', will $1 allow the wielder to evade attacks the next turn.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 350,
-    tier : 1,
-    
-    triggerConditionEffects : [
-      'base:trigger-evade' // 100% next turn
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : []
-  }
-)
-*/
 
 
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Regen',
-    id : 'base:regen',
-    description : ', will $1 slightly recover the users wounds.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 350,
-    tier : 0,
-    traits: 0,
-    
-    triggerConditionEffects : [
-      'base:trigger-regen'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    onCreate ::(this){}
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Break',
-    id : 'base:chance-to-break',
-    description : ', will $1 break.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: -1000,
-    tier : 4,
-    
-    triggerConditionEffects : [
-      'base:trigger-break-chance'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : TRAIT.HARMFUL,
-    onCreate ::(this){}
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Ailment',
-    id : 'base:chance-to-inflict-ailment',
-    description : ', will $1 give the holder a random status ailment.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: -1000,
-    tier : 0,
-    
-    triggerConditionEffects : [
-      'base:trigger-random-ailment'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : TRAIT.HARMFUL,
-    onCreate ::(this){}
-  }
-)
-
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Hurt',
-    id : 'base:chance-to-hurt',
-    description : ', will $1 hurt the wielder.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: -200,
-    tier : 1,
-    
-    triggerConditionEffects : [
-      'base:trigger-hurt-chance'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : TRAIT.HARMFUL,
-    onCreate ::(this){}
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Fatigue',
-    id : 'base:chance-to-fatigue',
-    description : ', will $1 fatigue the wielder.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: -200,
-    tier : 1,
-    
-    triggerConditionEffects : [
-      'base:trigger-fatigue-chance'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : TRAIT.HARMFUL,
-    onCreate ::(this){}
-  }
-)
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Spikes',
-    id : 'base:spikes',
-    description : ', will $1 cast a spell that damages an enemy when attacked for a few turns.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 350,
-    tier : 0,
-    
-    triggerConditionEffects : [
-      'base:trigger-spikes'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : TRAIT.HARMFUL,
-    onCreate ::(this){}
-  }
-)
-
-/*
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Ensnare',
-    description : ', will $1 cast a spell to cause the wielder and the attacker to get ensnared.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 350,
-    tier : 1,
-    
-    triggerConditionEffects : [
-      'Trigger Ensnare'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : []
-  }
-)
-*/
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Ease',
-    id : 'base:ease',
-    description : ', will $1 recover from mental fatigue.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 350,
-    tier : 0,
-    traits: 0,
-    
-    triggerConditionEffects : [
-      'base:trigger-ap-regen'
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    onCreate ::(this){}
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Shield',
-    id : 'base:shield',
-    description : ', will $1 cast Shield for a while, which may block attacks.',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 250,
-    tier : 0,
-    traits : 0,
-    
-    triggerConditionEffects : [
-      'base:trigger-shield' 
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    onCreate ::(this){}
-  }
-)
-
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inflict Status',
-    id : 'base:status',
-    description : '',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-      @:elements = [
-        Damage.TYPE.FIRE,
-        Damage.TYPE.THUNDER,
-        Damage.TYPE.ICE,
-        Damage.TYPE.LIGHT,
-        Damage.TYPE.DARK,
-        Damage.TYPE.PHYS,
-        Damage.TYPE.POISON
-      ]
-
-      @:shifts = [
-        'not used silly',
-        'base:scorching',
-        'base:paralyzing',
-        'base:freezing',
-        'base:petrifying',
-        'base:blinding',
-        'base:bleeding',
-        'base:seeping',
-      ]      
-
-      @:shiftNames = [
-        'not used silly',
-        'Burned',
-        'Paralyzed',
-        'Frozen',
-        'Petrified',
-        'Blind',
-        'Bleeding',
-        'Poisoned',
-      ]      
-      
-      
-      @:element = random.pickArrayItem(:elements);
-      @:Effect = import(module:'game_database.effect.mt');
-      this.name = 'Inflict Status: ' + Effect.find(:shifts[element]).name;
-      
-
-      
-      this.equipEffects->push(:shifts[element]);
-    
-    }
-  }
-)
-
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Shift',
-    id : 'base:shift',
-    description : '',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 200,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-      @:elements = [
-        Damage.TYPE.FIRE,
-        Damage.TYPE.THUNDER,
-        Damage.TYPE.ICE,
-        Damage.TYPE.LIGHT,
-        Damage.TYPE.DARK
-      ]
-      @:element = random.pickArrayItem(:elements);
-      this.name = 'Shift: ' + Damage.TYPE_NAMES[element];
-      
-      @:shifts = [
-        'not used silly',
-        'base:burning',
-        'base:shock',
-        'base:icy',
-        'base:toxic',
-        'base:shimmering',
-        'base:dark',
-      ]
-      
-      this.equipEffects->push(:shifts[element]);
-    }
-  }
-)
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Aspect',
-    id : 'base:aspect',
-    description : '',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 250,
-    tier : 0,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-      @:elements = [
-        Damage.TYPE.FIRE,
-        Damage.TYPE.THUNDER,
-        Damage.TYPE.ICE,
-        Damage.TYPE.LIGHT,
-        Damage.TYPE.DARK,
-        Damage.TYPE.POISON
-      ]
-      @:element = random.pickArrayItem(:elements);
-      this.name = 'Aspect: ' + Damage.TYPE_NAMES[element];
-      
-      @:shifts = [
-        'not used silly',
-        'base:aspect-fire',
-        'base:aspect-thunder',
-        'base:aspect-ice',
-        'base:aspect-light',
-        'base:aspect-dark',
-        'Also not used?',
-        'base:aspect-poison'
-      ]
-      
-      this.equipEffects->push(:shifts[element]);
-    }
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Heart of Flame',
-    id : 'base:heart-of-flame',
-    description : '',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 2500,
-    tier : 3,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      'base:scorching',
-      'base:burning',
-      'base:aspect-fire',
-      'base:resist-fire'
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-);
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Soul of Ice',
-    id : 'base:soul-of-ice',
-    description : '',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 2500,
-    tier : 3,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      'base:freezing',
-      'base:icy',
-      'base:aspect-ice',
-      'base:resist-ice'
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-);
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Sigil of Thunder',
-    id : 'base:sigil-of-thunder',
-    description : '',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 2500,
-    tier : 3,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      'base:shock',
-      'base:paralyzing',
-      'base:aspect-thunder',
-      'base:resist-thunder'
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-);
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Blessing of Light',
-    id : 'base:aura-of-light',
-    description : '',
-    equipModBase : StatSet.new(
-    ),
-    levelMinimum : 1,
-    priceMod: 2500,
-    tier : 3,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-      'base:shimmering',
-      'base:petrifying',
-      'base:aspect-light',
-      'base:resist-light'
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){}
-  }
-);
-
-
-
-
-@:stats = {
-  'Power' : 'ATK',
-  'Shield' : 'DEF',
-  'Reflex' : 'DEX',
-  'Speed' : 'SPD',
-  'Mind' : 'INT',
-  
-}
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Rune',
-    id : 'base:rune',
-    description : '',
-    equipModBase : StatSet.new(
-    
-    ),
-    levelMinimum : 1,
-    priceMod: 20000,
-    tier : 3,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-      @:kind = random.pickArrayItem(:stats->values);
-      
-      @:statsA = {
-        ATK: -1,
-        DEX: -1,
-        SPD: -1,
-        DEF: -1,
-        INT: -1      
-      }
-      statsA[kind] = 7;
-      @desc = 'Powerful rune. ';
-      foreach(statsA) ::(k, v) {
-        when (k == kind) empty;
-        desc = desc + k + ',';
-      }      
-      desc = desc + ' base -1, ' + kind + ' base +7';
-      this.description = desc;
-      this.name = 'Rune of ' + kind;
-      this.equipModBase.add(:StatSet.new(*statsA));
-    }
-  }
-)
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Minor Aura',
-    id : 'base:minor-aura',
-    description : 'Enchanted with a simple aura that boosts all traits slightly.',
-    equipModBase : StatSet.new(
-      HP : 1,
-      AP : 1,
-      SPD: 1,
-      DEX: 1,
-      ATK: 1,
-      DEF: 1,
-      INT: 1
-    ),
-    priceMod: 140,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-
-
-
-
-
-
-
-
-
-
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Cursed',
-    id : 'base:cursed',
-    description : 'Cursed with dark magic. DEF, ATK base -3, INT, DEX base +6',
-    equipModBase : StatSet.new(
-      DEF: -3,
-      ATK: -3,
-      INT: 6,
-      DEX: 6
-    ),
-    levelMinimum : 5,
-    priceMod: 300,
-    tier : 1,
-    
-    triggerConditionEffects : [
-    ],
-    
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-
-/*
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Bloodstone',
-    id : 'base:inlet-bloodstone',
-    description : 'Set with a large bloodstone, shining sinisterly. HP base -1, SPD, DEX, ATK, DEF, INT +2',
-    equipModBase : StatSet.new(
-      SPD: 2,
-      DEX: 2,
-      ATK: 2,
-      DEF: 2,
-      INT: 2,
-      HP: -1
-    ),
-    priceMod: 2000,
-    tier : 3,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Inlet: Soulstone',
-    id : 'base:inlet-soulstone',
-    description : 'Set with a large soulstone, shining sinisterly. AP base -1, SPD, DEX, ATK, DEF, INT +2',
-    equipModBase : StatSet.new(
-      SPD: 2,
-      DEX: 2,
-      ATK: 2,
-      DEF: 2,
-      INT: 2,
-      AP: -1
-    ),
-    priceMod: 2000,
-    tier : 3,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0
-  }
-)
-*/
-
-
-::<= {
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Aura: Green',
-    id : 'base:aura-green',
-    description : 'Imbued with a stamina aura; it softly glows green.',
-    equipModBase : StatSet.new(
-      SPD: -1,
-      HP:  2
-    ),
-    priceMod: 200,
-    tier : 4,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-}
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Aura: Red',
-    id : 'base:aura-red',
-    description : 'Imbued with a stamina aura; it softly glows red.',
-    equipModBase : StatSet.new(
-      ATK: -1,
-      HP:  2
-    ),
-    priceMod: 200,
-    tier : 4,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Aura: Blue',
-    id : 'base:aura-blue',
-    description : 'Imbued with a stamina aura; it softly glows blue with a glimmer.',
-    equipModBase : StatSet.new(
-      DEF: -1,
-      HP:  2
-    ),
-    priceMod: 400,
-    tier : 4,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Aura: Yellow',
-    id : 'base:aura-yellow',
-    description : 'Imbued with a stamina aura; it softly glows yellow.',
-    equipModBase : StatSet.new(
-      INT: -1,
-      HP:  2
-    ),
-    priceMod: 200,
-    tier : 4,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Aura: Orange',
-    id : 'base:aura-orange',
-    description : 'Imbued with a stamina aura; it softly glows orange.',
-    equipModBase : StatSet.new(
-      DEX: -1,
-      HP:  2
-    ),
-    priceMod: 200,
-    tier : 4,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Aura: Silver',
-    id : 'base:aura-silver',
-    description : 'Imbued with a stamina aura; it softly glows silver.',
-    equipModBase : StatSet.new(
-      AP: -1,
-      HP:  2
-    ),
-    priceMod: 200,
-    tier : 4,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Aura: Gold',
-    id : 'base:aura-gold',
-    description : 'Imbued with a stamina aura; it softly glows gold.',
-    equipModBase : StatSet.new(
-      AP:  2,
-      HP:  2
-    ),
-    priceMod: 1000,
-    tier : 4,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-
-ItemEnchant.database.newEntry(
-  data : {
-    name : 'Soul',
-    id : 'base:soul',
-    description : '',
-    equipModBase : StatSet.new(
-    ),
-    priceMod: 1000,
-    tier : 0,
-    levelMinimum : 1,
-    
-    triggerConditionEffects : [
-    ],
-    equipEffects : [
-    ],
-    
-    useEffects : [],
-    traits : 0,
-    onCreate ::(this){
-    }
-  }
-)
-
-}
-
-
-@:ItemEnchant = databaseItemMutatorClass.create(
+@:CONDITION_EVENT_DESCRIPTION = {
+  onAffliction : ["When a new effect is added", 'On New Effect'],
+  onPreAttackOther : ["Right before attacking a target", 'Before Attack'],
+  onPostAttackOther : ["After damaging a target", 'After Attack'],
+  onPreAttacked : ["Before taking damage from an attack", 'Before being Attacked'],
+  onPostAttacked : ["After taking damage from an attack", 'After being Attacked'],
+  onRemoveEffect : ["When an effect is removed", 'On Effect Remove'],
+  onEffectRemoveForced : ["When an effect is forcibly removed", 'On Effect Force Remove'],
+  onPreDamaged : ["Right before getting damaged", 'Before Damaged'],
+  onPostDamaged : ["After getting damaged", 'After Damaged'],
+  onNextTurn : ["On the start of the holder's turn", 'On Turn'],
+  //"onStatRecalculate" // banning this one for now
+  onPreHeal : ['Before getting healed', 'Before Heal'],
+  onPreHeal : ['After getting healed', 'After Heal'],
+  onSuccessfulBlock : ["When successfully blocking an attack", 'On Block'],
+  onGotBlocked: ["Upon having the holder\'s attack blocked", 'Upon Getting Blocked'],
+  onPreAction: ["Right before using an Art", 'Before Art'],
+  onPostAction: ["After using an Art", 'After Art'],
+  onPreAddEffect: ["Before a new effect is added to the holder", 'Before New Effect'],
+  onPostAddEffect: ["After a new effect is added to the holder", 'After New Effect'],
+  //onCritted: ["When hit with a critical hit", 'When Crit\'d'],
+  //onCrit: ["When landing a critical hit", 'On Crit'],
+  //onKill: ["Upon killing a target", 'After Murder'],
+  onKnockout: ["Upon knocking out target", 'On Knockout'],
+  //"onDurationEnd", // too much
+  onKnockedOut: ["When getting knocked out", 'On Knocked Out']
+};
+
+
+
+@:CONDITION_ENCHANT_TURNS = 3;
+@:CONDITION_TYPE_CHANCE = 30;
+@:BAD_EFFECT_CHANCE = 20;
+
+@:Effect = import(module:'game_database.effect.mt');
+
+
+@:ItemEnchant = LoadableClass.create(
   name : 'Wyvern.ItemEnchant',
-  statics : {
-    TRAIT : {get::<- TRAIT}
-  },
+  
   items : {
-    name : '',
-    description : '',
-    condition : empty,
+    // percent chance of trigger
     conditionChance : 0,
-    conditionChanceName  : '',
-    artID : '',
-    equipEffects : empty,
-    useEffects : empty,
-    equipModBase : empty,
+    
+    // database id of the effect
+    effectID : '',
+    
+    // EffectStack event to cause the enchant to trigger 
+    // "" if its an on battle start effect
+    event : '',
+    
+    // Override description
+    description : '',
+    
+    // Override name,
+    name : ''
+    
   },
-
-  database: Database.new(
-    name : 'Wyvern.ItemEnchant.Base',
-    attributes : {
-      name : String,
-      id : String,
-      description : String,
-      levelMinimum : Number,
-      equipModBase : StatSet.type, // base stats
-      useEffects : Object,
-      equipEffects : Object,
-      triggerConditionEffects : Object,
-      priceMod : Number,
-      tier : Number,
-      traits : Number,
-      onCreate : Function
-    },
-    reset
-  ),
 
   define:::(this, state) {
-    @:ItemEnchantCondition = import(module:'game_database.itemenchantcondition.mt');
 
     this.interface = {
       initialize::{},
-      defaultLoad ::(base, conditionHint) {      
-        state.base = base;
-        state.equipEffects = [];
-        state.useEffects = [];
-        state.name = base.name;
-        state.description = base.description;
-        @:Effect = import(module:'game_database.effect.mt');
-        
-        if (base.id == 'base:soul') ::<= {
-          @:effectID = Effect.getRandomFiltered(::(value) <- 
-            value.hasNoTrait(:Effect.TRAIT.SPECIAL | Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.REVIVAL)
-          ).id;
-          state.equipEffects->push(:effectID);
+      defaultLoad ::(base, eventHint, conditionChanceHint, effectIDHint, nameHint, descriptionHint) {      
+        @:world = import(module:'game_singleton.world.mt');
+        @:tier = if (world.island) world.island.tier else 0;
+
+        if (effectIDHint != empty) state.effectID = effectIDHint => String
+        else ::<= {
+          if (random.try(percentSuccess:BAD_EFFECT_CHANCE) && tier > 0) 
+            state.effectID = Effect.getRandomFiltered(::(value) <- value.tier <= tier && ((value.traits & Effect.TRAIT.SPECIAL) == 0)).id
+          else
+            state.effectID = Effect.getRandomFiltered(::(value) <- value.tier <= tier && ((value.traits & Effect.TRAIT.SPECIAL) == 0) && ((value.traits & Effect.TRAIT.BUFF) != 0)).id;
         }
-        
-        if (base.id == 'base:art') ::<= {
-          state.artID = Arts.database.getRandomFiltered(::(value) <- 
-            (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
-            (value.kind != Arts.KIND.REACTION) &&
-            (value.traits & Arts.TRAIT.SPECIAL) == 0
-          ).id;   
-        }
-        
-        if (base.triggerConditionEffects->keycount > 0) ::<= {
-          if (conditionHint != empty) ::<= {
-            state.condition = ItemEnchantCondition.find(id:conditionHint);
-          } else ::<= {
-            state.condition = ItemEnchantCondition.getRandom();
+
+
+
+        if (eventHint == empty) ::<= {
+          if (random.try(percentSuccess:CONDITION_TYPE_CHANCE)) ::<= {
+            state.event = random.pickArrayItem(:CONDITION_EVENT_DESCRIPTION->keys);
           }
-          @conditionIndex = random.pickArrayItem(list:CONDITION_CHANCES->keys);
-          state.conditionChance = CONDITION_CHANCES[conditionIndex];
-          state.conditionChanceName = CONDITION_CHANCE_NAMES[conditionIndex];
+        } else ::<= {
+          state.event = eventHint;
+        }
+
+
+
+        
+        if (state.event != '') ::<= {
+          state.conditionChance = (((random.number() * 100) / 5)->ceil) * 5
+          if (state.conditionChance < 33) state.conditionChance = 33;
         }
         
-        foreach(base.equipEffects) ::(k, v) <- state.equipEffects->push(:v);
-        foreach(base.useEffects) ::(k, v) <- state.useEffects->push(:v);
-        state.equipModBase = base.equipModBase.clone();
-        base.onCreate(this);
+        if (nameHint != empty) state.name = nameHint;
+        if (descriptionHint != empty) state.description = descriptionHint;
+
         return this;
       },
-      
-      equipModBase : {
-        get ::<- state.equipModBase
-      },
-      
-      
-      art : {
-        get ::<- state.artID
-      },
-      
-      equipEffects : {get::<- state.equipEffects},
-
-      useEffects : {get::<- state.useEffects},
 
 
       description : {
         get ::{
-          @:Effect = import(module:'game_database.effect.mt');
-          when(state.base.id == 'base:soul') 
-            Effect.find(:state.equipEffects[0]).description;
-            
-          breakpoint();
-          @desc = if (state.description == '') ::<= {
-            @str = 'When this item is equipped: ';
-            foreach(state.equipEffects) ::(k, v) {
-              str = str + Effect.find(:v).description + (if (k != state.equipEffects->size-1) ',' else '');
-            }
-            return str;
-          } else 
-            state.base.description;
-            
-          when(state.condition == empty) desc;
-          @out = state.condition.description + (state.base.description)->replace(key:'$1', with: state.conditionChanceName);
-          when (state.artID == '') out;
-          out = out->replace(key:'$2', with: Arts.database.find(id:state.artID).name);
-          return out->replace(key:'$3', with: Arts.database.find(id:state.artID).description);          
+          when(state.description != '') state.description;
+          
+          // always on battle start
+          when(state.event == '') ::<= {
+            return '[Add Effect - At Battle Start]\n' + Effect.find(:state.effectID).description
+          }
+          
+          return '[Add Effect - ' + state.conditionChance + '% Chance: ' + CONDITION_EVENT_DESCRIPTION[state.event][1] + ']\n' + Effect.find(:state.effectID).description
         },
         
         set ::(value) {
@@ -1108,13 +146,7 @@ ItemEnchant.database.newEntry(
       
       name : {
         get ::{
-          @:Effect = import(module:'game_database.effect.mt');
-          when (state.base.id == 'base:soul')
-            'Soul of ' + Effect.find(:state.equipEffects[0]).name;
-            
-          when(state.condition == empty) state.name;
-          
-          return state.condition.name + ': ' + state.base.name;
+          return Effect.find(:state.effectID).name
         },
         
         set ::(value) {
@@ -1122,56 +154,35 @@ ItemEnchant.database.newEntry(
         }
       },
       
+      price : {
+        get ::{
+          @effect = Effect.find(:state.effectID)
+          @price = match(effect.tier) {
+            (0): 30,
+            (1): 80,
+            (2): 220,
+            (3): 300,
+            default: effect.tier * 100
+          }
+          
+          
+          if (effect.hasTraits(:Effect.TRAIT.DEBUFF) ||
+              effect.hasTraits(:Effect.TRAIT.AILMENT))
+            price *= -1
+        
+          return price;
+        }
+      },
+      
       processEvent ::(*args) {
         @:world = import(module:'game_singleton.world.mt');
-        when(state.condition == empty) empty;
-        if (state.condition.effectEvent == args.name) ::<= {
+        when(state.event == '') empty;
+        
+        if (state.event == args.name) ::<= {
           when(!random.try(percentSuccess:state.conditionChance)) empty;
-          foreach(state.base.triggerConditionEffects)::(i, effectName) {
-            args.holder.addEffect(
-              from:args.holder, id: effectName, durationTurns: 1, item:args.item
-            );
-          }
-
-          if (state.artID != '') ::<= {
-            when(args.holder.battle == empty) empty;
-
-            @:battle = args.holder.battle;
-            @:card = Arts.new(base:Arts.database.find(
-              :state.artID
-            ))
-            args.holder.temporaryArts->push(:card);
-            card.revealArt(
-              prompt:'The Art ' + card.base.name + ' was temporarily added to ' + args.holder.name + '\'s available Arts.'
-            );
-            /*
-            // insanity: instant casting
-            when(args.holder.battle == empty) empty;
-
-            @:battle = args.holder.battle;
-
-            if (world.party.isMember(:args.holder)) ::<= {
-              args.holder.playerUseArt(
-                commitAction ::(action) {
-                  battle.entityCommitAction(action:action);                
-                },
-                card:ArtsDeck.synthesizeHandCard(id:state.artID),
-                allies : args.holder.battle.getAllies(entity:args.holder.user),
-                enemies : args.holder.battle.getEnemies(entity:args.holder.user),
-                onCancel :: {
-                  
-                }
-              );
-            } else ::<= {
-              args.holder.battleAI.commitTargettedAction(
-                battle,
-                card: ArtsDeck.synthesizeHandCard(id: state.artID),
-                allies : args.holder.battle.getAllies(entity:args.holder.user),
-                enemies : args.holder.battle.getEnemies(entity:args.holder.user)
-              );
-            }
-            */
-          }
+          args.holder.addEffect(
+            from:args.holder, id: state.effectID, durationTurns: 1, item:args.item
+          );
         }
       }
     }
