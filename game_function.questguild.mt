@@ -38,7 +38,7 @@
   location.data.quests = random.scrambled(:location.data.quests);
   location.data.quests->setSize(:location.data.quests->size / 2);
   
-  for(location.data.quests->size, 18) ::(i) {
+  for(location.data.quests->size, 12) ::(i) {
     location.data.quests->push(value:
       Quest.new(
         landmark : location.landmark,
@@ -220,7 +220,7 @@
 @:guildShop::(location) {
   @:rerollShop ::(inventory){
     inventory.clear();
-    for(0, 15)::(i) {
+    for(0, 10)::(i) {
       // no weight, as the value scales
       @:item = Item.new(
         base:Item.database.getRandomFiltered(

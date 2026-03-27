@@ -160,7 +160,7 @@ Quest.database.newEntry(
     descriptions : [
       'The outlaw "%1" is hiding in a known location. Deal with them, dead or alive.',
       'Help! "%1" has been terrorizing us! Please deal with them.',
-      '"%1" is responsible for various killings. We need justice!',
+      '"%1" is responsible for various murders. We need justice!',
       '"%1" knows no bounds to their treachery. Please bring them to justice.'
     ],
     
