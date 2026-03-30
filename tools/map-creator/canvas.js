@@ -83,6 +83,8 @@ const Canvas = {
     // whether a pen stroke is active
     var inStroke = false;
 
+    // tooltips. undefined for none-set otherwise text
+    var tooltips = [];
     
     
     
@@ -133,6 +135,7 @@ const Canvas = {
 
 
     const refreshCanvas = function() {
+      tooltips = [];
       for(var y = 0; y < VIEW_HEIGHT; ++y) {
         const line = lines[y];
         
@@ -165,8 +168,40 @@ const Canvas = {
               if (pattern.connections[atlasIndex] != null) {
                 color = TEXT_COLOR_CONNECTION;
                 ch = pattern.connections[atlasIndex][0];
+                
+                tooltips[atlasIndex] = 'Requires connection: ' + pattern.connectionsNeeded[atlasIndex];
+              } else {
+                color = TEXT_COLOR_INACTIVE
+              
               }
+              
               break;
+              
+            case Settings.MODE.LOCATIONS:
+              if (pattern.mapLocations[atlasIndex] != null) {
+                color = TEXT_COLOR_LOCATION;
+                ch = 'o';
+                
+                tooltips[atlasIndex] = 'Location ID: [' + pattern.mapLocations[atlasIndex] + ']';
+              } else {
+                color = TEXT_COLOR_INACTIVE
+              }
+              
+              break;              
+
+            case Settings.MODE.ENTITIES:
+              if (pattern.mapEntities[atlasIndex] != null) {
+                color = TEXT_COLOR_ENTITY;
+                ch = '*';
+                
+                tooltips[atlasIndex] = 'Entity ID: [' + pattern.mapEntities[atlasIndex] + ']';
+              } else {
+                color = TEXT_COLOR_INACTIVE
+              
+              }
+              
+              break;              
+
 
           }
           
@@ -204,6 +239,8 @@ const Canvas = {
             pattern.chars[atlasIndex] = 0;
             pattern.wall[atlasIndex]  = false;
             pattern.connections[atlasIndex] = null;
+            pattern.mapEntities[atlasIndex] = null;
+            pattern.mapLocations[atlasIndex] = null;
           }
 
           overlayChars[atlasIndex] = moveSet.chars[xi + (yi)*moveSet.width];
@@ -291,10 +328,11 @@ const Canvas = {
               if (activeOverlay.getWidth() == 0 || activeOverlay.getHeight() == 0)
                 break;
             
-              const area = pattern.areaSet.addArea(0, 0);
+              const area = pattern.areaSet.addArea(0, 0, 1, 1);
               area.overlay.setP0(activeOverlay.getX(), activeOverlay.getY());
               area.overlay.setP1(activeOverlay.getX()+activeOverlay.getWidth(), activeOverlay.getY()+activeOverlay.getHeight());
               area.updateFromOverlay();
+              area.overlay.show();
               break;
           
             case Settings.MODE.SELECTOR:
@@ -331,10 +369,14 @@ const Canvas = {
               for(var yi = moveSetY; yi < moveSetY + moveSet.height; ++yi) {
                 for(var xi = moveSetX; xi < moveSetX + moveSet.width; ++xi) {
                   const selIter = xi - moveSetX + (yi - moveSetY)*moveSet.width
-                  if (moveSet.chars[selIter] != 0)
-                    pattern.chars[xi + yi*MAX_LENGTH] = moveSet.chars[selIter];
-                    pattern.wall [xi + yi*MAX_LENGTH] = moveSet.wall [selIter];
-                    pattern.connections [xi + yi*MAX_LENGTH] = moveSet.connections[selIter];
+                  if (moveSet.chars[selIter] != 0) {
+                    const atlasIndex = xi + yi*MAX_LENGTH; 
+                    pattern.chars[atlasIndex] = moveSet.chars[selIter];
+                    pattern.wall [atlasIndex] = moveSet.wall [selIter];
+                    pattern.connections [atlasIndex] = moveSet.connections[selIter];
+                    pattern.mapLocations [atlasIndex] = moveSet.mapLocations[selIter];
+                    pattern.mapEntities [atlasIndex] = moveSet.mapEntities[selIter];
+                  }
                 }
               }
               moveSet = null;
@@ -380,6 +422,8 @@ const Canvas = {
               //commitChange();
             }
           case Settings.MODE.CONNECTIONS:
+          case Settings.MODE.LOCATIONS:
+          case Settings.MODE.ENTITIES:
             if (inStroke == false) {
               inStroke = true;
             }
@@ -421,6 +465,7 @@ const Canvas = {
           // place new set
           moveSetX = iterX + x + moveOffsetX;
           moveSetY = iterY + y + moveOffsetY; 
+          
 
           for(var yi = moveSetY; yi < moveSetY + moveSet.height; ++yi) {
             for(var xi = moveSetX; xi < moveSetX + moveSet.width; ++xi) {
@@ -433,6 +478,10 @@ const Canvas = {
           return;
         }
 
+        if (tooltips[atlasIndex] != undefined) {
+          Tooltip.set(tooltips[atlasIndex]);
+        }
+
         switch(settings.getMode()) {
           case Settings.MODE.AREA_EDITOR:
           case Settings.MODE.SELECTOR:
@@ -441,6 +490,14 @@ const Canvas = {
             }
         }
       });
+      
+      line.events.addCallback('onLeave', function(data) {
+        const x = data.index 
+        const atlasIndex = iterX + x + (y + iterY)*MAX_LENGTH;        
+
+        Tooltip.unset();
+      });      
+      
 
 
       line.events.addCallback('onClick', function(data) {
@@ -489,8 +546,48 @@ const Canvas = {
               pattern.connections[atlasIndex] = newVal;
               refreshCanvas();
             }
-            
+
+
+            old = pattern.connectionsNeeded[atlasIndex];
+            if (settings.isErase()) { 
+              newVal = null;            
+            } else {
+              newVal = settings.getConnectionNeededID();
+            }
+            if (old != newVal) {
+              pattern.connectionsNeeded[atlasIndex] = newVal;
+              refreshCanvas();
+            }
+
             break;
+
+          case Settings.MODE.LOCATIONS:
+            old = pattern.mapLocations[atlasIndex]
+            if (settings.isErase()) { 
+              newVal = null;            
+            } else {
+              newVal = settings.getLocationID();
+            }
+            if (old != newVal) {
+              pattern.mapLocations[atlasIndex] = newVal;
+              refreshCanvas();
+            }
+            break;
+
+
+          case Settings.MODE.ENTITIES:
+            old = pattern.mapEntities[atlasIndex]
+            if (settings.isErase()) { 
+              newVal = null;            
+            } else {
+              newVal = settings.getEntityID();
+            }
+            if (old != newVal) {
+              pattern.mapEntities[atlasIndex] = newVal;
+              refreshCanvas();
+            }
+            break;
+
 
             
         }
@@ -534,20 +631,28 @@ const Canvas = {
         const set = [];
         const setW = [];
         const setC = [];
+        const setML = [];
+        const setME = [];
         const w = selectionX1 - selectionX0;
         for(var y = selectionY0; y < selectionY1; ++y) {
           var ySet = y - selectionY0;
           for(var x = selectionX0; x < selectionX1; ++x) {
             var xSet = x - selectionX0;
+            const copyIndex = xSet + ySet*w
+            const atlasIndex = x + y * MAX_LENGTH
             
-            set[xSet + ySet*w] = pattern.chars[x + y * MAX_LENGTH];
-            setW[xSet + ySet*w] = pattern.wall[x + y * MAX_LENGTH];
-            setC[xSet + ySet*w] = pattern.connections[x + y * MAX_LENGTH];
+            set[copyIndex] = pattern.chars[atlasIndex];
+            setW[copyIndex] = pattern.wall[atlasIndex];
+            setC[copyIndex] = pattern.connections[atlasIndex];
+            setML[copyIndex] = pattern.mapLocations[atlasIndex];
+            setME[copyIndex] = pattern.mapEntities[atlasIndex];
             
             if (yank) {
-              pattern.chars[x + y * MAX_LENGTH] = 0;
-              pattern.wall[x + y * MAX_LENGTH] = false;
-              pattern.connections[x + y * MAX_LENGTH] = null;
+              pattern.chars[atlasIndex] = 0;
+              pattern.wall[atlasIndex] = false;
+              pattern.connections[atlasIndex] = null;
+              pattern.mapLocations[atlasIndex] = null;
+              pattern.mapEntities[atlasIndex] = null;
             }
           }
         }
@@ -567,6 +672,8 @@ const Canvas = {
           chars : set,
           wall : setW,
           connections : setW,
+          mapLocations : setML,
+          mapEntities : setME,
           width : w,
           height : selectionY1 - selectionY0
         }
@@ -583,9 +690,12 @@ const Canvas = {
           for(var yi = y; yi < y + set.height; ++yi) {
             for(var xi = x; xi < x + set.width; ++xi) {
               const selIter = xi - x + (yi - y)*set.width
-              pattern.chars[xi + yi*MAX_LENGTH] = set.chars[selIter];
-              pattern.wall [xi + yi*MAX_LENGTH] = set.wall [selIter];
-              pattern.connections[xi + yi*MAX_LENGTH] = set.connections[selIter];
+              const localIndex = xi + yi*MAX_LENGTH;
+              pattern.chars[localIndex] = set.chars[selIter];
+              pattern.wall [localIndex] = set.wall [selIter];
+              pattern.connections[localIndex] = set.connections[selIter];
+              pattern.mapEntities[localIndex] = set.mapEntities[selIter];
+              pattern.mapLocations[localIndex] = set.mapLocations[selIter];
             }
           }
         }
@@ -614,6 +724,15 @@ const Canvas = {
       },
       
       events : events,
+      
+      // in map coordinates
+      addTooltip : function(x, y, text) {
+        tooltips[x + y * MAX_LENGTH] = text;
+      },
+      
+      clearTooltips : function() {
+        tooltips = []; 
+      },
       
       getPalette : function() {
         return palette;
@@ -686,6 +805,8 @@ const Canvas = {
       },
       
       setPattern : function(p) {
+        if (pattern)
+          pattern.areaSet.hide();
         pattern = p;
         refreshCanvas();
       },
@@ -693,31 +814,16 @@ const Canvas = {
       getPattern : function(p) {
         return pattern;
       },
+      
+      setTooltipAreas : function(list) {
+        
+      },
             
       moveRelative : function(x, y) {
         self.move(x + iterX, y + iterY);
       },
       
-      
-      save : function() {
-        const patternsOut = [];
-        for(var i = 0; i < patterns.length; ++i) {
-            patternsOut.push(patterns[i].save());
-        }
-      
-        return {
-          settings : {
-            flags : [
-            
-            ],
-            outOfBoundsCharacter : ' ',
-            wallCharacter : ' ',
-            patternMode : 'random'
-          },
-          
-          patterns : patternsOut
-        }
-      }
+
     }
     
     

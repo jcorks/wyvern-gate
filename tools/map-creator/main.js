@@ -46,22 +46,5 @@ document.body.style.fontFamily = 'Monospace';
   settings.setMode(Settings.MODE.WALL);
   settings.setMode(Settings.MODE.PEN);
   
-  const save = function() {
-    const obj = {};
-    obj.canvas = canvas.save();
-    obj.settings = settings.save();
-    
-    window.localStorage.setItem('save', JSON.stringify(obj));
-  }
-  
-  
-  const load = function() {
-    const obj = window.localStorage.getItem('save');
-    if (obj == undefined) return;
-    
-    // settings first so it can populate the pattern data for the canvas
-    settings.load(obj.canvas);
-    canvas.load(obj.canvas);
-  }
   
 })();

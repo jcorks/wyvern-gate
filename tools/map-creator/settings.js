@@ -4,13 +4,16 @@ const Settings = {
     WALL : 1,
     SELECTOR : 2,
     AREA_EDITOR : 3,
-    CONNECTIONS : 4
+    CONNECTIONS : 4,
+    LOCATIONS : 5,
+    ENTITIES : 6
   },
 
   new : function(canvas, xRange, yRange) {
+    var self;
     const table = document.createElement('table');
-    const patterns = {
-      Default : Pattern.new()
+    var patterns = {
+      Default : Pattern.new(canvas)
     };
 
     const makeLabel = function(str) {
@@ -78,9 +81,27 @@ const Settings = {
     var cursorOptions_connections_set;
     var undoRedo_set;
     
+    const initProject = function() {
+      if (Object.keys(window.localStorage).length == 0) {
+        const newP = Pattern.new(canvas);
+        canvas.setPattern(newP);        
+
+        const save = self.save();
+        const data = JSON.stringify(save);
+        
+        window.localStorage.setItem('Default', data);
+      }
+      const keys = Object.keys(window.localStorage);
+      self.loadProjectName(keys[0]);
+      rebuildProjectPulldown();
+      
+    }
+    
     const updateLayout = function() {
       hideSet(cursorOptions_isErase_set);
       hideSet(cursorOptions_connections_set);
+      hideSet(cursorOptions_entities_set);
+      hideSet(cursorOptions_locations_set);
       canvas.disablePatternContextMenu();
       canvas.disableAreas();
       switch(cursorMode_element.value) {
@@ -97,13 +118,24 @@ const Settings = {
           break;
           
         case 'Area Editor':
-          showSet(cursorOptions_isErase_set);
           canvas.enableAreas();
           break;
           
         case 'Connectors': 
           showSet(cursorOptions_connections_set);
           showSet(cursorOptions_isErase_set);
+          break;
+
+        case 'Locations': 
+          showSet(cursorOptions_locations_set);
+          showSet(cursorOptions_isErase_set);
+          break;
+
+        case 'Entities': 
+          showSet(cursorOptions_entities_set);
+          showSet(cursorOptions_isErase_set);
+          break;
+
         
           break;
 
@@ -115,7 +147,34 @@ const Settings = {
         const projectOptions_projectNew_element = makeButton(
           "New",
           function() {
-          
+            if (window.confirm("Save the current map?")) {
+              const save = self.save();
+              const data = JSON.stringify(save);
+              
+              const name = projectOptions_projectList_element.value
+              window.localStorage.setItem(name, data);              
+            }
+
+            const ch = window.prompt("Enter a name for the new, blank map.");
+            if ((typeof ch) != 'string') return;
+            if (typeof window.localStorage.getItem(ch) == "string") {
+              if (!window.confirm("The map " + ch + " exists. Overwrite?")) {
+                return;
+              }
+            }
+            
+            patterns = {
+              Default : Pattern.new(canvas)
+            };                        
+            const newP = patterns.Default;
+            canvas.setPattern(newP);
+            const save = self.save();
+            const data = JSON.stringify(save);
+            window.localStorage.setItem(ch, data);
+
+            rebuildProjectPulldown();
+            self.loadProjectName(ch);
+            
           }
         )
 
@@ -124,14 +183,48 @@ const Settings = {
         const projectOptions_projectSave_element  = makeButton(
           "Save",
           function() {
-          
+            const save = self.save();
+            const data = JSON.stringify(save);
+            
+            const name = projectOptions_projectList_element.value
+            window.localStorage.setItem(name, data);
           }
         )
 
         const projectOptions_projectExport_element  = makeButton(
           "Export",
           function() {
+            const save = self.save();
+            const data = JSON.stringify(save, null, 1);
+            
           
+            const supportsSaving = (typeof window.showSaveFilePicker != 'undefined');
+              
+            if (supportsSaving) {
+              const handle = window.showSaveFilePicker({
+                startIn : 'downloads',
+                suggestedName : 'map.txt'
+              })
+              
+              handle.write(data);
+              handle.close();
+              
+            } else {
+              const ch = window.prompt("The browser doesn't allow direct file saving, which. Yeah, fair. But also yes just enter a name here to put it in your downloads folder:");
+              if ((typeof ch) != 'string') return;
+
+              const blob = new Blob([data], {type : 'text/plain'});
+              const downloadelem = document.createElement("a");
+              const url = URL.createObjectURL(blob);
+              document.body.appendChild(downloadelem);
+              downloadelem.href = url;
+              downloadelem.download = ch;
+              downloadelem.click();
+              downloadelem.remove();
+              window.URL.revokeObjectURL(url);
+            }
+
+            
           }
         )
 
@@ -139,17 +232,48 @@ const Settings = {
         const projectOptions_projectImport_element  = makeButton(
           "Import",
           function() {
+            const el = document.createElement('input');
+            el.type = 'file';
+            el.addEventListener("change", function(event) {
           
+              const files = el.files;
+              if (!files || files.length == 0) return;
+              
+              files[0].text().then(function(value) {
+                
+                const ch = window.prompt("Enter a name for this map.");
+                if ((typeof ch) != 'string') return;
+                if (typeof window.localStorage.getItem(ch) == "string") {
+                  if (!window.confirm("The map " + ch + " exists. Overwrite?")) {
+                    return;
+                  }
+                }
+
+                
+                window.localStorage.setItem(ch, value);
+                rebuildProjectPulldown();
+                self.loadProjectName(ch);
+              });
+            
+            });
+            el.click();
           }
         )
 
         const projectOptions_projectList_element = document.createElement('select');
         setDropDownOptions(projectOptions_projectList_element, ['Default']);
         projectOptions_project_set = makeRow([
-          makeLabel('Project:'),
+          makeLabel('Map:'),
           projectOptions_projectList_element
         ]);
 
+        projectOptions_projectList_element.addEventListener(
+          "change",
+          function() {
+            const which = projectOptions_projectList_element.value
+            self.loadProjectName(which);
+          }
+        );
 
 
         projectOptions_project_set = makeRow([
@@ -182,7 +306,7 @@ const Settings = {
               return;
             }
             
-            const newP = Pattern.new();
+            const newP = Pattern.new(canvas);
             newP.load(canvas.getPattern().save());
             patterns[ch] = newP;
             
@@ -193,6 +317,7 @@ const Settings = {
             
             canvas.setPattern(newP);
             rebuildPatternPulldown();
+            updateLayout();
           }
         )
         const patternOptions_patternNew_element = makeButton(
@@ -204,7 +329,7 @@ const Settings = {
               window.alert('The name of this pattern already exists!');
               return;
             }
-            patterns[ch] = Pattern.new();
+            patterns[ch] = Pattern.new(canvas);
             canvas.setPattern(patterns[ch]);
             rebuildPatternPulldown();
           }
@@ -232,7 +357,7 @@ const Settings = {
               
               var pattern;
               if (keys.length == 0) {
-                pattern = Pattern.new();
+                pattern = Pattern.new(canvas);
                 patterns['Default'] = pattern;
               } else {
                 pattern = patterns[Object.keys(patterns)[0]];
@@ -258,6 +383,16 @@ const Settings = {
             }
           }
         }
+        
+        const rebuildProjectPulldown = function() {
+          const keys = Object.keys(window.localStorage);
+          if (keys.length == 0) {
+            setDropDownOptions(projectOptions_projectList_element, ['Default']);
+          } else {
+            setDropDownOptions(projectOptions_projectList_element, keys);
+          }        
+        }
+        
 
         
         
@@ -284,8 +419,12 @@ const Settings = {
         patternOptions_patternList_element.addEventListener(
           "change",
           function() {
+            const p = canvas.getPattern();
+            p.areaSet.hide();
+
             const newPattern = patterns[patternOptions_patternList_element.value];
             canvas.setPattern(newPattern);
+            updateLayout();
           }
         );
 
@@ -366,6 +505,8 @@ const Settings = {
           'Selector', 
           'Area Editor',
           'Connectors',
+          'Locations',
+          'Entities',
         ];
         const cursorMode_element = document.createElement('select');
         setDropDownOptions(cursorMode_element, modes);
@@ -412,13 +553,31 @@ const Settings = {
 
         ]);
         
+    // Locations
+        locationID_element = document.createElement('input');
+    
+        cursorOptions_locations_set = makeRow([
+          makeLabel(''),
+          makeLabel('ID:'),
+          locationID_element,
+        ]);
+
+    // Entities
+        entitiesID_element = document.createElement('input');
+    
+        cursorOptions_entities_set = makeRow([
+          makeLabel(''),
+          makeLabel('ID:'),
+          entitiesID_element,
+        ]);
+
+
 
         
     // SelectorOptions source
 
-
-    canvas.setPattern(patterns.Default);
-    return {
+    rebuildProjectPulldown();
+    self = {
       getElement : function() {
         return table;
       },
@@ -426,26 +585,50 @@ const Settings = {
       save : function() {
         const p = {};
         const keys = Object.keys(patterns);
+        var whichSaved = null;
+
       
         for(var i = 0; i < keys.length; ++i) {
-          p[keys[i]] = patterns.save();
+          p[keys[i]] = patterns[keys[i]].save();
+          if (patterns[keys[i]] == canvas.getPattern()) {
+            whichSaved = keys[i];
+          }
         }
       
         return {
+          activePattern : whichSaved,
           patterns : p
         }
       },
       
+      loadProjectName : function(name) {
+        const str = window.localStorage.getItem(name);
+        if (typeof str != 'string') return;
+        
+        const obj = JSON.parse(str);
+        self.load(obj);
+        if (projectOptions_projectList_element.value != name)
+          projectOptions_projectList_element.value = name;
+      },
+      
       load : function(obj) {
-        patterns = [];
-        const keys = Object.keys(patterns);
+        patterns = {};
+        const keys = Object.keys(obj.patterns);
         
         for(var i = 0; i < keys.length; ++i) {
-          const p = Pattern.new();
-          p.load(obj[keys]);
-          patterns.push(p);
+          const p = Pattern.new(canvas);
+          p.load(obj.patterns[keys[i]]);
+          patterns[keys[i]] = p;
         }
+        
+        if (obj.activePattern == null) {
+          obj.activePattern = keys[0];
+        }
+        
+        canvas.setPattern(patterns[obj.activePattern]);
+        
         rebuildPatternPulldown();
+        updateLayout();
       },
       
       setMode : function(i) {
@@ -456,6 +639,14 @@ const Settings = {
       getMode : function() {
         return modes.indexOf(cursorMode_element.value)
       },
+      
+      getEntityID : function() {
+        return entitiesID_element.value
+      },
+      getLocationID : function() {
+        return locationID_element.value
+      },
+
             
       getConnectionID : function() {
         return connectionID_element.value;
@@ -463,11 +654,15 @@ const Settings = {
       getConnectionNeededID : function() {
         return connectionNeededID_element.value;
       },
+
+
             
       isErase : function() {
         return isErase_element.checked
       }
     
     }
+    initProject();
+    return self;
   }
 }

@@ -133,6 +133,14 @@ const Line = {
       getChar : function(x) {
         return chars[x];
       },
+      
+      setTooltip : function(x, text) {
+        chars[x].tooltip = text;
+      },
+      
+      clearTooltip : function(x) {
+        delete chars[x].tooltip
+      },
 
       events : events,
       

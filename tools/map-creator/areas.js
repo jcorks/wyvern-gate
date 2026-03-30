@@ -8,7 +8,9 @@ const AreaSet = {
     const makeArea = function(x, y, w, h) {
       return {
         x : x,
-        y : y
+        y : y,
+        w : w,
+        h : h
       }
     }
     
@@ -22,6 +24,28 @@ const AreaSet = {
 	
     
     self = {
+      getAreaState : function() {
+        const out = [];
+        for(var i = 0; i < areas.length; ++i) {
+          out.push({
+            x : areas[i].x,
+            y : areas[i].y,
+            w : areas[i].w,
+            h : areas[i].h
+          });
+        }
+        return out;
+      },
+      
+      setAreaState : function(state) {
+        self.removeAll();
+        for(var i = 0; i < state.length; ++i) {
+          const a = state[i];
+          self.addArea(a.x, a.y, a.w, a.h);
+        }
+      },
+      
+    
       hide : function() {
         for(var i = 0; i < areas.length; ++i) {
             areas[i].overlay.hide();
@@ -50,8 +74,10 @@ const AreaSet = {
         const area = {
           x: x,
           y: y,
-          w: 10,
-          h: 10,
+          w: w,
+          h: h,
+          
+
           
           overlay : Overlay.new([255, 205, 205]),
                     
@@ -115,6 +141,7 @@ const AreaSet = {
         });  
         
         area.updateOverlay();     
+        area.overlay.hide();
         areas.push(area);
         return area;
       }
