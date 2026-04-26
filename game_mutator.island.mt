@@ -666,7 +666,6 @@ Island.database.newEntry(
           onDone(:state.map);        
         }
         
-        breakpoint();
         when((base.traits & TRAIT.EMPTY) != 0) ::<= {
           
           @:Map = import(module:'game_class.map.mt');

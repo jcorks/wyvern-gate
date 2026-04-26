@@ -375,16 +375,38 @@ instance.mainMenu(
     );  
   },
   
+  preloadJSON ::{
+    @:loaded = {};
+
+    enterNewLocation(
+      path: './',
+      action::(filesystem) {
+        foreach(filesystem.directoryContents) ::(k, v) {
+          if (v.name->contains(:'.json')) {
+            ::? {
+              loaded[v.name] = filesystem.readJSON(:v.path);
+            } => {
+              onError ::<- 
+                error(detail:v.path + ' could not be opened.')
+            }
+          }
+        }
+      }
+    );  
+    
+    return loaded
+  },
+  
   preloadMods :: {
     @:mods = [];
 
     @:jsonTypes = {
       name : String,
-      name : String,
       description : String,
       author : String,
       website : String,
       files : Object,
+      JSONdata : Object,
       loadFirst : Object
     }
     
@@ -410,6 +432,19 @@ instance.mainMenu(
           }
         }
       }
+      
+      foreach(json.JSONdata) ::(i, file) {
+        ::? {
+          setModule(
+            name:json.id + '/' + file,
+            value : JSON.decode(:Filesystem.readBytes(:file))
+          )
+        } => {
+          onError::(message) {
+            error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':' + message.detail);
+          }
+        }
+      }      
     }
     
 

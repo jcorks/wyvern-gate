@@ -75,6 +75,9 @@ const Settings = {
       }
     }
     
+    var rebuildLocationPulldown;
+    
+    
 
     var cursorOptions_isWall_set;
     var patternOptions_pattern_set;
@@ -101,7 +104,9 @@ const Settings = {
       hideSet(cursorOptions_isErase_set);
       hideSet(cursorOptions_connections_set);
       hideSet(cursorOptions_entities_set);
-      hideSet(cursorOptions_locations_set);
+      hideSet(cursorOptions_locationsOptions_set);
+      hideSet(cursorOptions_locationsPulldown_set);
+      hideSet(cursorOptions_locationsInfo_set);
       canvas.disablePatternContextMenu();
       canvas.disableAreas();
       switch(cursorMode_element.value) {
@@ -127,7 +132,9 @@ const Settings = {
           break;
 
         case 'Locations': 
-          showSet(cursorOptions_locations_set);
+          showSet(cursorOptions_locationsOptions_set);
+          showSet(cursorOptions_locationsPulldown_set);
+          showSet(cursorOptions_locationsInfo_set);
           showSet(cursorOptions_isErase_set);
           break;
 
@@ -195,7 +202,7 @@ const Settings = {
           "Export",
           function() {
             const save = self.save();
-            const data = JSON.stringify(save, null, 1);
+            const data = JSON.stringify(save);
             
           
             const supportsSaving = (typeof window.showSaveFilePicker != 'undefined');
@@ -240,6 +247,7 @@ const Settings = {
               if (!files || files.length == 0) return;
               
               files[0].text().then(function(value) {
+
                 
                 const ch = window.prompt("Enter a name for this map.");
                 if ((typeof ch) != 'string') return;
@@ -554,13 +562,105 @@ const Settings = {
         ]);
         
     // Locations
-        locationID_element = document.createElement('input');
+        const locationID_element = document.createElement('div');
+        const locationSymbol_element = document.createElement('div');
+        const locationPulldown_element = document.createElement('select');
+
+        
+        const updateLocationTags = function() {
+          const pattern = canvas.getPattern();
+          const which = pattern.locations[locationPulldown_element.value];
+          
+          if (!which) return;
+          locationSymbol_element.innerText = 'Symbol:['+which.symbol+']';
+          locationID_element.innerText = 'ID:['+which.id+']';        
+        }        
+        
+        rebuildLocationPulldown = function() {
+          const pattern = canvas.getPattern();
+          if (!pattern) return;
+          const keys = Object.keys(pattern.locations);
+          setDropDownOptions(locationPulldown_element, keys);
+          updateLocationTags();
+        }
+
+
+        locationPulldown_element.addEventListener("change", function() {
+          updateLocationTags();
+        })
+
+
+        
+        const locationNew_element = makeButton('New', function() {
+          const pattern = canvas.getPattern();
+          const name = window.prompt("Enter the name that uniquely defines this location");          
+          if (typeof name != 'string') return; 
+          
+          if (pattern.locations[name] != null) {
+            if (!window.confirm(name + ' already exists. Replace?')) return;
+          }
+          
+          const id = window.prompt("Enter the ID for this location");   
+          if (typeof id != 'string') return; 
+          const ch = window.prompt("Enter the character to represent this location");          
+          if (typeof ch != 'string') return; 
+          
+          pattern.locations[name] = {
+            id: id,
+            symbol : ch
+          }
+          rebuildLocationPulldown();
+        
+        });
+        const locationRemove_element = makeButton('Remove', function() {
+          const name = locationPulldown_element.value;
+          if (!window.confirm("Really remove location " + name + "? This is not undoable.")) return;
+
+          canvas.pattern.removeLocation(name);
+          rebuildLocationPulldown();        
+        });
+        const locationClone_element = makeButton('Clone', function() {
+          const pattern = canvas.getPattern();
+          const name = window.prompt("Enter the name that uniquely defines this cloned location");          
+          const source = locationPulldown_element.value
+          if (typeof name != 'string') return; 
+          if (name == source) return;
+
+          
+          pattern.locations[name] = {
+            id: pattern.locations[source].id,
+            symbol : pattern.locations[source].symbol
+          }
+          rebuildLocationPulldown();
+        
+        });
+
+
+
+
     
-        cursorOptions_locations_set = makeRow([
+        cursorOptions_locationsPulldown_set = makeRow([
           makeLabel(''),
-          makeLabel('ID:'),
-          locationID_element,
+          locationPulldown_element,
+          makeLabel(''),
         ]);
+        
+        cursorOptions_locationsOptions_set = makeRow([
+          makeLabel(''),
+          locationNew_element,
+          locationClone_element,
+          locationRemove_element,
+        ]);
+
+        cursorOptions_locationsInfo_set = makeRow([
+          makeLabel(''),
+          locationID_element,
+          locationSymbol_element
+        ]);
+
+
+
+
 
     // Entities
         entitiesID_element = document.createElement('input');
@@ -570,6 +670,7 @@ const Settings = {
           makeLabel('ID:'),
           entitiesID_element,
         ]);
+        rebuildLocationPulldown();
 
 
 
@@ -628,6 +729,7 @@ const Settings = {
         canvas.setPattern(patterns[obj.activePattern]);
         
         rebuildPatternPulldown();
+        rebuildLocationPulldown();
         updateLayout();
       },
       
@@ -643,8 +745,8 @@ const Settings = {
       getEntityID : function() {
         return entitiesID_element.value
       },
-      getLocationID : function() {
-        return locationID_element.value
+      getLocationName : function() {
+        return locationPulldown_element.value
       },
 
             

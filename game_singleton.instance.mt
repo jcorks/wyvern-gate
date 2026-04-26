@@ -143,7 +143,7 @@ import(module:'game_function.newrecord.mt');
   @:stone = world.party.getItem(condition::(value) <- value.base.id == 'base:knowledge-stone');
   when(stone == empty) empty;
   when(stone.data.steps == empty) stone.data.steps = 0;
-  if (stone.data.steps < 155) ::<= {  
+  if (stone.data.steps < 155) {  
     @:fraction = if (stone.data.steps >= 150) 1 else (stone.data.steps / 150);
     @:bar = canvas.renderBarAsString(
       width:13,
@@ -632,12 +632,18 @@ return class(
         onLoadState => Function,
         onListSlots => Function,
         preloadMods => Function,
+        preloadJSON => Function, //[name] = Json object in directory
         onSaveSettings => Function,
         onLoadSettings => Function,
         onPlaySFX => Function,
         onPlayBGM => Function, // if name is unrecognized, will halt playing music.
         onQuit => Function
       ) {
+        foreach(preloadJSON()) ::(k, v) {
+        
+          setModule(name:k, value:v);
+        }
+      
         sound.setup(
           nativeSFX: onPlaySFX,
           nativeBGM: onPlayBGM

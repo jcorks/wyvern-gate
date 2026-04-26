@@ -42,7 +42,8 @@
     'f',
     'r',
     'v',
-    'z'
+    'z',
+    'y'
   ];
   return :: {
     return random.pickArrayItem(list);

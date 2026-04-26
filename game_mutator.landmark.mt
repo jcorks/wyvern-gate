@@ -20,6 +20,7 @@
 @:Database = import(module:'game_class.database.mt');
 @:State = import(module:'game_class.state.mt');
 @:sound = import(module:'game_singleton.sound.mt');
+@:random = import(module:'game_singleton.random.mt');
 
 
 @:StateType = State.create(
@@ -33,11 +34,33 @@
 );
 
 
-@:TYPE = {
-  DUNGEON : 0,
-  STRUCTURE : 1,
-  CUSTOM : 2
-};
+@:TYPE = ::<= {
+  @:layouts = {};
+  @:idPool = 10;
+
+  return {
+    DUNGEON : {},
+    STRUCTURE : {},
+    CUSTOM : {},
+    
+    // imports a json layout in "single" mode, where 
+    // a random pattern is loaded as a valid map.
+    BLUEPRINT_SINGLE ::(path) <-
+      {
+        blueprint : true,
+        single : true,
+        data : import(:path)
+      },
+      
+    BLUEPRINT_COLLAGE ::(path) <-
+      {
+        blueprint : true,
+        single : false,
+        data : import(:path)
+      },
+      
+  };
+}
 
 @:TRAIT = {
   UNIQUE : 1,
@@ -725,24 +748,23 @@ Landmark.database.newEntry(
 
 Landmark.database.newEntry(
   data: {
-    name: 'Forest',
-    id: 'base:forest-generic',
-    legendName: 'Forest',
-    symbol : 'T',
+    name: 'Shop: Inside',
+    id: 'base:shop-inside',
+    legendName: '',
+    symbol : '$',
     rarity : 40,        
-    landmarkType : TYPE.DUNGEON,
+    landmarkType : TYPE.BLUEPRINT_SINGLE(:'roomtest.json'),
 
     traits :
       TRAIT.PEACEFUL |
       TRAIT.UNIQUE |
-      TRAIT.DUNGEON_FORCE_ENTRANCE |
       TRAIT.CAN_SAVE,
     minEvents : 0,
     maxEvents : 0,
-    eventPreference : LandmarkEvent.KIND.HOSTILE,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
-    minLocations : 3,
-    maxLocations : 5,
+    minLocations : 0,
+    maxLocations : 0,
     possibleLocations : [
     ],
     requiredLocations : [
@@ -750,12 +772,6 @@ Landmark.database.newEntry(
     requiredEvents : [
     ],
     mapHint: {
-      roomSize: 30,
-      wallCharacter: 'Y',
-      roomAreaSize: 7,
-      roomAreaSizeLarge: 14,
-      emptyAreaCount: 13,
-      outOfBoundsCharacter: '~'
     },
     onCreate ::(landmark, island){},
     onIncrementTime ::(landmark, island){},
@@ -848,6 +864,105 @@ Landmark.database.newEntry(
 */
 }
 
+
+@:makeBlueprintSingle::(this, state, data) {
+  @:Map = import(module:'game_class.map.mt');
+  @:Location = import(module:'game_mutator.location.mt');
+
+  @:buffer = 50;
+  breakpoint();
+
+  // first pick a random pattern 
+  @:pattern = random.pickArrayItem(:data.patterns->values)
+
+  @:top = pattern.top + buffer;
+  @:left = pattern.left + buffer;
+  
+  @:map = state.map;
+  map.width = pattern.width + top  + buffer;
+  map.height = pattern.height + left  + buffer;
+  
+
+  foreach(pattern.scenery) ::(k, v) {
+    @:next = v;
+    
+    map.setSceneryIndex(
+      x : left + next[0],
+      y : top + next[1],
+      symbol : map.addScenerySymbol(:next[2])
+    )
+  }
+
+
+  foreach(pattern.walls) ::(k, v) {
+    @:next = v;
+    
+    map.enableWall(
+      x : left + next[0],
+      y : top + next[1]
+    )
+  }
+
+  /*  
+  foreach(pattern.mapEntities) ::(k, v) {
+    state.mapEntityController.add(
+      x : left + next[0],
+      y : top + next[1],
+      
+    );
+  }
+  */
+
+  foreach(pattern.mapLocations) ::(k, v) {
+    @:next = v;
+    this.addLocation(
+      location : Location.new(
+        x : left + next[0],
+        y : top + next[1],
+        base : Location.database.find(:next[2]),
+        landmark : this
+      ),
+      
+      width: 1,
+      height : 1
+    );
+  }
+
+
+  foreach(pattern.areas) ::(k, v) {
+    @:next = v;
+    map.addArea(:Map.Area.new(
+      x : left + next[0],
+      y : top + next[1],
+      width: next[2],
+      height: next[3]
+    ));
+  }
+
+
+  
+
+
+
+ 
+}
+
+@:makeBlueprintCollage ::(this, state) {
+  error(detail:'Not working yet!');
+}
+
+// uses the json blueprint to create a map
+@:makeBlueprint::(this, state) {
+  @:self = state.base.landmarkType;
+  
+  if(self.single)
+    makeBlueprintSingle(this, state, data:self.data)
+  else
+    makeBlueprintCollage(this, state, data:self.data)
+  
+}
+
+
 @:Landmark = databaseItemMutatorClass.create(  
   name : 'Wyvern.Landmark',
   statics : {
@@ -869,7 +984,7 @@ Landmark.database.newEntry(
     mapEntityController : empty,
     overrideTitle : '',
     symbol : '',
-    legendName : ''
+    legendName : '',
   },
   
   database : Database.new(
@@ -888,7 +1003,7 @@ Landmark.database.newEntry(
       possibleLocations : Object,
       requiredLocations : Object,
       requiredEvents : Object,
-      landmarkType: Number,
+      landmarkType: Any,
       mapHint : Object,
       onCreate : Function,
       onVisit : Function,
@@ -932,6 +1047,10 @@ Landmark.database.newEntry(
 
     @:loadContent::(base) {
 
+      if (base.landmarkType.blueprint) {
+        state.map = Map.new(parent:this);
+        makeBlueprint(this, state); 
+      } else
       if (base.landmarkType == TYPE.DUNGEON) ::<= {
         state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
         if (base.hasTraits(:Landmark.TRAIT.DUNGEON_FORCE_ENTRANCE)) ::<= {
@@ -1046,6 +1165,8 @@ Landmark.database.newEntry(
       }
       
       state.mapEntityController = MapEntity.Controller.new(parent:this);
+      
+
     }
 
     this.interface =  {

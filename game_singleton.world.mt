@@ -893,10 +893,10 @@
         // retrieve, creating if it doesnt exist
         @which = save.islands[id];
         @alreadyLoaded;
-        breakpoint();
+
         if (which == empty) ::<= {
           @:newIsland = Island.new(
-            *{worldID : id, ...(if (islandGenTraits) islandGenTraits else {})}
+            *{worldID : id, ...(if (islandGenTraits) islandGenTraits else ({}))}
           );
           island = newIsland;
           newIsland.loadMap(onDone ::(map) {

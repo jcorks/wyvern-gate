@@ -178,11 +178,24 @@ const Canvas = {
               break;
               
             case Settings.MODE.LOCATIONS:
-              if (pattern.mapLocations[atlasIndex] != null) {
+
+              const ref = pattern.mapLocations[atlasIndex];
+              if (ref && ref.length > 0) {
+                const name = ref[ref.length-1];
+                const data = pattern.locations[name];
                 color = TEXT_COLOR_LOCATION;
-                ch = 'o';
                 
-                tooltips[atlasIndex] = 'Location ID: [' + pattern.mapLocations[atlasIndex] + ']';
+                if (ref.length == 1) {
+                  ch = data.symbol;
+                  tooltips[atlasIndex] = 
+                    name+ '\n' + 
+                    'Location ID: [' + data.id + ']';
+                } else {
+                  ch = "*";
+                  tooltips[atlasIndex] = 
+                    'Multiple Locations: [' + pattern.mapLocations[atlasIndex] + ']';
+                
+                }
               } else {
                 color = TEXT_COLOR_INACTIVE
               }
@@ -562,15 +575,42 @@ const Canvas = {
             break;
 
           case Settings.MODE.LOCATIONS:
-            old = pattern.mapLocations[atlasIndex]
-            if (settings.isErase()) { 
-              newVal = null;            
-            } else {
-              newVal = settings.getLocationID();
+            var ref = pattern.mapLocations[atlasIndex];
+            const erase = settings.isErase();
+            var next;
+
+            // just erase outright all of them if applicable
+            // hopefully not too confusing!
+            if (erase && pattern.mapLocations[atlasIndex]) {
+                pattern.mapLocations[atlasIndex] = null;
+                refreshCanvas();
+                break;
             }
-            if (old != newVal) {
-              pattern.mapLocations[atlasIndex] = newVal;
-              refreshCanvas();
+
+            const name = settings.getLocationName();
+            if (!pattern.locations[name]) return;
+            const id = pattern.locations[name].id;
+            
+            
+            // create an entry if none yet
+            if (ref == null) {
+                pattern.mapLocations[atlasIndex] = [];
+                ref = pattern.mapLocations[atlasIndex];
+            }
+            
+            
+            
+            // already here? locations dont have repeat overlays
+            var already = false;
+            for(var i = 0; i < ref.length; ++i) {
+              if (ref[i] == name) {
+                already = true;
+                break;
+              }
+            }
+            if (!already) {
+              ref.push(name);
+              refreshCanvas();            
             }
             break;
 

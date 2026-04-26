@@ -88,6 +88,7 @@
 
 @:TOO_FAR_CHARACTER = '░';
 @:TOO_FAR_SYMBOL_CHARACTER = 'o';
+@:DEFAULT_OUT_OF_BOUNDS = '`'
 
 @:distance = import(module:'game_function.distance.mt');
 
@@ -200,7 +201,7 @@
     @offsetY = 0;
     @drawLegend = false;
     @paged = false;
-    @outOfBoundsCharacter = '▓';
+    @outOfBoundsCharacter = '`';
     @wallCharacter = '▓';
     //@scenery = MemoryBuffer.new();
     @scenery = [];
@@ -648,7 +649,7 @@
           }
 
 
-          canvas.drawChar(text:' ');
+          canvas.drawChar(text:'`');
         }        
       }        
               

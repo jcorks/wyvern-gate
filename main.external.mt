@@ -37,6 +37,12 @@
 @:external_onEndCommit = getExternalFunction(name:'external_onEndCommit');
 
 
+// Called when telling the external device that 
+// JSON from the environment is needed
+@:external_preloadJSON = getExternalFunction(name:'external_preloadJSON');
+
+
+
 // Called when the next character to be displayed is known.
 // The characters are given from left to right, top to bottom.
 // The current size is standard VT 24 x 80
@@ -168,6 +174,10 @@ instance.mainMenu(
 
   onPlayBGM ::(name, loop) {
     external_onPlayBGM(a:name, b:loop);
+  },
+  
+  preloadJSON :: {
+    return external_preloadJSON();
   },
 
   preloadMods :: {
