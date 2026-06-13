@@ -182,7 +182,7 @@
         when(entity.isDead == false && entity.requestsRemove == false) empty;
         if (group2party[ent2group[entity]] && entity.isDead) ::<= {
           @:world = import(module:'game_singleton.world.mt')
-          world.scenario.onDeath(entity);
+          world.scenario.emit(event:'onDeath', entity);
         }
         @:group  = ent2group[entity];
         entity.battleEnd();

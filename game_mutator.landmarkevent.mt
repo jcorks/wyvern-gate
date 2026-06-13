@@ -545,7 +545,10 @@ LandmarkEvent.database.newEntry(
       events : Object,
       isActive : Function
     },
-    reset
+    reset,
+    knownEvents : [
+      'onStep'
+    ]
   ),
   
   define::(this, state) {
@@ -567,19 +570,17 @@ LandmarkEvent.database.newEntry(
       },
       
       step::{
-        if (state.base.events.onStep)
-          state.base.events.onStep(
-            landmark:landmark_,
-            data:state.data
-          );
+        state.base.emit(event:'onStep',
+          landmark:landmark_,
+          data:state.data
+        )
       },
 
       incrementTime::{
-        if (state.base.events.onIncrementTime)
-          state.base.events.onIncrementTime(
-            landmark:landmark_,
-            data:state.data
-          );
+        state.base.emit(event:'onIncrementTime',
+          landmark:landmark_,
+          data:state.data
+        );
       },
 
       

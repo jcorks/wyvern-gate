@@ -24,7 +24,13 @@
 @:hasTraits::(items)   <- (_.traits & items) == items
 @:hasAnyTrait::(items) <- (_.traits & items) != 0
 @:hasNoTrait::(items)  <- (_.traits & items) == 0
-
+@:emit::(*args) {
+  when(args.event->type != String)
+    error(:'Requested to fire event without a valid name (the. err. name of the event)');
+  when(_.events[args.event] == empty) empty;
+  
+  return _.events[args.event](*args);
+}
 
 @:Database = class(
   name : 'Wyvern.Database',
@@ -48,18 +54,25 @@
     @name_;
     @attributes_;
     @reset_;
+    @eventNames;
     @:databaseNameGetter = {
       get ::<- name_
     };
-    this.constructor = ::(attributes, name => String, reset => Function, statics) {
+    this.constructor = ::(attributes, name => String, reset => Function, statics, knownEvents) {
       LOOKUP[name] = this;
       name_ = name;
       attributes_ = attributes;
       reset_ = reset;
+      if (knownEvents != empty) ::<= {
+        eventNames = {};
+        foreach(knownEvents) ::(k, v) {
+          eventNames[v] = true;
+        }
+      }
       
       if (statics != empty)
         this.interface = statics;
-    };
+    }; 
 
     @:interface = {
       
@@ -77,6 +90,7 @@
         // preflight              
         @:item = Object.instantiate(type:ItemType);
 
+        item.events = {};
         foreach(attributes_) ::(key, typ) {
           @val = data[key];
           when(key->type != String)
@@ -93,11 +107,19 @@
             item[key] = val
           else 
             item[key] = {get::<-val}
-        }             
+        }      
+        if (eventNames != empty) ::<= {
+          foreach(data.events) ::(k, v) {
+            when(eventNames[k] == empty)
+              error(detail:'Internal error: database event "' + k + '" is NOT in knownEvents.') 
+          }
+        }
+               
         item.databaseName = databaseNameGetter;
         item.hasTraits = hasTraits;
         item.hasAnyTrait = hasAnyTrait;
         item.hasNoTrait = hasNoTrait;
+        item.emit = emit;
         item->setIsInterface(enabled:true, private:item);
                 
         items_[item.id] = item;

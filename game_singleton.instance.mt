@@ -32,6 +32,8 @@ import(module:'game_database.scene.mt');
 import(module:'game_database.species.mt');
 import(module:'game_database.book.mt');
 import(module:'game_database.artsterm.mt');
+import(module:'game_function.number.mt');
+import(module:'game_function.descriptivelist.mt');
 
 @:Arts = import(module:'game_mutator.arts.mt');
 import(module:'game_mutator.entityquality.mt');
@@ -410,7 +412,8 @@ return class(
       settings.debugMode = false;
       settings.animations = true;
       settings.effects = true;
-      settings.hud = true    
+      settings.hud = true;
+      settings.mods = false;
     }    
 
 
@@ -442,6 +445,22 @@ return class(
                   this.defaultSettings();
               }
             ),
+
+          'Mods', ::<-
+            windowEvent.queueAskBoolean(
+              onGetPrompt::<- 'Toggle Mod loading? (currently: ' + (if(settings.mods) 'Enabled' else 'Disabled') + ')',
+              onChoice::(which) {
+                when(which == false) empty;
+                settings.mods = !settings.mods;
+                this.updateSettings();
+
+                windowEvent.queueMessage(
+                  text: 'A restart of the program is required for this to take effect.'
+                )
+              }
+            ),
+          
+
           'Animations', ::<-          
             windowEvent.queueAskBoolean(
               onGetPrompt::<- 'Toggle Animations? (currently: ' + (if(settings.animations) 'Enabled' else 'Disabled') + ')',
@@ -478,6 +497,7 @@ return class(
         foreach(FEATURES) ::(k, i) <-
           if ((features_ & i) != 0)
             match(i) {
+
 
               (FEATURES.DEBUGGING): ::<={
                 opts->push(:'Debug Mode');
@@ -1158,17 +1178,20 @@ return empty;
         windowEvent.clearAll(
           onReady ::{
 
-            ::? {
-              mods = preloadMods();
-            } => {
-              onError ::(message) {
-                windowEvent.queueMessage(
-                  text: "Could not preload mods: " + message.summary
-                )
-                mods = {};
+            if (settings.mods == true) ::<= {
+              ::? {
+                mods = preloadMods();
+              } => {
+                onError ::(message) {
+                  windowEvent.queueMessage(
+                    text: "Could not preload mods: " + message.summary
+                  )
+                  mods = {};
+                }
               }
-            }
-            loadMods(mods);
+              loadMods(mods);
+            } else
+              mods = [];
 
             sound.playBGM(name:'boot', loop:false);
             (import(:'game_function.boot.mt'))(          
@@ -1263,7 +1286,7 @@ return empty;
         setupDefaultHud();
 
 
-        world.scenario.onResume();
+        world.scenario.resume();
       },
     
       startNew ::(name, scenario, seed){
@@ -1355,7 +1378,7 @@ return empty;
         @hasVisitIsland;
         if (windowEvent.canJumpToTag(name:'VisitIsland'))
           windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:if(atGate == empty)true else false);
-        this.islandTravel();
+        world.islandTravel();
         hasVisitIsland = true;
         when (restorePos == empty && atGate != empty) ::<= {
           @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
@@ -1371,8 +1394,7 @@ return empty;
           @gategate = gate.locations->filter(by:::(value) <- value.base.id == 'base:gate');
           when(gategate->size == 0) empty;
           
-          this.visitLandmark(
-            landmark:gate,
+          gate.visit(
             where: ::(landmark)<- gategate[0]
           );        
           
@@ -1514,11 +1536,11 @@ return empty;
                         prompt:'Enter?',
                         onChoice::(which) {
                           if (which == true)
-                            this.visitLandmark(landmark, where);
+                            landmark.visit(where);
                         }
                       )
                     }
-                    this.visitLandmark(landmark, where);              
+                    landmark.visit(where);              
                     if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
                       windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
                     }                  
@@ -1529,7 +1551,7 @@ return empty;
               foreach(islandOptions) ::(k, value) {
                 choices->push(:value.name);
                 choiceActions->push(::{
-                  value.onSelect(island);
+                  value.select(island);
                   if (!value.keepInteractionMenu && windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
                     windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
                   }              
@@ -1550,7 +1572,7 @@ return empty;
                   choices,
                   onChoice::(choice) {
                     when(choice == 0) empty;
-                    options[choice-1].onSelect(island);
+                    options[choice-1].select(island);
                     if (!options[choice-1].keepInteractionMenu && windowEvent.canJumpToTag(name:'LandmarkInteractionOptions'))
                       windowEvent.jumpToTag(name:'LandmarkInteractionOptions', goBeforeTag:true, doResolveNext:true);
                   }
@@ -1566,178 +1588,10 @@ return empty;
         islandTravel();       
       },
 
-      
-      visitLandmark ::(landmark => Landmark.type, where) {
-        @:world = import(module:'game_singleton.world.mt');
-        when (landmark.base.onVisit(landmark, island:landmark.island) == false) empty;
 
-        world.landmark = landmark;        
-        if (where != empty) ::<= {
-          where = where(landmark);
-          if (where != empty)
-            landmark.map.setPointer(
-              x:where.x,
-              y:where.y
-            ); 
-        }
-
-        foreach(world.party.members) ::(k, v) {
-          v.addOpinion(
-            fullName : 'the ' + landmark.name
-          );
-        }
-                    
-        
-        this.landmarkTravel();
-      },
       y:{get ::<- save},
       
-      landmarkTravel :: {
 
-        @:windowEvent = import(module:'game_singleton.windowevent.mt');
-        @:partyOptions = import(module:'game_function.partyoptions.mt');
-        @:Island = import(module:'game_mutator.island.mt');
-
-        @:party = world.party;
-        @:landmark = world.landmark;
-        landmark.updateTitle();
-        @:island = world.island;
-        
-        
-
-        
-        @stepCount = 0;
-        @choiceActions = [];
-
-        @:landmarkChoices = ::{
-          @landmarkOptions;
-          windowEvent.queueChoices(
-            leftWeight: 1,
-            topWeight: 1,
-            prompt: 'What next?',
-            keep:true,
-            canCancel:true,
-            jumpTag: 'LANDMARK_TRAVEL',
-            onGetChoices ::{
-              landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island, landmark));
-              
-              choiceActions = [];
-              @:choices = [];
-              @locationAt = landmark.map.getNamedItemsUnderPointerRadius(:3);
-              if (locationAt != empty) ::<= {
-                foreach(locationAt)::(i, loc) {
-                  if (loc.data.canInteract()) ::<= {
-                    choices->push(value:'Check ' + loc.name);
-                    choiceActions->push(::{
-                      locationAt = loc.data;
-                      locationAt.interact();                  
-                    });
-                  }
-                }
-              }              
-              
-              foreach(landmarkOptions) ::(k, value) {
-                choices->push(:value.name);
-                choiceActions->push(::{
-                  value.onSelect(island, landmark);                
-                });       
-              }
-              
-              choices->push(value: 'Options');
-              choiceActions->push(::{
-                @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island, landmark));
-                @:choices = [...options]->map(to::(value) <- value.name);
-
-                windowEvent.queueChoices(
-                  leftWeight: 1,
-                  topWeight: 1,
-                  prompt: 'Options',
-                  canCancel : true,
-                  keep: true,
-                  choices,
-                  onChoice::(choice) {
-                    when(choice == 0) empty;
-                    options[choice-1].onSelect(island, landmark);
-                  }
-                );              
-              });
-              
-
-
-              return choices;        
-            },
-            onChoice::(choice) {
-              choiceActions[choice-1]();
-            }
-          );
-        }
-
-        @nearby;
-        @cursorMoveRenderable = {
-          render::{
-            when(landmark.map == empty) canvas.fill();
-            landmark.map.render();
-
-            hud.render(island, landmark);
-            
-            
-            when(nearby == empty || nearby->size == 0) empty;
-            
-            
-            @:lines = [];
-            foreach(nearby)::(index, arr) {
-              lines->push(value:arr.name);
-            }
-            canvas.renderTextFrameGeneral(
-              leftWeight: 1,
-              topWeight: 1,
-              lines,
-              title: 'Arrived at:'
-            );
-          }
-        };
-        windowEvent.queueTransition(
-          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-          renderableMiddle:cursorMoveRenderable
-        );
-        
-
-        
-        windowEvent.queueCursorMove(
-          jumpTag: 'VisitLandmark',
-          onMenu ::{
-            landmarkChoices()
-          },
-          renderable: cursorMoveRenderable,
-          onMove ::(choice) {
-          
-            // move by one unit in that direction
-            // or ON it if its within one unit.
-            when(!landmark.map.movePointerAdjacent(
-              x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
-              y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
-            )) empty;
-            world.incrementTime(isStep:true);
-            landmark.step();
-            stepCount += 1;
-
-            
-            // every 5 steps, heal 1% HP if below 1/5th health
-            if (stepCount % 15 == 0) ::<= {
-              foreach(party.members)::(i, member) {
-                if (member.hp < member.stats.HP * 0.2)
-                  member.heal(amount:(member.stats.HP * 0.01)->ceil);
-              }
-            }
-            
-            // cancel if we've arrived somewhere
-            nearby = landmark.map.getNamedItemsUnderPointerRadius(:3);
-            foreach(nearby)::(index, arr) {
-              landmark.map.discover(:arr.data);
-            }
-          }        
-        )      
-      },
         
       
       onSaveState : {

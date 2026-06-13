@@ -666,7 +666,6 @@ Island.database.newEntry(
           onDone(:state.map);        
         }
         
-        breakpoint();
         when((base.traits & TRAIT.EMPTY) != 0) ::<= {
           
           @:Map = import(module:'game_class.map.mt');
@@ -777,7 +776,7 @@ Island.database.newEntry(
         }
         foreach(state.events)::(index, event) {
           if (event.expired) ::<= {
-            event.base.onEventEnd(event);          
+            event.base.emit(event:'onEventEnd', evt:event);          
             state.events->remove(key:state.events->findIndex(value:event));
           }
         }
@@ -833,9 +832,9 @@ Island.database.newEntry(
           data:landmark, 
           x:landmark.x, 
           y:landmark.y, 
+          traits : 0,
           symbol:landmark.symbol, 
-          name:landmark.legendName,
-          discovered:false
+          name:landmark.legendName
         );
       },
       

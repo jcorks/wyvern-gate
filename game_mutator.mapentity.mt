@@ -845,10 +845,10 @@ MapEntity.Task.database.newEntry(
     targetX : -1,
     targetY : -1,
     path : empty,
-    onArrive  : empty, // MapEntity.Task to do when arriving 
-    onCancel  : empty, // MapEntity.Task to do when cancelling.
-    onStepSet : empty, // MapEntity.Task array to do each step
-    onDeathSet: empty, // MapEntity.Task array to do on death
+    taskArrive  : empty, // MapEntity.Task to do when arriving 
+    taskCancel  : empty, // MapEntity.Task to do when cancelling.
+    taskStepSet : empty, // MapEntity.Task array to do each step
+    taskDeathSet: empty, // MapEntity.Task array to do on death
     steps : 0,
     speedSteps : 0,
     speed : 1,
@@ -905,11 +905,11 @@ MapEntity.Task.database.newEntry(
       defaultLoad::(x, y, symbol, entities => Object, tag, location) {
         state.entities = entities;
         state.tag = tag;
-        state.onStepSet = [];
-        state.onDeathSet = [];
+        state.taskStepSet = [];
+        state.taskDeathSet = [];
         state.friends = [];
         state.data = {};
-        map_.setItem(data:this, x, y, discovered:true, symbol); 
+        map_.setItem(data:this, x, y, traits: Map.TRAIT.DISCOVERED, symbol); 
         if (location != empty) ::<= {
           state.locationID = location.worldID;
           location_ = location;
@@ -972,7 +972,7 @@ MapEntity.Task.database.newEntry(
         when(isRemoved) empty;
         state.steps += 1;
         state.speedSteps += state.speed;
-        foreach(state.onStepSet) ::(k, task) {
+        foreach(state.taskStepSet) ::(k, task) {
           task.do(mapEntity:this);
         }
       
@@ -989,10 +989,10 @@ MapEntity.Task.database.newEntry(
                x1:map_.getItem(data:this).x,
                y1:map_.getItem(data:this).y
         ) < 2) ::<={
-          state.onCancel = empty;
-          if (state.onArrive) ::<= {
+          state.taskCancel = empty;
+          if (state.taskArrive) ::<= {
             @:task = MapEntity.Task.new(
-              base:MapEntity.Task.database.find(id:state.onArrive)
+              base:MapEntity.Task.database.find(id:state.taskArrive)
             );
             task.do(mapEntity:this);
             
@@ -1026,14 +1026,14 @@ MapEntity.Task.database.newEntry(
           foreach(items) ::(k, v) {
             if (v.data->type == Location.type) ::<= {
               when (v.data == location_) empty;
-              v.data.base.onStep(entities:state.entities, location:v.data);
+              v.data.base.emit(event:'onStep', entities:state.entities, location:v.data);
             }
           }
         }
       },
       
       addUpkeepTask ::(id) {
-        state.onStepSet->push(
+        state.taskStepSet->push(
           value: MapEntity.Task.new(
             base:MapEntity.Task.database.find(id)
           )
@@ -1041,7 +1041,7 @@ MapEntity.Task.database.newEntry(
       },
       
       addDeathTask ::(id) {
-        state.onDeathSet->push(
+        state.taskDeathSet->push(
           value: MapEntity.Task.new(
             base:MapEntity.Task.database.find(id)
           )
@@ -1049,15 +1049,15 @@ MapEntity.Task.database.newEntry(
       },   
       
       kill :: {
-        foreach(state.onDeathSet) ::(k, task) {
+        foreach(state.taskDeathSet) ::(k, task) {
           task.do(mapEntity:this);
         }
       },   
       
       removeUpkeepTask ::(id) {
-        @:index = state.onStepSet->findIndex(query::(value) <- value.base.id == id);
+        @:index = state.taskStepSet->findIndex(query::(value) <- value.base.id == id);
         when(index == -1) empty;
-        state.onStepSet->remove(key:index);
+        state.taskStepSet->remove(key:index);
       },
       
       controller : {
@@ -1156,14 +1156,14 @@ MapEntity.Task.database.newEntry(
       },
 
       // sets a new place to go to
-      newPathTo ::(x => Number, y => Number, onArrive, onCancel, speed) {
+      newPathTo ::(x => Number, y => Number, taskArrive, taskCancel, speed) {
         when(isRemoved) empty;
         this.clearPath();
         state.speed = if (speed == empty) 1 else speed;
         state.targetX = x;
         state.targetY = y;
-        state.onArrive = onArrive;
-        state.onCancel = onCancel;
+        state.taskArrive = taskArrive;
+        state.taskCancel = taskCancel;
         state.path = map_.getPathTo(
           data:this,
           x,
@@ -1174,15 +1174,15 @@ MapEntity.Task.database.newEntry(
       
       clearPath ::{
         when(isRemoved) empty;
-        if (state.onCancel != empty) ::<= {
+        if (state.taskCancel != empty) ::<= {
           @:task = MapEntity.Task.new(
-            base:MapEntity.Task.database.find(id:state.onArrive)
+            base:MapEntity.Task.database.find(id:state.taskArrive)
           );
           task.do(mapEntity:this);
         }
         state.path = empty;
-        state.onCancel = empty;
-        state.onArrive = empty;      
+        state.taskCancel = empty;
+        state.taskArrive = empty;      
       },
       
       hasPath : {

@@ -251,94 +251,96 @@ return {
       
       id: 'mod.dev.rasa.stat-sim:start',
       
-      // Called when first starting the scenario.
-      onBegin ::(data) {
-        data.entities = [];
+      events : {
+        // Called when first starting the scenario.
+        onBegin ::(data) {
+          data.entities = [];
 
-    
-
-        @:keyhome = Item.new(
-          base: Item.database.find(id:'base:wyvern-key')
-        );
-
-        keyhome.setIslandGenTraits(
-          nameHint:'', 
-          levelHint:6,
-          idHint: 'base:none',
-          tierHint: 0  
-        )
-
-        world.loadIsland(
-          key:keyhome, 
-          skipSave:true,
-          onDone ::(island){
-            windowEvent.queueMessage(
-              text: "Welcome to Stat-Sim! Let\'s start balancing!"
-            );
       
-            windowEvent.queueChoices(
-              canCancel: false,
-              keep:true,
-              leftWeight : 1,
-              topWeight : 0,
-              choices: [
-                'Island...',
-                'Entities...'
-              ],
-              jumpTag : MAIN_TAG,
-              
-              renderable : {
-                render ::{
-                  canvas.fill(:' ');
-                  @iter = 0;
-                  foreach(data.entities) ::(k, v) {
-                    @:bounds = canvas.renderTextFrameGeneral(
-                      x : iter,
-                      y : 0,
-                      title: v.name,
-                      lines: [
-                        'Lvl: ' + v.level + ', Tier ' + v.data.tier,
-                        v.profession.name + ' (' + v.species.name + ')',
+
+          @:keyhome = Item.new(
+            base: Item.database.find(id:'base:wyvern-key')
+          );
+
+          keyhome.setIslandGenTraits(
+            nameHint:'', 
+            levelHint:6,
+            idHint: 'base:none',
+            tierHint: 0  
+          )
+
+          world.loadIsland(
+            key:keyhome, 
+            skipSave:true,
+            onDone ::(island){
+              windowEvent.queueMessage(
+                text: "Welcome to Stat-Sim! Let\'s start balancing!"
+              );
+        
+              windowEvent.queueChoices(
+                canCancel: false,
+                keep:true,
+                leftWeight : 1,
+                topWeight : 0,
+                choices: [
+                  'Island...',
+                  'Entities...'
+                ],
+                jumpTag : MAIN_TAG,
+                
+                renderable : {
+                  render ::{
+                    canvas.fill(:' ');
+                    @iter = 0;
+                    foreach(data.entities) ::(k, v) {
+                      @:bounds = canvas.renderTextFrameGeneral(
+                        x : iter,
+                        y : 0,
+                        title: v.name,
+                        lines: [
+                          'Lvl: ' + v.level + ', Tier ' + v.data.tier,
+                          v.profession.name + ' (' + v.species.name + ')',
+                          
+                          ...v.statModComparisonToLines()
+                        ]
+                      );
+
                         
-                        ...v.statModComparisonToLines()
-                      ]
-                    );
+                      
+                      canvas.renderTextFrameGeneral(
+                        x: iter,
+                        y: bounds.height,
+                        title: 'Basic DMG',
+                        lines : [
+                          'Attack: ~' + Arts.database.find(:'base:attack').baseDamage(level:1, user:v),
+                          'Fire:   ~' + Arts.database.find(:'base:fire').baseDamage(level:1, user:v),
+                        ]
+                      );
 
                       
-                    
-                    canvas.renderTextFrameGeneral(
-                      x: iter,
-                      y: bounds.height,
-                      title: 'Basic DMG',
-                      lines : [
-                        'Attack: ~' + Arts.database.find(:'base:attack').baseDamage(level:1, user:v),
-                        'Fire:   ~' + Arts.database.find(:'base:fire').baseDamage(level:1, user:v),
-                      ]
-                    );
-
-                    
-                    iter += bounds.width;
+                      iter += bounds.width;
+                    }
                   }
+                },
+                
+                onChoice::(choice) {
+                  when(choice == 1) statSim_Island(data);              
+                  when(choice == 2) statSim_Entities(data);              
                 }
-              },
-              
-              onChoice::(choice) {
-                when(choice == 1) statSim_Island(data);              
-                when(choice == 2) statSim_Entities(data);              
-              }
-            );
-          }
-        ); 
-      },
-      
-      // Called when a new day starts
-      onNewDay ::(data){},
+              );
+            }
+          ); 
+        },
+        
+        // Called when a new day starts
+        onNewDay ::(data){},
 
-      // Called when a file is loaded with this scenario 
-      onResume ::(data){},
-      
-      // Called when a party member dies.
-      onDeath ::(data, entity){},
+        // Called when a file is loaded with this scenario 
+        onResume ::(data){},
+        
+        // Called when a party member dies.
+        onDeath ::(data, entity){}
+      },
 
       skipName : true,
       everyoneIsAFriend: true,

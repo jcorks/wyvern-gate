@@ -2588,9 +2588,6 @@ Effect.newEntry(
     traits : TRAIT.SPECIAL,
     stats: StatSet.new(),
     events : {
-      onAffliction ::(from, item, holder) {
-      },
-      
       onRemoveEffect ::(from, item, holder) {
         @:world = import(module:'game_singleton.world.mt');
         
@@ -7465,7 +7462,7 @@ Effect.newEntry(
 
 
 }
-
+@:EffectStack = import(:'game_class.effectstack.mt');
 @:Effect = Database.new(
   name: "Wyvern.Effect",
   statics : {
@@ -7481,12 +7478,17 @@ Effect.newEntry(
       return '?'
     }
   },
+  // See effectstack.EVENTS for details
+  knownEvents : EffectStack.EVENTS,
   attributes : {
     name : String,
     id : String,
     description : String,
     stats : StatSet.type,
     traits : Number,
+    
+    
+    
     events : Object,
     tier : Number, // the tier is used for applying effects as an enchantment
     stackable : Boolean // whether multiple of the same effect can coexist

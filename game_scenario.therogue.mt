@@ -83,23 +83,6 @@ completion:
   context : empty,
 
 
-  // Called when a new day starts
-  onNewDay ::(data){},
-
-  // Called when a file is loaded with this scenario 
-  onResume ::(data){
-    theRogue.context = data[DATA_KEY];  
-  
-    @world = import(module:'game_singleton.world.mt');
-    @:instance = import(module:'game_singleton.instance.mt');
-    instance.islandTravel();
-    if (world.landmark) ::<= {
-      instance.landmarkTravel();
-    }      
-  },
-  
-  // Called when a party member dies.
-  onDeath ::(data, entity){},
 
   skipName : false,
   everyoneIsAFriend : true,
@@ -157,52 +140,69 @@ completion:
     return '';
   },
 
+  events : {
+    // Called when a new day starts
+    onNewDay ::(data){},
 
-  
-  onBegin ::(data) {
-  
-    @:instance = import(module:'game_singleton.instance.mt');
-    @:story = import(module:'game_singleton.story.mt');
-    @world = import(module:'game_singleton.world.mt');
-    @:LargeMap = import(module:'game_singleton.largemap.mt');
-    @party = world.party;      
-
-    theRogue.context = theRogueClass.new();
-    data[DATA_KEY] = theRogue.context;
-
-    instance.gameOver(reason:'This isn\'t ready yet!!!');
-    return empty;
+    // Called when a file is loaded with this scenario 
+    onResume ::(data){
+      theRogue.context = data[DATA_KEY];  
     
-  
-
-
-    party.reset();
-    @:island = world.island;
-
-
-    @:keyother = Item.new(
-      base: Item.database.find(id:'base:wyvern-key')
-    );
+      @world = import(module:'game_singleton.world.mt');
+      @:instance = import(module:'game_singleton.instance.mt');
+      instance.islandTravel();
+      if (world.landmark) ::<= {
+        world.landmark.travel();
+      }      
+    },
     
-    keyother.setIslandGenTraits(
-      nameHint: 'The Dungeon',
-      levelHint: story.levelHint,
-      idHint: 'therogue:home',
-      tierHint: 0
-    );
+    // Called when a party member dies.
+    onDeath ::(data, entity){},
+    onBegin ::(data) {
+    
+      @:instance = import(module:'game_singleton.instance.mt');
+      @:story = import(module:'game_singleton.story.mt');
+      @world = import(module:'game_singleton.world.mt');
+      @:LargeMap = import(module:'game_singleton.largemap.mt');
+      @party = world.party;      
+
+      theRogue.context = theRogueClass.new();
+      data[DATA_KEY] = theRogue.context;
+
+      instance.gameOver(reason:'This isn\'t ready yet!!!');
+      return empty;
+      
     
 
-    world.loadIsland(key:keyother, onDone::(island) {
-      characterCreator(::(entity){
-        party.add(:entity);
-        breakpoint();
-        instance.visitLandmark(landmark:island.landmarks[0]);
+
+      party.reset();
+      @:island = world.island;
+
+
+      @:keyother = Item.new(
+        base: Item.database.find(id:'base:wyvern-key')
+      );
+      
+      keyother.setIslandGenTraits(
+        nameHint: 'The Dungeon',
+        levelHint: story.levelHint,
+        idHint: 'therogue:home',
+        tierHint: 0
+      );
+      
+
+      world.loadIsland(key:keyother, onDone::(island) {
+        characterCreator(::(entity){
+          party.add(:entity);
+          breakpoint();
+          instance.visitLandmark(landmark:island.landmarks[0]);
+        });
       });
-    });
 
 
 
-  }  
+    }  
+  }
 }
 
 return theRogue;

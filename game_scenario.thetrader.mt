@@ -2966,7 +2966,7 @@
 
       return trader.state.sellingLevel >= LEVEL_HIRE_EMPLOYEES;
     },
-    onSelect ::(entity, location) {
+    select ::(entity, location) {
       @:this = entity;
       when(this.isIncapacitated())
         windowEvent.queueMessage(
@@ -3070,170 +3070,190 @@
 return {
   name : 'The Trader',
   id : 'rasa:thetrader',
-  onBegin ::(data) {
-    windowEvent.queueMessage(
-      text: 'This scenario autosaves on the end of each day. Manual saves will not be possible.'
-    );
-  
-    @:instance = import(module:'game_singleton.instance.mt');
-    @:story = import(module:'game_singleton.story.mt');
-    @world = import(module:'game_singleton.world.mt');
-    @:LargeMap = import(module:'game_singleton.largemap.mt');
-    @party = world.party;      
+  events : {
+    onBegin ::(data) {
+      windowEvent.queueMessage(
+        text: 'This scenario autosaves on the end of each day. Manual saves will not be possible.'
+      );
+    
+      @:instance = import(module:'game_singleton.instance.mt');
+      @:story = import(module:'game_singleton.story.mt');
+      @world = import(module:'game_singleton.world.mt');
+      @:LargeMap = import(module:'game_singleton.largemap.mt');
+      @party = world.party;      
 
 
-    ::? {
-      forever ::{
-        if (world.time == world.TIME.MORNING) send();
-        world.incrementTime();
+      ::? {
+        forever ::{
+          if (world.time == world.TIME.MORNING) send();
+          world.incrementTime();
+        }
       }
+    
+      @:keyhome = Item.new(
+        base: Item.database.find(id:'thetrader:wyvern-key')
+      );
+      keyhome.name = 'Key: Home';
+      
+      @:Island = import(module:'game_mutator.island.mt');
+      keyhome.setIslandGenTraits(
+        nameHint:namegen.island(), 
+        levelHint:story.levelHint,
+        idHint: 'thetrader:starting-island',
+        tierHint: 0  
+      )
+      world.loadIsland(key:keyhome, skipSave:true, onDone::(island) {
+        party = world.party;
+        party.reset();
+        party.inventory.maxItems = 70;
+        @:island = world.island;
+        party.inventory.add(:keyhome);
+
+
+        
+        // debug
+          //party.inventory.addGold(amount:100000);
+
+        
+        // since both the party members are from this island, 
+        // they will already know all its locations
+        foreach(world.island.landmarks)::(index, landmark) {
+          landmark.discover(); 
+        }
+        
+        
+        
+        @:Species = import(module:'game_database.species.mt');
+        @:p0 = island.newInhabitant(professionHint: 'base:trader', levelHint:story.levelHint);
+        p0.normalizeStats();
+
+        
+
+        // Add initial inventory.
+        for(0, 15)::(i) {
+          party.inventory.add(item:
+            Item.new(
+              base:Item.database.getRandomFiltered(
+                filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
+                          && value.tier <= world.island.tier
+              ),
+              from:p0, 
+              rngEnchantHint:true,
+              forceNeedsAppraisal: false
+            )
+          );
+        }
+
+        party.add(member:p0);
+        party.inventory.addGold(amount:250);
+        
+        
+        
+        // setup shop
+        @:city = island.landmarks->filter(by::(value) <- value.base.id == 'thetrader:city')[0];      
+        @:shop = city.locations->filter(by::(value) <- value.base.id == 'thetrader:shop')[0];
+        shop.ownedBy = empty;
+
+        data.trader = TraderState.new(
+          city,
+          shop
+        );
+        party.inventory.add(item:
+          Item.new(
+            base:Item.database.find(id:'base:gold-pouch'),
+            from:p0
+          )
+        );
+
+        @:basicArts = [
+          'base:pebble',
+          'base:agility',
+          'base:quick-shield',
+          'base:wyvern-prayer'
+        ];
+
+        p0.supportArts = [...basicArts]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));;
+
+
+          
+          /*
+          //party.inventory.addGold(amount:250000);
+          party.inventory.addGold(amount:2500);
+          
+          world.island.tier = 3;
+          
+          
+          
+          data.trader.addHiree(
+            entity: world.island.newInhabitant(),
+            rate:117
+          );
+          data.trader.addHiree(
+            entity: world.island.newInhabitant(),
+            rate:103
+          );
+          data.trader.addHiree(
+            entity: world.island.newInhabitant(),
+            rate:157
+          );
+              
+          party.inventory.add(item:
+            Item.new(
+              base:Item.database.find(id:'Shipment'),
+              from:p0
+            )
+          );
+
+          party.inventory.add(item:
+            Item.new(
+              base:Item.database.find(id:'Crate'),
+              from:p0
+            )
+          );
+          */
+          
+
+        @somewhere = LargeMap.getAPosition(map:island.map);
+        island.map.setPointer(
+          x: somewhere.x,
+          y: somewhere.y
+        );         
+        instance.savestate();
+        @:Scene = import(module:'game_database.scene.mt');
+        Scene.start(id:'thetrader:scene_intro', onDone::{          
+          data.trader.dayStart();        
+        });    
+        
+        
+      
+      });
+    },
+
+    onNewDay ::(data){
+      when(data.trader == empty) empty;
+      data.trader.newDay();
+    },
+
+    
+    
+    onResume ::(data) {
+      @:trader = data.trader;
+      trader.dayStart();        
+    },
+    
+    onDeath ::(data, entity) {
+      @:world = import(module:'game_singleton.world.mt')
+      when (entity == world.party.members[0]) ::<= {
+        @:instance = import(module:'game_singleton.instance.mt');
+        instance.gameOver(reason:
+          'The Trader ' + entity.name + '\'s journey comes to an end...'      
+        );
+      }
+      
+      data.trader.removeHireeEntity(entity);
     }
-  
-    @:keyhome = Item.new(
-      base: Item.database.find(id:'thetrader:wyvern-key')
-    );
-    keyhome.name = 'Key: Home';
-    
-    @:Island = import(module:'game_mutator.island.mt');
-    keyhome.setIslandGenTraits(
-      nameHint:namegen.island(), 
-      levelHint:story.levelHint,
-      idHint: 'thetrader:starting-island',
-      tierHint: 0  
-    )
-    world.loadIsland(key:keyhome, skipSave:true, onDone::(island) {
-      party = world.party;
-      party.reset();
-      party.inventory.maxItems = 70;
-      @:island = world.island;
-      party.inventory.add(:keyhome);
-
-
-      
-      // debug
-        //party.inventory.addGold(amount:100000);
-
-      
-      // since both the party members are from this island, 
-      // they will already know all its locations
-      foreach(world.island.landmarks)::(index, landmark) {
-        landmark.discover(); 
-      }
-      
-      
-      
-      @:Species = import(module:'game_database.species.mt');
-      @:p0 = island.newInhabitant(professionHint: 'base:trader', levelHint:story.levelHint);
-      p0.normalizeStats();
-
-      
-
-      // Add initial inventory.
-      for(0, 15)::(i) {
-        party.inventory.add(item:
-          Item.new(
-            base:Item.database.getRandomFiltered(
-              filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
-                        && value.tier <= world.island.tier
-            ),
-            from:p0, 
-            rngEnchantHint:true,
-            forceNeedsAppraisal: false
-          )
-        );
-      }
-
-      party.add(member:p0);
-      party.inventory.addGold(amount:250);
-      
-      
-      
-      // setup shop
-      @:city = island.landmarks->filter(by::(value) <- value.base.id == 'thetrader:city')[0];      
-      @:shop = city.locations->filter(by::(value) <- value.base.id == 'thetrader:shop')[0];
-      shop.ownedBy = empty;
-
-      data.trader = TraderState.new(
-        city,
-        shop
-      );
-      party.inventory.add(item:
-        Item.new(
-          base:Item.database.find(id:'base:gold-pouch'),
-          from:p0
-        )
-      );
-
-      @:basicArts = [
-        'base:pebble',
-        'base:agility',
-        'base:quick-shield',
-        'base:wyvern-prayer'
-      ];
-
-      p0.supportArts = [...basicArts]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));;
-
-
-        
-        /*
-        //party.inventory.addGold(amount:250000);
-        party.inventory.addGold(amount:2500);
-        
-        world.island.tier = 3;
-        
-        
-        
-        data.trader.addHiree(
-          entity: world.island.newInhabitant(),
-          rate:117
-        );
-        data.trader.addHiree(
-          entity: world.island.newInhabitant(),
-          rate:103
-        );
-        data.trader.addHiree(
-          entity: world.island.newInhabitant(),
-          rate:157
-        );
-            
-        party.inventory.add(item:
-          Item.new(
-            base:Item.database.find(id:'Shipment'),
-            from:p0
-          )
-        );
-
-        party.inventory.add(item:
-          Item.new(
-            base:Item.database.find(id:'Crate'),
-            from:p0
-          )
-        );
-        */
-        
-
-      @somewhere = LargeMap.getAPosition(map:island.map);
-      island.map.setPointer(
-        x: somewhere.x,
-        y: somewhere.y
-      );         
-      instance.savestate();
-      @:Scene = import(module:'game_database.scene.mt');
-      Scene.start(id:'thetrader:scene_intro', onDone::{          
-        data.trader.dayStart();        
-      });    
-      
-      
-    
-    });
   },
 
-  onNewDay ::(data){
-    when(data.trader == empty) empty;
-    data.trader.newDay();
-  },
-
-  
   interactionsPerson : interactionsPerson,
   interactionsLocation : [
     InteractionMenuEntry.new(
@@ -3256,7 +3276,7 @@ return {
         ;
       },
           
-      onSelect::(location) {
+      select::(location) {
         @world = import(module:'game_singleton.world.mt');
         @:trader = world.scenario.data.trader;
         
@@ -3337,22 +3357,6 @@ return {
       }
     )
   ],
-  onResume ::(data) {
-    @:trader = data.trader;
-    trader.dayStart();        
-  },
-  
-  onDeath ::(data, entity) {
-    @:world = import(module:'game_singleton.world.mt')
-    when (entity == world.party.members[0]) ::<= {
-      @:instance = import(module:'game_singleton.instance.mt');
-      instance.gameOver(reason:
-        'The Trader ' + entity.name + '\'s journey comes to an end...'      
-      );
-    }
-    
-    data.trader.removeHireeEntity(entity);
-  },
   skipName : false,
   everyoneIsAFriend : true,
 
@@ -3363,7 +3367,7 @@ return {
       name: 'Finances',
       keepInteractionMenu: true,
       filter::(island, landmark) <- true,
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         @:world = import(module:'game_singleton.world.mt')
         world.scenario.data.trader.finances();
       }
@@ -3381,7 +3385,7 @@ return {
         else
           landmark == empty || landmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN) == false
       },
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         windowEvent.queueAskBoolean(
           prompt: 'Wait until next day to open shop / explore?',
           onChoice::(which) {
@@ -4054,8 +4058,7 @@ return {
         Item.TRAIT.UNIQUE
 
       ,
-      onCreate ::(item, user, creationHint) {
-      }
+      events : {}
     });
   
   
@@ -4090,8 +4093,7 @@ return {
         Item.TRAIT.SHARP |
         Item.TRAIT.METAL
       ,
-      onCreate ::(item, creationHint) {}
-
+      events :{}
     })    
 
 
@@ -4126,7 +4128,8 @@ return {
         Item.TRAIT.SHARP |
         Item.TRAIT.METAL 
       ,
-      onCreate ::(item, creationHint) {}
+      events : {}
+
 
     })   
 
