@@ -44,14 +44,8 @@
       attributes : {
         name : String,
         id : String,
-        // the function to start off the scenario
-        onBegin : Function,
-        // Function called when a new day starts.
-        onNewDay : Function,
-        // Function called when loading a save.
-        onResume : Function,
-        // Function to be called when a party member experiences death.
-        onDeath : Function,
+        events : Object,
+
         
         // Whether the naming of the file is skipped. If false,
         // the file name is the empty string.
@@ -107,7 +101,19 @@
         reportCard : Function
       },
       
-      reset
+      reset,
+      
+      knownEvents : [
+        // the function to start off the scenario
+        'onBegin',
+        // Function called when a new day starts.
+        'onNewDay',
+        // Function called when loading a save.
+        'onResume',
+        // Function to be called when a party member experiences death.
+        'onDeath'        
+              
+      ]
     ),
   define::(this, state) {
     this.interface = {
@@ -126,16 +132,20 @@
         get ::<- state.data
       },
       
-      onNewDay :: {
-        state.base.onNewDay(data:state.data)
+      markNewDay :: {
+        state.base.emit(event:'onNewDay', data:state.data)
       },
 
-      onResume :: {
-        state.base.onResume(data:state.data)
+      resume :: {
+        state.base.emit(event:'onResume', data:state.data)
       },
       
-      onDeath ::(entity) {
-        state.base.onDeath(data:state.data, entity);
+      death ::(entity) {
+        state.base.emit(event:'onDeath', data:state.data, entity);
+      },
+      
+      start ::{
+        state.base.emit(event:'onBegin', data:state.data);      
       }
     }
   }

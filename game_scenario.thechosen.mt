@@ -31,7 +31,7 @@
     name: 'Hire',
     keepInteractionMenu: true,
     filter ::(entity)<- true, // everyone can barter,
-    onSelect ::(entity, location) {
+    select ::(entity, location) {
       @:this = entity;
       when(this.isIncapacitated())
         windowEvent.queueMessage(
@@ -104,7 +104,7 @@
     name: 'Aggress',
     keepInteractionMenu: true,
     filter ::(entity)<- true, // everyone can barter,
-    onSelect::(entity, location) {
+    select::(entity, location) {
       @:this = entity;
       @whom;
 
@@ -273,6 +273,7 @@ return {
   id : 'rasa:thechosen',
   skipName : false,
   everyoneIsAFriend : true,
+  events : {
   onBegin ::(data) {
     @:instance = import(module:'game_singleton.instance.mt');
     @:story = import(module:'game_singleton.story.mt');
@@ -754,263 +755,262 @@ return {
     )
     world.loadIsland(key:keyhome, onDone:onMapLoad);
 
-  },
-  onNewDay ::(data){},
-  
-  onResume ::(data) {
-    @world = import(module:'game_singleton.world.mt');
-    @:story = import(module:'game_singleton.story.mt');
-    @:Scene = import(module:'game_database.scene.mt');            
-    @:instance = import(module:'game_singleton.instance.mt');
-    // the changeling
-    when (world.party.members->size == 0) ::<= {
-      Scene.start(id:'thechosen:scene_intro_changeling', onDone::{        
-        @:changeling = world.island.newInhabitant(
-          professionHint : 'base:adventurer',
-          levelHint:story.levelHint*2 // the power of a changeling shouldnt be underestimated
-        );
-        @:Arts = import(:'game_mutator.arts.mt');
-
-        changeling.name = '[   ]';
-        changeling.supportArts = [
-          'base:wyvern-prayer',
-          'base:quick-shield',
-          'base:bloods-summoning',
-          'base:shield-amplifier',
-          'base:pebble',
-          'base:prismatic-wisp',
-          'base:b260',
-          'base:b177'
-        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
-        
-        @:keyother = Item.new(
-          base: Item.database.find(id:'thechosen:wyvern-key-of-fire')
-        );
-        world.party.inventory.add(:keyother);
-
-        world.party.add(:changeling);
-        instance.savestate();
-        
-        instance.islandTravel();       
-      });  
-    }
-
-
-    instance.islandTravel();
-    if (world.landmark) ::<= {
-      instance.landmarkTravel();
-    }       
+    }, 
     
-    
-    
-    ///////////////////
-    /*
-    @:Effect = import(:'game_database.effect.mt');
-    @:dump ::(filter, filename) {
-      Effect.dumpCSV(
-        filter,
-        filename,
+    onResume ::(data) {
+      @world = import(module:'game_singleton.world.mt');
+      @:story = import(module:'game_singleton.story.mt');
+      @:Scene = import(module:'game_database.scene.mt');            
+      @:instance = import(module:'game_singleton.instance.mt');
+      // the changeling
+      when (world.party.members->size == 0) ::<= {
+        Scene.start(id:'thechosen:scene_intro_changeling', onDone::{        
+          @:changeling = world.island.newInhabitant(
+            professionHint : 'base:adventurer',
+            levelHint:story.levelHint*2 // the power of a changeling shouldnt be underestimated
+          );
+          @:Arts = import(:'game_mutator.arts.mt');
+
+          changeling.name = '[   ]';
+          changeling.supportArts = [
+            'base:wyvern-prayer',
+            'base:quick-shield',
+            'base:bloods-summoning',
+            'base:shield-amplifier',
+            'base:pebble',
+            'base:prismatic-wisp',
+            'base:b260',
+            'base:b177'
+          ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
+          
+          @:keyother = Item.new(
+            base: Item.database.find(id:'thechosen:wyvern-key-of-fire')
+          );
+          world.party.inventory.add(:keyother);
+
+          world.party.add(:changeling);
+          instance.savestate();
+          
+          instance.islandTravel();       
+        });  
+      }
+
+
+      instance.islandTravel();
+      if (world.landmark) ::<= {
+        world.landmark.travel();
+      }       
       
-        titles : [
-          'Name', 'ID', 'Battle only?', 'Flags', 'Stackable?', 'Addt. block points', 'HP', 'AP', 'ATK', 'DEF', 'INT', 'SPD', 'LUK', 'DEX', 'Description'
-        ],
+      
+      
+      ///////////////////
+      /*
+      @:Effect = import(:'game_database.effect.mt');
+      @:dump ::(filter, filename) {
+        Effect.dumpCSV(
+          filter,
+          filename,
         
-        fieldFormatters : {
-          ('Name') ::(item) <- item.name,
-          ('ID') ::(item) <- item.id,
-          ('Flags') ::(item) {
-            @:traits = [];
-            @trait = item.flags;
-            ::? {
-              @iter = 0;
-              forever ::{
-                when(iter > 12) send();
-                
-                if (trait & (1 << iter)) ::<= {
-                  traits->push(:match(iter) {
-                    (0): 'Ailment',
-                    (1): 'Buff',
-                    (2): 'Debuff'
-                  });
-                  traits->push(:',');
+          titles : [
+            'Name', 'ID', 'Battle only?', 'Flags', 'Stackable?', 'Addt. block points', 'HP', 'AP', 'ATK', 'DEF', 'INT', 'SPD', 'LUK', 'DEX', 'Description'
+          ],
+          
+          fieldFormatters : {
+            ('Name') ::(item) <- item.name,
+            ('ID') ::(item) <- item.id,
+            ('Flags') ::(item) {
+              @:traits = [];
+              @trait = item.flags;
+              ::? {
+                @iter = 0;
+                forever ::{
+                  when(iter > 12) send();
+                  
+                  if (trait & (1 << iter)) ::<= {
+                    traits->push(:match(iter) {
+                      (0): 'Ailment',
+                      (1): 'Buff',
+                      (2): 'Debuff'
+                    });
+                    traits->push(:',');
+                  }
+                  iter += 1;
                 }
-                iter += 1;
               }
-            }
-            return String.combine(:traits);
-          },
-          ('Stackable?') ::(item) <- if (item.stackable) 'yes' else 'no',
-          ('Addt. block points') ::(item) <- if (item.blockPoints == 0) '--' else ''+item.blockPoints,
-          ('HP') ::(item) <- if (item.stats.HP == 0) '--' else '%' + item.stats.HP,
-          ('AP') ::(item) <- if (item.stats.AP == 0) '--' else '%' + item.stats.AP,
-          ('ATK') ::(item) <- if (item.stats.ATK == 0) '--' else '%' + item.stats.ATK,
-          ('DEF') ::(item) <- if (item.stats.DEF == 0) '--' else '%' + item.stats.DEF,
-          ('INT') ::(item) <- if (item.stats.INT == 0) '--' else '%' + item.stats.INT,
-          ('SPD') ::(item) <- if (item.stats.SPD == 0) '--' else '%' + item.stats.SPD,
-          ('LUK') ::(item) <- if (item.stats.LUK == 0) '--' else '%' + item.stats.LUK,
-          ('DEX') ::(item) <- if (item.stats.DEX == 0) '--' else '%' + item.stats.DEX,
-          ('Description') ::(item) <- item.description
-        }
-      );
-    }
-    
-    dump(filename: 'effects.csv', filter::(value) <- true)
-    */
-
-
-
-    /*
-    @:Arts = import(:'game_mutator.arts.mt');
-    @:dump ::(filter, filename) {
-      Arts.database.dumpCSV(
-        filter,
-        filename,
-        //sort      
-        titles : [
-          'Name', 'ID', 'Kind', 'Traits', 'Rarity',  'Target mode', 'AI Usage Hint', 'Description', 'Art Specs', 'Deck Role', 'Keywords', 'Keyword Definitions'
-        ],
-        
-        fieldFormatters : {
-          ('Description') ::(item) <- item.description,
-          ('Keywords') ::(item) <- 
-            if (item.keywords->size == 0)
-              ''
-            else
-              item.keywords->reduce(::(previous, value) <- (if (previous == empty) '' else previous) + value +', '),
-
-
-          ('Keyword Definitions') ::(item) {
-            return String.combine(:Arts.generateKeywordDefinitionLines(:item))
-          },
-
-
-          ('Rarity')::(item) <- 
-            match(item.rarity) {
-              (Arts.RARITY.COMMON): 'Common',
-              (Arts.RARITY.UNCOMMON): 'Uncommon',
-              (Arts.RARITY.RARE): 'Rare',
-              (Arts.RARITY.EPIC): 'Epic'
+              return String.combine(:traits);
             },
-          ('Art Specs')::(item) <- '',
-          ('Deck Role')::(item) <- '',
-                      
-          ('AI Usage Hint') ::(item) <- 
-            match(item.usageHintAI) {
-              (Arts.USAGE_HINT.OFFENSIVE): 'Offensive',
-              (Arts.USAGE_HINT.HEAL): 'Heal',
-              (Arts.USAGE_HINT.BUFF): 'Buff',
-              (Arts.USAGE_HINT.DEBUFF): 'Debuff',
-              (Arts.USAGE_HINT.DONTUSE): 'Don\'t use'
+            ('Stackable?') ::(item) <- if (item.stackable) 'yes' else 'no',
+            ('Addt. block points') ::(item) <- if (item.blockPoints == 0) '--' else ''+item.blockPoints,
+            ('HP') ::(item) <- if (item.stats.HP == 0) '--' else '%' + item.stats.HP,
+            ('AP') ::(item) <- if (item.stats.AP == 0) '--' else '%' + item.stats.AP,
+            ('ATK') ::(item) <- if (item.stats.ATK == 0) '--' else '%' + item.stats.ATK,
+            ('DEF') ::(item) <- if (item.stats.DEF == 0) '--' else '%' + item.stats.DEF,
+            ('INT') ::(item) <- if (item.stats.INT == 0) '--' else '%' + item.stats.INT,
+            ('SPD') ::(item) <- if (item.stats.SPD == 0) '--' else '%' + item.stats.SPD,
+            ('LUK') ::(item) <- if (item.stats.LUK == 0) '--' else '%' + item.stats.LUK,
+            ('DEX') ::(item) <- if (item.stats.DEX == 0) '--' else '%' + item.stats.DEX,
+            ('Description') ::(item) <- item.description
+          }
+        );
+      }
+      
+      dump(filename: 'effects.csv', filter::(value) <- true)
+      */
+
+
+
+      /*
+      @:Arts = import(:'game_mutator.arts.mt');
+      @:dump ::(filter, filename) {
+        Arts.database.dumpCSV(
+          filter,
+          filename,
+          //sort      
+          titles : [
+            'Name', 'ID', 'Kind', 'Traits', 'Rarity',  'Target mode', 'AI Usage Hint', 'Description', 'Art Specs', 'Deck Role', 'Keywords', 'Keyword Definitions'
+          ],
+          
+          fieldFormatters : {
+            ('Description') ::(item) <- item.description,
+            ('Keywords') ::(item) <- 
+              if (item.keywords->size == 0)
+                ''
+              else
+                item.keywords->reduce(::(previous, value) <- (if (previous == empty) '' else previous) + value +', '),
+
+
+            ('Keyword Definitions') ::(item) {
+              return String.combine(:Arts.generateKeywordDefinitionLines(:item))
             },
-            
-          ('Target mode') ::(item) <- 
-            match(item.targetMode) {
-              (Arts.TARGET_MODE.ONE): 'One',
-              (Arts.TARGET_MODE.ONEPART): 'One (body part)',
-              (Arts.TARGET_MODE.ALLALLY): 'All ally',
-              (Arts.TARGET_MODE.RANDOM): 'Random',
-              (Arts.TARGET_MODE.NONE): 'None',
-              (Arts.TARGET_MODE.ALLENEMY): 'All enemy',
-              (Arts.TARGET_MODE.ALL): 'Everyone'
-            },
-        
-        
-          ('Name') :: (item) <- item.name,
-          ('ID') ::(item) <- item.id,
-          ('Kind') ::(item) <-
-            match(item.kind) {
-              (Arts.KIND.ABILITY): 'Ability',
-              (Arts.KIND.REACTION): 'Reaction',
-              (Arts.KIND.EFFECT): 'Effect',
-              (Arts.KIND.FIELD): 'Field'
-            },
-            
-          ('Traits') ::(item) {
-            @:traits = [];
-            @trait = item.traits;
-            ::? {
-              @iter = 1;
-              forever ::{
-                when(Arts.TRAIT->values->findIndex(:iter) == -1) send();
-                if (trait & iter) ::<= {
-                  @name = ::? {
-                    foreach(Arts.TRAIT) ::(k, v) {
-                      if (v == iter) ::<= {
-                        send(:k);
+
+
+            ('Rarity')::(item) <- 
+              match(item.rarity) {
+                (Arts.RARITY.COMMON): 'Common',
+                (Arts.RARITY.UNCOMMON): 'Uncommon',
+                (Arts.RARITY.RARE): 'Rare',
+                (Arts.RARITY.EPIC): 'Epic'
+              },
+            ('Art Specs')::(item) <- '',
+            ('Deck Role')::(item) <- '',
+                        
+            ('AI Usage Hint') ::(item) <- 
+              match(item.usageHintAI) {
+                (Arts.USAGE_HINT.OFFENSIVE): 'Offensive',
+                (Arts.USAGE_HINT.HEAL): 'Heal',
+                (Arts.USAGE_HINT.BUFF): 'Buff',
+                (Arts.USAGE_HINT.DEBUFF): 'Debuff',
+                (Arts.USAGE_HINT.DONTUSE): 'Don\'t use'
+              },
+              
+            ('Target mode') ::(item) <- 
+              match(item.targetMode) {
+                (Arts.TARGET_MODE.ONE): 'One',
+                (Arts.TARGET_MODE.ONEPART): 'One (body part)',
+                (Arts.TARGET_MODE.ALLALLY): 'All ally',
+                (Arts.TARGET_MODE.RANDOM): 'Random',
+                (Arts.TARGET_MODE.NONE): 'None',
+                (Arts.TARGET_MODE.ALLENEMY): 'All enemy',
+                (Arts.TARGET_MODE.ALL): 'Everyone'
+              },
+          
+          
+            ('Name') :: (item) <- item.name,
+            ('ID') ::(item) <- item.id,
+            ('Kind') ::(item) <-
+              match(item.kind) {
+                (Arts.KIND.ABILITY): 'Ability',
+                (Arts.KIND.REACTION): 'Reaction',
+                (Arts.KIND.EFFECT): 'Effect',
+                (Arts.KIND.FIELD): 'Field'
+              },
+              
+            ('Traits') ::(item) {
+              @:traits = [];
+              @trait = item.traits;
+              ::? {
+                @iter = 1;
+                forever ::{
+                  when(Arts.TRAIT->values->findIndex(:iter) == -1) send();
+                  if (trait & iter) ::<= {
+                    @name = ::? {
+                      foreach(Arts.TRAIT) ::(k, v) {
+                        if (v == iter) ::<= {
+                          send(:k);
+                        }
                       }
                     }
+                    
+                    if (name) 
+                      traits->push(:name + ',' ); 
                   }
-                  
-                  if (name) 
-                    traits->push(:name + ',' ); 
+                  iter = iter << 1;
                 }
-                iter = iter << 1;
               }
+              
+              return String.combine(:traits);
             }
-            
-            return String.combine(:traits);
           }
+        );
+      }
+
+      dump(filename: 'arts.csv', filter::(value) <- true);
+      */
+      
+      
+      
+      ///////////////////
+      
+      
+      ///////////////////
+      /*
+      for(0, 4) ::(i) {
+        @:world = import(module:'game_singleton.world.mt');
+        world.party.queueCollectSupportArt();    
+      } 
+      */     
+      
+      
+      ////////////////////
+      
+      /*
+      @:world = import(module:'game_singleton.world.mt');
+      @:enemies = [
+        world.island.newInhabitant(),
+        world.island.newInhabitant()    
+      ];
+      
+      foreach(enemies) ::(k, v) {
+        v.anonymize();
+      }
+      world.battle.start(
+        party: world.party,
+
+        allies: world.party.members,
+        enemies,
+        landmark: {},
+        onStart :: {
+        },
+        onEnd ::(result) {
+          when(world.battle.partyWon()) ::<= { 
+          };
+            
+          @:instance = import(module:'game_singleton.instance.mt');
+          instance.gameOver(reason:'The party was wiped out.');
         }
       );
-    }
-
-    dump(filename: 'arts.csv', filter::(value) <- true);
-    */
+      */
+      
+      
+      //////////////////////
+      
+    },
     
-    
-    
-    ///////////////////
-    
-    
-    ///////////////////
-    /*
-    for(0, 4) ::(i) {
+    onDeath ::(data, entity) {
       @:world = import(module:'game_singleton.world.mt');
-      world.party.queueCollectSupportArt();    
-    } 
-    */     
-    
-    
-    ////////////////////
-    
-    /*
-    @:world = import(module:'game_singleton.world.mt');
-    @:enemies = [
-      world.island.newInhabitant(),
-      world.island.newInhabitant()    
-    ];
-    
-    foreach(enemies) ::(k, v) {
-      v.anonymize();
+      world.party.remove(member:entity);    
     }
-    world.battle.start(
-      party: world.party,
-
-      allies: world.party.members,
-      enemies,
-      landmark: {},
-      onStart :: {
-      },
-      onEnd ::(result) {
-        when(world.battle.partyWon()) ::<= { 
-        };
-          
-        @:instance = import(module:'game_singleton.instance.mt');
-        instance.gameOver(reason:'The party was wiped out.');
-      }
-    );
-    */
-    
-    
-    //////////////////////
-    
   },
-  
-  onDeath ::(data, entity) {
-    @:world = import(module:'game_singleton.world.mt');
-    world.party.remove(member:entity);    
-  },
-  
   interactionsPerson : interactionsPerson,
   interactionsLocation : [],
   interactionsLandmark : [],
@@ -1225,7 +1225,7 @@ return {
       name : 'Sentimental Box',
       id : 'thechosen:box-shopkeep',
       keepInteractionMenu : false,
-      onInteract ::(location, party) {
+      interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');
         
         @:shopkeep = location.ownedBy;
@@ -1259,7 +1259,7 @@ return {
       name : 'Wyvern of Fire',
       id : 'thechosen:wyvern-of-fire',
       keepInteractionMenu : false,
-      onInteract ::(location, party) {
+      interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');              
         if (world.scenario.data.fireWyvernDefeated == false) ::<= {
           Scene.start(id:'thechosen:scene_wyvernfire0', onDone::{}, location, landmark:location.landmark);
@@ -1274,7 +1274,7 @@ return {
       name : 'Wyvern of Ice',
       id : 'thechosen:wyvern-of-ice',
       keepInteractionMenu : false,
-      onInteract ::(location, party) {
+      interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');              
         if (world.scenario.data.iceWyvernDefeated == false) ::<= {
           Scene.start(id:'thechosen:scene_wyvernice0', onDone::{}, location, landmark:location.landmark);
@@ -1290,7 +1290,7 @@ return {
       name : 'Wyvern of Thunder',
       id : 'thechosen:wyvern-of-thunder',
       keepInteractionMenu : false,
-      onInteract ::(location, party) {
+      interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');              
         if (world.scenario.data.thunderWyvernDefeated == false) ::<= {
           Scene.start(id:'thechosen:scene_wyvernthunder0', onDone::{}, location, landmark:location.landmark);
@@ -1305,7 +1305,7 @@ return {
       name : 'Wyvern of Light',
       id : 'thechosen:wyvern-of-light',
       keepInteractionMenu : false,
-      onInteract ::(location, party) {
+      interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');              
         if (world.scenario.data.lightWyvernDefeated == false) ::<= {
           Scene.start(id:'thechosen:scene_wyvernlight0', onDone::{}, location, landmark:location.landmark);
@@ -1320,7 +1320,7 @@ return {
         name : 'Final Floor',
         id :  'thechosen:final-stairs',
         keepInteractionMenu : false,
-        onInteract ::(location, party) {
+        interact ::(location, party) {
           @:world = import(module:'game_singleton.world.mt');
 
           @:proceed ::{
@@ -1417,7 +1417,7 @@ return {
         name : 'Next Floor',
         id :  'thechosen:next-floor',
         keepInteractionMenu : false,
-        onInteract ::(location, party) {
+        interact ::(location, party) {
           if (location.targetLandmark == empty) ::<={
           
             if (location.landmark.floor > 5 && random.number() > 0.5 - (0.2*(location.landmark.floor - 5))) ::<= {
@@ -1457,7 +1457,7 @@ return {
               instance.visitLandmark(landmark:location.targetLandmark, where::(landmark) <- location.targetLandmarkEntry);
             }
           )
-        },
+        }
       }
     )  
     
@@ -1501,17 +1501,14 @@ return {
           'base:enchantment-stand'
         ],
         mapHint:{},
-        onIncrementTime ::(landmark, island){},
-        onStep ::(landmark, island) {},
-        onCreate ::(landmark, island){
-        },
+        events : {
         
-        onVisit ::(landmark, island) {
-          @:canvas = import(module:'game_singleton.canvas.mt');
-          @:windowEvent = import(module:'game_singleton.windowevent.mt');
-          windowEvent.queueMessage(text:'It seems this area has been long forgotten...');
-        }
-        
+          onVisit ::(landmark, island) {
+            @:canvas = import(module:'game_singleton.canvas.mt');
+            @:windowEvent = import(module:'game_singleton.windowevent.mt');
+            windowEvent.queueMessage(text:'It seems this area has been long forgotten...');
+          }
+        }        
       }
     ) 
 
@@ -1567,20 +1564,13 @@ return {
         mapHint:{
           layoutType: DungeonMap.LAYOUT_ALPHA
         },
-        onCreate ::(landmark, island){
-        },
-        onVisit ::(landmark, island) {
-          if (landmark.floor == 0)
-            windowEvent.queueMessage(
-              text:"This place seems to shift before you..."
-            );
-        },
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
+        events : {
+          onVisit ::(landmark, island) {
+            if (landmark.floor == 0)
+              windowEvent.queueMessage(
+                text:"This place seems to shift before you..."
+              );
+          }
         }
       }
     )
@@ -1632,23 +1622,15 @@ return {
         mapHint:{
           layoutType: DungeonMap.LAYOUT_BETA
         },
-        onCreate ::(landmark, island){
-        },
-        onVisit ::(landmark, island) {
-          if (landmark.floor == 0)
-            windowEvent.queueMessage(
-              text:"This place seems to shift before you..."
-            );
-        
-        },
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
+        events : {
+          onVisit ::(landmark, island) {
+            if (landmark.floor == 0)
+              windowEvent.queueMessage(
+                text:"This place seems to shift before you..."
+              );
+          
+          }
         }
-        
       }
     )
 
@@ -1701,23 +1683,15 @@ return {
         mapHint:{
           layoutType: DungeonMap.LAYOUT_GAMMA
         },
-        onCreate ::(landmark, island){
-        },
-        onVisit ::(landmark, island) {
-          if (landmark.floor == 0)
-            windowEvent.queueMessage(
-              text:"This place seems to shift before you..."
-            );
-        
-        },
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
+        events : {
+          onVisit ::(landmark, island) {
+            if (landmark.floor == 0)
+              windowEvent.queueMessage(
+                text:"This place seems to shift before you..."
+              );
+          
+          }
         }
-        
       }
     )
 
@@ -1773,23 +1747,15 @@ return {
         mapHint:{
           layoutType: DungeonMap.LAYOUT_DELTA
         },
-        onCreate ::(landmark, island){
-        },
-        onVisit ::(landmark, island) {
-          if (landmark.floor == 0)
-            windowEvent.queueMessage(
-              text:"This place seems to shift before you..."
-            );
-        
-        },
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
+        events : {
+          onVisit ::(landmark, island) {
+            if (landmark.floor == 0)
+              windowEvent.queueMessage(
+                text:"This place seems to shift before you..."
+              );
+          
+          }
         }
-        
       }
     )
 
@@ -1831,16 +1797,7 @@ return {
           wallCharacter: ' '
           
         },
-        onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {},
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
-        }
-        
+        events : {}        
       }
     )    
 
@@ -1882,15 +1839,7 @@ return {
           wallCharacter: ' '
           
         },
-        onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {},
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
-        }
+        events : {}
         
       }
     ) 
@@ -1930,16 +1879,7 @@ return {
           wallCharacter: ' '
           
         },
-        onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {},
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
-        }
-        
+        events : {}
       }
     ) 
 
@@ -1979,15 +1919,7 @@ return {
           wallCharacter: ' '
           
         },
-        onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {},
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
-        }
+        events : {}
         
       }
     ) 
@@ -2023,18 +1955,15 @@ return {
       minOccupants : 0,
       maxOccupants : 0,
       
-      onFirstInteract ::(location) {},
-      onInteract ::(location) {
-        @:world = import(module:'game_singleton.world.mt');
-        return true;
-      },
-      
-      onCreate ::(location) {
-        location.contested = true;
-      },
-      onStep ::(entities, location){},
-      onIncrementTime::(location, time) {
-      
+      events : {
+        onInteract ::(location) {
+          @:world = import(module:'game_singleton.world.mt');
+          return true;
+        },
+        
+        onCreate ::(location) {
+          location.contested = true;
+        }
       }
     })   
 
@@ -2059,55 +1988,41 @@ return {
       
       aggressiveInteractions : [
       ],
-      onStep ::(entities, location){},
 
 
       
       minOccupants : 0,
       maxOccupants : 0,
       
-      onFirstInteract ::(location) {
-      },
-      onInteract ::(location) {
-        return true;
-
-      },      
-      
-      onCreate ::(location) {
-        location.name = 'Wyvern Throne';
-        @:Profession = import(module:'game_database.profession.mt');
-        @:Species = import(module:'game_database.species.mt');
-        @:Story = import(module:'game_singleton.story.mt');
-        @:Scene = import(module:'game_database.scene.mt');
-        @:StatSet = import(module:'game_class.statset.mt');
-        location.ownedBy = location.landmark.island.newInhabitant(
-          speciesHint : 'thechosen:wyvern-of-fire',
-          professionHint: 'thechosen:wyvern-of-fire'
-        );
-        location.ownedBy.supportArts = [
-          'base:bloods-summoning',
-          'base:banishing-light'
-        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
-        location.ownedBy.name = 'Wyvern of Fire';
-        location.ownedBy.removeAllProfessionArts();
-        for(0, location.ownedBy.profession.arts->size) ::(i) {
-          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
-        }
-        location.ownedBy.equipAllProfessionArts();
-
-
-        location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-fire';
-        location.ownedBy.heal(amount:9999, silent:true); 
-        location.ownedBy.healAP(amount:9999, silent:true); 
-
+      events : {
         
+        onCreate ::(location) {
+          location.name = 'Wyvern Throne';
+          @:Profession = import(module:'game_database.profession.mt');
+          @:Species = import(module:'game_database.species.mt');
+          @:Story = import(module:'game_singleton.story.mt');
+          @:Scene = import(module:'game_database.scene.mt');
+          @:StatSet = import(module:'game_class.statset.mt');
+          location.ownedBy = location.landmark.island.newInhabitant(
+            speciesHint : 'thechosen:wyvern-of-fire',
+            professionHint: 'thechosen:wyvern-of-fire'
+          );
+          location.ownedBy.supportArts = [
+            'base:bloods-summoning',
+            'base:banishing-light'
+          ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
+          location.ownedBy.name = 'Wyvern of Fire';
+          location.ownedBy.removeAllProfessionArts();
+          for(0, location.ownedBy.profession.arts->size) ::(i) {
+            location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+          }
+          location.ownedBy.equipAllProfessionArts();
 
 
-
-      },
-      
-      onIncrementTime::(location, time) {
-      
+          location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-fire';
+          location.ownedBy.heal(amount:9999, silent:true); 
+          location.ownedBy.healAP(amount:9999, silent:true); 
+        }
       }
     })
 
@@ -2136,26 +2051,14 @@ return {
       
       minOccupants : 0,
       maxOccupants : 0,
+      events : {
       
-      onFirstInteract ::(location) {},
-      onInteract ::(location) {
-        @open = location.isUnlockedWithPlate();
-        if (!open)  
-          windowEvent.queueMessage(text: 'The entry to the stairway is locked. Perhaps some lever or plate nearby can unlock it.');
-        return open;      
-      },
-      
-      onCreate ::(location) {
-        /*
-        if (location.landmark.island.tier > 1) 
-          if (random.flipCoin()) ::<= {
-            location.lockWithPressurePlate();
-          }
-        */
-      },
-      
-      onIncrementTime::(location, time) {
-      
+        onInteract ::(location) {
+          @open = location.isUnlockedWithPlate();
+          if (!open)  
+            windowEvent.queueMessage(text: 'The entry to the stairway is locked. Perhaps some lever or plate nearby can unlock it.');
+          return open;      
+        }
       }
     })
 
@@ -2181,57 +2084,48 @@ return {
       aggressiveInteractions : [
       ],
 
-      onStep ::(entities, location){},
 
       
       minOccupants : 0,
       maxOccupants : 0,
       
-      onFirstInteract ::(location) {
-      },
-      onInteract ::(location) {
-        return true;
-
-      },      
-      
-      onCreate ::(location) {
-        location.name = 'Wyvern Throne';
-        @:Profession = import(module:'game_database.profession.mt');
-        @:Species = import(module:'game_database.species.mt');
-        @:Story = import(module:'game_singleton.story.mt');
-        @:Scene = import(module:'game_database.scene.mt');
-        @:StatSet = import(module:'game_class.statset.mt');
-        location.ownedBy = location.landmark.island.newInhabitant(
-          speciesHint : 'thechosen:wyvern-of-ice',
-          professionHint: 'thechosen:wyvern-of-ice'
-        );
+      events : {
         
-        location.ownedBy.supportArts = [
-          'base:bloods-shield',                  
-          'base:bloods-exaltation',                  
-          'base:bloods-summoning',
-          'base:banishing-light'
-        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));  
-        location.ownedBy.name = 'Wyvern of Ice';
-        location.ownedBy.removeAllProfessionArts();
-        for(0, location.ownedBy.profession.arts->size) ::(i) {
-          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+        onCreate ::(location) {
+          location.name = 'Wyvern Throne';
+          @:Profession = import(module:'game_database.profession.mt');
+          @:Species = import(module:'game_database.species.mt');
+          @:Story = import(module:'game_singleton.story.mt');
+          @:Scene = import(module:'game_database.scene.mt');
+          @:StatSet = import(module:'game_class.statset.mt');
+          location.ownedBy = location.landmark.island.newInhabitant(
+            speciesHint : 'thechosen:wyvern-of-ice',
+            professionHint: 'thechosen:wyvern-of-ice'
+          );
+          
+          location.ownedBy.supportArts = [
+            'base:bloods-shield',                  
+            'base:bloods-exaltation',                  
+            'base:bloods-summoning',
+            'base:banishing-light'
+          ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));  
+          location.ownedBy.name = 'Wyvern of Ice';
+          location.ownedBy.removeAllProfessionArts();
+          for(0, location.ownedBy.profession.arts->size) ::(i) {
+            location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+          }
+          location.ownedBy.equipAllProfessionArts();
+
+          
+          location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-ice';
+          location.ownedBy.heal(amount:9999, silent:true); 
+          location.ownedBy.healAP(amount:9999, silent:true); 
+
+          
+
+
+
         }
-        location.ownedBy.equipAllProfessionArts();
-
-        
-        location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-ice';
-        location.ownedBy.heal(amount:9999, silent:true); 
-        location.ownedBy.healAP(amount:9999, silent:true); 
-
-        
-
-
-
-      },
-      
-      onIncrementTime::(location, time) {
-      
       }
     })
 
@@ -2257,59 +2151,49 @@ return {
       aggressiveInteractions : [
       ],
 
-      onStep ::(entities, location){},
-
       
       minOccupants : 0,
       maxOccupants : 0,
-      
-      onFirstInteract ::(location) {
-      },
-      onInteract ::(location) {
-        return true;
-
-      },      
-      
-      onCreate ::(location) {
-        location.name = 'Wyvern Throne';
-        @:Profession = import(module:'game_database.profession.mt');
-        @:Species = import(module:'game_database.species.mt');
-        @:Story = import(module:'game_singleton.story.mt');
-        @:Scene = import(module:'game_database.scene.mt');
-        @:StatSet = import(module:'game_class.statset.mt');
-        @:Entity = import(module:'game_class.entity.mt');
-        location.ownedBy = location.landmark.island.newInhabitant(
-          speciesHint : 'thechosen:wyvern-of-thunder',
-          professionHint: 'thechosen:wyvern-of-thunder'
-        );
+      events : {
         
-        location.ownedBy.name = 'Wyvern of Thunder';
-        location.ownedBy.supportArts = [
-          'base:bloods-shield',                  
-          'base:bloods-exaltation',                  
-          'base:bloods-summoning',
-          'base:banishing-light'
-        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value))); 
-        location.ownedBy.removeAllProfessionArts();
-        for(0, location.ownedBy.profession.arts->size) ::(i) {
-          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+        
+        onCreate ::(location) {
+          location.name = 'Wyvern Throne';
+          @:Profession = import(module:'game_database.profession.mt');
+          @:Species = import(module:'game_database.species.mt');
+          @:Story = import(module:'game_singleton.story.mt');
+          @:Scene = import(module:'game_database.scene.mt');
+          @:StatSet = import(module:'game_class.statset.mt');
+          @:Entity = import(module:'game_class.entity.mt');
+          location.ownedBy = location.landmark.island.newInhabitant(
+            speciesHint : 'thechosen:wyvern-of-thunder',
+            professionHint: 'thechosen:wyvern-of-thunder'
+          );
+          
+          location.ownedBy.name = 'Wyvern of Thunder';
+          location.ownedBy.supportArts = [
+            'base:bloods-shield',                  
+            'base:bloods-exaltation',                  
+            'base:bloods-summoning',
+            'base:banishing-light'
+          ]->map(::(value) <- Arts.new(base:Arts.database.find(:value))); 
+          location.ownedBy.removeAllProfessionArts();
+          for(0, location.ownedBy.profession.arts->size) ::(i) {
+            location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+          }
+          location.ownedBy.equipAllProfessionArts();
+
+          
+          location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-thunder';
+          location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+          location.ownedBy.heal(amount:9999, silent:true); 
+          location.ownedBy.healAP(amount:9999, silent:true); 
+
+          
+
+
+
         }
-        location.ownedBy.equipAllProfessionArts();
-
-        
-        location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-thunder';
-        location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
-        location.ownedBy.heal(amount:9999, silent:true); 
-        location.ownedBy.healAP(amount:9999, silent:true); 
-
-        
-
-
-
-      },
-      
-      onIncrementTime::(location, time) {
-      
       }
     })
 
@@ -2322,7 +2206,6 @@ return {
       symbol: 'W',
       onePerLandmark : true,
       minStructureSize : 1,
-      onStep ::(entities, location){},
 
       descriptions: [
         "What seems to be a stone throne",
@@ -2340,52 +2223,43 @@ return {
       minOccupants : 0,
       maxOccupants : 0,
       
-      onFirstInteract ::(location) {
-      },
-      onInteract ::(location) {
-        return true;
+      events : {        
+        onCreate ::(location) {
+          location.name = 'Wyvern Throne';
+          @:Profession = import(module:'game_database.profession.mt');
+          @:Entity = import(module:'game_class.entity.mt');
+          @:Species = import(module:'game_database.species.mt');
+          @:Story = import(module:'game_singleton.story.mt');
+          @:Scene = import(module:'game_database.scene.mt');
+          @:StatSet = import(module:'game_class.statset.mt');
+          location.ownedBy = location.landmark.island.newInhabitant(
+            speciesHint : 'thechosen:wyvern-of-light',
+            professionHint: 'thechosen:wyvern-of-light'
+          );
+          
+          location.ownedBy.supportArts = [
+            'base:bloods-shield',                  
+            'base:bloods-exaltation',                  
+          ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));  
+          location.ownedBy.name = 'Wyvern of Light';
+          location.ownedBy.removeAllProfessionArts();
+          for(0, location.ownedBy.profession.arts->size) ::(i) {
+            location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+          }
+          location.ownedBy.equipAllProfessionArts();
 
-      },      
-      
-      onCreate ::(location) {
-        location.name = 'Wyvern Throne';
-        @:Profession = import(module:'game_database.profession.mt');
-        @:Entity = import(module:'game_class.entity.mt');
-        @:Species = import(module:'game_database.species.mt');
-        @:Story = import(module:'game_singleton.story.mt');
-        @:Scene = import(module:'game_database.scene.mt');
-        @:StatSet = import(module:'game_class.statset.mt');
-        location.ownedBy = location.landmark.island.newInhabitant(
-          speciesHint : 'thechosen:wyvern-of-light',
-          professionHint: 'thechosen:wyvern-of-light'
-        );
-        
-        location.ownedBy.supportArts = [
-          'base:bloods-shield',                  
-          'base:bloods-exaltation',                  
-        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));  
-        location.ownedBy.name = 'Wyvern of Light';
-        location.ownedBy.removeAllProfessionArts();
-        for(0, location.ownedBy.profession.arts->size) ::(i) {
-          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);                      
+          
+          location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-light'
+          
+          location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
+          location.ownedBy.heal(amount:9999, silent:true); 
+          location.ownedBy.healAP(amount:9999, silent:true); 
+
+          
+
+
+
         }
-        location.ownedBy.equipAllProfessionArts();
-
-        
-        location.ownedBy.overrideInteractID = 'thechosen:wyvern-of-light'
-        
-        location.ownedBy.unequip(slot:Entity.EQUIP_SLOTS.HAND_LR, silent:true);
-        location.ownedBy.heal(amount:9999, silent:true); 
-        location.ownedBy.healAP(amount:9999, silent:true); 
-
-        
-
-
-
-      },
-      
-      onIncrementTime::(location, time) {
-      
       }
     })
 
@@ -2412,31 +2286,18 @@ return {
       aggressiveInteractions : [
       ],
 
-      onStep ::(entities, location){},
 
       
       minOccupants : 0,
       maxOccupants : 0,
       
-      onFirstInteract ::(location) {},
-      onInteract ::(location) {
-        @open = location.isUnlockedWithPlate();
-        if (!open)  
-          windowEvent.queueMessage(text: 'The entry to the stairway is locked. Perhaps some lever or plate nearby can unlock it.');
-        return open;      
-      },
-      
-      onCreate ::(location) {
-        /*
-        if (location.landmark.island.tier > 1) 
-          if (random.flipCoin()) ::<= {
-            location.lockWithPressurePlate();
-          }
-        */
-      },
-      
-      onIncrementTime::(location, time) {
-      
+      events : {
+        onInteract ::(location) {
+          @open = location.isUnlockedWithPlate();
+          if (!open)  
+            windowEvent.queueMessage(text: 'The entry to the stairway is locked. Perhaps some lever or plate nearby can unlock it.');
+          return open;      
+        }
       }
     })
 
@@ -2461,27 +2322,12 @@ return {
       aggressiveInteractions : [
       ],
 
-      onStep ::(entities, location){},
 
       
       minOccupants : 0,
       maxOccupants : 0,
       
-      onFirstInteract ::(location) {},
-      onInteract ::(location) {
-      },
-      
-      onCreate ::(location) {
-        /*
-        if (location.landmark.island.tier > 1) 
-          if (random.flipCoin()) ::<= {
-            location.lockWithPressurePlate();
-          }
-        */
-      },
-      
-      onIncrementTime::(location, time) {
-      
+      events : {
       }
     })
 
@@ -2536,20 +2382,13 @@ return {
         mapHint:{
           layoutType: DungeonMap.LAYOUT_EPSILON
         },
-        onCreate ::(landmark, island){
-        },
-        onVisit ::(landmark, island) {
-          if (landmark.floor == 0)
-            windowEvent.queueMessage(
-              text:"This place seems to shift before you..."
-            );
-        },
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
+        events : {
+          onVisit ::(landmark, island) {
+            if (landmark.floor == 0)
+              windowEvent.queueMessage(
+                text:"This place seems to shift before you..."
+              );
+          }
         }
       }
     )
@@ -2583,215 +2422,210 @@ return {
         ],
         mapHint : {
         },
-        onCreate ::(landmark, island){
-          @:map = landmark.map;
-          map.width = 100;
-          map.height = 60;
-          map.outOfBoundsCharacter = '.'
-          
-          
-          @:CASTLE_MAIN_X = 30;
-          @:CASTLE_MAIN_HEIGHT = 13;
-          @:CASTLE_MAIN_WIDTH = 32;
-          @:CASTLE_WINDOW_HEIGHT = 3;
-          
-          @:CASTLE_EXT_HEIGHT = 18;
+        
+        events : {
+          onCreate ::(landmark, island){
+            @:map = landmark.map;
+            map.width = 100;
+            map.height = 60;
+            map.outOfBoundsCharacter = '.'
+            
+            
+            @:CASTLE_MAIN_X = 30;
+            @:CASTLE_MAIN_HEIGHT = 13;
+            @:CASTLE_MAIN_WIDTH = 32;
+            @:CASTLE_WINDOW_HEIGHT = 3;
+            
+            @:CASTLE_EXT_HEIGHT = 18;
 
-          @:PATH_HEIGHT = 22;
-
-
-
-          // main castle
-          map.paintScenerySolidRectangle(
-            x: CASTLE_MAIN_X,
-            y: 0,
-            width: CASTLE_MAIN_WIDTH,
-            height: CASTLE_MAIN_HEIGHT,
-            symbol : map.addScenerySymbol(
-              character: '▓'
-            ),
-            isWall:true
-          );
-          
-          map.paintScenerySolidRectangle(
-            x: 0,
-            y: 0,
-            width: CASTLE_MAIN_X,
-            height: CASTLE_EXT_HEIGHT,
-            symbol : map.addScenerySymbol(
-              character: '▓'
-            ),
-            isWall:true
-          );
-          
-          map.paintScenerySolidRectangle(
-            x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH,
-            y: 0,
-            width: map.width - (CASTLE_MAIN_X + CASTLE_MAIN_WIDTH)-1,
-            height: CASTLE_EXT_HEIGHT,
-            symbol : map.addScenerySymbol(
-              character: '▓'
-            ),
-            isWall:true
-          );
-          
-
-          map.paintScenerySolidRectangle(
-            x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH/2 - 2,
-            y: CASTLE_MAIN_HEIGHT - 1,
-            width: 4,
-            height: 1,
-            symbol : map.addScenerySymbol(
-              character: ' '
-            ),
-            isWall:false
-          );
-          
-          @:l = landmark.addLocation(
-            location: Location.new(
-              landmark: landmark,
-              base:Location.database.find(id: 'thechosen:foreboding-entrance'),
-              x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH/2 - 2,
-              y: CASTLE_MAIN_HEIGHT - 1
-            ),
-            width: 4,
-            height: 1
-          );
-
-
-          // castle details 
-          // grows down
-          @:makeWindow ::<= {
-            @:emp = map.addScenerySymbol(character: ' ');
-            return ::(x, y) {
-              map.paintScenerySolidRectangle(
-                x,
-                y,
-                width: 1,
-                height: CASTLE_WINDOW_HEIGHT,
-                symbol: emp,
-                isWall : false
-              );
-            }
-          }
-
-          @:makeWindowPair::(x, y) {
-            makeWindow(x, y);
-            makeWindow(x:x+2, y);
-          }
+            @:PATH_HEIGHT = 22;
 
 
 
-
-
-          for(0, 2) ::(y) {
-
-            for(0, 2) ::(i) {          
-              makeWindowPair(
-                x: CASTLE_MAIN_X + 1 + i * 5, 
-                y: CASTLE_MAIN_HEIGHT - CASTLE_WINDOW_HEIGHT - 2 - y*(CASTLE_WINDOW_HEIGHT + 2));
-            }
-
-            for(0, 2) ::(i) {          
-              makeWindowPair(
-                x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH - 4 - i * 5, 
-                y: CASTLE_MAIN_HEIGHT - CASTLE_WINDOW_HEIGHT - 2 - y*(CASTLE_WINDOW_HEIGHT + 2));
-            }
-          }
-
-
-          for(0, 3) ::(y) {
-            for(0, 5) ::(i) {          
-              makeWindowPair(
-                x: CASTLE_MAIN_X - (1 + 4 + i * 5), 
-                y: CASTLE_EXT_HEIGHT - CASTLE_WINDOW_HEIGHT - 2 - y*(CASTLE_WINDOW_HEIGHT + 2) + 1);
-            }
-
-            for(0, 5) ::(i) {          
-              makeWindowPair(
-                x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH + (2 + i * 5), 
-                y: CASTLE_EXT_HEIGHT - CASTLE_WINDOW_HEIGHT - 2 - y*(CASTLE_WINDOW_HEIGHT + 2) + 1);
-            }
-          }
-
-
-
-
-
-
-
-          // pathway 
-
-          map.paintScenerySolidRectangle(
-            x: 0,
-            y: CASTLE_EXT_HEIGHT,
-            width: CASTLE_MAIN_X+CASTLE_MAIN_WIDTH/2-2,
-            height: PATH_HEIGHT,
-            symbol : map.addScenerySymbol(
-              character: '.'
-            ),
-            isWall:true
-          );
-
-          map.paintScenerySolidRectangle(
-            x: CASTLE_MAIN_X+CASTLE_MAIN_WIDTH/2+2,
-            y: CASTLE_EXT_HEIGHT,
-            width: map.width - CASTLE_MAIN_X+CASTLE_MAIN_WIDTH/2-1,
-            height: PATH_HEIGHT,
-            symbol : map.addScenerySymbol(
-              character: '.'
-            ),
-            isWall:true
-          );
-
-
-          map.paintScenerySolidRectangle(
-            x: 0,
-            y: CASTLE_EXT_HEIGHT + PATH_HEIGHT,
-            width: map.width-1,
-            height: map.height - (CASTLE_EXT_HEIGHT + PATH_HEIGHT) - 1,
-            symbol : map.addScenerySymbol(
-              character: '.'
-            ),
-            isWall:true
-          );
-          
-
-          map.paintScenerySolidRectangle(
-            x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH/2 - 5,
-            y: CASTLE_EXT_HEIGHT + PATH_HEIGHT - 3,
-            width: 10,
-            height: 6,
-            symbol : map.addScenerySymbol(
-              character: ' '
-            ),
-            isWall:false
-          );
-
-
-
-
-
+            // main castle
+            map.paintScenerySolidRectangle(
+              x: CASTLE_MAIN_X,
+              y: 0,
+              width: CASTLE_MAIN_WIDTH,
+              height: CASTLE_MAIN_HEIGHT,
+              symbol : map.addScenerySymbol(
+                character: '▓'
+              ),
+              isWall:true
+            );
+            
+            map.paintScenerySolidRectangle(
+              x: 0,
+              y: 0,
+              width: CASTLE_MAIN_X,
+              height: CASTLE_EXT_HEIGHT,
+              symbol : map.addScenerySymbol(
+                character: '▓'
+              ),
+              isWall:true
+            );
+            
+            map.paintScenerySolidRectangle(
+              x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH,
+              y: 0,
+              width: map.width - (CASTLE_MAIN_X + CASTLE_MAIN_WIDTH)-1,
+              height: CASTLE_EXT_HEIGHT,
+              symbol : map.addScenerySymbol(
+                character: '▓'
+              ),
+              isWall:true
+            );
             
 
+            map.paintScenerySolidRectangle(
+              x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH/2 - 2,
+              y: CASTLE_MAIN_HEIGHT - 1,
+              width: 4,
+              height: 1,
+              symbol : map.addScenerySymbol(
+                character: ' '
+              ),
+              isWall:false
+            );
+            
+            @:l = landmark.addLocation(
+              location: Location.new(
+                landmark: landmark,
+                base:Location.database.find(id: 'thechosen:foreboding-entrance'),
+                x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH/2 - 2,
+                y: CASTLE_MAIN_HEIGHT - 1
+              ),
+              width: 4,
+              height: 1
+            );
 
 
-          map.setPointer(
-            x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH / 2,
-            y: CASTLE_EXT_HEIGHT + PATH_HEIGHT
-          );
+            // castle details 
+            // grows down
+            @:makeWindow ::<= {
+              @:emp = map.addScenerySymbol(character: ' ');
+              return ::(x, y) {
+                map.paintScenerySolidRectangle(
+                  x,
+                  y,
+                  width: 1,
+                  height: CASTLE_WINDOW_HEIGHT,
+                  symbol: emp,
+                  isWall : false
+                );
+              }
+            }
+
+            @:makeWindowPair::(x, y) {
+              makeWindow(x, y);
+              makeWindow(x:x+2, y);
+            }
+
+
+
+
+
+            for(0, 2) ::(y) {
+
+              for(0, 2) ::(i) {          
+                makeWindowPair(
+                  x: CASTLE_MAIN_X + 1 + i * 5, 
+                  y: CASTLE_MAIN_HEIGHT - CASTLE_WINDOW_HEIGHT - 2 - y*(CASTLE_WINDOW_HEIGHT + 2));
+              }
+
+              for(0, 2) ::(i) {          
+                makeWindowPair(
+                  x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH - 4 - i * 5, 
+                  y: CASTLE_MAIN_HEIGHT - CASTLE_WINDOW_HEIGHT - 2 - y*(CASTLE_WINDOW_HEIGHT + 2));
+              }
+            }
+
+
+            for(0, 3) ::(y) {
+              for(0, 5) ::(i) {          
+                makeWindowPair(
+                  x: CASTLE_MAIN_X - (1 + 4 + i * 5), 
+                  y: CASTLE_EXT_HEIGHT - CASTLE_WINDOW_HEIGHT - 2 - y*(CASTLE_WINDOW_HEIGHT + 2) + 1);
+              }
+
+              for(0, 5) ::(i) {          
+                makeWindowPair(
+                  x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH + (2 + i * 5), 
+                  y: CASTLE_EXT_HEIGHT - CASTLE_WINDOW_HEIGHT - 2 - y*(CASTLE_WINDOW_HEIGHT + 2) + 1);
+              }
+            }
+
+
+
+
+
+
+
+            // pathway 
+
+            map.paintScenerySolidRectangle(
+              x: 0,
+              y: CASTLE_EXT_HEIGHT,
+              width: CASTLE_MAIN_X+CASTLE_MAIN_WIDTH/2-2,
+              height: PATH_HEIGHT,
+              symbol : map.addScenerySymbol(
+                character: '.'
+              ),
+              isWall:true
+            );
+
+            map.paintScenerySolidRectangle(
+              x: CASTLE_MAIN_X+CASTLE_MAIN_WIDTH/2+2,
+              y: CASTLE_EXT_HEIGHT,
+              width: map.width - CASTLE_MAIN_X+CASTLE_MAIN_WIDTH/2-1,
+              height: PATH_HEIGHT,
+              symbol : map.addScenerySymbol(
+                character: '.'
+              ),
+              isWall:true
+            );
+
+
+            map.paintScenerySolidRectangle(
+              x: 0,
+              y: CASTLE_EXT_HEIGHT + PATH_HEIGHT,
+              width: map.width-1,
+              height: map.height - (CASTLE_EXT_HEIGHT + PATH_HEIGHT) - 1,
+              symbol : map.addScenerySymbol(
+                character: '.'
+              ),
+              isWall:true
+            );
+            
+
+            map.paintScenerySolidRectangle(
+              x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH/2 - 5,
+              y: CASTLE_EXT_HEIGHT + PATH_HEIGHT - 3,
+              width: 10,
+              height: 6,
+              symbol : map.addScenerySymbol(
+                character: ' '
+              ),
+              isWall:false
+            );
+
+
+
+
+
+              
+
+
+
+            map.setPointer(
+              x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH / 2,
+              y: CASTLE_EXT_HEIGHT + PATH_HEIGHT
+            );
+            
+            map.paged = false;
+
           
-          map.paged = false;
-
-        
-        },
-        onVisit ::(landmark, island) {},       
-        onIncrementTime ::(landmark) {
-        
-        },
-        
-        onStep ::(landmark) {
-        
+          },
         }
       }
     );

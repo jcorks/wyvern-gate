@@ -25,7 +25,7 @@ return {
       name : 'Attack',
       keepInteractionMenu : false,
       filter::(user, battle) <- true,
-      onSelect::(user, battle, commitAction) {
+      select::(user, battle, commitAction) {
         @:card = Arts.new(base:Arts.database.find(id:'base:attack'));
 
         when(user.canUseAbilities() == false) 
@@ -59,7 +59,7 @@ return {
       name : 'Arts',
       filter::(user, battle) <- true,
       keepInteractionMenu : false,
-      onSelect::(user, battle, commitAction) {
+      select::(user, battle, commitAction) {
         @:choicesColumns = import(module:'game_function.choicescolumns.mt');
         @which;
         @choiceActs = [];
@@ -203,7 +203,7 @@ return {
       name : 'Check',
       filter::(user, battle) <- true,
       keepInteractionMenu : false,
-      onSelect::(user, battle, commitAction) {
+      select::(user, battle, commitAction) {
 
         @:allies  = battle.getAllies(entity:user);
         @:enemies = battle.getEnemies(entity:user);
@@ -254,7 +254,7 @@ return {
       name : 'Wait',
       filter::(user, battle) <- true,
       keepInteractionMenu : false,
-      onSelect::(user, battle, commitAction) {
+      select::(user, battle, commitAction) {
         windowEvent.queueChoices(
           choices : [
             'Use',
@@ -283,7 +283,7 @@ return {
       name : 'Item',
       filter::(user, battle) <- true,
       keepInteractionMenu : false,
-      onSelect::(user, battle, commitAction) {
+      select::(user, battle, commitAction) {
         @:world = import(module:'game_singleton.world.mt');
         @:itemmenu = import(module:'game_function.itemmenu.mt');
         @:enemies = battle.getEnemies(entity:user);
@@ -304,7 +304,7 @@ return {
       name : 'Log',
       filter::(user, battle) <- true,
       keepInteractionMenu : false,
-      onSelect::(user, battle, commitAction) {        
+      select::(user, battle, commitAction) {        
         windowEvent.queueReader(
             prompt: if (random.flipCoin()) 
               '"What just happened??"' 
@@ -322,7 +322,7 @@ return {
       name : 'Quit',
       keepInteractionMenu : true,
       filter::(island, landmark) <- true,
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         windowEvent.queueChoices(
           prompt:'Quit?',
           choices: [
@@ -342,7 +342,7 @@ return {
       name : 'Save',
       filter ::(island, landmark) <- landmark == empty,
       keepInteractionMenu : true,
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         @:instance = import(module:'game_singleton.instance.mt');
         @:loading = import(module:'game_function.loading.mt');
         loading(
@@ -360,7 +360,7 @@ return {
       name : 'Quick Save',
       filter ::(island, landmark) <- true,
       keepInteractionMenu : true,
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         @:instance = import(module:'game_singleton.instance.mt');
         @:loading = import(module:'game_function.loading.mt');
         loading(
@@ -383,7 +383,7 @@ return {
       name: 'Settings',
       keepInteractionMenu : true,
       filter ::(island, landmark) <- true,
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         @:world = import(module:'game_singleton.world.mt');
       
         @:instance = import(:'game_singleton.instance.mt')
@@ -396,7 +396,7 @@ return {
       name : 'Check',
       keepInteractionMenu : true,
       filter::(island, landmark) <- landmark == empty,
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         island.incrementTime();
         @:world = import(module:'game_singleton.world.mt');
         
@@ -483,7 +483,7 @@ return {
       name : 'Party',
       keepInteractionMenu : true,
       filter::(island, landmark) <- true,
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         (import(module:'game_function.partyoptions.mt'))();
       }
     ),
@@ -495,7 +495,7 @@ return {
         @:world = import(module:'game_singleton.world.mt');
         return world.party.quests->size > 0;      
       },
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         @:world = import(module:'game_singleton.world.mt');
         @:quests = world.party.quests;
         @which;
@@ -548,7 +548,7 @@ return {
       name : 'Inventory',
       keepInteractionMenu : true,
       filter::(island, landmark) <- true,
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         @:world = import(module:'game_singleton.world.mt');
         @firstAwake = empty;
         ::? {
@@ -587,7 +587,7 @@ return {
       name : 'Wait',
       keepInteractionMenu : false,
       filter::(island, landmark) <- landmark != empty,
-      onSelect::(island, landmark) {
+      select::(island, landmark) {
         @:Landmark = import(module:'game_mutator.landmark.mt');
         @:world = import(module:'game_singleton.world.mt');
         when(landmark != empty && landmark.base.landmarkType == Landmark.TYPE.DUNGEON) 
@@ -665,7 +665,7 @@ return {
         @:party = world.party;
         return party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) == -1
       },
-      onSelect::(entity, location) {
+      select::(entity, location) {
         when(entity.adventurous || location == empty) ::<= {
           windowEvent.queueMessage(
             speaker: entity.name,
@@ -720,7 +720,7 @@ return {
         @:party = world.party;
         return party.quests->findIndexCondition(::(value) <- value.issuerID == entity.worldID) != -1
       },
-      onSelect::(entity, location) {
+      select::(entity, location) {
         @:this = entity;
         when(this.isIncapacitated())
           windowEvent.queueMessage(
@@ -744,7 +744,7 @@ return {
       name: 'Barter',
       keepInteractionMenu : true,
       filter ::(entity)<- true, // everyone can barter,
-      onSelect::(entity, location) {
+      select::(entity, location) {
         @:this = entity;
         when(this.isIncapacitated())
           windowEvent.queueMessage(

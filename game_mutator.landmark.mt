@@ -45,6 +45,8 @@
     
     // imports a json layout in "single" mode, where 
     // a random pattern is loaded as a valid map.
+    // NOTE: all json files are preloaded by the 
+    // game at startup or on modload
     BLUEPRINT_SINGLE ::(path) <-
       {
         blueprint : true,
@@ -69,7 +71,8 @@
   EPHEMERAL: 8,
   CAN_SAVE : 16,
   POINT_OF_NO_RETURN : 32,
-  GUARDED : 64
+  GUARDED : 64,
+  NOTHING_HIDDEN : 128
 }
 
 
@@ -119,12 +122,10 @@ Landmark.database.newEntry(
       scatterChar: 'Y',
       scatterRate: 0.3
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {
-      sound.playBGM(name:'town-2', loop:true);
-
+    events :{
+      onVisit ::(landmark, island) {
+        sound.playBGM(name:'town-2', loop:true);
+      }
     }
   }
 )
@@ -163,11 +164,7 @@ Landmark.database.newEntry(
       scatterChar: 'Y',
       scatterRate: 0.3
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {
-    }
+    events : {}
   }
 )
 
@@ -219,13 +216,11 @@ Landmark.database.newEntry(
       emptyAreaCount: 18,
       wallCharacter : '|'
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {
-      sound.playBGM(name:'town-2', loop:true);
-    }
-    
+    events : {
+      onVisit ::(landmark, island) {
+        sound.playBGM(name:'town-2', loop:true);
+      }
+    }    
   }
 )
 
@@ -267,10 +262,7 @@ Landmark.database.newEntry(
       roomAreaSizeLarge: 10,
       emptyAreaCount: 15
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {}
+    events : {}
     
   }
 )
@@ -311,11 +303,7 @@ Landmark.database.newEntry(
       roomAreaSizeLarge: 7,
       emptyAreaCount: 30
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {}
-    
+    events : {}
   }
 )
 
@@ -368,15 +356,13 @@ Landmark.database.newEntry(
     mapHint:{
       layoutType: DungeonMap.LAYOUT_EPSILON
     },
-    onCreate ::(landmark, island){
-    },
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {
-      if (landmark.floor == 0)
-        windowEvent.queueMessage(
-          text:"This place seems to shift before you..."
-        );
+    events : {
+      onVisit ::(landmark, island) {
+        if (landmark.floor == 0)
+          windowEvent.queueMessage(
+            text:"This place seems to shift before you..."
+          );
+      }
     }
   }
 )
@@ -434,17 +420,14 @@ Landmark.database.newEntry(
     mapHint:{
       layoutType: DungeonMap.LAYOUT_DELTA
     },
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onCreate ::(landmark, island){
-    },
-    onVisit ::(landmark, island) {
-      when (landmark.data.isCompleted == true) ::<= {
-        windowEvent.queueMessage(text:'The entrance looks to be covered in rubble. There\'s no way to enter it again.');
-        return false;
+    events : {
+      onVisit ::(landmark, island) {
+        when (landmark.data.isCompleted == true) ::<= {
+          windowEvent.queueMessage(text:'The entrance looks to be covered in rubble. There\'s no way to enter it again.');
+          return false;
+        }
       }
-    }
-    
+    }  
   }
 )
 
@@ -480,17 +463,13 @@ Landmark.database.newEntry(
       'base:enchantment-stand'
     ],
     mapHint:{},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onCreate ::(landmark, island){
-    },
-    
-    onVisit ::(landmark, island) {
-      @:canvas = import(module:'game_singleton.canvas.mt');
-      @:windowEvent = import(module:'game_singleton.windowevent.mt');
-      windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.fill()});
-    }
-    
+    events : {
+      onVisit ::(landmark, island) {
+        @:canvas = import(module:'game_singleton.canvas.mt');
+        @:windowEvent = import(module:'game_singleton.windowevent.mt');
+        windowEvent.queueMessage(text:'It seems this area has been long forgotten...', renderable:{render::<-canvas.fill()});
+      }
+    }    
   }
 )
 
@@ -528,18 +507,15 @@ Landmark.database.newEntry(
       roomAreaSizeLarge: 9,
       emptyAreaCount: 2
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {
-      @:world = import(module:'game_singleton.world.mt');
-      windowEvent.queueMessage(text:'The party enters the pit full of treasure.');
-      foreach(world.island.landmarks) ::(k, v) {
-        v.data.isCompleted = true;
+    events : {
+      onVisit ::(landmark, island) {
+        @:world = import(module:'game_singleton.world.mt');
+        windowEvent.queueMessage(text:'The party enters the pit full of treasure.');
+        foreach(world.island.landmarks) ::(k, v) {
+          v.data.isCompleted = true;
+        }
       }
-    }
-    
-    
+    }    
   }
 )
 
@@ -583,11 +559,7 @@ Landmark.database.newEntry(
       roomAreaSizeLarge: 14,
       emptyAreaCount: 7
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {}
-    
+    events : {}    
   }
 )
 
@@ -628,10 +600,7 @@ Landmark.database.newEntry(
       roomAreaSizeLarge: 14,
       emptyAreaCount: 4
     },    
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {}
+    events : {}
   }
 )
 
@@ -671,10 +640,7 @@ Landmark.database.newEntry(
       roomAreaSizeLarge: 14,
       emptyAreaCount: 4
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {}
+    events : {}
   }
 )
 
@@ -733,15 +699,13 @@ Landmark.database.newEntry(
       emptyAreaCount: 25,
       outOfBoundsCharacter: '~'
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {
-      windowEvent.queueMessage(
-        text:"This place seems to shift before you..."
-      );    
-    }
-    
+    events : {
+      onVisit ::(landmark, island) {
+        windowEvent.queueMessage(
+          text:"This place seems to shift before you..."
+        );    
+      }
+    }    
   }
 )
 
@@ -758,7 +722,8 @@ Landmark.database.newEntry(
     traits :
       TRAIT.PEACEFUL |
       TRAIT.UNIQUE |
-      TRAIT.CAN_SAVE,
+      TRAIT.CAN_SAVE |
+      TRAIT.NOTHING_HIDDEN,
     minEvents : 0,
     maxEvents : 0,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
@@ -773,10 +738,7 @@ Landmark.database.newEntry(
     ],
     mapHint: {
     },
-    onCreate ::(landmark, island){},
-    onIncrementTime ::(landmark, island){},
-    onStep ::(landmark, island) {},
-    onVisit ::(landmark, island) {
+    events : {
     }
     
   }
@@ -870,7 +832,7 @@ Landmark.database.newEntry(
   @:Location = import(module:'game_mutator.location.mt');
 
   @:buffer = 50;
-  breakpoint();
+
 
   // first pick a random pattern 
   @:pattern = random.pickArrayItem(:data.patterns->values)
@@ -903,29 +865,41 @@ Landmark.database.newEntry(
     )
   }
 
-  /*  
-  foreach(pattern.mapEntities) ::(k, v) {
-    state.mapEntityController.add(
+  foreach(pattern.mapEvents) ::(k, next) {
+    this.addEvent(
+      id : next[2],
       x : left + next[0],
-      y : top + next[1],
-      
+      y : top + next[1]
     );
   }
-  */
 
-  foreach(pattern.mapLocations) ::(k, v) {
+  foreach(pattern.mapObjects) ::(k, v) {
     @:next = v;
-    this.addLocation(
-      location : Location.new(
+    
+    foreach(next[2]) ::(index, id) {
+      @:data = pattern.objects[id];
+      @:location = Location.new(
         x : left + next[0],
         y : top + next[1],
-        base : Location.database.find(:next[2]),
-        landmark : this
-      ),
+        base : Location.database.find(:data.id),
+        landmark : this,
+        data: data.data
+      );
       
-      width: 1,
-      height : 1
-    );
+      if (data.symbol != '')
+        location.symbol = data.symbol
+        
+      match(data.haloMode) {
+        (0): empty,
+        (1): location.halo = true,
+        (2): location.halo = false
+      }
+      this.addLocation(
+        location,
+        width: 1,
+        height : 1
+      );
+    }
   }
 
 
@@ -1005,13 +979,24 @@ Landmark.database.newEntry(
       requiredEvents : Object,
       landmarkType: Any,
       mapHint : Object,
-      onCreate : Function,
-      onVisit : Function,
-      onIncrementTime : Function,
-      onStep : Function,
+      /*
+        onCreate : Function,
+        onVisit : Function,
+        onIncrementTime : Function,
+        onStep : Function,
+      */
+      events : Object,
       traits : Number
     },
-    reset
+    reset,
+    knownEvents : [
+      'onCreate',
+      'onVisit',
+      'onIncrementTime',
+      'onStep',
+      'onAddLocation',
+      'onRemoveLocation'
+    ]
   ),
 
   
@@ -1034,6 +1019,36 @@ Landmark.database.newEntry(
 
     @:world = import(module:'game_singleton.world.mt');
 
+
+    @:nearby = {};
+    @:setNearby::(newNearby) {
+      @:removed = [];
+      @:new = [];
+
+      @:checked = {};
+      foreach(newNearby) ::(k, v) {
+        checked[v] = true;
+        when (nearby[v] == true) empty;
+        new->push(:v);
+      }
+
+      // get who was removed
+      foreach(nearby) ::(k, v) {
+        if (checked[k] != true)
+          removed->push(:k);   
+      }
+
+      foreach(new) ::(k, v) {
+        nearby[v] = true;
+        v.partyEntered();
+        this.map.discover(:v);
+      }    
+      
+      foreach(removed) ::(k, v) {
+        nearby->remove(key:v);
+        v.partyLeft();
+      }    
+    }
 
     
     
@@ -1168,6 +1183,10 @@ Landmark.database.newEntry(
       
 
     }
+    
+
+    
+
 
     this.interface =  {
       initialize ::(parent, island) {
@@ -1213,7 +1232,7 @@ Landmark.database.newEntry(
 
         if (!base.hasTraits(:TRAIT.EPHEMERAL))
           loadContent(base);
-        this.base.onCreate(landmark:this, island:island_);    
+        this.base.emit(event:'onCreate', landmark:this, island:island_);    
         
       },
 
@@ -1305,6 +1324,201 @@ Landmark.database.newEntry(
       floor : {
         get :: <- state.floor
       },
+
+      // adds a special location that teleports to a different landmark 
+      // within the same island.     
+      addPortal ::(x, y, width, height, destination, destinationX, destinationY, symbol) {
+        @:location = Location.new(base:Location.database.find(:'base:portal'), x, y);
+        location.data.destination = {
+          worldID : destination.worldID,
+          x : destinationX,
+          y : destinationY
+        };
+        
+        if (symbol == empty)
+          symbol = '#';
+
+        this.addLocation(
+          location,
+          width, height,
+          traits : 0
+        );
+      },
+
+      // enters the travel ui state, bringing the user to the 
+      // interactive travel menu for this landmark.
+      travel :: {
+        @:hud = import(:'game_singleton.hud.mt');
+        @:windowEvent = import(module:'game_singleton.windowevent.mt');
+        @:partyOptions = import(module:'game_function.partyoptions.mt');
+        @:Island = import(module:'game_mutator.island.mt');
+
+        @:party = world.party;
+        @:landmark = this;
+        landmark.updateTitle();
+        @:island = this.island;
+        
+        
+
+        
+        @stepCount = 0;
+        @choiceActions = [];
+
+        @:landmarkChoices = ::{
+          @landmarkOptions;
+          windowEvent.queueChoices(
+            leftWeight: 1,
+            topWeight: 1,
+            prompt: 'What next?',
+            keep:true,
+            canCancel:true,
+            jumpTag: 'LANDMARK_TRAVEL',
+            onGetChoices ::{
+              landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island, landmark));
+              
+              choiceActions = [];
+              @:choices = [];
+              @locationAt = landmark.map.getNamedItemsUnderPointerRadius(:3);
+              if (locationAt != empty) ::<= {
+                foreach(locationAt)::(i, loc) {
+                  if (loc.data.canInteract()) ::<= {
+                    choices->push(value:'Check ' + loc.name);
+                    choiceActions->push(::{
+                      locationAt = loc.data;
+                      locationAt.interact();                  
+                    });
+                  }
+                }
+              }              
+              
+              foreach(landmarkOptions) ::(k, value) {
+                choices->push(:value.name);
+                choiceActions->push(::{
+                  value.select(island, landmark);                
+                });       
+              }
+              
+              choices->push(value: 'Options');
+              choiceActions->push(::{
+                @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island, landmark));
+                @:choices = [...options]->map(to::(value) <- value.name);
+
+                windowEvent.queueChoices(
+                  leftWeight: 1,
+                  topWeight: 1,
+                  prompt: 'Options',
+                  canCancel : true,
+                  keep: true,
+                  choices,
+                  onChoice::(choice) {
+                    when(choice == 0) empty;
+                    options[choice-1].select(island, landmark);
+                  }
+                );              
+              });
+              
+
+
+              return choices;        
+            },
+            onChoice::(choice) {
+              choiceActions[choice-1]();
+            }
+          );
+        }
+
+        @cursorMoveRenderable = {
+          render::{
+            when(landmark.map == empty) canvas.fill();
+            landmark.map.render();
+
+            hud.render(island, landmark);
+            
+            when(nearby == empty || nearby->keycount == 0) empty;
+            
+            @:nearbySet = nearby->keys;
+            nearbySet->sort(::(a, b) <- a.name < a.name)
+            
+            @:lines = [];
+            foreach(nearbySet)::(index, arr) {
+              lines->push(value:arr.name);
+            }
+            canvas.renderTextFrameGeneral(
+              leftWeight: 1,
+              topWeight: 1,
+              lines,
+              title: 'Arrived at:'
+            );
+          }
+        };
+        windowEvent.queueTransition(
+          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+          renderableMiddle:cursorMoveRenderable
+        );
+        
+
+        
+        windowEvent.queueCursorMove(
+          jumpTag: 'VisitLandmark',
+          onMenu ::{
+            landmarkChoices()
+          },
+          renderable: cursorMoveRenderable,
+          onMove ::(choice) {
+          
+            // move by one unit in that direction
+            // or ON it if its within one unit.
+            when(!landmark.map.movePointerAdjacent(
+              x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
+              y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
+            )) empty;
+            world.incrementTime(isStep:true);
+            landmark.step();
+            stepCount += 1;
+
+            
+            // every 5 steps, heal 1% HP if below 1/5th health
+            if (stepCount % 15 == 0) ::<= {
+              foreach(party.members)::(i, member) {
+                if (member.hp < member.stats.HP * 0.2)
+                  member.heal(amount:(member.stats.HP * 0.01)->ceil);
+              }
+            }
+            
+            // cancel if we've arrived somewhere
+            setNearby(:landmark.map.getNamedItemsUnderPointerRadius(:3)->map(::(value) <- value.data));
+          }        
+        )      
+      },
+
+      
+      visit ::(where)  {
+        @:landmark = this;
+        @:world = import(module:'game_singleton.world.mt');
+        when (state.base.emit(event:'onVisit', landmark:this, island:landmark.island) == false) empty;
+
+        if (world.landmark)
+          world.landmark.leave();
+          
+        world.landmark = this;        
+        if (where != empty) ::<= {
+          where = where(landmark);
+          if (where != empty)
+            this.map.setPointer(
+              x:where.x,
+              y:where.y
+            ); 
+        }
+
+        foreach(world.party.members) ::(k, v) {
+          v.addOpinion(
+            fullName : 'the ' + landmark.name
+          );
+        }
+                    
+        
+        this.travel();
+      },
       
       updateTitle ::(override)  {
         if (override) 
@@ -1333,7 +1547,7 @@ Landmark.database.newEntry(
       incrementTime ::{
         this.updateTitle();
         
-        state.base.onIncrementTime();
+        state.base.emit(event:'onIncrementTime');
         
         foreach(this.locations) ::(k, v) {
           v.incrementTime();
@@ -1350,7 +1564,7 @@ Landmark.database.newEntry(
 
       // represents a step made within the landmark.
       step :: {
-        state.base.onStep(landmark:this, island:this.island);
+        state.base.emit(event:'onStep', landmark:this, island:this.island);
         state.mapEntityController.step();
 
         foreach(world.party.quests) ::(k, v) {
@@ -1373,7 +1587,7 @@ Landmark.database.newEntry(
         if (locations->type == Object) ::<= {
           foreach(locations) ::(k, v) {
             if (v.data->type == Location.type) ::<= {
-              v.data.base.onStep(entities: world.party.members, location:v.data);
+              v.data.base.emit(event:'onStep', entities: world.party.members, location:v.data);
             }
           }
         }
@@ -1460,23 +1674,48 @@ Landmark.database.newEntry(
         get ::<- state.data
       },
 
-
-      removeLocation ::(location) {
-        state.map.removeItem(data:location);
-        windowEvent.invalidateCache(:'VisitLandmark');
+      addEvent ::(id, x, y) {
+        state.events->push(value:
+          LandmarkEvent.new(
+            parent: this,
+            base: id
+          )
+        );      
+      },
+      
+      removeEvent ::(event => LandmarkEvent.type) {
+        state.events = state.events->filter(::(value) <- value != event);
       },
 
-      addLocation ::(location, width, height, noHalo, discovered) {
+
+      removeLocation ::(location => Location.type) {
+        when (state.map.getItem(:location) == empty) empty;
+        state.map.removeItem(data:location);
+        windowEvent.invalidateCache(:'VisitLandmark');
+        state.base.emit(event:'onRemoveLocation', landmark:this, location);
+
+      },
+
+      addLocation ::(location, width, height, traits) {
         location.landmark = this;
         @:loc = location;
-        if (discovered == empty) 
-          discovered = false         
-        @:defaultAdd ::(discovered){
+        
+        
+        if (traits == empty)
+          traits = 0
+          
+        if (loc.halo)
+          traits |= Map.TRAIT.HAS_HALO;
+        
+        if (state.base.hasTraits(:TRAIT.NOTHING_HIDDEN))
+          traits |= Map.TRAIT.DISCOVERED
+             
+        @:defaultAdd ::{
           when (width == empty && height == empty)
-            state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.base.symbol, discovered, name:loc.name);
+            state.map.setItem(data:loc, x:loc.x, y:loc.y, symbol: loc.symbol, traits, name:loc.name);
           for(loc.x, width + loc.x) ::(ix) {
             for(loc.y, height + loc.y) ::(iy) {
-              state.map.setItem(data:loc, x:ix, y:iy, symbol: loc.base.symbol, discovered, name:loc.name);            
+              state.map.setItem(data:loc, x:ix, y:iy, symbol: loc.symbol, traits, name:loc.name);            
             }
           }
                 
@@ -1484,26 +1723,31 @@ Landmark.database.newEntry(
 
         if (state.base.landmarkType == TYPE.DUNGEON) ::<= {
           if (loc.x == 0 && loc.y == 0)
-            state.map.addToRandomEmptyArea(item:loc, symbol: loc.base.symbol, name:loc.name, discovered:false)
+            state.map.setItem(data:loc, area:state.map.getRandomEmptyArea(), symbol: loc.symbol, traits, name:loc.name)
           else
-            defaultAdd(discovered:false);
+            defaultAdd();
           
         } else if (state.base.landmarkType == TYPE.STRUCTURE) ::<= {
           if (structureMapBuilder != empty)
             structureMapBuilder.addLocation(location:loc)
           else  
-            defaultAdd(discovered:false);
+            defaultAdd();
 
         } else 
-          defaultAdd(discovered:false);
+          defaultAdd();
 
         windowEvent.invalidateCache(:'VisitLandmark');
+        state.base.emit(event:'onAddLocation', landmark:this, location);
         return loc;      
 
       },
       
       moveLocation ::(location) {
         
+      },
+      
+      leave ::{
+        setNearby(:[]);
       },
       
       island : {

@@ -6,9 +6,10 @@ Pattern = {
     var connectionsNeeded = [];
     var undoController = UndoContext.new();
     var areaSet = AreaSet.new(canvas);
-    var mapEntities = [];
-    var mapLocations = [];
-    var locations = {};
+    var mapEvents = [];
+    var mapObjects = [];
+    var objects = {};
+    var markers = [];
     var self;
 
     for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
@@ -16,6 +17,7 @@ Pattern = {
       wall[i] = false;
       connections[i] = null;
       connectionsNeeded[i] = null;
+      markers[i] = null;
     }
     // messy quick save that wastes data but is perfect for undo / redo 
     const quickSave = function() {
@@ -25,9 +27,10 @@ Pattern = {
         Array.from(connections),
         Array.from(connectionsNeeded),
         areaSet.getAreaState(),
-        Array.from(mapEntities),
-        Array.from(mapLocations),
-        Array.from(locations)
+        Array.from(mapEvents),
+        Array.from(mapObjects),
+        {...objects},
+        Array.from(markers)
       ]
     }
     
@@ -37,17 +40,19 @@ Pattern = {
       connections = state[2];
       connectionsNeeded = state[3];
       self.areaSet.setAreaState(state[4]);
-      mapEntities = state[5];
-      mapLocations = state[6];
-      locations = state[7];
+      mapEvents = state[5];
+      mapObjects = state[6];
+      objects = state[7];
+      markers = state[8];
       
       self.chars = chars;
       self.wall = wall;
       self.connections = connections;
       self.connectionsNeeded = connectionsNeeded;
-      self.mapEntities = mapEntities;
-      self.mapLocations = mapLocations;
-      self.locations = locations;
+      self.mapEvents = mapEvents;
+      self.mapObjects = mapObjects;
+      self.objects = objects;
+      self.markers = markers;
     }
     
     
@@ -57,15 +62,15 @@ Pattern = {
       connections : connections,
       connectionsNeeded : connectionsNeeded,
       areaSet : areaSet,
-      mapEntities : mapEntities,
-      mapLocations : mapLocations,
-      locations : locations,
+      mapEvents : mapEvents,
+      mapObjects : mapObjects,
+      objects : objects,
       
-      removeLocation : function(name) {
-        delete locations[name];
+      removeObject : function(name) {
+        delete objects[name];
         for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
-          if (mapLocations[i]) {
-            const ref = mapLocations[i];
+          if (mapObjects[i]) {
+            const ref = mapObjects[i];
             const newRef = [];
             for(var n = 0; n < ref.length; ++n) {
               if (ref[n] != name) {
@@ -74,9 +79,9 @@ Pattern = {
             }
             
             if (newRef.length == 0) {
-              mapLocations[i] = null;
+              mapObjects[i] = null;
             } else {
-              mapLocations[i] = newRef;
+              mapObjects[i] = newRef;
             }
           }
         }
@@ -90,7 +95,7 @@ Pattern = {
         var bottom = 0;
         
         for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
-          if (chars[i] || wall[i] || connections[i] || mapEntities[i] || mapLocations[i]) {
+          if (chars[i] || wall[i] || connections[i] || mapEvents[i] || mapObjects[i]) {
             const x = i % MAX_LENGTH
             const y = Math.floor(i / MAX_LENGTH);
             
@@ -114,8 +119,8 @@ Pattern = {
         
         out.scenery = [];
         out.walls = [];
-        out.mapEntities = [];
-        out.mapLocations = [];
+        out.mapEvents = [];
+        out.mapObjects = [];
         for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
           const x = i % MAX_LENGTH
           const y = Math.floor(i / MAX_LENGTH);
@@ -136,27 +141,27 @@ Pattern = {
             ]);
           }          
           
-          if (typeof mapEntities[i] == 'string') {
-            out.mapEntities.push([
+          if (typeof mapEvents[i] == 'string') {
+            out.mapEvents.push([
               x - left,
               y - top,
-              mapEntities[i]
+              mapEvents[i]
             ]);
           }
 
-          if (mapLocations[i] && (typeof mapLocations[i] == 'object')) {
-            for(var n = 0; n < mapLocations[i].length; ++n) {
-              out.mapLocations.push([
+          if (mapObjects[i] && (typeof mapObjects[i] == 'object')) {
+            for(var n = 0; n < mapObjects[i].length; ++n) {
+              out.mapObjects.push([
                 x - left,
                 y - top,
-                mapLocations[i]
+                mapObjects[i]
               ]);
             }
           }
         }
         
         // that simple?
-        out.locations = locations;
+        out.objects = objects;
 
 
         
@@ -192,6 +197,27 @@ Pattern = {
           }
           
         }
+
+
+
+        
+        out.markers = [];
+        for(var i = 0; i < markers.length; ++i) {
+          const x = i % MAX_LENGTH
+          const y = Math.floor(i / MAX_LENGTH);
+
+          if (markers[i]) {
+          
+            out.markers.push([
+              x - left,
+              y - top,
+              markers[i][0], // name
+              markers[i][1] // string
+            ]);
+          }
+          
+        }
+
         
         
         return out;
@@ -225,17 +251,19 @@ Pattern = {
         wall = [];
         connections = [];
         connectionsNeeded = [];     
-        mapEntities = [];
-        mapLocations = [];
-        locations = {};
+        mapEvents = [];
+        mapObjects = [];
+        objects = {};
+        markers = [];
         
         self.chars = chars;
         self.wall = wall;
         self.connections = connections;
         self.connectionsNeeded = connectionsNeeded;
-        self.mapEntities = mapEntities;
-        self.mapLocations = mapLocations;
-        self.locations = locations;
+        self.mapEvents = mapEvents;
+        self.mapObjects = mapObjects;
+        self.objects = objects;
+        self.markers = markers;
             
         for(var i = 0; i < MAX_LENGTH*MAX_LENGTH; ++i) {
           chars[i] = 0;
@@ -275,42 +303,30 @@ Pattern = {
           wall[x + y * MAX_LENGTH] = true;
         }
         
-        for(var i = 0; i < state.mapEntities.length; ++i) {
-          const next = state.mapEntities[i];
+        for(var i = 0; i < state.mapEvents.length; ++i) {
+          const next = state.mapEvents[i];
           const x = next[0] + left;
           const y = next[1] + top;
-          mapEntities[x + y * MAX_LENGTH] = next[2];
+          mapEvents[x + y * MAX_LENGTH] = next[2];
         }
 
-        for(var i = 0; i < state.mapLocations.length; ++i) {
-          const next = state.mapLocations[i];
+        for(var i = 0; i < state.mapObjects.length; ++i) {
+          const next = state.mapObjects[i];
           const x = next[0] + left;
           const y = next[1] + top;
-          mapLocations[x + y * MAX_LENGTH] = next[2];
+          mapObjects[x + y * MAX_LENGTH] = next[2];
         }
         
         // temporary old version
-        if (!state.locations) {
-          const token = 'IMPORTED';
-          for(var i = 0; i < state.mapLocations.length; ++i) {
-            const next = state.mapLocations[i];
-            const x = next[0] + left;
-            const y = next[1] + top;
-            const name = token+next[2];
-            mapLocations[x + y * MAX_LENGTH] = [name];
-            
-            locations[name] = {
-              id : next[2],
-              symbol: '.'
-            }
-          }
-          
-          
-        } else {
-          const keys = Object.keys(state.locations);
-          for(var i = 0; i < keys.length; ++i) {
-            locations[keys[i]] = state.locations[keys[i]];
-          }
+        
+        const keys = Object.keys(state.objects);
+        for(var i = 0; i < keys.length; ++i) {
+          const object = state.objects[keys[i]];
+          if (object.haloMode == undefined) object.haloMode = 0;
+          if (object.data == undefined) object.data = {};
+          if (typeof (object.data) == 'string') object.data = {}
+          if (object.symbol == undefined) object.symbol = '*'
+          objects[keys[i]] = state.objects[keys[i]];
         }
 
         
@@ -322,6 +338,15 @@ Pattern = {
           connections[x + y*MAX_LENGTH] = c[2];
           connectionsNeeded[x + y*MAX_LENGTH] = c[3];
         }
+
+        for(var i = 0; i < state.markers.length; ++i) {
+          const c = state.markers[i];
+          
+          const x = c[0] + left;
+          const y = c[1] + top;
+          markers[x + y*MAX_LENGTH] = [c[2], c[3]];
+        }
+
       }
     };
     

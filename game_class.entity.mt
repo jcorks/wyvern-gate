@@ -898,7 +898,7 @@
     effectStack : Nullable,
     battle : Nullable,
     requestsRemove : Boolean,
-    onInteract : Function,
+    overrideInteract : Function,
     abilitiesUsedBattle : Nullable,
     owns : Nullable,
     canActThisTurn : Boolean,
@@ -3378,7 +3378,7 @@
       @:state = _.state;
       when(_.state.overrideInteractID != '') ::<= {
         @:Interaction = import(module:'game_database.interaction.mt');
-        Interaction.find(:state.overrideInteractID).onInteract(location, party);
+        Interaction.find(:state.overrideInteractID).emit(event:'onInteract', location, party);
       };
       
       (import(module:'game_function.interactperson.mt'))(
@@ -3399,11 +3399,11 @@
     },
     
     // when set, this overrides the default interaction menu
-    onInteract : {
+    overrideInteract : {
       set ::(value) {
-        _.onInteract = value;
+        _.overrideInteract = value;
       },
-      get :: <- _.onInteract
+      get :: <- _.overrideInteract
     },
       
     describeQualities ::{

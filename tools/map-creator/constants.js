@@ -14,8 +14,9 @@ const TEXT_COLOR_SELECT = "#afafff";
 const TEXT_COLOR_SELECT_INACTIVE = "#5f5faf";
 
 const TEXT_COLOR_CONNECTION = "#9090ff";
-const TEXT_COLOR_LOCATION = "#ff9090";
-const TEXT_COLOR_ENTITY = "#ff90ff";
+const TEXT_COLOR_OBJECT = "#ff9090";
+const TEXT_COLOR_EVENT = "#ff90ff";
+const TEXT_COLOR_MARKER = "#ffff90";
 
 
 

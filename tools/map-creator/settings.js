@@ -5,8 +5,9 @@ const Settings = {
     SELECTOR : 2,
     AREA_EDITOR : 3,
     CONNECTIONS : 4,
-    LOCATIONS : 5,
-    ENTITIES : 6
+    OBJECTS : 5,
+    EVENTS : 6,
+    MARKERS : 7
   },
 
   new : function(canvas, xRange, yRange) {
@@ -75,7 +76,7 @@ const Settings = {
       }
     }
     
-    var rebuildLocationPulldown;
+    var rebuildObjectPulldown;
     
     
 
@@ -103,10 +104,12 @@ const Settings = {
     const updateLayout = function() {
       hideSet(cursorOptions_isErase_set);
       hideSet(cursorOptions_connections_set);
-      hideSet(cursorOptions_entities_set);
-      hideSet(cursorOptions_locationsOptions_set);
-      hideSet(cursorOptions_locationsPulldown_set);
-      hideSet(cursorOptions_locationsInfo_set);
+      hideSet(cursorOptions_events_set);
+      hideSet(cursorOptions_markers_set);
+      hideSet(cursorOptions_markersData_set);
+      hideSet(cursorOptions_objectsOptions_set);
+      hideSet(cursorOptions_objectsPulldown_set);
+      hideSet(cursorOptions_objectsInfo_set);
       canvas.disablePatternContextMenu();
       canvas.disableAreas();
       switch(cursorMode_element.value) {
@@ -131,15 +134,21 @@ const Settings = {
           showSet(cursorOptions_isErase_set);
           break;
 
-        case 'Locations': 
-          showSet(cursorOptions_locationsOptions_set);
-          showSet(cursorOptions_locationsPulldown_set);
-          showSet(cursorOptions_locationsInfo_set);
+        case 'Objects': 
+          showSet(cursorOptions_objectsOptions_set);
+          showSet(cursorOptions_objectsPulldown_set);
+          showSet(cursorOptions_objectsInfo_set);
           showSet(cursorOptions_isErase_set);
           break;
 
-        case 'Entities': 
-          showSet(cursorOptions_entities_set);
+        case 'Events': 
+          showSet(cursorOptions_events_set);
+          showSet(cursorOptions_isErase_set);
+          break;
+
+        case 'Markers': 
+          showSet(cursorOptions_markers_set);
+          showSet(cursorOptions_markersData_set);
           showSet(cursorOptions_isErase_set);
           break;
 
@@ -257,10 +266,18 @@ const Settings = {
                   }
                 }
 
-                
-                window.localStorage.setItem(ch, value);
+                try {
+                  window.localStorage.setItem(ch, value);
+                } catch(e) {
+                  window.localStorage.removeItem(ch);
+                  rebuildProjectPulldown();
+                  self.loadProjectName(ch);
+                  
+                  window.alert('The map could not be loaded.');
+                }
                 rebuildProjectPulldown();
                 self.loadProjectName(ch);
+
               });
             
             });
@@ -432,6 +449,7 @@ const Settings = {
 
             const newPattern = patterns[patternOptions_patternList_element.value];
             canvas.setPattern(newPattern);
+            rebuildObjectPulldown();
             updateLayout();
           }
         );
@@ -473,35 +491,35 @@ const Settings = {
     
     
     // ROW 1: View
-        const locationX_element = document.createElement('input');
-        const locationY_element = document.createElement('input');
-        locationX_element.type = 'number';
-        locationY_element.type = 'number';
-        locationX_element.value = 0;
-        locationY_element.value = 0;
-        locationX_element.style.width = "70px";
-        locationY_element.style.width = "70px";
+        const objectX_element = document.createElement('input');
+        const objectY_element = document.createElement('input');
+        objectX_element.type = 'number';
+        objectY_element.type = 'number';
+        objectX_element.value = 0;
+        objectY_element.value = 0;
+        objectX_element.style.width = "70px";
+        objectY_element.style.width = "70px";
 
 
         // make ui elements
         makeRow([
-          makeLabel('View location:'),
-          locationX_element,
-          locationY_element
+          makeLabel('View object:'),
+          objectX_element,
+          objectY_element
         ]);
 
         // make connections
         canvas.events.addCallback('onMove', function() {
-          locationX_element.value = canvas.getViewX()
-          locationY_element.value = canvas.getViewY()
+          objectX_element.value = canvas.getViewX()
+          objectY_element.value = canvas.getViewY()
         });
         
-        locationX_element.addEventListener('change', function() {
-          xRange.value = locationX_element.value;
+        objectX_element.addEventListener('change', function() {
+          xRange.value = objectX_element.value;
           xRange.dispatchEvent(new Event("change"));
         });
-        locationY_element.addEventListener('change', function() {
-          yRange.value = locationY_element.value;
+        objectY_element.addEventListener('change', function() {
+          yRange.value = objectY_element.value;
           yRange.dispatchEvent(new Event("change"));
         });
  
@@ -513,8 +531,9 @@ const Settings = {
           'Selector', 
           'Area Editor',
           'Connectors',
-          'Locations',
-          'Entities',
+          'Objects',
+          'Events',
+          'Markers'
         ];
         const cursorMode_element = document.createElement('select');
         setDropDownOptions(cursorMode_element, modes);
@@ -561,77 +580,135 @@ const Settings = {
 
         ]);
         
-    // Locations
-        const locationID_element = document.createElement('div');
-        const locationSymbol_element = document.createElement('div');
-        const locationPulldown_element = document.createElement('select');
+    // Objects
+        var objectPulldown_element = document.createElement('select');;
+        const objectID_element = document.createElement('input');
+        objectID_element.size = 8;
+        const objectSymbol_element = document.createElement('input');
+        objectSymbol_element.size = 2;
+        const objectData_element = document.createElement('button');
+        objectData_element.innerText = 'Set Data...'
+        objectData_element.addEventListener('click', function(ev) {
+          const pattern = canvas.getPattern();
+          const which = pattern.objects[objectPulldown_element.value];
+          const data = window.prompt("Enter the JSON data string for this object to be available during runtime.");          
+          try {
+            which.data = JSON.parse(data);
+            pattern.commitChange();
+            canvas.refresh();
+          } catch(e) {
+            window.alert('The data entered could not be parsed into valid JSON. It might be easiest if you type the JSON in a text editor, verify it, then paste it here.');
+          }
+        });
+        const objectHalo_element = document.createElement('select');
+        objectHalo_element.type = 'checkbox';
+        const objectHalo_element_keys = ['Default Halo', 'Show Halo', 'Hide Halo']
+        setDropDownOptions(objectHalo_element, objectHalo_element_keys);
+
+        objectHalo_element.addEventListener("change", function() {
+          const pattern = canvas.getPattern();
+          const which = pattern.objects[objectPulldown_element.value];
+
+          which.haloMode = objectHalo_element_keys.indexOf(objectHalo_element.value);          
+          pattern.commitChange();
+          canvas.refresh();
+        
+        });
+
+
+
+        objectID_element.addEventListener("change", function() {
+          const pattern = canvas.getPattern();
+          const which = pattern.objects[objectPulldown_element.value];
+
+          which.id = objectID_element.value;          
+          pattern.commitChange();
+          canvas.refresh();
+        });
+
+
+        objectSymbol_element.addEventListener("change", function() {
+          const pattern = canvas.getPattern();
+          const which = pattern.objects[objectPulldown_element.value];
+
+          which.symbol = objectSymbol_element.value;          
+          pattern.commitChange();
+          canvas.refresh();
+        });
+
+
+
 
         
-        const updateLocationTags = function() {
+        const updateObjectTags = function() {
           const pattern = canvas.getPattern();
-          const which = pattern.locations[locationPulldown_element.value];
+          const which = pattern.objects[objectPulldown_element.value];
           
           if (!which) return;
-          locationSymbol_element.innerText = 'Symbol:['+which.symbol+']';
-          locationID_element.innerText = 'ID:['+which.id+']';        
+          objectSymbol_element.value = which.symbol;
+          objectID_element.value = which.id;        
+          objectData_element.value = which.data;
+          objectHalo_element.value = objectHalo_element_keys[which.haloMode];
         }        
         
-        rebuildLocationPulldown = function() {
+        rebuildObjectPulldown = function() {
           const pattern = canvas.getPattern();
           if (!pattern) return;
-          const keys = Object.keys(pattern.locations);
-          setDropDownOptions(locationPulldown_element, keys);
-          updateLocationTags();
+          const keys = Object.keys(pattern.objects);
+          setDropDownOptions(objectPulldown_element, keys);
+          updateObjectTags();
         }
 
 
-        locationPulldown_element.addEventListener("change", function() {
-          updateLocationTags();
+        objectPulldown_element.addEventListener("change", function() {
+          updateObjectTags();
         })
 
 
         
-        const locationNew_element = makeButton('New', function() {
+        const objectNew_element = makeButton('New', function() {
           const pattern = canvas.getPattern();
-          const name = window.prompt("Enter the name that uniquely defines this location");          
+          const name = window.prompt("Enter the name that uniquely defines this object");          
           if (typeof name != 'string') return; 
           
-          if (pattern.locations[name] != null) {
+          if (pattern.objects[name] != null) {
             if (!window.confirm(name + ' already exists. Replace?')) return;
           }
           
-          const id = window.prompt("Enter the ID for this location");   
-          if (typeof id != 'string') return; 
-          const ch = window.prompt("Enter the character to represent this location");          
-          if (typeof ch != 'string') return; 
-          
-          pattern.locations[name] = {
-            id: id,
-            symbol : ch
+          pattern.objects[name] = {
+            id: 'base:none',
+            symbol : '*',
+            haloMode : 0,
+            data : '{}'
           }
-          rebuildLocationPulldown();
+          rebuildObjectPulldown();
         
         });
-        const locationRemove_element = makeButton('Remove', function() {
-          const name = locationPulldown_element.value;
-          if (!window.confirm("Really remove location " + name + "? This is not undoable.")) return;
-
-          canvas.pattern.removeLocation(name);
-          rebuildLocationPulldown();        
-        });
-        const locationClone_element = makeButton('Clone', function() {
+        const objectRemove_element = makeButton('Remove', function() {
           const pattern = canvas.getPattern();
-          const name = window.prompt("Enter the name that uniquely defines this cloned location");          
-          const source = locationPulldown_element.value
+          if (!pattern) return;
+
+          const name = objectPulldown_element.value;
+          if (!window.confirm("Really remove object " + name + "? This is not undoable.")) return;
+
+          pattern.removeObject(name);
+          rebuildObjectPulldown();        
+        });
+        const objectClone_element = makeButton('Clone', function() {
+          const pattern = canvas.getPattern();
+          const name = window.prompt("Enter the name that uniquely defines this cloned object");          
+          const source = objectPulldown_element.value
           if (typeof name != 'string') return; 
           if (name == source) return;
 
           
-          pattern.locations[name] = {
-            id: pattern.locations[source].id,
-            symbol : pattern.locations[source].symbol
+          pattern.objects[name] = {
+            id: pattern.objects[source].id,
+            symbol : pattern.objects[source].symbol,
+            haloMode : pattern.objects[source].haloMode,
+            data : pattern.objects[souce].data
           }
-          rebuildLocationPulldown();
+          rebuildObjectPulldown();
         
         });
 
@@ -639,38 +716,57 @@ const Settings = {
 
 
     
-        cursorOptions_locationsPulldown_set = makeRow([
+        cursorOptions_objectsPulldown_set = makeRow([
           makeLabel(''),
-          locationPulldown_element,
+          objectPulldown_element,
           makeLabel(''),
         ]);
         
-        cursorOptions_locationsOptions_set = makeRow([
+        cursorOptions_objectsOptions_set = makeRow([
           makeLabel(''),
-          locationNew_element,
-          locationClone_element,
-          locationRemove_element,
+          objectNew_element,
+          objectClone_element,
+          objectRemove_element,
         ]);
 
-        cursorOptions_locationsInfo_set = makeRow([
+        cursorOptions_objectsInfo_set = makeRow([
           makeLabel(''),
-          locationID_element,
-          locationSymbol_element
+          makeLabel('ID'),
+          objectID_element,
+          makeLabel('Symbol'),
+          objectSymbol_element,
+          objectHalo_element,
+          makeLabel('Data'),
+          objectData_element
         ]);
 
 
 
 
 
-    // Entities
-        entitiesID_element = document.createElement('input');
+    // Events
+        eventsID_element = document.createElement('input');
     
-        cursorOptions_entities_set = makeRow([
+        cursorOptions_events_set = makeRow([
           makeLabel(''),
           makeLabel('ID:'),
-          entitiesID_element,
+          eventsID_element,
         ]);
-        rebuildLocationPulldown();
+
+    // Markers
+        markersID_element = document.createElement('input');
+        cursorOptions_markers_set = makeRow([
+          makeLabel(''),
+          makeLabel('ID:'),
+          markersID_element,
+        ]);
+
+        markersData_element = document.createElement('input');
+        cursorOptions_markersData_set = makeRow([
+          makeLabel(''),
+          makeLabel('Data:'),
+          markersData_element,
+        ]);
 
 
 
@@ -729,7 +825,7 @@ const Settings = {
         canvas.setPattern(patterns[obj.activePattern]);
         
         rebuildPatternPulldown();
-        rebuildLocationPulldown();
+        rebuildObjectPulldown();
         updateLayout();
       },
       
@@ -742,11 +838,21 @@ const Settings = {
         return modes.indexOf(cursorMode_element.value)
       },
       
-      getEntityID : function() {
-        return entitiesID_element.value
+      getEventID : function() {
+        return eventsID_element.value
       },
-      getLocationName : function() {
-        return locationPulldown_element.value
+
+      getMarkerID : function() {
+        return markersID_element.value
+      },
+
+      getMarkerData : function() {
+        return markersData_element.value
+      },
+
+
+      getObjectName : function() {
+        return objectPulldown_element.value
       },
 
             

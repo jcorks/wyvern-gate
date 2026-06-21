@@ -20,8 +20,7 @@
 @:random = import(module:'game_singleton.random.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:State = import(module:'game_class.state.mt');
-
-
+@Map;
 
 @:StateType = State.create(
   items : {
@@ -169,13 +168,21 @@
 );
 
 
-@:Map =  LoadableClass.create(
+Map =  LoadableClass.create(
   name: 'Wyvern.Map',
 
   statics : {
     Area : {
       get::<-Area
-    } 
+    },
+    TRAIT : {get ::<- {
+      // whether the map item should have a "halo"
+      // halo items indicate
+      HAS_HALO : 1,
+      
+      // Whether the symbol should be hidden
+      DISCOVERED : 2
+    }}
   },
   items : {},
   
@@ -202,7 +209,7 @@
     @drawLegend = false;
     @paged = false;
     @outOfBoundsCharacter = '`';
-    @wallCharacter = '▓';
+    @wallCharacter = '';//'▓';
     //@scenery = MemoryBuffer.new();
     @scenery = [];
     @sceneryValues = [];
@@ -249,10 +256,10 @@
           @:dy = targetOffsets[k][1];
           @at = itemX+dx+((itemY+dy)*width);
 
-          if (scenery[at] == 0 || this.sceneryAt(x:itemX+dx, y:itemY+dy) == ' ') ::<= {
+          //if (scenery[at] == 0 || this.sceneryAt(x:itemX+dx, y:itemY+dy) == ' ') ::<= {
             canvas.movePen(x:x+dx, y:y+dy);  
             canvas.drawChar(:char);
-          }        
+          //}        
         }
       }
     }
@@ -631,8 +638,8 @@
 
 
           @:items = this.itemsAt(x:itemX, y:itemY);
-          when(items != empty) ::<= {
-            @:discovered = items[items->keycount-1].discovered;
+          if (items != empty) ::<= {
+            @:discovered = (items[items->keycount-1].traits & Map.TRAIT.DISCOVERED) != 0;
             
             if (discovered == true)
               targets->push(:{x:x, y:y, itemX:itemX, itemY:itemY});
@@ -649,7 +656,7 @@
           }
 
 
-          canvas.drawChar(text:'`');
+          canvas.drawChar(text:outOfBoundsCharacter);
         }        
       }        
               
@@ -658,6 +665,7 @@
       }
 
       foreach(importantItems) ::(k, v) {
+        when(v.ch == '') empty;
         @xt = left + v.x;
         @yt = top + v.y
         canvas.movePen(x:xt, y:yt);  
@@ -769,17 +777,17 @@
           
           @chosenChar = ::<= {
             
-            when(symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
+            when(wallCharacter->length > 0 && symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
               return wallCharacter;
             }
 
             @:items = this.itemsAt(x:itemX, y:itemY);
             when(items != empty && items->keycount > 0) ::<= {
-              @:discovered = items[items->keycount-1].discovered;
+              @:discovered = (items[items->keycount-1].traits & Map.TRAIT.DISCOVERED) != 0;
               
-              if (discovered == true && (items[items->keycount-1].noHalo == empty))
+              if (discovered == true && ((items[items->keycount-1].traits & Map.TRAIT.HAS_HALO) != 0)) {
                 targets->push(:{x:x, y:y, itemX:itemX, itemY:itemY});
-                
+              }
               importantItems->push(:{
                 ch:if (discovered == false) '?' else items[items->keycount-1].symbol,
                 x: x,
@@ -808,6 +816,8 @@
       }
 
       foreach(importantItems) ::(k, v) {
+        when(v.ch == '') empty;
+
         @xt = v.x;
         @yt = v.y
         canvas.movePen(x:xt, y:yt);  
@@ -858,33 +868,25 @@
         [ 0, 2],
         [ 0, -2],
       ];
-      return ::(area, item, symbol, name, discovered) {
-        area.occupy()
-        ::? {        
-          @iter = 0;
-          forever ::{
-            @:offset = tryMap[iter];
-            iter += 1;
-            if (iter >= tryMap->size)
-              iter = 0;
-              
-            @location = {
-              x: (area.x + area.width/2 + offset[0])->floor,
-              y: (area.y + area.height/2 + offset[1])->floor
-            }        
+      return ::(area, item) <- ::? {        
+        @iter = 0;
+        forever ::{
+          @:offset = tryMap[iter];
+          iter += 1;
+          if (iter >= tryMap->size)
+            iter = 0;
+            
+          @location = {
+            x: (area.x + area.width/2 + offset[0])->floor,
+            y: (area.y + area.height/2 + offset[1])->floor
+          }        
 
-            @:already = this.itemsAt(x:location.x, y:location.y);
-            when(already != empty && already->keycount) empty;
-            item.x = location.x;
-            item.y = location.y;
-
-            this.setItem(data:item, x:location.x, y:location.y, symbol, discovered, name);
-
-
-
-            send();
-          }    
-        }      
+          @:already = this.itemsAt(x:location.x, y:location.y);
+          when(already != empty && already->keycount) empty;
+          area.occupy()
+          send(:location);
+        }    
+      
       }
     }    
 
@@ -1015,7 +1017,10 @@
           
         @:index = scenery[at] & (~SETTINGS_MASK);
         when(index == 0) empty;
-        return sceneryValues[index-1];
+        @:val = sceneryValues[index-1];
+        
+        when(val == '') empty;
+        return val;
       },
 
       // loads a whole block of graphical scenery 
@@ -1082,15 +1087,35 @@
       },
 
 
+
       setItem::(
         data,
+        
+        // if presented, supercedes any x / y specified 
+        // When an area is given, the map will attempt to place the 
+        // item within a non-occupied region within the area.
+        // if that fails, it will always place it in the center 
+        // of the area.
+        area,
+        
         x,
         y,
         symbol,
-        discovered,
-        name,
-        noHalo
+        traits,
+        name
       ) {
+        // default: plain item
+        if (traits == empty) {
+          traits = Map.TRAIT.DISCOVERED
+        }
+      
+        if (area) {
+          @:location = putArea(area);
+          if (location) {
+            x = location.x;
+            y = location.y;
+          }
+        }
         x = x->floor;
         y = y->floor;
         
@@ -1106,10 +1131,9 @@
           x: x,
           y: y,
           symbol : symbol,
-          discovered : discovered,
+          traits : traits,
           data: data,
-          name: name,
-          noHalo : noHalo
+          name: name
         }
         loc->push(value:val);
         items->push(value:val);
@@ -1236,8 +1260,8 @@
       discover ::(data){
         @:item = retrieveItem(data);
         // ignore discovered == empty, which says "no discovery"
-        if (item.discovered == false)
-          item.discovered = true;      
+        if ((item.traits & Map.TRAIT.DISCOVERED) == 0)
+          item.traits |= Map.TRAIT.DISCOVERED;      
       },
       
       movePointerToward::(x, y) {
@@ -1493,40 +1517,7 @@
       },
       
       'isWalled' : ::(x, y) <- isWalled(x, y),
-      addToArea ::(area => Area.type, item, symbol, name, discovered) {
-        return putArea(
-          area,
-          item,
-          symbol,
-          name,
-          discovered
-        );
-        
-      },
-      
-      addToRandomArea ::(item, symbol, name, discovered) {
-        return putArea(
-          area: random.pickArrayItem(list:areas),
-          item,
-          symbol,
-          name,
-          discovered
-        );
-      },
-      
-      addToRandomEmptyArea ::(item, symbol, name, discovered) {
-        @areasEmpty = [...areas]->filter(by::(value) <- value.isOccupied == false);
-        when (areasEmpty->keycount == 0)
-          this.addToRandomArea(item, symbol, name, discovered)
 
-        return putArea(
-          area: random.pickArrayItem(list:areasEmpty),
-          item,
-          symbol,
-          name,
-          discovered
-        );
-      },
       
       getRandomEmptyArea :: {
         @areasEmpty = [...areas]->filter(by::(value) <- value.isOccupied == false);
@@ -1562,7 +1553,7 @@
           @:itemList = [];
           foreach(legendEntries)::(index, item) {
             
-            @:val = if(item.discovered) 
+            @:val = if((item.traits & Map.TRAIT.DISCOVERED) != 0) 
               '' + item.symbol + ' ' + if (item.name == '') item.name else item.name
             else 
               '? ????'

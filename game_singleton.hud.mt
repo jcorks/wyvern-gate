@@ -26,10 +26,36 @@
 return class(
   name : 'Wyvern.HUD',
   define ::(this) {
-    
+    @:canvas = import(module:'game_singleton.canvas.mt');
+
     @enabled = true;
     
     @sets = [];
+    
+    
+    // ID to lines
+    @onDisplayLines = {};
+    @:onDisplay ::(landmark, island) {
+      when (onDisplayLines->size == 0) empty;
+      @lines = [];
+      foreach(onDisplayLines) ::(k, v) {
+        foreach(v) ::(index, line) {
+          lines->push(:line)
+        }
+        lines->push(:'');
+      }
+      canvas.renderTextFrameGeneral(
+        leftWeight: 1,
+        topWeight: 0,
+        lines
+      );
+    }
+    
+    sets->push(:{
+      name : 'built-in-display',
+      onIslandStep : onDisplay,
+      onLandmarkStep : onDisplay
+    });
     
     this.interface = {
       addRenderer :: (
@@ -37,15 +63,37 @@ return class(
         onIslandStep,
         onLandmarkStep
       ) {
-        sets->push(:{
+        @:out = {
           name : name,
           onIslandStep : onIslandStep,
           onLandmarkStep : onLandmarkStep
-        });
+        }
+        sets->push(:out);
+        return out;
+      },
+      
+      addDisplay ::(
+        lines
+      ) {
+        onDisplayLines->push(:lines)
+        return lines;
+      },
+      
+      removeDisplay ::(lines) {
+        onDisplayLines = onDisplayLines->filter(::(value) <- value != lines)
+      },
+      
+      remove ::(key) {
+        sets = sets->filter(::(value)<- value != key);
       },
       
       clear ::{
         sets = [];
+        sets->push(:{
+          name : 'built-in-display',
+          onIslandStep : onDisplay,
+          onLandmarkStep : onDisplay
+        });
       },
       
       render ::(island, landmark) {

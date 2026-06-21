@@ -713,7 +713,7 @@
           state.turn = 0;
           state.time += 1;
           if (state.time == TIME.MORNING)
-            this.scenario.onNewDay();
+            this.scenario.markNewDay();
           newHour = true;
         }
           
@@ -767,7 +767,7 @@
         state.saveName = name;
         state.scenario = scenario;
         initializeNPCs();
-        this.scenario.base.onBegin(data:this.scenario.data);
+        this.scenario.start();
       
       },
       
@@ -893,7 +893,6 @@
         // retrieve, creating if it doesnt exist
         @which = save.islands[id];
         @alreadyLoaded;
-
         if (which == empty) ::<= {
           @:newIsland = Island.new(
             *{worldID : id, ...(if (islandGenTraits) islandGenTraits else ({}))}

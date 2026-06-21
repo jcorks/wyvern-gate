@@ -81,12 +81,12 @@ return ::(this, party, location, onDone, skipIntro) {
     jumpTag: 'InteractPerson',
     onChoice::(choice) {
       when(choice == 0) empty;
-      interactions[choice-1].onSelect(
+      interactions[choice-1].select(
         location,
         entity:this
       );
         
-      if (this.onInteract) this.onInteract(interaction:interactions[choice-1].name);
+      if (this.overrideInteract) this.overrideInteract(interaction:interactions[choice-1].name);
 
       if (!interactions[choice-1].keepInteractionMenu && windowEvent.canJumpToTag(name:'InteractPerson')) 
         windowEvent.jumpToTag(name:'InteractPerson', goBeforeTag:true, doResolveNext:true);

@@ -16,7 +16,6 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
-@:Effect = import(module:'game_database.effect.mt');
 
 
 
@@ -253,6 +252,7 @@ foreach(EVENTS) ::(k, v) {
     effects : empty,
   },
   define:::(state, this) {
+    @:Effect = import(module:'game_database.effect.mt');
     @:subscribers = {};
     
     @:getAll :: <- [

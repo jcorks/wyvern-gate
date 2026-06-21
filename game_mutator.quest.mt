@@ -55,90 +55,82 @@ Quest.database.newEntry(
       'I need my %1! Please go to the forest to get it!'
     ],
     
-    onCreate ::(issuer, quest) {
-      quest.name = issuer.name + '\'s Item';
-      quest.data.item = Item.new(
-        base:Item.database.getRandomFiltered(
-          filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
-        ),
-        rngEnchantHint:true, 
-        forceEnchant:true
-      )
+    events : {
       
-      quest.description = quest.description->replace(key:'%1', with : quest.data.item.name);
+      onCreate ::(issuer, quest) {
+        quest.name = issuer.name + '\'s Item';
+        quest.data.item = Item.new(
+          base:Item.database.getRandomFiltered(
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE)
+          ),
+          rngEnchantHint:true, 
+          forceEnchant:true
+        )
+        
+        quest.description = quest.description->replace(key:'%1', with : quest.data.item.name);
+      },
+
+      onAccept ::(island, quest, issuer) {
+        @:Landmark = import(:'game_mutator.landmark.mt');
+        @:pos = island.getAPosition();
+        @:landmark = Landmark.new(
+          island : island,
+          base: Landmark.database.find(:'base:forest-generic'),
+          x : pos.x,
+          y : pos.y
+        );
+        landmark.symbol = 'X';
+        landmark.legendName = quest.name;
+        
+        @:loc = landmark.getRandomEmptyPosition();
+        
+        @:item = Location.new(
+          landmark: landmark,
+          x : loc.x,
+          y : loc.y,
+          base: Location.database.find(:'base:lost-item-hostile')
+        );
+        landmark.addLocation(location:item);
+        
+        item.inventory.add(:quest.data.item);
+        quest.data.itemID = quest.data.item.worldID; // only one copy of an item can exist when saving.
+        quest.data.landmarkID = landmark.worldID;
+        quest.data.itemName = quest.data.item.name;
+        quest.data.item = empty;
+        island.addLandmark(:landmark);
+        
+        windowEvent.queueMessage(
+          speaker: issuer.name,
+          text : '"Thank you so much. Please come back when you\'ve found it!"'
+        );      
+
+        windowEvent.queueMessage(
+          text : 'The probable location was marked on the island map.'
+        );      
+      },
+      
+      onTurnIn ::(quest, issuer) {
+        windowEvent.queueMessage(
+          speaker: issuer.name,
+          text: '"Oh excellent! You found the ' + quest.data.itemName + '! Thank you so much!"'
+        );
+
+        windowEvent.queueMessage(
+          text: 'The party handed over the ' + quest.data.itemName + '.'
+        );
+
+        world.party.getItem(condition::(value) <- value.worldID == quest.data.itemID, remove:true);
+
+        windowEvent.queueMessage(
+          speaker: issuer.name,
+          text: '"Here, I would like you to have this."'
+        );
+
+              
+        
+        world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
+      }
     },
-
-    onAccept ::(island, quest, issuer) {
-      @:Landmark = import(:'game_mutator.landmark.mt');
-      @:pos = island.getAPosition();
-      @:landmark = Landmark.new(
-        island : island,
-        base: Landmark.database.find(:'base:forest-generic'),
-        x : pos.x,
-        y : pos.y
-      );
-      landmark.symbol = 'X';
-      landmark.legendName = quest.name;
-      
-      @:loc = landmark.getRandomEmptyPosition();
-      
-      @:item = Location.new(
-        landmark: landmark,
-        x : loc.x,
-        y : loc.y,
-        base: Location.database.find(:'base:lost-item-hostile')
-      );
-      landmark.addLocation(location:item);
-      
-      item.inventory.add(:quest.data.item);
-      quest.data.itemID = quest.data.item.worldID; // only one copy of an item can exist when saving.
-      quest.data.landmarkID = landmark.worldID;
-      quest.data.itemName = quest.data.item.name;
-      quest.data.item = empty;
-      island.addLandmark(:landmark);
-      
-      windowEvent.queueMessage(
-        speaker: issuer.name,
-        text : '"Thank you so much. Please come back when you\'ve found it!"'
-      );      
-
-      windowEvent.queueMessage(
-        text : 'The probable location was marked on the island map.'
-      );      
-    },
-    
-    onStep ::(quest, landmark, island) {
-    
-    },
-    
-    onTurnIn ::(quest, issuer) {
-      windowEvent.queueMessage(
-        speaker: issuer.name,
-        text: '"Oh excellent! You found the ' + quest.data.itemName + '! Thank you so much!"'
-      );
-
-      windowEvent.queueMessage(
-        text: 'The party handed over the ' + quest.data.itemName + '.'
-      );
-
-      world.party.getItem(condition::(value) <- value.worldID == quest.data.itemID, remove:true);
-
-      windowEvent.queueMessage(
-        speaker: issuer.name,
-        text: '"Here, I would like you to have this."'
-      );
-
-            
-      
-      world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
-    },
-    
-    onIncrementTime ::(quest, landmark, island) {
-    
-    },
-
-    // The scene to play when a landmark is entered.
-    onLandmarkEnter ::(quest, landmark) {},
   
     // Whether the quest is complete and able to be taken back 
     // for the reward.
@@ -163,215 +155,208 @@ Quest.database.newEntry(
       '"%1" is responsible for various murders. We need justice!',
       '"%1" knows no bounds to their treachery. Please bring them to justice.'
     ],
-    
-    onCreate ::(issuer, quest) {
-      @:outlaw = world.island.newInhabitant();
-      @:badQualifiers = [
-        'Wicked',
-        'Unscrupulous',
-        'Terrible',
-        'Sly',
-        'Crooked',
-        'Ruthless',
-        'Sinister',
-        'Scandalous',
-        'Gnarled',
-        'Devious',
-        'Duplicitous',
-        'Wily',
-        'Insidious',
-        'Nasty',
-        'Vicious',
-        'Vile',
-        'Deplorable',
-        'Egregious',
-        'Heinous',
-        'Abhorrent',
-        'Atrocious',
-        'Vicious',
-        'Accursed',
-        'Horrendous',
-        'Dreadful',
-        'Horrid',
-        'Awful',
-        'Foul',
-        'Rotten',
-        'Beastly',
-        'Unnatural',
-        'Appaling',
-        'Hideous',
-        'Bad',
-        'Horrible',
-        'Detestable',
-        'Cruel',
-        'Gruesome',
-        'Wretched' // <- thanks Nido
-      ];
-      outlaw.name = outlaw.name + ' the ' + random.pickArrayItem(:badQualifiers);
-      @:henchman1 = world.island.newInhabitant();
-      henchman1.name = 'Lackey 1';
+    events : {
+      onCreate ::(issuer, quest) {
+        @:outlaw = world.island.newInhabitant();
+        @:badQualifiers = [
+          'Wicked',
+          'Unscrupulous',
+          'Terrible',
+          'Sly',
+          'Crooked',
+          'Ruthless',
+          'Sinister',
+          'Scandalous',
+          'Gnarled',
+          'Devious',
+          'Duplicitous',
+          'Wily',
+          'Insidious',
+          'Nasty',
+          'Vicious',
+          'Vile',
+          'Deplorable',
+          'Egregious',
+          'Heinous',
+          'Abhorrent',
+          'Atrocious',
+          'Vicious',
+          'Accursed',
+          'Horrendous',
+          'Dreadful',
+          'Horrid',
+          'Awful',
+          'Foul',
+          'Rotten',
+          'Beastly',
+          'Unnatural',
+          'Appaling',
+          'Hideous',
+          'Bad',
+          'Horrible',
+          'Detestable',
+          'Cruel',
+          'Gruesome',
+          'Wretched' // <- thanks Nido
+        ];
+        outlaw.name = outlaw.name + ' the ' + random.pickArrayItem(:badQualifiers);
+        @:henchman1 = world.island.newInhabitant();
+        henchman1.name = 'Lackey 1';
 
-      @:henchman2 = world.island.newInhabitant();
-      henchman2.name = 'Lackey 2';
+        @:henchman2 = world.island.newInhabitant();
+        henchman2.name = 'Lackey 2';
 
-      for(0, quest.rank*2) ::(i) {
-        outlaw.autoLevel();
-      }
-
-      for(0, quest.rank) ::(i) {
-        henchman1.autoLevel();
-        henchman2.autoLevel();
-      }
-      
-      @:Item = import(module:'game_mutator.item.mt');
-      
-      @:Entity = import(module:'game_class.entity.mt');
-      
-      foreach([outlaw, henchman1, henchman2]) ::(k, entity) {
-        if (entity.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).base.id == 'base:none') ::<= {
-          // add a weapon
-          @:wep = Item.database.find(:'base:dagger')
-            
-          entity.equip(
-            slot:Entity.EQUIP_SLOTS.HAND_LR, 
-            item:Item.new(
-              base:wep
-            ), 
-            inventory:entity.inventory, 
-            silent:true
-          );
-        }
-      }
-
-      quest.setReward(g:(quest.rewardG * 5 / 50)->floor * 50);
-      
-
-    
-      quest.name = 'BOUNTY! (' + RANK2NAME[quest.rank] + ' Rank)';
-      quest.description = quest.description->replace(key:'%1', with :outlaw.name);
-      
-      quest.data.henchman1 = henchman1;
-      quest.data.henchman2 = henchman2;
-      quest.data.outlaw = outlaw;
-      
-    },
-
-    onAccept ::(island, quest, issuer) {
-      @:Landmark = import(:'game_mutator.landmark.mt');
-      @:pos = island.getAPosition();
-      @:landmark = Landmark.new(
-        island : island,
-        base: Landmark.database.find(:'base:forest-generic'),
-        x : pos.x,
-        y : pos.y
-      );
-      landmark.symbol = 'X';
-      landmark.legendName = quest.name;
-      
-      @:loc = landmark.getRandomEmptyPosition();
-      
-      @:item = Location.new(
-        landmark: landmark,
-        x : loc.x,
-        y : loc.y,
-        base: Location.database.find(:'base:small-chest')
-      );
-      landmark.addLocation(location:item);
-      
-      quest.data.landmarkID = landmark.worldID;
-      island.addLandmark(:landmark);  
-    },
-    
-    onStep ::(quest, landmark, island) {
-      when (landmark.worldID != quest.data.landmarkID ||
-          quest.data.outlaw.isIncapacitated()) empty
-
-      @:phrases = [
-        '"Well well well... Look who stumbled into our territory. Heh, gettem!"',
-        '"Look everyone, we got ourselves an intruder! Let\'s show em some hospitality..."',
-        '"Hey buddy, you look a little lost... Let\'s help em\' out gang!"'
-      ];
-      
-      windowEvent.queueMessage(
-        speaker: quest.data.outlaw.name,
-        text: random.pickArrayItem(:phrases)
-      );
-      
-      // funny interference sometimes
-      @bountyHunter = if(random.try(percentSuccess:10)) ::<= {
-        windowEvent.queueMessage(
-          speaker: quest.data.outlaw.name,
-          text: '"..Wait... huh? Who are YOU supposed to be?"'
-        );
-      
-        @:ent = world.island.newInhabitant();
         for(0, quest.rank*2) ::(i) {
-          ent.autoLevel();
+          outlaw.autoLevel();
         }
 
+        for(0, quest.rank) ::(i) {
+          henchman1.autoLevel();
+          henchman2.autoLevel();
+        }
+        
         @:Item = import(module:'game_mutator.item.mt');
+        
         @:Entity = import(module:'game_class.entity.mt');
         
-        ent.name = 'the ' + ent.species.name + ' Bounty Hunter';
-        if (ent.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).base.id == 'base:none') ::<= {
-          // add a weapon
-          @:wep = Item.database.getRandomFiltered(
-            filter:::(value) <-
-              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-              value.traits & Item.TRAIT.WEAPON
-          );
-            
-          ent.equip(
-            slot:Entity.EQUIP_SLOTS.HAND_LR, 
-            item:Item.new(
-              base:wep
-            ), 
-            inventory:ent.inventory, 
-            silent:true
-          );
+        foreach([outlaw, henchman1, henchman2]) ::(k, entity) {
+          if (entity.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).base.id == 'base:none') ::<= {
+            // add a weapon
+            @:wep = Item.database.find(:'base:dagger')
+              
+            entity.equip(
+              slot:Entity.EQUIP_SLOTS.HAND_LR, 
+              item:Item.new(
+                base:wep
+              ), 
+              inventory:entity.inventory, 
+              silent:true
+            );
+          }
         }
 
-        windowEvent.queueMessage(
-          speaker: ent.name,
-          text: '"Hey, hands off the merchandise! This bounty is mine, don\'t interfere!"'
+        quest.setReward(g:(quest.rewardG * 5 / 50)->floor * 50);
+        
+
+      
+        quest.name = 'BOUNTY! (' + RANK2NAME[quest.rank] + ' Rank)';
+        quest.description = quest.description->replace(key:'%1', with :outlaw.name);
+        
+        quest.data.henchman1 = henchman1;
+        quest.data.henchman2 = henchman2;
+        quest.data.outlaw = outlaw;
+        
+      },
+
+      onAccept ::(island, quest, issuer) {
+        @:Landmark = import(:'game_mutator.landmark.mt');
+        @:pos = island.getAPosition();
+        @:landmark = Landmark.new(
+          island : island,
+          base: Landmark.database.find(:'base:forest-generic'),
+          x : pos.x,
+          y : pos.y
         );
-        return ent;
-      } else empty;
+        landmark.symbol = 'X';
+        landmark.legendName = quest.name;
+        
+        @:loc = landmark.getRandomEmptyPosition();
+        
+        @:item = Location.new(
+          landmark: landmark,
+          x : loc.x,
+          y : loc.y,
+          base: Location.database.find(:'base:small-chest')
+        );
+        landmark.addLocation(location:item);
+        
+        quest.data.landmarkID = landmark.worldID;
+        island.addLandmark(:landmark);  
+      },
       
-      world.battle.start(
-        party: world.party,              
-        allies: world.party.members,
-        enemies: [
-          quest.data.outlaw,
-          quest.data.henchman1,
-          quest.data.henchman2            
-        ],
-        landmark: {},
-        onEnd::(result) {
-          @:instance = import(module:'game_singleton.instance.mt');
-          if (!world.battle.partyWon()) 
-            instance.gameOver(reason:'The party was wiped out.');
+      onStep ::(quest, landmark, island) {
+        when (landmark.worldID != quest.data.landmarkID ||
+            quest.data.outlaw.isIncapacitated()) empty
+
+        @:phrases = [
+          '"Well well well... Look who stumbled into our territory. Heh, gettem!"',
+          '"Look everyone, we got ourselves an intruder! Let\'s show em some hospitality..."',
+          '"Hey buddy, you look a little lost... Let\'s help em\' out gang!"'
+        ];
+        
+        windowEvent.queueMessage(
+          speaker: quest.data.outlaw.name,
+          text: random.pickArrayItem(:phrases)
+        );
+        
+        // funny interference sometimes
+        @bountyHunter = if(random.try(percentSuccess:10)) ::<= {
+          windowEvent.queueMessage(
+            speaker: quest.data.outlaw.name,
+            text: '"..Wait... huh? Who are YOU supposed to be?"'
+          );
+        
+          @:ent = world.island.newInhabitant();
+          for(0, quest.rank*2) ::(i) {
+            ent.autoLevel();
+          }
+
+          @:Item = import(module:'game_mutator.item.mt');
+          @:Entity = import(module:'game_class.entity.mt');
+          
+          ent.name = 'the ' + ent.species.name + ' Bounty Hunter';
+          if (ent.getEquipped(:Entity.EQUIP_SLOTS.HAND_LR).base.id == 'base:none') ::<= {
+            // add a weapon
+            @:wep = Item.database.getRandomFiltered(
+              filter:::(value) <-
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.traits & Item.TRAIT.WEAPON
+            );
+              
+            ent.equip(
+              slot:Entity.EQUIP_SLOTS.HAND_LR, 
+              item:Item.new(
+                base:wep
+              ), 
+              inventory:ent.inventory, 
+              silent:true
+            );
+          }
+
+          windowEvent.queueMessage(
+            speaker: ent.name,
+            text: '"Hey, hands off the merchandise! This bounty is mine, don\'t interfere!"'
+          );
+          return ent;
+        } else empty;
+        
+        world.battle.start(
+          party: world.party,              
+          allies: world.party.members,
+          enemies: [
+            quest.data.outlaw,
+            quest.data.henchman1,
+            quest.data.henchman2            
+          ],
+          landmark: {},
+          onEnd::(result) {
+            @:instance = import(module:'game_singleton.instance.mt');
+            if (!world.battle.partyWon()) 
+              instance.gameOver(reason:'The party was wiped out.');
+          }
+        );
+        
+        if (bountyHunter) ::<= {
+          world.battle.join(group:[bountyHunter]);
         }
-      );
+
+      },
       
-      if (bountyHunter) ::<= {
-        world.battle.join(group:[bountyHunter]);
+      onTurnIn ::(quest, issuer) {
+        world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
       }
-
-    },
-    
-    onTurnIn ::(quest, issuer) {
-      world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
-    },
-    
-    onIncrementTime ::(quest, landmark, island) {
-    
     },
 
-    // The scene to play when a landmark is entered.
-    onLandmarkEnter ::(quest, landmark) {
-
-    },
   
     // Whether the quest is complete and able to be taken back 
     // for the reward.
@@ -712,25 +697,10 @@ Quest.database.newEntry(
       
       // Special traits that the quest has. Check the TRAIT enum
       traits : Number,
-      
-      // Called on the first time the quest is created.
-      onCreate : Function,
-      
-      // Called when accepting the quest. This should generate 
-      // any landmark to be visited.
-      onAccept : Function,
-      
-      // Called when the quest is turned in.
-      onTurnIn : Function,
-      
-      // when a player takes a step in either the landmark context
-      onStep : Function,
-      
-      // when a new hour passes,
-      onIncrementTime : Function,
-      
-      // The action to do when a landmark is entered.
-      onLandmarkEnter : Function,
+     
+
+      events : Object,
+
 
       // Whether the quest is complete and able to be taken back 
       // for the reward.
@@ -741,7 +711,27 @@ Quest.database.newEntry(
       
       
     },
-    reset
+    reset,
+    knownEvents : [
+      // Called on the first time the quest is created.
+      'onCreate',
+      // Called when accepting the quest. This should generate 
+      // any landmark to be visited.
+      'onAccept',
+      
+      // Called when the quest is turned in.
+      'onTurnIn',
+      
+      // when a player takes a step in either the landmark context
+      'onStep',
+      
+      // when a new hour passes,
+      'onIncrementTime',
+      
+      // The action to do when a landmark is entered.
+      'onLandmarkEnter'      
+          
+    ]
   ),
   
   define::(this, state) {
@@ -762,7 +752,7 @@ Quest.database.newEntry(
         state.issuerName = issuer.name + ', the ' + issuer.species.name + (if(issuer.profession.id == 'base:none') '' else ' ' + issuer.profession.name)
         state.description = random.pickArrayItem(:base.descriptions);
         generateDefaultReward(state);
-        base.onCreate(quest:this, issuer);
+        base.emit(event:'onCreate', quest:this, issuer);
       },      
       
       
@@ -779,7 +769,7 @@ Quest.database.newEntry(
       // creates the quest, returning the landmark 
       // for where the quest belongs
       accept ::(island, issuer) {
-        @:landmark = state.base.onAccept(quest:this, island, issuer);
+        @:landmark = state.base.emit(event:'onAccept', quest:this, island, issuer);
         return landmark;
       },
       
@@ -805,21 +795,21 @@ Quest.database.newEntry(
       },
       
       step ::(landmark, island){
-        state.base.onStep(quest:this, landmark, island);
+        state.base.emit(event:'onStep', quest:this, landmark, island);
       },
 
       incrementTime ::(landmark, island){
-        state.base.onIncrementTime(quest:this, landmark, island);
+        state.base.emit(event:'onIncrementTime', quest:this, landmark, island);
       },
       
       enterLandmark ::(landmark) {
-        state.base.onLandmarkEnter(quest:this, landmark:landmark);
+        state.base.emit(event:'onLandmarkEnter', quest:this, landmark:landmark);
       },
       
-      nextHour ::<- state.base.onNextHour(quest:this),
+      nextHour ::<- state.base.emit(event:'onNextHour', quest:this),
       
       turnIn ::(issuer) {
-        state.base.onTurnIn(quest:this, issuer);
+        state.base.emit(event:'onTurnIn', quest:this, issuer);
         
         windowEvent.queueDisplay(
           lines : [

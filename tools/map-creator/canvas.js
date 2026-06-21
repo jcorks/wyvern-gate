@@ -176,24 +176,46 @@ const Canvas = {
               }
               
               break;
-              
-            case Settings.MODE.LOCATIONS:
 
-              const ref = pattern.mapLocations[atlasIndex];
+
+            case Settings.MODE.MARKERS:
+              if (pattern.markers[atlasIndex] != null) {
+                color = TEXT_COLOR_MARKER;
+                ch = 'M';
+                
+                tooltips[atlasIndex] = 'Marker ' + ch + ': "' + pattern.markers[atlasIndex][1] + '"';
+              } else {
+                color = TEXT_COLOR_INACTIVE
+              }
+              
+              break;
+
+              
+            case Settings.MODE.OBJECTS:
+
+              const ref = pattern.mapObjects[atlasIndex];
               if (ref && ref.length > 0) {
                 const name = ref[ref.length-1];
-                const data = pattern.locations[name];
-                color = TEXT_COLOR_LOCATION;
+                const data = pattern.objects[name];
+                color = TEXT_COLOR_OBJECT;
                 
                 if (ref.length == 1) {
-                  ch = data.symbol;
+                  if (data.symbol.length >= 1)  
+                    ch = data.symbol
+                  else
+                    ch = '*'
                   tooltips[atlasIndex] = 
-                    name+ '\n' + 
-                    'Location ID: [' + data.id + ']';
+                    'Object: ' + name+ '\n' + 
+                    'Symbol: ' + data.symbol + '\n' + 
+                    'ID:     ' + data.id + '\n' + 
+                    'Halo?:  ' + (data.haloMode == 0 ? 'Default' : data.haloMode == 1 ? 'Always' : 'Never') + '\n' +
+                    'Data:\n' + 
+                    JSON.stringify(data.data, null, 2)
+                  ;
                 } else {
                   ch = "*";
                   tooltips[atlasIndex] = 
-                    'Multiple Locations: [' + pattern.mapLocations[atlasIndex] + ']';
+                    'Multiple Objects: [' + pattern.mapObjects[atlasIndex] + ']';
                 
                 }
               } else {
@@ -202,12 +224,12 @@ const Canvas = {
               
               break;              
 
-            case Settings.MODE.ENTITIES:
-              if (pattern.mapEntities[atlasIndex] != null) {
-                color = TEXT_COLOR_ENTITY;
+            case Settings.MODE.EVENTS:
+              if (pattern.mapEvents[atlasIndex] != null) {
+                color = TEXT_COLOR_EVENT;
                 ch = '*';
                 
-                tooltips[atlasIndex] = 'Entity ID: [' + pattern.mapEntities[atlasIndex] + ']';
+                tooltips[atlasIndex] = 'Event ID: [' + pattern.mapEvents[atlasIndex] + ']';
               } else {
                 color = TEXT_COLOR_INACTIVE
               
@@ -252,8 +274,9 @@ const Canvas = {
             pattern.chars[atlasIndex] = 0;
             pattern.wall[atlasIndex]  = false;
             pattern.connections[atlasIndex] = null;
-            pattern.mapEntities[atlasIndex] = null;
-            pattern.mapLocations[atlasIndex] = null;
+            pattern.mapEvents[atlasIndex] = null;
+            pattern.mapObjects[atlasIndex] = null;
+            pattern.markers[atlasIndex] = null;
           }
 
           overlayChars[atlasIndex] = moveSet.chars[xi + (yi)*moveSet.width];
@@ -387,8 +410,9 @@ const Canvas = {
                     pattern.chars[atlasIndex] = moveSet.chars[selIter];
                     pattern.wall [atlasIndex] = moveSet.wall [selIter];
                     pattern.connections [atlasIndex] = moveSet.connections[selIter];
-                    pattern.mapLocations [atlasIndex] = moveSet.mapLocations[selIter];
-                    pattern.mapEntities [atlasIndex] = moveSet.mapEntities[selIter];
+                    pattern.mapObjects [atlasIndex] = moveSet.mapObjects[selIter];
+                    pattern.mapEvents [atlasIndex] = moveSet.mapEvents[selIter];
+                    pattern.markers [atlasIndex] = moveSet.markers[selIter];
                   }
                 }
               }
@@ -435,8 +459,9 @@ const Canvas = {
               //commitChange();
             }
           case Settings.MODE.CONNECTIONS:
-          case Settings.MODE.LOCATIONS:
-          case Settings.MODE.ENTITIES:
+          case Settings.MODE.OBJECTS:
+          case Settings.MODE.EVENTS:
+          case Settings.MODE.MARKERS:
             if (inStroke == false) {
               inStroke = true;
             }
@@ -574,33 +599,33 @@ const Canvas = {
 
             break;
 
-          case Settings.MODE.LOCATIONS:
-            var ref = pattern.mapLocations[atlasIndex];
+          case Settings.MODE.OBJECTS:
+            var ref = pattern.mapObjects[atlasIndex];
             const erase = settings.isErase();
             var next;
 
             // just erase outright all of them if applicable
             // hopefully not too confusing!
-            if (erase && pattern.mapLocations[atlasIndex]) {
-                pattern.mapLocations[atlasIndex] = null;
+            if (erase) {
+                pattern.mapObjects[atlasIndex] = null;
                 refreshCanvas();
                 break;
             }
 
-            const name = settings.getLocationName();
-            if (!pattern.locations[name]) return;
-            const id = pattern.locations[name].id;
+            const name = settings.getObjectName();
+            if (!pattern.objects[name]) return;
+            const id = pattern.objects[name].id;
             
             
             // create an entry if none yet
             if (ref == null) {
-                pattern.mapLocations[atlasIndex] = [];
-                ref = pattern.mapLocations[atlasIndex];
+                pattern.mapObjects[atlasIndex] = [];
+                ref = pattern.mapObjects[atlasIndex];
             }
             
             
             
-            // already here? locations dont have repeat overlays
+            // already here? objects dont have repeat overlays
             var already = false;
             for(var i = 0; i < ref.length; ++i) {
               if (ref[i] == name) {
@@ -615,19 +640,32 @@ const Canvas = {
             break;
 
 
-          case Settings.MODE.ENTITIES:
-            old = pattern.mapEntities[atlasIndex]
+          case Settings.MODE.EVENTS:
+            old = pattern.mapEvents[atlasIndex]
             if (settings.isErase()) { 
               newVal = null;            
             } else {
-              newVal = settings.getEntityID();
+              newVal = settings.getEventID();
             }
             if (old != newVal) {
-              pattern.mapEntities[atlasIndex] = newVal;
+              pattern.mapEvents[atlasIndex] = newVal;
               refreshCanvas();
             }
             break;
 
+          case Settings.MODE.MARKERS:
+            old = pattern.markers[atlasIndex]
+            if (settings.isErase()) { 
+              newVal = null;            
+            } else {
+              newVal = [
+                settings.getMarkerID(),
+                settings.getMarkerData()
+              ]
+            }
+            pattern.markers[atlasIndex] = newVal;
+            refreshCanvas();
+            break;
 
             
         }
@@ -673,6 +711,7 @@ const Canvas = {
         const setC = [];
         const setML = [];
         const setME = [];
+        const setMK = [];
         const w = selectionX1 - selectionX0;
         for(var y = selectionY0; y < selectionY1; ++y) {
           var ySet = y - selectionY0;
@@ -684,15 +723,17 @@ const Canvas = {
             set[copyIndex] = pattern.chars[atlasIndex];
             setW[copyIndex] = pattern.wall[atlasIndex];
             setC[copyIndex] = pattern.connections[atlasIndex];
-            setML[copyIndex] = pattern.mapLocations[atlasIndex];
-            setME[copyIndex] = pattern.mapEntities[atlasIndex];
+            setML[copyIndex] = pattern.mapObjects[atlasIndex];
+            setME[copyIndex] = pattern.mapEvents[atlasIndex];
+            setMK[copyIndex] = pattern.markers[atlasIndex];
             
             if (yank) {
               pattern.chars[atlasIndex] = 0;
               pattern.wall[atlasIndex] = false;
               pattern.connections[atlasIndex] = null;
-              pattern.mapLocations[atlasIndex] = null;
-              pattern.mapEntities[atlasIndex] = null;
+              pattern.mapObjects[atlasIndex] = null;
+              pattern.mapEvents[atlasIndex] = null;
+              pattern.markers[atlasIndex] = null;
             }
           }
         }
@@ -712,8 +753,9 @@ const Canvas = {
           chars : set,
           wall : setW,
           connections : setW,
-          mapLocations : setML,
-          mapEntities : setME,
+          mapObjects : setML,
+          mapEvents : setME,
+          markers : setMK,
           width : w,
           height : selectionY1 - selectionY0
         }
@@ -734,8 +776,9 @@ const Canvas = {
               pattern.chars[localIndex] = set.chars[selIter];
               pattern.wall [localIndex] = set.wall [selIter];
               pattern.connections[localIndex] = set.connections[selIter];
-              pattern.mapEntities[localIndex] = set.mapEntities[selIter];
-              pattern.mapLocations[localIndex] = set.mapLocations[selIter];
+              pattern.mapEvents[localIndex] = set.mapEvents[selIter];
+              pattern.mapObjects[localIndex] = set.mapObjects[selIter];
+              pattern.markers[localIndex] = set.markers[selIter];
             }
           }
         }
@@ -789,6 +832,8 @@ const Canvas = {
       setSettings : function(e) {
         settings = e;
       },
+      
+      refresh : refreshCanvas,
       
       clientPositionToMap : function(x, y) {
         // reverse order! the lines slightly overlap, so less-accurate

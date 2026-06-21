@@ -19,6 +19,7 @@
 @:class = import(module:'Matte.Core.Class');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 @:databaseItemMutatorClass = import(module:'game_singleton.databaseitemmutatorclass.mt');
+@:g = import(module:'game_function.g.mt');
 
 
 @:CATEGORY = {  
@@ -52,6 +53,71 @@
 @:windowEvent = import(module:'game_singleton.windowevent.mt');
 @:State = import(module:'game_class.state.mt');
 
+
+Location.database.newEntry(data:{
+  id: 'base:door',
+  name: 'Door',
+  rarity: 100000000,
+  ownVerb: '',
+  category : CATEGORY.ENTRANCE,
+
+  descriptions: [
+    "A door leading to elsewhere."
+  ],
+  symbol: '#',
+  
+  interactions : [
+    'base:go-door',
+  ],
+  
+  aggressiveInteractions : [      
+  ],
+  
+  
+  traits : 0,
+  events : {
+  
+  }
+})
+
+Location.database.newEntry(data:{
+  id: 'base:portal',
+  name: 'Portal',
+  rarity: 100000000,
+  ownVerb: '',
+  category : CATEGORY.ENTRANCE,
+  descriptions: [
+    "From somewhere, to somewhere."
+  ],
+  symbol: ' ',
+  
+  interactions : [
+  ],
+  
+  aggressiveInteractions : [      
+  ],
+  traits : 0,
+  
+  events : {
+    onStep ::(location, entities) {
+      // find referred to landmark
+      @:target = ::? {
+        foreach(location.landmark.island.landmarks) ::(k, v) {
+          if (v.worldID == location.data.destination.worldID)
+            send(:v);
+        }
+      }
+      
+      when(target == empty) empty;
+      target.visitLandmark(where ::<- {
+        x : location.data.destination.x,
+        y : location.data.destination.y
+      })
+    }
+  }
+})
+
+
 Location.database.newEntry(data:{
   id: 'base:entrance',
   name: 'Entrance',
@@ -73,10 +139,6 @@ Location.database.newEntry(data:{
   aggressiveInteractions : [      
     'base:vandalize',
   ],
-  
-  
-  minOccupants : 0,
-  maxOccupants : 0,
   events : {}
 })
 
@@ -104,9 +166,6 @@ Location.database.newEntry(data:{
     'base:steal',
   ],
   
-  
-  minOccupants : 0,
-  maxOccupants : 0,
   events : {
     onFirstInteract ::(location){
       location.ownedBy = location.landmark.island.newInhabitant();
@@ -128,7 +187,6 @@ Location.database.newEntry(data:{
       }
     }
   }
-
 })
 
 
@@ -139,6 +197,7 @@ Location.database.newEntry(data:{
   ownVerb: 'owned',
   category : CATEGORY.RESIDENTIAL,
   symbol: '',
+  traits : 0,
 
   descriptions: [
     "A well-kept residence. Looks like it's big enough to hold a few people",
@@ -159,9 +218,6 @@ Location.database.newEntry(data:{
   ],
   
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  
   events : {
     onFirstInteract ::(location) {
       location.ownedBy = location.landmark.island.newInhabitant();
@@ -179,10 +235,8 @@ Location.database.newEntry(data:{
           )
         );
       }
-    },      
+    }
   }
-  
-
 })
 
 Location.database.newEntry(data:{
@@ -206,10 +260,8 @@ Location.database.newEntry(data:{
   ],
   
   
-  minOccupants : 0,
-  maxOccupants : 0,
+  traits : 0,
   events : {}
-  
 
 })
 
@@ -236,8 +288,6 @@ Location.database.newEntry(data:{
   ],
   
   traits : 0,
-  minOccupants : 0,
-  maxOccupants : 0,
   events : {}
 })
 
@@ -260,9 +310,7 @@ Location.database.newEntry(data:{
   ],
   
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  events : [],
+  events : {}
   
 
 })
@@ -275,20 +323,59 @@ Location.database.newEntry(data:{
   ownVerb: '???',
   category : CATEGORY.UTILITY,
   symbol: '',
+  traits : 0,
 
   descriptions: [
   ],
   
   interactions : [
+    'base:buy:shop',
   ],
   
   aggressiveInteractions : [
   ],
   
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  events : {}
+  events : {
+    onCreate ::(location) {
+      location.data.discount = random.integer(from:20, to:50);
+      location.inventory.add(item:
+        Item.new(
+          base:Item.database.getRandomFiltered(
+            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) /*&&
+                      location.ownedBy.level >= value.levelMinimum
+                      && value.tier <= location.landmark.island.tier*/ 
+                      // specials are wild.
+          ),
+          forceNeedsAppraisal : false,
+          rngEnchantHint:true
+        )
+      );
+      @:item = location.inventory.items[0];
+      location.data.originalPrice = (Item.BUY_PRICE_MULTIPLIER* item.price)->floor
+      location.data.discountPrice = (Item.BUY_PRICE_MULTIPLIER * item.price * (1 - 0.01*location.data.discount))->floor
+    },
+  
+    onPartyEnter ::(location) {
+      @:hud = import(:'game_singleton.hud.mt');
+      @:item = location.inventory.items[0];
+      if (location.data.hudID == empty)
+        location.data.hudID = hud.addDisplay(:[
+          'On sale!!!',
+          '"' + item.name + '"',
+          'Was: ' + g(:location.data.originalPrice) ,
+          'Now: ' + g(:location.data.discountPrice) + '('+location.data.discount+'% off!)'
+        ]);
+    },
+    
+    onPartyLeave ::(location) {
+      @:hud = import(:'game_singleton.hud.mt');
+      if (location.data.hudID != empty) {
+        hud.removeDisplay(:location.data.hudID);
+        location.data.hudID = empty;
+      }
+    }
+  }
   
 
 })
@@ -377,8 +464,6 @@ Location.database.newEntry(data:{
 
 
     
-    minOccupants : 0,
-    maxOccupants : 0,
     traits : 0,
     events : {
       onFirstInteract ::(location) {
@@ -393,7 +478,6 @@ Location.database.newEntry(data:{
 
         restockShop(location);
       },
-      
       onIncrementTime::(location) {
         @:world = import(module:'game_singleton.world.mt');
         if (world.time == world.TIME.MIDNIGHT) ::<= {
@@ -473,8 +557,6 @@ Location.database.newEntry(data:{
 
 
     
-    minOccupants : 0,
-    maxOccupants : 0,
     events : {
       onFirstInteract ::(location) {
         @:Profession = import(module:'game_database.profession.mt');
@@ -525,8 +607,6 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   traits : 0,
   events : {
     onFirstInteract ::(location) {
@@ -548,9 +628,7 @@ Location.database.newEntry(data:{
       location.inventory.add(item:Item.new(base:Item.database.find(
         id: 'base:arts-crystal'
       )));        
-    },
-      
-    onIncrementTime::(location) {
+    },    onIncrementTime::(location) {
       @:world = import(module:'game_singleton.world.mt');
       @:Arts = import(:'game_mutator.arts.mt');
       if (world.time == world.TIME.MIDNIGHT) ::<= {
@@ -598,8 +676,6 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   traits : 0,
   events : {
     onFirstInteract ::(location) {
@@ -679,8 +755,6 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   traits : 0,
   events : {
     onFirstInteract ::(location) {
@@ -733,8 +807,6 @@ Location.database.newEntry(data:{
     // add a poke option
   ],
   
-  minOccupants : 0,
-  maxOccupants : 0,
   events : {}
 })
 
@@ -745,7 +817,7 @@ Location.database.newEntry(data:{
   ownVerb : 'run',
   category : CATEGORY.UTILITY,
   symbol: '&',
-  traits: TRAIT.STRUCTURE_LARGE
+  traits: TRAIT.STRUCTURE_LARGE,
 
   descriptions: [
     "A modest tavern with a likely rich history.",
@@ -763,8 +835,6 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   events : {
     onFirstInteract ::(location) {
       location.ownedBy = location.landmark.island.newInhabitant();      
@@ -779,7 +849,7 @@ Location.database.newEntry(data:{
   ownVerb : 'run',
   category : CATEGORY.UTILITY,
   symbol: '!',
-  traits : TRAIT.STRUCTURE_LARGE
+  traits : TRAIT.STRUCTURE_LARGE,
 
   descriptions: [
     "A fighting arena",
@@ -797,8 +867,6 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   events : {
     onFirstInteract ::(location) {
       location.ownedBy = location.landmark.island.newInhabitant();      
@@ -831,9 +899,11 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  events : {}
+  events : {
+    onFirstInteract ::(location) {
+      location.ownedBy = location.landmark.island.newInhabitant();      
+    }
+  }
 })
 
 Location.database.newEntry(data:{
@@ -860,8 +930,6 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   events : {
     onInteract ::(location) {
       @:Profession = import(:'game_database.profession.mt');
@@ -873,7 +941,6 @@ Location.database.newEntry(data:{
       location.ownedBy = location.landmark.island.newInhabitant();
       location.name = 'Profession school';
       location.data.professionSet = Profession.getRandomSet(count:3, filter::(value) <- value.learnable)->map(::(value) <- value.id);
-
     }
   }
 })
@@ -902,8 +969,6 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   events : {}
 })
 
@@ -929,9 +994,12 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  events : {}
+  events : {
+    // TODO: remove
+    onCreate ::(location) {
+      location.contested = true;
+    }
+  }
 })
 
 
@@ -957,8 +1025,6 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   traits : 0,
   events : {
     onInteract ::(location) {
@@ -966,14 +1032,6 @@ Location.database.newEntry(data:{
       if (!open)  
         windowEvent.queueMessage(text: 'The entry to the stairway is locked. Perhaps some lever or plate nearby can unlock it.');
       return open;      
-    },
-
-    onStep ::(location, entities) {
-    
-    },
-    
-    onIncrementTime::(location, time) {
-    
     }
   }
 })
@@ -1001,32 +1059,8 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   traits : 0,
-  events : {
-    
-    onFirstInteract ::(location) {},
-    onInteract ::(location) {
-      return true;
-    },
-    
-    onCreate ::(location) {
-      /*
-      if (location.landmark.island.tier > 1) 
-        if (random.flipCoin()) ::<= {
-          location.lockWithPressurePlate();
-        }
-      */
-    },
-    onStep ::(location, entities) {
-    
-    },
-    
-    onIncrementTime::(location, time) {
-    
-    }
-  }
+  events : {}
 })
 
 
@@ -1050,8 +1084,6 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   traits : 0,
   events : {
     onFirstInteract ::(location) {
@@ -1089,11 +1121,9 @@ Location.database.newEntry(data:{
   
   aggressiveInteractions : [
   ],
-
+  traits: 0,
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
   events : {}
 })    
 
@@ -1104,6 +1134,7 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '?',
   category : CATEGORY.EXIT,
+  traits: 0,
 
   descriptions: [
     "A suspicious pit.",
@@ -1117,14 +1148,7 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  events : {
-  
-  onInteract ::(location) {
-    @:world = import(module:'game_singleton.world.mt');
-    return true;
-  }
+  events : {}
 })     
 
 
@@ -1137,8 +1161,8 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '$',
   category : CATEGORY.UTILITY,
-  onePerLandmark : false,
-  minStructureSize : 1,
+  traits: 0,
+
 
   descriptions: [
   ],
@@ -1151,36 +1175,24 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {},
-  
-  onInteract ::(location) {
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onCreate ::(location) {
-    @:story = import(module:'game_singleton.story.mt');
-    for(0, 2) ::(i) {
-      location.inventory.add(item:
-        Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- 
-              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
-              value.tier <= location.landmark.island.tier
-          ),
-          rngEnchantHint:true, 
-          forceEnchant:true
-        )
-      );
+  events : {  
+    onCreate ::(location) {
+      @:story = import(module:'game_singleton.story.mt');
+      for(0, 2) ::(i) {
+        location.inventory.add(item:
+          Item.new(
+            base:Item.database.getRandomFiltered(
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
+                value.tier <= location.landmark.island.tier
+            ),
+            rngEnchantHint:true, 
+            forceEnchant:true
+          )
+        );
+      }
     }
-  },
-  
-  onIncrementTime::(location, time) {
-  
   }
 }) 
 
@@ -1194,8 +1206,8 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '|',
   category : CATEGORY.UTILITY,
-  onePerLandmark : false,
-  minStructureSize : 1,
+  traits: 0,
+
 
   descriptions: [
   ],
@@ -1208,25 +1220,13 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {},
-  
-  onInteract ::(location) {
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onCreate ::(location) {
-    location.landmark.map.enableWall(
-      x : location.x,
-      y : location.y
-    );
-  },
-  
-  onIncrementTime::(location, time) {
-  
+  events : {    
+    onCreate ::(location) {
+      location.landmark.map.enableWall(
+        x : location.x,
+        y : location.y
+      );
+    }
   }
 }) 
 
@@ -1238,8 +1238,8 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '▆',
   category : CATEGORY.UTILITY,
-  onePerLandmark : false,
-  minStructureSize : 1,
+  traits: 0,
+
 
   descriptions: [
   ],
@@ -1252,26 +1252,15 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {},
-  
-  onInteract ::(location) {
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onCreate ::(location) {
-    location.landmark.map.enableWall(
-      x : location.x,
-      y : location.y
-    );
+  events : {    
+    
+    onCreate ::(location) {
+      location.landmark.map.enableWall(
+        x : location.x,
+        y : location.y
+      );
 
-  },
-  
-  onIncrementTime::(location, time) {
-  
+    }
   }
 }) 
 
@@ -1283,8 +1272,8 @@ Location.database.newEntry(data:{
   ownVerb : 'owned',
   symbol: 'i',
   category : CATEGORY.UTILITY,
-  minStructureSize : 1,
-  onePerLandmark : false,
+  traits: 0,
+
 
   descriptions: [
     'An item of some kind.'
@@ -1298,33 +1287,24 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract::(location){},      
-  onInteract ::(location) {
-  },
-  onStep ::(location, entities) {
-  
-  },  
-  onCreate ::(location) {
-    @:item = Item.new(
-      base:Item.database.getRandomFiltered(
-        filter:::(value) <- 
-          value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-          value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
-          value.tier <= location.landmark.island.tier
-      ),
-      rngEnchantHint:true, 
-      forceEnchant:true
-    )
-    location.name = item.name;
-    location.inventory.add(item:
-      item
-    );
-  },
-  
-  onIncrementTime::(location, time) {
-  
+  events : {
+
+    onCreate ::(location) {
+      @:item = Item.new(
+        base:Item.database.getRandomFiltered(
+          filter:::(value) <- 
+            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+            value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
+            value.tier <= location.landmark.island.tier
+        ),
+        rngEnchantHint:true, 
+        forceEnchant:true
+      )
+      location.name = item.name;
+      location.inventory.add(item:
+        item
+      );
+    }
   }
 }) 
 
@@ -1337,9 +1317,7 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '$',
   category : CATEGORY.UTILITY,
-  onePerLandmark : true,
-  minStructureSize : 1,
-
+  traits : TRAIT.ONE_PER_LANDMARK,
   descriptions: [
   ],
   interactions : [
@@ -1351,57 +1329,47 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {},
+  events : {
+
   
-  onInteract ::(location) {
-  },
-  
-  onCreate ::(location) {
-    @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+    onCreate ::(location) {
+      @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
 
 
-    @:possibilities = [
-      {
-        rarity: 10,
-        item : Item.new(
-          base:Item.database.find(:'base:tablet')                
-        )
-      },
-      
-      {
-        rarity: 50,
-        item: Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- 
-              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-              value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)          
-          ),
-          forceNeedsAppraisal : true
-        )
-      },
-      
-      {
-        rarity : 40,
-        item: Item.new(
-          base:Item.database.find(id:'base:seed')
-        )
-      }
-      
-    ] 
-  
-    location.inventory.add(:random.pickArrayItemWeighted(:possibilities).item);
-    location.inventory.add(:random.pickArrayItemWeighted(:possibilities).item);
-  
-  
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onIncrementTime::(location, time) {
-  
+      @:possibilities = [
+        {
+          rarity: 10,
+          item : Item.new(
+            base:Item.database.find(:'base:tablet')                
+          )
+        },
+        
+        {
+          rarity: 50,
+          item: Item.new(
+            base:Item.database.getRandomFiltered(
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)          
+            ),
+            forceNeedsAppraisal : true
+          )
+        },
+        
+        {
+          rarity : 40,
+          item: Item.new(
+            base:Item.database.find(id:'base:seed')
+          )
+        }
+        
+      ] 
+    
+      location.inventory.add(:random.pickArrayItemWeighted(:possibilities).item);
+      location.inventory.add(:random.pickArrayItemWeighted(:possibilities).item);
+    
+    
+    }
   }
 }) 
 
@@ -1413,8 +1381,8 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '$',
   category : CATEGORY.UTILITY,
-  onePerLandmark : false,
-  minStructureSize : 1,
+  traits: 0,
+
 
   descriptions: [
   ],
@@ -1427,42 +1395,33 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {},
+  events : {  
+    onInteract ::(location) {
+      @open = location.isUnlockedWithPlate();
+      if (!open)  
+        windowEvent.queueMessage(text: 'The chest is locked. Perhaps some lever or plate nearby can unlock it.');
+      return open;      
+    },
   
-  onInteract ::(location) {
-    @open = location.isUnlockedWithPlate();
-    if (!open)  
-      windowEvent.queueMessage(text: 'The chest is locked. Perhaps some lever or plate nearby can unlock it.');
-    return open;      
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onCreate ::(location) {
-    location.lockWithPressurePlate();  
-  
-    @:story = import(module:'game_singleton.story.mt');
-    for(0, 3) ::{
-      location.inventory.add(item:
-        Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- 
-              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) 
-              && value.tier <= location.landmark.island.tier + 1
-          ),
-          rngEnchantHint:true, 
-          forceEnchant:true
-        )
-      );
+    onCreate ::(location) {
+      location.lockWithPressurePlate();  
+    
+      @:story = import(module:'game_singleton.story.mt');
+      for(0, 3) ::{
+        location.inventory.add(item:
+          Item.new(
+            base:Item.database.getRandomFiltered(
+              filter:::(value) <- 
+                value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) 
+                && value.tier <= location.landmark.island.tier + 1
+            ),
+            rngEnchantHint:true, 
+            forceEnchant:true
+          )
+        );
+      }
     }
-  },
-  
-  onIncrementTime::(location, time) {
-  
   }
 }) 
 
@@ -1474,8 +1433,8 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '=',
   category : CATEGORY.UTILITY,
-  onePerLandmark : false,
-  minStructureSize : 1,
+  traits: 0,
+
 
   descriptions: [
   ],
@@ -1489,23 +1448,7 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {},
-  
-  onInteract ::(location) {
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onCreate ::(location) {
-    location.data.pressed = false;
-  },
-  
-  onIncrementTime::(location, time) {
-  
-  }
+  events : {}
 }) 
 
 
@@ -1519,8 +1462,7 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: 'S',
   category : CATEGORY.DUNGEON_SPECIAL,
-  onePerLandmark : true,
-  minStructureSize : 1,
+  traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
     'A simple fountain flowing with fresh water.'
@@ -1534,24 +1476,9 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {},
-  
-  onInteract ::(location) {
-  },
-  
-  onCreate ::(location) {
-
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onIncrementTime::(location, time) {
+  events : {
   
   }
-
 });
 
 
@@ -1562,8 +1489,7 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: 'O',
   category : CATEGORY.DUNGEON_SPECIAL,
-  onePerLandmark : true,
-  minStructureSize : 1,
+  traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
     'An inscribed circle containing a one-time use healing spell.'
@@ -1577,22 +1503,10 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {},
-  
-  onInteract ::(location) {
-  },
-  
-  onCreate ::(location) {
-    location.data.used = false;
-  },
-  
-  onStep ::(location, entities) {
-  
-  },
-  onIncrementTime::(location, time) {
-  
+  events : {
+    onCreate ::(location) {
+      location.data.used = false;
+    }  
   }
 
 });
@@ -1605,8 +1519,7 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: 'M',
   category : CATEGORY.DUNGEON_SPECIAL,
-  onePerLandmark : false,
-  minStructureSize : 1,
+  traits: 0,
 
   descriptions: [
     'A statue depecting a forlorn wyvern holding their hands in the air in sorrow. It\'s very old.',
@@ -1622,25 +1535,11 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {},
-  
-  onInteract ::(location) {
-  },
-  
-  onCreate ::(location) {
-    location.data.hasPrayer = true;
-
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onIncrementTime::(location, time) {
-  
+  events : {
+    onCreate ::(location) {
+      location.data.hasPrayer = true;
+    }
   }
-
 });
 
 
@@ -1651,8 +1550,8 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '%',
   category : CATEGORY.DUNGEON_SPECIAL,
-  onePerLandmark : false,
-  minStructureSize : 1,
+  traits: TRAIT.ONE_PER_LANDMARK,
+
 
   descriptions: [
     'A stone stand with magic runes.'
@@ -1666,26 +1565,12 @@ Location.database.newEntry(data:{
 
   
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {
-  },  
-  
-  onInteract ::(location) {
-  },
-  
-  onCreate ::(location) { 
-    @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
-    location.data.enchant = ItemEnchant.new()
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onIncrementTime::(location, time) {
-  
+  events : {
+    onCreate ::(location) { 
+      @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
+      location.data.enchant = ItemEnchant.new()
+    }
   }
-
 });
 
 
@@ -1696,8 +1581,7 @@ Location.database.newEntry(data:{
   ownVerb : 'run',
   symbol: '%',
   category : CATEGORY.DUNGEON_SPECIAL,
-  onePerLandmark : true,
-  minStructureSize : 1,
+  traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
     'A makeshift wooden stand with a crude sign depecting a sheep selling clothing.'
@@ -1716,66 +1600,58 @@ Location.database.newEntry(data:{
 
   
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {
-    @:Profession = import(module:'game_database.profession.mt');
-    @:Entity = import(module:'game_class.entity.mt');
-    @:EntityQuality = import(module:'game_mutator.entityquality.mt');
-    @:world = import(module:'game_singleton.world.mt');        
-    when(world.npcs.mei == empty || world.npcs.mei.isIncapacitated())
-      location.ownedBy = empty;
+  events : {
+    onFirstInteract ::(location) {
+      @:Profession = import(module:'game_database.profession.mt');
+      @:Entity = import(module:'game_class.entity.mt');
+      @:EntityQuality = import(module:'game_mutator.entityquality.mt');
+      @:world = import(module:'game_singleton.world.mt');        
+      when(world.npcs.mei == empty || world.npcs.mei.isIncapacitated())
+        location.ownedBy = empty;
 
-    location.ownedBy = world.npcs.mei;
-    location.inventory.maxItems = 50;
+      location.ownedBy = world.npcs.mei;
+      location.inventory.maxItems = 50;
 
-    @:nameGen = import(module:'game_singleton.namegen.mt');
-    @:story = import(module:'game_singleton.story.mt');
-
-    for(0, 10)::(i) {
-      // no weight, as the value scales
-      location.inventory.add(item:
-        Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.hasTraits(:Item.TRAIT.APPAREL) && value.hasNoTrait(:Item.TRAIT.UNIQUE)
-          ),
-          forceNeedsAppraisal : false,
-          apparelHint: 'base:wool-plus',
-          rngEnchantHint:true
-        )
-      );
-    }
-  },  
-  
-  onInteract ::(location) {
-    @:story = import(module:'game_singleton.story.mt');
-    @:world = import(module:'game_singleton.world.mt');  
-          
-    when(location.ownedBy == empty) ::<= {
-      windowEvent.queueMessage(
-        text: 'The shop seems empty...'
-      );
-      return false;
-    }
-    location.ownedBy.onInteract = ::(interaction) {
-      when(interaction != 'Hire' && interaction != 'Hire with contract') empty;
+      @:nameGen = import(module:'game_singleton.namegen.mt');
       @:story = import(module:'game_singleton.story.mt');
-      world.npcs.mei = empty;
-      world.accoladeEnable(name:'recruitedOPNPC');
-    };      
-  },
-  
-  onCreate ::(location) { 
-    location.data.peaceful = true;
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onIncrementTime::(location, time) {
-  
-  }
 
+      for(0, 10)::(i) {
+        // no weight, as the value scales
+        location.inventory.add(item:
+          Item.new(
+            base:Item.database.getRandomFiltered(
+              filter:::(value) <- value.hasTraits(:Item.TRAIT.APPAREL) && value.hasNoTrait(:Item.TRAIT.UNIQUE)
+            ),
+            forceNeedsAppraisal : false,
+            apparelHint: 'base:wool-plus',
+            rngEnchantHint:true
+          )
+        );
+      }
+    },  
+    
+    onInteract ::(location) {
+      @:story = import(module:'game_singleton.story.mt');
+      @:world = import(module:'game_singleton.world.mt');  
+            
+      when(location.ownedBy == empty) ::<= {
+        windowEvent.queueMessage(
+          text: 'The shop seems empty...'
+        );
+        return false;
+      }
+      location.ownedBy.overrideInteract = ::(interaction) {
+        when(interaction != 'Hire' && interaction != 'Hire with contract') empty;
+        @:story = import(module:'game_singleton.story.mt');
+        world.npcs.mei = empty;
+        world.accoladeEnable(name:'recruitedOPNPC');
+      };      
+    },
+  
+    onCreate ::(location) { 
+      location.data.peaceful = true;
+    }
+  }
 });
 
 Location.database.newEntry(data:{
@@ -1785,8 +1661,7 @@ Location.database.newEntry(data:{
   ownVerb : 'run',
   symbol: 'P',
   category : CATEGORY.DUNGEON_SPECIAL,
-  onePerLandmark : true,
-  minStructureSize : 1,
+  traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
     'A makeshift wooden stand with a crude sign depecting a drake-kin selling potions.'
@@ -1805,61 +1680,54 @@ Location.database.newEntry(data:{
 
   
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {
-    @:Profession = import(module:'game_database.profession.mt');
-    @:Entity = import(module:'game_class.entity.mt');
-    @:EntityQuality = import(module:'game_mutator.entityquality.mt');
-    @:story = import(module:'game_singleton.story.mt');
-    @:world = import(module:'game_singleton.world.mt');        
-    when (world.npcs.sylvia == empty || world.npcs.sylvia.isIncapacitated())
-      location.ownedBy = empty;
-
-    location.ownedBy = world.npcs.sylvia;
-    location.inventory.maxItems = 50;
-
-    @:nameGen = import(module:'game_singleton.namegen.mt');
-    @:story = import(module:'game_singleton.story.mt');
-
-    for(0, 21)::(i) {
-      @:item = Item.new(
-        base:Item.database.find(:'base:potion')
-      );
-      
-      // scalping is bad!
-      item.price *= 5;
-
-      location.inventory.add(item);
-    }
-  },  
-  
-  onInteract ::(location) {
-    @:story = import(module:'game_singleton.story.mt');
-    when(location.ownedBy == empty) ::<= {
-      windowEvent.queueMessage(
-        text: 'The shop seems empty...'
-      );
-      return false;
-    }
-    location.ownedBy.onInteract = ::(interaction) {
-      when(interaction != 'Hire' && interaction != 'Hire with contract') empty;
+  events : {
+    onFirstInteract ::(location) {
+      @:Profession = import(module:'game_database.profession.mt');
+      @:Entity = import(module:'game_class.entity.mt');
+      @:EntityQuality = import(module:'game_mutator.entityquality.mt');
+      @:story = import(module:'game_singleton.story.mt');
       @:world = import(module:'game_singleton.world.mt');        
-      world.npcs.sylvia = empty;
-      // Nerfed 'em because too common of an appearance. People can recruit if they want without penalty.
-      //world.accoladeEnable(name:'recruitedOPNPC');
-    };      
-  },
+      when (world.npcs.sylvia == empty || world.npcs.sylvia.isIncapacitated())
+        location.ownedBy = empty;
+
+      location.ownedBy = world.npcs.sylvia;
+      location.inventory.maxItems = 50;
+
+      @:nameGen = import(module:'game_singleton.namegen.mt');
+      @:story = import(module:'game_singleton.story.mt');
+
+      for(0, 21)::(i) {
+        @:item = Item.new(
+          base:Item.database.find(:'base:potion')
+        );
+        
+        // scalping is bad!
+        item.price *= 5;
+
+        location.inventory.add(item);
+      }
+    },  
   
-  onCreate ::(location) { 
-    location.data.peaceful = true;
-  },
-  onStep ::(location, entities) {
+    onInteract ::(location) {
+      @:story = import(module:'game_singleton.story.mt');
+      when(location.ownedBy == empty) ::<= {
+        windowEvent.queueMessage(
+          text: 'The shop seems empty...'
+        );
+        return false;
+      }
+      location.ownedBy.overrideInteract = ::(interaction) {
+        when(interaction != 'Hire' && interaction != 'Hire with contract') empty;
+        @:world = import(module:'game_singleton.world.mt');        
+        world.npcs.sylvia = empty;
+        // Nerfed 'em because too common of an appearance. People can recruit if they want without penalty.
+        //world.accoladeEnable(name:'recruitedOPNPC');
+      };      
+    },
   
-  },
-  
-  onIncrementTime::(location, time) {
-  
+    onCreate ::(location) { 
+      location.data.peaceful = true;
+    }
   }
 
 });
@@ -1871,8 +1739,7 @@ Location.database.newEntry(data:{
   ownVerb : 'run',
   symbol: '$',
   category : CATEGORY.DUNGEON_SPECIAL,
-  onePerLandmark : true,
-  minStructureSize : 1,
+  traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
     'A surprisingly ornate and refined shopping stand.'
@@ -1891,76 +1758,68 @@ Location.database.newEntry(data:{
 
   
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract ::(location) {
-    @:Profession = import(module:'game_database.profession.mt');
-    @:Entity = import(module:'game_class.entity.mt');
-    @:EntityQuality = import(module:'game_mutator.entityquality.mt');
-    @:world = import(module:'game_singleton.world.mt');        
-    when(world.npcs.faus == empty || world.npcs.faus.isIncapacitated()) empty;
-      location.ownedBy = empty
-      
-    location.ownedBy = world.npcs.faus;
-    location.inventory.maxItems = 50;
-
-    @:nameGen = import(module:'game_singleton.namegen.mt');
-    @:story = import(module:'game_singleton.story.mt');
-
-
-
-    @:qualities = [
-      'base:legendary',
-      'base:divine',
-      'base:masterwork',
-      'base:queens',
-      'base:kings'
-    ]
-
-
-    for(0, 10)::(i) {
-      // no weight, as the value scales
-      location.inventory.add(item:
-        Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.hasTraits(:Item.TRAIT.HAS_QUALITY)
-          ),
-          forceNeedsAppraisal : false,
-          qualityHint: random.pickArrayItem(list:qualities),
-          rngEnchantHint:true
-        )
-      );
-    }
-  },  
-  
-  onInteract ::(location) {
-    @:story = import(module:'game_singleton.story.mt');
-    when(location.ownedBy == empty) ::<= {
-      windowEvent.queueMessage(
-        text: 'The shop seems empty...'
-      );
-      return false;
-    }
-    
-    location.ownedBy.onInteract = ::(interaction) {
-      when(interaction != 'Hire' && interaction != 'Hire with contract') empty;
+  events : {
+    onFirstInteract ::(location) {
+      @:Profession = import(module:'game_database.profession.mt');
+      @:Entity = import(module:'game_class.entity.mt');
+      @:EntityQuality = import(module:'game_mutator.entityquality.mt');
       @:world = import(module:'game_singleton.world.mt');        
-      world.npcs.faus = empty;      
-      world.accoladeEnable(name:'recruitedOPNPC');
-    };    
-  },
-  
-  onCreate ::(location) { 
-    location.data.peaceful = true;
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onIncrementTime::(location, time) {
-  
-  }
+      when(world.npcs.faus == empty || world.npcs.faus.isIncapacitated()) empty;
+        location.ownedBy = empty
+        
+      location.ownedBy = world.npcs.faus;
+      location.inventory.maxItems = 50;
 
+      @:nameGen = import(module:'game_singleton.namegen.mt');
+      @:story = import(module:'game_singleton.story.mt');
+
+
+
+      @:qualities = [
+        'base:legendary',
+        'base:divine',
+        'base:masterwork',
+        'base:queens',
+        'base:kings'
+      ]
+
+
+      for(0, 10)::(i) {
+        // no weight, as the value scales
+        location.inventory.add(item:
+          Item.new(
+            base:Item.database.getRandomFiltered(
+              filter:::(value) <- value.hasTraits(:Item.TRAIT.HAS_QUALITY)
+            ),
+            forceNeedsAppraisal : false,
+            qualityHint: random.pickArrayItem(list:qualities),
+            rngEnchantHint:true
+          )
+        );
+      }
+    },  
+  
+    onInteract ::(location) {
+      @:story = import(module:'game_singleton.story.mt');
+      when(location.ownedBy == empty) ::<= {
+        windowEvent.queueMessage(
+          text: 'The shop seems empty...'
+        );
+        return false;
+      }
+      
+      location.ownedBy.overrideInteract = ::(interaction) {
+        when(interaction != 'Hire' && interaction != 'Hire with contract') empty;
+        @:world = import(module:'game_singleton.world.mt');        
+        world.npcs.faus = empty;      
+        world.accoladeEnable(name:'recruitedOPNPC');
+      };    
+    },
+    
+    onCreate ::(location) { 
+      location.data.peaceful = true;
+    }
+  }
 });
 
 
@@ -1971,8 +1830,7 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '$',
   category : CATEGORY.UTILITY,
-  minStructureSize : 1,
-  onePerLandmark : true,
+  traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
     'An extremely ornate, large chest. What\'s inside?'
@@ -1986,71 +1844,58 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  
-  onFirstInteract ::(location) {
-    @:nameGen = import(module:'game_singleton.namegen.mt');
-    @:Story = import(module:'game_singleton.story.mt');
+  events : {
     
+    onFirstInteract ::(location) {
+      @:nameGen = import(module:'game_singleton.namegen.mt');
+      @:Story = import(module:'game_singleton.story.mt');
+      
 
-    @:story = import(module:'game_singleton.story.mt');
-    
-    location.inventory.add(item:
-      Item.new(
-        base:Item.database.getRandomFiltered(
-          filter:::(value) <- 
-            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-            value.hasTraits(:Item.TRAIT.HAS_QUALITY)          
-        ),
-        qualityHint : 'base:masterwork',
-        rngEnchantHint:true
-      )
-    );    
+      @:story = import(module:'game_singleton.story.mt');
+      
+      location.inventory.add(item:
+        Item.new(
+          base:Item.database.getRandomFiltered(
+            filter:::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.hasTraits(:Item.TRAIT.HAS_QUALITY)          
+          ),
+          qualityHint : 'base:masterwork',
+          rngEnchantHint:true
+        )
+      );    
 
-    location.inventory.add(item:
-      Item.new(
-        base:Item.database.getRandomFiltered(
-          filter:::(value) <- 
-            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-            value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)          
-        ),
-        forceNeedsAppraisal : true
-      )
-    );   
+      location.inventory.add(item:
+        Item.new(
+          base:Item.database.getRandomFiltered(
+            filter:::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)          
+          ),
+          forceNeedsAppraisal : true
+        )
+      );   
 
-    location.inventory.add(item:
-      Item.new(
-        base:Item.database.find(id:'base:perfect-arts-crystal')
-      )
-    );    
+      location.inventory.add(item:
+        Item.new(
+          base:Item.database.find(id:'base:perfect-arts-crystal')
+        )
+      );    
 
-    location.inventory.add(item:
-      Item.new(
-        base:Item.database.find(id:'base:wyvern-key')
-      )
-    );    
+      location.inventory.add(item:
+        Item.new(
+          base:Item.database.find(id:'base:wyvern-key')
+        )
+      );    
 
-    location.inventory.add(item:
-      Item.new(
-        base:Item.database.find(id:'base:seed')
-      )
-    );    
+      location.inventory.add(item:
+        Item.new(
+          base:Item.database.find(id:'base:seed')
+        )
+      );    
 
 
-  },
-  onInteract ::(location) {
-  },
-  
-  onCreate ::(location) {
-
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onIncrementTime::(location, time) {
-  
+    }
   }
 })
 
@@ -2061,8 +1906,7 @@ Location.database.newEntry(data:{
   ownVerb : 'owned',
   symbol: '-',
   category : CATEGORY.DUNGEON_SPECIAL,
-  minStructureSize : 1,
-  onePerLandmark : false,
+  traits : 0,
 
   descriptions: [
     'An incapacitated individual.'
@@ -2076,32 +1920,34 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract::(location){},      
-  onInteract ::(location) {
-  },
-  
-  onStep ::(location, entities) {
-  
-  },
-  onCreate ::(location) {
-    @world = import(module:'game_singleton.world.mt');  
-    if (world.party.inDungeon) ::<= {
-      foreach(location.ownedBy.inventory.items)::(i, item) {
-        location.inventory.add(:item);
-      }
-    } else ::<= {
-      foreach(location.ownedBy.inventory.items)::(i, item) {
-        location.inventory.add(:item);
-      }    
-    }
+  events : {
+    /*
+    onPartyEnter ::(location) {
+      location.data.hudID = hud.addDisplay(:[
+        'Contains: ',
+        [...location.ownedBy.inventory.items->map(::(value)<- value.name)]
+      ])
+    },
+    
+    onPartyLeave ::(location) {
+      hud.removeDisplay(:location.data.hudID);
+    },
+    */
 
-    location.ownedBy.inventory.clear();
-  },
-  
-  onIncrementTime::(location, time) {
-  
+    onCreate ::(location) {
+      @world = import(module:'game_singleton.world.mt');  
+      if (world.party.inDungeon) ::<= {
+        foreach(location.ownedBy.inventory.items)::(i, item) {
+          location.inventory.add(:item);
+        }
+      } else ::<= {
+        foreach(location.ownedBy.inventory.items)::(i, item) {
+          location.inventory.add(:item);
+        }    
+      }
+
+      location.ownedBy.inventory.clear();
+    }
   }
 })    
 
@@ -2112,8 +1958,7 @@ Location.database.newEntry(data:{
   id: 'base:poison-tile',
   symbol: '~',
   category : CATEGORY.DUNGEON_SPECIAL,
-  minStructureSize : 1,
-  onePerLandmark : false,
+  traits : 0,
 
   descriptions: [
     'This area seems to be covered in an acidic poison. Best not to stay on it for too long.'
@@ -2128,41 +1973,31 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract::(location){},      
-  onInteract ::(location) {
-  },
-  
-  onCreate ::(location) {
-  },
-  onIncrementTime::(location, time) {
-  
-  },
-  
-  onStep::(location, entities) {
-    
-    @:Damage = import(:'game_class.damage.mt');
-    foreach(entities) ::(k, v) {
-      when (v.hp <= 1) empty;
-      @world = import(module:'game_singleton.world.mt');  
+  events : {
+    onStep::(location, entities) {
       
-      if (!world.party.isMember(:v))
-        windowEvent.autoSkip = true;
+      @:Damage = import(:'game_class.damage.mt');
+      foreach(entities) ::(k, v) {
+        when (v.hp <= 1) empty;
+        @world = import(module:'game_singleton.world.mt');  
+        
+        if (!world.party.isMember(:v))
+          windowEvent.autoSkip = true;
 
-      v.damage(
-        attacker: v,
-        damage : Damage.new(
-          amount: 1,
-          damageType: Damage.TYPE.POISON,
-          damageClass: Damage.CLASS.HP
-        ),
-        dodgeable: false,
-        exact:true
-      )
+        v.damage(
+          attacker: v,
+          damage : Damage.new(
+            amount: 1,
+            damageType: Damage.TYPE.POISON,
+            damageClass: Damage.CLASS.HP
+          ),
+          dodgeable: false,
+          exact:true
+        )
 
-      if (!world.party.isMember(:v))
-        windowEvent.autoSkip = false;
+        if (!world.party.isMember(:v))
+          windowEvent.autoSkip = false;
+      }
     }
   }
 })
@@ -2177,8 +2012,8 @@ Location.database.newEntry(data:{
   ownVerb : '',
   symbol: '~',
   category : CATEGORY.DUNGEON_SPECIAL,
-  minStructureSize : 1,
-  onePerLandmark : false,
+  traits: 0,
+
 
   descriptions: [
     'This area seems to be wet. Careful not to slip!'
@@ -2191,21 +2026,7 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract::(location){},      
-  onInteract ::(location) {
-  },
-  
-  onCreate ::(location) {
-  },
-  onStep ::(location, entities) {
-  
-  },
-  
-  onIncrementTime::(location, time) {
-  
-  }
+  events : {}
 })
 
 
@@ -2219,8 +2040,8 @@ Location.database.newEntry(data:{
   ownVerb : 'owned',
   symbol: 'i',
   category : CATEGORY.DUNGEON_SPECIAL,
-  minStructureSize : 1,
-  onePerLandmark : false,
+  traits: 0,
+
 
   descriptions: [
     'A lost item.'
@@ -2234,20 +2055,8 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract::(location){},      
-  onInteract ::(location) {
-  },
-  onStep ::(location, entities) {
-  
-  },  
-  onCreate ::(location) {
-  },
-  
-  onIncrementTime::(location, time) {
-  
-  }
+  events : {}
+
 }) 
 
 
@@ -2258,8 +2067,8 @@ Location.database.newEntry(data:{
   ownVerb : 'owned',
   symbol: 'i',
   category : CATEGORY.DUNGEON_SPECIAL,
-  minStructureSize : 1,
-  onePerLandmark : false,
+  traits: 0,
+
 
   descriptions: [
     'A lost item.'
@@ -2273,38 +2082,28 @@ Location.database.newEntry(data:{
 
 
   
-  minOccupants : 0,
-  maxOccupants : 0,
-  onFirstInteract::(location){},      
-  onInteract ::(location) {
-    @:world = import(module:'game_singleton.world.mt');
-    when (location.data.alreadyWon == true) empty;
+  events : {
+    onInteract ::(location) {
+      @:world = import(module:'game_singleton.world.mt');
+      when (location.data.alreadyWon == true) empty;
 
-    windowEvent.queueMessage(
-      text:'A shadow leapt in from the darkness!'
-    );
-    world.battle.start(
-      party:world.party,              
-      allies: [...world.party.members],
-      enemies: [location.landmark.island.newHostileCreature(levelHint : location.landmark.island.level/2)],
-      landmark: {},
-      onEnd::(result) {
-        location.data.alreadyWon = true;
-        when(world.battle.partyWon()) empty;
-          
-        @:instance = import(module:'game_singleton.instance.mt');
-        instance.gameOver(reason:'The party was wiped out.');
-      }
-    );      
-  },
-  onStep ::(location, entities) {
-  
-  },  
-  onCreate ::(location) {
-  },
-  
-  onIncrementTime::(location, time) {
-  
+      windowEvent.queueMessage(
+        text:'A shadow leapt in from the darkness!'
+      );
+      world.battle.start(
+        party:world.party,              
+        allies: [...world.party.members],
+        enemies: [location.landmark.island.newHostileCreature(levelHint : location.landmark.island.level/2)],
+        landmark: {},
+        onEnd::(result) {
+          location.data.alreadyWon = true;
+          when(world.battle.partyWon()) empty;
+            
+          @:instance = import(module:'game_singleton.instance.mt');
+          instance.gameOver(reason:'The party was wiped out.');
+        }
+      );      
+    }
   }
 }) 
 
@@ -2329,7 +2128,11 @@ Location.database.newEntry(data:{
     data : empty, // simple table
     visited : false,
     data : empty,
-    overrideInteractID : ''
+    overrideInteractID : '',
+    interactions : empty,
+    aggressiveInteractions : empty,
+    symbol : '',
+    halo : false
   },
   statics : {
     CATEGORY : {get ::<- CATEGORY},
@@ -2345,6 +2148,8 @@ Location.database.newEntry(data:{
       rarity: Number,
       descriptions : Object,
       symbol : String,
+      category : Number,
+
       
       // List of interaction names
       interactions : Object,
@@ -2355,44 +2160,55 @@ Location.database.newEntry(data:{
       aggressiveInteractions : Object,
       
       ownVerb : String,
-      // number of people aside from the owner
-      minOccupants : Number,
-      // number of people aside from the owner
-      maxOccupants : Number,
 
       // See Location.TRAIT
       traits : Number,
 
-      // contains events for the location.
-      // current events:
-      /*
-          // when the location is interacted with, before displaying options
-          // The return value is whether to continue with interaction options 
-          // or not.
-          onInteract : Function(location),
-          
-          // Called on first time interaction is attempted. 
-          onFirstInteract : Function (location),
-          
-          // when the location is created
-          onCreate : Function(location),
-          
-          // called by the world when the time of day changes, hourly
-          onIncrementTime : Function(location, time),
-
-          
-          // Called when entities step on the tile.
-          // argument: entities, location
-          onStep : Function(location, entities)
-      */
-      events : Object,
-
       // the type of location it is
       category : Number,
       
+      // events known
+      events : Object
 
     },
-    reset
+    reset,
+    knownEvents : [
+      // when the location is interacted with, before displaying options
+      // The return value is whether to continue with interaction options 
+      // or not.
+      'onInteract',
+      
+      // Called on first time interaction is attempted. 
+      'onFirstInteract',
+      
+      // when the location is created
+      'onCreate',
+      
+      // called by the world when the time of day changes, hourly
+      'onIncrementTime',
+
+      // the type of location it is
+      'category',
+      
+      // Called when entities step on the tile.
+      // argument: entities, location
+      'onStep',
+      
+      // Called when an entity is entering the location
+      'onEntityEnter',
+      
+      // called when an entity is leaving the location
+      'onEntityLeave',
+      
+      // called when a party comes within interactable range 
+      // of the location.
+      'onPartyEnter',
+      
+      // called when a party was in interactable range and 
+      // is not any longer. This includes if the party entered  
+      // and and left the landmark entirely.
+      'onPartyLeave',
+    ]
   ),
   
   define:::(this, state) {
@@ -2405,7 +2221,7 @@ Location.database.newEntry(data:{
 
     @landmark_;
     @world = import(module:'game_singleton.world.mt');  
-
+    @partyEntered = false;
         
     
     this.interface = {
@@ -2420,13 +2236,21 @@ Location.database.newEntry(data:{
 
         landmark_ = landmark;   
       },
-      defaultLoad ::(base, x, y, ownedByHint) {
+      defaultLoad ::(base, x, y, ownedByHint, data) {
         state.worldID = world.getNextID();
         state.occupants = []; // entities. non-owners can shift
         state.inventory = Inventory.new(size:30);
         state.data = {}; // simple table
-        state.data = {};
-
+        if (data != empty) {
+          foreach(data) ::(k, v) {
+            state.data[k] = v
+          }
+        }
+          
+        state.interactions = [...base.interactions]
+        state.aggressiveInteractions = [...base.aggressiveInteractions]
+        state.symbol = base.symbol;
+        state.halo = true;
 
         state.base = base;
         state.x = if (x) x else 0;
@@ -2438,7 +2262,7 @@ Location.database.newEntry(data:{
              
         @:desc = random.pickArrayItem(list:base.descriptions);
         state.description = if (desc != empty) desc else "";
-        base.onCreate(location:this);
+        base.emit(event:'onCreate', location:this);
         return this;
       },
       
@@ -2464,6 +2288,11 @@ Location.database.newEntry(data:{
         get ::<- state.targetLandmarkEntry,
         set ::(value) <- state.targetLandmarkEntry = value
       },
+      
+      symbol : {
+        get ::<- state.symbol,
+        set ::(value) <- state.symbol = value
+      },
 
       
       inventory : {
@@ -2479,6 +2308,20 @@ Location.database.newEntry(data:{
             value.owns = this;
         }
       },
+      
+      partyEntered :: {
+        when(partyEntered) empty;
+        partyEntered = true;
+        state.base.emit(event:'onPartyEnter', location:this);
+      },
+
+
+      partyLeft :: {
+        when(partyEntered == false) empty;
+        partyEntered = false;
+        state.base.emit(event:'onPartyLeave', location:this);
+      },
+
       
       data : {
         get ::<- state.data
@@ -2512,8 +2355,20 @@ Location.database.newEntry(data:{
       },
       occupants : {
         get :: {
-          return state.occupants;
+          return [...state.occupants];
         }
+      },
+      
+      enter ::(entity) {
+        when (entity->findIndex(:entity) != -1) empty;
+        state.occupants->push(:entity);
+        state.base.emit(event:'onEntityEnter', location:this, entity);
+      },
+      
+      leave ::(entity) {
+        when (entity->findIndex(:entity) == -1) empty;
+        state.occupants = state.occupants->filter(::(value) <- value != entity);
+        state.base.emit(event:'onEntityLeave', location:this, entity);
       },
       
       discovered : {
@@ -2533,15 +2388,30 @@ Location.database.newEntry(data:{
         }
       },
       
-      canInteract ::<- state.base.interactions->size > 0,
+      canInteract ::<- state.interactions->size > 0,
       
       // per location mod data.
       data : {
         get ::<- state.data
       },
       
+      // go ahead! add what you like.
+      interactions : {
+        get ::<- state.interactions
+      },
+      
+      // go ahead! add what you like.
+      aggressiveInteractions : {
+        get ::<- state.aggressiveInteractions
+      },
+      
+      halo : {
+        get ::<- state.halo,
+        set ::(value) <- state.halo = value
+      },
+      
       incrementTime :: {
-        state.base.onIncrementTime(location:this);
+        state.base.emit(event:'onIncrementTime', location:this);
       },
       
       lockWithPressurePlate :: {
@@ -2576,6 +2446,8 @@ Location.database.newEntry(data:{
       },
       
       interact ::{
+        breakpoint();
+      
         @world = import(module:'game_singleton.world.mt');
         @party = world.party;      
         @:Interaction = import(module:'game_database.interaction.mt');
@@ -2584,7 +2456,7 @@ Location.database.newEntry(data:{
         @:aggress::(location, party) {
         
           @:choiceNames = [];
-          foreach(location.base.aggressiveInteractions) ::(k, name) {
+          foreach(location.aggressiveInteractions) ::(k, name) {
             choiceNames->push(value:
               Interaction.find(id:name).name
             );
@@ -2602,7 +2474,7 @@ Location.database.newEntry(data:{
               );
               
               when (!location.landmark.peaceful) ::<= {
-                interaction.onInteract(location, party);          
+                interaction.emit(event:'onInteract', location, party);          
                 if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
                   windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
 
@@ -2613,7 +2485,7 @@ Location.database.newEntry(data:{
                 prompt: 'Are you sure?',
                 onChoice::(which) {
                   when(which == false) empty;
-                  interaction.onInteract(location, party);                                        
+                  interaction.emit(event:'onInteract', location, party);                                        
                   if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
                     windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
                 }
@@ -2626,28 +2498,20 @@ Location.database.newEntry(data:{
         // initial interaction 
         // Initial interaction triggers an event.
         
-        if (state.visited == false) ::<= {
-          for(0, random.integer(from:state.base.minOccupants, to:state.base.maxOccupants))::(i) {
-            state.occupants->push(value:landmark_.island.newInhabitant());
-          }
-        
-        
+        if (state.visited == false) ::<= {        
           state.visited = true;
-          this.base.onFirstInteract(location:this);
+          this.base.emit(event:'onFirstInteract', location:this);
         }
           
         
-        @canInteract = ::? {
-          return this.base.onInteract(location:this);
-        }
           
-        when(canInteract == false) empty;
+        when(this.base.emit(event:'onInteract', location:this) == false) empty;
         
         when (state.overrideInteractID != '') 
-          Interaction.find(:state.overrideInteractID).onInteract(party, location:this);
+          Interaction.find(:state.overrideInteractID).interact(party, location:this);
 
         
-        @:interactionNames = [...this.base.interactions]->map(to:::(value) {
+        @:interactionNames = [...this.interactions]->map(to:::(value) {
           return Interaction.find(id:value).name;
         });
         
@@ -2661,7 +2525,7 @@ Location.database.newEntry(data:{
         ];
         
 
-        if (this.base.aggressiveInteractions->keycount)
+        if (this.aggressiveInteractions->keycount)
           choices->push(value: 'Aggress');
           
         windowEvent.queueChoices(
@@ -2675,20 +2539,20 @@ Location.database.newEntry(data:{
             when(choice == 0) empty;
 
             // aggress
-            when(this.base.aggressiveInteractions->keycount > 0 && choice == choices->size) ::<= {
+            when(this.aggressiveInteractions->keycount > 0 && choice == choices->size) ::<= {
               aggress(location:this, party);
             }
             
             when(choice-1 >= interactionNames->size) ::<= {
               @:interaction = scenarioInteractions[choice-(1+interactionNames->size)];
-              interaction.onSelect(location:this)
+              interaction.select(location:this)
               if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
                 windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
             }
             
-            @:interaction = Interaction.find(id:this.base.interactions[choice-1])
+            @:interaction = Interaction.find(id:this.interactions[choice-1])
             
-            interaction.onInteract(
+            interaction.base.emit(event:'onInteract',
               location: this,
               party
             );          

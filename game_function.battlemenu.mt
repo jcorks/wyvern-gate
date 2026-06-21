@@ -70,7 +70,7 @@
       onKept ::<-     battle.requestRedrawBG(),
       onChoice::(choice) {
         when(choice == 0) empty;
-        options[choice-1].onSelect(user, battle, commitAction);    
+        options[choice-1].select(user, battle, commitAction);    
       }
     );   
   }

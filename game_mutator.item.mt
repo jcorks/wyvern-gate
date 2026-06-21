@@ -3737,7 +3737,11 @@ none.name = 'None';
       possibleArts : Object,
       sortType : Number,
     },
-    reset     
+    reset,
+    knownEvents : [
+      'onCreate',
+      'onStep'
+    ]
   ),
   
   private : {
@@ -3938,8 +3942,7 @@ none.name = 'None';
           state.inletSlotData = import(:'game_class.inletset.mt').new(size:slotCount);          
         }
       }
-      if (base.events.onCreate != empty)
-        base.events.onCreate(item:this, creationHint);
+      base.emit(event:'onCreate', item:this, creationHint);
       recalculateName(*_);
       state.stats.simplify();
       
@@ -3982,10 +3985,9 @@ none.name = 'None';
       }
     },
     
-    step :: {
-      if (_.state.base.events.onStep != empty)
-        _.state.base.events.onStep(:_.this);
-    },
+    step ::<- 
+      _.state.base.emit(event:'onStep', item:_.this)
+    ,
       
     name : {
       get :: {

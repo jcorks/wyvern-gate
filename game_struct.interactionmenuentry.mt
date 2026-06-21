@@ -36,6 +36,6 @@ return struct(
     keepInteractionMenu : Boolean,
     
     // The action to do when the option is selected.
-    onSelect: Function
+    select: Function
   }
 );  
