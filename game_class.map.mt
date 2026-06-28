@@ -1137,6 +1137,7 @@ Map =  LoadableClass.create(
         }
         loc->push(value:val);
         items->push(value:val);
+        return {x:x, y:y}
       },
       
       getItem::(data) {

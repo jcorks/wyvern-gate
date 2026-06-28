@@ -2139,7 +2139,7 @@ Interaction.newEntry(
                   render ::<- canvas.fill()
                 },
                 onLeave :: {
-                  instance.visitCurrentIsland(
+                  world.island.visit(
                     atGate:true
                   );
                 }
@@ -2230,7 +2230,7 @@ Interaction.newEntry(
       windowEvent.queueCustom(
         onEnter:: {
           @:instance = import(module:'game_singleton.instance.mt');
-          instance.visitLandmark(landmark:location.targetLandmark, where::(landmark) <- location.targetLandmarkEntry);
+          location.targetLandmark.visit(where::(landmark) <- location.targetLandmarkEntry);
         }
       )
     },
@@ -2258,8 +2258,8 @@ Interaction.newEntry(
           
           windowEvent.queueCustom(
             onEnter::{
-              @:instance = import(module:'game_singleton.instance.mt');
-              instance.visitCurrentIsland();             
+              @:world = import(module:'game_singleton.world.mt');
+              world.island.visit();
             }
           )        
         }
@@ -2348,7 +2348,7 @@ Interaction.newEntry(
       }
       @:instance = import(module:'game_singleton.instance.mt');
 
-      instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
+      location.targetLandmark.visit(where::(landmark)<-location.targetLandmarkEntry);
       canvas.clear();
     }
   }

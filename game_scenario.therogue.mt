@@ -150,7 +150,7 @@ completion:
     
       @world = import(module:'game_singleton.world.mt');
       @:instance = import(module:'game_singleton.instance.mt');
-      instance.islandTravel();
+      world.island.travel();       
       if (world.landmark) ::<= {
         world.landmark.travel();
       }      
@@ -195,7 +195,7 @@ completion:
         characterCreator(::(entity){
           party.add(:entity);
           breakpoint();
-          instance.visitLandmark(landmark:island.landmarks[0]);
+          island.landmarks[0].visit();
         });
       });
 

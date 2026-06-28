@@ -6109,7 +6109,7 @@ Effect.newEntry(
           empty;
           
         @:instance = import(:'game_singleton.instance.mt');
-        instance.visitCurrentIsland(restorePos:true);
+        world.island.visit(restorePos:true);
         windowEvent.queueMessage(text:'The party teleported out of the area.');
       }
     }

@@ -1061,7 +1061,7 @@ Landmark.database.newEntry(
     @:Entity = import(module:'game_class.entity.mt');
 
     @:loadContent::(base) {
-
+      breakpoint();
       if (base.landmarkType.blueprint) {
         state.map = Map.new(parent:this);
         makeBlueprint(this, state); 
@@ -1118,7 +1118,7 @@ Landmark.database.newEntry(
         this.addLocation(
           location:Location.new(landmark:this, base:Location.database.find(:which.id))
         );
-        if (Location.database.find(id:which.id).onePerLandmark) ::<= {
+        if (Location.database.find(id:which.id).hasTraits(:Location.TRAIT.ONE_PER_LANDMARK)) ::<= {
           possibleLocations->remove(key:possibleLocations->findIndex(value:which));
         }
         mapIndex += 1;
@@ -1500,7 +1500,8 @@ Landmark.database.newEntry(
         if (world.landmark)
           world.landmark.leave();
           
-        world.landmark = this;        
+        world.landmark = this;  
+        breakpoint();      
         if (where != empty) ::<= {
           where = where(landmark);
           if (where != empty)
@@ -1722,9 +1723,11 @@ Landmark.database.newEntry(
         }
 
         if (state.base.landmarkType == TYPE.DUNGEON) ::<= {
-          if (loc.x == 0 && loc.y == 0)
-            state.map.setItem(data:loc, area:state.map.getRandomEmptyArea(), symbol: loc.symbol, traits, name:loc.name)
-          else
+          if (loc.x == 0 && loc.y == 0) {
+            @:pos = state.map.setItem(data:loc, area:state.map.getRandomEmptyArea(), symbol: loc.symbol, traits, name:loc.name)
+            loc.x = pos.x
+            loc.y = pos.y;
+          } else
             defaultAdd();
           
         } else if (state.base.landmarkType == TYPE.STRUCTURE) ::<= {

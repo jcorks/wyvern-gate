@@ -732,9 +732,7 @@ Island.database.newEntry(
         ::? {
           foreach(areas) ::(k, v) {
             if (v.x == x && v.y == y) ::<= {
-              instance.visitLandmark(
-                landmark: v
-              );
+              v.visit()
             }
           }
         }
@@ -828,11 +826,12 @@ Island.database.newEntry(
       },
       
       addLandmark ::(landmark) {
+        @:Map = import(module:'game_class.map.mt');
         state.map.setItem(
           data:landmark, 
           x:landmark.x, 
           y:landmark.y, 
-          traits : 0,
+          traits : Map.TRAIT.HAS_HALO,
           symbol:landmark.symbol, 
           name:landmark.legendName
         );
@@ -950,8 +949,232 @@ Island.database.newEntry(
         get :: {
           return world_;
         }
-      }
+      },
+      
+      travel :: {
+        @:island = this;
+        @:sound = import(module:'game_singleton.sound.mt');
+        sound.playBGM(name:'world', loop:true);
+        when(island == empty)
+          error(detail:'No island to make a menu for! Use visitIsland() to set the current island.');
+        
+        @enteredChoices = false;
+        @underFoot;
+        @steps = 0;
+        @:world = import(module:'game_singleton.world.mt');
+        island.map.title = island.name + ' : ' + world.timeString;
 
+
+        @islandTravel = ::{
+          windowEvent.queueCursorMove(
+            leftWeight: 1,
+            topWeight: 1,
+            prompt: 'Traveling...',
+            jumpTag: 'VisitIsland',
+            onMenu :: {
+              islandChoices();
+            },
+            
+            renderable : {
+              render ::{
+                @:hud = import(module:'game_singleton.hud.mt');
+                world.landmark = empty;
+                island.map.render();
+                hud.render(island);
+                when(underFoot == empty || underFoot->size == 0) empty;
+
+
+                
+                @:lines = [];
+                foreach(underFoot)::(i, arr) {
+
+
+                  lines->push(value:arr.data.name);
+
+                  //island.map.setPointer(
+                  //  x: arr.x,
+                  //  y: arr.y
+                  //);
+                
+                }
+                
+                
+                
+                canvas.renderTextFrameGeneral(
+                  title: 'Nearby:',
+                  topWeight : 1,
+                  leftWeight : 1,
+                  lines
+                );
+              }
+            },
+            onMove ::(choice) {
+              
+              @:target = island.landmarks[choice-1];
+              
+              
+              // move by one unit in that direction
+              // or ON it if its within one unit.
+              island.map.movePointerFree(
+                x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
+                y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
+              );
+              island.map.title = island.name + ' : ' + world.timeString + '           ';
+              steps += 1;
+              
+              if (steps%4 == 0)
+                world.incrementTime();
+              island.step();
+              
+              // cancel if we've arrived somewhere
+              underFoot = island.map.getNamedItemsUnderPointerRadius(radius:5);
+              
+              foreach(underFoot)::(i, arr) {
+                arr.data.discover();
+                island.map.discover(data:arr.data);                      
+              }
+              
+            }
+          );
+        }
+
+        
+        
+        
+        @:islandChoices = ::{   
+        
+          @islandOptions;
+          @choiceActions;
+          enteredChoices = true;
+          windowEvent.queueChoices(
+            leftWeight: 1,
+            topWeight: 1,
+            prompt: 'What next?',
+            //renderable: island.map,
+            canCancel : true,
+            keep: true,
+            jumpTag: 'LandmarkInteraction',
+            onGetChoices ::{
+              islandOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island));
+              
+              @choices = [];
+              choiceActions = [];
+              @visitable = island.map.getNamedItemsUnderPointerRadius(radius:5);
+
+              if (visitable != empty) ::<= {
+                foreach(visitable)::(i, vis) {
+                  choices->push(value:'Visit ' + vis.name); 
+                  choiceActions->push(::{
+                    @:landmark = vis.data;
+
+                    @where = ::(landmark) <- landmark.gate;
+
+                    when (landmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN)) ::<= {
+                      windowEvent.queueMessage(
+                        text: "It may be difficult to return... "
+                      );
+                      windowEvent.queueAskBoolean(
+                        prompt:'Enter?',
+                        onChoice::(which) {
+                          if (which == true)
+                            landmark.visit(where);
+                        }
+                      )
+                    }
+                    landmark.visit(where);              
+                    if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
+                      windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
+                    }                  
+                  });       
+                }
+              }
+              
+              foreach(islandOptions) ::(k, value) {
+                choices->push(:value.name);
+                choiceActions->push(::{
+                  value.select(island);
+                  if (!value.keepInteractionMenu && windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
+                    windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
+                  }              
+                })
+              }
+              choices->push(value: 'Options');
+              choiceActions->push(::{
+                @:options = [...world.scenario.base.interactionsOptions]->filter(by::(value) <- value.filter(island));
+                @:choices = [...options]->map(to::(value) <- value.name);
+
+                windowEvent.queueChoices(
+                  leftWeight: 1,
+                  topWeight: 1,
+                  prompt: 'Options',
+                  canCancel : true,
+                  keep: true,
+                  jumpTag: 'LandmarkInteractionOptions',
+                  choices,
+                  onChoice::(choice) {
+                    when(choice == 0) empty;
+                    options[choice-1].select(island);
+                    if (!options[choice-1].keepInteractionMenu && windowEvent.canJumpToTag(name:'LandmarkInteractionOptions'))
+                      windowEvent.jumpToTag(name:'LandmarkInteractionOptions', goBeforeTag:true, doResolveNext:true);
+                  }
+                );              
+              });
+              return choices;
+            },
+            onChoice::(choice) {
+              choiceActions[choice-1]();
+            }
+          );
+        } 
+        islandTravel();        
+      },
+      
+      visit ::(restorePos, atGate, onReady) {        
+        @:world = import(module:'game_singleton.world.mt');
+        world.island = this;
+        @:island = this;
+        
+
+        // check if we're AT a location.
+        island.map.title = "(Map of " + island.name + ')';
+
+        @hasVisitIsland;
+        if (windowEvent.canJumpToTag(name:'VisitIsland'))
+          windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:if(atGate == empty)true else false);
+        this.travel();
+        hasVisitIsland = true;
+        when (restorePos == empty && atGate != empty) ::<= {
+          @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
+          when(gate->size == 0) empty;
+          
+          gate = gate[0];
+          island.map.setPointer(
+            x: gate.x,
+            y: gate.y
+          );         
+          
+          
+          @gategate = gate.locations->filter(by:::(value) <- value.base.id == 'base:gate');
+          when(gategate->size == 0) empty;
+          
+          gate.visit(
+            where: ::(landmark)<- gategate[0]
+          );        
+          
+          if (hasVisitIsland && onReady) ::<= {
+            windowEvent.queueCallback(
+              callback::{
+                onReady();
+                return windowEvent.CALLBACK_DONE
+              }
+            );
+          } else
+            if (onReady)
+              onReady();
+        }
+        if (onReady)
+          onReady();
+      }
     }
     
 

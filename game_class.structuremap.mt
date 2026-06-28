@@ -613,7 +613,7 @@
         }
       
       
-        @:size = location.base.minStructureSize;
+        @:size = if (location.base.hasTraits(:Location.TRAIT.STRUCTURE_LARGE)) 2 else 1;
         when(random.flipCoin() && size == 1) ::<= {
           when(freeSpaces->keycount == 0) false;
           

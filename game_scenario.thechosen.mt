@@ -555,7 +555,7 @@ return {
             Scene.start(id:'thechosen:scene_intro', onDone::{          
             //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
 
-              instance.visitCurrentIsland(onReady :: {
+              world.island.visit(onReady :: {
                 windowEvent.queueMessage(
                   speaker: party.members[0].name,
                   text: '"..."'
@@ -791,12 +791,12 @@ return {
           world.party.add(:changeling);
           instance.savestate();
           
-          instance.islandTravel();       
+          world.island.travel();       
         });  
       }
 
 
-      instance.islandTravel();
+      world.island.travel();       
       if (world.landmark) ::<= {
         world.landmark.travel();
       }       
@@ -1345,7 +1345,7 @@ return {
             }
             @:instance = import(module:'game_singleton.instance.mt');
 
-            instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
+            location.targetLandmark.visit(where::(landmark)<-location.targetLandmarkEntry);
             canvas.clear();          
           }
 
@@ -1399,7 +1399,7 @@ return {
                   windowEvent.queueCustom(
                     onEnter::{
                       @:instance = import(module:'game_singleton.instance.mt');
-                      instance.visitCurrentIsland();             
+                      world.island.visit();
                     }
                   )
                 },
@@ -1454,7 +1454,7 @@ return {
           windowEvent.queueCustom(
             onEnter:: {
               @:instance = import(module:'game_singleton.instance.mt');
-              instance.visitLandmark(landmark:location.targetLandmark, where::(landmark) <- location.targetLandmarkEntry);
+              location.targetLandmark.visit(where::(landmark) <- location.targetLandmarkEntry);
             }
           )
         }
@@ -1939,8 +1939,6 @@ return {
       ownVerb : '',
       symbol: '/',
       category : Location.CATEGORY.EXIT,
-      onePerLandmark : false,
-      minStructureSize : 1,
 
       descriptions: [
         "Significant-looking stairs.",
@@ -1951,9 +1949,8 @@ return {
       
       aggressiveInteractions : [
       ],
-      
-      minOccupants : 0,
-      maxOccupants : 0,
+      traits : Location.TRAIT.ONE_PER_LANDMARK,
+
       
       events : {
         onInteract ::(location) {
@@ -1975,8 +1972,6 @@ return {
       ownVerb : 'owned',
       category : Location.CATEGORY.RESIDENTIAL,
       symbol: 'W',
-      onePerLandmark : true,
-      minStructureSize : 1,
 
       descriptions: [
         "What seems to be a stone throne",
@@ -1989,10 +1984,7 @@ return {
       aggressiveInteractions : [
       ],
 
-
-      
-      minOccupants : 0,
-      maxOccupants : 0,
+      traits : Location.TRAIT.ONE_PER_LANDMARK,
       
       events : {
         
@@ -2033,8 +2025,7 @@ return {
       ownVerb : '',
       symbol: '\\',
       category : Location.CATEGORY.EXIT,
-      onePerLandmark : false,
-      minStructureSize : 1,
+      traits : Location.TRAIT.ONE_PER_LANDMARK,
 
       descriptions: [
         "Decrepit stairs",
@@ -2047,10 +2038,6 @@ return {
       ],
       onStep ::(entities, location){},
 
-
-      
-      minOccupants : 0,
-      maxOccupants : 0,
       events : {
       
         onInteract ::(location) {
@@ -2070,8 +2057,7 @@ return {
       ownVerb : 'owned',
       category : Location.CATEGORY.RESIDENTIAL,
       symbol: 'W',
-      onePerLandmark : true,
-      minStructureSize : 1,
+      traits : Location.TRAIT.ONE_PER_LANDMARK,
 
       descriptions: [
         "What seems to be a stone throne",
@@ -2084,10 +2070,6 @@ return {
       aggressiveInteractions : [
       ],
 
-
-      
-      minOccupants : 0,
-      maxOccupants : 0,
       
       events : {
         
@@ -2137,8 +2119,7 @@ return {
       ownVerb : 'owned',
       category : Location.CATEGORY.RESIDENTIAL,
       symbol: 'W',
-      onePerLandmark : true,
-      minStructureSize : 1,
+      traits : Location.TRAIT.ONE_PER_LANDMARK,
 
       descriptions: [
         "What seems to be a stone throne",
@@ -2152,8 +2133,6 @@ return {
       ],
 
       
-      minOccupants : 0,
-      maxOccupants : 0,
       events : {
         
         
@@ -2204,8 +2183,7 @@ return {
       ownVerb : 'owned',
       category : Location.CATEGORY.RESIDENTIAL,
       symbol: 'W',
-      onePerLandmark : true,
-      minStructureSize : 1,
+      traits : Location.TRAIT.ONE_PER_LANDMARK,
 
       descriptions: [
         "What seems to be a stone throne",
@@ -2219,9 +2197,6 @@ return {
       ],
 
 
-      
-      minOccupants : 0,
-      maxOccupants : 0,
       
       events : {        
         onCreate ::(location) {
@@ -2273,8 +2248,7 @@ return {
       ownVerb : '',
       symbol: '\\',
       category : Location.CATEGORY.EXIT,
-      onePerLandmark : false,
-      minStructureSize : 1,
+      traits : Location.TRAIT.ONE_PER_LANDMARK,
 
       descriptions: [
         "Decrepit stairs",
@@ -2286,10 +2260,6 @@ return {
       aggressiveInteractions : [
       ],
 
-
-      
-      minOccupants : 0,
-      maxOccupants : 0,
       
       events : {
         onInteract ::(location) {
@@ -2309,8 +2279,7 @@ return {
       ownVerb : '',
       symbol: ' ',
       category : Location.CATEGORY.ENTRANCE,
-      onePerLandmark : false,
-      minStructureSize : 1,
+      traits : Location.TRAIT.ONE_PER_LANDMARK,
 
       descriptions: [
         "An entrance to a place that seems to welcome you eerily. It makes you feel uneasy.",
@@ -2322,10 +2291,6 @@ return {
       aggressiveInteractions : [
       ],
 
-
-      
-      minOccupants : 0,
-      maxOccupants : 0,
       
       events : {
       }
@@ -4238,7 +4203,7 @@ return {
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
                 world.loadIsland(key, onDone::(island) {
-                  instance.visitCurrentIsland(atGate:true);
+                  world.island.visit(atGate:true);
                   doNext();     
                 });
               }
@@ -4251,7 +4216,7 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
 
             world.loadIsland(key, onDone::(island) {
-              instance.visitCurrentIsland(atGate:true, onReady:doNext);
+              world.island.visit(atGate:true, onReady:doNext);
             });
           } 
         ]
@@ -4279,9 +4244,7 @@ return {
                   island : location.landmark.island,
                   base : Landmark.database.find(id:'thechosen:dark-lair-entrance')
                 );
-                instance.visitLandmark(
-                  landmark
-                );
+                landmark.visit();
               }
             );
           },
@@ -4307,7 +4270,7 @@ return {
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
                 world.loadIsland(key, onDone::(island) {
-                  instance.visitCurrentIsland(atGate:true, onReady:doNext);
+                  world.island.visit(atGate:true, onReady:doNext);
                   doNext();     
                 });
               }

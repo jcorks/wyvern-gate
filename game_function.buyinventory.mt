@@ -98,20 +98,28 @@ return ::(inventory, shopkeep, onDone) {
           lines: [
             'Stat boosts:',
             ...(hoveredItem.stats.descriptionRateLines->map(::(value) <- ' ' + value)),
-
-            '',
-            'Arts:',
-            ...getArtDesc(id1:hoveredItem.arts[0],
-                          id2:hoveredItem.arts[1]),
             
             ...([if (hoveredItem.inletSlotSet != empty)
               '' + hoveredItem.inletSlotSet.size + ' gem slot' + if (hoveredItem.inletSlotSet.size == 1) '.' else 's.'
             else 
               ''])
+
           ],
           leftWeight: 0,
-          topWeight: 0.5
+          topWeight: 0
         )
+
+        canvas.renderTextFrameGeneral(
+          title: 'Summary:',
+          lines: [
+            'Arts:',
+            ...getArtDesc(id1:hoveredItem.arts[0],
+                          id2:hoveredItem.arts[1])
+          ],
+          leftWeight: 0,
+          topWeight: 1
+        )
+
       }
     },
     

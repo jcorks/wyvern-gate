@@ -16,7 +16,6 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 @:class = import(module:'Matte.Core.Class');
-@:Island = import(module:'game_mutator.island.mt');
 @:Party = import(module:'game_class.party.mt');
 @:Battle = import(module:'game_class.battle.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
@@ -195,7 +194,8 @@
       @:EntityQuality = import(module:'game_mutator.entityquality.mt');
       @:Item = import(module:'game_mutator.item.mt');
       @:story = import(module:'game_singleton.story.mt');
-      
+      @:Island = import(module:'game_mutator.island.mt');
+
       @:currentIsland = this.island;
       
       this.island = Island.new(
@@ -849,6 +849,7 @@
 
         
         @:commitLoad :: {
+          @:Island = import(module:'game_mutator.island.mt');
           state.currentIslandID = id;
           if (alreadyLoaded != empty)
             island = alreadyLoaded 
@@ -894,6 +895,7 @@
         @which = save.islands[id];
         @alreadyLoaded;
         if (which == empty) ::<= {
+          @:Island = import(module:'game_mutator.island.mt');
           @:newIsland = Island.new(
             *{worldID : id, ...(if (islandGenTraits) islandGenTraits else ({}))}
           );
@@ -944,7 +946,8 @@
             random.load(:serialized.rng);
           
           state.load(parent:this, serialized:serialized.world, loadFirst:['scenario']);
-          
+          @:Island = import(module:'game_mutator.island.mt');
+
           island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
           island.load(:serialized.islands[state.currentIslandID]);
           landmark = ::? {  

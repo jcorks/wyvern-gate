@@ -2233,7 +2233,7 @@
                   @world = import(module:'game_singleton.world.mt');
                   @:instance = import(module:'game_singleton.instance.mt');
                   world.loadIslandID(id:state.islandID, onDone::(island) {
-                    instance.islandTravel();
+                    world.island.travel();
 
                     foreach(state.hirees) ::(k, hiree) {
                       if (hiree.role == ROLES.IN_PARTY)
@@ -2248,8 +2248,7 @@
                     @:shop = locations[locations->findIndexCondition(::(value) <- value.worldID == state.shopID)]
 
                     
-                    instance.visitLandmark(
-                      landmark:city,
+                    city.visit(
                       where: ::(landmark)<- shop
                     );        
 
@@ -3574,7 +3573,7 @@ return {
           
           
 
-          instance.visitLandmark(landmark:location.targetLandmark, where::(landmark)<-location.targetLandmarkEntry);
+          location.targetLandmark.visit(where::(landmark)<-location.targetLandmarkEntry);
           canvas.clear();
         }
       }
@@ -4181,7 +4180,7 @@ return {
             @:d = Landmark.new(
               base:Landmark.database.find(id:'thetrader:fortune-wyvern-dimension')
             );
-            instance.visitLandmark(landmark:d);       
+            d.visit();
             doNext();
           }
         ]
@@ -4209,7 +4208,7 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
 
 
-            instance.visitCurrentIsland(atGate:true);        
+            world.island.visit(atGate:true);        
           }
         ]
       }
@@ -4236,7 +4235,7 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
 
 
-            instance.visitCurrentIsland(atGate:true);        
+            world.island.visit(atGate:true);        
           }
         ]
       }
@@ -4288,7 +4287,7 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
 
 
-            instance.visitCurrentIsland(atGate:true);        
+            world.island.visit(atGate:true);        
             @:world = import(module:'game_singleton.world.mt');
             @:party = world.party;
             @:trader = world.scenario.data.trader;

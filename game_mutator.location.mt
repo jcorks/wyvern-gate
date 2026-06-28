@@ -2474,7 +2474,7 @@ Location.database.newEntry(data:{
               );
               
               when (!location.landmark.peaceful) ::<= {
-                interaction.emit(event:'onInteract', location, party);          
+                interaction.interact(location, party);          
                 if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
                   windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
 
@@ -2485,7 +2485,7 @@ Location.database.newEntry(data:{
                 prompt: 'Are you sure?',
                 onChoice::(which) {
                   when(which == false) empty;
-                  interaction.emit(event:'onInteract', location, party);                                        
+                  interaction.interact(location, party);                                        
                   if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
                     windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
                 }
@@ -2552,7 +2552,7 @@ Location.database.newEntry(data:{
             
             @:interaction = Interaction.find(id:this.interactions[choice-1])
             
-            interaction.base.emit(event:'onInteract',
+            interaction.interact(
               location: this,
               party
             );          
