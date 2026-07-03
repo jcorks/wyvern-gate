@@ -97,7 +97,7 @@ Quest.database.newEntry(
         quest.data.landmarkID = landmark.worldID;
         quest.data.itemName = quest.data.item.name;
         quest.data.item = empty;
-        island.addLandmark(:landmark);
+        island.addLandmark(landmark);
         
         windowEvent.queueMessage(
           speaker: issuer.name,
@@ -271,7 +271,7 @@ Quest.database.newEntry(
         landmark.addLocation(location:item);
         
         quest.data.landmarkID = landmark.worldID;
-        island.addLandmark(:landmark);  
+        island.addLandmark(landmark);  
       },
       
       onStep ::(quest, landmark, island) {

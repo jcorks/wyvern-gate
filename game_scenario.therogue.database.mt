@@ -395,7 +395,7 @@ Location.database.newEntry(data:{
       requiredEvents : [
         'base:dungeon-encounters',
       ],
-      possibleLocations : [
+      possibleObjects : [
   //          {id: 'Stairs Down', rarity:1},
         {id: 'base:fountain', rarity:18},
         {id: 'base:potion-shop', rarity: 25},
@@ -408,12 +408,12 @@ Location.database.newEntry(data:{
         {id: 'base:fancy-shop', rarity: 50}
 
       ],
-      requiredLocations : [
-        'base:stairs-up',
-        'base:item',
-        'base:item',
-        'therogue:gold',
-        'base:warp-point'
+      requiredObjects : [
+        {id: 'base:stairs-up'},
+        {id: 'base:item'},
+        {id: 'base:item'},
+        {id: 'therogue:gold'},
+        {id: 'base:warp-point'}
       ],
       mapHint:{
         layoutType: DungeonMap.LAYOUT_EPSILON
@@ -545,9 +545,9 @@ Location.database.newEntry(data:{
       landmarkType : Landmark.TYPE.CUSTOM,
       requiredEvents : [
       ],
-      possibleLocations : [
+      possibleObjects : [
       ],
-      requiredLocations : [
+      requiredObjects : [
       ],
       mapHint:{},
       onCreate ::(landmark, island) {

@@ -381,6 +381,51 @@ Location.database.newEntry(data:{
 })
 
 
+
+Location.database.newEntry(data:{
+    name: 'Shop',
+    id: 'base:shop-gateway',
+    rarity: 100,
+    ownVerb : 'run',
+    category : CATEGORY.BUSINESS,
+    symbol: '$',
+
+    descriptions: [
+      "A modest trading shop. Relatively small.",
+      "Extravagant shop with many wild trinkets."
+    ],
+    interactions : [
+
+    ],
+    
+    aggressiveInteractions : [
+    ],
+
+
+    
+    traits : 0,
+    events : {
+      onStep ::(location) {
+        @:island = location.landmark.island
+        when(location.data.targetID != empty) 
+          island.findLandmark(:location.data.targetID).visit()
+
+        @:landmark = Landmark.new(
+          island: location.landmark.island,
+          base : Landmark.database.find(:'base:shop-inside'),
+          x:0,
+          y:0
+        );
+        
+        island.addLandmark(landmark, unmapped: true);
+        location.data.targetID = landmark.worldID;
+        landmark.visit();
+        
+      }
+    }
+  })
+
+
 ::<= {
   @:restockShop::(location) {
     when(location.ownedBy == empty) empty;

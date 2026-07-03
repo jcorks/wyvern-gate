@@ -3721,8 +3721,8 @@ return {
         legendName : 'City',
         symbol : '|',
         rarity : 5,
-        minLocations : 12,
-        maxLocations : 17,
+        minObjects : 12,
+        maxObjects : 17,
         traits :
           Landmark.TRAIT.UNIQUE |
           Landmark.TRAIT.GUARDED |
@@ -3733,25 +3733,33 @@ return {
         eventPreference : LandmarkEvent.KIND.PEACEFUL,
         landmarkType : Landmark.TYPE.STRUCTURE,
         requiredEvents : [],
-        possibleLocations : [
+        possibleObjects : [
           {id:'base:home', rarity: 1},
           //{id:'inn', rarity: 3},
           //{id:'guild', rarity: 25}
           //{id:'tavern', rarity: 100}
           //{id:'school', rarity: 7}
         ],
-        requiredLocations : [
-          'base:shop',
-          'thetrader:shop',
-          'base:shop',
-          'base:arts-tecker',
-          'base:tavern',
-          'base:arena',
-          'base:inn',
-          'base:school',
-          'base:school',
-          'base:blacksmith'  ,
-          'base:auction-house'    
+        requiredObjects : [
+          {
+            name : 'Shop',
+            symbol: '$',
+            id: 'base:shop-inside'
+          },
+          //'thetrader:shop',
+          {
+            name : 'Shop',
+            symbol: '$',
+            id: 'base:shop-inside'
+          },
+          //'base:arts-tecker',
+          //'base:tavern',
+          //'base:arena',
+          //'base:inn',
+          //'base:school',
+          //'base:school',
+          //'base:blacksmith'  ,
+          //'base:auction-house'    
         ],
         mapHint : {
           roomSize: 30,
@@ -3785,13 +3793,13 @@ return {
         maxEvents: 4,
         eventPreference : LandmarkEvent.KIND.HOSTILE,
             
-        minLocations : 2,
-        maxLocations : 4,
+        minObjects : 2,
+        maxObjects : 4,
         landmarkType : Landmark.TYPE.DUNGEON,
         requiredEvents : [
           'base:dungeon-encounters',
         ],
-        possibleLocations : [
+        possibleObjects : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
@@ -3807,7 +3815,7 @@ return {
           {id: 'base:fancy-shop', rarity: 50}
 
         ],
-        requiredLocations : [
+        requiredObjects : [
           'base:stairs-down',
           'base:locked-chest',
           'base:small-chest',
@@ -3844,14 +3852,14 @@ return {
         maxEvents : 0,
         eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
-        minLocations : 2,
-        maxLocations : 2,
+        minObjects : 2,
+        maxObjects : 2,
         landmarkType : Landmark.TYPE.DUNGEON,
         requiredEvents : [
         ],
-        possibleLocations : [
+        possibleObjects : [
         ],
-        requiredLocations : [
+        requiredObjects : [
           'thetrader:fortune-throne',
         ],
         

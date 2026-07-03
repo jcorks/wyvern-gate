@@ -1487,18 +1487,18 @@ return {
         maxEvents : 0,
         eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
-        minLocations : 2,
-        maxLocations : 2,
+        minObjects : 2,
+        maxObjects : 2,
         landmarkType : Landmark.TYPE.DUNGEON,
         requiredEvents : [
         ],
-        possibleLocations : [
+        possibleObjects : [
           {id: 'base:small-chest', rarity:3},
         ],
-        requiredLocations : [
-          'thechosen:final-stairs',
-          'base:small-chest',
-          'base:enchantment-stand'
+        requiredObjects : [
+          {id: 'thechosen:final-stairs'},
+          {id: 'base:small-chest'},
+          {id: 'base:enchantment-stand'}
         ],
         mapHint:{},
         events : {
@@ -1521,8 +1521,8 @@ return {
         legendName: 'Shrine',
         symbol : 'M',
         rarity : 100000,    
-        minLocations : 1,
-        maxLocations : 2,
+        minObjects : 1,
+        maxObjects : 2,
         landmarkType : Landmark.TYPE.DUNGEON,
         traits : 
           Landmark.TRAIT.UNIQUE |
@@ -1536,7 +1536,7 @@ return {
         requiredEvents : [
           'base:creature-encounters'
         ],
-        possibleLocations : [
+        possibleObjects : [
     //          {id: 'Stairs Down', rarity:1},
 
           // the standard set
@@ -1555,11 +1555,11 @@ return {
           {id: 'base:fancy-shop', rarity: 500}
 
         ],
-        requiredLocations : [
-          'thechosen:stairs-down',
-          'thechosen:stairs-down',
-          'base:item',
-          'base:item'
+        requiredObjects : [
+          {id: 'thechosen:stairs-down'},
+          {id: 'thechosen:stairs-down'},
+          {id: 'base:item'},
+          {id: 'base:item'}
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_ALPHA
@@ -1582,8 +1582,8 @@ return {
         legendName: 'Shrine',
         symbol : 'M',
         rarity : 100000,    
-        minLocations : 1,
-        maxLocations : 4,
+        minObjects : 1,
+        maxObjects : 4,
         landmarkType : Landmark.TYPE.DUNGEON,
         traits : 
           Landmark.TRAIT.UNIQUE |
@@ -1599,7 +1599,7 @@ return {
           'base:dungeon-encounters',
           'base:item-specter',
         ],
-        possibleLocations : [
+        possibleObjects : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:wyvern-statue', rarity: 15},
@@ -1612,11 +1612,11 @@ return {
           {id: 'base:clothing-shop', rarity: 300},
           {id: 'base:fancy-shop', rarity: 500},
         ],
-        requiredLocations : [
-          'thechosen:stairs-down',
-          'base:item',
-          'base:item',
-          'base:enchantment-stand'
+        requiredObjects : [
+          {id: 'thechosen:stairs-down'},
+          {id: 'base:item'},
+          {id: 'base:item'},
+          {id: 'base:enchantment-stand'}
           
         ],
         mapHint:{
@@ -1641,8 +1641,8 @@ return {
         symbol : 'M',
         legendName: 'Shrine',
         rarity : 100000,    
-        minLocations : 2,
-        maxLocations : 4,
+        minObjects : 2,
+        maxObjects : 4,
         landmarkType : Landmark.TYPE.DUNGEON,
         traits : 
           Landmark.TRAIT.UNIQUE |
@@ -1657,7 +1657,7 @@ return {
           'base:dungeon-encounters',
           'base:item-specter',
         ],
-        possibleLocations : [
+        possibleObjects : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
@@ -1671,14 +1671,14 @@ return {
           {id: 'base:fancy-shop', rarity: 100}
 
         ],
-        requiredLocations : [
-          'thechosen:stairs-down',
-          'base:small-chest',
-          'base:item',
+        requiredObjects : [
+          {id: 'thechosen:stairs-down'},
+          {id: 'base:small-chest'},
+          {id: 'base:item'},
 
-          'base:warp-point',
-          'base:warp-point',
-          'base:enchantment-stand'
+          {id: 'base:warp-point'},
+          {id: 'base:warp-point'},
+          {id: 'base:enchantment-stand'}
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_GAMMA
@@ -1703,8 +1703,8 @@ return {
         symbol : 'M',
         legendName: 'Shrine',
         rarity : 100000,    
-        minLocations : 2,
-        maxLocations : 4,
+        minObjects : 2,
+        maxObjects : 4,
         landmarkType : Landmark.TYPE.DUNGEON,
 
         traits : 
@@ -1721,7 +1721,7 @@ return {
           'base:dungeon-encounters',
           'base:item-specter'
         ],
-        possibleLocations : [
+        possibleObjects : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
@@ -1736,13 +1736,13 @@ return {
           {id: 'base:fancy-shop', rarity: 50}
 
         ],
-        requiredLocations : [
-          'thechosen:stairs-down',
-          'base:small-chest',
-          'base:enchantment-stand',
+        requiredObjects : [
+          {id: 'thechosen:stairs-down'},
+          {id: 'base:small-chest'},
+          {id: 'base:enchantment-stand'},
           
-          'base:warp-point',
-          'base:warp-point'          
+          {id: 'base:warp-point'},
+          {id: 'base:warp-point'}          
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_DELTA
@@ -1768,8 +1768,8 @@ return {
         legendName: '???',
         symbol : 'M',
         rarity : 1,    
-        minLocations : 2,
-        maxLocations : 2,
+        minObjects : 2,
+        maxObjects : 2,
         traits : 
           Landmark.TRAIT.UNIQUE   |
           Landmark.TRAIT.PEACEFUL |
@@ -1783,10 +1783,10 @@ return {
         
         requiredEvents : [
         ],
-        possibleLocations : [
+        possibleObjects : [
         ],
-        requiredLocations : [
-          'thechosen:throne-fire',
+        requiredObjects : [
+          {id: 'thechosen:throne-fire'},
         ],
         
         mapHint : {
@@ -1810,8 +1810,8 @@ return {
         legendName: '???',
         symbol : 'M',
         rarity : 1,    
-        minLocations : 2,
-        maxLocations : 2,
+        minObjects : 2,
+        maxObjects : 2,
         landmarkType : Landmark.TYPE.DUNGEON,
         traits : 
           Landmark.TRAIT.UNIQUE   |
@@ -1825,10 +1825,10 @@ return {
 
         requiredEvents : [
         ],
-        possibleLocations : [
+        possibleObjects : [
         ],
-        requiredLocations : [
-          'thechosen:throne-ice',
+        requiredObjects : [
+          {id: 'thechosen:throne-ice'},
         ],
         
         mapHint : {
@@ -1851,8 +1851,8 @@ return {
         legendName: '???',
         symbol : 'M',
         rarity : 1,    
-        minLocations : 2,
-        maxLocations : 2,
+        minObjects : 2,
+        maxObjects : 2,
         landmarkType : Landmark.TYPE.DUNGEON,
         traits : 
           Landmark.TRAIT.UNIQUE   |
@@ -1865,10 +1865,10 @@ return {
 
         requiredEvents : [
         ],
-        possibleLocations : [
+        possibleObjects : [
         ],
-        requiredLocations : [
-          'thechosen:throne-thunder',
+        requiredObjects : [
+          {id: 'thechosen:throne-thunder'},
         ],
         
         mapHint : {
@@ -1891,8 +1891,8 @@ return {
         legendName: '???',
         symbol : 'M',
         rarity : 1,    
-        minLocations : 2,
-        maxLocations : 2,
+        minObjects : 2,
+        maxObjects : 2,
         landmarkType : Landmark.TYPE.DUNGEON,
         traits : 
           Landmark.TRAIT.UNIQUE   |
@@ -1905,10 +1905,10 @@ return {
 
         requiredEvents : [
         ],
-        possibleLocations : [
+        possibleObjects : [
         ],
-        requiredLocations : [
-          'thechosen:throne-light',
+        requiredObjects : [
+          {id: 'thechosen:throne-light'},
         ],
         
         mapHint : {
@@ -2309,8 +2309,8 @@ return {
         symbol : 'M',
         legendName: 'Shrine',
         rarity : 100000,    
-        minLocations : 0,
-        maxLocations : 4,
+        minObjects : 0,
+        maxObjects : 4,
 
         traits : 
           Landmark.TRAIT.UNIQUE |
@@ -2326,7 +2326,7 @@ return {
         requiredEvents : [
           'base:damned-souls',
         ],
-        possibleLocations : [
+        possibleObjects : [
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
@@ -2338,11 +2338,11 @@ return {
           {id: 'base:Healing Circle', rarity:35}
 
         ],
-        requiredLocations : [
-          'base:enchantment-stand',
-          'base:stairs-up',
-          'base:locked-chest',
-          'base:Small-chest'
+        requiredObjects : [
+          {id: 'base:enchantment-stand'},
+          {id: 'base:stairs-up'},
+          {id: 'base:locked-chest'},
+          {id: 'base:Small-chest'}
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_EPSILON
@@ -2366,8 +2366,8 @@ return {
         legendName : 'Dark Lair',
         symbol : '#',
         rarity : 100000,
-        minLocations : 0,
-        maxLocations : 0,
+        minObjects : 0,
+        maxObjects : 0,
         traits : 
           Landmark.TRAIT.UNIQUE |
           Landmark.TRAIT.POINT_OF_NO_RETURN |
@@ -2381,9 +2381,9 @@ return {
 
         landmarkType : Landmark.TYPE.CUSTOM,
         requiredEvents : [],
-        possibleLocations : [
+        possibleObjects : [
         ],
-        requiredLocations : [
+        requiredObjects : [
         ],
         mapHint : {
         },

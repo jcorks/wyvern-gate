@@ -221,7 +221,7 @@ Island.database.newEntry(
 
     if (x != 0 && y != 0)
       clearScenery(map, x, y);
-    island.addLandmark(:landmark);
+    island.addLandmark(landmark);
     return landmark;
   }
 }
@@ -309,6 +309,10 @@ Island.database.newEntry(
     
     // explored areas of the island. May or may not have a map marking
     areas : empty,
+    
+    // landmarks that are not part of the map.
+    // added to when adding a landmark with the unmapped flag
+    unmappedLandmarks : empty,
   },
   
   database : Database.new(
@@ -568,6 +572,7 @@ Island.database.newEntry(
           state.encounterRate = random.number();
           state.sizeW  = sizeW;
           state.sizeH  = sizeH;
+          state.unmappedLandmarks = [];
 
           if (state.sizeW < base.minSize) state.sizeW = base.minSize;
           if (state.sizeW > base.maxSize) state.sizeW = base.maxSize;
@@ -681,7 +686,7 @@ Island.database.newEntry(
               x:0,
               y:0
             );
-            this.addLandmark(:landmark);          
+            this.addLandmark(landmark);          
           }
         }
         
@@ -786,7 +791,7 @@ Island.database.newEntry(
       
       findLocation ::(id) {
         return ::? {
-          foreach(state.map.getAllItemData())::(i, landmark) {
+          foreach(this.landmarks)::(i, landmark) {
             foreach(landmark.locations)::(n, location) {
               when(location.worldID == id)
                 send(message:location);
@@ -794,6 +799,15 @@ Island.database.newEntry(
           }
         }
       },
+      
+      findLandmark ::(id) {
+        return ::? {
+          foreach(this.landmarks)::(i, landmark) {
+            when(landmark.worldID == id)
+              send(message:landmark);
+          }
+        }
+      },      
       
       // represents a physical step in island space (not in a landmark)
       step :: {      
@@ -825,16 +839,20 @@ Island.database.newEntry(
         }  
       },
       
-      addLandmark ::(landmark) {
+      addLandmark ::(landmark, unmapped) {
         @:Map = import(module:'game_class.map.mt');
-        state.map.setItem(
-          data:landmark, 
-          x:landmark.x, 
-          y:landmark.y, 
-          traits : Map.TRAIT.HAS_HALO,
-          symbol:landmark.symbol, 
-          name:landmark.legendName
-        );
+        
+        if (unmapped == true)
+          state.unmappedLandmarks->push(:landmark)
+        else
+          state.map.setItem(
+            data:landmark, 
+            x:landmark.x, 
+            y:landmark.y, 
+            traits : Map.TRAIT.HAS_HALO,
+            symbol:landmark.symbol, 
+            name:landmark.legendName
+          );
       },
       
       removeLandmark ::(landmark) {
@@ -927,17 +945,12 @@ Island.database.newEntry(
         return angy;  
       },
 
-      
-      getLandmarkIndex ::(landmark => Landmark.type) {
-        return state.map.getAllItemData()->findIndex(value:landmark);
-      },
-      
       getAPosition :: {
         return LargeMap.getAPosition(:state.map);
       },
       
       landmarks : {
-        get ::<- state.map.getAllItemData()
+        get ::<- [...state.map.getAllItemData(), ...state.unmappedLandmarks]
       },
       
       level : {

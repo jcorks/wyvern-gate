@@ -34,34 +34,89 @@
 );
 
 
-@:TYPE = ::<= {
-  @:layouts = {};
-  @:idPool = 10;
-
-  return {
-    DUNGEON : {},
-    STRUCTURE : {},
-    CUSTOM : {},
+@:TYPE = {
+  // Dungeon mode features a generation algorithm to determine areas and 
+  // points of interest in a continuous, connected space.
+  // Objects are placed within these map areas calculated.
+  // In dungeon mode, every object (required / possible) is a location specification
+  /*
+      {
+        // the ID of the location to spawn
+        id: 'location-id',
+        
+        // optional symbol to override its mark with 
+        overrideSymbol : '*',
+        
+        // Optional override name
+        overrideName : 'My Display Name',
+      
+        // Optional any-data to pass to the location.
+        data : {
+          someData : thing
+        },
+        
+        // Optional relative rarity (higher means more rare)
+        // Only used for "possible" entries
+        rarity : 10
+      }
+  */
+  DUNGEON : {},
+  
+  // In structure mode, every object (required / possible) is a portal.
+  // "buildings" are created with portals leading to the objects.
+  // This is purely cosmetic and used for placement.
+  // Portals are special jump points to other landmarks.
+  // Technically, portals are special locations within the landmarks.
+  /*
+      {
+        // the ID of a landmark to warp to.
+        // Landmarks created this way are generated on-the-fly 
+        // upon first visiting the portal. The landmark is 
+        // also added to a 
+        id: 'landmark-id',
+        
+        // optional symbol to identify the structure associated with the portal
+        // More often than not override symbols are blank
+        symbol : '*',
+      
+        // Optional any-data to pass to the landmark 
+        data : {
+          someData : thing
+        },
+        
+        // Optional relative rarity (higher means more rare)
+        // Only used for "possible" entries
+        rarity : 10
+      }
+  */
+  STRUCTURE : {},
+  
+  // objects are ignored and it is up to the landmark or manager 
+  // to populate the landmark.
+  CUSTOM : {},
+  
+  // imports a json layout in "single" mode, where 
+  // a random pattern is loaded as a valid map.
+  // NOTE: all json files are preloaded by the 
+  // game at startup or on modload
+  //
+  // Each blueprint interprets objects as 
+  // locations.
+  BLUEPRINT_SINGLE ::(path) <-
+    {
+      blueprint : true,
+      single : true,
+      data : import(:path)
+    },
     
-    // imports a json layout in "single" mode, where 
-    // a random pattern is loaded as a valid map.
-    // NOTE: all json files are preloaded by the 
-    // game at startup or on modload
-    BLUEPRINT_SINGLE ::(path) <-
-      {
-        blueprint : true,
-        single : true,
-        data : import(:path)
-      },
-      
-    BLUEPRINT_COLLAGE ::(path) <-
-      {
-        blueprint : true,
-        single : false,
-        data : import(:path)
-      },
-      
-  };
+  // Each blueprint interprets objects as 
+  // locations.
+  BLUEPRINT_COLLAGE ::(path) <-
+    {
+      blueprint : true,
+      single : false,
+      data : import(:path)
+    }
 }
 
 @:TRAIT = {
@@ -89,8 +144,8 @@ Landmark.database.newEntry(
     legendName : 'Town',
     symbol : '#',
     rarity : 100000,
-    minLocations : 7,
-    maxLocations : 15,
+    minObjects : 7,
+    maxObjects : 15,
     minEvents : 0,
     maxEvents : 3,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
@@ -101,17 +156,24 @@ Landmark.database.newEntry(
       TRAIT.PEACEFUL,
 
     requiredEvents : [],
-    possibleLocations : [
-      {id:'base:home', rarity: 1},
+    possibleObjects : [
+      {
+        id:'base:home'
+      },
       //{id:'guild', rarity: 25}
     ],
-    requiredLocations : [
-      'base:shop',
-      'base:arts-tecker',
-      'base:school',
-      'base:tavern',
-      'base:blacksmith',
-      'base:inn'      
+    requiredObjects : [
+      {
+        name : 'Shop',
+        symbol: '$',
+        id: 'base:shop-inside'
+      },
+    
+      {id:'base:arts-tecker'},
+      {id:'base:school'},
+      {id:'base:tavern'},
+      {id:'base:blacksmith'},
+      {id:'base:inn'}      
     ],
     mapHint : {
       roomSize: 30,
@@ -138,8 +200,8 @@ Landmark.database.newEntry(
     legendName : '',
     symbol : ' ',
     rarity : 100000,
-    minLocations : 7,
-    maxLocations : 15,
+    minObjects : 7,
+    maxObjects : 15,
     minEvents : 0,
     maxEvents : 3,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
@@ -151,9 +213,9 @@ Landmark.database.newEntry(
       TRAIT.UNIQUE,
 
     requiredEvents : [],
-    possibleLocations : [
+    possibleObjects : [
     ],
-    requiredLocations : [
+    requiredObjects : [
     ],
     mapHint : {
       roomSize: 30,
@@ -177,8 +239,8 @@ Landmark.database.newEntry(
     legendName : 'City',
     symbol : '|',
     rarity : 5,
-    minLocations : 12,
-    maxLocations : 17,
+    minObjects : 12,
+    maxObjects : 17,
     traits : 
       TRAIT.PEACEFUL |
       TRAIT.GUARDED |
@@ -189,17 +251,30 @@ Landmark.database.newEntry(
 
     landmarkType : TYPE.STRUCTURE,
     requiredEvents : [],
-    possibleLocations : [
+    possibleObjects : [
       {id:'base:home', rarity: 1},
       //{id:'inn', rarity: 3},
       //{id:'guild', rarity: 25}
       //{id:'tavern', rarity: 100}
       //{id:'school', rarity: 7}
     ],
-    requiredLocations : [
-      'base:shop',
-      'base:shop',
-      'base:shop',
+    requiredObjects : [
+      {
+        name : 'Shop',
+        symbol: '$',
+        id: 'base:shop-inside'
+      },
+      {
+        name : 'Shop',
+        symbol: '$',
+        id: 'base:shop-inside'
+      },
+      {
+        name : 'Shop',
+        symbol: '$',
+        id: 'base:shop-inside'
+      },            
+      /*
       'base:auction-house',
       'base:arts-tecker',
       'base:tavern',
@@ -208,6 +283,7 @@ Landmark.database.newEntry(
       'base:school',
       'base:school',
       'base:blacksmith'      
+      */
     ],
     mapHint : {
       roomSize: 30,
@@ -232,8 +308,8 @@ Landmark.database.newEntry(
     legendName: 'Mine',
     symbol : 'O',
     rarity : 5,
-    minLocations : 10,
-    maxLocations : 15,
+    minObjects : 10,
+    maxObjects : 15,
     minEvents : 0,
     maxEvents : 0,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
@@ -245,16 +321,12 @@ Landmark.database.newEntry(
 
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [],
-    possibleLocations : [
+    possibleObjects : [
       {id:'base:ore-vein', rarity: 1},
-      //{id:'inn', rarity: 3},
-      //{id:'guild', rarity: 25}
-      //{id:'tavern', rarity: 100}
-      //{id:'school', rarity: 7}
     ],
-    requiredLocations : [
-      'base:ore-vein',
-      'base:smelter',
+    requiredObjects : [
+      {id:'base:ore-vein'},
+      {id:'base:smelter'},
     ],
     mapHint : {
       roomSize: 15,
@@ -275,8 +347,8 @@ Landmark.database.newEntry(
     legendName: 'Gate',
     symbol : '@',
     rarity : 10,
-    minLocations : 4,
-    maxLocations : 10,
+    minObjects : 4,
+    maxObjects : 10,
     minEvents : 0,
     maxEvents : 0,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
@@ -289,11 +361,11 @@ Landmark.database.newEntry(
 
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [],
-    possibleLocations : [
+    possibleObjects : [
 
     ],
-    requiredLocations : [
-      'base:gate'
+    requiredObjects : [
+      {id:'base:gate'}
     ],
     
     mapHint : {
@@ -316,8 +388,8 @@ Landmark.database.newEntry(
     symbol : 'M',
     legendName: 'Shrine',
     rarity : 100000,    
-    minLocations : 0,
-    maxLocations : 4,
+    minObjects : 0,
+    maxObjects : 4,
     traits : 
       TRAIT.UNIQUE |
       TRAIT.POINT_OF_NO_RETURN |
@@ -329,7 +401,7 @@ Landmark.database.newEntry(
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
     ],
-    possibleLocations : [
+    possibleObjects : [
 //          {id: 'Stairs Down', rarity:1},
       {id: 'base:fountain', rarity:18},
       {id: 'base:potion-shop', rarity: 25},
@@ -344,14 +416,14 @@ Landmark.database.newEntry(
       {id: 'base:fancy-shop', rarity: 50}
 
     ],
-    requiredLocations : [
-      'base:stairs-down',
-      'base:stairs-down',
-      'base:enchantment-stand',
-      'base:item',
-      'base:item',
-      'base:warp-point',
-      'base:warp-point'
+    requiredObjects : [
+      {id:'base:stairs-down'},
+      {id:'base:stairs-down'},
+      {id:'base:enchantment-stand'},
+      {id:'base:item'},
+      {id:'base:item'},
+      {id:'base:warp-point'},
+      {id:'base:warp-point'}
     ],
     mapHint:{
       layoutType: DungeonMap.LAYOUT_EPSILON
@@ -382,8 +454,8 @@ Landmark.database.newEntry(
     symbol : 'M',
     legendName: 'Shrine',
     rarity : 100000,    
-    minLocations : 2,
-    maxLocations : 4,
+    minObjects : 2,
+    maxObjects : 4,
     traits :
       TRAIT.UNIQUE |
       TRAIT.POINT_OF_NO_RETURN |
@@ -395,7 +467,7 @@ Landmark.database.newEntry(
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
     ],
-    possibleLocations : [
+    possibleObjects : [
 //          {id: 'Stairs Down', rarity:1},
       {id: 'base:fountain', rarity:18},
       {id: 'base:potion-shop', rarity: 25},
@@ -410,12 +482,12 @@ Landmark.database.newEntry(
       {id: 'base:fancy-shop', rarity: 50}
 
     ],
-    requiredLocations : [
-      'base:stairs-down',
-      'base:locked-chest',
-      'base:item',
-      'base:item',
-      'base:warp-point'
+    requiredObjects : [
+      {id: 'base:stairs-down'},
+      {id: 'base:locked-chest'},
+      {id: 'base:item'},
+      {id: 'base:item'},
+      {id: 'base:warp-point'}
     ],
     mapHint:{
       layoutType: DungeonMap.LAYOUT_DELTA
@@ -438,8 +510,8 @@ Landmark.database.newEntry(
     symbol : 'M',
     legendName: 'Shrine',
     rarity : 100000,    
-    minLocations : 2,
-    maxLocations : 2,
+    minObjects : 2,
+    maxObjects : 2,
     minEvents : 0,
     maxEvents : 0,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
@@ -453,14 +525,14 @@ Landmark.database.newEntry(
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
     ],
-    possibleLocations : [
+    possibleObjects : [
       {id: 'base:small-chest', rarity:3},
     ],
-    requiredLocations : [
-      'base:treasure-pit',
-      'base:small-chest',
-      'base:small-chest',
-      'base:enchantment-stand'
+    requiredObjects : [
+      {id: 'base:treasure-pit'},
+      {id: 'base:small-chest'},
+      {id: 'base:small-chest'},
+      {id: 'base:enchantment-stand'}
     ],
     mapHint:{},
     events : {
@@ -481,8 +553,8 @@ Landmark.database.newEntry(
     legendName: 'T. Room',
     symbol : 'O',
     rarity : 5,    
-    minLocations : 1,
-    maxLocations : 5,
+    minObjects : 1,
+    maxObjects : 5,
     traits : 
       TRAIT.UNIQUE |
       TRAIT.PEACEFUL,
@@ -493,12 +565,12 @@ Landmark.database.newEntry(
     landmarkType : TYPE.DUNGEON,
     requiredEvents : [
     ],
-    possibleLocations : [
+    possibleObjects : [
       {id: 'base:small-chest', rarity:5},
     ],
-    requiredLocations : [
-      'base:large-chest',
-      'base:ladder'
+    requiredObjects : [
+      {id: 'base:large-chest'},
+      {id: 'base:ladder'}
     ],
     
     mapHint : {
@@ -529,8 +601,8 @@ Landmark.database.newEntry(
     legendName: 'Port',
     rarity : 30,        
     symbol : '~',
-    minLocations : 3,
-    maxLocations : 10,
+    minObjects : 3,
+    maxObjects : 10,
     landmarkType : TYPE.STRUCTURE,
     traits : 
       TRAIT.PEACEFUL |
@@ -543,14 +615,14 @@ Landmark.database.newEntry(
 
     requiredEvents : [
     ],
-    possibleLocations : [
+    possibleObjects : [
       {id:'base:home', rarity:5},
       {id:'base:shop', rarity:40}
       //'guild',
       //'guardpost',
     ],
-    requiredLocations : [
-      'base:tavern'
+    requiredObjects : [
+      {id:'base:tavern'}
       //'shipyard'
     ],
     mapHint : {
@@ -570,8 +642,8 @@ Landmark.database.newEntry(
     legendName: 'Village',
     rarity : 5,        
     symbol : '*',
-    minLocations : 3,
-    maxLocations : 7,
+    minObjects : 3,
+    maxObjects : 7,
     landmarkType : TYPE.STRUCTURE,
     traits :
       TRAIT.PEACEFUL |
@@ -580,17 +652,19 @@ Landmark.database.newEntry(
     maxEvents : 3,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
       
-    possibleLocations : [
-      {id:'base:home', rarity:1},
+    possibleObjects : [
+      /*{id:'base:home', rarity:1},
       {id:'base:tavern', rarity:7},
       {id:'base:shop', rarity:7},
       {id:'base:arts-tecker', rarity:7},
-      {id:'base:farm', rarity:4}
+      {id:'base:farm', rarity:4}*/
     ],
-    requiredLocations : [
-      'base:farm',
-      'base:home',
-      'base:school'    
+    requiredObjects : [
+      /*
+      {id:'base:farm'},
+      {id:'base:home'},
+      {id:'base:school'}    
+      */
     ],
     requiredEvents : [
     ],
@@ -619,19 +693,19 @@ Landmark.database.newEntry(
     maxEvents : 3,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
       
-    minLocations : 5,
-    maxLocations : 10,
-    possibleLocations : [
-      {id:'base:home', rarity:1},
-      {id:'base:tavern', rarity:7},
-      {id:'base:farm', rarity:4}
+    minObjects : 5,
+    maxObjects : 10,
+    possibleObjects : [
+      //{id:'base:home', rarity:1},
+      //{id:'base:tavern', rarity:7},
+      //{id:'base:farm', rarity:4}
     ],
     requiredEvents : [
     ],
-    requiredLocations : [
-      'base:farm',
-      'base:home',
-      'base:school'        
+    requiredObjects : [
+      //'base:farm',
+      //'base:home',
+      //'base:school'        
     ],
     mapHint : {
       roomSize: 25,
@@ -649,12 +723,12 @@ Landmark.database.newEntry(
     id: 'Outpost',
     symbol : '[]',
     rarity : 500,        
-    minLocations : 0,
-    maxLocations : 0,
-    possibleLocations : [
+    minObjects : 0,
+    maxObjects : 0,
+    possibleObjects : [
       //'barracks'        
     ],
-    requiredLocations : []
+    requiredObjects : []
   }
 )*/
 
@@ -675,18 +749,18 @@ Landmark.database.newEntry(
     maxEvents : 1,
     eventPreference : LandmarkEvent.KIND.HOSTILE,
 
-    minLocations : 3,
-    maxLocations : 5,
-    possibleLocations : [
+    minObjects : 3,
+    maxObjects : 5,
+    possibleObjects : [
       {id: 'base:small-chest', rarity:1},
     ],
-    requiredLocations : [
-      'base:item',
-      'base:item',
-      'base:item',
-      'base:item',
-      'base:item',
-      'base:item'
+    requiredObjects : [
+      {id: 'base:item'},
+      {id: 'base:item'},
+      {id: 'base:item'},
+      {id: 'base:item'},
+      {id: 'base:item'},
+      {id: 'base:item'}
     ],
     requiredEvents : [
       'base:the-snakesiren'
@@ -728,11 +802,11 @@ Landmark.database.newEntry(
     maxEvents : 0,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
-    minLocations : 0,
-    maxLocations : 0,
-    possibleLocations : [
+    minObjects : 0,
+    maxObjects : 0,
+    possibleObjects : [
     ],
-    requiredLocations : [
+    requiredObjects : [
     ],
     requiredEvents : [
     ],
@@ -756,14 +830,14 @@ Landmark.database.newEntry(
     pointOfNoReturn : false,
     ephemeral : false,
     dungeonForceEntrance: true,
-    minLocations : 0,
-    maxLocations : 0,
+    minObjects : 0,
+    maxObjects : 0,
     guarded : false,
     canSave : true,
     requiredEvents : [
     ],
-    possibleLocations : [],
-    requiredLocations : [],
+    possibleObjects : [],
+    requiredObjects : [],
     mapHint: {},
     onCreate ::(landmark, island){},
     onVisit ::(landmark, island) {}
@@ -782,16 +856,16 @@ Landmark.database.newEntry(
     landmarkType : TYPE.DUNGEON,
     dungeonForceEntrance: true,
     
-    minLocations : 0,
-    maxLocations : 0,
+    minObjects : 0,
+    maxObjects : 0,
     guarded : false,
     canSave : true,
     pointOfNoReturn : false,
     ephemeral : false,
     requiredEvents : [
     ],
-    possibleLocations : [],
-    requiredLocations : [],
+    possibleObjects : [],
+    requiredObjects : [],
     mapHint: {},
     onCreate ::(landmark, island){},
     onVisit ::(landmark, island) {}
@@ -810,14 +884,14 @@ Landmark.database.newEntry(
     canSave : true,
     dungeonForceEntrance: true,
     guarded : false,
-    minLocations : 0,
-    maxLocations : 0,
+    minObjects : 0,
+    maxObjects : 0,
     pointOfNoReturn : false,
     ephemeral : false,
     requiredEvents : [
     ],
-    possibleLocations : [],
-    requiredLocations : [],
+    possibleObjects : [],
+    requiredObjects : [],
     mapHint: {},        
     onCreate ::(landmark, island){},
     onVisit ::(landmark, island) {}
@@ -972,10 +1046,10 @@ Landmark.database.newEntry(
       minEvents : Number,
       maxEvents : Number,
       eventPreference : Number,
-      minLocations : Number,
-      maxLocations : Number,
-      possibleLocations : Object,
-      requiredLocations : Object,
+      minObjects : Number,
+      maxObjects : Number,
+      possibleObjects : Object,
+      requiredObjects : Object,
       requiredEvents : Object,
       landmarkType: Any,
       mapHint : Object,
@@ -1062,6 +1136,19 @@ Landmark.database.newEntry(
 
     @:loadContent::(base) {
       breakpoint();
+    
+      @:selected = [];
+      @:possibleObjects = [...base.possibleObjects];
+      for(0, random.integer(from:base.minObjects, to:base.maxObjects))::(i) {
+        when(possibleObjects->keycount == 0) empty;
+        @:which = random.pickArrayItemWeighted(list:possibleObjects);
+        selected->push(:which);
+        if (Location.database.find(id:which.id).hasTraits(:Location.TRAIT.ONE_PER_LANDMARK)) ::<= {
+          possibleObjects->remove(key:possibleObjects->findIndex(value:which));
+        }
+      }        
+      
+      
       if (base.landmarkType.blueprint) {
         state.map = Map.new(parent:this);
         makeBlueprint(this, state); 
@@ -1071,10 +1158,17 @@ Landmark.database.newEntry(
         if (base.hasTraits(:Landmark.TRAIT.DUNGEON_FORCE_ENTRANCE)) ::<= {
           this.addLocation(location:Location.new(landmark: this, base:Location.database.find(:'base:entrance')));
         }
+        this.setupLocations(:base.requiredObjects);
+        this.setupLocations(:selected);
+
       } else if (base.landmarkType == TYPE.STRUCTURE) ::<= {
         structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
         structureMapBuilder.initialize(mapHint:base.mapHint, parent:this);
-        this.addLocation(location:Location.new(landmark: this, base:Location.database.find(:'base:entrance')));
+        
+        
+        
+        this.setupPortals(:base.requiredObjects);
+        this.setupPortals(:selected);
       } else ::<= {
         state.map = Map.new(parent:this);
       }
@@ -1082,11 +1176,10 @@ Landmark.database.newEntry(
 
       
       /*
-      [0, Random.integer(from:base.minLocations, to:base.maxLocations)]->for(do:::(i) {
+      [0, Random.integer(from:base.minObjects, to:base.maxObjects)]->for(do:::(i) {
         locations->push(value:island.newInhabitant());      
       });
       */
-      @mapIndex = 0;
    
 
 
@@ -1096,33 +1189,7 @@ Landmark.database.newEntry(
 
 
       
-      
 
-
-
-
-
-      
-
-      foreach(base.requiredLocations)::(i, loc) {
-        this.addLocation(
-          location:Location.new(landmark:this, base:Location.database.find(:loc))
-        );
-      
-        mapIndex += 1;
-      }
-      @:possibleLocations = [...base.possibleLocations];
-      for(0, random.integer(from:base.minLocations, to:base.maxLocations))::(i) {
-        when(possibleLocations->keycount == 0) empty;
-        @:which = random.pickArrayItemWeighted(list:possibleLocations);
-        this.addLocation(
-          location:Location.new(landmark:this, base:Location.database.find(:which.id))
-        );
-        if (Location.database.find(id:which.id).hasTraits(:Location.TRAIT.ONE_PER_LANDMARK)) ::<= {
-          possibleLocations->remove(key:possibleLocations->findIndex(value:which));
-        }
-        mapIndex += 1;
-      }
       
       if (base.landmarkType == TYPE.DUNGEON) ::<= {
         @:gate = this.gate;
@@ -1255,6 +1322,51 @@ Landmark.database.newEntry(
         if (state.mapEntityController != empty)
           state.mapEntityController.initialize(parent:this);
       },
+      
+      setupPortals ::(portalDataArray) {
+        @:addPortal = ::{
+          
+        }
+      
+      
+      
+        foreach(portalDataArray)::(i, landmarkData) {
+
+          @:island = this.island
+          when(location.data.targetID != empty) 
+            island.findLandmark(:location.data.targetID).visit()
+
+          @:landmark = Landmark.new(
+            island: location.landmark.island,
+            base : Landmark.database.find(:'base:shop-inside'),
+            x:0,
+            y:0
+          );
+          
+          island.addLandmark(landmark, unmapped: true);
+          location.data.targetID = landmark.worldID;
+          landmark.visit();
+
+
+          this.addPortal(
+          
+          );
+      
+          addPort(:portalDataArray[i]);
+        }
+          
+          @:loc = Location.new(landmark:this, base:Location.database.find(:locData.id));
+          if (locData.overrideSymbol != empty)
+            loc.symbol = locData.overrideSymbol;
+            
+          
+          this.addLocation(
+            location:loc
+          );
+        
+        }
+      
+      },
 
       worldID : {
         get ::<- state.worldID
@@ -1327,22 +1439,20 @@ Landmark.database.newEntry(
 
       // adds a special location that teleports to a different landmark 
       // within the same island.     
-      addPortal ::(x, y, width, height, destination, destinationX, destinationY, symbol) {
+      addPortal ::(x, y, destination, symbol) {
         @:location = Location.new(base:Location.database.find(:'base:portal'), x, y);
         location.data.destination = {
-          worldID : destination.worldID,
-          x : destinationX,
-          y : destinationY
+          worldID : destination.worldID
         };
         
         if (symbol == empty)
-          symbol = '#';
+          symbol = '';
 
         this.addLocation(
           location,
-          width, height,
           traits : 0
         );
+        return location;
       },
 
       // enters the travel ui state, bringing the user to the 
@@ -1696,6 +1806,10 @@ Landmark.database.newEntry(
         state.base.emit(event:'onRemoveLocation', landmark:this, location);
 
       },
+      
+      getNewLocationPosition() {
+      
+      },
 
       addLocation ::(location, width, height, traits) {
         location.landmark = this;
@@ -1730,13 +1844,7 @@ Landmark.database.newEntry(
           } else
             defaultAdd();
           
-        } else if (state.base.landmarkType == TYPE.STRUCTURE) ::<= {
-          if (structureMapBuilder != empty)
-            structureMapBuilder.addLocation(location:loc)
-          else  
-            defaultAdd();
-
-        } else 
+        } else
           defaultAdd();
 
         windowEvent.invalidateCache(:'VisitLandmark');
