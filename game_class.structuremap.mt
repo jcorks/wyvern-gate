@@ -84,7 +84,6 @@
 
     
     
-    @locations = [];  
     
     @:getSpaceBySlot::(x, y) {
       return freeSpaces[freeSpaces->findIndexCondition(::(value) <- value.x == x && value.y == y)];
@@ -550,70 +549,70 @@
       // is empty if there is no gate.
       gateSide : {get::<- gateSide},
       
-      // returns false if cant fit the location
-      addLocation::(location) {
-        // entrances take up 2 slots.
-        when(location.base.category == Location.CATEGORY.ENTRANCE) ::<= {          
-          ::? {
-            for(0, 20)::(i) {
-              @x0;
-              @y0;
-              @x1;
-              @y1;
-              
-              match(gateSide) {
-                (EAST, WEST):::<= {
-                  x0 = if (gateSide == WEST) 0 else unitsWide - 1;
-                  y0 = random.integer(from:0, to:unitsHigh-1);
-                  
-                  x1 = x0;
-                  y1 = y0;
-                  if (gateSide == WEST)
-                    x1 += 1
-                  else  
-                    x1 -= 1;
-                                
-                },
+      addEntrance ::{
+        ::? {
+          for(0, 20)::(i) {
+            @x0;
+            @y0;
+            @x1;
+            @y1;
+            
+            match(gateSide) {
+              (EAST, WEST):::<= {
+                x0 = if (gateSide == WEST) 0 else unitsWide - 1;
+                y0 = random.integer(from:0, to:unitsHigh-1);
                 
-                
-                (NORTH, SOUTH):::<= {
-                  x0 = random.integer(from:0, to:unitsWide-1);                
-                  y0 = if (gateSide == NORTH) 0 else unitsHigh - 1;
-
-                  x1 = x0;
-                  y1 = y0;
-                  if (gateSide == SOUTH)
-                    y1 += 1
-                  else  
-                    y1 -= 1;                
-                }
-              }              
-              when(slots[x0][y0] != false) empty;
-              //when(slots[x1][y1] != false) empty;
-
-              @:space0 = getSpaceBySlot(x:x0, y:y0);
-              //@:space1 = getSpaceBySlot(x:x1, y:y1);
-
-
+                x1 = x0;
+                y1 = y0;
+                if (gateSide == WEST)
+                  x1 += 1
+                else  
+                  x1 -= 1;
+                              
+              },
               
-              slots[x0][y0] = true;
-              //slots[x1][y1] = true;
               
-              freeSpaces->remove(key:space0);
-              //freeSpaces->remove(key:space1);
-              addGate(
-                location,
-                left:space0.x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
-                top:space0.y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING,
-                which:gateSide
-              );
-              send();
-            }
+              (NORTH, SOUTH):::<= {
+                x0 = random.integer(from:0, to:unitsWide-1);                
+                y0 = if (gateSide == NORTH) 0 else unitsHigh - 1;
+
+                x1 = x0;
+                y1 = y0;
+                if (gateSide == SOUTH)
+                  y1 += 1
+                else  
+                  y1 -= 1;                
+              }
+            }              
+            when(slots[x0][y0] != false) empty;
+            //when(slots[x1][y1] != false) empty;
+
+            @:space0 = getSpaceBySlot(x:x0, y:y0);
+            //@:space1 = getSpaceBySlot(x:x1, y:y1);
+
+
+            
+            slots[x0][y0] = true;
+            //slots[x1][y1] = true;
+            
+            freeSpaces->remove(key:space0);
+            //freeSpaces->remove(key:space1);
+            addGate(
+              location,
+              left:space0.x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
+              top:space0.y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING,
+              which:gateSide
+            );
+            send();
           }
-        }
+        }      
+      },
       
       
-        @:size = if (location.base.hasTraits(:Location.TRAIT.STRUCTURE_LARGE)) 2 else 1;
+      // returns false if cant fit the location
+      addPortal::(landmark) {
+      
+        @:size = if (landmark.base.hasTraits(:Location.TRAIT.STRUCTURE_LARGE)) 2 else 1;
         when(random.flipCoin() && size == 1) ::<= {
           when(freeSpaces->keycount == 0) false;
           
@@ -925,7 +924,6 @@
     }
     
     @Location = import(module:'game_mutator.location.mt');
-    @:locations = [];
     this.interface = {
       initialize::(mapHint => Object, parent) {
         map = Map.new(parent);
@@ -947,7 +945,7 @@
     
       // special function that adds a location value 
       // to the map in a designated zoning area.
-      addLocation::(location => Location.type) {
+      addPortal::(landmark) {
         @:zonesCat = zones->filter(by:::(value) <- value.category == location.base.category);
         @zone = if (zonesCat == empty || zonesCat->keycount == 0)
           addZone(category:location.base.category)
@@ -955,15 +953,10 @@
           random.pickArrayItem(list:zonesCat)
         ;
         
-        if (zone.addLocation(location) == false) ::<= {
+        if (zone.addPortal(landmark) == false) ::<= {
           zone = addZone(category:location.base.category);
-          zone.addLocation(location);
+          zone.addPortal(landmark);
         }
-        locations->push(value:location);
-      },
-      
-      locations : {
-        get ::<- locations
       },
       
       getWidth ::<- map.width,

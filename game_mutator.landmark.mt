@@ -127,7 +127,12 @@
   CAN_SAVE : 16,
   POINT_OF_NO_RETURN : 32,
   GUARDED : 64,
-  NOTHING_HIDDEN : 128
+  NOTHING_HIDDEN : 128,
+  
+  // by default, locations are of structure size small 
+  // this bumps it up. really only for structure maps
+  STRUCTURE_LARGE : 256,
+
 }
 
 
@@ -1270,16 +1275,19 @@ Landmark.database.newEntry(
         island_ = island;
       },
 
-      defaultLoad::(base, x, y, floorHint){
+      defaultLoad::(base, x, y, floorHint, data){
         state.worldID = world.getNextID();
         state.x = 0;
         state.y = 0;
         state.floor = 0;
         state.steps = 0;
-        state.data = {};
         state.events = [];
         state.symbol = base.symbol;
         state.legendName = base.legendName;
+        if (data != empty)
+          state.data = data;
+        else
+          state.data = {};
 
         state.base = base;
         state.x = if (x != empty) x else 0;

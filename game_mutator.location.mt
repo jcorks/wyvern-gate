@@ -35,10 +35,6 @@
   // will have no halo or symbol drawn
   INVISIBLE : 1,
   
-  // by default, locations are of structure size small 
-  // this bumps it up. really only for structure maps
-  STRUCTURE_LARGE : 2,
-  
   // Hint for generative maps to not make more than one.
   ONE_PER_LANDMARK : 4
 }
@@ -80,6 +76,54 @@ Location.database.newEntry(data:{
   }
 })
 
+
+::<= {
+
+@:checkSpec::(spec) {
+  if (spec.symbol == empty)
+    spec.symbol = '';
+
+  if (spec.id->type != String) 
+    error(:'Portal specification is malformed: id should be a string pointing to a Landmark base name');
+
+    
+  if (spec.rarity == empty)
+    spec.rarity = 1;
+
+}
+
+	
+@:createLandmark::(location) {
+  when(location.data.destinationWorldID != empty) empty;
+  
+  checkSpec(:location.data);
+    
+  if (location.data.linkedPortalID == empty || (location.data.linkedPortalID)->type != String)
+    error(:'Portal.data must contain a linkedPortalID (String) to identify which portal location within the target the party should teleport to when teleporting.');
+  
+  
+  @:landmark = Landmark.create(
+    data : location.data.data,
+    base : Landmark.find(:location.data.id)
+  );  
+  location.landmark.island.addLandmark(landmark, unmapped: true);  
+  
+  // now find corresponding linkedPortalID
+  @:targetPortal = ::? {
+    foreach(landmark.locations) ::(i, locationIter) {
+      if (locationIter.data.linkedPortalID == location.data.linkedPortalID)
+        send(:locationIter);
+    }
+  }
+  
+  when(targetPortal == empty)
+    error(:'Portal landmark creation encountered an error: target portal in created landmark could not be found. this locations data.linkedPortalID must match one within the newly created landmark that this portal created.')
+  
+
+  location.data.destinationWorldID = targetPortal.worldID;  
+}
+	
+
 Location.database.newEntry(data:{
   id: 'base:portal',
   name: 'Portal',
@@ -98,24 +142,34 @@ Location.database.newEntry(data:{
   ],
   traits : 0,
   
-  events : {
+  events : {  
+  
     onStep ::(location, entities) {
+      if (location.data.destinationWorldID == empty)
+        createLandmark();
+    
       // find referred to landmark
       @:target = ::? {
-        foreach(location.landmark.island.landmarks) ::(k, v) {
-          if (v.worldID == location.data.destination.worldID)
-            send(:v);
+        foreach(location.landmark.island.landmarks) ::(k, landmark) {
+          when(landmark == location.landmark) empty;
+          
+          foreach(landmark.locations) ::(k, loc) {
+            if (location.data.destinationWorldID == loc.worldID)
+              send(:lov);
+          }
         }
       }
       
-      when(target == empty) empty;
+      when(target == empty)
+        error(:'Portal\'s target could not be found.');
       target.visitLandmark(where ::<- {
-        x : location.data.destination.x,
-        y : location.data.destination.y
+        x : target.x,
+        y : target.y
       })
     }
   }
 })
+}
 
 
 Location.database.newEntry(data:{
