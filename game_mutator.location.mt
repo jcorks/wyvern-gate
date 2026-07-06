@@ -22,21 +22,23 @@
 @:g = import(module:'game_function.g.mt');
 
 
-@:CATEGORY = {  
-  ENTRANCE : 0,
-  RESIDENTIAL : 1,
-  BUSINESS : 2,
-  UTILITY : 3,
-  EXIT : 4,
-  DUNGEON_SPECIAL : 5
-}  
 
 @:TRAIT = {
+
   // will have no halo or symbol drawn
   INVISIBLE : 1,
-  
+
   // Hint for generative maps to not make more than one.
-  ONE_PER_LANDMARK : 4
+  ONE_PER_LANDMARK : 2,
+
+  // Whether this location can be symbolically considered an 
+  // an entrance to a different landmark. Mostly used for dungeons.
+  ENTRANCE_HINT : 4,
+
+  // Whether this location can be symbolically considered an 
+  // exit out of a landmark. Mostly used for dungeons.
+  EXIT_HINT : 8  
+
 }
 
 @:reset ::{
@@ -55,7 +57,6 @@ Location.database.newEntry(data:{
   name: 'Door',
   rarity: 100000000,
   ownVerb: '',
-  category : CATEGORY.ENTRANCE,
 
   descriptions: [
     "A door leading to elsewhere."
@@ -70,7 +71,7 @@ Location.database.newEntry(data:{
   ],
   
   
-  traits : 0,
+  traits : TRAIT.ENTRANCE_HINT,
   events : {
   
   }
@@ -129,7 +130,6 @@ Location.database.newEntry(data:{
   name: 'Portal',
   rarity: 100000000,
   ownVerb: '',
-  category : CATEGORY.ENTRANCE,
   descriptions: [
     "From somewhere, to somewhere."
   ],
@@ -140,7 +140,7 @@ Location.database.newEntry(data:{
   
   aggressiveInteractions : [      
   ],
-  traits : 0,
+  traits : TRAIT.ENTRANCE_HINT,
   
   events : {  
   
@@ -177,8 +177,7 @@ Location.database.newEntry(data:{
   name: 'Entrance',
   rarity: 100000000,
   ownVerb: '',
-  category : CATEGORY.ENTRANCE,
-  traits : 0,
+  traits : TARIT.ENTRANCE_HINT,
   descriptions: [
     "A sturdy gate surrounded by a well-maintained fence around the area.",
     "A decrepit gate surrounded by a feeble attempt at fencing.",
@@ -201,7 +200,6 @@ Location.database.newEntry(data:{
   name: 'Farm',
   rarity: 100,
   ownVerb: 'owned',
-  category : CATEGORY.RESIDENTIAL,
   symbol: 'F',
   traits: TRAIT.STRUCTURE_LARGE,
 
@@ -249,7 +247,6 @@ Location.database.newEntry(data:{
   name: 'Home',
   rarity: 100,
   ownVerb: 'owned',
-  category : CATEGORY.RESIDENTIAL,
   symbol: '',
   traits : 0,
 
@@ -298,7 +295,6 @@ Location.database.newEntry(data:{
   id: 'base:ore-vein',
   rarity: 100,
   ownVerb: '???',
-  category : CATEGORY.UTILITY,
   symbol: '%',
 
   descriptions: [
@@ -325,7 +321,6 @@ Location.database.newEntry(data:{
   name: 'Smelter',
   rarity: 100,
   ownVerb: '???',
-  category : CATEGORY.UTILITY,
   symbol: 'm',
 
   descriptions: [
@@ -350,7 +345,6 @@ Location.database.newEntry(data:{
   name: 'Shopkeep',
   rarity: 100,
   ownVerb: '???',
-  category : CATEGORY.UTILITY,
   symbol: 'm',
   traits : TRAIT.INVISIBLE,
 
@@ -375,7 +369,6 @@ Location.database.newEntry(data:{
   name: 'Special!',
   rarity: 100,
   ownVerb: '???',
-  category : CATEGORY.UTILITY,
   symbol: '',
   traits : 0,
 
@@ -441,7 +434,6 @@ Location.database.newEntry(data:{
     id: 'base:shop-gateway',
     rarity: 100,
     ownVerb : 'run',
-    category : CATEGORY.BUSINESS,
     symbol: '$',
 
     descriptions: [
@@ -540,7 +532,6 @@ Location.database.newEntry(data:{
     id: 'base:shop',
     rarity: 100,
     ownVerb : 'run',
-    category : CATEGORY.BUSINESS,
     symbol: '$',
 
     descriptions: [
@@ -635,7 +626,6 @@ Location.database.newEntry(data:{
     id: 'base:auction-house',
     rarity: 300,
     ownVerb : 'run',
-    category : CATEGORY.BUSINESS,
     symbol: '%',
     traits : TRAIT.ONE_PER_LANDMARK,
 
@@ -685,7 +675,6 @@ Location.database.newEntry(data:{
   id: 'base:arts-tecker',
   rarity: 100,
   ownVerb : 'run',
-  category : CATEGORY.BUSINESS,
   symbol: '^',
 
   descriptions: [
@@ -755,7 +744,6 @@ Location.database.newEntry(data:{
   id: 'base:enchant-stand',
   rarity: 100,
   ownVerb : 'run',
-  category : CATEGORY.BUSINESS,
   symbol: '$',
 
   descriptions: [
@@ -833,7 +821,6 @@ Location.database.newEntry(data:{
   id: 'base:blacksmith',
   rarity: 100,
   ownVerb : 'run',
-  category : CATEGORY.BUSINESS,
   symbol: '/',
 
   descriptions: [
@@ -891,7 +878,6 @@ Location.database.newEntry(data:{
   id: 'base:chair',
   rarity: 100,
   ownVerb : 'run',
-  category : CATEGORY.DUNGEON_SPECIAL,
   symbol: 'n',
   traits : TRAIT.STRUCTURE_LARGE,
 
@@ -914,7 +900,6 @@ Location.database.newEntry(data:{
   id: 'base:tavern',
   rarity: 100,
   ownVerb : 'run',
-  category : CATEGORY.UTILITY,
   symbol: '&',
   traits: TRAIT.STRUCTURE_LARGE,
 
@@ -946,7 +931,6 @@ Location.database.newEntry(data:{
   id: 'base:arena',
   rarity: 100,
   ownVerb : 'run',
-  category : CATEGORY.UTILITY,
   symbol: '!',
   traits : TRAIT.STRUCTURE_LARGE,
 
@@ -978,7 +962,6 @@ Location.database.newEntry(data:{
   id: 'base:inn',
   rarity: 100,
   ownVerb : 'run',
-  category : CATEGORY.UTILITY,
   symbol: '=',
   traits : TRAIT.STRUCTURE_LARGE,
 
@@ -1010,7 +993,6 @@ Location.database.newEntry(data:{
   id: 'base:school',
   rarity: 100,
   ownVerb : 'run',
-  category : CATEGORY.UTILITY,
   symbol: '+',
   traits : TRAIT.STRUCTURE_LARGE,
 
@@ -1049,7 +1031,6 @@ Location.database.newEntry(data:{
   id: 'base:library',
   rarity: 100,
   ownVerb : '',
-  category : CATEGORY.UTILITY,
   symbol: '[]',
   traits: TRAIT.STRUCTURE_LARGE | TRAIT.ONE_PER_LANDMARK,
 
@@ -1077,7 +1058,6 @@ Location.database.newEntry(data:{
   id: 'base:gate',
   rarity: 100,
   ownVerb : '',
-  category : CATEGORY.UTILITY,
   symbol: '@',
   traits : TRAIT.ONE_PER_LANDMARK,
 
@@ -1110,7 +1090,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '\\',
-  category : CATEGORY.EXIT,
 
   descriptions: [
     "Decrepit stairs",
@@ -1124,7 +1103,7 @@ Location.database.newEntry(data:{
 
 
   
-  traits : 0,
+  traits : TRAIT.EXIT_HINT,
   events : {
     onInteract ::(location) {
       @open = location.isUnlockedWithPlate();
@@ -1144,7 +1123,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '\\',
-  category : CATEGORY.EXIT,
 
   descriptions: [
     "Decrepit stairs?",
@@ -1158,7 +1136,7 @@ Location.database.newEntry(data:{
 
 
   
-  traits : 0,
+  traits : TRAIT.EXIT_HINT,
   events : {}
 })
 
@@ -1169,7 +1147,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: 'w',
-  category : CATEGORY.DUNGEON_SPECIAL,
 
   descriptions: [
     "Strange stone column that allows travel between 2 points.",
@@ -1209,7 +1186,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '=',
-  category : CATEGORY.EXIT,
 
   descriptions: [
     "Ladder leading to the surface.",
@@ -1220,7 +1196,7 @@ Location.database.newEntry(data:{
   
   aggressiveInteractions : [
   ],
-  traits: 0,
+  traits: TRAIT.EXIT_HINT,
 
   
   events : {}
@@ -1232,8 +1208,7 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '?',
-  category : CATEGORY.EXIT,
-  traits: 0,
+  traits: TRAIT.EXIT_HINT,
 
   descriptions: [
     "A suspicious pit.",
@@ -1259,7 +1234,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '$',
-  category : CATEGORY.UTILITY,
   traits: 0,
 
 
@@ -1304,7 +1278,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '|',
-  category : CATEGORY.UTILITY,
   traits: 0,
 
 
@@ -1336,7 +1309,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '▆',
-  category : CATEGORY.UTILITY,
   traits: 0,
 
 
@@ -1370,7 +1342,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : 'owned',
   symbol: 'i',
-  category : CATEGORY.UTILITY,
   traits: 0,
 
 
@@ -1415,7 +1386,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '$',
-  category : CATEGORY.UTILITY,
   traits : TRAIT.ONE_PER_LANDMARK,
   descriptions: [
   ],
@@ -1479,7 +1449,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '$',
-  category : CATEGORY.UTILITY,
   traits: 0,
 
 
@@ -1531,7 +1500,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '=',
-  category : CATEGORY.UTILITY,
   traits: 0,
 
 
@@ -1560,7 +1528,6 @@ Location.database.newEntry(data:{
   rarity: 4,
   ownVerb : '',
   symbol: 'S',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
@@ -1587,7 +1554,6 @@ Location.database.newEntry(data:{
   rarity: 4,
   ownVerb : '',
   symbol: 'O',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
@@ -1617,7 +1583,6 @@ Location.database.newEntry(data:{
   rarity: 4,
   ownVerb : '',
   symbol: 'M',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: 0,
 
   descriptions: [
@@ -1648,7 +1613,6 @@ Location.database.newEntry(data:{
   rarity: 4,
   ownVerb : '',
   symbol: '%',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: TRAIT.ONE_PER_LANDMARK,
 
 
@@ -1679,7 +1643,6 @@ Location.database.newEntry(data:{
   rarity: 4,
   ownVerb : 'run',
   symbol: '%',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
@@ -1759,7 +1722,6 @@ Location.database.newEntry(data:{
   rarity: 4,
   ownVerb : 'run',
   symbol: 'P',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
@@ -1837,7 +1799,6 @@ Location.database.newEntry(data:{
   rarity: 4,
   ownVerb : 'run',
   symbol: '$',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
@@ -1928,7 +1889,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '$',
-  category : CATEGORY.UTILITY,
   traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
@@ -2004,7 +1964,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : 'owned',
   symbol: '-',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits : 0,
 
   descriptions: [
@@ -2056,7 +2015,6 @@ Location.database.newEntry(data:{
   name: 'Poisonous Goop',
   id: 'base:poison-tile',
   symbol: '~',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits : 0,
 
   descriptions: [
@@ -2110,7 +2068,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : '',
   symbol: '~',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: 0,
 
 
@@ -2138,7 +2095,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : 'owned',
   symbol: 'i',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: 0,
 
 
@@ -2165,7 +2121,6 @@ Location.database.newEntry(data:{
   rarity: 1000000000000,
   ownVerb : 'owned',
   symbol: 'i',
-  category : CATEGORY.DUNGEON_SPECIAL,
   traits: 0,
 
 
@@ -2234,7 +2189,6 @@ Location.database.newEntry(data:{
     halo : false
   },
   statics : {
-    CATEGORY : {get ::<- CATEGORY},
     TRAIT : {get::<- TRAIT}
   },
 
@@ -2247,7 +2201,6 @@ Location.database.newEntry(data:{
       rarity: Number,
       descriptions : Object,
       symbol : String,
-      category : Number,
 
       
       // List of interaction names
@@ -2263,8 +2216,6 @@ Location.database.newEntry(data:{
       // See Location.TRAIT
       traits : Number,
 
-      // the type of location it is
-      category : Number,
       
       // events known
       events : Object
@@ -2285,9 +2236,6 @@ Location.database.newEntry(data:{
       
       // called by the world when the time of day changes, hourly
       'onIncrementTime',
-
-      // the type of location it is
-      'category',
       
       // Called when entities step on the tile.
       // argument: entities, location

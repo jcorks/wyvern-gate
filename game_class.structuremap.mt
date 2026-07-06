@@ -61,6 +61,7 @@
     @_category;
     @_topDeco;
     @_bottomDeco;
+    @_landmark;
     @unitsWide;
     @unitsHigh;
     @gateSide = random.integer(from:NORTH, to:SOUTH);
@@ -90,7 +91,7 @@
     }   
     
     // adds a minimally-sized building
-    @:addMinimalBuilding ::(left, top, symbol, location) {
+    @:addMinimalBuilding ::(left, top, symbol, locationLeft, locationRight) {
       /*   
         |  |
         xxxx
@@ -123,10 +124,15 @@
       
       
       
-      location.x = left + 2;
-      location.y = top + 4;
-      _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', name:location.name);
-      _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', name:location.name);
+      locationLeft.x = left + 2;
+      locationLeft.y = top + 4;
+
+      locationRight.x = left + 3;
+      locationRight.y = top + 4;
+
+     
+      _landmark.addLocation(locationLeft);
+      _landmark.addLocation(locationRight);        
         
 
     }  
@@ -377,10 +383,15 @@
         _map.clearScenery(x:left + 2, y: top + 4);
         _map.clearScenery(x:left + 3, y: top + 4);
 
-        location.x = left + 2;
-        location.y = top + 4;
-        _map.setItem(data:location, x:left + 2, y: top + 4, symbol: ' ', name:location.name);
-        _map.setItem(data:location, x:left + 3, y: top + 4, symbol: ' ', name:location.name);
+        locationLeft.x = left + 2;
+        locationLeft.y = top + 4;
+
+        locationRight.x = left + 3;
+        locationRight.y = top + 4;
+
+
+        _landmark.addLocation(locationLeft);
+        _landmark.addLocation(locationRight);
         
 
         if (symbol != empty) ::<= {
@@ -396,11 +407,14 @@
         _map.clearScenery(x:left + 8, y: top + 4);
         _map.clearScenery(x:left + 9, y: top + 4);
         
-        location.x = left + 8;
-        location.y = top + 4;
-        _map.setItem(data:location, x:left + 8, y: top + 4, symbol: ' ', name:location.name);
-        _map.setItem(data:location, x:left + 9, y: top + 4, symbol: ' ', name:location.name);
-        
+        locationLeft.x = left + 8;
+        locationLeft.y = top + 4;
+
+        locationRight.x = left + 9;
+        locationRight.y = top + 4;
+
+        _landmark.addLocation(locationLeft);
+        _landmark.addLocation(locationRight);        
 
         if (symbol != empty) ::<= {
           @:index = _map.addScenerySymbol(character:symbol);
@@ -443,11 +457,13 @@
       _map.clearScenery(x:left + 2, y: top + 7);
       _map.clearScenery(x:left + 3, y: top + 7);
       
-      location.x = left + 2;
-      location.y = top + 7;
-      _map.setItem(data:location, x:left + 2, y: top + 7, symbol: ' ', name:location.name);
-      _map.setItem(data:location, x:left + 3, y: top + 7, symbol: ' ', name:location.name);
+      locationLeft.x = left + 2;
+      locationLeft.y = top + 7;
+      locationRight.x = left + 3;
+      locationRight.y = top + 7;
 
+      _landmark.addLocation(locationLeft);
+      _landmark.addLocation(locationRight);        
       
       if (symbol != empty) ::<= {
         @:index = _map.addScenerySymbol(character:symbol);
@@ -461,12 +477,12 @@
 
     @:Location = import(module:'game_mutator.location.mt');
 
-    this.constructor = ::(map, category => Number, topDeco => String, bottomDeco => String) {
+    this.constructor = ::(map, landmark, category => Number, topDeco => String, bottomDeco => String) {
       _topDeco = map.addScenerySymbol(character:topDeco);
       _bottomDeco = map.addScenerySymbol(character:bottomDeco);
       unitsWide = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
       unitsHigh = random.integer(from:ZONE_MINIMUM_SPAN, to:ZONE_MAXIMUM_SPAN); 
-      
+      _landmark = landmark;
 
       if (unitsWide > ZONE_MAXIMUM_SPAN ||
         unitsHigh > ZONE_MAXIMUM_SPAN)
@@ -610,9 +626,18 @@
       
       
       // returns false if cant fit the location
-      addPortal::(landmark) {
+      addPortal::(portalSpec) {
+        @:locationLeft = Landmark.createPortalFromSpecification(:portalSpec);
+        @:locationRight = Landmark.createPortalFromSpecification(:portalSpec);
+
+
+        // {"linkedPortalID" : "structure-entrance-left"}
+        // {"linkedPortalID" : "structure-entrance-right"}
+        locationLeft.data.linkedPortalID = 'structure-entrance-left';
+        locationRight.data.linkedPortalID = 'structure-entrance-right';
       
-        @:size = if (landmark.base.hasTraits(:Location.TRAIT.STRUCTURE_LARGE)) 2 else 1;
+        
+        @:size = if (landmark.base.hasTraits(:Landmark.TRAIT.STRUCTURE_LARGE)) 2 else 1;
         when(random.flipCoin() && size == 1) ::<= {
           when(freeSpaces->keycount == 0) false;
           
@@ -620,7 +645,8 @@
           slots[space.x][space.y] = true;
           freeSpaces->remove(key:freeSpaces->findIndex(value:space));
           addMinimalBuilding(
-            location,
+            locationLeft,
+            locationRight,
             symbol:if (location.base.category == Location.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
             left:space.x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
             top:space.y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING
@@ -659,7 +685,8 @@
               if (wide) ::<= {
                 @:left = if (space0.x < space1.x) space0.x else space1.x;
                 addWideBuilding(
-                  location,
+                  locationLeft,
+                  locationRight,
                   symbol:if (location.base.category == Location.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
                   left:_x + left * ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING,
                   top: _y + space0.y * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING
@@ -667,7 +694,8 @@
               } else ::<= {
                 @:top = if (space0.y < space1.y) space0.y else space1.y;
                 addTallBuilding(
-                  location,
+                  locationLeft,
+                  locationRight,
                   symbol:if (location.base.category == Location.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
                   left:_x + space0.x * ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING,
                   top: _y + top * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING
@@ -691,314 +719,319 @@
 
 
 
-@:StructureMap = class(
-  name: 'Wyvern.StructureMap',
-  define:::(this) {
-    @map;
-    
-    @hasZoningWalls = true;
-    @hasFillerBuildings = true;
-    @zones = [];
-    @paired = [];
-    @topDeco = random.pickArrayItem(
-      list : [
-        ',',
-        '|',
-        '.',
-        '-',
-        '_',
-        '=',
-        '~'
-      ]
-    );
-    @bottomDeco = random.pickArrayItem(
-      list : [
-        '▓'
-      ]
-    );
-    
-    @isPaired = ::(i, n) {
-      @temp;
-      if (i < n) ::<= {
-        temp = i;
-        i = n;
-        n = temp;
-      }
-      
-      return paired['' + i + '-' + n]!=empty;
+return ::(mapHint => Object, landmark, objects) {
+  @Location = import(module:'game_mutator.location.mt');
+
+  @map;
+  @landmark
+  @hasZoningWalls = true;
+  @hasFillerBuildings = true;
+  @zones = [];
+  @paired = [];
+  @topDeco = random.pickArrayItem(
+    list : [
+      ',',
+      '|',
+      '.',
+      '-',
+      '_',
+      '=',
+      '~'
+    ]
+  );
+  @bottomDeco = random.pickArrayItem(
+    list : [
+      '▓'
+    ]
+  );
+  
+  @isPaired = ::(i, n) {
+    @temp;
+    if (i < n) ::<= {
+      temp = i;
+      i = n;
+      n = temp;
     }
     
-    
-    @setPaired = ::(i, n, alongIcoord, alongIside, alongIcenter) {
-      @temp;
-      if (i < n) ::<= {
-        temp = i;
-        i = n;
-        n = temp;
-      }
-      
-      paired['' + i + '-' + n] = {
-        first: i,
-        second: n,
-        coord: alongIcoord,
-        side: alongIside,
-        center:alongIcenter
-      }
-    }    
-
-
-    
-    // returns whether 2 line segments overlap
-    // l0 is less than m0,
-    // l1 is less than m1
-    @:is1DlineOverlap::(l0, m0, l1, m1) <-
-      if (l0 < l1) 
-        l1 < m0
-      else 
-        m1 > l0
-    ;
-    
-    
-    @:isZoneAllowed::(top, left, zone) {
-      when (
-        top < STRUCTURE_MAP_PADDING ||
-        left < STRUCTURE_MAP_PADDING ||
-        left + zone.width  > map.width - STRUCTURE_MAP_PADDING ||
-        top + zone.height > map.height - STRUCTURE_MAP_PADDING
-        
-      ) false;
-
-    
-      return ::? {
-        foreach(zones)::(i, z) {
-          // intersects with existing zones
-          @xOverlap = is1DlineOverlap(
-            l0:   z.left, m0:   z.left +  z.width,
-            l1:   left, m1:   left + zone.width
-          );
-          
-          @yOverlap = is1DlineOverlap(
-            l0:   z.top, m0:   z.top +  z.height,
-            l1:   top, m1:   top + zone.height
-          );
-          
-          
-          if (xOverlap
-             &&
-            yOverlap
-          ) send(message:false);
-
-
-
-        }
-        
-        return true;
-      }
-    }
-    
-    // adds a new zone.
-    // if no zones exist, then the zone is placed somewhere 
-    // out in the open. Else, it must be touching an existing zone 
-    // on its side
-    @:addZone ::(category) {
-      @zone = Zone.new(map:map, category, topDeco, bottomDeco);
-      @top;
-      @left;
-      @alongIcoord;
-      @alongIside;
-      @alongIcenter;
-      @preZone;
-      if (zones->keycount == 0) ::<= {
-        // fallback
-        match(zone.gateSide) {
-          (NORTH):::<= {
-            top = STRUCTURE_MAP_PADDING;
-            left = ((map.width - STRUCTURE_MAP_PADDING) / 2)->floor;
-          },
-
-          (EAST):::<= {
-            top = ((map.height - STRUCTURE_MAP_PADDING) / 2)->floor;
-            left = (map.width - STRUCTURE_MAP_PADDING) - zone.width;
-          },
-          
-          (WEST):::<= {
-            top = ((map.height - STRUCTURE_MAP_PADDING) / 2)->floor;
-            left = STRUCTURE_MAP_PADDING;
-          },
-          
-          (SOUTH):::<= {
-            top = (map.height - STRUCTURE_MAP_PADDING) - zone.height;
-            left = ((map.width - STRUCTURE_MAP_PADDING) / 2)->floor;
-          },
-
-          default: ::<= {
-            top  = STRUCTURE_MAP_STARTING_Y + STRUCTURE_MAP_PADDING;
-            left = STRUCTURE_MAP_STARTING_X + STRUCTURE_MAP_PADDING;                  
-          }
-        }
-      } else ::<= {
-        ::? {
-          @try = 0;
-          forever ::{
-            // pick a random zone and extend it 
-            preZone = zones[try]; try = (try+1)%zones->size;
-            when(preZone == empty) empty;
-            match(random.integer(from:0, to:3)) {
-              // North
-              (NORTH):::<= {
-                top = preZone.top - zone.height;
-                left = (preZone.left + preZone.width / 2 + (-0.5 + random.float()) * zone.width)->floor - zone.width/2;
-                top = top->floor;
-                left = left->floor;
-                alongIcoord = preZone.top;
-                alongIside = NORTH;
-                
-                @:innerMiddle = if (left > preZone.left) left else preZone.left;
-                @:outerMiddle = if (zone.width + left < preZone.width + preZone.left) zone.width + left else preZone.width + preZone.left;
-                alongIcenter = ((innerMiddle + outerMiddle)/2)->floor;
-              },
-              
-              // East 
-              (WEST):::<= {
-                top = (preZone.top + preZone.height / 2 + (-0.5 + random.float()) * zone.height)->floor - zone.height/2;          
-                left = preZone.left - zone.width;
-                top = top->floor;
-                left = left->floor;
-                alongIcoord = preZone.left;
-                alongIside = WEST;
-                @:innerMiddle = if (top > preZone.top) top else preZone.top;
-                @:outerMiddle = if (zone.height + top < preZone.height + preZone.top) zone.height + top else preZone.height + preZone.top;
-                alongIcenter = ((innerMiddle + outerMiddle)/2)->floor;
-
-              },
-              
-              // South
-              (SOUTH):::<= {
-                top = preZone.top + preZone.height;
-                left = (preZone.left + preZone.width / 2 + (-0.5 + random.float()) * zone.width)->floor - zone.width/2;
-                top = top->floor;
-                left = left->floor;
-                alongIcoord = top;
-                alongIside = SOUTH;
-                @:innerMiddle = if (left > preZone.left) left else preZone.left;
-                @:outerMiddle = if (zone.width + left < preZone.width + preZone.left) zone.width + left else preZone.width + preZone.left;
-                alongIcenter = ((innerMiddle + outerMiddle)/2)->floor;
-              },
-              
-              // West
-              (EAST):::<= {
-                top = (preZone.top + preZone.height / 2 + (-0.5 + random.float()) * zone.height)->floor - zone.height/2;          
-                left = preZone.left + preZone.width;
-                top = top->floor;
-                left = left->floor;
-                alongIcoord = left;
-                alongIside = EAST;
-                @:innerMiddle = if (top > preZone.top) top else preZone.top;
-                @:outerMiddle = if (zone.height + top < preZone.height + preZone.top) zone.height + top else preZone.height + preZone.top;
-                alongIcenter = ((innerMiddle + outerMiddle)/2)->floor;
-              }
-
-              
-            }
-            
-            when (!isZoneAllowed(top, left, zone)) empty;            
-            send();
-          }
-        }
-      }
-      
-      zone.setPosition(top, left);      
-      zones->push(value:zone);
-
-            
-      setPaired(
-        i:zones->findIndex(value:preZone),
-        n:zones->keycount-1,
-        alongIcoord,
-        alongIside,
-        alongIcenter
-      );  
-      
-      
-      return zone;
-    }
-    
-    @Location = import(module:'game_mutator.location.mt');
-    this.interface = {
-      initialize::(mapHint => Object, parent) {
-        map = Map.new(parent);
-
-        map.paged = false;
-        map.renderOutOfBounds = true;
-        map.outOfBoundsCharacter = ' ';
-        
-
-        if (mapHint.wallCharacter != empty) map.wallCharacter = mapHint.wallCharacter;
-        if (mapHint.outOfBoundsCharacter != empty) map.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
-        if (mapHint.hasZoningWalls != empty) hasZoningWalls = mapHint.hasZoningWalls;
-        if (mapHint.hasFillerBuildings != empty) hasFillerBuildings = mapHint.hasFillerBuildings;
-
-        map.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
-        map.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
-
-      },    
-    
-      // special function that adds a location value 
-      // to the map in a designated zoning area.
-      addPortal::(landmark) {
-        @:zonesCat = zones->filter(by:::(value) <- value.category == location.base.category);
-        @zone = if (zonesCat == empty || zonesCat->keycount == 0)
-          addZone(category:location.base.category)
-        else
-          random.pickArrayItem(list:zonesCat)
-        ;
-        
-        if (zone.addPortal(landmark) == false) ::<= {
-          zone = addZone(category:location.base.category);
-          zone.addPortal(landmark);
-        }
-      },
-      
-      getWidth ::<- map.width,
-      getHeight ::<- map.height,
-      
-      // indicates that no other locations will be added 
-      // so any final step can be taken, such as adding 
-      // zoning walls and expanding / connecting 
-      // buildings.
-      finalize::{
-
-        foreach(zones)::(i, zone) {
-          zone.fillDecoration();
-        }
-        
-        
-        
-        foreach(paired)::(i, data) {
-          @:base = zones[data.first];
-          @:other = zones[data.second];
-          match(data.side) {
-            (NORTH, SOUTH):::<= {
-              for(data.center-1, data.center+2)::(x) {
-                map.disableWall(x, y: data.coord);
-                map.clearScenery(x, y: data.coord);            
-              }
-            },
-
-            (EAST, WEST):::<= {
-              for(data.center-1, data.center+2)::(y) {
-                map.disableWall(x:data.coord, y);
-                map.clearScenery(x:data.coord, y);            
-              }
-            }
-
-          }
-        }
-
-
-        return map;
-      }
-    } 
+    return paired['' + i + '-' + n]!=empty;
   }
+  
+  
+  @setPaired = ::(i, n, alongIcoord, alongIside, alongIcenter) {
+    @temp;
+    if (i < n) ::<= {
+      temp = i;
+      i = n;
+      n = temp;
+    }
+    
+    paired['' + i + '-' + n] = {
+      first: i,
+      second: n,
+      coord: alongIcoord,
+      side: alongIside,
+      center:alongIcenter
+    }
+  }    
+
+
+  
+  // returns whether 2 line segments overlap
+  // l0 is less than m0,
+  // l1 is less than m1
+  @:is1DlineOverlap::(l0, m0, l1, m1) <-
+    if (l0 < l1) 
+      l1 < m0
+    else 
+      m1 > l0
+  ;
+  
+  
+  @:isZoneAllowed::(top, left, zone) {
+    when (
+      top < STRUCTURE_MAP_PADDING ||
+      left < STRUCTURE_MAP_PADDING ||
+      left + zone.width  > map.width - STRUCTURE_MAP_PADDING ||
+      top + zone.height > map.height - STRUCTURE_MAP_PADDING
+      
+    ) false;
+
+  
+    return ::? {
+      foreach(zones)::(i, z) {
+        // intersects with existing zones
+        @xOverlap = is1DlineOverlap(
+          l0:   z.left, m0:   z.left +  z.width,
+          l1:   left, m1:   left + zone.width
+        );
+        
+        @yOverlap = is1DlineOverlap(
+          l0:   z.top, m0:   z.top +  z.height,
+          l1:   top, m1:   top + zone.height
+        );
+        
+        
+        if (xOverlap
+           &&
+          yOverlap
+        ) send(message:false);
+
+
+
+      }
+      
+      return true;
+    }
+  }
+  
+  // adds a new zone.
+  // if no zones exist, then the zone is placed somewhere 
+  // out in the open. Else, it must be touching an existing zone 
+  // on its side
+  @:addZone ::(category) {
+    @zone = Zone.new(map:map, landmark, category, topDeco, bottomDeco);
+    @top;
+    @left;
+    @alongIcoord;
+    @alongIside;
+    @alongIcenter;
+    @preZone;
+    if (zones->keycount == 0) ::<= {
+      // fallback
+      match(zone.gateSide) {
+        (NORTH):::<= {
+          top = STRUCTURE_MAP_PADDING;
+          left = ((map.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+        },
+
+        (EAST):::<= {
+          top = ((map.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+          left = (map.width - STRUCTURE_MAP_PADDING) - zone.width;
+        },
+        
+        (WEST):::<= {
+          top = ((map.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+          left = STRUCTURE_MAP_PADDING;
+        },
+        
+        (SOUTH):::<= {
+          top = (map.height - STRUCTURE_MAP_PADDING) - zone.height;
+          left = ((map.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+        },
+
+        default: ::<= {
+          top  = STRUCTURE_MAP_STARTING_Y + STRUCTURE_MAP_PADDING;
+          left = STRUCTURE_MAP_STARTING_X + STRUCTURE_MAP_PADDING;                  
+        }
+      }
+    } else ::<= {
+      ::? {
+        @try = 0;
+        forever ::{
+          // pick a random zone and extend it 
+          preZone = zones[try]; try = (try+1)%zones->size;
+          when(preZone == empty) empty;
+          match(random.integer(from:0, to:3)) {
+            // North
+            (NORTH):::<= {
+              top = preZone.top - zone.height;
+              left = (preZone.left + preZone.width / 2 + (-0.5 + random.float()) * zone.width)->floor - zone.width/2;
+              top = top->floor;
+              left = left->floor;
+              alongIcoord = preZone.top;
+              alongIside = NORTH;
+              
+              @:innerMiddle = if (left > preZone.left) left else preZone.left;
+              @:outerMiddle = if (zone.width + left < preZone.width + preZone.left) zone.width + left else preZone.width + preZone.left;
+              alongIcenter = ((innerMiddle + outerMiddle)/2)->floor;
+            },
+            
+            // East 
+            (WEST):::<= {
+              top = (preZone.top + preZone.height / 2 + (-0.5 + random.float()) * zone.height)->floor - zone.height/2;          
+              left = preZone.left - zone.width;
+              top = top->floor;
+              left = left->floor;
+              alongIcoord = preZone.left;
+              alongIside = WEST;
+              @:innerMiddle = if (top > preZone.top) top else preZone.top;
+              @:outerMiddle = if (zone.height + top < preZone.height + preZone.top) zone.height + top else preZone.height + preZone.top;
+              alongIcenter = ((innerMiddle + outerMiddle)/2)->floor;
+
+            },
+            
+            // South
+            (SOUTH):::<= {
+              top = preZone.top + preZone.height;
+              left = (preZone.left + preZone.width / 2 + (-0.5 + random.float()) * zone.width)->floor - zone.width/2;
+              top = top->floor;
+              left = left->floor;
+              alongIcoord = top;
+              alongIside = SOUTH;
+              @:innerMiddle = if (left > preZone.left) left else preZone.left;
+              @:outerMiddle = if (zone.width + left < preZone.width + preZone.left) zone.width + left else preZone.width + preZone.left;
+              alongIcenter = ((innerMiddle + outerMiddle)/2)->floor;
+            },
+            
+            // West
+            (EAST):::<= {
+              top = (preZone.top + preZone.height / 2 + (-0.5 + random.float()) * zone.height)->floor - zone.height/2;          
+              left = preZone.left + preZone.width;
+              top = top->floor;
+              left = left->floor;
+              alongIcoord = left;
+              alongIside = EAST;
+              @:innerMiddle = if (top > preZone.top) top else preZone.top;
+              @:outerMiddle = if (zone.height + top < preZone.height + preZone.top) zone.height + top else preZone.height + preZone.top;
+              alongIcenter = ((innerMiddle + outerMiddle)/2)->floor;
+            }
+
+            
+          }
+          
+          when (!isZoneAllowed(top, left, zone)) empty;            
+          send();
+        }
+      }
+    }
+    
+    zone.setPosition(top, left);      
+    zones->push(value:zone);
+
+          
+    setPaired(
+      i:zones->findIndex(value:preZone),
+      n:zones->keycount-1,
+      alongIcoord,
+      alongIside,
+      alongIcenter
+    );  
+    
+    
+    return zone;
+  }    
+
+
+
+  return ::<= {
+    map = Map.new(parent);
+    landmark.map = map;
+
+    map.paged = false;
+    map.renderOutOfBounds = true;
+    map.outOfBoundsCharacter = ' ';
+    map.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+    map.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+    
+
+    if (mapHint.wallCharacter != empty) map.wallCharacter = mapHint.wallCharacter;
+    if (mapHint.outOfBoundsCharacter != empty) map.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+    if (mapHint.hasZoningWalls != empty) hasZoningWalls = mapHint.hasZoningWalls;
+    if (mapHint.hasFillerBuildings != empty) hasFillerBuildings = mapHint.hasFillerBuildings;
+
+
+
+    @:zone = addZone(category:Landmark.TRAIT.STRUCTURE_ENTRANCE);
+    zone.addEntrance();
+
+    // special function that adds a location value 
+    // to the map in a designated zoning area.
+    foreach(objects) ::(k, v) {
+      @:base = Landmark.database.find(:v.id);
+      @:category = if (base.hasTraits(:Landmark.TRAIT.STRUCTURE_RESIDENTIAL))
+        Landmark.TRAIT.STRUCTURE_RESIDENTIAL
+      else if (base.hasTraits(:Landmark.TRAIT.STRUCTURE_BUSINESS))
+        Landmark.TRAIT.STRUCTURE_BUSINESS 
+      else 
+        Landmark.TRAIT.STRUCTURE_UTILITY
+    
+    
+    
+      @:zonesCat = zones->filter(by:::(value) <- value.category == category);
+      @zone = if (zonesCat == empty || zonesCat->keycount == 0)
+        addZone(category)
+      else
+        random.pickArrayItem(list:zonesCat)
+      ;
+      
+      if (zone.addPortal(:v) == false) ::<= {
+        zone = addZone(category);
+        zone.addPortal(:v);
+      }
+    },
+
+
+
+
+    // indicates that no other locations will be added 
+    // so any final step can be taken, such as adding 
+    // zoning walls and expanding / connecting 
+    // buildings.
+
+    foreach(zones)::(i, zone) {
+      zone.fillDecoration();
+    }
+    
+    foreach(paired)::(i, data) {
+      @:base = zones[data.first];
+      @:other = zones[data.second];
+      match(data.side) {
+        (NORTH, SOUTH):::<= {
+          for(data.center-1, data.center+2)::(x) {
+            map.disableWall(x, y: data.coord);
+            map.clearScenery(x, y: data.coord);            
+          }
+        },
+
+        (EAST, WEST):::<= {
+          for(data.center-1, data.center+2)::(y) {
+            map.disableWall(x:data.coord, y);
+            map.clearScenery(x:data.coord, y);            
+          }
+        }
+
+      }
+    }
+  } 
 );
 return StructureMap;

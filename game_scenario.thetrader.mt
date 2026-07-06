@@ -1666,9 +1666,9 @@
 
               @rent = 0;
               foreach(state.ownedProperties) ::(i, id) {
-                @:location = world.island.findLocation(id);
+                @:location = world.island.findLandmark(id);
                 
-                if (location.base.category == Location.CATEGORY.RESIDENTIAL) ::<= {
+                if (location.base.hasTraits(:Landmark.TRAIT.STRUCTURE_RESIDENTIAL)) ::<= {
                   rent += (location.data.trader.boughtPrice * 0.07)->ceil;
                   @current = location.data.trader.listPrice;
                   current += (((random.number() - 0.5) * 0.05) * location.data.trader.boughtPrice)->floor;
@@ -1692,8 +1692,8 @@
 
               rent = 0;
               foreach(state.ownedProperties) ::(i, id) {
-                @:location = world.island.findLocation(id);
-                when (location.base.category == Location.CATEGORY.RESIDENTIAL) empty
+                @:location = world.island.findLandmark(id);
+                when (location.base.hasTraits(:Landmark.TRAIT.STRUCTURE_RESIDENTIAL)) empty
                 
                 @profit = location.data.trader.listPrice * 0.15;
                 profit = random.integer(from:(profit * 0.5)->floor, to:(profit * 1.5)->floor);
@@ -3826,12 +3826,7 @@ return {
         mapHint:{
           layoutType: DungeonMap.LAYOUT_DELTA
         },
-        onIncrementTime ::(landmark, island){},
-        onStep ::(landmark, island) {},
-        onCreate ::(landmark, island){
-        },
-        onVisit ::(landmark, island) {
-        }
+        events : {}
         
       }
     )
@@ -3871,10 +3866,7 @@ return {
           wallCharacter: ' ',
           outOfBoundsCharacter: '$'
         },
-        onCreate ::(landmark, island){},
-        onVisit ::(landmark, island) {},
-        onIncrementTime::(landmark) {},
-        onStep::(landmark) {}
+        events : {}
         
       }
     )
@@ -3887,7 +3879,6 @@ return {
       name: 'Wyvern Throne of Fortune',
       rarity: 1,
       ownVerb : 'owned',
-      category : Location.CATEGORY.DUNGEON_SPECIAL,
       symbol: 'W',
       onePerLandmark : true,
       minStructureSize : 1,
@@ -3989,7 +3980,6 @@ return {
       id: 'thetrader:shop',
       rarity: 100,
       ownVerb : 'run',
-      category : Location.CATEGORY.BUSINESS,
       symbol: '$',
       onePerLandmark : false,
       minStructureSize : 1,

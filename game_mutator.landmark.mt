@@ -78,6 +78,9 @@
         // optional symbol to identify the structure associated with the portal
         // More often than not override symbols are blank
         symbol : '*',
+        
+        // Public name of the portal to show.
+        name : 'Shop',
       
         // Optional any-data to pass to the landmark 
         data : {
@@ -132,6 +135,10 @@
   // by default, locations are of structure size small 
   // this bumps it up. really only for structure maps
   STRUCTURE_LARGE : 256,
+  
+  STRUCTURE_RESIDENTIAL : 512,
+  STRUCTURE_BUSINESS : 1024,
+  STRUCTURE_UTILITY : 2048,
 
 }
 
@@ -802,7 +809,8 @@ Landmark.database.newEntry(
       TRAIT.PEACEFUL |
       TRAIT.UNIQUE |
       TRAIT.CAN_SAVE |
-      TRAIT.NOTHING_HIDDEN,
+      TRAIT.NOTHING_HIDDEN |
+      TRAIT.STRUCTURE_BUSINESS,
     minEvents : 0,
     maxEvents : 0,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
@@ -1020,7 +1028,39 @@ Landmark.database.newEntry(
   name : 'Wyvern.Landmark',
   statics : {
     TYPE : {get ::<- TYPE},
-    TRAIT : {get ::<- TRAIT}
+    TRAIT : {get ::<- TRAIT},
+
+    // creates a location from a Landmark object specification
+    createLocationFromSpecification::(spec) {
+      @:Location = import(module:'game_mutator.location.mt');
+      @:loc = Location.new(
+        base: Location.base.find(:spec.id),
+        data : spec.data
+      );
+      
+      if (spec.overrideSymbol != empty) ::<= {
+        spec.overrideSymbol => String
+        loc.symbol = spec.overrideSymbol
+      }
+        
+      if (spec.overrideName != empty) ::<= {
+        spec.overrideName => String
+        loc.name = spec.overrideName
+      }
+    
+      return loc
+    },
+
+    
+    // creates a location from a Landmark object specification
+    createPortalFromSpecification ::(spec) {
+      @:dataConv = {...spec};
+      dataConv.overrideSymbol = dataConv.symbol
+      dataConv.overrideName = dataConv.name 
+      dataConv.data = dataConv;
+      @:loc = Landmark.createLocationFromSpecification(:dataConv);
+      return loc;
+    }
   },
   items : {
     worldID : 0,
@@ -1069,6 +1109,7 @@ Landmark.database.newEntry(
     },
     reset,
     knownEvents : [
+      'onLoadContent',
       'onCreate',
       'onVisit',
       'onIncrementTime',
@@ -1094,7 +1135,6 @@ Landmark.database.newEntry(
     @:LandmarkEvent = import(module:'game_mutator.landmarkevent.mt');
 
     @island_;
-    @structureMapBuilder; // only used in initialization
 
     @:world = import(module:'game_singleton.world.mt');
 
@@ -1153,6 +1193,13 @@ Landmark.database.newEntry(
         }
       }        
       
+      @:setupLocations = ::(objects) {
+        foreach(objects) ::(k, v) {
+          @:loc = Landmark.createLocationFromSpecification(:v);
+          this.addLocation(:loc);
+        }
+      }
+      
       
       if (base.landmarkType.blueprint) {
         state.map = Map.new(parent:this);
@@ -1163,17 +1210,15 @@ Landmark.database.newEntry(
         if (base.hasTraits(:Landmark.TRAIT.DUNGEON_FORCE_ENTRANCE)) ::<= {
           this.addLocation(location:Location.new(landmark: this, base:Location.database.find(:'base:entrance')));
         }
-        this.setupLocations(:base.requiredObjects);
-        this.setupLocations(:selected);
+        this.setupLocations(:[...base.requiredObjects, ...selected]);
 
-      } else if (base.landmarkType == TYPE.STRUCTURE) ::<= {
-        structureMapBuilder = StructureMap.new();//Map.new(mapHint: base.mapHint);
-        structureMapBuilder.initialize(mapHint:base.mapHint, parent:this);
-        
-        
-        
-        this.setupPortals(:base.requiredObjects);
-        this.setupPortals(:selected);
+      } else if (base.landmarkType == TYPE.STRUCTURE) ::<= {        
+        // handles portal adding and such
+        StructureMap(
+          mapHint:base.mapHint, 
+          parent:this,
+          objects : [...base.requiredObjects, selected]
+        );
       } else ::<= {
         state.map = Map.new(parent:this);
       }
@@ -1207,7 +1252,6 @@ Landmark.database.newEntry(
           );          
         }
       } else if (base.landmarkType == TYPE.STRUCTURE) ::<= {
-        state.map = structureMapBuilder.finalize();
         @:gate = this.gate;
         state.map.setPointer(
           x:gate.x,
@@ -1215,7 +1259,6 @@ Landmark.database.newEntry(
         );
 
         // cant add locations to structure maps through the landmark.
-        structureMapBuilder = empty;
       }
 
 
@@ -1252,6 +1295,7 @@ Landmark.database.newEntry(
       }
       
       state.mapEntityController = MapEntity.Controller.new(parent:this);
+      this.base.emit(event:'onLoadContent', landmark:this);    
       
 
     }
@@ -1305,8 +1349,6 @@ Landmark.database.newEntry(
           state.name = base.name + ' of ' + NameGen.place();
 
 
-        if (!base.hasTraits(:TRAIT.EPHEMERAL))
-          loadContent(base);
         this.base.emit(event:'onCreate', landmark:this, island:island_);    
         
       },
@@ -1330,51 +1372,7 @@ Landmark.database.newEntry(
         if (state.mapEntityController != empty)
           state.mapEntityController.initialize(parent:this);
       },
-      
-      setupPortals ::(portalDataArray) {
-        @:addPortal = ::{
-          
-        }
-      
-      
-      
-        foreach(portalDataArray)::(i, landmarkData) {
 
-          @:island = this.island
-          when(location.data.targetID != empty) 
-            island.findLandmark(:location.data.targetID).visit()
-
-          @:landmark = Landmark.new(
-            island: location.landmark.island,
-            base : Landmark.database.find(:'base:shop-inside'),
-            x:0,
-            y:0
-          );
-          
-          island.addLandmark(landmark, unmapped: true);
-          location.data.targetID = landmark.worldID;
-          landmark.visit();
-
-
-          this.addPortal(
-          
-          );
-      
-          addPort(:portalDataArray[i]);
-        }
-          
-          @:loc = Location.new(landmark:this, base:Location.database.find(:locData.id));
-          if (locData.overrideSymbol != empty)
-            loc.symbol = locData.overrideSymbol;
-            
-          
-          this.addLocation(
-            location:loc
-          );
-        
-        }
-      
-      },
 
       worldID : {
         get ::<- state.worldID
@@ -1430,10 +1428,10 @@ Landmark.database.newEntry(
       },
       
       width : {
-        get ::<- if (structureMapBuilder) structureMapBuilder.getWidth() else state.map.width
+        get ::<- state.map.width
       },
       height : {
-        get ::<- if (structureMapBuilder) structureMapBuilder.getHeight() else state.map.height
+        get ::<- state.map.height
       },
       
       peaceful : {
@@ -1447,11 +1445,35 @@ Landmark.database.newEntry(
 
       // adds a special location that teleports to a different landmark 
       // within the same island.     
-      addPortal ::(x, y, destination, symbol) {
-        @:location = Location.new(base:Location.database.find(:'base:portal'), x, y);
-        location.data.destination = {
-          worldID : destination.worldID
-        };
+      //
+      // Portal data can contain:
+      /*
+      {
+        // the ID of a landmark to warp to.
+        // Landmarks created this way are generated on-the-fly 
+        // upon first visiting the portal. 
+        id: 'landmark-id',
+        
+        // optional symbol to identify the structure associated with the portal
+        // More often than not override symbols are blank
+        symbol : '*',
+        
+        // public name to use for the portal
+        name : '',
+      
+        // Optional any-data to pass to the landmark 
+        data : {
+          someData : thing
+        }
+      }
+      */
+      addPortal ::(x, y, portalData) {
+        @:location = Location.new(
+          base:Location.database.find(:'base:portal'), 
+          x, 
+          y,
+          data: portalData
+        );
         
         if (symbol == empty)
           symbol = '';
@@ -1462,6 +1484,7 @@ Landmark.database.newEntry(
         );
         return location;
       },
+
 
       // enters the travel ui state, bringing the user to the 
       // interactive travel menu for this landmark.
@@ -1571,7 +1594,10 @@ Landmark.database.newEntry(
         };
         windowEvent.queueTransition(
           kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-          renderableMiddle:cursorMoveRenderable
+          renderableMiddle::{
+            this.loadContent();
+            cursorMoveRenderable()
+          }
         );
         
 
@@ -1815,9 +1841,9 @@ Landmark.database.newEntry(
 
       },
       
-      getNewLocationPosition() {
-      
-      },
+
+
+
 
       addLocation ::(location, width, height, traits) {
         location.landmark = this;

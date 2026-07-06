@@ -1938,7 +1938,6 @@ return {
       rarity: 1000000000000,
       ownVerb : '',
       symbol: '/',
-      category : Location.CATEGORY.EXIT,
 
       descriptions: [
         "Significant-looking stairs.",
@@ -1949,7 +1948,7 @@ return {
       
       aggressiveInteractions : [
       ],
-      traits : Location.TRAIT.ONE_PER_LANDMARK,
+      traits : Location.TRAIT.ONE_PER_LANDMARK | Location.TRAIT.EXIT_HINT,
 
       
       events : {
@@ -1970,7 +1969,6 @@ return {
       id: 'thechosen:throne-fire',
       rarity: 1,
       ownVerb : 'owned',
-      category : Location.CATEGORY.RESIDENTIAL,
       symbol: 'W',
 
       descriptions: [
@@ -2024,7 +2022,6 @@ return {
       rarity: 1000000000000,
       ownVerb : '',
       symbol: '\\',
-      category : Location.CATEGORY.EXIT,
       traits : Location.TRAIT.ONE_PER_LANDMARK,
 
       descriptions: [
@@ -2055,7 +2052,6 @@ return {
       id: 'thechosen:throne-ice',
       rarity: 1,
       ownVerb : 'owned',
-      category : Location.CATEGORY.RESIDENTIAL,
       symbol: 'W',
       traits : Location.TRAIT.ONE_PER_LANDMARK,
 
@@ -2117,7 +2113,6 @@ return {
       id: 'thechosen:throne-thunder',
       rarity: 1,
       ownVerb : 'owned',
-      category : Location.CATEGORY.RESIDENTIAL,
       symbol: 'W',
       traits : Location.TRAIT.ONE_PER_LANDMARK,
 
@@ -2181,7 +2176,6 @@ return {
       id: 'thechosen:throne-light',
       rarity: 1,
       ownVerb : 'owned',
-      category : Location.CATEGORY.RESIDENTIAL,
       symbol: 'W',
       traits : Location.TRAIT.ONE_PER_LANDMARK,
 
@@ -2247,8 +2241,7 @@ return {
       rarity: 1000000000000,
       ownVerb : '',
       symbol: '\\',
-      category : Location.CATEGORY.EXIT,
-      traits : Location.TRAIT.ONE_PER_LANDMARK,
+      traits : Location.TRAIT.ONE_PER_LANDMARK | Location.TRAIT.EXIT_HINT,
 
       descriptions: [
         "Decrepit stairs",
@@ -2278,8 +2271,7 @@ return {
       rarity: 1000000000000,
       ownVerb : '',
       symbol: ' ',
-      category : Location.CATEGORY.ENTRANCE,
-      traits : Location.TRAIT.ONE_PER_LANDMARK,
+      traits : Location.TRAIT.ONE_PER_LANDMARK | Location.TRAIT.ENTRANCE_HINT,
 
       descriptions: [
         "An entrance to a place that seems to welcome you eerily. It makes you feel uneasy.",
@@ -2389,7 +2381,7 @@ return {
         },
         
         events : {
-          onCreate ::(landmark, island){
+          onLoadContent ::(landmark, island){
             @:map = landmark.map;
             map.width = 100;
             map.height = 60;

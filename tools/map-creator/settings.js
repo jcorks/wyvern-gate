@@ -706,7 +706,7 @@ const Settings = {
             id: pattern.objects[source].id,
             symbol : pattern.objects[source].symbol,
             haloMode : pattern.objects[source].haloMode,
-            data : pattern.objects[souce].data
+            data : pattern.objects[source].data
           }
           rebuildObjectPulldown();
         
