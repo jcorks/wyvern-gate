@@ -1662,8 +1662,9 @@
               status = status + "  Earnings   : "+ (if (earnings < 0) g(g:earnings) else "+" + g(g:earnings)) + "\n\n";
 
 
+              @:Landmark = import(module:'game_mutator.landmark.mt');
               @:Location = import(module:'game_mutator.location.mt');
-
+  
               @rent = 0;
               foreach(state.ownedProperties) ::(i, id) {
                 @:location = world.island.findLandmark(id);
@@ -3573,7 +3574,7 @@ return {
           
           
 
-          location.targetLandmark.visit(where::(landmark)<-location.targetLandmarkEntry);
+          location.targetLandmark.visit(onLoad::(landmark)<-location.targetLandmarkEntry);
           canvas.clear();
         }
       }
@@ -3864,7 +3865,7 @@ return {
           roomAreaSizeLarge: 15,
           emptyAreaCount: 1,
           wallCharacter: ' ',
-          outOfBoundsCharacter: '$'
+          undefinedCharacter: '$'
         },
         events : {}
         

@@ -123,6 +123,7 @@
 }
 
 @:TRAIT = {
+  NONE : 0,
   UNIQUE : 1,
   PEACEFUL : 2,
   DUNGEON_FORCE_ENTRANCE: 4,
@@ -170,7 +171,9 @@ Landmark.database.newEntry(
     requiredEvents : [],
     possibleObjects : [
       {
-        id:'base:home'
+        name : 'Home',
+        symbol: ' ',
+        id:'base:home-inside', rarity:20
       },
       //{id:'guild', rarity: 25}
     ],
@@ -180,12 +183,13 @@ Landmark.database.newEntry(
         symbol: '$',
         id: 'base:shop-inside'
       },
-    
+      /*    
       {id:'base:arts-tecker'},
       {id:'base:school'},
       {id:'base:tavern'},
       {id:'base:blacksmith'},
       {id:'base:inn'}      
+      */
     ],
     mapHint : {
       roomSize: 30,
@@ -783,7 +787,7 @@ Landmark.database.newEntry(
       roomAreaSize: 7,
       roomAreaSizeLarge: 14,
       emptyAreaCount: 25,
-      outOfBoundsCharacter: '~'
+      undefinedCharacter: '~'
     },
     events : {
       onVisit ::(landmark, island) {
@@ -826,6 +830,47 @@ Landmark.database.newEntry(
     mapHint: {
     },
     events : {
+    }
+    
+  }
+)
+
+
+
+
+Landmark.database.newEntry(
+  data: {
+    name: 'Home: Inside',
+    id: 'base:home-inside',
+    legendName: '',
+    symbol : '',
+    rarity : 40,        
+    landmarkType : TYPE.BLUEPRINT_SINGLE(:'home.json'),
+
+    traits :
+      TRAIT.PEACEFUL |
+      TRAIT.UNIQUE |
+      TRAIT.CAN_SAVE |
+      TRAIT.NOTHING_HIDDEN |
+      TRAIT.STRUCTURE_RESIDENTIAL,
+    minEvents : 0,
+    maxEvents : 0,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+    minObjects : 0,
+    maxObjects : 0,
+    possibleObjects : [
+    ],
+    requiredObjects : [
+    ],
+    requiredEvents : [
+    ],
+    mapHint: {
+    },
+    events : {
+      onLoadContent::(landmark) {
+        
+      }
     }
     
   }
@@ -1028,39 +1073,9 @@ Landmark.database.newEntry(
   name : 'Wyvern.Landmark',
   statics : {
     TYPE : {get ::<- TYPE},
-    TRAIT : {get ::<- TRAIT},
+    TRAIT : {get ::<- TRAIT}
 
-    // creates a location from a Landmark object specification
-    createLocationFromSpecification::(spec) {
-      @:Location = import(module:'game_mutator.location.mt');
-      @:loc = Location.new(
-        base: Location.base.find(:spec.id),
-        data : spec.data
-      );
-      
-      if (spec.overrideSymbol != empty) ::<= {
-        spec.overrideSymbol => String
-        loc.symbol = spec.overrideSymbol
-      }
-        
-      if (spec.overrideName != empty) ::<= {
-        spec.overrideName => String
-        loc.name = spec.overrideName
-      }
-    
-      return loc
-    },
 
-    
-    // creates a location from a Landmark object specification
-    createPortalFromSpecification ::(spec) {
-      @:dataConv = {...spec};
-      dataConv.overrideSymbol = dataConv.symbol
-      dataConv.overrideName = dataConv.name 
-      dataConv.data = dataConv;
-      @:loc = Landmark.createLocationFromSpecification(:dataConv);
-      return loc;
-    }
   },
   items : {
     worldID : 0,
@@ -1188,15 +1203,15 @@ Landmark.database.newEntry(
         when(possibleObjects->keycount == 0) empty;
         @:which = random.pickArrayItemWeighted(list:possibleObjects);
         selected->push(:which);
-        if (Location.database.find(id:which.id).hasTraits(:Location.TRAIT.ONE_PER_LANDMARK)) ::<= {
+        if (base.landmarkType == TYPE.DUNGEON && Location.database.find(id:which.id).hasTraits(:Location.TRAIT.ONE_PER_LANDMARK)) ::<= {
           possibleObjects->remove(key:possibleObjects->findIndex(value:which));
         }
       }        
       
       @:setupLocations = ::(objects) {
         foreach(objects) ::(k, v) {
-          @:loc = Landmark.createLocationFromSpecification(:v);
-          this.addLocation(:loc);
+          @:loc = this.createLocationFromSpecification(:v);
+          this.addLocation(location:loc);
         }
       }
       
@@ -1210,14 +1225,15 @@ Landmark.database.newEntry(
         if (base.hasTraits(:Landmark.TRAIT.DUNGEON_FORCE_ENTRANCE)) ::<= {
           this.addLocation(location:Location.new(landmark: this, base:Location.database.find(:'base:entrance')));
         }
-        this.setupLocations(:[...base.requiredObjects, ...selected]);
+        setupLocations(:[...base.requiredObjects, ...selected]);
 
       } else if (base.landmarkType == TYPE.STRUCTURE) ::<= {        
         // handles portal adding and such
+        state.map = Map.new(parent:this);
         StructureMap(
           mapHint:base.mapHint, 
-          parent:this,
-          objects : [...base.requiredObjects, selected]
+          landmark:this,
+          objects : [...base.requiredObjects, ...selected]
         );
       } else ::<= {
         state.map = Map.new(parent:this);
@@ -1329,7 +1345,7 @@ Landmark.database.newEntry(
         state.symbol = base.symbol;
         state.legendName = base.legendName;
         if (data != empty)
-          state.data = data;
+          state.data = data
         else
           state.data = {};
 
@@ -1468,19 +1484,23 @@ Landmark.database.newEntry(
       }
       */
       addPortal ::(x, y, portalData) {
+        if (portalData.symbol == empty)
+          portalData.symbol = '';
+
         @:location = Location.new(
+          landmark: this,
           base:Location.database.find(:'base:portal'), 
           x, 
           y,
           data: portalData
         );
         
-        if (symbol == empty)
-          symbol = '';
+        location.halo = false;
+        location.symbol = '';
+
 
         this.addLocation(
-          location,
-          traits : 0
+          location
         );
         return location;
       },
@@ -1488,7 +1508,11 @@ Landmark.database.newEntry(
 
       // enters the travel ui state, bringing the user to the 
       // interactive travel menu for this landmark.
-      travel :: {
+      //
+      // onLoad is called within the "loading spot" of the transition 
+      // Optionally, onLoad can return an object containing x and y 
+      // members for a location to move the pointer when arriving at the location.
+      travel ::(onLoad) {
         @:hud = import(:'game_singleton.hud.mt');
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
         @:partyOptions = import(module:'game_function.partyoptions.mt');
@@ -1594,9 +1618,22 @@ Landmark.database.newEntry(
         };
         windowEvent.queueTransition(
           kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-          renderableMiddle::{
-            this.loadContent();
-            cursorMoveRenderable()
+          renderableMiddle: {
+            render :: {
+              @where = onLoad
+              if (where != empty) ::<= {
+                where = where(landmark);
+                if (where != empty)
+                  this.map.setPointer(
+                    x:where.x,
+                    y:where.y
+                  ); 
+              }
+
+
+              this.loadContent();
+              cursorMoveRenderable.render()
+            }
           }
         );
         
@@ -1636,7 +1673,7 @@ Landmark.database.newEntry(
       },
 
       
-      visit ::(where)  {
+      visit ::(onLoad)  {
         @:landmark = this;
         @:world = import(module:'game_singleton.world.mt');
         when (state.base.emit(event:'onVisit', landmark:this, island:landmark.island) == false) empty;
@@ -1645,24 +1682,14 @@ Landmark.database.newEntry(
           world.landmark.leave();
           
         world.landmark = this;  
-        breakpoint();      
-        if (where != empty) ::<= {
-          where = where(landmark);
-          if (where != empty)
-            this.map.setPointer(
-              x:where.x,
-              y:where.y
-            ); 
-        }
 
         foreach(world.party.members) ::(k, v) {
           v.addOpinion(
             fullName : 'the ' + landmark.name
           );
         }
-                    
         
-        this.travel();
+        this.travel(onLoad);
       },
       
       updateTitle ::(override)  {
@@ -1730,6 +1757,7 @@ Landmark.database.newEntry(
 
         @:locations = state.map.getItemsUnderPointer();
         if (locations->type == Object) ::<= {
+          breakpoint();
           foreach(locations) ::(k, v) {
             if (v.data->type == Location.type) ::<= {
               v.data.base.emit(event:'onStep', entities: world.party.members, location:v.data);
@@ -1897,6 +1925,44 @@ Landmark.database.newEntry(
       
       island : {
         get ::<- island_
+      },
+
+      // creates a location from a Landmark object specification
+      createLocationFromSpecification::(spec) {
+        @:Location = import(module:'game_mutator.location.mt');
+        @:loc = Location.new(
+          landmark: this,
+          base: Location.database.find(:spec.id),
+          data : spec.data
+        );
+        
+        if (spec.overrideSymbol != empty) ::<= {
+          spec.overrideSymbol => String
+          loc.symbol = spec.overrideSymbol
+        }
+          
+        if (spec.overrideName != empty) ::<= {
+          spec.overrideName => String
+          loc.name = spec.overrideName
+        }
+      
+        return loc
+      },
+
+      
+      // creates a location from a Landmark object specification
+      createPortalFromSpecification ::(spec) {
+        @:dataConv = {...spec};
+        dataConv.overrideSymbol = dataConv.symbol
+        dataConv.overrideName = dataConv.name 
+        dataConv.id = 'base:portal'
+        dataConv.data = spec;
+        @:loc = this.createLocationFromSpecification(:dataConv);
+        
+        loc.halo = false;
+        loc.symbol = '';
+        
+        return loc;
       },
       
       map : {

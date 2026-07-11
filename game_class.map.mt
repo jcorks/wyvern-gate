@@ -38,14 +38,13 @@
     offsetY : 0,
     drawLegend : false,
     paged : false,
-    outOfBoundsCharacter : '',
+    undefinedCharacter : '',
     wallCharacter : '',
     //@scenery = MemoryBuffer.new();
     sceneryCompressed : empty,
     sceneryValues : empty,
     stepAction : empty,
     areas : empty,
-    renderOutOfBounds : false,
     isDark : false
   }
 )
@@ -208,14 +207,13 @@ Map =  LoadableClass.create(
     @offsetY = 0;
     @drawLegend = false;
     @paged = false;
-    @outOfBoundsCharacter = '`';
+    @undefinedCharacter = '`';
     @wallCharacter = '';//'▓';
     //@scenery = MemoryBuffer.new();
     @scenery = [];
     @sceneryValues = [];
     @stepAction = [];
     @areas = [];
-    @renderOutOfBounds = true;
     @isDark = false;
     @parent_;
     @neighbors = [];
@@ -632,8 +630,6 @@ Map =  LoadableClass.create(
             when (symbol != empty)
               canvas.drawChar(text:symbol);
 
-            when(!renderOutOfBounds) empty;
-            canvas.drawChar(text:outOfBoundsCharacter);
           }
 
 
@@ -656,7 +652,7 @@ Map =  LoadableClass.create(
           }
 
 
-          canvas.drawChar(text:outOfBoundsCharacter);
+          canvas.drawChar(text:undefinedCharacter);
         }        
       }        
               
@@ -744,26 +740,19 @@ Map =  LoadableClass.create(
       */  
       @:targets = {};   
       @:importantItems = {};  
+      
+      canvas.fill(:undefinedCharacter);
+      
       for(0, mapSizeH+1)::(y) {
         for(0, mapSizeW+1)::(x) {
           @itemX = ((x + pointer.x - mapSizeW/2))->floor;
           @itemY = ((y + pointer.y - mapSizeH/2))->floor;
 
+          when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) empty
+          
+
           @symbol = this.sceneryAt(x:itemX, y:itemY);
-
           canvas.movePen(x:left + x, y:top + y);  
-
-
-
-          when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) ::<= {
-            when (symbol != empty) ::<= {
-              canvas.drawChar(text:symbol);
-            }
-
-            when(renderOutOfBounds) ::<= {
-              canvas.drawChar(text:outOfBoundsCharacter);
-            }
-          }
 
           
           
@@ -771,9 +760,7 @@ Map =  LoadableClass.create(
           //  if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
           //    obscured[itemX][itemY] = false;
           
-          when(scenery[itemX+itemY*width] & IS_OBSCURED_MASK) ::<= {
-            canvas.drawChar(text:outOfBoundsCharacter);            
-          }
+          when(scenery[itemX+itemY*width] & IS_OBSCURED_MASK) empty
           
           @chosenChar = ::<= {
             
@@ -782,7 +769,7 @@ Map =  LoadableClass.create(
             }
 
             @:items = this.itemsAt(x:itemX, y:itemY);
-            when(items != empty && items->keycount > 0) ::<= {
+            if (items != empty && items->keycount > 0) ::<= {
               @:discovered = (items[items->keycount-1].traits & Map.TRAIT.DISCOVERED) != 0;
               
               if (discovered == true && ((items[items->keycount-1].traits & Map.TRAIT.HAS_HALO) != 0)) {
@@ -802,7 +789,9 @@ Map =  LoadableClass.create(
           }
 
           when(isDark == true && isLit[itemX+itemY*width] != true && chosenChar != empty) ::<= {
-            when(chosenChar != empty && chosenChar == ' ') empty;
+            when(chosenChar != empty && chosenChar == ' ')
+              canvas.drawChar(text:' ');            
+              
             canvas.drawChar(text:TOO_FAR_CHARACTER);            
           }
           if (chosenChar)
@@ -977,7 +966,22 @@ Map =  LoadableClass.create(
         
         scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
       },
-      
+
+      fillSceneryIndexRectangle ::(
+        symbol => Number,
+        x => Number,
+        y => Number,
+        fillWidth => Number,
+        fillHeight => Number
+      ) {
+        for(x, x+fillHeight)::(x) {
+          for(y, y+fillWidth)::(y) {
+            @index = x + y*(width);
+          
+            scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
+          }    
+        }
+      },        
       
       fillSceneryIndex ::(
         symbol => Number
@@ -1010,10 +1014,10 @@ Map =  LoadableClass.create(
       sceneryAt::(x, y) {
         @at = x+(y*width);
         when(x < 0 || y < 0)
-          outOfBoundsCharacter;
+          undefinedCharacter;
           
         when(x >= width || y >= height)
-          outOfBoundsCharacter;
+          undefinedCharacter;
           
         @:index = scenery[at] & (~SETTINGS_MASK);
         when(index == 0) empty;
@@ -1330,9 +1334,9 @@ Map =  LoadableClass.create(
         get ::<- pointer.y      
       },
       
-      outOfBoundsCharacter : {
-        get::<- outOfBoundsCharacter,
-        set::(value) <- outOfBoundsCharacter = value
+      undefinedCharacter : {
+        get::<- undefinedCharacter,
+        set::(value) <- undefinedCharacter = value
       },
 
       wallCharacter : {
@@ -1494,11 +1498,6 @@ Map =  LoadableClass.create(
       offsetY : {
         get::<- offsetY,
         set::(value) <- offsetY = value
-      },
-      
-      renderOutOfBounds : {
-        get::<- renderOutOfBounds,
-        set::(value) <- renderOutOfBounds = value
       },
       
       areas : {
@@ -1688,14 +1687,13 @@ Map =  LoadableClass.create(
           offsetY : offsetY,
           drawLegend : drawLegend,
           paged : paged,
-          outOfBoundsCharacter : outOfBoundsCharacter,
+          undefinedCharacter : undefinedCharacter,
           wallCharacter : wallCharacter,
           //@scenery = MemoryBuffer.new();
           sceneryCompressed : sceneryCompressed,
           sceneryValues : sceneryValues,
           stepAction : stepAction,
           areas : areas,
-          renderOutOfBounds : renderOutOfBounds,
           isDark : isDark,
         }
         return state.save();    
@@ -1754,12 +1752,11 @@ Map =  LoadableClass.create(
         offsetY = v.offsetY;
         drawLegend = v.drawLegend;
         paged = v.paged;
-        outOfBoundsCharacter = v.outOfBoundsCharacter;
+        undefinedCharacter = v.undefinedCharacter;
         wallCharacter = v.wallCharacter;
         sceneryValues = v.sceneryValues;
         stepAction = v.stepAction;
         areas = v.areas;
-        renderOutOfBounds = v.renderOutOfBounds;
         isDark = v.isDark;
       }
     }  

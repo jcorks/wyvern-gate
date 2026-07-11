@@ -36,6 +36,12 @@
 @:GEN_OFFSET = 20;
 
 
+@:enableWall ::(map, x, y) {
+  map.enableWall(
+    x, y
+  );
+  map.clearScenery(x, y);
+}  
 
 
 
@@ -49,7 +55,7 @@
   @ROOM_SIZE = random.integer(from:35, to:45); //50;
   @ROOM_EMPTY_AREA_COUNT = random.integer(from:12, to: 18); //13;
   ;
-  
+  @:spaceIndex = map.addScenerySymbol(:' ');
 
   @:generateArea ::(item) {
     @width  = if (random.number() > 0.5) ROOM_AREA_SIZE else ROOM_AREA_SIZE_LARGE;
@@ -77,26 +83,39 @@
       width: width,
       height: height
     ));
+
+    map.fillSceneryIndexRectangle(
+        x: left,
+        y: top,
+        fillWidth: width+1,
+        fillHeight: height+1,
+        symbol: spaceIndex
+    );
+    
         
     for(0, width+1)::(i) {
-      map.enableWall(
+      enableWall(
+        map,
         x:left + i,
         y:top
       );
 
-      map.enableWall(
+      enableWall(
+        map,
         x:left + i,
         y:top + height
       );
     }
 
     for(0, height+1)::(i) {
-      map.enableWall(
+      enableWall(
+        map,
         x:left,
         y:top + i
       );
 
-      map.enableWall(
+      enableWall(
+        map,
         x:left + width,
         y:top + i
       );
@@ -106,36 +125,52 @@
   
   @:applyCavities::{
     foreach(cavities)::(i, cav) {
-      map.enableWall(
+      enableWall(
+        map,
         x:cav.x+1,
         y:cav.y
       );
-      map.enableWall(
+      map.setSceneryIndex(
+        x:cav.x,
+        y:cav.y,
+        symbol: spaceIndex      
+      );
+      enableWall(
+        map,
         x:cav.x-1,
         y:cav.y
       );
-      map.enableWall(
+      
+      
+      
+      enableWall(
+        map,
         x:cav.x,
         y:cav.y+1
       );
-      map.enableWall(
+      enableWall(
+        map,
         x:cav.x,
         y:cav.y-1
       );
       
-      map.enableWall(
+      enableWall(
+        map,
         x:cav.x-1,
         y:cav.y-1
       );
-      map.enableWall(
+      enableWall(
+        map,
         x:cav.x+1,
         y:cav.y+1
       );
-      map.enableWall(
+      enableWall(
+        map,
         x:cav.x+1,
         y:cav.y-1
       );
-      map.enableWall(
+      enableWall(
+        map,
         x:cav.x-1,
         y:cav.y+1
       );
@@ -148,12 +183,20 @@
       for(area.x+1, area.x + area.width)::(x) {
         for(area.y+1, area.y + area.height)::(y) {
           map.disableWall(x, y);
+          map.setSceneryIndex(
+            x, y,
+            symbol: spaceIndex      
+          );
         }
       }
     }
     
     foreach(cavities)::(i, cav) {
       map.disableWall(x:cav.x, y:cav.y);
+      map.setSceneryIndex(
+        x:cav.x, y:cav.y,
+        symbol: spaceIndex      
+      );
     }
     cavities = [];
   }
@@ -268,6 +311,7 @@
 @:DungeonBeta = ::(map, mapHint) {
   @cavities = [];
   @:areas = [];
+  @:spaceIndex = map.addScenerySymbol(:' ');
   
   @:AREA_SIZE = 7; 
   @:MINIMUM_AREA_COUNT = 4;
@@ -671,35 +715,73 @@
         @:top  = node.area.y;
         @:width  = node.area.width;
         @:height = node.area.height;
+        
+        breakpoint();
+
+        map.fillSceneryIndexRectangle(
+          x : left,
+          y : top,
+          fillWidth: width,
+          fillHeight: height,
+          symbol:spaceIndex
+        )
+        
         for(0, width)::(i) {
-          map.enableWall(
+          enableWall(
+            map,
             x:left + i,
             y:top
           );
 
-          map.enableWall(
+          enableWall(
+            map,
             x:left + i,
             y:top + height-1
           );
         }
 
         for(0, height)::(i) {
-          map.enableWall(
+          enableWall(
+            map,
             x:left,
             y:top + i
           );
 
-          map.enableWall(
+          enableWall(
+            map,
             x:left + width-1,
             y:top + i
           );
         }
         
         // openings
-        if (node.waysOpen[NORTH]) map.disableWall(x:left + (width / 2)->floor, y: top);  
-        if (node.waysOpen[SOUTH]) map.disableWall(x:left + (width / 2)->floor, y: top + height-1);  
-        if (node.waysOpen[EAST])  map.disableWall(x:left + width -1,       y: top + (height / 2)->floor);  
-        if (node.waysOpen[WEST])  map.disableWall(x:left,            y: top + (height / 2)->floor);  
+        @xOpen
+        @yOpen
+        if (node.waysOpen[NORTH]) ::<= {
+          xOpen = left + (width / 2)->floor
+          yOpen = top;  
+        }
+        if (node.waysOpen[SOUTH]) ::<= {
+          xOpen = left + (width / 2)->floor
+          yOpen = top + height-1; 
+        } 
+        if (node.waysOpen[EAST]) ::<= {
+          xOpen = left + width -1;
+          yOpen = top + (height / 2)->floor;  
+        }
+        if (node.waysOpen[WEST]) ::<= {
+          xOpen = left
+          yOpen = top + (height / 2)->floor;  
+        }
+        
+        
+        map.disableWall(x:xOpen, y:yOpen);  
+        map.setSceneryIndex(
+          x:xOpen, y:yOpen,
+          symbol: spaceIndex      
+        );
+
+
       }
       
       // else its a path
@@ -709,51 +791,80 @@
 
       //start with the junction
 
-      map.enableWall(
+      map.setSceneryIndex(
+        x:centerX,
+        y:centerY,
+        symbol: spaceIndex      
+      );
+
+      enableWall(
+        map,
         x:centerX - 1,
         y:centerY - 1
       );      
-      map.enableWall(
+      enableWall(
+        map,
         x:centerX - 1,
         y:centerY
       );      
-      map.enableWall(
+      enableWall(
+        map,
         x:centerX - 1,
         y:centerY + 1
       );      
 
-      map.enableWall(
+      enableWall(
+        map,
         x:centerX + 1,
         y:centerY - 1
       );      
-      map.enableWall(
+      enableWall(
+        map,
         x:centerX + 1,
         y:centerY
       );      
-      map.enableWall(
+      enableWall(
+        map,
         x:centerX + 1,
         y:centerY + 1
       );      
 
-      map.enableWall(
+      enableWall(
+        map,
         x:centerX,
         y:centerY + 1
       );      
 
-      map.enableWall(
+      enableWall(
+        map,
         x:centerX,
         y:centerY - 1
       ); 
       
       if (node.waysOpen[NORTH] && y > 0) ::<= {
         map.disableWall(x:centerX, y:centerY-1);   
+        map.setSceneryIndex(
+          x:centerX,
+          y:centerY-1,
+          symbol: spaceIndex      
+        );
+
 
         for(centerY - (AREA_SIZE/2)->floor, centerY-1)::(i) {
-          map.enableWall(
+          enableWall(
+            map,
             x:centerX-1,
             y:i
           ); 
-          map.enableWall(
+
+          map.setSceneryIndex(
+            x:centerX,
+            y:i,
+            symbol: spaceIndex      
+          );
+
+          enableWall(
+            map,
             x:centerX+1,
             y:i
           ); 
@@ -762,13 +873,25 @@
       }
       if (node.waysOpen[SOUTH] && y < AREA_HEIGHT-1) ::<= {
         map.disableWall(x:centerX, y:centerY+1);   
+        map.setSceneryIndex(
+          x:centerX,
+          y:centerY+1,
+          symbol: spaceIndex      
+        );
 
         for(centerY+1, centerY+(AREA_SIZE/2)->floor+1)::(i) {
-          map.enableWall(
+          enableWall(
+            map,
             x:centerX-1,
             y:i
           ); 
-          map.enableWall(
+          map.setSceneryIndex(
+            x:centerX,
+            y:i,
+            symbol: spaceIndex      
+          );
+          enableWall(
+            map,
             x:centerX+1,
             y:i
           ); 
@@ -777,13 +900,25 @@
       }
       if (node.waysOpen[EAST] && x < AREA_WIDTH-1) ::<= {
         map.disableWall(x:centerX+1, y:centerY);   
+        map.setSceneryIndex(
+          x:centerX+1,
+          y:centerY,
+          symbol: spaceIndex      
+        );
 
         for(centerX+1, centerX+(AREA_SIZE/2)->floor+1)::(i) {
-          map.enableWall(
+          enableWall(
+            map,
             x:i,
             y:centerY-1
           ); 
-          map.enableWall(
+          map.setSceneryIndex(
+            x:i,
+            y:centerY,
+            symbol: spaceIndex      
+          );
+          enableWall(
+            map,
             x:i,
             y:centerY+1
           ); 
@@ -791,13 +926,26 @@
       }
       if (node.waysOpen[WEST] && x > 0) ::<= {
         map.disableWall(x:centerX-1, y:centerY);   
+        map.setSceneryIndex(
+          x:centerX-1,
+          y:centerY,
+          symbol: spaceIndex      
+        );
         
         for(centerX - (AREA_SIZE/2)->floor, centerX-1)::(i) {
-          map.enableWall(
+          enableWall(
+            map,
             x:i,
             y:centerY-1
           ); 
-          map.enableWall(
+          map.setSceneryIndex(
+            x:i,
+            y:centerY,
+            symbol: spaceIndex      
+          );
+
+          enableWall(
+            map,
             x:i,
             y:centerY+1
           ); 
@@ -826,11 +974,19 @@
         @:from = topNode + AREA_SIZE;
         @:to   = from + AREA_GAP*2;
         for(from, to) ::(i) {
-          map.enableWall(
+          enableWall(
+            map,
             x:centerX+1,
             y:i
           ); 
-          map.enableWall(
+          map.setSceneryIndex(
+            x:centerX,
+            y:i,
+            symbol: spaceIndex      
+          );
+
+          enableWall(
+            map,
             x:centerX-1,
             y:i
           );           
@@ -842,11 +998,18 @@
         @:from = leftNode + AREA_SIZE;
         @:to   = from + AREA_GAP*2;
         for(from, to) ::(i) {
-          map.enableWall(
+          enableWall(
+            map,
             x:i,
             y:centerY+1
           ); 
-          map.enableWall(
+          map.setSceneryIndex(
+            x:i,
+            y:centerY,
+            symbol: spaceIndex      
+          );
+          enableWall(
+            map,
             x:i,
             y:centerY-1
           );           
@@ -1276,7 +1439,7 @@
   @:wallIndex = map.addScenerySymbol(character:'▓');
   @:emptyIndex = map.addScenerySymbol(character:' ');
   @:funnyIndex = map.addScenerySymbol(character:'.');
-  
+  @:spaceIndex = map.addScenerySymbol(:' ')  
   
   map.width = 200;
   map.height = 200;
@@ -1341,27 +1504,28 @@
       }
       
       @:makeWallPerimeter::(dims) {
+
+      
         for(dims.y, dims.y + dims.h) ::(yiter) {
           map.setSceneryIndex(x:dims.x, y:yiter, symbol:wallIndex);
-          map.enableWall(x:dims.x, y:yiter);
-
+          enableWall(map, x:dims.x, y:yiter); 
 
           map.setSceneryIndex(x:dims.x+dims.w, y:yiter, symbol:wallIndex);
-          map.enableWall(x:dims.x+dims.w, y:yiter);
+          enableWall(map, x:dims.x+dims.w, y:yiter);
         }
 
         for(dims.x, dims.x + dims.w) ::(xiter) {
           map.setSceneryIndex(y:dims.y, x:xiter, symbol:wallIndex);
-          map.enableWall(y:dims.y, x:xiter);
+          enableWall(map, y:dims.y, x:xiter);
 
 
           map.setSceneryIndex(y:dims.y+dims.h, x:xiter, symbol:wallIndex);
-          map.enableWall(y:dims.y+dims.h, x:xiter);
+          enableWall(map, y:dims.y+dims.h, x:xiter);
         }      
 
 
         map.setSceneryIndex(x:dims.x+dims.w, y:dims.y+dims.h, symbol:wallIndex);
-        map.enableWall(x:dims.x+dims.w, y:dims.y+dims.h);
+        enableWall(map, x:dims.x+dims.w, y:dims.y+dims.h);
 
         if (dims.openings != empty) ::<= {
           foreach(dims.openings) ::(k, v) {
@@ -1377,6 +1541,13 @@
           y: dims.y+1,
           width: dims.w-1,
           height: dims.h-1
+        );
+        map.fillSceneryIndexRectangle(
+          x: dims.x+1,
+          y: dims.y+1,
+          fillWidth: dims.w-1,
+          fillHeight: dims.h-1,
+          symbol: spaceIndex
         );
 
         @faceOpen = random.flipCoin();
@@ -1688,6 +1859,14 @@
             y = y - (openH + 1);
             h = openH + LAYOUT_ROOM_OFF_SIZE + 1;
             
+            map.fillSceneryIndexRectangle(
+              x: x+1,
+              y: y+1,
+              fillWidth: w-1,
+              fillHeight: openH-1,
+              symbol: spaceIndex
+            );
+
             return Map.Area.new(
               x: x+1,
               y: y+1,
@@ -1699,6 +1878,15 @@
           (RIGHT): ::<= {
             @:openW = random.integer(from:LAYOUT_ROOM_OPEN_SIZE_MIN, to:LAYOUT_ROOM_OPEN_SIZE_MAX);
             w = LAYOUT_ROOM_OFF_SIZE + openW;
+
+            map.fillSceneryIndexRectangle(
+              x: x+LAYOUT_ROOM_OFF_SIZE+1,
+              y: y+1,
+              fillWidth: openW-1,
+              fillHeight: h-1,
+              symbol: spaceIndex
+            );
+
             
             return Map.Area.new(
               x: x+LAYOUT_ROOM_OFF_SIZE+1,
@@ -1712,6 +1900,16 @@
           (BELOW): ::<= {
             @:openH = random.integer(from:LAYOUT_ROOM_OPEN_SIZE_MIN, to:LAYOUT_ROOM_OPEN_SIZE_MAX);
             h = openH + LAYOUT_ROOM_OFF_SIZE;
+
+            map.fillSceneryIndexRectangle(
+              x: x+1,
+              y: y+LAYOUT_ROOM_OFF_SIZE+1,
+              fillWidth: w-1,
+              fillHeight: openH-1,
+              symbol: spaceIndex
+            );
+
+
             
             return Map.Area.new(
               x: x+1,
@@ -1725,6 +1923,14 @@
             @:openW = random.integer(from:LAYOUT_ROOM_OPEN_SIZE_MIN, to:LAYOUT_ROOM_OPEN_SIZE_MAX);
             w = openW + 1 + LAYOUT_ROOM_OFF_SIZE;
             x = x - openW;
+
+            map.fillSceneryIndexRectangle(
+              x: x+1,
+              y: y+1,
+              fillWidth: openW-1,
+              fillHeight: h-1,
+              symbol: spaceIndex
+            );
             
             return Map.Area.new(
               x: x+1,
@@ -2108,11 +2314,13 @@
         @areas;
 
         map.paged = false;
-        map.renderOutOfBounds = true;
-        map.outOfBoundsCharacter = '`';
+        map.undefinedCharacter = '`';
+        map.wallCharacter = '▓';
+        
+        
 
         if (mapHint.wallCharacter != empty) map.wallCharacter = mapHint.wallCharacter;
-        if (mapHint.outOfBoundsCharacter != empty) map.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+        if (mapHint.undefinedCharacter != empty) map.undefinedCharacter = mapHint.undefinedCharacter;
         
         areas = layoutToAreas(layout:mapHint.layoutType, map, mapHint);
         foreach(areas) ::(k, v) {

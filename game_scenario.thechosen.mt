@@ -1345,7 +1345,7 @@ return {
             }
             @:instance = import(module:'game_singleton.instance.mt');
 
-            location.targetLandmark.visit(where::(landmark)<-location.targetLandmarkEntry);
+            location.targetLandmark.visit(onLoad::(landmark)<-location.targetLandmarkEntry);
             canvas.clear();          
           }
 
@@ -1454,7 +1454,7 @@ return {
           windowEvent.queueCustom(
             onEnter:: {
               @:instance = import(module:'game_singleton.instance.mt');
-              location.targetLandmark.visit(where::(landmark) <- location.targetLandmarkEntry);
+              location.targetLandmark.visit(onLoad::(landmark) <- location.targetLandmarkEntry);
             }
           )
         }
@@ -1562,7 +1562,7 @@ return {
           {id: 'base:item'}
         ],
         mapHint:{
-          layoutType: DungeonMap.LAYOUT_ALPHA
+          layoutType: DungeonMap.LAYOUT_GAMMA
         },
         events : {
           onVisit ::(landmark, island) {
@@ -2385,7 +2385,7 @@ return {
             @:map = landmark.map;
             map.width = 100;
             map.height = 60;
-            map.outOfBoundsCharacter = '.'
+            map.undefinedCharacter = '.'
             
             
             @:CASTLE_MAIN_X = 30;

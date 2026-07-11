@@ -131,8 +131,8 @@
       locationRight.y = top + 4;
 
      
-      _landmark.addLocation(locationLeft);
-      _landmark.addLocation(locationRight);        
+      _landmark.addLocation(location:locationLeft, traits : Map.TRAIT.DISCOVERED);
+      _landmark.addLocation(location:locationRight, traits : Map.TRAIT.DISCOVERED);        
         
 
     }  
@@ -349,7 +349,7 @@
 
 
     // adds a minimally-sized wide building
-    @:addWideBuilding ::(left, top, symbol, location) {
+    @:addWideBuilding ::(left, top, symbol, locationLeft, locationRight) {
       /*
         x        x
         xxxxxxxxxx
@@ -390,8 +390,8 @@
         locationRight.y = top + 4;
 
 
-        _landmark.addLocation(locationLeft);
-        _landmark.addLocation(locationRight);
+        _landmark.addLocation(location:locationLeft, traits : Map.TRAIT.DISCOVERED);
+        _landmark.addLocation(location:locationRight, traits : Map.TRAIT.DISCOVERED);        
         
 
         if (symbol != empty) ::<= {
@@ -413,8 +413,8 @@
         locationRight.x = left + 9;
         locationRight.y = top + 4;
 
-        _landmark.addLocation(locationLeft);
-        _landmark.addLocation(locationRight);        
+        _landmark.addLocation(location:locationLeft, traits : Map.TRAIT.DISCOVERED);
+        _landmark.addLocation(location:locationRight, traits : Map.TRAIT.DISCOVERED);        
 
         if (symbol != empty) ::<= {
           @:index = _map.addScenerySymbol(character:symbol);
@@ -429,7 +429,7 @@
 
 
     // adds a minimally-sized wide building
-    @:addTallBuilding ::(left, top, symbol, location) {
+    @:addTallBuilding ::(left, top, symbol, locationLeft, locationRight) {
       /*
         ||||
         xxxx
@@ -462,8 +462,8 @@
       locationRight.x = left + 3;
       locationRight.y = top + 7;
 
-      _landmark.addLocation(locationLeft);
-      _landmark.addLocation(locationRight);        
+      _landmark.addLocation(location:locationLeft, traits : Map.TRAIT.DISCOVERED);
+      _landmark.addLocation(location:locationRight, traits : Map.TRAIT.DISCOVERED);        
       
       if (symbol != empty) ::<= {
         @:index = _map.addScenerySymbol(character:symbol);
@@ -491,7 +491,7 @@
       blockSceneryIndex = map.addScenerySymbol(character:'▓');
 
       // if category is Entrance, the area is 2x2 
-      if (category == Location.CATEGORY.ENTRANCE) ::<= {
+      if (category == 0) ::<= {
         unitsWide = 1;
         unitsHigh = 1;
       }
@@ -566,6 +566,12 @@
       gateSide : {get::<- gateSide},
       
       addEntrance ::{
+        @:location = Location.new(
+          base: Location.database.find(:'base:entrance'),
+          landmark: _landmark
+        );
+
+
         ::? {
           for(0, 20)::(i) {
             @x0;
@@ -627,8 +633,13 @@
       
       // returns false if cant fit the location
       addPortal::(portalSpec) {
-        @:locationLeft = Landmark.createPortalFromSpecification(:portalSpec);
-        @:locationRight = Landmark.createPortalFromSpecification(:portalSpec);
+        @:Landmark = import(module:'game_mutator.landmark.mt');
+
+        @:locationLeft = _landmark.createPortalFromSpecification(:portalSpec);
+        @:locationRight = _landmark.createPortalFromSpecification(:portalSpec);
+
+        locationLeft.addPortalChainItem(:locationRight);
+        locationRight.addPortalChainItem(:locationLeft);
 
 
         // {"linkedPortalID" : "structure-entrance-left"}
@@ -636,8 +647,9 @@
         locationLeft.data.linkedPortalID = 'structure-entrance-left';
         locationRight.data.linkedPortalID = 'structure-entrance-right';
       
+        @:landmarkBase = Landmark.database.find(:portalSpec.id);
         
-        @:size = if (landmark.base.hasTraits(:Landmark.TRAIT.STRUCTURE_LARGE)) 2 else 1;
+        @:size = if (landmarkBase.hasTraits(:Landmark.TRAIT.STRUCTURE_LARGE)) 2 else 1;
         when(random.flipCoin() && size == 1) ::<= {
           when(freeSpaces->keycount == 0) false;
           
@@ -647,7 +659,7 @@
           addMinimalBuilding(
             locationLeft,
             locationRight,
-            symbol:if (location.base.category == Location.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
+            symbol:if (landmarkBase.hasTraits(:Landmark.TRAIT.STRUCTURE_RESIDENTIAL)) empty else portalSpec.symbol,
             left:space.x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
             top:space.y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING
           );
@@ -687,7 +699,7 @@
                 addWideBuilding(
                   locationLeft,
                   locationRight,
-                  symbol:if (location.base.category == Location.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
+                  symbol:if (landmarkBase.hasTraits(:Landmark.TRAIT.STRUCTURE_RESIDENTIAL)) empty else portalSpec.symbol,
                   left:_x + left * ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING,
                   top: _y + space0.y * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING
                 );
@@ -696,7 +708,7 @@
                 addTallBuilding(
                   locationLeft,
                   locationRight,
-                  symbol:if (location.base.category == Location.CATEGORY.RESIDENTIAL) empty else location.base.symbol,
+                  symbol:if (landmarkBase.hasTraits(:Landmark.TRAIT.STRUCTURE_RESIDENTIAL)) empty else portalSpec.symbol,
                   left:_x + space0.x * ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING,
                   top: _y + top * ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING
                 );              
@@ -954,24 +966,22 @@ return ::(mapHint => Object, landmark, objects) {
 
 
   return ::<= {
-    map = Map.new(parent);
-    landmark.map = map;
-
+    @:Landmark = import(module:'game_mutator.landmark.mt');
+    map = landmark.map;
     map.paged = false;
-    map.renderOutOfBounds = true;
-    map.outOfBoundsCharacter = ' ';
+    map.undefinedCharacter = ' ';
     map.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
     map.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
     
 
     if (mapHint.wallCharacter != empty) map.wallCharacter = mapHint.wallCharacter;
-    if (mapHint.outOfBoundsCharacter != empty) map.outOfBoundsCharacter = mapHint.outOfBoundsCharacter;
+    if (mapHint.undefinedCharacter != empty) map.undefinedCharacter = mapHint.undefinedCharacter;
     if (mapHint.hasZoningWalls != empty) hasZoningWalls = mapHint.hasZoningWalls;
     if (mapHint.hasFillerBuildings != empty) hasFillerBuildings = mapHint.hasFillerBuildings;
 
 
 
-    @:zone = addZone(category:Landmark.TRAIT.STRUCTURE_ENTRANCE);
+    @:zone = addZone(category:0);
     zone.addEntrance();
 
     // special function that adds a location value 
@@ -998,7 +1008,7 @@ return ::(mapHint => Object, landmark, objects) {
         zone = addZone(category);
         zone.addPortal(:v);
       }
-    },
+    }
 
 
 
@@ -1033,5 +1043,5 @@ return ::(mapHint => Object, landmark, objects) {
       }
     }
   } 
-);
-return StructureMap;
+};
+

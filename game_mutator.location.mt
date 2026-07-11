@@ -24,6 +24,7 @@
 
 
 @:TRAIT = {
+  NONE : 0,
 
   // will have no halo or symbol drawn
   INVISIBLE : 1,
@@ -103,11 +104,21 @@ Location.database.newEntry(data:{
     error(:'Portal.data must contain a linkedPortalID (String) to identify which portal location within the target the party should teleport to when teleporting.');
   
   
-  @:landmark = Landmark.create(
+  @:landmark = Landmark.new(
     data : location.data.data,
-    base : Landmark.find(:location.data.id)
+    base : Landmark.database.find(:location.data.id)
   );  
   location.landmark.island.addLandmark(landmark, unmapped: true);  
+  location.data.destinationLandmarkWorldID = landmark.worldID;
+
+  return landmark;
+}
+	
+	
+@:setupLandmark ::(location) {
+  @:landmark = location.landmark.island.findLandmark(:location.data.destinationLandmarkWorldID)
+
+  landmark.loadContent();
   
   // now find corresponding linkedPortalID
   @:targetPortal = ::? {
@@ -121,9 +132,10 @@ Location.database.newEntry(data:{
     error(:'Portal landmark creation encountered an error: target portal in created landmark could not be found. this locations data.linkedPortalID must match one within the newly created landmark that this portal created.')
   
 
-  location.data.destinationWorldID = targetPortal.worldID;  
+  location.data.destinationWorldID = targetPortal.worldID;
+  targetPortal.data.destinationWorldID = location.worldID
+  targetPortal.data.destinationLandmarkWorldID = location.landmark.worldID;
 }
-	
 
 Location.database.newEntry(data:{
   id: 'base:portal',
@@ -145,27 +157,48 @@ Location.database.newEntry(data:{
   events : {  
   
     onStep ::(location, entities) {
-      if (location.data.destinationWorldID == empty)
-        createLandmark();
-    
-      // find referred to landmark
-      @:target = ::? {
-        foreach(location.landmark.island.landmarks) ::(k, landmark) {
-          when(landmark == location.landmark) empty;
+      if (location.data.destinationLandmarkWorldID == empty)
+        createLandmark(location)
+
+      @:target = location.landmark.island.findLandmark(:location.data.destinationLandmarkWorldID)
+
+
+      target.visit(
+        onLoad ::(landmark) { 
+          if (location.data.destinationWorldID == empty) ::<= {
+            if (location.data.portalChainItems != empty) ::<= {
+              foreach(location.data.portalChainItems) ::(k, v) {
+                @:loc = location.landmark.island.findLocation(:v);
+
+                loc.data.destinationLandmarkWorldID = landmark.worldID;
+                setupLandmark(:loc);
+              }
+            }
+            setupLandmark(location);
+          }
+        
+          // find referred to landmark
+          @:target = ::? {
+            foreach(location.landmark.island.landmarks) ::(k, landmark) {
+              when(landmark == location.landmark) empty;
+              
+              foreach(landmark.locations) ::(k, loc) {
+                if (location.data.destinationWorldID == loc.worldID)
+                  send(:loc);
+              }
+            }
+          }
           
-          foreach(landmark.locations) ::(k, loc) {
-            if (location.data.destinationWorldID == loc.worldID)
-              send(:lov);
+          when(target == empty)
+            error(:'Portal\'s target could not be found.');        
+        
+      
+          return {
+            x : target.x,
+            y : target.y
           }
         }
-      }
-      
-      when(target == empty)
-        error(:'Portal\'s target could not be found.');
-      target.visitLandmark(where ::<- {
-        x : target.x,
-        y : target.y
-      })
+      )
     }
   }
 })
@@ -177,7 +210,7 @@ Location.database.newEntry(data:{
   name: 'Entrance',
   rarity: 100000000,
   ownVerb: '',
-  traits : TARIT.ENTRANCE_HINT,
+  traits : TRAIT.ENTRANCE_HINT,
   descriptions: [
     "A sturdy gate surrounded by a well-maintained fence around the area.",
     "A decrepit gate surrounded by a feeble attempt at fencing.",
@@ -201,7 +234,7 @@ Location.database.newEntry(data:{
   rarity: 100,
   ownVerb: 'owned',
   symbol: 'F',
-  traits: TRAIT.STRUCTURE_LARGE,
+  traits: 0,//TRAIT.STRUCTURE_LARGE,
 
   descriptions: [
     "A well-maintained farm. Looks like an experienced farmer works it.",
@@ -243,37 +276,29 @@ Location.database.newEntry(data:{
 
 
 Location.database.newEntry(data:{
-  id: 'base:home',
-  name: 'Home',
+  id: 'base:person-static',
+  name: '',
   rarity: 100,
-  ownVerb: 'owned',
+  ownVerb: '',
   symbol: '',
   traits : 0,
 
   descriptions: [
-    "A well-kept residence. Looks like it's big enough to hold a few people",
-    "An old residence. It looks like it has a rich history.",
-    "A modest residence. Not too much in the way of amenities, but probably lived in by someone trustworthy",
-    "An ornate residence. Unexpectedly, this seems lived in by people of wealth.",
-    "An average residence. Nothing short of ordinary."
   ],
   
   interactions : [
     'base:talk',
-    'base:examine'
   ],
   
   aggressiveInteractions : [      
     'base:steal',
-    'base:vandalize',
   ],
   
   
   events : {
-    onFirstInteract ::(location) {
+    onCreate ::(location) {
       location.ownedBy = location.landmark.island.newInhabitant();
-      @:story = import(module:'game_singleton.story.mt');
-    
+
       for(0, 2+(random.number()*4)->ceil)::(i) {
         // no weight, as the value scales
         location.inventory.add(
@@ -286,7 +311,11 @@ Location.database.newEntry(data:{
           )
         );
       }
-    }
+
+      @:owner = location.ownedBy;
+      location.name = owner.name;
+      
+    },
   }
 })
 
@@ -879,7 +908,7 @@ Location.database.newEntry(data:{
   rarity: 100,
   ownVerb : 'run',
   symbol: 'n',
-  traits : TRAIT.STRUCTURE_LARGE,
+  traits : 0,//TRAIT.STRUCTURE_LARGE,
 
   descriptions: [
     "A wooden chair.",
@@ -901,7 +930,7 @@ Location.database.newEntry(data:{
   rarity: 100,
   ownVerb : 'run',
   symbol: '&',
-  traits: TRAIT.STRUCTURE_LARGE,
+  traits: 0,//TRAIT.STRUCTURE_LARGE,
 
   descriptions: [
     "A modest tavern with a likely rich history.",
@@ -932,7 +961,7 @@ Location.database.newEntry(data:{
   rarity: 100,
   ownVerb : 'run',
   symbol: '!',
-  traits : TRAIT.STRUCTURE_LARGE,
+  traits : 0,//TRAIT.STRUCTURE_LARGE,
 
   descriptions: [
     "A fighting arena",
@@ -963,7 +992,7 @@ Location.database.newEntry(data:{
   rarity: 100,
   ownVerb : 'run',
   symbol: '=',
-  traits : TRAIT.STRUCTURE_LARGE,
+  traits : 0,//TRAIT.STRUCTURE_LARGE,
 
 
   descriptions: [
@@ -994,7 +1023,7 @@ Location.database.newEntry(data:{
   rarity: 100,
   ownVerb : 'run',
   symbol: '+',
-  traits : TRAIT.STRUCTURE_LARGE,
+  traits : 0,//TRAIT.STRUCTURE_LARGE,
 
   descriptions: [
     "A school.",
@@ -1032,7 +1061,7 @@ Location.database.newEntry(data:{
   rarity: 100,
   ownVerb : '',
   symbol: '[]',
-  traits: TRAIT.STRUCTURE_LARGE | TRAIT.ONE_PER_LANDMARK,
+  traits: TRAIT.ONE_PER_LANDMARK, // large structure
 
   descriptions: [
     "A library",
@@ -1349,7 +1378,8 @@ Location.database.newEntry(data:{
     'An item of some kind.'
   ],
   interactions : [
-    'base:take'
+    'base:take',
+    'base:describe-item',
   ],
   
   aggressiveInteractions : [
@@ -2404,6 +2434,18 @@ Location.database.newEntry(data:{
         get :: {
           return [...state.occupants];
         }
+      },
+      
+      // adds a location to trigger portal resolving 
+      // once it is done for this location.
+      addPortalChainItem::(other) {
+        if (state.base.id != 'base:portal')
+          error(:'This is only relevant for base:portal locations');
+          
+        if (state.data.portalChainItems == empty)
+          state.data.portalChainItems = [];
+          
+        state.data.portalChainItems->push(:other.worldID);
       },
       
       enter ::(entity) {

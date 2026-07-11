@@ -1090,11 +1090,11 @@ Island.database.newEntry(
                         prompt:'Enter?',
                         onChoice::(which) {
                           if (which == true)
-                            landmark.visit(where);
+                            landmark.visit(:where);
                         }
                       )
                     }
-                    landmark.visit(where);              
+                    landmark.visit(:where);              
                     if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
                       windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
                     }                  
@@ -1171,7 +1171,7 @@ Island.database.newEntry(
           when(gategate->size == 0) empty;
           
           gate.visit(
-            where: ::(landmark)<- gategate[0]
+            onLoad: ::(landmark)<- gategate[0]
           );        
           
           if (hasVisitIsland && onReady) ::<= {

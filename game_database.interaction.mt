@@ -434,52 +434,62 @@ Interaction.newEntry(
 
       @talkee;
       
-      windowEvent.queueChoices(
-        prompt: 'Talk to whom?',
-        choices : [...choices]->map(to:::(value) <- value.name),
-        canCancel : true,
-        onChoice::(choice) {
-          when(choice == 0) empty;
-          talkee = choices[choice-1];              
-
-          // if cancelled
-          when(talkee == empty) empty;
-
-
-          if (location.peaceful == false && !talkee.isIncapacitated()) ::<= {
-            @:Landmark = import(module:'game_mutator.landmark.mt');
-
-
-            if (location.landmark.base.hasTraits(:Landmark.TRAIT.GUARDED)) ::<= {
-              windowEvent.queueMessage(speaker:talkee.name, text:'Guards! Guards! Help!');
-              Scene.start(id:'base:scene_guards0', onDone::{}, location, landmark:location.landmark);
-            } else ::<= {
-              @:world = import(module:'game_singleton.world.mt');
-              windowEvent.queueMessage(speaker:talkee.name, text:'You never should have come here!');
-              world.battle.start(
-                party,              
-                allies: party.members,
-                enemies: [talkee],
-                landmark: {},
-                onEnd::(result) {
-                  @:instance = import(module:'game_singleton.instance.mt');
-                  when(!world.battle.partyWon()) 
-                    instance.gameOver(reason:'The party was wiped out.');
-                
-                  location.ownedBy = empty;                                    
-                }
-              );                
-            }
-          } else ::<= {
-            talkee.interactPerson(
-              party,
-              location
-            );
-          }
-
-        }
-      );
       
+      @:talk = :: {
+
+        // if cancelled
+        when(talkee == empty) empty;
+
+
+        if (location.peaceful == false && !talkee.isIncapacitated()) ::<= {
+          @:Landmark = import(module:'game_mutator.landmark.mt');
+
+
+          if (location.landmark.base.hasTraits(:Landmark.TRAIT.GUARDED)) ::<= {
+            windowEvent.queueMessage(speaker:talkee.name, text:'Guards! Guards! Help!');
+            Scene.start(id:'base:scene_guards0', onDone::{}, location, landmark:location.landmark);
+          } else ::<= {
+            @:world = import(module:'game_singleton.world.mt');
+            windowEvent.queueMessage(speaker:talkee.name, text:'You never should have come here!');
+            world.battle.start(
+              party,              
+              allies: party.members,
+              enemies: [talkee],
+              landmark: {},
+              onEnd::(result) {
+                @:instance = import(module:'game_singleton.instance.mt');
+                when(!world.battle.partyWon()) 
+                  instance.gameOver(reason:'The party was wiped out.');
+              
+                location.ownedBy = empty;                                    
+              }
+            );                
+          }
+        } else ::<= {
+          talkee.interactPerson(
+            party,
+            location
+          );
+        }
+      }
+      
+      
+      if (choices->size == 1) ::<= {
+        talkee = choices[0];              
+        talk();
+      
+      } else ::<= {
+        windowEvent.queueChoices(
+          prompt: 'Talk to whom?',
+          choices : [...choices]->map(to:::(value) <- value.name),
+          canCancel : true,
+          onChoice::(choice) {
+            when(choice == 0) empty;
+            talkee = choices[choice-1];              
+            talk();
+          }
+        );
+      }
     }
   }
 )
@@ -2230,7 +2240,7 @@ Interaction.newEntry(
       windowEvent.queueCustom(
         onEnter:: {
           @:instance = import(module:'game_singleton.instance.mt');
-          location.targetLandmark.visit(where::(landmark) <- location.targetLandmarkEntry);
+          location.targetLandmark.visit(onLoad::(landmark) <- location.targetLandmarkEntry);
         }
       )
     },
@@ -2348,7 +2358,7 @@ Interaction.newEntry(
       }
       @:instance = import(module:'game_singleton.instance.mt');
 
-      location.targetLandmark.visit(where::(landmark)<-location.targetLandmarkEntry);
+      location.targetLandmark.visit(onLoad::(landmark)<-location.targetLandmarkEntry);
       canvas.clear();
     }
   }
@@ -3445,6 +3455,18 @@ Interaction.newEntry(
   }
 ) 
 
+
+Interaction.newEntry(
+  data : {
+    name : 'Describe',
+    id :  'base:describe-item',
+    keepInteractionMenu : true,
+    interact ::(location, party) {      
+      when (location.inventory.items->size != 1) false;
+      location.inventory.items[0].describe();
+    }
+  }
+) 
 
 Interaction.newEntry(
   data : {

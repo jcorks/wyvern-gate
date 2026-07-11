@@ -105,6 +105,8 @@ import(module:'game_class.landmarkevent_gnome.mt')
 import(module:'game_class.landmarkevent_giantflea.mt')
 import(module:'game_class.landmarkevent_monolith.mt')
 
+import(module:'game_class.structuremap.mt');
+
 
 @:distance::(x0, y0, x1, y1) {
   @xd = x1 - x0;
