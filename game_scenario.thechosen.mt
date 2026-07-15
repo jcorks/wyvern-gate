@@ -1562,7 +1562,7 @@ return {
           {id: 'base:item'}
         ],
         mapHint:{
-          layoutType: DungeonMap.LAYOUT_GAMMA
+          layoutType: DungeonMap.LAYOUT_ALPHA
         },
         events : {
           onVisit ::(landmark, island) {

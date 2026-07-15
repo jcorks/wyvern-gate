@@ -750,9 +750,9 @@ Landmark.database.newEntry(
 
 Landmark.database.newEntry(
   data: {
-    name: 'Forest',
+    name: 'Forest Cave',
     id: 'base:forest',
-    legendName: 'Forest',
+    legendName: 'Forest Cave',
     symbol : 'T',
     rarity : 40,        
     peaceful: true,
@@ -780,6 +780,51 @@ Landmark.database.newEntry(
     ],
     requiredEvents : [
       'base:the-snakesiren'
+    ],
+    mapHint: {
+      roomSize: 60,
+      wallCharacter: 'Y',
+      roomAreaSize: 7,
+      roomAreaSizeLarge: 14,
+      emptyAreaCount: 25,
+      undefinedCharacter: '~'
+    },
+    events : {
+      onVisit ::(landmark, island) {
+        windowEvent.queueMessage(
+          text:"This place seems to shift before you..."
+        );    
+      }
+    }    
+  }
+)
+
+Landmark.database.newEntry(
+  data: {
+    name: 'Hidden Forest Cave',
+    id: 'base:forest-generic',
+    legendName: 'Forest',
+    symbol : 'T',
+    rarity : 40,        
+    peaceful: true,
+    landmarkType : TYPE.DUNGEON,
+
+    traits :
+      TRAIT.EPHEMERAL |
+      TRAIT.DUNGEON_FORCE_ENTRANCE,
+    minEvents : 0,
+    maxEvents : 1,
+    eventPreference : LandmarkEvent.KIND.HOSTILE,
+
+    minObjects : 0,
+    maxObjects : 1,
+    possibleObjects : [
+      {id: 'base:small-chest', rarity:1},
+    ],
+    requiredObjects : [
+
+    ],
+    requiredEvents : [
     ],
     mapHint: {
       roomSize: 60,
@@ -1195,7 +1240,6 @@ Landmark.database.newEntry(
     @:Entity = import(module:'game_class.entity.mt');
 
     @:loadContent::(base) {
-      breakpoint();
     
       @:selected = [];
       @:possibleObjects = [...base.possibleObjects];
@@ -1222,10 +1266,19 @@ Landmark.database.newEntry(
       } else
       if (base.landmarkType == TYPE.DUNGEON) ::<= {
         state.map = DungeonMap.create(parent:this, mapHint: base.mapHint);
+        @entrance;
         if (base.hasTraits(:Landmark.TRAIT.DUNGEON_FORCE_ENTRANCE)) ::<= {
-          this.addLocation(location:Location.new(landmark: this, base:Location.database.find(:'base:entrance')));
+          entrance = Location.new(landmark: this, base:Location.database.find(:'base:ladder'));
+          this.addLocation(location:entrance);
         }
         setupLocations(:[...base.requiredObjects, ...selected]);
+
+        if (base.hasTraits(:Landmark.TRAIT.DUNGEON_FORCE_ENTRANCE)) ::<= {
+          breakpoint();
+          state.map.setPointer(x:entrance.x, y:entrance.y);
+        } else {
+          this.movePointerToRandomArea();        
+        }
 
       } else if (base.landmarkType == TYPE.STRUCTURE) ::<= {        
         // handles portal adding and such
@@ -1250,32 +1303,6 @@ Landmark.database.newEntry(
 
 
 
-
-
-
-
-      
-
-      
-      if (base.landmarkType == TYPE.DUNGEON) ::<= {
-        @:gate = this.gate;
-        if (gate == empty) ::<= {
-          this.movePointerToRandomArea();
-        } else ::<= {
-          state.map.setPointer(
-            x:gate.x,
-            y:gate.y
-          );          
-        }
-      } else if (base.landmarkType == TYPE.STRUCTURE) ::<= {
-        @:gate = this.gate;
-        state.map.setPointer(
-          x:gate.x,
-          y:gate.y
-        );
-
-        // cant add locations to structure maps through the landmark.
-      }
 
 
 
@@ -1323,7 +1350,9 @@ Landmark.database.newEntry(
     this.interface =  {
       initialize ::(parent, island) {
         @:Island = import(module:'game_mutator.island.mt');
-        if (parent)
+        if (parent->type == Island.type)
+          island = parent
+        else if (parent)
           island = parent.parent; // parents of locations are always maps
 
         // backup: just take the current world's island
@@ -1512,17 +1541,21 @@ Landmark.database.newEntry(
       // onLoad is called within the "loading spot" of the transition 
       // Optionally, onLoad can return an object containing x and y 
       // members for a location to move the pointer when arriving at the location.
-      travel ::(onLoad) {
+      //
+      // flatten is an optional boolean. When present and true, it will 
+      // remove all windowEvent requests until the IslandVisit event, effectively 
+      // removing all travel() window event stack entries. Typically used for 
+      travel ::(onLoad, startRenderable) {
         @:hud = import(:'game_singleton.hud.mt');
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
         @:partyOptions = import(module:'game_function.partyoptions.mt');
         @:Island = import(module:'game_mutator.island.mt');
 
+
         @:party = world.party;
         @:landmark = this;
         landmark.updateTitle();
-        @:island = this.island;
-        
+        @:island = this.island;                    
         
 
         
@@ -1602,7 +1635,7 @@ Landmark.database.newEntry(
             when(nearby == empty || nearby->keycount == 0) empty;
             
             @:nearbySet = nearby->keys;
-            nearbySet->sort(::(a, b) <- a.name < a.name)
+            nearbySet->sort(::(a, b) <- a.name < b.name)
             
             @:lines = [];
             foreach(nearbySet)::(index, arr) {
@@ -1618,6 +1651,7 @@ Landmark.database.newEntry(
         };
         windowEvent.queueTransition(
           kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+          renderableStart : startRenderable,
           renderableMiddle: {
             render :: {
               @where = onLoad
@@ -1629,7 +1663,6 @@ Landmark.database.newEntry(
                     y:where.y
                   ); 
               }
-
 
               this.loadContent();
               cursorMoveRenderable.render()
@@ -1667,13 +1700,25 @@ Landmark.database.newEntry(
             }
             
             // cancel if we've arrived somewhere
-            setNearby(:landmark.map.getNamedItemsUnderPointerRadius(:3)->map(::(value) <- value.data));
+            @:locations = landmark.map.getNamedItemsUnderPointerRadius(:3)->map(::(value) <- value.data)
+            setNearby(:locations->filter(::(value) <- value.base.hasNoTrait(:Location.TRAIT.INVISIBLE)));
           }        
         )      
       },
 
-      
-      visit ::(onLoad)  {
+      // Makes this landmark the "current" landmark that 
+      // the party is within. This implicitly calls this.travel(), which 
+      // makes the windowevent context and map in the traveling mode where 
+      // users can interact with Locations within the landmark.
+      //
+      // onLoad is an optional function that can 
+      // be used to dynamically spawn heavy content. onLoad is called 
+      // in the middle of the transition once the screen is dark, allowing 
+      // for seamless loading.
+      //
+      // dontFlatten is an optional boolean that, when true 
+      // will preserve the visit queue.
+      visit ::(onLoad, startRenderable)  {
         @:landmark = this;
         @:world = import(module:'game_singleton.world.mt');
         when (state.base.emit(event:'onVisit', landmark:this, island:landmark.island) == false) empty;
@@ -1681,6 +1726,8 @@ Landmark.database.newEntry(
         if (world.landmark)
           world.landmark.leave();
           
+          
+        @:old = world.landmark;
         world.landmark = this;  
 
         foreach(world.party.members) ::(k, v) {
@@ -1688,8 +1735,7 @@ Landmark.database.newEntry(
             fullName : 'the ' + landmark.name
           );
         }
-        
-        this.travel(onLoad);
+        this.travel(onLoad, startRenderable);
       },
       
       updateTitle ::(override)  {
@@ -1757,7 +1803,6 @@ Landmark.database.newEntry(
 
         @:locations = state.map.getItemsUnderPointer();
         if (locations->type == Object) ::<= {
-          breakpoint();
           foreach(locations) ::(k, v) {
             if (v.data->type == Location.type) ::<= {
               v.data.base.emit(event:'onStep', entities: world.party.members, location:v.data);
@@ -1884,7 +1929,9 @@ Landmark.database.newEntry(
         if (loc.halo)
           traits |= Map.TRAIT.HAS_HALO;
         
-        if (state.base.hasTraits(:TRAIT.NOTHING_HIDDEN))
+
+        
+        if (state.base.hasTraits(:TRAIT.NOTHING_HIDDEN) || location.base.hasTraits(:Location.TRAIT.INVISIBLE))
           traits |= Map.TRAIT.DISCOVERED
              
         @:defaultAdd ::{
@@ -1954,11 +2001,11 @@ Landmark.database.newEntry(
       createPortalFromSpecification ::(spec) {
         @:dataConv = {...spec};
         dataConv.overrideSymbol = dataConv.symbol
-        dataConv.overrideName = dataConv.name 
+        dataConv.overrideName = '';//dataConv.name 
         dataConv.id = 'base:portal'
         dataConv.data = spec;
         @:loc = this.createLocationFromSpecification(:dataConv);
-        
+        loc.name = '';
         loc.halo = false;
         loc.symbol = '';
         

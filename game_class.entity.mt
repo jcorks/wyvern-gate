@@ -623,7 +623,7 @@
 
   @:applyHPbonus ::{
     @:newState = this.stats.save();
-    @amount = random.integer(from:6, to:8);
+    @amount = random.integer(from:2, to:4);
     newState['HP'] += amount;
     this.stats.load(serialized:newState);
     this.heal(amount, silent:true);
@@ -1025,17 +1025,18 @@
         state.faveWeapon = Item.database.find(id:faveWeapon);
 
       if (island != empty)  ::<= {
-        state.inventory.add(item:
-          Item.new(
-            base: Item.database.getRandomFiltered(
-              filter:::(value) <- 
-                value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
-                value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
-                && value.tier <= island.tier
-            ),
-            rngEnchantHint:true
-          )
-        );
+        if (random.try(percentSuccess:40))
+          state.inventory.add(item:
+            Item.new(
+              base: Item.database.getRandomFiltered(
+                filter:::(value) <- 
+                  value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                  value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                  && value.tier <= island.tier
+              ),
+              rngEnchantHint:true
+            )
+          );
 
 
         if (random.try(percentSuccess:0.2 + island.tier*2)) ::<= {

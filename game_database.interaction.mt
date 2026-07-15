@@ -37,66 +37,7 @@
 @:lootget = import(:'game_function.lootget.mt');
 
 
-Interaction.newEntry(
-  data : {
-    id :  'base:exit',
-    name : 'Exit',
-    keepInteractionMenu : false,
-    interact ::(location, party) {
-      @:go ::{
-        // jumps to the prev menu lock
-        windowEvent.queueCustom(
-          onEnter::{
-            //invaidate a cache
-            windowEvent.jumpToTag(name:'VisitLandmark', goBeforeTag:true);
-          }
-        );
 
-        windowEvent.queueTransition(
-          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-          renderableStart : location.landmark.map,
-          renderableMiddle: location.landmark.island.map
-        );
-      }
-    
-      when (location.peaceful == false && 
-        (location.landmark.base.id == 'base:town' || location.landmark.base.id == 'base:city')) ::<= {
-        windowEvent.queueMessage(
-          speaker: '???',
-          text: "There they are!!"
-        );
-        @:world = import(module:'game_singleton.world.mt');
-
-        world.battle.start(
-          party,              
-          allies: party.members,
-          enemies: [
-            location.landmark.island.newInhabitant(professionHint:'base:guard'),
-            location.landmark.island.newInhabitant(professionHint:'base:guard'),
-            location.landmark.island.newInhabitant(professionHint:'base:guard'),            
-          ]->map(to:::(value){ value.anonymize(); return value;}),
-          landmark: {},
-          onEnd::(result) {
-            match(result) {
-              (Battle.RESULTS.ALLIES_WIN,
-               Battle.RESULTS.NOONE_WIN): ::<= {
-              },
-              
-              (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                @:instance = import(module:'game_singleton.instance.mt');
-                instance.gameOver(reason:'The party was wiped out.');
-              }
-            }
-          }
-        )
-         
-      }
-
-      go();
-
-    }
-  }
-)
 Interaction.newEntry(
   data : {
     name : 'Examine',
@@ -2196,7 +2137,7 @@ Interaction.newEntry(
     },
   }
 )    
-  
+
   
 // specifically for exploring different areas of dungeons.
 Interaction.newEntry(
@@ -2329,8 +2270,19 @@ Interaction.newEntry(
     keepInteractionMenu : false,
     interact ::(location, party) {
 
-      windowEvent.queueMessage(text:'The party uses the ladder to climb up to the surface.', renderable:{render::{canvas.fill();}});
-      windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});          
+      windowEvent.queueMessage(text:'The party uses the ladder to climb up to the surface.');
+      @hit = false;
+      windowEvent.queueCustom(
+        onEnter::{
+          //invaidate a cache
+          windowEvent.jumpToTag(name:'VisitIsland');
+        }
+      );
+      windowEvent.queueTransition(
+        kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+        renderableStart : location.landmark.map,
+        renderableMiddle: location.landmark.island.map
+      );
     },
   }
 )  
@@ -3461,8 +3413,9 @@ Interaction.newEntry(
     name : 'Describe',
     id :  'base:describe-item',
     keepInteractionMenu : true,
-    interact ::(location, party) {      
-      when (location.inventory.items->size != 1) false;
+    interact ::(location, party) {  
+      breakpoint();    
+      when (location.inventory.items->size < 1) false;
       location.inventory.items[0].describe();
     }
   }

@@ -49,10 +49,10 @@ Quest.database.newEntry(
     traits : TRAIT.HIDDEN_REWARD |
              TRAIT.SPECIAL,
     descriptions : [
-      'I was in the forest and I lost my %1! Please help!',
-      'I was scared by some creatures in the forest and dropped my %1! Please retrieve it.',
-      'A while back, I dropped my %1 in the forest. I\'d like you to get it back for me.',
-      'I need my %1! Please go to the forest to get it!'
+      'I was in a forest cave and I lost my %1! Please help!',
+      'I was scared by some creatures in the cave by the forest and dropped my %1! Please retrieve it.',
+      'A while back, I dropped my %1 in the cave by the forest. I\'d like you to get it back for me.',
+      'I need my %1! Please go to the forest cave to get it!'
     ],
     
     events : {
@@ -81,6 +81,7 @@ Quest.database.newEntry(
         );
         landmark.symbol = 'X';
         landmark.legendName = quest.name;
+        landmark.loadContent();
         
         @:loc = landmark.getRandomEmptyPosition();
         

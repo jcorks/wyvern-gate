@@ -977,6 +977,25 @@ Island.database.newEntry(
         @:world = import(module:'game_singleton.world.mt');
         island.map.title = island.name + ' : ' + world.timeString;
 
+        @:visitLandmark::(landmark) {
+          when (landmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN)) ::<= {
+            windowEvent.queueMessage(
+              text: "It may be difficult to return... "
+            );
+            windowEvent.queueAskBoolean(
+              prompt:'Enter?',
+              onChoice::(which) {
+                if (which == true)
+                  landmark.visit();
+              }
+            )
+          }
+          landmark.visit();              
+          if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
+            windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
+          }                       
+        }
+
 
         @islandTravel = ::{
           windowEvent.queueCursorMove(
@@ -991,7 +1010,6 @@ Island.database.newEntry(
             renderable : {
               render ::{
                 @:hud = import(module:'game_singleton.hud.mt');
-                world.landmark = empty;
                 island.map.render();
                 hud.render(island);
                 when(underFoot == empty || underFoot->size == 0) empty;
@@ -1022,10 +1040,8 @@ Island.database.newEntry(
               }
             },
             onMove ::(choice) {
-              
-              @:target = island.landmarks[choice-1];
-              
-              
+              world.landmark = empty;
+                            
               // move by one unit in that direction
               // or ON it if its within one unit.
               island.map.movePointerFree(
@@ -1046,7 +1062,10 @@ Island.database.newEntry(
                 arr.data.discover();
                 island.map.discover(data:arr.data);                      
               }
-              
+              @:underunderFoot = island.map.getNamedItemsUnderPointer();
+              if (underunderFoot != empty && underunderFoot->size == 1)
+                visitLandmark(:underunderFoot[0].data);                
+
             }
           );
         }
@@ -1078,26 +1097,7 @@ Island.database.newEntry(
                 foreach(visitable)::(i, vis) {
                   choices->push(value:'Visit ' + vis.name); 
                   choiceActions->push(::{
-                    @:landmark = vis.data;
-
-                    @where = ::(landmark) <- landmark.gate;
-
-                    when (landmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN)) ::<= {
-                      windowEvent.queueMessage(
-                        text: "It may be difficult to return... "
-                      );
-                      windowEvent.queueAskBoolean(
-                        prompt:'Enter?',
-                        onChoice::(which) {
-                          if (which == true)
-                            landmark.visit(:where);
-                        }
-                      )
-                    }
-                    landmark.visit(:where);              
-                    if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
-                      windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
-                    }                  
+                    visitLandmark(:vis.data);                
                   });       
                 }
               }

@@ -83,7 +83,27 @@
       _map.setSceneryIndex(x, y, symbol:_bottomDeco);
     }
 
+    @:addLocations::(name, locationLeft, locationRight, x, y) {
+      locationLeft.x = x;
+      locationLeft.y = y;
+
+      locationRight.x = x+1;
+      locationRight.y = y;
+
+      @:locationMarker = Location.new(
+        landmark: _landmark,
+        base: Location.database.find(:'base:sign')
+      );
+      
+      locationMarker.name = name;
+      locationMarker.x = x;
+      locationMarker.y = y;
+      _landmark.addLocation(location:locationMarker, traits : Map.TRAIT.DISCOVERED, width:2, height:1);        
+     
+      _landmark.addLocation(location:locationLeft, traits : Map.TRAIT.DISCOVERED);
+      _landmark.addLocation(location:locationRight, traits : Map.TRAIT.DISCOVERED);        
     
+    }
     
     
     @:getSpaceBySlot::(x, y) {
@@ -91,7 +111,7 @@
     }   
     
     // adds a minimally-sized building
-    @:addMinimalBuilding ::(left, top, symbol, locationLeft, locationRight) {
+    @:addMinimalBuilding ::(name, left, top, symbol, locationLeft, locationRight) {
       /*   
         |  |
         xxxx
@@ -123,7 +143,8 @@
       }
       
       
-      
+      addLocations(name, locationLeft, locationRight, x:left + 2, y: top + 4);
+      /*
       locationLeft.x = left + 2;
       locationLeft.y = top + 4;
 
@@ -133,7 +154,7 @@
      
       _landmark.addLocation(location:locationLeft, traits : Map.TRAIT.DISCOVERED);
       _landmark.addLocation(location:locationRight, traits : Map.TRAIT.DISCOVERED);        
-        
+      */
 
     }  
     
@@ -289,20 +310,49 @@
 
 
     // adds a minimally-sized building
-    @:addGate ::(left, top, which, location) {
-      location.x = left;
-      location.y = top;
+    @:addGate ::(left, top, which) {
+      @:location = Location.new(
+        base: Location.database.find(:'base:entrance'),
+        landmark: _landmark
+      );
 
-
+      @:mark = Location.new(
+        landmark: location.landmark,
+        base: Location.database.find(:'base:sign')
+      );
       
-      @:index = _map.addScenerySymbol(character:'#');
+      @:spaceIndex = _map.addScenerySymbol(:' ');
+      
+      
+      mark.name = 'Exit'
+      mark.halo = false;
+      
 
       match(which) {
         // North       
         (NORTH):::<={
-          for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1)::(i) {
-            _map.setItem(data:location, x:left+i,   y:top-ZONE_CONTENT_PADDING+1, symbol: '#', name:location.name);
-            _map.setSceneryIndex(x:left+i,   y:top-ZONE_CONTENT_PADDING+1, symbol:index);
+          location.x = left - ZONE_CONTENT_PADDING;
+          location.y = top-ZONE_CONTENT_PADDING+1;
+          mark.x = location.x;
+          mark.y = location.y;
+          
+          location.landmark.addLocation(
+            location,
+            width: ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2+1,
+            height: 1
+          );
+          location.landmark.addLocation(
+            location:mark,
+            width: ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2+1,
+            height: 1,
+            traits: Map.TRAIT.DISCOVERED
+          );
+          
+          
+          _map.setPointer(x:location.x + ZONE_BUILDING_MINIMUM_WIDTH/2+ZONE_CONTENT_PADDING, y:location.y);
+          for(location.x+1, location.x + ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2-1) ::(i) {
+            _map.disableWall(x:i, y:location.y);
+            _map.setSceneryIndex(x:i, y:location.y-1, symbol:spaceIndex);
           }
         
 
@@ -310,30 +360,84 @@
 
         // East       
         (EAST):::<={
-          for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1)::(i) {
-            _map.setItem(data:location, x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, symbol: '#', name:location.name);
-            _map.setSceneryIndex(x:left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1, y:top+i, symbol:index);
+          location.x = left+ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING-1;
+          location.y = top - ZONE_CONTENT_PADDING;
+          mark.x = location.x;
+          mark.y = location.y;
+          
+          location.landmark.addLocation(
+            location,
+            width: 1,
+            height: ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2+1
+          );
+          location.landmark.addLocation(
+            location:mark,
+            width: 1,
+            height: ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2+1,
+            traits: Map.TRAIT.DISCOVERED
+          );
+
+          _map.setPointer(x:location.x, y:location.y+ZONE_BUILDING_MINIMUM_WIDTH/2+ZONE_CONTENT_PADDING);
+          for(location.y+1, location.y + ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2-1) ::(i) {
+            _map.disableWall(x:location.x,   y:i);
+            _map.setSceneryIndex(x:location.x+1, y:i, symbol:spaceIndex);
           }
 
 
-        
         },
 
         // West       
         (WEST):::<={
-          for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING+1)::(i) {
-            _map.setItem(data:location, x:left-ZONE_CONTENT_PADDING+1, y:top+i, symbol: '#', name:location.name);
-            _map.setSceneryIndex(x:left-ZONE_CONTENT_PADDING+1, y:top+i, symbol:index);
+
+          location.x = left-ZONE_CONTENT_PADDING+1;
+          location.y = top - ZONE_CONTENT_PADDING;
+          mark.x = location.x;
+          mark.y = location.y;
+          
+          location.landmark.addLocation(
+            location,
+            width: 1,
+            height: ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2+1
+          );
+          location.landmark.addLocation(
+            location:mark,
+            width: 1,
+            height: ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2+1,
+            traits: Map.TRAIT.DISCOVERED
+          );
+
+          _map.setPointer(x:location.x, y:location.y+ZONE_BUILDING_MINIMUM_WIDTH/2+ZONE_CONTENT_PADDING);
+          for(location.y+1, location.y + ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2-1) ::(i) {
+            _map.disableWall(x:location.x,   y:i);
+            _map.setSceneryIndex(x:location.x-1, y:i, symbol:spaceIndex);
           }
+
         },
 
 
 
         // South
         (SOUTH):::<={
-          for(-ZONE_CONTENT_PADDING, ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING+1)::(i) {
-            _map.setItem(data:location, x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, symbol: '#', name:location.name);
-            _map.setSceneryIndex(x:left+i,   y:top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1, symbol:index);
+          location.x = left - ZONE_CONTENT_PADDING;
+          location.y = top+ZONE_BUILDING_MINIMUM_HEIGHT+ZONE_CONTENT_PADDING-1;
+          mark.x = location.x;
+          mark.y = location.y;
+          
+          location.landmark.addLocation(
+            location,
+            width: ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2+1,
+            height: 1
+          );
+          location.landmark.addLocation(
+            location:mark,
+            width: ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2+1,
+            height: 1,
+            traits: Map.TRAIT.DISCOVERED
+          );
+          _map.setPointer(x:location.x +ZONE_BUILDING_MINIMUM_WIDTH/2+ZONE_CONTENT_PADDING, y:location.y);
+          for(location.x+1, location.x + ZONE_BUILDING_MINIMUM_WIDTH+ZONE_CONTENT_PADDING*2-1) ::(i) {
+            _map.disableWall(x:i, y:location.y);
+            _map.setSceneryIndex(x:i, y:location.y+1, symbol:spaceIndex);
           }
 
         }
@@ -349,7 +453,7 @@
 
 
     // adds a minimally-sized wide building
-    @:addWideBuilding ::(left, top, symbol, locationLeft, locationRight) {
+    @:addWideBuilding ::(name, left, top, symbol, locationLeft, locationRight) {
       /*
         x        x
         xxxxxxxxxx
@@ -383,15 +487,9 @@
         _map.clearScenery(x:left + 2, y: top + 4);
         _map.clearScenery(x:left + 3, y: top + 4);
 
-        locationLeft.x = left + 2;
-        locationLeft.y = top + 4;
 
-        locationRight.x = left + 3;
-        locationRight.y = top + 4;
-
-
-        _landmark.addLocation(location:locationLeft, traits : Map.TRAIT.DISCOVERED);
-        _landmark.addLocation(location:locationRight, traits : Map.TRAIT.DISCOVERED);        
+        addLocations(name, locationLeft, locationRight, x:left + 2, y: top + 4);
+       
         
 
         if (symbol != empty) ::<= {
@@ -407,14 +505,7 @@
         _map.clearScenery(x:left + 8, y: top + 4);
         _map.clearScenery(x:left + 9, y: top + 4);
         
-        locationLeft.x = left + 8;
-        locationLeft.y = top + 4;
-
-        locationRight.x = left + 9;
-        locationRight.y = top + 4;
-
-        _landmark.addLocation(location:locationLeft, traits : Map.TRAIT.DISCOVERED);
-        _landmark.addLocation(location:locationRight, traits : Map.TRAIT.DISCOVERED);        
+        addLocations(name, locationLeft, locationRight, x:left + 8, y: top + 4);
 
         if (symbol != empty) ::<= {
           @:index = _map.addScenerySymbol(character:symbol);
@@ -429,7 +520,7 @@
 
 
     // adds a minimally-sized wide building
-    @:addTallBuilding ::(left, top, symbol, locationLeft, locationRight) {
+    @:addTallBuilding ::(name, left, top, symbol, locationLeft, locationRight) {
       /*
         ||||
         xxxx
@@ -457,13 +548,9 @@
       _map.clearScenery(x:left + 2, y: top + 7);
       _map.clearScenery(x:left + 3, y: top + 7);
       
-      locationLeft.x = left + 2;
-      locationLeft.y = top + 7;
-      locationRight.x = left + 3;
-      locationRight.y = top + 7;
-
-      _landmark.addLocation(location:locationLeft, traits : Map.TRAIT.DISCOVERED);
-      _landmark.addLocation(location:locationRight, traits : Map.TRAIT.DISCOVERED);        
+      
+      addLocations(name, locationLeft, locationRight, x:left + 2, y: top + 7);
+      
       
       if (symbol != empty) ::<= {
         @:index = _map.addScenerySymbol(character:symbol);
@@ -531,6 +618,7 @@
           _map.enableWall(x:_x, y:_y+i);
           _map.enableWall(x:_x+_w, y:_y+i);
         }
+        _map.enableWall(x:_x+_w, y:_y+_h);
            
       },
           
@@ -566,10 +654,7 @@
       gateSide : {get::<- gateSide},
       
       addEntrance ::{
-        @:location = Location.new(
-          base: Location.database.find(:'base:entrance'),
-          landmark: _landmark
-        );
+
 
 
         ::? {
@@ -620,7 +705,6 @@
             freeSpaces->remove(key:space0);
             //freeSpaces->remove(key:space1);
             addGate(
-              location,
               left:space0.x * ZONE_BUILDING_MINIMUM_WIDTH + _x+ZONE_CONTENT_PADDING,
               top:space0.y * ZONE_BUILDING_MINIMUM_HEIGHT + _y+ZONE_CONTENT_PADDING,
               which:gateSide
@@ -657,6 +741,7 @@
           slots[space.x][space.y] = true;
           freeSpaces->remove(key:freeSpaces->findIndex(value:space));
           addMinimalBuilding(
+            name: portalSpec.name,
             locationLeft,
             locationRight,
             symbol:if (landmarkBase.hasTraits(:Landmark.TRAIT.STRUCTURE_RESIDENTIAL)) empty else portalSpec.symbol,
@@ -697,6 +782,7 @@
               if (wide) ::<= {
                 @:left = if (space0.x < space1.x) space0.x else space1.x;
                 addWideBuilding(
+                  name: portalSpec.name,
                   locationLeft,
                   locationRight,
                   symbol:if (landmarkBase.hasTraits(:Landmark.TRAIT.STRUCTURE_RESIDENTIAL)) empty else portalSpec.symbol,
@@ -706,6 +792,7 @@
               } else ::<= {
                 @:top = if (space0.y < space1.y) space0.y else space1.y;
                 addTallBuilding(
+                  name: portalSpec.name,
                   locationLeft,
                   locationRight,
                   symbol:if (landmarkBase.hasTraits(:Landmark.TRAIT.STRUCTURE_RESIDENTIAL)) empty else portalSpec.symbol,

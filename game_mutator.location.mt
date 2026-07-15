@@ -26,7 +26,7 @@
 @:TRAIT = {
   NONE : 0,
 
-  // will have no halo or symbol drawn
+  // will have no halo or symbol drawn and will not appear in the nearby name list
   INVISIBLE : 1,
 
   // Hint for generative maps to not make more than one.
@@ -73,6 +73,31 @@ Location.database.newEntry(data:{
   
   
   traits : TRAIT.ENTRANCE_HINT,
+  events : {
+  
+  }
+})
+
+
+
+Location.database.newEntry(data:{
+  id: 'base:sign',
+  name: 'Sign',
+  rarity: 100000000,
+  ownVerb: '',
+
+  descriptions: [
+  ],
+  symbol: '',
+  
+  interactions : [
+  ],
+  
+  aggressiveInteractions : [      
+  ],
+  
+  
+  traits : 0,
   events : {
   
   }
@@ -135,6 +160,7 @@ Location.database.newEntry(data:{
   location.data.destinationWorldID = targetPortal.worldID;
   targetPortal.data.destinationWorldID = location.worldID
   targetPortal.data.destinationLandmarkWorldID = location.landmark.worldID;
+  targetPortal.data.isPortalExit = true;
 }
 
 Location.database.newEntry(data:{
@@ -152,18 +178,22 @@ Location.database.newEntry(data:{
   
   aggressiveInteractions : [      
   ],
-  traits : TRAIT.ENTRANCE_HINT,
+  traits : TRAIT.ENTRANCE_HINT | TRAIT.INVISIBLE,
   
   events : {  
   
     onStep ::(location, entities) {
       if (location.data.destinationLandmarkWorldID == empty)
         createLandmark(location)
-
+  
+      @:world = import(module:'game_singleton.world.mt');
       @:target = location.landmark.island.findLandmark(:location.data.destinationLandmarkWorldID)
 
-
+      @:currentLandmark = world.landmark
+      
+      breakpoint();
       target.visit(
+        startRenderable : currentLandmark.map,
         onLoad ::(landmark) { 
           if (location.data.destinationWorldID == empty) ::<= {
             if (location.data.portalChainItems != empty) ::<= {
@@ -210,22 +240,236 @@ Location.database.newEntry(data:{
   name: 'Entrance',
   rarity: 100000000,
   ownVerb: '',
-  traits : TRAIT.ENTRANCE_HINT,
+  traits : TRAIT.ENTRANCE_HINT | TRAIT.INVISIBLE,
   descriptions: [
     "A sturdy gate surrounded by a well-maintained fence around the area.",
     "A decrepit gate surrounded by a feeble attempt at fencing.",
     "A protective gate surrounded by a proper stone wall. Likely for safety."
   ],
-  symbol: '#',
+  symbol: '',
   
   interactions : [
-    'base:exit',
   ],
   
   aggressiveInteractions : [      
-    'base:vandalize',
   ],
-  events : {}
+  events : {
+    onStep ::(location){
+      @:world = import(module:'game_singleton.world.mt');
+      @:party = location;
+      @:Battle = import(module:'game_class.battle.mt');
+
+      @:go ::{
+
+
+        // jumps to the prev menu lock
+        windowEvent.queueCustom(
+          onEnter::{
+            //invaidate a cache
+            windowEvent.jumpToTag(name:'VisitIsland');
+          }
+        );
+
+        windowEvent.queueTransition(
+          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+          renderableStart : location.landmark.map,
+          renderableMiddle: location.landmark.island.map
+        );
+      }
+    
+      when (location.peaceful == false && 
+        (location.landmark.base.id == 'base:town' || location.landmark.base.id == 'base:city')) ::<= {
+        windowEvent.queueMessage(
+          speaker: '???',
+          text: "There they are!!"
+        );
+
+        world.battle.start(
+          party,              
+          allies: party.members,
+          enemies: [
+            location.landmark.island.newInhabitant(professionHint:'base:guard'),
+            location.landmark.island.newInhabitant(professionHint:'base:guard'),
+            location.landmark.island.newInhabitant(professionHint:'base:guard'),            
+          ]->map(to:::(value){ value.anonymize(); return value;}),
+          landmark: {},
+          onEnd::(result) {
+            match(result) {
+              (Battle.RESULTS.ALLIES_WIN,
+               Battle.RESULTS.NOONE_WIN): ::<= {
+              },
+              
+              (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                @:instance = import(module:'game_singleton.instance.mt');
+                instance.gameOver(reason:'The party was wiped out.');
+              }
+            }
+          }
+        )
+         
+      }
+
+      go();    
+    }
+  }
+})
+
+
+
+Location.database.newEntry(data:{
+  id: 'base:entrance',
+  name: 'Entrance',
+  rarity: 100000000,
+  ownVerb: '',
+  traits : TRAIT.ENTRANCE_HINT | TRAIT.INVISIBLE,
+  descriptions: [
+    "A sturdy gate surrounded by a well-maintained fence around the area.",
+    "A decrepit gate surrounded by a feeble attempt at fencing.",
+    "A protective gate surrounded by a proper stone wall. Likely for safety."
+  ],
+  symbol: '',
+  
+  interactions : [
+  ],
+  
+  aggressiveInteractions : [      
+  ],
+  events : {
+    onStep ::(location){
+      @:world = import(module:'game_singleton.world.mt');
+      @:party = location;
+      @:Battle = import(module:'game_class.battle.mt');
+
+      @:go ::{
+
+
+        // jumps to the prev menu lock
+        windowEvent.queueCustom(
+          onEnter::{
+            //invaidate a cache
+            windowEvent.jumpToTag(name:'VisitIsland');
+          }
+        );
+
+        windowEvent.queueTransition(
+          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+          renderableStart : location.landmark.map,
+          renderableMiddle: location.landmark.island.map
+        );
+      }
+    
+      when (location.peaceful == false && 
+        (location.landmark.base.id == 'base:town' || location.landmark.base.id == 'base:city')) ::<= {
+        windowEvent.queueMessage(
+          speaker: '???',
+          text: "There they are!!"
+        );
+
+        world.battle.start(
+          party,              
+          allies: party.members,
+          enemies: [
+            location.landmark.island.newInhabitant(professionHint:'base:guard'),
+            location.landmark.island.newInhabitant(professionHint:'base:guard'),
+            location.landmark.island.newInhabitant(professionHint:'base:guard'),            
+          ]->map(to:::(value){ value.anonymize(); return value;}),
+          landmark: {},
+          onEnd::(result) {
+            match(result) {
+              (Battle.RESULTS.ALLIES_WIN,
+               Battle.RESULTS.NOONE_WIN): ::<= {
+              },
+              
+              (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                @:instance = import(module:'game_singleton.instance.mt');
+                instance.gameOver(reason:'The party was wiped out.');
+              }
+            }
+          }
+        )
+         
+      }
+
+      go();    
+    }
+  }
+})
+
+
+Location.database.newEntry(data:{
+  id: 'base:dungeon-entrance',
+  name: 'Entrance',
+  rarity: 100000000,
+  ownVerb: '',
+  traits : TRAIT.ENTRANCE_HINT,
+  descriptions: [
+  ],
+  symbol: '',
+  
+  interactions : [
+  ],
+  
+  aggressiveInteractions : [      
+  ],
+  events : {
+    onStep ::(location){
+      @:world = import(module:'game_singleton.world.mt');
+      @:party = location;
+      @:Battle = import(module:'game_class.battle.mt');
+
+      @:go ::{
+
+
+        // jumps to the prev menu lock
+        windowEvent.queueCustom(
+          onEnter::{
+            //invaidate a cache
+            windowEvent.jumpToTag(name:'VisitIsland');
+          }
+        );
+
+        windowEvent.queueTransition(
+          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+          renderableStart : location.landmark.map,
+          renderableMiddle: location.landmark.island.map
+        );
+      }
+    
+      when (location.peaceful == false && 
+        (location.landmark.base.id == 'base:town' || location.landmark.base.id == 'base:city')) ::<= {
+        windowEvent.queueMessage(
+          speaker: '???',
+          text: "There they are!!"
+        );
+
+        world.battle.start(
+          party,              
+          allies: party.members,
+          enemies: [
+            location.landmark.island.newInhabitant(professionHint:'base:guard'),
+            location.landmark.island.newInhabitant(professionHint:'base:guard'),
+            location.landmark.island.newInhabitant(professionHint:'base:guard'),            
+          ]->map(to:::(value){ value.anonymize(); return value;}),
+          landmark: {},
+          onEnd::(result) {
+            match(result) {
+              (Battle.RESULTS.ALLIES_WIN,
+               Battle.RESULTS.NOONE_WIN): ::<= {
+              },
+              
+              (Battle.RESULTS.ENEMIES_WIN): ::<= {
+                @:instance = import(module:'game_singleton.instance.mt');
+                instance.gameOver(reason:'The party was wiped out.');
+              }
+            }
+          }
+        )
+         
+      }
+
+      go();    
+    }
+  }
 })
 
 Location.database.newEntry(data:{
@@ -405,7 +649,8 @@ Location.database.newEntry(data:{
   ],
   
   interactions : [
-    'base:buy:shop',
+    'base:describe-item',
+    'base:buy:shop'
   ],
   
   aggressiveInteractions : [
@@ -2327,7 +2572,11 @@ Location.database.newEntry(data:{
         state.interactions = [...base.interactions]
         state.aggressiveInteractions = [...base.aggressiveInteractions]
         state.symbol = base.symbol;
-        state.halo = true;
+        
+        if (base.hasTraits(:Location.TRAIT.INVISIBLE))
+          state.halo = false
+        else
+          state.halo = true;
 
         state.base = base;
         state.x = if (x) x else 0;
@@ -2438,9 +2687,15 @@ Location.database.newEntry(data:{
       
       // adds a location to trigger portal resolving 
       // once it is done for this location.
+      // This makes it so that the "other" portal 
+      // will point to the same landmark as this portal
       addPortalChainItem::(other) {
         if (state.base.id != 'base:portal')
           error(:'This is only relevant for base:portal locations');
+
+        if (other.base.id != 'base:portal')
+          error(:'This is only relevant for base:portal locations');
+
           
         if (state.data.portalChainItems == empty)
           state.data.portalChainItems = [];
@@ -2498,6 +2753,7 @@ Location.database.newEntry(data:{
         get ::<- state.halo,
         set ::(value) <- state.halo = value
       },
+      
       
       incrementTime :: {
         state.base.emit(event:'onIncrementTime', location:this);

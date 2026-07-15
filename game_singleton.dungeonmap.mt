@@ -42,7 +42,7 @@
   );
   map.clearScenery(x, y);
 }  
-
+@counter = 0;
 
 
 @:DungeonAlpha = ::(map, mapHint) {
@@ -716,7 +716,6 @@
         @:width  = node.area.width;
         @:height = node.area.height;
         
-        breakpoint();
 
         map.fillSceneryIndexRectangle(
           x : left,
@@ -1503,7 +1502,27 @@
         };
       }
       
-      @:makeWallPerimeter::(dims) {
+      @:makeWallPerimeter::(dims, skipFill) {
+        
+        if (skipFill == empty) {
+          map.fillSceneryIndexRectangle(
+            x: dims.x+1,
+            y: dims.y+1,
+            fillWidth: dims.w-1,
+            fillHeight: dims.h-1,
+            symbol: spaceIndex
+          );        
+        }
+        
+        /*
+        map.fillSceneryIndexRectangle(
+          x: dims.x+1,
+          y: dims.y+1,
+          fillWidth: dims.w-1,
+          fillHeight: dims.h-1,
+          symbol: spaceIndex
+        );
+        */
 
       
         for(dims.y, dims.y + dims.h) ::(yiter) {
@@ -1529,6 +1548,7 @@
 
         if (dims.openings != empty) ::<= {
           foreach(dims.openings) ::(k, v) {
+            //OK
             map.setSceneryIndex(x:v.x, y:v.y, symbol:emptyIndex);
             map.disableWall(x:v.x, y:v.y);
           }
@@ -1542,13 +1562,9 @@
           width: dims.w-1,
           height: dims.h-1
         );
-        map.fillSceneryIndexRectangle(
-          x: dims.x+1,
-          y: dims.y+1,
-          fillWidth: dims.w-1,
-          fillHeight: dims.h-1,
-          symbol: spaceIndex
-        );
+        
+
+        counter+=1;
 
         @faceOpen = random.flipCoin();
 
@@ -1614,10 +1630,10 @@
         @hitWall = false;
 
         map.disableWall(x:x0, y:y0);
-        map.setSceneryIndex(x:x0, y:y0, symbol:emptyIndex);
+        //map.setSceneryIndex(x:x0, y:y0, symbol:emptyIndex);
 
         map.disableWall(x:x1, y:y1);
-        map.setSceneryIndex(x:x1, y:y1, symbol:emptyIndex);
+        //map.setSceneryIndex(x:x1, y:y1, symbol:emptyIndex);
         
         @:path = [];
         
@@ -1859,13 +1875,7 @@
             y = y - (openH + 1);
             h = openH + LAYOUT_ROOM_OFF_SIZE + 1;
             
-            map.fillSceneryIndexRectangle(
-              x: x+1,
-              y: y+1,
-              fillWidth: w-1,
-              fillHeight: openH-1,
-              symbol: spaceIndex
-            );
+            
 
             return Map.Area.new(
               x: x+1,
@@ -1878,14 +1888,8 @@
           (RIGHT): ::<= {
             @:openW = random.integer(from:LAYOUT_ROOM_OPEN_SIZE_MIN, to:LAYOUT_ROOM_OPEN_SIZE_MAX);
             w = LAYOUT_ROOM_OFF_SIZE + openW;
-
-            map.fillSceneryIndexRectangle(
-              x: x+LAYOUT_ROOM_OFF_SIZE+1,
-              y: y+1,
-              fillWidth: openW-1,
-              fillHeight: h-1,
-              symbol: spaceIndex
-            );
+            
+            
 
             
             return Map.Area.new(
@@ -1900,14 +1904,7 @@
           (BELOW): ::<= {
             @:openH = random.integer(from:LAYOUT_ROOM_OPEN_SIZE_MIN, to:LAYOUT_ROOM_OPEN_SIZE_MAX);
             h = openH + LAYOUT_ROOM_OFF_SIZE;
-
-            map.fillSceneryIndexRectangle(
-              x: x+1,
-              y: y+LAYOUT_ROOM_OFF_SIZE+1,
-              fillWidth: w-1,
-              fillHeight: openH-1,
-              symbol: spaceIndex
-            );
+            
 
 
             
@@ -1924,13 +1921,7 @@
             w = openW + 1 + LAYOUT_ROOM_OFF_SIZE;
             x = x - openW;
 
-            map.fillSceneryIndexRectangle(
-              x: x+1,
-              y: y+1,
-              fillWidth: openW-1,
-              fillHeight: h-1,
-              symbol: spaceIndex
-            );
+
             
             return Map.Area.new(
               x: x+1,
@@ -2001,15 +1992,26 @@
             }
           }
         }
+        breakpoint();
         foreach(rooms) ::(k, v) <- 
-          makeWallPerimeter(:v);
+          makeWallPerimeter(dims:v);
 
-        makeWallPerimeter(:{
+        makeWallPerimeter(skipFill:true, dims:{
           x: x,
           y: y,
           w: w,
           h: h
         });
+
+        map.fillSceneryIndexRectangle(
+          x: openArea.x,
+          y: openArea.y,
+          fillWidth: openArea.width,
+          fillHeight: openArea.height,
+          symbol: spaceIndex
+        );     
+
+
         
         if (neighbor != empty) ::<= {
           connectLayout(*neighbor);
@@ -2046,15 +2048,34 @@
         },
         
         overlaps ::(other) {
-          @:ra_x0 = x;
-          @:ra_x1 = x + w;
-          @:ra_y0 = y;
-          @:ra_y1 = y + h;
+          @:l1 = {
+            x: x,
+            y: y + h
+          }
+          
+          @:r1 = {
+            x: x + w,
+            y: y
+          }
+          
+          
+          
+          @:l2 = {
+            x: other.x,
+            y: other.y + other.height
+          
+          }
+          @:r2 = {
+            x: other.x + other.width,
+            y: other.y
+          }
                   
-          return
-            (ra_x0 < other.x + other.width  && ra_x1 > other.x &&
-             ra_y0 < other.y + other.height && ra_y1 > other.y)
-          ;
+          when (l1.x > r2.x || l2.x > r1.x) false;
+
+          // If one rectangle is above the other
+          when (r1.y > l2.y || r2.y > l1.y) false;
+
+          return true;
         }
       }
     }
@@ -2326,6 +2347,13 @@
         foreach(areas) ::(k, v) {
           map.addArea(area:v);
         }
+        
+        @:start = map.getRandomArea();
+        map.setPointer(
+          x : start.x + start.width / 2,
+          y : (start.y + start.height / 2)->floor +1
+        )
+        
         return map;
       }
     } 

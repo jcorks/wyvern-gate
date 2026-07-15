@@ -879,7 +879,6 @@ Map =  LoadableClass.create(
       }
     }    
 
-
     this.interface = {
       initialize ::(parent) {
         parent_ = parent;
@@ -974,9 +973,9 @@ Map =  LoadableClass.create(
         fillWidth => Number,
         fillHeight => Number
       ) {
-        for(x, x+fillHeight)::(x) {
-          for(y, y+fillWidth)::(y) {
-            @index = x + y*(width);
+        for(x, x+fillWidth)::(xi) {
+          for(y, y+fillHeight)::(yi) {
+            @index = xi + yi*(width);
           
             scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
           }    
@@ -1249,6 +1248,7 @@ Map =  LoadableClass.create(
 
         pointer.x = x;
         pointer.y = y;
+        
 
         @:trigger = stepAction[x + y*width];
         if (trigger != empty)
