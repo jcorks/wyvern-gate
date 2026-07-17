@@ -735,44 +735,6 @@
         }
  
         battleEnd = ::{
-          @:queueKnowledgeStone ::{
-            @:stone = party.getItem(condition ::(value) <- value.base.id == 'base:knowledge-stone');
-            when(stone == empty) empty;
-            when(stone.data.steps < 150) empty;
-            
-            
-            windowEvent.queueMessage(text: 'The Knowledge Stone releases its power!');
-            windowEvent.queueMessage(text: 'Pick a new Art to keep!');
-            
-            @:arts = []
-            for(0, 3) ::(i) {
-              arts->push(:Arts.new(base:Arts.database.getRandomFiltered(::(value) <- 
-                (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
-                ((value.traits & Arts.TRAIT.SPECIAL) == 0)         
-              )));
-            }
-            
-
-            windowEvent.queueNestedResolve(
-              onEnter :: {
-                Arts.viewCards(
-                  ids: arts->map(::(value) <- value.base.id),
-                  canCancel : false,
-                  keep: false,
-                  onChoice ::(art) {
-                    party.queueCollectSupportArt(
-                      arts : [Arts.database.find(:art)]
-                    );                
-                    
-                    windowEvent.queueCustom(
-                      onEnter ::<-stone.data.steps = 0
-                    );
-                  }
-                );
-              }
-            );
-          }
-        
           @:startEnd ::(message) {
             breakpoint();
             active = false;
@@ -808,7 +770,6 @@
               queueFriends();
             
             
-            queueKnowledgeStone();
             party.gainProfessionExp(
               exp:getEnemiesDefeated(ent:party.members[0])->size * Entity.PROF_EXP_PER_KNOCKOUT,
               onDone::{

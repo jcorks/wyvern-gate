@@ -130,59 +130,9 @@ return ::{
       );
     
     }
-    @:loadouts :: {
-      //when (member.loadoutTemplateNames->size == 1) 
-    
-      windowEvent.queueChoices(
-        leftWeight: 1,
-        topWeight : 1,
-        prompt: member.name + 's loadouts:',
-        keep : true,
-        jumpTag : 'DECKMENU',
-        canCancel: true,
-        onGetChoices::<- [
-          ...(member.loadoutTemplateNames->map(::(value) <- 
-            if (member.getEquippedLoadoutName() == value) 
-              '* ' + value 
-            else 
-              '  ' + value
-          )), 
-          'Make new loadout...'
-        ],
-        onChoice::(choice) {
-          when(choice-1 == member.loadoutTemplateNames->size) ::<= {
-            import(:'game_function.name.mt')(
-              prompt: 'New loadout name:',
-              canCancel: true,
-              onDone ::(name) {
-                member.addLoadout(:name);
-              }
-            );
-          }
-          @:loadoutName = member.loadoutTemplateNames[choice-1];
-          windowEvent.queueChoices(
-            prompt: 'Loadout: ' + loadoutName,
-            choices: ['Equip loadout', 'Edit...', 'Remove'],
-            leftWeight : 1,
-            topWeight : 1,
-            keep : true,
-            canCancel: true,
-            onChoice::(choice) {
-              when(choice-1 == 0)
-                member.equipLoadout(name:loadoutName);
-                
-              when(choice-1 == 1)
-                member.editLoadout(:loadoutName);            
-                
-                
-              deleteLoadout(:loadoutName);
-            }
 
-          );
-        }
-      );
-    }
-    
+    member.editLoadout();
+    /*
     @:quickViewArts:: {
       @:choicesColumns = import(module:'game_function.choicescolumns.mt');
       @which;
@@ -216,18 +166,20 @@ return ::{
     }
     
     
+    
     windowEvent.queueChoices(
       prompt: member.name + 's Arts',
 
       choicesMatch : [
         'Check', ::<- quickViewArts(),
-        'Loadouts...', ::<- loadouts()
+        'Edit...', ::<- member.editLoadout()
       ],
       leftWeight: 1,
       topWeight : 1,
       keep: true,
       canCancel: true
     )
+    */
   }
   
   @:professionMenu ::(member) {
@@ -501,7 +453,11 @@ return ::{
                     pickItem(
                       leftWeight: 1,
                       topWeight: 0.5,
-                      filter: ::(value) <- value.base.id == 'base:placeholder' || member.getSlotsForItem(item:value)->findIndex(value:slot) != -1,
+                      filter: ::(value) <- 
+                        value.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP) == false && 
+                        (
+                          value.base.id == 'base:placeholder' || member.getSlotsForItem(item:value)->findIndex(value:slot) != -1
+                        ),
                       inventory : inv,
                       prompt: member.name + ': ' + slotToName(slot),
                       canCancel: true,
@@ -549,7 +505,7 @@ return ::{
                         
 
                         windowEvent.queueChoices(
-                          choices: ['Equip', 'Check', 'Rename', 'Compare'],
+                          choices: ['Equip', 'Check', 'Rename', 'Gems...', 'Compare'],
                           prompt: item.name,
                           canCancel: true,
                           leftWeight: 1,
@@ -584,9 +540,11 @@ return ::{
                                 }
                               );
                             }
-                              
-
                             when(choice == 4) ::<= {
+                              item.inletSlotSet.equip(user:member, item:item);
+                            }
+
+                            when(choice == 5) ::<= {
                               @slot = member.getSlotsForItem(item)[0];
                               @currentEquip = member.getEquipped(slot);
                               

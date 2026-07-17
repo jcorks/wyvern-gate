@@ -318,7 +318,21 @@ return {
       );
       party.inventory.add(:keyother);
 
-
+  for(0, 10) ::(i) {
+    @:test = Item.new(
+      base: Item.database.getRandomFiltered(::(value) <- value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED))
+    );
+    test.setInletSlots(:6);
+    party.inventory.add(:test);
+  }
+  
+  for(0, 10) ::(i) {
+    @:test = Item.new(
+      base: Item.database.find(:'base:inlet-gem')
+    );
+    party.inventory.add(:test);
+  }
+      
 
 
       /*
@@ -390,7 +404,7 @@ return {
         
         chosenProfs[prof] = true;
         @:p0 = island.newInhabitant(
-          levelHint:story.levelHint,
+          levelHint:story.levelHint-1,
           professionHint: prof
         );
         p0.stats.load(:p0.stats.add(:StatSet.new(
@@ -515,6 +529,7 @@ return {
         loading(
           message: 'Saving...',
           do :: {
+            /*
             @:basicArts = [
               'base:pebble',
               'base:parry',
@@ -528,9 +543,10 @@ return {
             party.members->foreach(::(k, v) {
               v.supportArts = basicArts->map(::(value) <- Arts.new(base:Arts.database.find(:value)))
             });
+            */
             @town
             foreach(island.landmarks) ::(k, v) {
-              if (v.base.id == 'base:town')
+              if (v.base.id == 'base:town-start')
                 town = v;
             }
           
@@ -540,47 +556,50 @@ return {
               y: town.y
             );         
             
-            ::? {
-              foreach(town.locations) ::(k, v) {
-                if (v.base.id == 'base:shop') ::<= {
-                  v.overrideInteractID = 'thechosen:box-shopkeep';
-                  send();
-                }
-              }
-            }
+       
             
             instance.savestate();
 
             @:Scene = import(module:'game_database.scene.mt');
             Scene.start(id:'thechosen:scene_intro', onDone::{          
             //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
-
+              canvas.freeze();
               world.island.visit(onReady :: {
-                windowEvent.queueMessage(
-                  speaker: party.members[0].name,
-                  text: '"..."'
-                );
+                town.visit(
+                  skipAnimation: true,
+                  onLoad ::{
+                    foreach(town.locations) ::(k, v) {
+                    
+                    }
+                    town.map.setPointer(x:
+                    
+                    windowEvent.queueMessage(
+                      speaker: party.members[0].name,
+                      text: '"..."'
+                    );
 
-                windowEvent.queueMessage(
-                  speaker: party.members[0].name,
-                  text: '"I must have dozed off... What a strange dream..."'
-                );
+                    windowEvent.queueMessage(
+                      speaker: party.members[0].name,
+                      text: '"I must have dozed off... What a strange dream..."'
+                    );
 
-                windowEvent.queueMessage(
-                  speaker: party.members[0].name,
-                  text: '"..."'
-                );
+                    windowEvent.queueMessage(
+                      speaker: party.members[0].name,
+                      text: '"..."'
+                    );
 
-                windowEvent.queueMessage(
-                  speaker: party.members[0].name,
-                  text: '"...Huh? A Key? Maybe it wasn\'t a dream..."'
-                );
+                    windowEvent.queueMessage(
+                      speaker: party.members[0].name,
+                      text: '"...Huh? A Key? Maybe it wasn\'t a dream..."'
+                    );
 
 
-                windowEvent.queueMessage(
-                  speaker: party.members[0].name,
-                  text: '"Ah, right! I should go into town. The shopkeeper had something for me."'
-                );
+                    windowEvent.queueMessage(
+                      speaker: party.members[0].name,
+                      text: '"Maybe now is the time to open that box in storage... Right, I can get to the bank from the other room."'
+                    );      
+                  }
+
               
               });            
             });    
@@ -772,6 +791,7 @@ return {
           @:Arts = import(:'game_mutator.arts.mt');
 
           changeling.name = '[   ]';
+          
           changeling.supportArts = [
             'base:wyvern-prayer',
             'base:quick-shield',
@@ -1225,6 +1245,7 @@ return {
       name : 'Sentimental Box',
       id : 'thechosen:box-shopkeep',
       keepInteractionMenu : false,
+      isAvailable ::(location, party) <- true,
       interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');
         
@@ -1259,6 +1280,7 @@ return {
       name : 'Wyvern of Fire',
       id : 'thechosen:wyvern-of-fire',
       keepInteractionMenu : false,
+      isAvailable ::(location, party) <- true,
       interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');              
         if (world.scenario.data.fireWyvernDefeated == false) ::<= {
@@ -1274,6 +1296,7 @@ return {
       name : 'Wyvern of Ice',
       id : 'thechosen:wyvern-of-ice',
       keepInteractionMenu : false,
+      isAvailable ::(location, party) <- true,
       interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');              
         if (world.scenario.data.iceWyvernDefeated == false) ::<= {
@@ -1290,6 +1313,7 @@ return {
       name : 'Wyvern of Thunder',
       id : 'thechosen:wyvern-of-thunder',
       keepInteractionMenu : false,
+      isAvailable ::(location, party) <- true,
       interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');              
         if (world.scenario.data.thunderWyvernDefeated == false) ::<= {
@@ -1305,6 +1329,7 @@ return {
       name : 'Wyvern of Light',
       id : 'thechosen:wyvern-of-light',
       keepInteractionMenu : false,
+      isAvailable ::(location, party) <- true,
       interact ::(location, party) {
         @:world = import(module:'game_singleton.world.mt');              
         if (world.scenario.data.lightWyvernDefeated == false) ::<= {
@@ -1319,6 +1344,7 @@ return {
       data : {
         name : 'Final Floor',
         id :  'thechosen:final-stairs',
+        isAvailable ::(location, party) <- true,
         keepInteractionMenu : false,
         interact ::(location, party) {
           @:world = import(module:'game_singleton.world.mt');
@@ -1417,6 +1443,7 @@ return {
         name : 'Next Floor',
         id :  'thechosen:next-floor',
         keepInteractionMenu : false,
+        isAvailable ::(location, party) <- true,
         interact ::(location, party) {
           if (location.targetLandmark == empty) ::<={
           

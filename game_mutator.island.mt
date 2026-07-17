@@ -118,7 +118,7 @@ Island.database.newEntry(
   data : {
     id : 'base:starting-island',
     requiredLandmarks : [
-      'base:town',
+      'base:town-start',
       'base:wyvern-gate',
     ],
     possibleLandmarks : [
@@ -355,50 +355,11 @@ Island.database.newEntry(
 
       // Assigns support arts for every entity.
       @:assignSupportArts::(entity, professionLevel, removeBasicCount) {
-        // basic arts: 10 + 12 = 22
-        entity.supportArts = [
-          'base:pebble',    //5
-          'base:block',     //3
-          'base:prismatic-wisp' //3
-        ]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
         
-        
-        entity.supportArts = random.scrambled(:entity.supportArts);
-        for(0, removeBasicCount) ::(i) {
-          entity.supportArts->pop;
-        }
-        
-        // for each professional art, a support art is replaced
-        /*for(0, professionLevel) ::(i) {
+        for(0, professionLevel) ::(i) {
           entity.autoLevelProfession(:entity.profession);
         }
-        entity.equipAllProfessionArts();  */
-        foreach(entity.professionArts) ::(k, v) {
-          entity.supportArts->pop;
-        }
-        
-
-        // finally collect unique random support arts until 35 is reached
-        @:addCondition ::(value) <- 
-          entity.supportArts->map(::(value) <- 
-            value.id
-          )->findIndex(:value.id) == -1
-        ::? {
-          forever ::{
-            if (entity.arts->size > 15) send();
-
-            entity.supportArts->push(:
-              Arts.new(base:Arts.database.getRandomFiltered(::(value) <- 
-                ((value.traits & Arts.TRAIT.SPECIAL) == 0)
-                &&
-                ((value.traits & Arts.TRAIT.SUPPORT) != 0)
-                &&
-                addCondition(:value)
-              ))
-            );
-
-          }
-        }
+        entity.equipAllProfessionArts();
       }
 
     
@@ -409,8 +370,7 @@ Island.database.newEntry(
         (0):::<= {
           assignSupportArts(
             entity,
-            professionLevel : 1,
-            removeBasicCount : 0
+            professionLevel : 1
           );
         }, // tier zero has no mods 
 
@@ -418,8 +378,7 @@ Island.database.newEntry(
         (1):::<= {
           assignSupportArts(
             entity,
-            professionLevel : 1,
-            removeBasicCount : 1
+            professionLevel : 2
           );
         },
         
@@ -448,8 +407,7 @@ Island.database.newEntry(
           
           assignSupportArts(
             entity,
-            professionLevel : 2,
-            removeBasicCount : 2
+            professionLevel : 3
           );
 
 
@@ -480,8 +438,7 @@ Island.database.newEntry(
           
           assignSupportArts(
             entity,
-            professionLevel : 4,
-            removeBasicCount : 3
+            professionLevel : 4
           );
 
         },
@@ -1142,7 +1099,7 @@ Island.database.newEntry(
         islandTravel();        
       },
       
-      visit ::(restorePos, atGate, onReady) {        
+      visit ::(restorePos, atGate, onReady, skipAnimation) {        
         @:world = import(module:'game_singleton.world.mt');
         world.island = this;
         @:island = this;
@@ -1154,8 +1111,9 @@ Island.database.newEntry(
         @hasVisitIsland;
         if (windowEvent.canJumpToTag(name:'VisitIsland'))
           windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:if(atGate == empty)true else false);
-        this.travel();
+        this.travel(skipAnimation);
         hasVisitIsland = true;
+        
         when (restorePos == empty && atGate != empty) ::<= {
           @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
           when(gate->size == 0) empty;

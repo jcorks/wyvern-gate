@@ -209,6 +209,73 @@ Landmark.database.newEntry(
 )
 
 
+
+Landmark.database.newEntry(
+  data: {
+    name: 'Home Town',
+    id: 'base:town-start',
+    legendName : 'Home Town',
+    symbol : '#',
+    rarity : 100000,
+    minObjects : 7,
+    maxObjects : 15,
+    minEvents : 0,
+    maxEvents : 3,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+    landmarkType : TYPE.STRUCTURE,
+    traits : 
+      TRAIT.GUARDED |
+      TRAIT.CAN_SAVE |
+      TRAIT.PEACEFUL,
+
+    requiredEvents : [],
+    possibleObjects : [
+      {
+        name : 'Home',
+        symbol: ' ',
+        id:'base:home-inside', rarity:20
+      },
+      //{id:'guild', rarity: 25}
+    ],
+    requiredObjects : [
+      {
+        name : 'Your Home',
+        symbol: ' ',
+        id:'base:home-inside-start', rarity:20
+      },
+
+      {
+        name : 'Shop',
+        symbol: '$',
+        id: 'base:shop-inside'
+      },
+      /*    
+      {id:'base:arts-tecker'},
+      {id:'base:school'},
+      {id:'base:tavern'},
+      {id:'base:blacksmith'},
+      {id:'base:inn'}      
+      */
+    ],
+    mapHint : {
+      roomSize: 30,
+      roomAreaSize: 7,
+      roomAreaSizeLarge: 9,
+      emptyAreaCount: 6,
+      wallCharacter: '!',
+      scatterChar: 'Y',
+      scatterRate: 0.3
+    },
+    events :{
+      onVisit ::(landmark, island) {
+        sound.playBGM(name:'town-2', loop:true);
+      }
+    }
+  }
+)
+
+
+
 Landmark.database.newEntry(
   data: {
     name: '',
@@ -920,6 +987,45 @@ Landmark.database.newEntry(
     
   }
 )
+
+
+Landmark.database.newEntry(
+  data: {
+    name: 'Home: Inside',
+    id: 'base:home-inside-start',
+    legendName: '',
+    symbol : '',
+    rarity : 40,        
+    landmarkType : TYPE.BLUEPRINT_SINGLE(:'home-chosen.json'),
+
+    traits :
+      TRAIT.PEACEFUL |
+      TRAIT.UNIQUE |
+      TRAIT.CAN_SAVE |
+      TRAIT.NOTHING_HIDDEN |
+      TRAIT.STRUCTURE_RESIDENTIAL,
+    minEvents : 0,
+    maxEvents : 0,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+    minObjects : 0,
+    maxObjects : 0,
+    possibleObjects : [
+    ],
+    requiredObjects : [
+    ],
+    requiredEvents : [
+    ],
+    mapHint: {
+    },
+    events : {
+      onLoadContent::(landmark) {
+        
+      }
+    }
+    
+  }
+)
 /*
 Landmark.database.newEntry(
   data: {
@@ -1542,10 +1648,7 @@ Landmark.database.newEntry(
       // Optionally, onLoad can return an object containing x and y 
       // members for a location to move the pointer when arriving at the location.
       //
-      // flatten is an optional boolean. When present and true, it will 
-      // remove all windowEvent requests until the IslandVisit event, effectively 
-      // removing all travel() window event stack entries. Typically used for 
-      travel ::(onLoad, startRenderable) {
+      travel ::(onLoad, startRenderable, skipAnimation) {
         @:hud = import(:'game_singleton.hud.mt');
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
         @:partyOptions = import(module:'game_function.partyoptions.mt');
@@ -1649,27 +1752,34 @@ Landmark.database.newEntry(
             );
           }
         };
-        windowEvent.queueTransition(
-          kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-          renderableStart : startRenderable,
-          renderableMiddle: {
-            render :: {
-              @where = onLoad
-              if (where != empty) ::<= {
-                where = where(landmark);
-                if (where != empty)
-                  this.map.setPointer(
-                    x:where.x,
-                    y:where.y
-                  ); 
-              }
-
-              this.loadContent();
-              cursorMoveRenderable.render()
-            }
-          }
-        );
         
+        @:startup ::{
+          @where = onLoad
+          if (where != empty) ::<= {
+            where = where(landmark);
+            if (where != empty)
+              this.map.setPointer(
+                x:where.x,
+                y:where.y
+              ); 
+          }
+
+          this.loadContent();
+          cursorMoveRenderable.render()
+        }
+        
+        if (skipAnimation != true)
+          windowEvent.queueTransition(
+            kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+            renderableStart : startRenderable,
+            renderableMiddle: {
+              render :: {
+                startup();
+              }
+            }
+          )
+        else
+          startup();
 
         
         windowEvent.queueCursorMove(
@@ -1718,7 +1828,7 @@ Landmark.database.newEntry(
       //
       // dontFlatten is an optional boolean that, when true 
       // will preserve the visit queue.
-      visit ::(onLoad, startRenderable)  {
+      visit ::(onLoad, startRenderable, skipAnimation)  {
         @:landmark = this;
         @:world = import(module:'game_singleton.world.mt');
         when (state.base.emit(event:'onVisit', landmark:this, island:landmark.island) == false) empty;
@@ -1735,7 +1845,7 @@ Landmark.database.newEntry(
             fullName : 'the ' + landmark.name
           );
         }
-        this.travel(onLoad, startRenderable);
+        this.travel(onLoad, startRenderable, skipAnimation);
       },
       
       updateTitle ::(override)  {
@@ -2003,7 +2113,7 @@ Landmark.database.newEntry(
         dataConv.overrideSymbol = dataConv.symbol
         dataConv.overrideName = '';//dataConv.name 
         dataConv.id = 'base:portal'
-        dataConv.data = spec;
+        dataConv.data.portal = spec;
         @:loc = this.createLocationFromSpecification(:dataConv);
         loc.name = '';
         loc.halo = false;

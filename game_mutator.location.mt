@@ -103,65 +103,37 @@ Location.database.newEntry(data:{
   }
 })
 
+Location.database.newEntry(data:{
+  id: 'base:decoration',
+  name: 'Decoration',
+  rarity: 100000000,
+  ownVerb: '',
 
-::<= {
-
-@:checkSpec::(spec) {
-  if (spec.symbol == empty)
-    spec.symbol = '';
-
-  if (spec.id->type != String) 
-    error(:'Portal specification is malformed: id should be a string pointing to a Landmark base name');
-
-    
-  if (spec.rarity == empty)
-    spec.rarity = 1;
-
-}
-
-	
-@:createLandmark::(location) {
-  when(location.data.destinationWorldID != empty) empty;
+  descriptions: [
+  ],
+  symbol: '',
   
-  checkSpec(:location.data);
-    
-  if (location.data.linkedPortalID == empty || (location.data.linkedPortalID)->type != String)
-    error(:'Portal.data must contain a linkedPortalID (String) to identify which portal location within the target the party should teleport to when teleporting.');
+  interactions : [
+  ],
+  
+  aggressiveInteractions : [      
+  ],
   
   
-  @:landmark = Landmark.new(
-    data : location.data.data,
-    base : Landmark.database.find(:location.data.id)
-  );  
-  location.landmark.island.addLandmark(landmark, unmapped: true);  
-  location.data.destinationLandmarkWorldID = landmark.worldID;
-
-  return landmark;
-}
-	
-	
-@:setupLandmark ::(location) {
-  @:landmark = location.landmark.island.findLandmark(:location.data.destinationLandmarkWorldID)
-
-  landmark.loadContent();
-  
-  // now find corresponding linkedPortalID
-  @:targetPortal = ::? {
-    foreach(landmark.locations) ::(i, locationIter) {
-      if (locationIter.data.linkedPortalID == location.data.linkedPortalID)
-        send(:locationIter);
+  traits : 0,
+  events : {
+    onCreate::(location) {
+      if (location.landmark.data.decorationCh == empty)
+        location.landmark.data.decorationCh = ' '->setCharCodeAt(index:0, value:random.integer(from:33, to:126)); 
+      location.symbol = location.landmark.data.decorationCh
     }
   }
-  
-  when(targetPortal == empty)
-    error(:'Portal landmark creation encountered an error: target portal in created landmark could not be found. this locations data.linkedPortalID must match one within the newly created landmark that this portal created.')
-  
+})
 
-  location.data.destinationWorldID = targetPortal.worldID;
-  targetPortal.data.destinationWorldID = location.worldID
-  targetPortal.data.destinationLandmarkWorldID = location.landmark.worldID;
-  targetPortal.data.isPortalExit = true;
-}
+
+
+
+
 
 Location.database.newEntry(data:{
   id: 'base:portal',
@@ -183,56 +155,11 @@ Location.database.newEntry(data:{
   events : {  
   
     onStep ::(location, entities) {
-      if (location.data.destinationLandmarkWorldID == empty)
-        createLandmark(location)
-  
-      @:world = import(module:'game_singleton.world.mt');
-      @:target = location.landmark.island.findLandmark(:location.data.destinationLandmarkWorldID)
-
-      @:currentLandmark = world.landmark
+      location.usePortal();
       
-      breakpoint();
-      target.visit(
-        startRenderable : currentLandmark.map,
-        onLoad ::(landmark) { 
-          if (location.data.destinationWorldID == empty) ::<= {
-            if (location.data.portalChainItems != empty) ::<= {
-              foreach(location.data.portalChainItems) ::(k, v) {
-                @:loc = location.landmark.island.findLocation(:v);
-
-                loc.data.destinationLandmarkWorldID = landmark.worldID;
-                setupLandmark(:loc);
-              }
-            }
-            setupLandmark(location);
-          }
-        
-          // find referred to landmark
-          @:target = ::? {
-            foreach(location.landmark.island.landmarks) ::(k, landmark) {
-              when(landmark == location.landmark) empty;
-              
-              foreach(landmark.locations) ::(k, loc) {
-                if (location.data.destinationWorldID == loc.worldID)
-                  send(:loc);
-              }
-            }
-          }
-          
-          when(target == empty)
-            error(:'Portal\'s target could not be found.');        
-        
-      
-          return {
-            x : target.x,
-            y : target.y
-          }
-        }
-      )
     }
   }
 })
-}
 
 
 Location.database.newEntry(data:{
@@ -780,9 +707,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:life-crystal');
     addMissing(id:'base:potion', minCount:5);
     addMissing(id:'base:scroll', minCount:3);
-    addMissing(id:'base:inlet-crystal', minCount:2);
-    addMissing(id:'base:inlet-gem', minCount:2);
-    addMissing(id:'base:inlet-soulgem', minCount:4);
+    addMissing(id:'base:inlet-gem', minCount:7);
     addMissing(id:'base:wyvern-flower', minCount:1);
     
     for(location.inventory.items->size, 60 + (location.ownedBy.level / 4)->ceil)::(i) {
@@ -1476,6 +1401,28 @@ Location.database.newEntry(data:{
   events : {}
 })    
 
+
+
+Location.database.newEntry(data:{
+  name: 'Bed',
+  id: 'base:bed',
+  rarity: 1000000000000,
+  ownVerb : '',
+  symbol: '',
+
+  descriptions: [
+  ],
+  interactions : [
+    'base:sleep',
+  ],
+  
+  aggressiveInteractions : [
+  ],
+  traits: 0,
+  events : {}
+})  
+
+
 Location.database.newEntry(data:{
   name: '?????',
   id: 'base:treasure-pit',
@@ -1499,7 +1446,35 @@ Location.database.newEntry(data:{
   events : {}
 })     
 
+Location.database.newEntry(data:{
+  name: 'Bank Teller',
+  id: 'base:party-chest',
+  rarity: 1000000000000,
+  ownVerb : '',
+  symbol: '$',
+  traits: 0,
 
+
+  descriptions: [
+  ],
+  interactions : [
+    'base:bank'
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  events : {  
+    onCreate ::(location) {
+      @:world = import(module:'game_singleton.world.mt');        
+      world.party.bank.add(item:Item.new(
+        base:Item.database.find(id:'thechosen:sentimental-box')
+      ));
+    }
+  }
+}) 
 
     
 Location.database.newEntry(data:{
@@ -2697,10 +2672,121 @@ Location.database.newEntry(data:{
           error(:'This is only relevant for base:portal locations');
 
           
-        if (state.data.portalChainItems == empty)
-          state.data.portalChainItems = [];
+        if (state.data.portal.portalChainItems == empty)
+          state.data.portal.portalChainItems = [];
           
-        state.data.portalChainItems->push(:other.worldID);
+        state.data.portal.portalChainItems->push(:other.worldID);
+      },
+      
+      getPortalDestination ::{
+        return this.data.portal.destinationLandmarkWorldID      
+      },
+      
+      usePortal : <=:: {
+        @:checkSpec::(spec) {
+          if (spec.symbol == empty)
+            spec.symbol = '';
+
+          if (spec.id->type != String) 
+            error(:'Portal specification is malformed: id should be a string pointing to a Landmark base name');
+
+            
+          if (spec.rarity == empty)
+            spec.rarity = 1;
+
+        }
+
+	        
+        @:createLandmark::(location) {
+          when(location.data.destinationWorldID != empty) empty;
+          
+          checkSpec(:location.data);
+            
+          if (location.data.portal.linkedPortalID == empty || (location.data.portal.linkedPortalID)->type != String)
+            error(:'Portal.data must contain a linkedPortalID (String) to identify which portal location within the target the party should teleport to when teleporting.');
+          
+          
+          @:landmark = Landmark.new(
+            data : location.data.data,
+            base : Landmark.database.find(:location.data.portal.id)
+          );  
+          location.landmark.island.addLandmark(landmark, unmapped: true);  
+          location.data.portal.destinationLandmarkWorldID = landmark.worldID;
+
+          return landmark;
+        }
+	        
+	        
+        @:setupLandmark ::(location) {
+          @:landmark = location.landmark.island.findLandmark(:location.data.destinationLandmarkWorldID)
+
+          landmark.loadContent();
+          
+          // now find corresponding linkedPortalID
+          @:targetPortal = ::? {
+            foreach(landmark.locations) ::(i, locationIter) {
+              if (locationIter.data.portal.linkedPortalID == location.data.portal.linkedPortalID)
+                send(:locationIter);
+            }
+          }
+          
+          when(targetPortal == empty)
+            error(:'Portal landmark creation encountered an error: target portal in created landmark could not be found. this locations data.linkedPortalID must match one within the newly created landmark that this portal created.')
+          
+
+          location.data.portal.destinationWorldID = targetPortal.worldID;
+          targetPortal.data.portal.destinationWorldID = location.worldID
+          targetPortal.data.portal.destinationLandmarkWorldID = location.landmark.worldID;
+          targetPortal.data.portal.isPortalExit = true;
+        }      
+        return ::{
+          if (location.data.portal.destinationLandmarkWorldID == empty)
+            createLandmark(location)
+      
+          @:world = import(module:'game_singleton.world.mt');
+          @:target = location.landmark.island.findLandmark(:location.data.portal.destinationLandmarkWorldID)
+
+          @:currentLandmark = world.landmark
+          
+          breakpoint();
+          target.visit(
+            startRenderable : currentLandmark.map,
+            onLoad ::(landmark) { 
+              if (location.data.destinationWorldID == empty) ::<= {
+                if (location.data.portal.portalChainItems != empty) ::<= {
+                  foreach(location.data.portal.portalChainItems) ::(k, v) {
+                    @:loc = location.landmark.island.findLocation(:v);
+
+                    loc.data.portal.destinationLandmarkWorldID = landmark.worldID;
+                    setupLandmark(:loc);
+                  }
+                }
+                setupLandmark(location);
+              }
+            
+              // find referred to landmark
+              @:target = ::? {
+                foreach(location.landmark.island.landmarks) ::(k, landmark) {
+                  when(landmark == location.landmark) empty;
+                  
+                  foreach(landmark.locations) ::(k, loc) {
+                    if (location.data.portal.destinationWorldID == loc.worldID)
+                      send(:loc);
+                  }
+                }
+              }
+              
+              when(target == empty)
+                error(:'Portal\'s target could not be found.');        
+            
+          
+              return {
+                x : target.x,
+                y : target.y
+              }
+            }
+          )      
+        }
       },
       
       enter ::(entity) {

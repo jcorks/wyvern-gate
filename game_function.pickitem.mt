@@ -23,26 +23,26 @@
 
 // needed to preserve order
 @:tabbedReqKeys = [
-  'All',
   'Usables',
   'Weapons',
   'Armor / Clothes',
   'Accessories',
+  'Gems',
   'Keys',
-  'Inlet Gems',
   'Misc',
-  'Loot'
+  'Loot',
+  'All',
 ]
 @:tabbedReqs = [
-  empty,
   Item.SORT_TYPE.USABLES,
   Item.SORT_TYPE.WEAPON,
   Item.SORT_TYPE.ARMOR_CLOTHES,
   Item.SORT_TYPE.ACCESSORIES,
-  Item.SORT_TYPE.KEYS,
   Item.SORT_TYPE.INLET,
+  Item.SORT_TYPE.KEYS,
   Item.SORT_TYPE.MISC,
-  Item.SORT_TYPE.LOOT
+  Item.SORT_TYPE.LOOT,
+  empty
 ]
 
 

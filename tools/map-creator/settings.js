@@ -679,7 +679,7 @@ const Settings = {
             id: 'base:none',
             symbol : '*',
             haloMode : 0,
-            data : '{}'
+            data : {}
           }
           rebuildObjectPulldown();
         

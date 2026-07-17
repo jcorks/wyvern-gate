@@ -24,6 +24,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:InletSet = import(:'game_class.inletset.mt');
 @:Arts = import(module:'game_mutator.arts.mt');
+@:Effect = import(module:'game_database.effect.mt');
 
 
 return ::(inventory, shopkeep, onDone) {
@@ -50,21 +51,8 @@ return ::(inventory, shopkeep, onDone) {
       render ::{
         when(hoveredItem == empty) empty;
         
-        when(hoveredItem.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) empty;
 
-        when (hoveredItem.inletStats != empty) ::<= {
-          when(hoveredItem.inletEffect != empty) empty;
-        
-          canvas.renderTextFrameGeneral(
-            title: 'Gem base stats:',
-            lines: [
-              'Shape: ' + InletSet.SLOT_NAMES[hoveredItem.inletShape],
-              ...hoveredItem.inletStats.descriptionAugmentLines
-            ],
-            leftWeight: 0,
-            topWeight: 0.5
-          )
-        }
+
         
         @:getArtDesc ::(id1, id2) {
           @:toParts = ::(id) {
@@ -93,6 +81,38 @@ return ::(inventory, shopkeep, onDone) {
             leftJustifieds : [true, true]
           );
         }
+        
+        when(hoveredItem.inletArt != empty) ::<= {
+          breakpoint();
+          canvas.renderTextFrameGeneral(
+            title: hoveredItem.name,
+            lines: [
+              'Arts:',
+              ...getArtDesc(id1:hoveredItem.inletArt.base.id)
+            ],
+            leftWeight: 0,
+            topWeight: 0.5
+          )
+        }
+
+
+        when(hoveredItem.inletEffect != empty) ::<= {
+          breakpoint();
+          canvas.renderTextFrameGeneral(
+            title: hoveredItem.name,
+            lines: [
+              'Effect:',
+              Effect.find(:hoveredItem.inletEffect).description
+            ],
+            leftWeight: 0,
+            topWeight: 0.5
+          )
+        }
+
+        when(hoveredItem.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) empty;
+
+        
+        
         canvas.renderTextFrameGeneral(
           title: 'Summary:',
           lines: [

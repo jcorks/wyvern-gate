@@ -110,12 +110,48 @@
 
 @none;
 
+// for gems, less flashy
+@:gemQualifiersMinor = [
+  'Shiny',
+  'Chipped',
+  'Cracked',
+  'Old',
+  'Small',
+  'Large',
+  'Gilded',
+  'Ornate',
+  'Cloudy',
+  'Dull',
+  'Smooth',
+  'Rough',
+  'Rare',
+  'Common',
+  'Ancient',
+  'Great',
+  'Minor'
+]
+
+@:gemMaterials = [
+  'Morion',
+  'Amethyst',
+  'Citrine',
+  'Garnet',
+  'Praesolite',
+  'Aquamarine',
+  'Diamond',
+  'Pearl',
+  'Ruby',
+  'Sapphire',
+  'Opal',
+  'Topaz'
+]
 
 // The keys have qualifiers not normal for 
 // average objects to highlight their power.
 @:keyQualifiers = [
   'Mysterious',
   'Sentimental',
+  'Gleaming',
   'Lucid',
   'Impressive',
   'Foolish',
@@ -3141,6 +3177,7 @@ Item.database.newEntry(data : {
   events : {}}) 
 
 
+/*
 ::<= {
 @:crystals = {
   'Teal'     : ['SPD', 'DEX'],
@@ -3204,24 +3241,20 @@ Item.database.newEntry(data : {
         stats : StatSet.new(*statsA)
       );
       @:InletSet = import(:'game_class.inletset.mt');  
-      item.name = kind + ' Crystal '/*(' +
-        (match(item.inletShape) {
-          (InletSet.SLOTS.ROUND) : 'round',
-          (InletSet.SLOTS.TRIANGLE) : 'triangular',
-          (InletSet.SLOTS.SQUARE) : 'square'
-        }) + ')'*/
+      item.name = kind + ' Crystal '
       
     }
   }
 })   
 }
-
+*/
 
 
 
 
 ::<= {
 
+/*
 @:gems = {
   'Morion'     : ['SPD', 'DEX'],
   'Amethyst'   : ['DEX', 'ATK'],
@@ -3235,92 +3268,26 @@ Item.database.newEntry(data : {
   'Sapphire'   : ['SPD', 'ATK'],
   'Opal'       : ['ATK', 'INT']
   
+}*/
+
 }
+
 
 Item.database.newEntry(
   data : {
-    name : 'Gemstone',
+    name : 'Gem',
     id : 'base:inlet-gem',
-    description: "An enchanted gemstone. When set in slots on equipment, it can rebalance stats.",
-    examine : 'Its abilities are unknown.',
-    sortType : SORT_TYPE.INLET,
-    equipType: TYPE.HAND,
-    rarity : 500,
-    weight : 0.1,
-    tier: 2,
-    enchantLimit : 6,
-    levelMinimum : 1,
-    useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 30000,
-    possibleArts : [],
-
-    equipMod : StatSet.new(
-    ),
-    useEffects : [
-    ],
-    equipEffects : [],
-    traits : 
-      TRAIT.STRANGE_TO_EQUIP
-    ,
-    events : {
-      onCreate ::(item, creationHint) {
-        @:kind = random.pickArrayItem(:gems->keys);
-        
-        @:statsA = {
-          ATK: -2,
-          DEX: -2,
-          SPD: -2,
-          DEF: -2,
-          INT: -2      
-        }
-        foreach(gems[kind]) ::(k, v) {
-          statsA[v] = 5;
-        }
-        @desc = item.base.description + ": ";
-        foreach(statsA) ::(k, v) {
-          when (k == gems[kind][0]) empty;
-          when (k == gems[kind][1]) empty;
-          desc = desc + k + ',';
-        }      
-        desc = desc + ' base -2, ' + gems[kind][0] + ',' + gems[kind][1] + ' base +5';
-        //item.setOverrideDescription(:desc);
-        
-        item.setUpInlet(
-          stats : StatSet.new(*statsA)
-        );
-
-        @:InletSet = import(:'game_class.inletset.mt');
-        item.name = kind /*+ ' (' +
-          (match(item.inletShape) {
-            (InletSet.SLOTS.ROUND) : 'round',
-            (InletSet.SLOTS.TRIANGLE) : 'triangular',
-            (InletSet.SLOTS.SQUARE) : 'square'
-          }) + ')';*/
-        item.setUpInlet(
-          stats : StatSet.new(*statsA)
-        );
-      }
-    }
-  }
-)
-}
-
-
-Item.database.newEntry(
-  data : {
-    name : 'Soul Gem',
-    id : 'base:inlet-soulgem',
     description: "",
     examine : 'Its abilities are unknown.',
     sortType : SORT_TYPE.INLET,
     equipType: TYPE.HAND,
     rarity : 500,
     weight : 0.1,
-    tier: 4,
+    tier: 0,
     enchantLimit : 6,
     levelMinimum : 1,
     useTargetHint : USE_TARGET_HINT.ONE,
-    basePrice: 70000,
+    basePrice: 5000,
     possibleArts : [],
 
     equipMod : StatSet.new(
@@ -3333,23 +3300,63 @@ Item.database.newEntry(
     ,
     events : {
       onCreate ::(item, creationHint) {
-        @:Effect = import(module:'game_database.effect.mt');
-        @:effect = Effect.getRandomFiltered(::(value) <- value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL));
-        item.setUpInlet(
-          effect : effect.id
-        );
-        
-        item.setOverrideDescription(
-          : "A soul gem which grants the effect " + effect.name + ":" + effect.description
-        )
-
         @:InletSet = import(:'game_class.inletset.mt');
-        item.name = effect.name + ' Soul Gem ' /*(' +
-          (match(item.inletShape) {
-            (InletSet.SLOTS.ROUND) : 'round',
-            (InletSet.SLOTS.TRIANGLE) : 'triangular',
-            (InletSet.SLOTS.SQUARE) : 'square'
-          }) + ')';*/
+        @:world = import(module:'game_singleton.world.mt');
+        @:Effect = import(module:'game_database.effect.mt');
+        @:Arts = import(module:'game_mutator.arts.mt');
+
+        @art = item.data.inletArt
+        @effect = item.data.inletEffect
+
+        if (item.data.inletShape == empty &&
+            item.data.inletArt == empty) {
+            
+            
+          if (random.try(percentSuccess:65)) {
+            art = Arts.new(base:Arts.database.getRandomFiltered(::(value) <- 
+              (value.traits & Arts.TRAIT.SUPPORT) != 0 &&
+              ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
+              (value.rarity < Arts.RARITY.EPIC)
+            ));
+          } else { 
+            effect = Effect.getRandomFiltered(::(value) <- 
+              value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL) &&
+              value.tier <= world.island.tier)
+          }
+        }
+        
+        item.price = (item.price * random.range(from:0.3, to:1.5))->ceil;
+        
+        if (art) {
+          item.setUpInlet(
+            art : art,
+            slot : item.data.inletShape
+          );
+          item.setOverrideDescription(
+            : "An aura gem which grants the Art " + art.base.name + ":" + art.base.description
+          )
+        } else { 
+          item.setUpInlet(
+            effect : effect.id,
+            slot : item.data.inletShape
+          );
+          item.price = (item.price * 1.9)->ceil;
+
+          item.setOverrideDescription(
+            : "A soul gem which grants the effect " + effect.name + ":" + effect.description
+          )
+        }
+
+        item.name = 
+          '(' + InletSet.SLOT_CHARS[item.inletShape] + ') ' +
+          random.pickArrayItem(:gemQualifiersMinor) + ' ' +
+          random.pickArrayItem(:gemMaterials)
+
+
+
+        
+
+
       }
     }
   }
@@ -3739,6 +3746,7 @@ none.name = 'None';
     },
     reset,
     knownEvents : [
+      'onDescribe',
       'onCreate',
       'onStep'
     ]
@@ -3923,7 +3931,7 @@ none.name = 'None';
         @:slotCount = match(tier) {
           (0):
             random.pickArrayItem(:[
-              0, 0, 0, 0, 1
+              0, 1
             ]),
           (1): 
             random.pickArrayItem(:[
@@ -3938,8 +3946,13 @@ none.name = 'None';
         
         
         if (slotCount > 0) ::<= {
-          state.price += 400**(1+0.15*slotCount);
+          state.price += 100**(1+0.15*slotCount);
           state.inletSlotData = import(:'game_class.inletset.mt').new(size:slotCount);          
+          
+          if (random.flipCoin()) {
+            this.fillInletSlots(count:(slotCount/2)->ceil);
+          }
+            
         }
       }
       base.emit(event:'onCreate', item:this, creationHint);
@@ -3949,6 +3962,17 @@ none.name = 'None';
       return this;
       
     },
+    
+    setInletSlots::(count) {
+      _.state.inletSlotData = import(:'game_class.inletset.mt').new(size:count);  
+    },
+    
+    
+    fillInletSlots::(count) {
+      when(_.state.inletSlotData == empty) empty;
+      _.state.inletSlotData.fillInletSlots(count);
+    },
+    
     boxUp ::{
       when(_.this.base.id == 'base:item-box') 
         _.this;
@@ -4012,6 +4036,11 @@ none.name = 'None';
       }
     },
     
+    gems : {
+      get ::<- if (_.state.inletSlotData == empty) []
+        else 
+          _.state.inletSlotData.gems
+    },
     // returns a new item representing the appraisal.
     // appraisals always have:
     appraise ::{
@@ -4070,13 +4099,7 @@ none.name = 'None';
         @:state = _.state;
         if (state.improvementStats == empty) state.improvementStats = StatSet.new();
         @:a = _.state.improvementStats.clone();
-        a.add(: ::<= {
-          when(state.inletSlotData == empty)state.statsBase
-          @:out = StatSet.new();
-          out.add(:state.statsBase);
-          out.add(:state.inletSlotData.stats);
-          return out;
-        });
+        a.add(: state.statsBase);
         return a
       }
     },
@@ -4278,6 +4301,10 @@ none.name = 'None';
     describe ::(by) {
       @:state = _.state;
       @:this = _.this;
+      
+      when(state.base.canEmit(:'onDescribe'))
+        state.base.emit(event:'onDescribe', item:this);
+      
       @:Effect = import(module:'game_database.effect.mt');
       
       when (state.needsAppraisal)
@@ -4285,7 +4312,56 @@ none.name = 'None';
           speaker : this.name + ': Description',
           text : this.description
         );
-            
+        
+      
+      when(this.inletArt != empty) ::<= {
+        @:Arts = import(module:'game_mutator.arts.mt');
+        windowEvent.queueMessage(
+          speaker : this.name + '',
+          topWeight : 1,
+          leftWeight: 0.5,
+          text : 'An inlet gem that, when set in an equipped item, grants an Art. Equip the Art through the Party Arts menu.\n' +
+                 'Shape: ' + InletSet.SLOT_NAMES[this.inletShape] + ', Value: ' + starsToString(:this),
+          renderable : {
+            render ::{
+              Arts.renderArt(
+                id:this.inletArt.id,
+                topWeight: 0.1,
+                leftWeight: 0.5,
+                maxWidth: 0.9
+              );              
+            }
+          }
+        );
+      }
+
+
+      when(this.inletEffect != empty) ::<= {
+        @:Arts = import(module:'game_mutator.arts.mt');
+        windowEvent.queueMessage(
+          speaker : this.name + '',
+          topWeight : 1,
+          leftWeight: 0.5,
+          text : 'An inlet gem that, when set in an equipped item, grants an effect on the holder at the start of battle.\n' +
+                 'Shape: ' + InletSet.SLOT_NAMES[this.inletShape] + ', Value: ' + starsToString(:this),
+
+          renderable : {
+            render ::{
+              canvas.renderTextFrameGeneral(
+                topWeight: 0.2,
+                leftWeight : 0.5,
+                maxWidth: 0.9,
+                lines : [
+                  '[Add Effect - At Battle Start]',
+                  'Name: ' + Effect.find(:this.inletEffect).name,
+                  Effect.find(:this.inletEffect).description
+                ]
+              );        
+            }
+          }
+        );
+      }
+
       
       windowEvent.queueMessageSet(
         speakers : [
@@ -4351,6 +4427,9 @@ none.name = 'None';
 
         );
         
+      if (state.inletSlotData)
+        state.inletSlotData.queueShowBasic();
+
       if (state.useEffects->filter(::(value) <- value != 'base:fling' && value != 'base:break-item')->size > 0)
         windowEvent.queueReader(
           prompt: this.name + ': Use Effects',
@@ -4379,20 +4458,9 @@ none.name = 'None';
           
         )
 
-      if (this.inletStats != empty)
-        windowEvent.queueReader(
-          prompt : [
-            this.name + ': Gem stats'
-          ],
-          lines : [
-            'Gem shape: ' + InletSet.SLOT_NAMES[this.inletShape], 
-            ...this.inletStats.descriptionAugmentLines
-          ]
-        )
 
       
-      if (state.inletSlotData)
-        state.inletSlotData.queueShowBasic();
+
       
       if (by != empty) ::<= {
         by.exclaimAGoodWeapon(:this);
@@ -4403,7 +4471,6 @@ none.name = 'None';
       get :: {
         when (_.state.inletData == empty) _.state.stats;
         @out = _.state.stats.clone();
-        out.add(:_.state.inletData.stats);
         return out;
       }
     },    
@@ -4425,19 +4492,19 @@ none.name = 'None';
       set ::(value) <- _.state.faveMark = value
     },
     
-    setUpInlet ::(stats, effect) {
+    setUpInlet ::(stats, effect, art, slot) {
       @:InletSet = import(:'game_class.inletset.mt');
       _.state.inletData = {
-        stats : if (stats == empty) StatSet.new() else stats,
-        slot  : random.pickArrayItem(:InletSet.SLOTS->values),
-        effect : effect
+        slot  : if (slot != empty) slot else random.pickArrayItem(:InletSet.SLOTS->values),
+        effect : effect,
+        art : art
       }
     },
     
-    inletStats : {
+    inletArt : {
       get ::{ 
         when (_.state.inletData == empty) empty;
-        return _.state.inletData.stats;
+        return _.state.inletData.art;
       }
     },
 
@@ -4458,19 +4525,17 @@ none.name = 'None';
     
     inletGetDescriptionLines :: {
       @:Effect = import(module:'game_database.effect.mt');
+      @:Arts = import(module:'game_mutator.arts.mt');
       when(_.state.inletData == empty) [];
       when(_.state.inletData.effect != empty) [
-        'Grants the effect "' + Effect.find(:_.state.inletData.effect).name + '": ',
-        '',
-        Effect.find(:_.state.inletData.effect).description
+        'Grants the effect "' + Effect.find(:_.state.inletData.effect).name + '"',
+      ]
+
+      when(_.state.inletData.art != empty) [
+        'Grants the Art "' + _.state.inletData.art.base.name + '"',
       ]
       
-      
-      
-      return [
-        'Grants base stats: ',
-        ...(_.state.inletData.stats.descriptionAugmentLines)
-      ]
+      return [];
     },
     
     

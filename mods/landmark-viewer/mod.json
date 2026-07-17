@@ -1,0 +1,12 @@
+{
+  "id": "mod.dev.rasa.landmark-viewer",
+  "name": "Landmark Viewer",
+  "description": "Quickly explore specific landmarks.",
+  "author": "Rasa",
+  "website": "https://github.com/jcorks/wyvern-gate",
+  "files" : [
+    "main.mt"
+  ],
+  "JSONdata" : [],
+  "loadFirst" : []
+}

@@ -44,7 +44,11 @@
 @:MIN_SUPPORT_COUNT = 5;
 @:DAMAGE_RNG_SPREAD = 0.3;
 @:PROF_EXP_PER_KNOCKOUT = 35;
-@:ART_EQUIP_LIMIT = 12;
+
+@:MAX_PROFESSION_ART_COUNT = 5
+@:MAX_GEM_ART_COUNT = 8
+
+
 @:FEELING_TYPE = {
   PERSON : 1,
   ITEM : 2,
@@ -575,7 +579,7 @@
 
 
   @:level2exp ::(level) {
-    @:ct = profession.arts->size;
+    @:ct = profession.arts->size*2;
     @:MAX_DEFEATS = 15;
     @:averageSub = MAX_DEFEATS / ct;
     // y = mx + b
@@ -590,7 +594,7 @@
     @:m = (MAX_DEFEATS - 2) / (ct - 0);
     @:b = MAX_DEFEATS - m*ct;
     
-    return ((m*level + b)*PROF_EXP_PER_KNOCKOUT)->floor;
+    return ((m*level*2 + b)*PROF_EXP_PER_KNOCKOUT)->floor;
   }
 
   
@@ -605,9 +609,11 @@
     set.level += 1;
     set.exp = 0;
     set.expToNext = level2exp(:set.level);
-    @:nextArt = profession.arts[set.level-1];
-    if (nextArt)
-      state.professionArts->push(:nextArt);
+    if (set.level%2==0) {
+      @:nextArt = profession.arts[set.level-1];
+      if (nextArt)
+        state.professionArts->push(:nextArt);
+    }
   }
   
 }
@@ -627,6 +633,15 @@
     newState['HP'] += amount;
     this.stats.load(serialized:newState);
     this.heal(amount, silent:true);
+  }
+  
+  @:applyStatBonus::(which) {
+    @:newState = this.stats.save();
+    @amount = 1;
+    newState[which] += amount;
+    this.stats.load(serialized:newState);
+    this.heal(amount, silent:true);
+    
   }
 
   if (set == empty) ::<= {
@@ -661,38 +676,77 @@
         onFinish :: {
           
           if (set.expToNext == 0) ::<= {
-            levelUpProfession(this, state, profession);
+            if (set.level%2==0)
+              levelUpProfession(this, state, profession);
             windowEvent.queueDisplay(
               lines: [
                 'Level Up!',
                 this.name + ', the ' + profession.name + ' is now Level ' + if (set.level >= profession.arts->size) 'MAX' else set.level,
                 '',
-                'Learned: ' + Arts.database.find(:profession.arts[set.level-1]).name
+                if (set.level%2==0)
+                  'Learned: ' + Arts.database.find(:profession.arts[(set.level/2)->floor]).name
+                else 
+                  ''
               ]
             )
+            if (set.level%2==0) ::<= {
+              if (state.equippedProfessionArts->size < MAX_PROFESSION_ART_COUNT) ::<= {
+                @:art = Arts.new(base:Arts.database.find(:profession.arts[(set.level/2)->floor]));
+                art.charge = 0;
+                state.equippedProfessionArts->push(:art);
+                
+                windowEvent.queueMessage(
+                  text: 'The new Art was automatically equipped.'
+                );
+              }
+              windowEvent.queueMessage(
+                text: 'To view this new art, visit the Arts menu for ' + this.name + ' in the party menu.'
+              );
+
+            }
             
-            windowEvent.queueMessage(
-              text: 'To view this new art, visit the Arts menu for ' + this.name + ' in the party menu.'
-            );
             
             windowEvent.queueMessage(
               text: this.name + '\'s fortitude increased.'
             );
-            
+
             @:oldStats = StatSet.new();
             oldStats.load(serialized:this.stats.save());
             
             applyHPbonus();
-            
-            oldStats.printDiff(
-              other:this.stats,
-              prompt: 'New stats: ' + this.name
-            );            
-            
-            when (set.level >= profession.arts->size) 
-              if (onDone) onDone();
-            
-            animateLevel()
+            @:statChoices = [
+              'HP',
+              'AP',
+              'ATK',
+              'INT',
+              'DEF',
+              'LUK',
+              'SPD',
+              'DEX'
+            ];
+
+              
+            windowEvent.queueChoices(
+              choices: [...statChoices]->map(to:::(value) <- value + ' (' + this.stats.save()[value] + ')'),
+              prompt: 'Pick a base stat to improve.',
+              canCancel : false,
+              onChoice::(choice) {
+
+                
+                applyStatBonus(:statChoices[choice-1]);
+                
+                
+                oldStats.printDiff(
+                  other:this.stats,
+                  prompt: 'New stats: ' + this.name
+                );            
+                
+                when (set.level >= profession.arts->size) 
+                  if (onDone) onDone();
+                
+                animateLevel()
+              }
+            )
           } else 
             if (onDone) onDone();
 
@@ -793,6 +847,45 @@
   );
 }
 
+@:reportGemChange::(state, this, oldGemArts) {
+  // remove existing gem arts
+  @:oldEq = {};
+  foreach(oldGemArts) ::(k, v) {
+    oldEq[v] = true;
+  }
+  
+  @:newEq = {}
+  foreach(this.gemArts) ::(k, v) {
+    newEq[v] = true;
+  }
+
+  @:lostEq = oldGemArts->filter(::(value) <- newEq[value] != true);
+  if (lostEq->size > 0) 
+    windowEvent.queueDisplay(
+      lines : [
+        this.name + ' no longer has access to these arts :',
+        ...(oldEq->map(::(value) <- ' - ' + Arts.database.find(:value.id).name))
+        
+      ]
+    );
+  
+  
+  @:newlyEq = this.gemArts->filter(::(value) <- oldEq[value] != true);
+  if (newlyEq->size > 0) 
+    windowEvent.queueDisplay(
+      lines : [
+        this.name + ' now has newly available Arts :',
+        ...(newlyEq->map(::(value) <- ' - ' + Arts.database.find(:value.id).name))
+        
+      ]
+    );
+
+  if (this.gemArtsAll->size != this.gemArts->size)
+    windowEvent.queueMessage(text:'The gems of the current equipment exceed the Gem Arts limit. Some new Arts were not equipped.');
+  
+
+}
+
 
 
 @:EQUIP_SLOTS = {
@@ -881,9 +974,8 @@
     expNext : 1,
     level : 0,
     data : empty,
-    loadoutTemplates : empty,
     professionArts : empty,
-    equippedLoadout : 'MAIN',
+    equippedProfessionArts : empty,
     innateEffects : empty,
     professionProgress : empty,
     opinions : empty,
@@ -892,6 +984,7 @@
     equipArts : empty,
     levelPenalty : 0,
     overrideInteractID : '',
+    supportArts : empty
   },
   
   private : {
@@ -929,14 +1022,9 @@
       state.equipArts = [];
       _.temporaryArts = [];
       state.worldID = world.getNextID();
-      state.loadoutTemplates = {
-        MAIN : {
-          supportArts : [],
-          professionArts : []
-        }
-      };
       state.professionArts = [];
 
+      state.equippedProfessionArts = [];
 
 
       @:Location = import(module:'game_mutator.location.mt');
@@ -959,6 +1047,7 @@
         empty, // ringr
         empty
       ];
+      state
       state.abilitiesLearned = []; // abilities that can choose outside battle.
       
       state.expNext = 10;
@@ -1025,7 +1114,21 @@
         state.faveWeapon = Item.database.find(id:faveWeapon);
 
       if (island != empty)  ::<= {
-        if (random.try(percentSuccess:40))
+      
+        when(random.try(percentSuccess:60))
+          state.inventory.add(item:
+            Item.new(
+              base: Item.database.getRandomFiltered(
+                filter:::(value) <- 
+                  value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
+                  value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
+                  && value.tier <= island.tier
+              ),
+              rngEnchantHint:true
+            )
+          );
+
+        when(random.try(percentSuccess:30))
           state.inventory.add(item:
             Item.new(
               base: Item.database.getRandomFiltered(
@@ -1074,17 +1177,18 @@
           state.inventory.add(item);
             
         }
+      } 
       
-        if (state.faveWeapon == empty)
-          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- 
-            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-            (value.traits & Item.TRAIT.WEAPON) != 0 && value.tier <= island.tier)
-      } else ::<= {
-        if (state.faveWeapon == empty)
-          state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- 
-            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-            (value.traits & Item.TRAIT.WEAPON) != 0)
-      }
+      if (state.faveWeapon == empty)
+        if (island != empty)
+            state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              (value.traits & Item.TRAIT.WEAPON) != 0 && value.tier <= island.tier)
+        else
+            state.faveWeapon = Item.database.getRandomFiltered(filter::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              (value.traits & Item.TRAIT.WEAPON) != 0)
+
       state.inventory.addGold(amount:(random.number() * 100)->ceil);
       state.favoriteItem = Item.database.getRandomFiltered(filter::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE))
 
@@ -1204,6 +1308,14 @@
     battle : {
       get ::<- _.battle
     },
+    
+    // Adds innate arts that are not editable
+    supportArts : {
+      set ::(value) {
+        @:state = _.state;
+        state.supportArts = {...value};
+      }
+    },
       
     owns : {
       get ::<- _.owns,
@@ -1216,20 +1328,38 @@
     },
     
     
-    supportArts : {
-      get ::<- _.state.loadoutTemplates[_.state.equippedLoadout].supportArts,
-      set ::(value) <- _.state.loadoutTemplates[_.state.equippedLoadout].supportArts = value
-    },
-    
     professionArts : {
       get ::<- [..._.state.professionArts]
     },
     
+    gemArts : {
+      get :: {
+        @:all = _.this.gemArtsAll;
+        when(all->size > MAX_GEM_ART_COUNT) all->subset(from:0, to:MAX_GEM_ART_COUNT-1);
+        return all;
+      } 
+    },
+    
+    gemArtsAll : {
+      get :: {
+        @:all = [];
+        foreach(_.state.equips) ::(i, v) {
+          when(v == empty) empty;
+          when(v.base.id == 'base:none') empty;      
+          when(v.inletArt == empty) empty;
+          
+          all->push(:v.inletArt);
+        }
+        return all;
+      }
+    },
+    
     arts : {
       get ::<- [..._.state.equipArts,
-                ..._.state.loadoutTemplates[_.state.equippedLoadout].professionArts,
-                ..._.state.loadoutTemplates[_.state.equippedLoadout].supportArts,
-                ..._.temporaryArts
+                ..._.state.equippedProfessionArts,
+                ..._.this.gemArts,
+                ..._.temporaryArts,
+                ...(if (_.state.supportArts != empty) _.state.supportArts else [])
                ]
     },
     
@@ -1242,167 +1372,25 @@
     },
       
     
-    addLoadout ::(name) {
-      @:state = _.state;
-      @:this = _.this;
-      
-      state.loadoutTemplates[name] = {
-        supportArts : [],
-        professionArts : []
-      };
-    },
-    
-    getEquippedLoadoutName ::<- _.state.equippedLoadout,
-    
-    equipLoadout ::(name, silent) {
-      @:state = _.state;
-      @:this = _.this;
 
-      when (state.loadoutTemplates->keys->findIndex(:name) == -1) 
-        error(:"No such loadout is equippable. Check your code!");
 
-      @:set = state.loadoutTemplates[name];
-      
-      when (::? {
-        foreach(this.arts) ::(k, v) {
-          if (!v.canUse) send(:true);
-        }
-        return false;
-      })
-        windowEvent.queueMessage(
-          text: 'Loadouts can\'t be switched while Arts are not fully charged!'
-        );
-      
-      if (silent != true)
-        windowEvent.queueMessage(
-          text: this.name + ' is now using the loadout ' + name + '.'
-        );
-
-      _.state.equippedLoadout = name;
-    },
     
-    removeLoadout ::(which) {
-      @:state = _.state;
-      @:this = _.this;
-
-      when(which == state.equippedLoadout) empty;
-      @:world = import(module:'game_singleton.world.mt');
-      
-      foreach(state.loadoutTemplates[which].supportArts) ::(k, v) {
-        world.party.addSupportArt(id:v);
-      }
-      state.loadoutTemplates->remove(:which);
-    },
-    
-    editLoadout ::(which) {
+    editLoadout :: {
       @:state = _.state;
       @:this = _.this;
       @:pickArt = import(:'game_function.pickart.mt');
       
-      @:set = state.loadoutTemplates[which];
-      if (set == empty)
-        error(:'Incorrect loadout name');
       
       
       
-      @:equipped::{
-        when(set.supportArts->size == 0)
-          windowEvent.queueMessage(
-            text: this.name + ' currently has no Support Arts. View the Trunk to add some.'
-          );
       
-        @:pickArt = import(:'game_function.pickart.mt');
-        pickArt( 
-           
-          onGetList :: {
-            return set.supportArts;
-          },
-          canCancel:true,
-          keep: true,
-          onChoice::(choice) {
-            @:which = choice;
-            @:id = set.supportArts[which];
-            
-            when(id == empty) empty;
-            
-            @:art = Arts.database.find(id:id);
-            
-            windowEvent.queueChoices(
-              prompt: art.name,
-              choices : [
-                'Put in Trunk'
-              ],
-              canCancel: true,
-              onChoice::(choice) {
-                @:world = import(module:'game_singleton.world.mt');
-                
-                when (art.canUse == false)
-                  windowEvent.queueMessage(
-                    text: 'This art is not fully charged. Only fully charged arts can be unequipped.'
-                  );
-                
-                world.party.addSupportArt(id:art.id);
-                set.supportArts->remove(:set.supportArts->findIndex(:art.id));
-              }
-            );
-
-          }
-        );
-
-        
-      }
-      
-      
-      @:trunk::{
-        @:world = import(module:'game_singleton.world.mt');
-
-        when(world.party.arts->size == 0)
-          windowEvent.queueMessage(
-            text: 'The party\'s Support Trunk currently has no Support Arts.'
-          );
-          
-        @list;
-
-        @:pickArt = import(:'game_function.pickart.mt');
-        pickArt(
-          keep: true,
-          prompt : 'Support Trunk:', 
-          canCancel:true,
-          onGetList ::<- world.party.arts,
-          onChoice::(art, category) {
-            @id = art;
-            when(id == empty) empty;
-            
-            art = Arts.database.find(id);
-            /*
-            windowEvent.queueMessage(
-              speaker: this.name + ':' + which,
-              text: art.name + ' has been equipped.'
-            );
-            */
-            @:world = import(module:'game_singleton.world.mt');
-            
-            
-            when(this.arts->size - (state.equipArts->size) >= ART_EQUIP_LIMIT)
-              windowEvent.queueMessage(
-                speaker: this.name + ': Arts Limit',
-                text: this.name + ' cannot equip any more Arts. Please unequip other Arts and try again.'
-              );
-
-
-            world.party.takeSupportArt(id:art.id);
-            set.supportArts->push(:Arts.new(base:art));
-
-          }
-        );
-      }
       
       @:addProfessionArt ::{
         
 
         when (this.getUnequippedProfessionArts()->size == 0) 
           windowEvent.queueMessage(
-            text: this.name + ' has no more equippable profession Arts available.'
+            text: this.name + ' has no more equippable profession Arts available. Profession Arts are gathered from combat experience.'
           );        
         
       
@@ -1411,68 +1399,75 @@
           onGetList ::<- this.getUnequippedProfessionArts(),
           canCancel: true,
           onChoice ::(art, category) {
-            when(this.arts->size - (state.equipArts->size) >= ART_EQUIP_LIMIT)
-              windowEvent.queueMessage(
-                speaker: this.name + ': Arts Limit',
-                text: this.name + ' cannot equip any more Arts. Please unequip other Arts and try again.'
-              );
 
 
-            set.professionArts->push(:Arts.new(base:Arts.database.find(:art)));
+            @:art = Arts.new(base:Arts.database.find(:art));
+            art.charge = 0;
+            state.equippedProfessionArts->push(:art);
           }
         );
       }
       
 
-
       @:start ::{
         pickArt(
+          prompt: 'Equipped Arts',
           keep:true,
           onGetCategories ::{
             @:categories = [];
             @:hand = state.equips[EQUIP_SLOTS.HAND_LR];
-            categories->push(:['Weapon:', state.equipArts->map(::(value) <- value.id)]);
+            categories->push(:['Weapon:', ::<= {
+              @:wepArts = state.equipArts->map(::(value) <- value.id)
+              for(wepArts->size, 2) ::(i) {
+                wepArts->push(:empty);
+              }
+              return wepArts
+            }]);
 
             categories->push(:['Profession:',::<= {
-              @:profArts = set.professionArts->map(::(value) <- value.id);
-              for(profArts->size, 5) ::(i) {
+              @:profArts = state.equippedProfessionArts->map(::(value) <- value.id);
+              for(profArts->size, MAX_PROFESSION_ART_COUNT) ::(i) {
                 profArts->push(:empty);
               }
               return profArts;
             }]);
 
-            categories->push(:['Support:', set.supportArts->map(::(value) <- value.id)]);
-            categories->push(:[' Add support...', []]);
+            categories->push(:['Gems:',::<= {
+              @:gemArts = this.gemArts->map(::(value) <- value.id);
+              for(gemArts->size, MAX_GEM_ART_COUNT) ::(i) {
+                gemArts->push(:empty);
+              }
+              return gemArts;
+            }]);
+
             return categories;
           },
           onChoice::(art, category) {
-            
-            when(category == ' Add support...') ::<= {
-              trunk();
-            }
           
-            when(category == 'Support:') ::<= {
-              when (art == empty)
-                trunk();
-                
+            when(category == 'Gems:') ::<= {
+              windowEvent.queueMessage(
+                text: 'Gem arts come directly from Gems attached to equipment.'
+              );            
+              /*
+              when(art == empty) ::<= {
+                addGemArt();
+              }
+              
               windowEvent.queueChoices(
                 choices: ['Unequip'],
+                leftWeight: 1,
+                topWeight: 1,
                 canCancel: true,
-                leftWeight : 1,
-                topWeight : 1,
+                keep: false,
                 onChoice::(choice) {
-                  @:world = import(module:'game_singleton.world.mt');
-                  world.party.addSupportArt(id:art);
-                  set.supportArts->remove(:
-                    set.supportArts->map(
-                      ::(value) <- value.id
-                    )->findIndex(:
-                      art
-                    )
+                  when(choice == 0) empty;
+                  
+                  state.equippedGemArts->remove(:
+                    state.equippedGemArts->map(::(value) <- value.id)->findIndex(:art)
                   );
-                
                 }
-              )
+              );
+              */
             }
 
             when(category == 'Weapon:') 
@@ -1495,8 +1490,8 @@
                 onChoice::(choice) {
                   when(choice == 0) empty;
                   
-                  set.professionArts->remove(:
-                    set.professionArts->map(::(value) <- value.id)->findIndex(:art)
+                  state.equippedProfessionArts->remove(:
+                    state.equippedProfessionArts->map(::(value) <- value.id)->findIndex(:art)
                   );
                 }
               );
@@ -2590,17 +2585,20 @@
     
     equipAllProfessionArts:: {
       @:state = _.state;
-      state.loadoutTemplates[state.equippedLoadout].professionArts = [...state.professionArts]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
+      state.equippedProfessionArts = [...state.professionArts]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));
     },
     
     getUnequippedProfessionArts:: {
       @:state = _.state;
-      @:equippedIDs = state.loadoutTemplates[state.equippedLoadout].professionArts->map(::(value) <- value.id);
+      @:equippedIDs = state.equippedProfessionArts->map(::(value) <- value.id);
 
       return state.professionArts->filter(::(value) <-
         equippedIDs->findIndex(:value) == -1
       )
     },
+
+
+
       
     dropExp :: {
       @:state = _.state;
@@ -2940,6 +2938,7 @@
       @:this = _.this;
       this.recalculateStats();
       @:oldstats = StatSet.new();
+      @:oldGemArts = [...this.gemArts];
       oldstats.add(stats: this.stats);
 
       @olditem = state.equips[slot];
@@ -2951,7 +2950,8 @@
         error(detail:'Item does not enter the given slot.');
       }
 
-
+      if (olditem)
+        this.unequipItem(item:olditem, inventory);
 
       @:old = this.unequip(slot, silent:true);        
       this.addOpinion(
@@ -3008,6 +3008,10 @@
           windowEvent.queueMessage(text:this.name + ' unequipped the ' + olditem.name + ' and equipped the ' + item.name + '.');          
         }
         oldstats.printDiff(prompt: '(Equipped: ' + item.name + ')', other:this.stats);
+
+        reportGemChange(state, this, oldGemArts);
+            
+                  
       }
     },
     anonymize :: {
@@ -3043,6 +3047,14 @@
         this.unequipItem(item, silent, inventory);
       }
     },
+    
+    // used by inlet set to notify of a gem swap rather than unequipping and reequipping the item
+    notifyGemSwap ::(oldGemArts) {
+      @:state = _.state;
+      @:this = _.this;
+      reportGemChange(this, state, oldGemArts);
+
+    },
       
     unequip ::(slot => Number, silent, inventory) {
       @:state = _.state;
@@ -3050,6 +3062,7 @@
       @:current = state.equips[slot];
       when (current == empty) empty;
       
+      @:oldGemArts = this.gemArts;
       state.equipArts = state.equipArts->filter(::(value) <- value.source != current.worldID);
       state.equips[slot] = empty;        
       
@@ -3063,6 +3076,11 @@
           );
         }
       }
+      
+
+
+                
+      
       if (inventory)
         inventory.add(:current);
 
@@ -3081,6 +3099,8 @@
       }*/
       
       this.recalculateStats();
+      if (silent != true)
+        reportGemChange(this, state, oldGemArts);
       return current;
     },
     unequipItem ::(item => Item.type, silent, inventory) {

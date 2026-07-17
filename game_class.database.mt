@@ -31,6 +31,8 @@
   
   return _.events[args.event](*args);
 }
+@:canEmit::(event) <- _.events[event] != empty;
+
 
 @:Database = class(
   name : 'Wyvern.Database',
@@ -120,6 +122,7 @@
         item.hasAnyTrait = hasAnyTrait;
         item.hasNoTrait = hasNoTrait;
         item.emit = emit;
+        item.canEmit = canEmit;
         item->setIsInterface(enabled:true, private:item);
                 
         items_[item.id] = item;

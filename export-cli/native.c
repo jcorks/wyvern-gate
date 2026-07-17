@@ -359,6 +359,8 @@ typedef struct {
     int width;
     int height;
     
+    int freeze;
+    
     uint32_t * canvas;
     matteArray_t * frames; // full of uint32_t * canvas
     matteArray_t * frames_id; // full of uint32_t ids
@@ -407,6 +409,31 @@ static void composite(WyvGateCanvas * cr) {
       L_NEXT:;
     }
 }
+
+static matteValue_t wyvern_gate__native__canvas__freeze(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    matteStore_t * store = matte_vm_get_store(vm);
+    WyvGateCanvas * cr = (WyvGateCanvas*)userData;
+    cr->freeze += 1;    
+    return matte_store_new_value(store);
+}
+
+static matteValue_t wyvern_gate__native__canvas__thaw(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    matteStore_t * store = matte_vm_get_store(vm);
+    WyvGateCanvas * cr = (WyvGateCanvas*)userData;
+    cr->freeze -= 1;    
+    return matte_store_new_value(store);
+}
+
 
 static matteValue_t wyvern_gate__native__canvas__reset(
     matteVM_t * vm,
@@ -1541,6 +1568,7 @@ static void pushToScreen(
     matteStore_t * store,
     int renderNow
 ) {
+    if (cr->freeze) return;
     matteValue_t onCommit = matte_value_object_access_string(
         store,
         cr->self,
@@ -1796,6 +1824,24 @@ static matteValue_t wyvern_gate__native__canvas(
         "y",
         NULL
     );
+
+    matte_add_external_function(
+        userData,
+        "wyvern_gate__native__canvas__freeze",
+        wyvern_gate__native__canvas__freeze,
+        cr,
+        NULL
+    );
+
+    matte_add_external_function(
+        userData,
+        "wyvern_gate__native__canvas__thaw",
+        wyvern_gate__native__canvas__thaw,
+        cr,
+        NULL
+    );
+
+
     matte_add_external_function(
         userData,
         "wyvern_gate__native__canvas__newFramebuffer",

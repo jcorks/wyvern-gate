@@ -31,6 +31,12 @@
   SQUARE : 2
 }
 
+@:SLOT_CHARS = {
+  (SLOTS.ROUND):    'o',
+  (SLOTS.TRIANGLE): '^',
+  (SLOTS.SQUARE):   '▓'
+}
+
 
 @:makeSlot ::<- {
   shape : random.pickArrayItem(:SLOTS->values),
@@ -125,58 +131,7 @@
   }
 }
 
-@:generateStats ::(state) {
-  @stats = StatSet.new();
-  // first get chains. singles are also in the chains, but will have a size of 1
-  @chains = [];
-  ::<= {
-    @curChain = [];;
-    foreach(state.slots) ::(k, v) {
-      when (v.inset == empty) ::<= {
-        // failed to create chain. Added each as 
-        // standalone chains
-        foreach(curChain) ::(k, index) {
-          chains->push(:[index]);
-        }
-        curChain = [];
-      }
 
-      curChain->push(:k);
-            
-      // chain is done
-      when(v.connectNext == false) ::<= {
-        chains->push(:curChain);
-        curChain = [];
-      }
-    }
-    if (curChain->size > 0) ::<= {
-      chains->push(:curChain);
-      curChain = [];
-    }
-  }
-  
-  
-  foreach(chains) ::(k, v) {
-    when(v->size == 1) ::<= {
-      stats.add(:state.slots[v[0]].inset.inletStats);
-    }
-    
-    @:chainStats = StatSet.new();
-    foreach(v) ::(k, index) {
-      @:s = state.slots[index].inset.inletStats.save();
-      foreach(s) ::(name, stat) {
-        if (stat < 0)
-          s[name] = 0
-      }
-      
-      @:s_off = StatSet.new();
-      s_off.load(:s);
-      chainStats.add(:s_off);
-    }
-    stats.add(:chainStats);
-  }
-  return stats;
-}
 
 @:InletSet = LoadableClass.create(
   name: 'Wyvern.InletSet',
@@ -187,6 +142,8 @@
       'Triangular',
       'Square'
     ]},
+    SLOT_CHARS : {get ::<- SLOT_CHARS},
+
   },
   items : {
     slots  : empty
@@ -201,6 +158,10 @@
         get ::<- state.slots->size
       },
       
+      gems : {
+        get :: <- state.slots->filter(::(value) <- value.inset != empty)->map(::(value) <- value.inset)        
+      },
+      
       defaultLoad::(size) {
         for(0, size) ::(i) {
           state.slots->push(:makeSlot())
@@ -210,6 +171,26 @@
       renderSet :: <-
         renderField(state, selected:-1)
       ,
+      
+      fillInletSlots ::(count) {
+        @:Item = import(module:'game_mutator.item.mt');
+        ::? {
+          for(0, state.slots->size) ::(i) {
+            when(count == 0) send();
+            when (state.slots[i].inset != empty) empty;             
+            count -= 1
+            @:inlet = Item.new(
+              base:Item.database.find(:'base:inlet-gem'),
+              forceNeedsAppraisal : false,
+              data : {
+                inletShape : state.slots[i].shape
+              }
+            )
+            
+            state.slots[i].inset = inlet;
+          }
+        }
+      },
       
       equip ::(user, item, canCancel) {
         @:onItem = item;
@@ -227,43 +208,78 @@
             
           @:pickItem = import(:'game_function.pickitem.mt');
           @selectedItem;
+          @:Effect = import(module:'game_database.effect.mt');
+          @:Arts = import(module:'game_mutator.arts.mt');
           pickItem(
             inventory: inv,
             filter,
-            topWeight: 0.5,
+            leftWeight : 0.5,
+            topWeight: 0.0,
             prompt: 'Compatible Gems',
             canCancel : true,
-            keep : false,
+            keep : true,
             renderable : {
               render ::{
-                when(selectedItem == empty) empty;
-                canvas.renderTextFrameGeneral(
-                  leftWeight: 0,
-                  topWeight : 0.5,
-                  lines : selectedItem.inletGetDescriptionLines()
-                );
+                canvas.renderTextFrameGeneral(          
+                  lines : 
+                    if (selectedItem.inletArt != empty)
+                      [
+                        'Grants Art:',
+                        selectedItem.inletArt.base.name
+                      ]
+                    else 
+                      [
+                        'Grants Effect:',
+                        Effect.find(:selectedItem.inletEffect).name                      
+                      ],
+                  topWeight: 1
+                );      
               }
             },
             onHover ::(item) {
               selectedItem = item;
             },
             onPick ::(item) {
-              if (slot.inset)
-                inv.add(:slot.inset);
-              inv.remove(:item);
-              slot.inset = item;
-              
-              windowEvent.queueMessage(
-                text:user.name + ' placed the ' + item.name + ' into the ' + onItem.name + '.'
-              );
-              
-              if (user.hasEquipped(:onItem))
-                user.recalculateStats();
-              
+              windowEvent.queueChoices(
+                prompt: item.name + '...',
+                choices : ['Equip', 'Check'],
+                canCancel: true,
+                keep: false,
+                onChoice::(choice) {
+                
+                  // equip
+                  when(choice == 1) ::<= {
+                    @:old = slot.inset;
+                    @:oldGemArts = user.gemArts
+                    if (slot.inset)
+                      inv.add(:slot.inset);
+                    inv.remove(:item);
+       
+                    slot.inset = item;
+                    
+                    windowEvent.queueMessage(
+                      text:user.name + ' placed the ' + item.name + ' into the ' + onItem.name + '.'
+                    );
+
+                    if (user.hasEquipped(:onItem)) {
+                      user.notifyGemSwap(oldGemArts);
+                      user.recalculateStats();
+                    }                
+                  }
+
+
+                  when(choice == 2) ::<= {
+                    item.describe();              
+                  }
+
+                  
+                }
+              )
             }
           );
           
         }
+
         
         
         @selected
@@ -280,29 +296,35 @@
           onChoice::(choice) {
             @:slot = state.slots[selected];
 
+            when(slot.inset == empty)
+              equipInlet(slot);
+              
             windowEvent.queueChoices(
-              prompt: if (slot.inset != empty) slot.inset.name else "Empty Slot: " + InletSet.SLOT_NAMES[slot.shape],
+              prompt: slot.inset.name,
               canCancel: true,
               keep:false,
-              leftWeight: 1,
+              leftWeight: 0.5,
+              topWeight: 0.7,
               renderable : {
                 render::{
                   when (slot.inset == empty) empty;
                   this.renderSlotInfo(:slot);
                 }
               },  
-              choices : if(slot.inset == empty) ['Place'] else ['Swap', 'Remove', 'Check'],
+              choices : ['Swap', 'Remove', 'Check'],
               onChoice ::(choice) {
                 when(choice == 1) equipInlet(slot);
                 
 
                 when (choice == 2) ::<= {
+                 @:oldGemArts = user.gemArts
+     
                   if (slot.inset)
                     inv.add(:slot.inset);
                   slot.inset = empty;
                   if (user.hasEquipped(:item))
                     user.recalculateStats();
-
+                  user.notifyGemSwap(oldGemArts);
                 }
 
                 
@@ -367,26 +389,39 @@
       },
       
       queueShowBasic ::{
-        windowEvent.queueMessage(
+        @selected
+        windowEvent.queueChoices(
+          horizontalFlow: true,
+          hideWindow : true,
+          keep:false,
+          choices : state.slots->map(::(value) <- ''),
+          onHover ::(choice) {
+            selected = choice-1;
+          },
+          canCancel: true,
+          
+          onChoice::(choice) {
+
+          },
+          
           renderable : {
             render ::{
-              renderField(
-                state : state
-              )
+              renderField(state, selected);            
+
+              /*canvas.renderTextFrameGeneral(
+                leftWeight: 0.5,
+                topWeight: 1,
+                title : 'Gems: Stats (Base)',
+                lines : this.stats.description->split(token:'\n')
+              )*/
+
+              this.renderSlotInfo(slot:state.slots[selected]);
+
             }
-          },
-          leftWeight: 0.5,
-          topWeight: 1,
-          speaker : 'Gem inlets:',
-          text : 
-            '' + (state.slots->filter(::(value) <- value.inset != empty)->size) + ' / ' + state.slots->size + ' slots in use.'
-          
+          }
         );
-      },
+      }
       
-      stats : {
-        get::<- generateStats(:state)
-      },
     }
   }
 );

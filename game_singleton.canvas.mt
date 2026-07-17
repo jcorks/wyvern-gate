@@ -61,6 +61,10 @@
   a.hasEffects = getExternalFunction(:'wyvern_gate__native__canvas__hasEffects');
   a.update = getExternalFunction(:'wyvern_gate__native__canvas__update');
   a.commit = getExternalFunction(:'wyvern_gate__native__canvas__commit');
+  a.freeze = getExternalFunction(:'wyvern_gate__native__canvas__freeze');
+  a.thaw = getExternalFunction(:'wyvern_gate__native__canvas__thaw');
+
+
   return a;  
 } => {
   onError::(message) {
@@ -130,6 +134,7 @@ return class(
     @peny = 0;
     @onCommit;
     @debugLines = [];
+    @frozen = 0;
     
     
     @idStatePool = 0;
@@ -159,6 +164,7 @@ return class(
     }
     
     @:pushToScreen ::(renderNow) {
+      when(frozen > 0) empty;
       @lines_output = [];
       for(0, CANVAS_HEIGHT)::(row) {
         lines_output[row] = String.combine(strings:canvas->subset(from:row*CANVAS_WIDTH, to:(row+1)*CANVAS_WIDTH-1));
@@ -634,6 +640,14 @@ return class(
           currentFrame = oldFrame
         } 
         pushToScreen();
+      },
+      
+      freeze ::{
+        frozen += 1;
+      },
+      
+      thaw ::{
+        frozen -= 1;
       },
         
       commit ::(renderNow) {
