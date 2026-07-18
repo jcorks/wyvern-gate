@@ -2679,10 +2679,17 @@ Location.database.newEntry(data:{
       },
       
       getPortalDestination ::{
+        when(this.data == empty || this.data.portal == empty) empty;
         return this.data.portal.destinationLandmarkWorldID      
       },
       
-      usePortal : <=:: {
+      getPortalDestinationID ::{
+        when(this.data == empty || this.data.portal == empty) empty;
+        return this.data.portal.id;
+      },
+      
+      usePortal : ::<= {
+        @:location = this;
         @:checkSpec::(spec) {
           if (spec.symbol == empty)
             spec.symbol = '';
@@ -2700,9 +2707,9 @@ Location.database.newEntry(data:{
         @:createLandmark::(location) {
           when(location.data.destinationWorldID != empty) empty;
           
-          checkSpec(:location.data);
+          checkSpec(:location.data.portal);
             
-          if (location.data.portal.linkedPortalID == empty || (location.data.portal.linkedPortalID)->type != String)
+          if (location.data.linkedPortalID == empty || (location.data.linkedPortalID)->type != String)
             error(:'Portal.data must contain a linkedPortalID (String) to identify which portal location within the target the party should teleport to when teleporting.');
           
           
@@ -2718,14 +2725,14 @@ Location.database.newEntry(data:{
 	        
 	        
         @:setupLandmark ::(location) {
-          @:landmark = location.landmark.island.findLandmark(:location.data.destinationLandmarkWorldID)
+          @:landmark = location.landmark.island.findLandmark(:location.data.portal.destinationLandmarkWorldID)
 
           landmark.loadContent();
           
           // now find corresponding linkedPortalID
           @:targetPortal = ::? {
             foreach(landmark.locations) ::(i, locationIter) {
-              if (locationIter.data.portal.linkedPortalID == location.data.portal.linkedPortalID)
+              if (locationIter.data.linkedPortalID == location.data.linkedPortalID)
                 send(:locationIter);
             }
           }
@@ -2735,11 +2742,12 @@ Location.database.newEntry(data:{
           
 
           location.data.portal.destinationWorldID = targetPortal.worldID;
+          if (targetPortal.data.portal == empty) targetPortal.data.portal = {};
           targetPortal.data.portal.destinationWorldID = location.worldID
           targetPortal.data.portal.destinationLandmarkWorldID = location.landmark.worldID;
           targetPortal.data.portal.isPortalExit = true;
         }      
-        return ::{
+        return ::(skipAnimation, onLoad) {
           if (location.data.portal.destinationLandmarkWorldID == empty)
             createLandmark(location)
       
@@ -2751,6 +2759,7 @@ Location.database.newEntry(data:{
           breakpoint();
           target.visit(
             startRenderable : currentLandmark.map,
+            skipAnimation, 
             onLoad ::(landmark) { 
               if (location.data.destinationWorldID == empty) ::<= {
                 if (location.data.portal.portalChainItems != empty) ::<= {
@@ -2778,8 +2787,8 @@ Location.database.newEntry(data:{
               
               when(target == empty)
                 error(:'Portal\'s target could not be found.');        
-            
-          
+              
+              if (onLoad) onLoad();
               return {
                 x : target.x,
                 y : target.y

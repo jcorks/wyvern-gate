@@ -921,7 +921,7 @@ Island.database.newEntry(
         }
       },
       
-      travel :: {
+      travel ::(skipAnimation) {
         @:island = this;
         @:sound = import(module:'game_singleton.sound.mt');
         sound.playBGM(name:'world', loop:true);

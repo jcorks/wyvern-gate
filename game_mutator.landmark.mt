@@ -2113,7 +2113,10 @@ Landmark.database.newEntry(
         dataConv.overrideSymbol = dataConv.symbol
         dataConv.overrideName = '';//dataConv.name 
         dataConv.id = 'base:portal'
+        
+        dataConv.data = spec;
         dataConv.data.portal = spec;
+        
         @:loc = this.createLocationFromSpecification(:dataConv);
         loc.name = '';
         loc.halo = false;

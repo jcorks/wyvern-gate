@@ -567,39 +567,46 @@ return {
               world.island.visit(onReady :: {
                 town.visit(
                   skipAnimation: true,
-                  onLoad ::{
-                    foreach(town.locations) ::(k, v) {
-                    
-                    }
-                    town.map.setPointer(x:
-                    
-                    windowEvent.queueMessage(
-                      speaker: party.members[0].name,
-                      text: '"..."'
-                    );
+                  onLoad ::(landmark) {
+                    @:which = town.locations->filter(::(value) <- value.getPortalDestinationID() == 'base:home-inside-start')[0];
+                    town.map.setPointer(x: which.x, y: which.y);
+                    which.usePortal(onLoad::{
+                      windowEvent.queueCustom(
+                        onEnter ::{
+                          canvas.thaw();
+                        }
+                      );
 
-                    windowEvent.queueMessage(
-                      speaker: party.members[0].name,
-                      text: '"I must have dozed off... What a strange dream..."'
-                    );
+                      
+                      windowEvent.queueMessage(
+                        speaker: party.members[0].name,
+                        text: '"..."'
+                      );
 
-                    windowEvent.queueMessage(
-                      speaker: party.members[0].name,
-                      text: '"..."'
-                    );
+                      windowEvent.queueMessage(
+                        speaker: party.members[0].name,
+                        text: '"I must have dozed off... What a strange dream..."'
+                      );
 
-                    windowEvent.queueMessage(
-                      speaker: party.members[0].name,
-                      text: '"...Huh? A Key? Maybe it wasn\'t a dream..."'
-                    );
+                      windowEvent.queueMessage(
+                        speaker: party.members[0].name,
+                        text: '"..."'
+                      );
+
+                      windowEvent.queueMessage(
+                        speaker: party.members[0].name,
+                        text: '"...Huh? A Key? Maybe it wasn\'t a dream..."'
+                      );
 
 
-                    windowEvent.queueMessage(
-                      speaker: party.members[0].name,
-                      text: '"Maybe now is the time to open that box in storage... Right, I can get to the bank from the other room."'
-                    );      
+                      windowEvent.queueMessage(
+                        speaker: party.members[0].name,
+                        text: '"Maybe now is the time to open that box in storage... Right, I can get to the bank from the other room."'
+                      );  
+                    });
+    
                   }
-
+                )
               
               });            
             });    
