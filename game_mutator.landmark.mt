@@ -1645,10 +1645,21 @@ Landmark.database.newEntry(
       // interactive travel menu for this landmark.
       //
       // onLoad is called within the "loading spot" of the transition 
-      // Optionally, onLoad can return an object containing x and y 
-      // members for a location to move the pointer when arriving at the location.
       //
-      travel ::(onLoad, startRenderable, skipAnimation) {
+      // onReady is called in a queued event RIGHT before 
+      // the cursorMove event for the travel.
+      //
+      // startAnimationRenderable is a renderable that will be used 
+      // for the starting visual for the transition animation.
+      //
+      // skipAnimation is whether to skip the transition from the travel
+      travel ::(onLoad, onReady, startAnimationRenderable, skipAnimation) {      
+        @:world = import(module:'game_singleton.world.mt');
+        if (world.landmark != this) ::<= {
+          error(:'The current landmark isnt the one being traveled to!')
+        }
+        @:jumpTag = 'LANDMARK_VISIT' + this.worldID;
+
         @:hud = import(:'game_singleton.hud.mt');
         @:windowEvent = import(module:'game_singleton.windowevent.mt');
         @:partyOptions = import(module:'game_function.partyoptions.mt');
@@ -1660,6 +1671,9 @@ Landmark.database.newEntry(
         landmark.updateTitle();
         @:island = this.island;                    
         
+
+        if (windowEvent.canJumpToTag(:jumpTag))
+          windowEvent.jumpToTag(name:jumpTag, goBeforeTag:true);
 
         
         @stepCount = 0;
@@ -1673,7 +1687,7 @@ Landmark.database.newEntry(
             prompt: 'What next?',
             keep:true,
             canCancel:true,
-            jumpTag: 'LANDMARK_TRAVEL',
+            jumpTag:'LANDMARK_TRAVEL',
             onGetChoices ::{
               landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island, landmark));
               
@@ -1730,6 +1744,7 @@ Landmark.database.newEntry(
 
         @cursorMoveRenderable = {
           render::{
+            this.visit();
             when(landmark.map == empty) canvas.fill();
             landmark.map.render();
 
@@ -1754,24 +1769,19 @@ Landmark.database.newEntry(
         };
         
         @:startup ::{
+          this.loadContent();
           @where = onLoad
           if (where != empty) ::<= {
-            where = where(landmark);
-            if (where != empty)
-              this.map.setPointer(
-                x:where.x,
-                y:where.y
-              ); 
+            where(landmark);
           }
 
-          this.loadContent();
           cursorMoveRenderable.render()
         }
         
         if (skipAnimation != true)
           windowEvent.queueTransition(
             kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-            renderableStart : startRenderable,
+            renderableStart: startAnimationRenderable,
             renderableMiddle: {
               render :: {
                 startup();
@@ -1781,9 +1791,14 @@ Landmark.database.newEntry(
         else
           startup();
 
+        windowEvent.queueCustom(
+          onEnter ::{
+            if (onReady) onReady();
+          }
+        );
         
         windowEvent.queueCursorMove(
-          jumpTag: 'VisitLandmark',
+          jumpTag,
           onMenu ::{
             landmarkChoices()
           },
@@ -1817,20 +1832,12 @@ Landmark.database.newEntry(
       },
 
       // Makes this landmark the "current" landmark that 
-      // the party is within. This implicitly calls this.travel(), which 
-      // makes the windowevent context and map in the traveling mode where 
-      // users can interact with Locations within the landmark.
+      // the party is within.
       //
-      // onLoad is an optional function that can 
-      // be used to dynamically spawn heavy content. onLoad is called 
-      // in the middle of the transition once the screen is dark, allowing 
-      // for seamless loading.
-      //
-      // dontFlatten is an optional boolean that, when true 
-      // will preserve the visit queue.
-      visit ::(onLoad, startRenderable, skipAnimation)  {
+      visit ::  {
         @:landmark = this;
         @:world = import(module:'game_singleton.world.mt');
+        when(world.landmark == this) empty;
         when (state.base.emit(event:'onVisit', landmark:this, island:landmark.island) == false) empty;
 
         if (world.landmark)
@@ -1845,7 +1852,6 @@ Landmark.database.newEntry(
             fullName : 'the ' + landmark.name
           );
         }
-        this.travel(onLoad, startRenderable, skipAnimation);
       },
       
       updateTitle ::(override)  {
@@ -2104,25 +2110,6 @@ Landmark.database.newEntry(
         }
       
         return loc
-      },
-
-      
-      // creates a location from a Landmark object specification
-      createPortalFromSpecification ::(spec) {
-        @:dataConv = {...spec};
-        dataConv.overrideSymbol = dataConv.symbol
-        dataConv.overrideName = '';//dataConv.name 
-        dataConv.id = 'base:portal'
-        
-        dataConv.data = spec;
-        dataConv.data.portal = spec;
-        
-        @:loc = this.createLocationFromSpecification(:dataConv);
-        loc.name = '';
-        loc.halo = false;
-        loc.symbol = '';
-        
-        return loc;
       },
       
       map : {

@@ -662,6 +662,9 @@ return class(
         onPlayBGM => Function, // if name is unrecognized, will halt playing music.
         onQuit => Function
       ) {
+      
+
+      
         foreach(preloadJSON()) ::(k, v) {
         
           setModule(name:k, value:v);
@@ -686,6 +689,10 @@ return class(
           settings = JSON.decode(string:settings);
           this.updateSettings();
         }
+
+
+
+
 
 /*
 import(:'game_function.tabbedchoices.mt')(
@@ -1203,9 +1210,12 @@ return empty;
               mods = [];
 
             sound.playBGM(name:'boot', loop:false);
+         
+            
             (import(:'game_function.boot.mt'))(          
               onBooted :: {
                 sound.playBGM(name:"title", loop:false)
+                
                 windowEvent.queueChoices(
                   onGetChoices ::{
                     return genChoices();

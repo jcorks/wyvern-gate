@@ -1433,6 +1433,7 @@ return {
                     onEnter::{
                       @:instance = import(module:'game_singleton.instance.mt');
                       world.island.visit();
+                      world.island.travel();
                     }
                   )
                 },
@@ -4271,6 +4272,7 @@ return {
                   base : Landmark.database.find(id:'thechosen:dark-lair-entrance')
                 );
                 landmark.visit();
+                landmark.travel();
               }
             );
           },

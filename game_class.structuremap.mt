@@ -719,18 +719,28 @@
       addPortal::(portalSpec) {
         @:Landmark = import(module:'game_mutator.landmark.mt');
 
-        @:locationLeft = _landmark.createPortalFromSpecification(:portalSpec);
-        @:locationRight = _landmark.createPortalFromSpecification(:portalSpec);
+        @:createPortalFromSpecification:: {
+          @:spec = {...portalSpec};
+          @:landmarkID = portalSpec.id;
+          spec.id = 'base:portal'
+          @:loc = _landmark.createLocationFromSpecification(spec);
+          loc.data.linkedPortalLandmarkID = landmarkID;
+          return loc;
+        }
 
-        locationLeft.addPortalChainItem(:locationRight);
-        locationRight.addPortalChainItem(:locationLeft);
-
+        @:locationLeft = createPortalFromSpecification();
+        @:locationRight = createPortalFromSpecification();
 
         // {"linkedPortalID" : "structure-entrance-left"}
         // {"linkedPortalID" : "structure-entrance-right"}
         locationLeft.data.linkedPortalID = 'structure-entrance-left';
         locationRight.data.linkedPortalID = 'structure-entrance-right';
       
+        locationLeft.portal.addChainItem(:locationRight);
+        locationRight.portal.addChainItem(:locationLeft);
+
+
+
         @:landmarkBase = Landmark.database.find(:portalSpec.id);
         
         @:size = if (landmarkBase.hasTraits(:Landmark.TRAIT.STRUCTURE_LARGE)) 2 else 1;

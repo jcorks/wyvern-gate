@@ -4180,6 +4180,7 @@ return {
               base:Landmark.database.find(id:'thetrader:fortune-wyvern-dimension')
             );
             d.visit();
+            d.travel();
             doNext();
           }
         ]

@@ -2112,9 +2112,23 @@ Interaction.newEntry(
                   render ::<- canvas.fill()
                 },
                 onLeave :: {
-                  world.island.visit(
-                    atGate:true
-                  );
+                  world.island.visit();
+                  @:landmarkMaybe = world.island.landmarks->filter(::(value) <- value.base.id == 'base:wyvern-gate');
+                  if (landmarkMaybe->size > 0) {
+                    world.island.map.setPointer(x:landmarkMaybe[0].x, y:landmarkMaybe[0].y);
+                  } else {
+                    if (world.island.landmarks->size > 0) {
+                      world.island.map.setPointer(x:world.island.landmarks[0].x, y:world.island.landmarks[0].y);
+
+                    } else {
+                      error(:'Visiting an island in this manner requires a wyvern gate to exist on the target island.');
+                    }
+                  }
+                  world.island.travel(startAnimationRenderable:{
+                    render::{
+                      canvas.blackout();
+                    }
+                  });
                 }
               )
             });
@@ -2298,17 +2312,13 @@ Interaction.newEntry(
     interact ::(location, party) {
 
       windowEvent.queueMessage(text:'The party uses the ladder to climb up to the surface.');
-      @hit = false;
+
       windowEvent.queueCustom(
-        onEnter::{
-          //invaidate a cache
-          windowEvent.jumpToTag(name:'VisitIsland');
+        onEnter ::{
+          location.landmark.island.travel(
+            startAnimationRenderable : location.landmark.map
+          );
         }
-      );
-      windowEvent.queueTransition(
-        kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-        renderableStart : location.landmark.map,
-        renderableMiddle: location.landmark.island.map
       );
     },
   }

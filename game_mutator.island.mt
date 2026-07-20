@@ -920,18 +920,47 @@ Island.database.newEntry(
           return world_;
         }
       },
-      
-      travel ::(skipAnimation) {
+
+
+      // enters the travel ui state, bringing the user to the 
+      // interactive travel menu for this island.
+      // This also removes any existing travel menu for and up to 
+      // this one.
+      //
+      // onLoad is called within the "loading spot" of the transition 
+      //
+      // onReady is called in a queued event RIGHT before 
+      // the cursorMove event for the travel.
+      //
+      // startAnimationRenderable is a renderable that will be used 
+      // for the starting visual for the transition animation.
+      //
+      // skipAnimation is whether to skip the transition from the travel
+      travel ::(onLoad, onReady, startAnimationRenderable, skipAnimation) {  
+        @:world = import(module:'game_singleton.world.mt');
         @:island = this;
         @:sound = import(module:'game_singleton.sound.mt');
+        @:jumpTag = 'VisitIslandWORLDID'+this.worldID;
+        if (world.island != this) ::<= {
+          error(:'The current landmark isnt the one being traveled to!')
+        }
+
         sound.playBGM(name:'world', loop:true);
-        when(island == empty)
-          error(detail:'No island to make a menu for! Use visitIsland() to set the current island.');
+
+        if (windowEvent.canJumpToTag(:jumpTag)) {
+          canvas.freeze();
+          windowEvent.jumpToTag(name:jumpTag, goBeforeTag:true);
+          windowEvent.queueCustom(
+            onEnter ::{
+              canvas.thaw();            
+            }
+          );
+        }
+
         
         @enteredChoices = false;
         @underFoot;
         @steps = 0;
-        @:world = import(module:'game_singleton.world.mt');
         island.map.title = island.name + ' : ' + world.timeString;
 
         @:visitLandmark::(landmark) {
@@ -942,12 +971,15 @@ Island.database.newEntry(
             windowEvent.queueAskBoolean(
               prompt:'Enter?',
               onChoice::(which) {
-                if (which == true)
+                if (which == true) {
                   landmark.visit();
+                  landmark.travel();
+                }
               }
             )
           }
           landmark.visit();              
+          landmark.travel();
           if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
             windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
           }                       
@@ -955,76 +987,103 @@ Island.database.newEntry(
 
 
         @islandTravel = ::{
-          windowEvent.queueCursorMove(
-            leftWeight: 1,
-            topWeight: 1,
-            prompt: 'Traveling...',
-            jumpTag: 'VisitIsland',
-            onMenu :: {
-              islandChoices();
-            },
-            
-            renderable : {
-              render ::{
-                @:hud = import(module:'game_singleton.hud.mt');
-                island.map.render();
-                hud.render(island);
-                when(underFoot == empty || underFoot->size == 0) empty;
+          @:startup ::{
+            windowEvent.queueCustom(
+              onEnter ::{
+                if (onReady) onReady();
+              }
+            );
+
+          
+            windowEvent.queueCursorMove(
+              leftWeight: 1,
+              topWeight: 1,
+              prompt: 'Traveling...',
+              jumpTag,
+              onMenu :: {
+                islandChoices();
+              },
+              
+              renderable : {
+                render ::{
+                  this.visit();
+                  @:hud = import(module:'game_singleton.hud.mt');
+                  island.map.render();
+                  hud.render(island);
+                  when(underFoot == empty || underFoot->size == 0) empty;
 
 
-                
-                @:lines = [];
-                foreach(underFoot)::(i, arr) {
+                  
+                  @:lines = [];
+                  foreach(underFoot)::(i, arr) {
 
 
-                  lines->push(value:arr.data.name);
+                    lines->push(value:arr.data.name);
 
-                  //island.map.setPointer(
-                  //  x: arr.x,
-                  //  y: arr.y
-                  //);
-                
+                    //island.map.setPointer(
+                    //  x: arr.x,
+                    //  y: arr.y
+                    //);
+                  
+                  }
+                  
+                  
+                  
+                  canvas.renderTextFrameGeneral(
+                    title: 'Nearby:',
+                    topWeight : 1,
+                    leftWeight : 1,
+                    lines
+                  );
                 }
-                
-                
-                
-                canvas.renderTextFrameGeneral(
-                  title: 'Nearby:',
-                  topWeight : 1,
-                  leftWeight : 1,
-                  lines
+              },
+              onMove ::(choice) {
+                world.landmark = empty;
+                              
+                // move by one unit in that direction
+                // or ON it if its within one unit.
+                island.map.movePointerFree(
+                  x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
+                  y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
                 );
-              }
-            },
-            onMove ::(choice) {
-              world.landmark = empty;
-                            
-              // move by one unit in that direction
-              // or ON it if its within one unit.
-              island.map.movePointerFree(
-                x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
-                y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
-              );
-              island.map.title = island.name + ' : ' + world.timeString + '           ';
-              steps += 1;
-              
-              if (steps%4 == 0)
-                world.incrementTime();
-              island.step();
-              
-              // cancel if we've arrived somewhere
-              underFoot = island.map.getNamedItemsUnderPointerRadius(radius:5);
-              
-              foreach(underFoot)::(i, arr) {
-                arr.data.discover();
-                island.map.discover(data:arr.data);                      
-              }
-              @:underunderFoot = island.map.getNamedItemsUnderPointer();
-              if (underunderFoot != empty && underunderFoot->size == 1)
-                visitLandmark(:underunderFoot[0].data);                
+                island.map.title = island.name + ' : ' + world.timeString + '           ';
+                steps += 1;
+                
+                if (steps%4 == 0)
+                  world.incrementTime();
+                island.step();
+                
+                // cancel if we've arrived somewhere
+                underFoot = island.map.getNamedItemsUnderPointerRadius(radius:5);
+                
+                foreach(underFoot)::(i, arr) {
+                  arr.data.discover();
+                  island.map.discover(data:arr.data);                      
+                }
+                @:underunderFoot = island.map.getNamedItemsUnderPointer();
+                if (underunderFoot != empty && underunderFoot->size == 1)
+                  visitLandmark(:underunderFoot[0].data);                
 
-            }
-          );
+              }
+            );
+          }
+        
+
+          if (skipAnimation != true)
+            windowEvent.queueTransition(
+              kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
+              renderableStart: startAnimationRenderable,
+              renderableMiddle: {
+                render :: {
+                  startup();
+                  this.map.render();
+                }
+              }
+            )
+          else
+            startup();
+
+
         }
 
         
@@ -1099,52 +1158,27 @@ Island.database.newEntry(
         islandTravel();        
       },
       
-      visit ::(restorePos, atGate, onReady, skipAnimation) {        
+      
+      // Analog to landmark.visit()
+      // Sets this island as the active island and implicitly visits it.
+      //
+      // onLoad is called within the "loading spot" of the transition 
+      //
+      // onReady is called in a queued event RIGHT before 
+      // the cursorMove event for the travel.
+      visit ::(onLoad, onReady, startAnimationRenderable, skipAnimation) {        
         @:world = import(module:'game_singleton.world.mt');
+        when (world.island == this) empty;
         world.island = this;
         @:island = this;
         
-
         // check if we're AT a location.
         island.map.title = "(Map of " + island.name + ')';
 
         @hasVisitIsland;
-        if (windowEvent.canJumpToTag(name:'VisitIsland'))
-          windowEvent.jumpToTag(name:'VisitIsland', goBeforeTag:true, doResolveNext:if(atGate == empty)true else false);
-        this.travel(skipAnimation);
         hasVisitIsland = true;
         
-        when (restorePos == empty && atGate != empty) ::<= {
-          @gate = island.landmarks->filter(by:::(value) <- value.base.id == 'base:wyvern-gate');
-          when(gate->size == 0) empty;
-          
-          gate = gate[0];
-          island.map.setPointer(
-            x: gate.x,
-            y: gate.y
-          );         
-          
-          
-          @gategate = gate.locations->filter(by:::(value) <- value.base.id == 'base:gate');
-          when(gategate->size == 0) empty;
-          
-          gate.visit(
-            onLoad: ::(landmark)<- gategate[0]
-          );        
-          
-          if (hasVisitIsland && onReady) ::<= {
-            windowEvent.queueCallback(
-              callback::{
-                onReady();
-                return windowEvent.CALLBACK_DONE
-              }
-            );
-          } else
-            if (onReady)
-              onReady();
-        }
-        if (onReady)
-          onReady();
+        
       }
     }
     

@@ -161,9 +161,11 @@
       queue : {}
     });
     
-    @:commitVisual ::{
+    @:commitVisual ::(data){
       setFramebufferList();
       canvas.commit();
+      if (data.onFrameRendered)
+        data.onFrameRendered();
     }
     
     @:renderAction ::(data, rerender) {
@@ -282,7 +284,7 @@
             data.renderState = RENDER_STATE.DONE;
           }
 
-          commitVisual();
+          commitVisual(data);
           
         } else ::<= {        
 
@@ -296,7 +298,7 @@
           }
             
           if (renderOnly == empty && rerender != true)
-            commitVisual();
+            commitVisual(data);
 
           
           if (renderAgain == false)
@@ -1857,6 +1859,7 @@
         isAnimation, 
         waitFrames,
         animationFrame,
+        onFrameRendered,
         // Watch out! disableCache is a very special attribute. If active, every draw 
         // of the topmost widget will trigger a redraw of this leading up to every 
         // item in the menu stack up to the current one.
@@ -1886,6 +1889,7 @@
             isAnimation : isAnimation,
             animationFrame : animationFrame,
             waitFrames : waitFrames,
+            onFrameRendered : onFrameRendered,
             onInput : onInput,
             disableCache : if (disableCache != empty) PERMANENT else empty,
             framebufferID : canvas.newFramebuffer()
@@ -1934,7 +1938,8 @@
         jumpTag, 
         onLeave, 
         isAnimation, 
-        animationFrame
+        animationFrame,
+        onFrameRendered
         
       ) {
         @:onEnterReal::{
@@ -1965,6 +1970,7 @@
             onLeave: onLeaveReal,
             isAnimation : isAnimation,
             animationFrame : animationFrame,
+            onFrameRendered : onFrameRendered,
             onInput : onInput,
             resolveStack : true,
             framebufferID : canvas.newFramebuffer()
@@ -1980,7 +1986,8 @@
       queueNestedPhases ::(
         phases => Object,
         onFinish,
-        renderable
+        renderable,
+        onFrameRendered
       ) {
         @finished = false;
         phases = [...phases]
@@ -2004,7 +2011,7 @@
           onEnter :: {
             doNextPhase();
           },
-          
+          onFrameRendered : onFrameRendered,
           onLeave ::{
             if (onFinish != empty && finished == false)
               onFinish(:false);
@@ -2020,7 +2027,8 @@
         callback => Function,
         jumpTag,
         isAnimation, 
-        animationFrame
+        animationFrame,
+        onFrameRendered
       ) {
         when(requestAutoSkip) ::<= {
           ::? {
@@ -2038,6 +2046,7 @@
             jumpTag: jumpTag,
             isAnimation : isAnimation,
             animationFrame : animationFrame,
+            onFrameRendered : onFrameRendered,
             framebufferID : canvas.newFramebuffer()
           });
         }]);        
@@ -2092,7 +2101,8 @@
         hideWindow,
         horizontalFlow,
         onInput,
-        onGetFooter
+        onGetFooter,
+        onFrameRendered
       ) {
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
@@ -2126,6 +2136,7 @@
             onGetFooter : onGetFooter,
             onGetChoices : onGetChoices,
             onGetChoicesMatch : onGetChoicesMatch,
+            onFrameRendered : onFrameRendered,
             framebufferID : canvas.newFramebuffer()
           });
         }]);
@@ -2152,7 +2163,8 @@
         onGetPrompt, 
         jumpTag, 
         onLeave, 
-        onCancel
+        onCancel,
+        onFrameRendered
       ) {
 
 
@@ -2175,6 +2187,7 @@
             onGetPrompt : onGetPrompt,
             renderable:renderable,
             jumpTag : jumpTag,
+            onFrameRendered : onFrameRendered,
             framebufferID : canvas.newFramebuffer()
           });
         }]);
@@ -2243,7 +2256,8 @@
         jumpTag, 
         onLeave, 
         onKept,
-        onCancel
+        onCancel,
+        onFrameRendered
       ) {
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
@@ -2263,6 +2277,7 @@
             keep : keep,
             renderable:renderable,
             onKept : onKept,
+            onFrameRendered : onFrameRendered,
             framebufferID : canvas.newFramebuffer()
           });
         }]);
@@ -2280,6 +2295,7 @@
         onLeave, 
         jumpTag, 
         canCancel, 
+        onFrameRendered,
         trap
       ) {
         pushResolveQueueTop(fns:[::{
@@ -2297,7 +2313,8 @@
             jumpTag: jumpTag,
             trap : trap,
             onMenu : onMenu,
-            framebufferID : canvas.newFramebuffer()
+            framebufferID : canvas.newFramebuffer(),
+            onFrameRendered : onFrameRendered
           });
           canvas.clear();
         }]);
@@ -2307,7 +2324,8 @@
       queueTransition ::(
         kind => Number,
         renderableMiddle,
-        renderableStart
+        renderableStart,
+        onFrameRendered
       ) {
         when(kind == TRANSITION.FADE_TO_BLACK) ::<= {
           this.queueCustomTransition(
@@ -2327,6 +2345,7 @@
             },
             
             renderableMiddle,
+            onFrameRendered : onFrameRendered,
             
             animationFrameAfter ::<= {
               @t = 0;
@@ -2350,6 +2369,7 @@
         animationFrameAfter => Function,
         renderableMiddle,
         renderableStart,
+        onFrameRendered,
         jumpTag
       ) {
         pushResolveQueueTop(fns:[::{
@@ -2359,6 +2379,7 @@
             renderAfter : animationFrameAfter,            
             renderableMiddle : renderableMiddle,
             renderableStart : renderableStart,
+            onFrameRendered : onFrameRendered,
             framebufferID : canvas.newFramebuffer()
           });
         }]);
@@ -2389,8 +2410,8 @@
       },
 
       // ask yes or no immediately.
-      queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt, defaultChoice) {
-        return this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave, topWeight, leftWeight,
+      queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt, defaultChoice, onFrameRendered) {
+        return this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave, topWeight, onFrameRendered, leftWeight,
           defaultChoice: if (defaultChoice == true) 0 else 1,
           onChoice::(choice){
             onChoice(which: choice == 1);
