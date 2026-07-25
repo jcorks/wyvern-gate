@@ -564,46 +564,51 @@ return {
             Scene.start(id:'thechosen:scene_intro', onDone::{          
             //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
               canvas.freeze();
-              world.island.visit(onReady :: {
-                town.visit(
+              world.island.visit()
+              world.island.travel(onReady::{
+                town.visit();
+                town.travel(
                   skipAnimation: true,
-                  onLoad ::(landmark) {
-                    @:which = town.locations->filter(::(value) <- value.getPortalDestinationID() == 'base:home-inside-start')[0];
+                  onReady ::(landmark) {
+                    @:which = town.locations->filter(::(value) <- value.portal != empty && value.portal.destinationLandmarkDatabaseID == 'base:home-inside-start')[0];
                     town.map.setPointer(x: which.x, y: which.y);
-                    which.usePortal(onLoad::{
-                      windowEvent.queueCustom(
-                        onEnter ::{
-                          canvas.thaw();
-                        }
-                      );
+                    which.portal.use(
+                      skipAnimation : true,
+                      onReady::{
+                        windowEvent.queueCustom(
+                          onEnter ::{
+                            canvas.thaw();
+                          }
+                        );
 
-                      
-                      windowEvent.queueMessage(
-                        speaker: party.members[0].name,
-                        text: '"..."'
-                      );
+                        
+                        windowEvent.queueMessage(
+                          speaker: party.members[0].name,
+                          text: '"..."'
+                        );
 
-                      windowEvent.queueMessage(
-                        speaker: party.members[0].name,
-                        text: '"I must have dozed off... What a strange dream..."'
-                      );
+                        windowEvent.queueMessage(
+                          speaker: party.members[0].name,
+                          text: '"I must have dozed off... What a strange dream..."'
+                        );
 
-                      windowEvent.queueMessage(
-                        speaker: party.members[0].name,
-                        text: '"..."'
-                      );
+                        windowEvent.queueMessage(
+                          speaker: party.members[0].name,
+                          text: '"..."'
+                        );
 
-                      windowEvent.queueMessage(
-                        speaker: party.members[0].name,
-                        text: '"...Huh? A Key? Maybe it wasn\'t a dream..."'
-                      );
+                        windowEvent.queueMessage(
+                          speaker: party.members[0].name,
+                          text: '"...Huh? A Key? Maybe it wasn\'t a dream..."'
+                        );
 
 
-                      windowEvent.queueMessage(
-                        speaker: party.members[0].name,
-                        text: '"Maybe now is the time to open that box in storage... Right, I can get to the bank from the other room."'
-                      );  
-                    });
+                        windowEvent.queueMessage(
+                          speaker: party.members[0].name,
+                          text: '"Maybe now is the time to open that box in storage... Right, I can get to the bank from the other room."'
+                        );  
+                      }
+                    );
     
                   }
                 )

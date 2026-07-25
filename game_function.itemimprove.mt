@@ -39,9 +39,9 @@
         prompt: 'New stats: ' + item.name
       );
 
-      @:state = item.improvementStats.save();
+      @:state = item.improvement.stats.save();
       state[stat] += 1;
-      item.improvementStats.load(:state);
+      item.improvement.stats.load(:state);
       
       
       if (user != empty) ::<= {
@@ -72,22 +72,22 @@
 
 @:addExpAnimated::(item, user, other, exp, onDone) {
   breakpoint();
-  @remainingForLevel = item.improvementEXPtoNext - item.improvementEXP;
+  @remainingForLevel = item.improvement.expToNext - item.improvement.exp;
   
   
   @:animateBar = import(:'game_function.animatebar.mt');
   @current = 0;
   animateBar(
-    from: item.improvementEXP,
-    to:   item.improvementEXP + exp,
-    max:  item.improvementEXPtoNext,
+    from: item.improvement.exp,
+    to:   item.improvement.exp + exp,
+    max:  item.improvement.expToNext,
     
     onGetPauseFinish:: <- true,
     onFinish ::{  
-      @:remaining = exp - (item.improvementEXPtoNext - item.improvementEXP);
-      @:oldLevel = item.improvements;
-      item.improve(:exp);      
-      when (oldLevel != item.improvements) ::<= {
+      @:remaining = exp - (item.improvement.expToNext - item.improvement.exp);
+      @:oldLevel = item.improvement.improvements;
+      item.improvement.improve(:exp);      
+      when (oldLevel != item.improvement.improvements) ::<= {
         windowEvent.queueMessage(
           text: 'Item: Level up!'
         );
@@ -111,9 +111,9 @@
          
     },
     
-    onGetCaption      ::<- 'Item level: ' + item.improvements,
-    onGetSubcaption   ::<- 'Exp to next level: ' + (remainingForLevel - (current - item.improvementEXP)),
-    onGetSubsubcaption::<- '                  +' + (exp - (current - item.improvementEXP)),
+    onGetCaption      ::<- 'Item level: ' + item.improvement.improvements,
+    onGetSubcaption   ::<- 'Exp to next level: ' + (remainingForLevel - (current - item.improvement.exp)),
+    onGetSubsubcaption::<- '                  +' + (exp - (current - item.improvement.exp)),
     
     onGetLeftWeight::<- 0.5,
     onGetTopWeight::<- 0.5,
@@ -209,7 +209,7 @@ return ::(user, item, inBattle) {
     );            
   }
   
-  when(item.improvementsLeft == 0) ::<= {
+  when(item.improvement.left == 0) ::<= {
     windowEvent.queueMessage(
       text: item.name + ' cannot be improved any further.'
     );                        

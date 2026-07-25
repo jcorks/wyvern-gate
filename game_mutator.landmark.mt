@@ -1671,9 +1671,8 @@ Landmark.database.newEntry(
         landmark.updateTitle();
         @:island = this.island;                    
         
+        windowEvent.removeTag(:jumpTag)
 
-        if (windowEvent.canJumpToTag(:jumpTag))
-          windowEvent.jumpToTag(name:jumpTag, goBeforeTag:true);
 
         
         @stepCount = 0;
@@ -1744,6 +1743,11 @@ Landmark.database.newEntry(
 
         @cursorMoveRenderable = {
           render::{
+            if (onReady != empty) {
+              onReady();
+              onReady = empty;
+            } 
+
             this.visit();
             when(landmark.map == empty) canvas.fill();
             landmark.map.render();
@@ -1774,29 +1778,25 @@ Landmark.database.newEntry(
           if (where != empty) ::<= {
             where(landmark);
           }
-
-          cursorMoveRenderable.render()
         }
         
         if (skipAnimation != true)
           windowEvent.queueTransition(
             kind:windowEvent.TRANSITION.FADE_TO_BLACK, 
-            renderableStart: startAnimationRenderable,
+            renderableStart: if (startAnimationRenderable == empty) empty else ({
+              render :: {
+                startAnimationRenderable.render();
+              }
+            }),
             renderableMiddle: {
               render :: {
                 startup();
+                landmark.map.render();
               }
             }
           )
-        else
-          startup();
 
-        windowEvent.queueCustom(
-          onEnter ::{
-            if (onReady) onReady();
-          }
-        );
-        
+
         windowEvent.queueCursorMove(
           jumpTag,
           onMenu ::{
@@ -1829,6 +1829,11 @@ Landmark.database.newEntry(
             setNearby(:locations->filter(::(value) <- value.base.hasNoTrait(:Location.TRAIT.INVISIBLE)));
           }        
         )      
+        if (skipAnimation == true)
+          startup();
+
+
+
       },
 
       // Makes this landmark the "current" landmark that 

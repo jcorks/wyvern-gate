@@ -2385,7 +2385,10 @@ Location.database.newEntry(data:{
     portal : empty
   },
   statics : {
-    TRAIT : {get::<- TRAIT}
+    TRAIT : {get::<- TRAIT},
+    Portal : {
+      get ::<- import(module:'game_class.location.portal.mt')
+    }
   },
 
   
@@ -2610,12 +2613,11 @@ Location.database.newEntry(data:{
         get ::{
           when (state.portal != empty) state.portal
           when (state.data.linkedPortalID == empty) empty;
-          @:Portal = import(module:'game_class.portal.mt');
 
           if (state.data.linkedPortalLandmarkID == empty)
             error(:'Portal locations that have a linkedPortalID are also required to have a linkedPortalLandmarkID in their data, as this is the database id of the landmark to create with the portal.');
 
-          state.portal = Portal.new(parent:this, landmarkID:state.data.linkedPortalLandmarkID);
+          state.portal = Location.Portal.new(parent:this, landmarkID:state.data.linkedPortalLandmarkID);
           return state.portal;
         }
       },

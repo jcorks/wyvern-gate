@@ -389,8 +389,8 @@
     }
 
     
-    @:commitInput ::(input, level, forceRedraw) {
-      canvas.update();
+    @:commitInput ::(input, level, forceRedraw, noCanvas) {
+
       ::? {
         if (input == empty)
           hadInputLast = false
@@ -432,7 +432,8 @@
             (CHOICE_MODE.READER):         commitInput_reader(data:val, input),
             (CHOICE_MODE.TRANSITION):     commitInput_transition(data:val, input)
           }    
-         
+          if (noCanvas != true)
+            canvas.update();
           
           // event callbacks mightve bonked out 
           // this current val. Double check 
@@ -476,7 +477,7 @@
     // resolves the next action 
     // this is normally done for you, but
     // when jumping, sometimes it is required.
-    @:resolveNext::(noCommit, level) {
+    @:resolveNext::(noCommit, level, noCanvas) {
       @inst = resolveQueues[resolveQueues->size-1];
       @:queue = inst.queue;
 
@@ -491,7 +492,7 @@
         commitInput(level);
     }
     
-    @:canResolveNext:: <- resolveQueues[resolveQueues->size-1].queue->size;
+    @:canResolveNext:: <- resolveQueues[resolveQueues->size-1].queue->size != 0;
 
 
     @:commitInput_cursor ::(data => Object, input) {
@@ -992,8 +993,17 @@
                 data.renderableStart.render()
               }
             );            
+            canvas.renderToFramebuffer(
+              id: data.framebufferID,
+              render ::{
+                data.renderableStart.render()
+              }
+            );            
+            commitVisual(data);
           }
+          breakpoint();
           data.phase += 1
+          return false;
         },
         (0): ::<= {
           data.animationFrame = data.renderBefore;
@@ -1610,6 +1620,16 @@
         get ::<- log_
       },
       
+      rollQueue ::{
+        breakpoint();
+        ::? {
+          forever ::{
+            when(!canResolveNext()) send();
+            resolveNext(noCanvas:true, noCommit:true);        
+          }
+        }
+      },
+      
       // Similar to message, but accepts a set of 
       // messages to display
       queueMessageSet::(
@@ -2207,6 +2227,19 @@
               send(message:true);
           }
         }      
+      },
+      
+      // removes a choice window currently in the stack with the name, if it exists
+      // It only removes the first instance of the tag
+      removeTag ::(name) {
+        ::? {
+          for(0, choiceStack->size) ::(i) {
+            when(choiceStack[i].jumpTag != name) empty;
+            removeChoiceStackItem(toRemove: choiceStack[i]);
+            send();
+            
+          }
+        }
       },
 
       // pops all choices in the stack until the tag is hit.

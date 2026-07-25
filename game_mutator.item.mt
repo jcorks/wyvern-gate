@@ -3495,9 +3495,6 @@ none.name = 'None';
   default: ' (*)'     
 };
 
-@:expToNextLevel::(level) {
-  return 100 ** (1 + 0.104*level);
-}
 
 @:recalculateName = ::(state) {  
   when(state.needsAppraisal) 
@@ -3505,8 +3502,10 @@ none.name = 'None';
 
   when (state.customPrefix != '') ::<= {
     state.customName = state.customPrefix + getEnchantTag(state);
-    if (state.improvements > 0) ::<= {
-      state.customName = state.customName +  '+'+(state.improvements);
+    if (state.improvement != empty) {
+      if (state.improvements > 0) ::<= {
+        state.customName = state.customName +  '+'+(state.improvement.improvements);
+      }
     }
   }
 
@@ -3529,8 +3528,10 @@ none.name = 'None';
   else
     baseName + enchantName;
 
-  if (state.improvements > 0) ::<= {
-    state.customName = state.customName +  '+'+(state.improvements);
+  if (state.improvement != empty) {
+    if (state.improvement.improvements > 0) ::<= {
+      state.customName = state.customName +  '+'+(state.improvement.improvements);
+    }
   }
 
 
@@ -3676,6 +3677,10 @@ none.name = 'None';
     SORT_TYPE : {get ::<- SORT_TYPE},
     BUY_PRICE_MULTIPLIER : {get ::<- 0.1},
     SELL_PRICE_MULTIPLIER : {get ::<- 0.05},
+    
+    Improvement : {
+      get ::<- import(:'game_class.item.improvement.mt')
+    }
   },
 
 
@@ -3697,11 +3702,8 @@ none.name = 'None';
     islandTierHint : 0,
     islandIDhint : 'base:normal-island',
     islandExtraLandmarks : empty,
-    improvementsLeft : 0,
-    improvements : 0,
-    improvementEXP : 0,
-    improvementEXPtoNext : 100,
-    improvementStats : empty,
+    improvement : empty,
+
     equipEffects : empty,
     useEffects : empty,
     intuition : 0,
@@ -3790,10 +3792,7 @@ none.name = 'None';
       state.stats.add(stats:base.equipMod);
       state.price = base.basePrice;
       state.price *= 1.05 * state.base.weight;
-      state.improvementsLeft = if (base.id == 'base:none') 0 else random.integer(from:10, to:25);
-      state.improvements = 0;
-      state.improvementEXP = 0;
-      state.improvementStats = StatSet.new();
+
       state.data = {};
       state.needsAppraisal = if (forceNeedsAppraisal != empty) forceNeedsAppraisal
         else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess::<= {
@@ -3808,7 +3807,7 @@ none.name = 'None';
         state.price = 999;
       
       if (base.hasTraits(:TRAIT.HAS_SIZE))   
-        assignSize(*_);
+        assignSize(state);
       foreach(base.equipEffects)::(i, effect) {
         state.equipEffects->push(value:effect);
       }
@@ -3956,7 +3955,7 @@ none.name = 'None';
         }
       }
       base.emit(event:'onCreate', item:this, creationHint);
-      recalculateName(*_);
+      recalculateName(state:_.state);
       state.stats.simplify();
       
       return this;
@@ -4021,8 +4020,21 @@ none.name = 'None';
       
       set ::(value => String)  {
         _.state.customPrefix = value;
-        recalculateName(*_);
+        recalculateName(state:_.state);
       }
+    },
+    
+    improvement : {
+      get :: {
+        if (_.state.improvement == empty)
+          _.state.improvement = Item.Improvement.new(parent:_.this);
+          
+        return _.state.improvement;
+      }
+    },
+    
+    recalculateName ::{
+      recalculateName(state:_.state);
     },
     
     needsAppraisal : {
@@ -4035,6 +4047,8 @@ none.name = 'None';
         _.state.appraisalCount = value
       }
     },
+    
+    
     
     gems : {
       get ::<- if (_.state.inletSlotData == empty) []
@@ -4081,7 +4095,7 @@ none.name = 'None';
         state.stats.add(stats:state.quality.equipMod);
         state.price += (state.price * (state.quality.pricePercentMod/100));
 
-        recalculateName(*_);
+        recalculateName(state:_.state);
       }
     },
       
@@ -4097,10 +4111,12 @@ none.name = 'None';
       get ::{ 
 
         @:state = _.state;
-        if (state.improvementStats == empty) state.improvementStats = StatSet.new();
-        @:a = _.state.improvementStats.clone();
-        a.add(: state.statsBase);
-        return a
+        @:out = StatSet.new();
+        if (state.improvement != empty) {
+          out.add(:state.improvement.stats);
+        }
+        out.add(: state.statsBase);
+        return out
       }
     },
 
@@ -4210,7 +4226,7 @@ none.name = 'None';
       state.enchants->push(value:mod);
       //if (description->contains(key:mod.description) == false)
       //  description = description + mod.description + ' ';
-      recalculateName(*_);
+      recalculateName(state:_.state);
       state.price += mod.price * 1.1**(state.enchants->size);
       state.price = state.price->ceil;
       return true;
@@ -4219,7 +4235,7 @@ none.name = 'None';
     description : {
       get :: {
         @:state = _.state;
-        return calculateDescription(*_);
+        return calculateDescription(this:_.this, state:_.state);
       }
     },
     
@@ -4236,21 +4252,7 @@ none.name = 'None';
       }
     },
     
-    improvementsLeft : {
-      get::<- _.state.improvementsLeft
-    },
 
-    improvements : {
-      get::<- _.state.improvements,
-    },
-    
-    improvementEXP : {
-      get ::<- _.state.improvementEXP
-    },
-    
-    improvementEXPtoNext : {
-      get ::<- _.state.improvementEXPtoNext
-    },
     
     stars : {
       get ::<- getStars(:_.this)
@@ -4260,38 +4262,7 @@ none.name = 'None';
       get ::<- starsToString(:_.this)
     },
     
-    improvementStats : {
-      get :: {
-        @:state = _.state;
-        if (state.improvementStats == empty) state.improvementStats = StatSet.new();
-        return state.improvementStats
-      }
-    },
 
-    improve ::(exp) {
-      @:state = _.state;
-      @:chunk = if (_.state.improvementEXP + exp > _.state.improvementEXPtoNext) 
-        state.improvementEXPtoNext - _.state.improvementEXP
-      else 
-        exp;
-
-      state.improvementEXP += chunk;
-      exp -= chunk;
-      @leveled = false;
-      if (state.improvementEXPtoNext == state.improvementEXP) ::<= {
-        state.improvements += 1;
-        state.improvementsLeft -= 1;
-        if (state.improvementsLeft < 0)
-            state.improvementsLeft = 0;
-        state.improvementEXPtoNext = expToNextLevel(:state.improvements)->floor;
-        state.improvementEXP = 0;
-        leveled = true;
-      }
-      
-      if (leveled)
-        recalculateName(*_);
-      return exp;
-    },
     
     useEffects : {
       get ::<- _.state.useEffects,
@@ -4537,15 +4508,14 @@ none.name = 'None';
       
       return [];
     },
-    
+
+    maxOut ::{
+      _.state.intuition = 20;
+      _.this.improvement.left = 0;
+    },
     
     inletSlotSet : {
       get ::<- _.state.inletSlotData
-    },
-      
-    maxOut ::{
-      _.state.intuition = 20;
-      _.state.improvementsLeft = 0;
     }
   }
 );

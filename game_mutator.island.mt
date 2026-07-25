@@ -947,15 +947,8 @@ Island.database.newEntry(
 
         sound.playBGM(name:'world', loop:true);
 
-        if (windowEvent.canJumpToTag(:jumpTag)) {
-          canvas.freeze();
-          windowEvent.jumpToTag(name:jumpTag, goBeforeTag:true);
-          windowEvent.queueCustom(
-            onEnter ::{
-              canvas.thaw();            
-            }
-          );
-        }
+
+        windowEvent.removeTag(:jumpTag);
 
         
         @enteredChoices = false;
@@ -988,11 +981,6 @@ Island.database.newEntry(
 
         @islandTravel = ::{
           @:startup ::{
-            windowEvent.queueCustom(
-              onEnter ::{
-                if (onReady) onReady();
-              }
-            );
 
           
             windowEvent.queueCursorMove(
@@ -1007,6 +995,10 @@ Island.database.newEntry(
               renderable : {
                 render ::{
                   this.visit();
+                  if (onReady != empty) {
+                    onReady();
+                    onReady = empty;
+                  } 
                   @:hud = import(module:'game_singleton.hud.mt');
                   island.map.render();
                   hud.render(island);
@@ -1161,12 +1153,7 @@ Island.database.newEntry(
       
       // Analog to landmark.visit()
       // Sets this island as the active island and implicitly visits it.
-      //
-      // onLoad is called within the "loading spot" of the transition 
-      //
-      // onReady is called in a queued event RIGHT before 
-      // the cursorMove event for the travel.
-      visit ::(onLoad, onReady, startAnimationRenderable, skipAnimation) {        
+      visit :: {        
         @:world = import(module:'game_singleton.world.mt');
         when (world.island == this) empty;
         world.island = this;
