@@ -318,6 +318,7 @@ return {
       );
       party.inventory.add(:keyother);
 
+  /*
   for(0, 10) ::(i) {
     @:test = Item.new(
       base: Item.database.getRandomFiltered(::(value) <- value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED))
@@ -332,30 +333,31 @@ return {
     );
     party.inventory.add(:test);
   }
+  */
       
 
 
-      /*
-      for(0, 4) ::(i) {
-        @:key = Item.new(
-          base: Item.database.find(id:'base:wyvern-key')
-        );
-        @:name = namegen.island();
-        key.setIslandGenTraits(
-          nameHint:name, 
-          levelHint:story.levelHint,
-          extraLandmarks : [
-            'thechosen:shrine-of-fire'
-          ],
-          tierHint: 0  
-        )  
-        key.name = 'Key of ' + name;
-        party.inventory.add(:key);  
-      }
-      */
+  /*
+  for(0, 4) ::(i) {
+    @:key = Item.new(
+      base: Item.database.find(id:'base:wyvern-key')
+    );
+    @:name = namegen.island();
+    key.setIslandGenTraits(
+      nameHint:name, 
+      levelHint:story.levelHint,
+      extraLandmarks : [
+        'thechosen:shrine-of-fire'
+      ],
+      tierHint: 0  
+    )  
+    key.name = 'Key of ' + name;
+    party.inventory.add(:key);  
+  }
+  */
 
-      
-      // debug
+  
+  // debug
 
 
   /*
@@ -574,7 +576,19 @@ return {
                     town.map.setPointer(x: which.x, y: which.y);
                     which.portal.use(
                       skipAnimation : true,
-                      onReady::{
+                      onLoad::{
+                        ::? {
+                          foreach(world.landmark.locations) ::(k, loc) {
+                            if (loc.base.id == 'base:bed') {
+                              world.landmark.map.setPointer(
+                                x: loc.x,
+                                y: loc.y
+                              );
+                            }
+                          }
+                        }
+                      },
+                      onReady :: {
                         windowEvent.queueCustom(
                           onEnter ::{
                             canvas.thaw();
@@ -1383,7 +1397,12 @@ return {
             }
             @:instance = import(module:'game_singleton.instance.mt');
 
-            location.targetLandmark.visit(onLoad::(landmark)<-location.targetLandmarkEntry);
+            location.targetLandmark.visit()
+            location.targetLandmark.map.setPointer(
+              x: location.targetLandmarkEntry.x,
+              y: location.targetLandmarkEntry.y
+            );
+            location.targetLandmark.travel();
             canvas.clear();          
           }
 
@@ -1494,7 +1513,12 @@ return {
           windowEvent.queueCustom(
             onEnter:: {
               @:instance = import(module:'game_singleton.instance.mt');
-              location.targetLandmark.visit(onLoad::(landmark) <- location.targetLandmarkEntry);
+              location.targetLandmark.visit();
+              location.targetLandmark.map.setPointer(
+                x:location.targetLandmarkEntry.x,
+                y:location.targetLandmarkEntry.y
+              );
+              location.targetLandmark.travel();
             }
           )
         }
@@ -2686,7 +2710,8 @@ return {
       equipEffects : [],
       traits : 
         Item.TRAIT.SHARP  |
-        Item.TRAIT.UNIQUE
+        Item.TRAIT.UNIQUE |
+        Item.TRAIT.STRANGE_TO_EQUIP
       ,
       events : {}
       
@@ -4235,7 +4260,14 @@ return {
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
                 world.loadIsland(key, onDone::(island) {
-                  world.island.visit(atGate:true);
+                  world.island.visit();
+                  @:which = world.island.landmarks->filter(::(value) <- value.base.id == 'base:wyvern-gate');
+                  if (which != empty && which->size > 0)
+                    world.island.map.setPointer(
+                      x: which[0].x,
+                      y: which[0].y
+                    );
+                  world.island.travel();
                   doNext();     
                 });
               }
@@ -4248,7 +4280,14 @@ return {
             @:instance = import(module:'game_singleton.instance.mt');
 
             world.loadIsland(key, onDone::(island) {
-              world.island.visit(atGate:true, onReady:doNext);
+              world.island.visit();
+              @:which = world.island.landmarks->filter(::(value) <- value.base.id == 'base:wyvern-gate');
+              if (which != empty && which->size > 0)
+                world.island.map.setPointer(
+                  x: which[0].x,
+                  y: which[0].y
+                );
+              world.island.travel(onReady:doNext);
             });
           } 
         ]
@@ -4303,8 +4342,15 @@ return {
               onEnter :: {
                 @:instance = import(module:'game_singleton.instance.mt');
                 world.loadIsland(key, onDone::(island) {
-                  world.island.visit(atGate:true, onReady:doNext);
-                  doNext();     
+                  world.island.visit();
+                  @:which = world.island.landmarks->filter(::(value) <- value.base.id == 'base:wyvern-gate');
+                  if (which != empty && which->size > 0)
+                    world.island.map.setPointer(
+                      x: which[0].x,
+                      y: which[0].y
+                    );
+
+                  world.island.travel(onReady:doNext);
                 });
               }
             ); 
@@ -4355,11 +4401,10 @@ return {
             doNext();
           },
           ['', 'Opening the box reveals items inside!'],
-          ['', 'The party receives 125G.'],
           ['', 'The party receives a book on how to fight.'],
           ['', 'The party receives 3 Potions.'],
+          ['', 'The party receives 3 Gems.'],
           ['', 'The party receives a Life Crystal.'],
-          ['', 'The party receives an Arts Crystal.'],
           ['', 'The party receives 4 Escape Stones.'],
           ['', 'The party also receives an equippable Tome.'],
           ['', 'There\'s also a note here...'],
@@ -4368,6 +4413,7 @@ return {
             @:Entity = import(module:'game_class.entity.mt');
             @:someone = world.island.newInhabitant();
             @:someoneElse = world.island.newInhabitant(levelHint:10);
+            /*
             windowEvent.queueMessage(text:
               (random.pickArrayItem(
                 list : [
@@ -4380,6 +4426,7 @@ return {
                 ]
               ))
             );
+            */
 
            windowEvent.queueMessage(text:
             '"Don\'t forget! If you\'re ever in a tight spot, use your Escape Stones. I think you\'ll need them. You can find more at any shop in a town or city, but I\'m sure you already know that."' +
@@ -4387,7 +4434,7 @@ return {
            );
 
 
-            world.party.inventory.addGold(amount:250);
+            world.party.inventory.addGold(amount:80);
             world.party.inventory.add(item: ::<= {
                @:i = Item.new(
                   base:Item.database.find(id:'base:life-crystal'),
@@ -4400,10 +4447,12 @@ return {
             );
             
             
-            for(0, 1)::(i) {
+            for(0, 3)::(i) {
               @:crystal = Item.new(
-                base:Item.database.find(id:'base:arts-crystal')
-              );
+                base:Item.database.find(:"base:inlet-gem"),
+                forceNeedsAppraisal : false
+              )
+
               world.party.inventory.add(item:crystal);
             }
 

@@ -55,8 +55,7 @@
         // theres a chance your former enemy will become a friend.
         everyoneIsAFriend : Boolean,
         
-        
-        
+      
         
         
         

@@ -285,7 +285,7 @@ return ::{
       {input:empty, waitFrames:10}
     ]},
     {nested:true, waitFrames:10},    
-      {text:"When fully charged, an Art's charges can be donated to another Art. This never ends the turn.", topWeight:0.6},
+      {text:"When fully charged, an Art's charges can be donated to another Art. This costs 1 AP, but it never ends the turn.", topWeight:0.6},
     {endNested:true},
     {inputs:[
       {input:windowEvent.CURSOR_ACTIONS.DOWN, waitFrames:20},

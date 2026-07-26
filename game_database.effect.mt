@@ -6276,7 +6276,7 @@ Effect.newEntry(
         windowEvent.queueNestedResolve(
           onEnter ::{
             windowEvent.queueMessage(
-              text: 'The stone raises up in the air before flashing in a bright light.'
+              text: 'A bright light flashes before you.'
             );
 
             windowEvent.queueMessage(

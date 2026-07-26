@@ -581,7 +581,6 @@
   @:level2exp ::(level) {
     @:ct = profession.arts->size*2;
     @:MAX_DEFEATS = 15;
-    @:averageSub = MAX_DEFEATS / ct;
     // y = mx + b
     // y - mx = b
     // m = ((y1 - mx1)-y0) / (-x0)
@@ -620,11 +619,6 @@
 
 @:expUpProfession ::(this, state, profession, exp, silent, onDone) {
   @set = state.professionProgress[profession.id];
-  if (set.level >= profession.arts->size)      
-    exp = 0;
-
-  when(exp == 0) 
-    if (onDone) onDone();
 
 
   @:applyHPbonus ::{
@@ -676,28 +670,23 @@
         onFinish :: {
           
           if (set.expToNext == 0) ::<= {
-            if (set.level%2==0)
-              levelUpProfession(this, state, profession);
-            windowEvent.queueDisplay(
-              lines: [
-                'Level Up!',
-                this.name + ', the ' + profession.name + ' is now Level ' + if (set.level >= profession.arts->size) 'MAX' else set.level,
-                '',
-                if (set.level%2==0)
-                  'Learned: ' + Arts.database.find(:profession.arts[(set.level/2)->floor]).name
-                else 
-                  ''
-              ]
-            )
-            if (set.level%2==0) ::<= {
+            levelUpProfession(this, state, profession);
+            @:lines = [
+              'Level Up!',
+              this.name + ', the ' + profession.name + ' is now Level ' + set.level
+            ];
+            @newArt = set.level%2==0 && profession.arts[(set.level/2)->floor] != empty;
+
+            if (newArt)
+              lines->push(:'Learned: ' + Arts.database.find(:profession.arts[(set.level/2)->floor]).name);
+            
+            windowEvent.queueDisplay(lines);
+            if (newArt) ::<= {
               if (state.equippedProfessionArts->size < MAX_PROFESSION_ART_COUNT) ::<= {
                 @:art = Arts.new(base:Arts.database.find(:profession.arts[(set.level/2)->floor]));
                 art.charge = 0;
                 state.equippedProfessionArts->push(:art);
-                
-                windowEvent.queueMessage(
-                  text: 'The new Art was automatically equipped.'
-                );
+
               }
               windowEvent.queueMessage(
                 text: 'To view this new art, visit the Arts menu for ' + this.name + ' in the party menu.'
@@ -706,21 +695,16 @@
             }
             
             
-            windowEvent.queueMessage(
-              text: this.name + '\'s fortitude increased.'
-            );
+
 
             @:oldStats = StatSet.new();
             oldStats.load(serialized:this.stats.save());
             
             applyHPbonus();
             @:statChoices = [
-              'HP',
-              'AP',
               'ATK',
               'INT',
               'DEF',
-              'LUK',
               'SPD',
               'DEX'
             ];
@@ -734,7 +718,10 @@
 
                 
                 applyStatBonus(:statChoices[choice-1]);
-                
+
+                windowEvent.queueMessage(
+                  text: this.name + '\'s fortitude increased as well.'
+                );                
                 
                 oldStats.printDiff(
                   other:this.stats,
@@ -751,13 +738,13 @@
             if (onDone) onDone();
 
         },
-        onGetCaption       ::<- this.name + ', ' + profession.name + ': Level ' + if (set.level >= profession.arts->size) 'MAX' else set.level,
+        onGetCaption       ::<- this.name + ', ' + profession.name + ': Level ' + set.level,
         onGetSubcaption    ::{
           @amount = (originalExpToNext-(curVal-originalSetExp));
           if (amount < 0) amount = 0; 
-          return if (set.level >= profession.arts->size) '' else 'Exp to next: ' + amount + ' EXP'
+          return 'Exp to next: ' + amount + ' EXP'
         },
-        onGetSubsubcaption ::<- if (set.level >= profession.arts->size) '' else '            +' + (originalExp - (curVal-originalSetExp)),
+        onGetSubsubcaption ::<- '            +' + (originalExp - (curVal-originalSetExp)),
         onGetLeftWeight:: <- 0.5,
         onGetTopWeight:: <- 0.5,
         
@@ -772,7 +759,6 @@
     ::? {
       forever ::{
         when(exp <= 0) send();
-        if (set.level >= profession.arts->size) send();
         
         if (exp >= set.expToNext) ::<= {
           exp -= set.expToNext;
@@ -2580,7 +2566,7 @@
     
     removeAllProfessionArts ::{
       @:state = _.state;
-      state.loadoutTemplates[state.equippedLoadout].professionArts = [];
+      state.equippedProfessionArts = [];
     },
     
     equipAllProfessionArts:: {

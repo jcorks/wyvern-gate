@@ -76,7 +76,6 @@
         
       },
 
-
       // adds a location to trigger portal resolving 
       // once it is done for this location.
       // This makes it so that the "other" portal 
@@ -107,6 +106,14 @@
         @:Landmark = import(module:'game_mutator.landmark.mt');
 
         if (targetLandmark == empty) {
+        
+          // cached, lazily loaded
+          when (state.destinationWorldID > -1) ::<= {
+            targetLandmark = location.landmark.island.findLocation(:state.destinationWorldID).landmark
+          }
+        
+        
+        
           @:landmark = Landmark.new(
             data : location.data.data,
             base : Landmark.database.find(:state.id)
@@ -123,6 +130,7 @@
           startAnimationRenderable : currentLandmark.map,
           skipAnimation, 
           onLoad ::(landmark) { 
+            breakpoint();
             if (state.destinationWorldID == -1) ::<= {
               if (state.chainItems != empty) ::<= {
                 foreach(state.chainItems) ::(k, v) {

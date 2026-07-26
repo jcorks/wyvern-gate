@@ -378,23 +378,8 @@ Quest.database.newEntry(
 
 
 @:generateDefaultReward::(state) {
-  match(state.rank) {
-    (RANK.NONE): ::<= {
-      state.rewardG = random.integer(from:20, to:70);
-      state.rewardItems = [
-        Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- 
-              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
-          ),
-          rngEnchantHint:true, 
-          forceEnchant:true
-        )
-      ]
-    },
-  
-    (RANK.E): ::<= {
+  match(state.rank) {  
+    (RANK.E, RANK.NONE): ::<= {
       state.rewardG = random.integer(from:20, to:70);
       if (random.try(percentSuccess:40)) ::<= {
         state.rewardItems = [
@@ -409,6 +394,14 @@ Quest.database.newEntry(
             forceEnchant:true
           )
         ]
+      } else {
+        state.rewardItems = [
+          Item.new(
+            base:Item.database.find(:"base:inlet-gem"),
+            forceNeedsAppraisal : false
+          )
+        ]
+      
       }
     },
     

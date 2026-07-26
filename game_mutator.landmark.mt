@@ -217,8 +217,8 @@ Landmark.database.newEntry(
     legendName : 'Home Town',
     symbol : '#',
     rarity : 100000,
-    minObjects : 7,
-    maxObjects : 15,
+    minObjects : 4,
+    maxObjects : 6,
     minEvents : 0,
     maxEvents : 3,
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
@@ -980,8 +980,31 @@ Landmark.database.newEntry(
     mapHint: {
     },
     events : {
-      onLoadContent::(landmark) {
-        
+      onLeave::(landmark) {
+        @:name = ::? {
+          foreach(landmark.locations) ::(k, loc) {
+            if (loc.base.id == 'base:person-static')
+              send(:loc.name);
+          }
+        }
+        when(name == empty) empty;
+      
+        foreach(landmark.locations) ::(k, loc) {
+          when (loc.base.id == 'base:portal' && loc.hasPortal) ::<= {
+            @:targetLocation = landmark.island.findLocation(:loc.portal.destinationWorldID);
+            breakpoint();
+            
+            @:items = targetLocation.landmark.map.itemsAt(x:targetLocation.x, y:targetLocation.y);
+            when(items == empty) empty;
+            
+            foreach(items) ::(k, item) {
+              @:location = item.data;
+              when(location.base.id != 'base:sign') empty;
+              location.name = name + '\'s Home';
+              targetLocation.name = name;
+            }
+          }
+        }
       }
     }
     
@@ -1020,7 +1043,7 @@ Landmark.database.newEntry(
     },
     events : {
       onLoadContent::(landmark) {
-        
+
       }
     }
     
@@ -1278,6 +1301,7 @@ Landmark.database.newEntry(
       'onLoadContent',
       'onCreate',
       'onVisit',
+      'onLeave',
       'onIncrementTime',
       'onStep',
       'onAddLocation',
@@ -1859,6 +1883,7 @@ Landmark.database.newEntry(
         }
       },
       
+      
       updateTitle ::(override)  {
         if (override) 
           state.overrideTitle = override;
@@ -2088,6 +2113,7 @@ Landmark.database.newEntry(
       },
       
       leave ::{
+        state.base.emit(event:'onLeave', landmark:this, island:this.island)
         setNearby(:[]);
       },
       

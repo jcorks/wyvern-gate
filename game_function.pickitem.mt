@@ -24,6 +24,7 @@
 // needed to preserve order
 @:tabbedReqKeys = [
   'Usables',
+  'Food',
   'Weapons',
   'Armor / Clothes',
   'Accessories',
@@ -35,6 +36,7 @@
 ]
 @:tabbedReqs = [
   Item.SORT_TYPE.USABLES,
+  Item.SORT_TYPE.FOOD,
   Item.SORT_TYPE.WEAPON,
   Item.SORT_TYPE.ARMOR_CLOTHES,
   Item.SORT_TYPE.ACCESSORIES,

@@ -117,8 +117,8 @@ return {
                   
                   choices: [
                     'Use',
-                    'Donate charge',
-                    'Convert charge to AP'
+                    'Donate charge (costs 1 AP)',
+                    'Convert charge (gain 1 AP)'
                   ],             
                   
                   onChoice::(choice) {
@@ -156,10 +156,18 @@ return {
                         windowEvent.queueMessage(
                           text: 'This art has not charged fully yet!'
                         );
+
+                      when(user.ap < 1)
+                        windowEvent.queueMessage(
+                          text: 'Donating a charge costs 1 AP!'
+                        );
+
+
                       @which = 0;
                       windowEvent.queueMessage(
                         text: 'Pick an Art to donate charge to.'
                       );
+                      
                       
                       Arts.queuePick(
                         arts : user.arts,
@@ -174,6 +182,7 @@ return {
                             
                           other.charge += source.charge;
                           source.charge = 0;
+                          user.ap -= 1;
                           windowEvent.jumpToTag(name:'ARTS_PICK', goBeforeTag:true);
                         } 
                       );

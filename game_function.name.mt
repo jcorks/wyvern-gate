@@ -11,10 +11,11 @@ return ::(
   @name = '';
   
   @:choices = [
-    'A', 'B', 'C', 'D', 'E', 'F', '_',
-    'G', 'H', 'I', 'J', 'L', 'M', 'Del',
-    'N', 'O', 'P', 'Q', 'R', 'S', 'Done',
-    'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 
+    'H', 'I', 'J', 'K', 'L', 'M', 'N',
+    'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+    'V', 'W', 'X', 'Y', 'Z', '_', 'Del',
+    '', '', '', '', '', '', 'Done', 
   ]
 
   
@@ -60,6 +61,8 @@ return ::(
     },
     onChoice ::(choice) {
       @:ch = choices[choice-1];
+      when(ch == '') empty;
+      
       when(ch == '_') ::<= {
         name = name + ' ';
       }

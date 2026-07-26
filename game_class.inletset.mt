@@ -177,6 +177,7 @@
         ::? {
           for(0, state.slots->size) ::(i) {
             when(count == 0) send();
+            when(state.slots[i] == empty) empty;
             when (state.slots[i].inset != empty) empty;             
             count -= 1
             @:inlet = Item.new(
@@ -334,14 +335,7 @@
                     windowEvent.queueMessage(
                       text: 'This gem slot is currently empty.'
                     );
-                    
-                  windowEvent.queueMessage(
-                    text : String.combine(:
-                      (slot.inset.inletGetDescriptionLines())->map(::(value) 
-                        <- value + '\n'
-                      )
-                    )
-                  );
+                  slot.inset.describe();
                 }
                   
               }

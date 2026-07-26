@@ -114,6 +114,7 @@ Location.database.newEntry(data:{
   symbol: '',
   
   interactions : [
+    'base:redecorate',
   ],
   
   aggressiveInteractions : [      
@@ -447,6 +448,7 @@ Location.database.newEntry(data:{
   
   interactions : [
     'base:talk',
+    'base:describe-person',
   ],
   
   aggressiveInteractions : [      
@@ -456,7 +458,9 @@ Location.database.newEntry(data:{
   
   events : {
     onCreate ::(location) {
-      location.ownedBy = location.landmark.island.newInhabitant();
+      location.ownedBy = location.landmark.island.newInhabitant(
+        professionHint: location.data.professionHint
+      );
 
       for(0, 2+(random.number()*4)->ceil)::(i) {
         // no weight, as the value scales
@@ -643,7 +647,6 @@ Location.database.newEntry(data:{
     }
 
 
-    addMissing(id:'base:arts-crystal');
     addMissing(id:'base:pickaxe');
     addMissing(id:'base:smithing-hammer');
     addMissing(id:'base:ingot', minCount:6);
@@ -654,6 +657,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:potion', minCount:5);
     addMissing(id:'base:scroll', minCount:3);
     addMissing(id:'base:inlet-gem', minCount:7);
+    addMissing(id:'base:basic-food', minCount:10);
     addMissing(id:'base:wyvern-flower', minCount:1);
     
     for(location.inventory.items->size, 60 + (location.ownedBy.level / 4)->ceil)::(i) {
@@ -851,16 +855,7 @@ Location.database.newEntry(data:{
 
       @:nameGen = import(module:'game_singleton.namegen.mt');
       @:story = import(module:'game_singleton.story.mt');
-
-
-
-
-      location.inventory.add(item:Item.new(base:Item.database.find(
-        id: 'base:arts-crystal'
-      )));        
-      location.inventory.add(item:Item.new(base:Item.database.find(
-        id: 'base:arts-crystal'
-      )));        
+        
     },    onIncrementTime::(location) {
       @:world = import(module:'game_singleton.world.mt');
       @:Arts = import(:'game_mutator.arts.mt');
@@ -2133,12 +2128,6 @@ Location.database.newEntry(data:{
 
       location.inventory.add(item:
         Item.new(
-          base:Item.database.find(id:'base:perfect-arts-crystal')
-        )
-      );    
-
-      location.inventory.add(item:
-        Item.new(
           base:Item.database.find(id:'base:wyvern-key')
         )
       );    
@@ -2343,7 +2332,7 @@ Location.database.newEntry(data:{
       world.battle.start(
         party:world.party,              
         allies: [...world.party.members],
-        enemies: [location.landmark.island.newHostileCreature(levelHint : location.landmark.island.level/2)],
+        enemies: [location.landmark.island.newHostileCreature(levelHint : location.landmark.island.level-1)],
         landmark: {},
         onEnd::(result) {
           location.data.alreadyWon = true;
@@ -2607,6 +2596,10 @@ Location.database.newEntry(data:{
         get :: {
           return [...state.occupants];
         }
+      },
+      
+      hasPortal : {
+        get::<- state.portal != empty
       },
       
       portal : {

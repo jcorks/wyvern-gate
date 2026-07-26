@@ -86,6 +86,35 @@ Interaction.newEntry(
   }
 )
 
+
+
+Interaction.newEntry(
+  data : {
+    id :  'base:describe-person',
+    name : 'Describe',
+    keepInteractionMenu : false,
+    isAvailable ::(location, party) <- true,
+    interact ::(location, party) {
+      location.ownedBy.describe();
+    }
+  }
+)
+
+
+Interaction.newEntry(
+  data : {
+    id :  'base:redecorate',
+    name : 'Redecorate',
+    keepInteractionMenu : false,
+    isAvailable ::(location, party) <- true,
+    interact ::(location, party) {
+      when (location.base.id != 'base:decoration') empty;
+      location.landmark.data.decorationCh = ' '->setCharCodeAt(index:0, value:random.integer(from:33, to:126)); 
+      location.landmark.map.getItem(:location).symbol = location.landmark.data.decorationCh
+    }
+  }
+)
+
 // D-tier horror. Still love it
 Interaction.newEntry(
   data : {
@@ -1604,26 +1633,41 @@ Interaction.newEntry(
     isAvailable ::(location, party) <- true,
     interact ::(location, party) {
       @:world = import(module:'game_singleton.world.mt');
-      when(location.ownedBy == empty)
+      
+      @seller = location.ownedBy
+      
+      if (seller == empty) {
+        seller = ::? {
+          foreach(location.landmark.locations) ::(k, v) {
+            if (v.base.id == 'base:person-static') {
+              if (v.base.ownedBy.profession.id == 'base:trader') {
+                send(:v.base.ownedBy);
+              }
+            }
+          }
+        }      
+      }
+      
+      when(seller == empty)
         windowEvent.queueMessage(
-          text: "No one is at the shop to sell you anything."
+          text: "No one is here to sell you anything."
         );
         
-      when(location.ownedBy.isIncapacitated())
+      when(seller.isIncapacitated())
         windowEvent.queueMessage(
-          text: location.ownedBy.name + ' is incapacitated and cannot sell you anything.'
+          text: seller.name + ' is incapacitated and cannot sell you anything.'
         );
 
 
-      when (location.peaceful == false && location.ownedBy != empty) ::<= {
+      when (location.peaceful == false && seller != empty) ::<= {
         windowEvent.queueMessage(
-          speaker: location.ownedBy.name,
+          speaker: seller.name,
           text: "You're not welcome here!!"
         );
         world.battle.start(
           party,              
           allies: party.members,
-          enemies: [location.ownedBy],
+          enemies: [seller],
           landmark: {},
           onEnd::(result) {
             @:instance = import(module:'game_singleton.instance.mt');
@@ -1639,11 +1683,14 @@ Interaction.newEntry(
       
       import(:'game_function.buyinventory.mt')(
         inventory:location.inventory,
-        shopkeep: location.ownedBy
+        shopkeep: seller
       );
     }
   }
 )
+
+
+
 
 Interaction.newEntry(
   data : {
@@ -2126,7 +2173,7 @@ Interaction.newEntry(
                   }
                   world.island.travel(startAnimationRenderable:{
                     render::{
-                      canvas.blackout();
+                      canvas.fill();
                     }
                   });
                 }

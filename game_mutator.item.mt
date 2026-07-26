@@ -53,7 +53,8 @@
   KEYS          : 4,
   INLET         : 5,
   MISC          : 6,
-  LOOT          : 7
+  FOOD          : 7,
+  LOOT          : 8
 }
 
 
@@ -288,6 +289,40 @@ Item.database.newEntry(
       TRAIT.KEY_ITEM |
       TRAIT.STACKABLE,
     events : {},
+
+    possibleArts : [],
+  }
+)
+
+
+Item.database.newEntry(
+  data : {
+    name : 'Food',
+    id : 'base:basic-food',
+    description : '',
+    sortType : SORT_TYPE.FOOD,
+    examine : '',
+    equipType : TYPE.HAND,
+    equipMod : StatSet.new(),
+    weight: 20,
+    rarity: 100,
+    levelMinimum : 1,
+    tier: 0,
+    enchantLimit : 0,
+    basePrice: 120,
+    enchantLimit : 0,
+    useTargetHint : USE_TARGET_HINT.ONE,
+    useEffects : [
+      //'base:eat-food'
+    ],
+    equipEffects : [],
+    traits : TRAIT.STRANGE_TO_EQUIP,
+    events : {
+      onCreate::(item) {
+        @:Edible = import(:'game_mutator.item.edible.mt');
+        item.edible = Edible.new(parent:item);
+      }
+    },
 
     possibleArts : [],
   }
@@ -2850,83 +2885,8 @@ Item.database.newEntry(data : {
 
 })
 
-Item.database.newEntry(data : {
-  name : "Perfect Arts Crystal",
-  id : 'base:perfect-arts-crystal',
-  description: "Extremely rare irridescent crystal that imparts knowledge when used. The skills required to make this have been lost to time.",
-  examine : 'Not much else is known about these.',
-  equipType: TYPE.HAND,
-  sortType : SORT_TYPE.USABLES,
-  rarity : 100,
-  weight : 3,
-  tier: 10,
-  enchantLimit : 0,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  basePrice: 3000,
-  possibleArts : [],
-
-  equipMod : StatSet.new(
-    ATK: 10, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:learn-arts-perfect',
-    'base:consume-item'     
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.STACKABLE |
-    TRAIT.UNIQUE |
-    TRAIT.MEANT_TO_BE_USED |
-    TRAIT.STRANGE_TO_EQUIP
-  ,
-  events : {}
-
-})
 
 
-Item.database.newEntry(data : {
-  name : "Arts Crystal",
-  id : 'base:arts-crystal',
-  description: "Irridescent crystal that imparts knowledge when used.",
-  examine : 'Quite sought after, highly skilled mages usually produce them for the public.',
-  equipType: TYPE.HAND,
-  sortType : SORT_TYPE.USABLES,
-  rarity : 100,
-  weight : 3,
-  tier: 0,
-  enchantLimit : 0,
-  levelMinimum : 1,
-  useTargetHint : USE_TARGET_HINT.ONE,
-  basePrice: 600,
-  possibleArts : [],
-
-  equipMod : StatSet.new(
-    ATK: 10, // well. its hard!
-    DEF: 2, // well. its hard!
-    SPD: -10,
-    DEX: -20
-  ),
-  useEffects : [
-    'base:learn-arts',
-    'base:consume-item'     
-  ],
-  equipEffects : [],
-  traits : 
-    TRAIT.SHARP |
-    TRAIT.STACKABLE |
-    TRAIT.UNIQUE |
-    TRAIT.MEANT_TO_BE_USED |  
-    TRAIT.STRANGE_TO_EQUIP
-  ,
-  events : {}
-
-})
-  
 
 
 
@@ -3352,11 +3312,6 @@ Item.database.newEntry(
           random.pickArrayItem(:gemQualifiersMinor) + ' ' +
           random.pickArrayItem(:gemMaterials)
 
-
-
-        
-
-
       }
     }
   }
@@ -3666,6 +3621,7 @@ none.name = 'None';
 
 
 
+@:Edible = import(:'game_mutator.item.edible.mt');
 
 @:Item = databaseItemMutatorClass.createLight(
   name : 'Wyvern.Item',  
@@ -3719,7 +3675,8 @@ none.name = 'None';
     inletData : empty,
     inletSlotData : empty,
     coreDescription : '',
-    forceEnchantCount : -1
+    forceEnchantCount : -1,
+    edible : empty
   },
   
   database : Database.new(
@@ -3949,7 +3906,7 @@ none.name = 'None';
           state.inletSlotData = import(:'game_class.inletset.mt').new(size:slotCount);          
           
           if (random.flipCoin()) {
-            this.fillInletSlots(count:(slotCount/2)->ceil);
+            this.fillInletSlots(count:random.integer(from:1, to:3));
           }
             
         }
@@ -3964,6 +3921,13 @@ none.name = 'None';
     
     setInletSlots::(count) {
       _.state.inletSlotData = import(:'game_class.inletset.mt').new(size:count);  
+    },
+    
+    edible : {
+      get ::<- _.state.edible,
+      set ::(value => Edible.type) {
+        _.state.edible = value;
+      } 
     },
     
     
@@ -4339,7 +4303,7 @@ none.name = 'None';
           this.name + ': Description'
         ],
         set : [
-          this.description + '\n\nValue: ' + starsToString(:this),
+          this.description + '\n\n(Value: ' + starsToString(:this) + ')',
         ]
       );
       
