@@ -313,6 +313,10 @@ Edible.database.newEntry(data : {
         recalculateDescription();
       },
       
+      base : {
+        get ::<- state.base
+      },
+      
       fillingRating : {
         get ::<- state.fillingRating,
         set ::(value) {

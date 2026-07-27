@@ -27,6 +27,8 @@
 
 @:MAX_QUEST_COUNT = 15
 
+@Hunger;
+
 @:Party = LoadableClass.create(
   name: 'Wyvern.Party',
   items : {
@@ -46,6 +48,7 @@
     activeQuests : [],
     completedQuests : [],
     firstEncounter : true,
+    hunger : empty,
     bank : empty,
     steps : 0
   },
@@ -60,6 +63,7 @@
       defaultLoad ::{      
         state.members = [];
         state.inventory = Inventory.new(size:40);
+        state.hunger = Hunger.new(parent:this);
       },
       reset ::{
         state.members = [];
@@ -600,8 +604,15 @@
             member.recharge()
           }
         }
+        @:world = import(module:'game_singleton.world.mt');
+        if (world.scenario.base.ignoreHunger != true) {
+          state.hunger.step();
+        }
       },
       
+      eat ::{
+        state.hunger.eat();
+      },
       
       setGuildTeamName ::(name) {
         state.guildTeamName = name;
@@ -635,4 +646,282 @@
     }
   }
 );
+
+
+// hunger helper class 
+@:HUNGER_LEVELS = [
+  [0.55, 'The party is starting to get hungry.'],
+  [0.4,  'The party is hungry.'],
+  [0.3,  'The party is quite hungry.'],
+  [0.21, 'The party is famished.'],
+  [0.15, 'The party is beginning to starve.'],
+  [0.04, 'The party is starving.'],
+]
+
+Hunger = LoadableClass.create(
+  name : 'Wyvern.Party.Hunger',
+  items : {
+    tummy : 1
+  },
+  
+  define::(this, state) {
+    @party;
+    
+    this.interface = {
+      initialize ::(parent) {
+        party = parent;
+        state.tummy = 0.5;
+      },
+      
+      defaultLoad::(parent) {
+        state.tummy = 0.5;      
+        party = parent;
+      },
+      
+      step ::{
+        @:rateToLevel::(rate) <-
+          ::? {
+            foreach(HUNGER_LEVELS) ::(i, val) {
+              when(rate > val[0]) send(:i)
+            }     
+            return HUNGER_LEVELS->size-1;     
+          }
+        
+        @:before = rateToLevel(:state.tummy);
+        @:after  = rateToLevel(:state.tummy - 0.0001);
+        
+        state.tummy -= 0.0001
+        breakpoint();
+        
+        if (before != after) {
+          windowEvent.queueMessage(
+            text: HUNGER_LEVELS[after][1]
+          );
+        }
+      },
+      
+      eat ::{
+        @:eatThese::(foods) {
+          @totalNutrients = 0;
+          @totalFilling = 0;
+          @:eatNext::() {
+            when(foods->size == 0) ::<= {
+              @:starsToString::(stars) {
+                @out = '';
+                for(0, stars) ::(i) {
+                  if (i%5 == 0 && i > 0)
+                    out = out + ' '  
+                  out = out + '*';
+                }
+                return out;
+              }
+              
+              if (totalNutrients < 0) totalNutrients = 0;
+              if (totalFilling < 1) totalFilling = 1;
+
+              @:RATINGS_FILLING = [
+                [3, 'Not very filling.'],
+                [6, 'Pretty filling.'],
+                [9, 'Very hearty.'],
+                [11, 'MAX']
+              ]
+
+              @:RATINGS_NUTRIENTS = [
+                [3, 'Not very nutritional.'],
+                [6, 'Pretty nutrient-rich.'],
+                [9, 'Very healthy.'],
+                [11, 'MAX']
+              ]
+
+
+              @:nutrientsToRating::<-
+                ::? {
+                  foreach(RATINGS_NUTRIENTS) ::(i, val) {
+                    when(totalNutrients < val[0]) send(:i)
+                  }     
+                  return RATINGS_NUTRIENTS->size-1;     
+                }
+
+              @:fillingToRating::<-
+                ::? {
+                  foreach(RATINGS_FILLING) ::(i, val) {
+                    when(totalFilling < val[0]) send(:i)
+                  }     
+                  return RATINGS_FILLING->size-1;     
+                }
+
+              
+              windowEvent.queueMessage(
+                text: 'The meal is finished.\n\n'+
+                  'Nutrients : ' + RATINGS_NUTRIENTS[nutrientsToRating()][1] + '\n' +
+                  'Filling   : ' + RATINGS_FILLING[fillingToRating()][1]
+              );
+              
+              state.tummy = 0.55 + (totalFilling / 2) * 0.1;
+              if (state.tummy > 1) state.tummy = 1;
+              
+                            
+              party.gainProfessionExp(
+                exp:Entity.PROF_EXP_PER_KNOCKOUT * totalNutrients,
+                onDone ::{
+                  //windowEvent.jumpToTag(name:'EATFOOD', goBeforeTag:true);
+                }
+              )
+              
+              
+              
+              
+            }
+            @:food = foods[0];
+            foods->remove(:0);
+            
+            windowEvent.queueMessage(
+              text: 'The party shared the ' + food.name + '.'
+            );
+            
+            
+            windowEvent.queueMessage(
+              renderable : {
+                render ::{
+                  @iter = 0;
+                  foreach(party.members) ::(k, member) {
+                    @:rating = member.judgeFood(:food);
+                    canvas.renderTextFrameGeneral(
+                      title: member.name,
+                      lines : [
+                        '"' + rating + '"'
+                      ],
+                      maxWidth : canvas.width / party.members->size,
+                      leftWeight: iter * 0.5
+                    );
+                    
+                    iter += 1;
+                  }
+                }
+              },
+              topWeight: 1,
+              text: 'Eating: ' + food.name
+            )
+            totalFilling += food.edible.fillingRating
+            totalNutrients += food.edible.nutrientRating;
+            
+            
+            
+            windowEvent.queueCustom(
+              onEnter::{
+                eatNext();
+              }
+            );
+          }
+          
+          eatNext();
+        }
+        
+        
+        when (state.tummy > HUNGER_LEVELS[0][0]) 
+          windowEvent.queueMessage(
+            text: 'The party is not currently hungry.'
+          )
+        
+        
+        @:foods = party.inventory.items->filter(::(value) <- value.edible != empty);
+        when (foods->size == 0) 
+          windowEvent.queueMessage(
+            text: 'Unfortunately, the party currently has no food...'
+          );
+        
+        @selected = {};
+        @hovered
+        
+        windowEvent.queueChoices(
+          topWeight: 1,
+          maxHeight : 6,
+          keep :true,
+          canCancel : true,
+          jumpTag: 'EATFOOD',
+          renderable : {
+            render ::{
+              if (hovered != empty)
+                canvas.renderTextFrameGeneral(
+                  topWeight: 0.3,
+                  lines : canvas.refitLines(
+                    input:[hovered.description],
+                    maxWidth : canvas.width-7
+                  )
+                );
+
+              canvas.renderTextFrameGeneral(
+                topWeight: 0,
+                lines : [
+                  'Pick up to 3 foods for the party\'s meal.'
+                ]
+              );
+
+              
+            }
+          },
+          onHover ::(choice) {
+            hovered = foods[choice-1];
+          },
+          
+          onGetChoices ::{
+            @list = [];
+            foreach(foods)::(i, food) {
+              list->push(:
+                (if(selected[food] == true) '[x] ' else '[ ] ') + food.name
+              );
+            }
+            
+            list->push(value: 'Done.');
+            return list;
+          },
+          onChoice::(choice) {
+            when (choice == foods->size+1) ::<= {
+              windowEvent.jumpToTag(name: 'EATFOOD', goBeforeTag:true);
+              windowEvent.queueAskBoolean(
+                renderable : {
+                  render ::{
+                    canvas.renderTextFrameGeneral(
+                      topWeight: 0,
+                      lines : canvas.refitLines(input:[
+                        'Have a meal of' + ::<= {
+                          @out = '';
+                          foreach(selected->keys) ::(i, food) {
+                            out = out + ', ' + (if(i == selected->keys->size-1) 'and ' else '') + food.name
+                          }
+                          return out;
+                        } + '?'
+                              
+                      ], maxWidth: canvas.width-5)
+                    )
+                  }
+                },
+                
+                onChoice::(which) {
+                  when(which == false) empty;
+                  eatThese(:selected->keys);
+                }
+              );  
+            } 
+            // toggle
+            if (selected[hovered] == true)
+              selected->remove(:hovered)
+            else {  
+              when (selected->keys->size >= 3) ::<= {
+                windowEvent.queueMessage(
+                  text: 'There\'s already 3 selected! Only up to 3 foods are supported.'
+                )
+              }
+              selected[hovered] = true;
+            }
+              
+          }
+        );
+      }
+    }  
+  }
+);
+
+
+
 return Party;

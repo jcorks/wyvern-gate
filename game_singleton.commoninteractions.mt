@@ -592,6 +592,16 @@ return {
       }
     ),
     
+    eatAMeal : InteractionMenuEntry.new(
+      name : 'Eat a Meal',
+      keepInteractionMenu : false,
+      filter::(island, landmark) <- landmark != empty,
+      select::(island, landmark) {
+        @:world = import(module:'game_singleton.world.mt');
+        world.party.eat();
+      }    
+    ),
+    
     wait : InteractionMenuEntry.new(
       name : 'Wait',
       keepInteractionMenu : false,

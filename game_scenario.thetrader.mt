@@ -3359,6 +3359,8 @@ return {
   ],
   skipName : false,
   everyoneIsAFriend : true,
+  // Whether to disable the hunger mechanic. Foods will still exist.
+  ignoreHunger : false,
 
   interactionsLandmark : [],
   interactionsWalk : [

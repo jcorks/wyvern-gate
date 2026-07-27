@@ -132,7 +132,9 @@ completion:
   
   // List of accolades (achievements) available when beating this scenario.
   accolades : [],
-  
+  // Whether to disable the hunger mechanic. Foods will still exist.
+  ignoreHunger : false,
+
   // Text to display when completing the scenario that summarizes highlights 
   // of data that the player did. For example in "The Chosen" scenario, the 
   // number of knockouts is displayed.

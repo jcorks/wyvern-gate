@@ -55,7 +55,9 @@
         // theres a chance your former enemy will become a friend.
         everyoneIsAFriend : Boolean,
         
-      
+        // Whether to remove the hunger mechanic from the scenario.
+        // Most scenarios keep this to true
+        ignoreHunger : Boolean,  
         
         
         

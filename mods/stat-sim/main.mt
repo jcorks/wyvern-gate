@@ -382,7 +382,11 @@ return {
       
       
       },
-      
+
+      // Whether to disable the hunger mechanic. Foods will still exist.
+      ignoreHunger : false,
+
+
       // List of accolades (achievements) available when beating this scenario.
       accolades : [],
       

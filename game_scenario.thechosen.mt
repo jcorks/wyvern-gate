@@ -1057,6 +1057,7 @@ return {
       world.party.remove(member:entity);    
     }
   },
+  ignoreHunger : false,
   interactionsPerson : interactionsPerson,
   interactionsLocation : [],
   interactionsLandmark : [],
@@ -1065,6 +1066,7 @@ return {
     commonInteractions.walk.party,
     commonInteractions.walk.quests,
     commonInteractions.walk.inventory,
+    commonInteractions.walk.eatAMeal,
     commonInteractions.walk.wait
   ],
   interactionsBattle : [

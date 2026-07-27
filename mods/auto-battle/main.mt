@@ -243,6 +243,8 @@ return {
       // List of general options available, such as quitting the game.
       interactionsOptions : [],
 
+      // Whether to disable the hunger mechanic. Foods will still exist.
+      ignoreHunger : false,
 
       // Function reserved for overriding database options. Good for database 
       // items that are specific to this scenario.

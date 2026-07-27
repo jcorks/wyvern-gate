@@ -970,7 +970,8 @@
     equipArts : empty,
     levelPenalty : 0,
     overrideInteractID : '',
-    supportArts : empty
+    supportArts : empty,
+    judgementFood : empty
   },
   
   private : {
@@ -3523,6 +3524,60 @@
       );    
     },
     
+    judgeFood::(food) {
+      @:state = _.state;
+      @:this = _.this;
+      if (state.judgementFood == empty)
+        state.judgementFood = {};
+      @:ratingToString ::(rating) {
+        when(this.species.hasTraits(:Species.TRAIT.NO_COMMON_SPEAK))
+          '...'
+      
+        when(rating < 0.08) random.pickArrayItem(:[
+          'I really did not like that.',
+        ]);
+
+        when(rating < 0.25) random.pickArrayItem(:[
+          'I didn\'t like it much.',
+        ]);
+
+        when(rating < 0.75) random.pickArrayItem(:[
+          'Well, that was alright.',
+          'That wasn\'t bad at all.',
+          'I quite liked that.',
+          'That was good.',
+          'I\'d have that again.',
+        ]);
+
+        when(rating < 0.25) random.pickArrayItem(:[
+          'That was amazing!',
+          'Wow, that was great!',
+        ]);
+
+
+        return random.pickArrayItem(:[
+          'This might be my favorite food.',
+          'This is SO good.',
+          'I\'m going to scream; this is amazing.',
+        ]);
+
+
+      }
+    
+      
+      @judge = state.judgementFood[food.edible.base.id];
+      when(judge != empty)  
+        judge.string;
+        
+      
+      judge = {
+        rating: random.number()
+      }
+      judge.string = ratingToString(:judge.rating)  
+      state.judgementFood[food.edible.base.id] = judge;
+      
+      return judge.string;
+    },
       
     describe::(excludeStats, showFeelings)  {
       @:state = _.state;
