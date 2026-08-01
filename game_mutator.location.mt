@@ -599,7 +599,8 @@ Location.database.newEntry(data:{
     onPartyEnter ::(location) {
       @:hud = import(:'game_singleton.hud.mt');
       @:item = location.inventory.items[0];
-      if (location.data.hudID == empty)
+      
+      if (item != empty && location.data.hudID == empty)
         location.data.hudID = hud.addDisplay(:[
           'On sale!!!',
           '"' + item.name + '"',
@@ -705,16 +706,14 @@ Location.database.newEntry(data:{
     
     traits : 0,
     events : {
-      onFirstInteract ::(location) {
+      onCreate ::(location) {
         @:Profession = import(module:'game_database.profession.mt');
         location.ownedBy = location.landmark.island.newInhabitant();      
         location.ownedBy.profession = Profession.find(id:'base:trader');
         location.name = 'Shop';
         location.inventory.maxItems = 100;
-
-        @:nameGen = import(module:'game_singleton.namegen.mt');
-        @:story = import(module:'game_singleton.story.mt');
-
+      },
+      onFirstInteract ::(location) {
         restockShop(location);
       },
       onIncrementTime::(location) {
@@ -1551,16 +1550,23 @@ Location.database.newEntry(data:{
   events : {
 
     onCreate ::(location) {
-      @:item = Item.new(
-        base:Item.database.getRandomFiltered(
-          filter:::(value) <- 
-            value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
-            value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
-            value.tier <= location.landmark.island.tier
-        ),
-        rngEnchantHint:true, 
-        forceEnchant:true
-      )
+      @:item = if (random.try(percentSuccess:75))
+        Item.new(
+          base:Item.database.getRandomFiltered(
+            filter:::(value) <- 
+              value.hasNoTrait(:Item.TRAIT.UNIQUE) &&
+              value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS) &&
+              value.tier <= location.landmark.island.tier
+          ),
+          rngEnchantHint:true, 
+          forceEnchant:true
+        )
+      else 
+        Item.new(
+          base:Item.database.find(:'base:inlet-gem')
+        )
+
+
       location.name = item.name;
       location.inventory.add(item:
         item

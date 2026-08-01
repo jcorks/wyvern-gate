@@ -505,7 +505,11 @@ return ::{
                         
 
                         windowEvent.queueChoices(
-                          choices: ['Equip', 'Check', 'Rename', 'Gems...', 'Compare'],
+                          choices:
+                            if (item.inletSlotSet == empty)
+                              ['Equip', 'Check', 'Rename', 'Compare']
+                            else
+                              ['Equip', 'Check', 'Rename', 'Compare', 'Gems...'],
                           prompt: item.name,
                           canCancel: true,
                           leftWeight: 1,
@@ -540,11 +544,8 @@ return ::{
                                 }
                               );
                             }
-                            when(choice == 4) ::<= {
-                              item.inletSlotSet.equip(user:member, item:item);
-                            }
 
-                            when(choice == 5) ::<= {
+                            when(choice == 4) ::<= {
                               @slot = member.getSlotsForItem(item)[0];
                               @currentEquip = member.getEquipped(slot);
                               
@@ -552,6 +553,11 @@ return ::{
                                 prompt: currentEquip.name + ' -> ' + item.name,
                                 other:item.equipMod
                               );                                   
+                            }
+
+
+                            when(choice == 5) ::<= {
+                              item.inletSlotSet.equip(user:member, item:item);
                             }
                           }
                         )

@@ -731,6 +731,8 @@ return {
           topWeight: 0.5,
           leftWeight: 0.5,
           keep:true,
+          disableFrame: true,
+          skipAnimation: true,
           jumpTag: 'ChooseMember',        
           onCancel ::{
             if (p0 != empty) p0 = empty;
@@ -1610,8 +1612,6 @@ return {
           {id: 'base:potion-shop', rarity: 100},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:enchantment-stand', rarity: 35},
-          {id: 'base:small-chest', rarity: 30},
-          {id: 'base:locked-chest', rarity: 40},
 
 
           {id: 'base:healing-circle', rarity:30},
@@ -1669,9 +1669,9 @@ return {
     //          {id: 'Stairs Down', rarity:1},
           {id: 'base:fountain', rarity:18},
           {id: 'base:wyvern-statue', rarity: 15},
-          {id: 'base:small-chest', rarity: 16},
-          {id: 'base:locked-chest', rarity: 12},
-          {id: 'base:magic-chest', rarity: 15},
+          {id: 'base:small-chest', rarity: 36},
+          {id: 'base:locked-chest', rarity: 22},
+          {id: 'base:magic-chest', rarity: 40},
           {id: 'base:healing-circle', rarity:20},
 
           {id: 'base:potion-shop', rarity: 100},
@@ -1728,8 +1728,8 @@ return {
           {id: 'base:fountain', rarity:18},
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
-          {id: 'base:locked-chest', rarity: 11},
-          {id: 'base:magic-chest', rarity: 15},
+          {id: 'base:locked-chest', rarity: 40},
+          {id: 'base:magic-chest', rarity: 60},
 
           {id: 'base:healing-circle', rarity:25},
 
@@ -1739,10 +1739,9 @@ return {
         ],
         requiredObjects : [
           {id: 'thechosen:stairs-down'},
-          {id: 'base:small-chest'},
+          {id: 'base:item'},
           {id: 'base:item'},
 
-          {id: 'base:warp-point'},
           {id: 'base:warp-point'},
           {id: 'base:enchantment-stand'}
         ],
@@ -1793,7 +1792,7 @@ return {
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:wyvern-statue', rarity: 15},
           {id: 'base:small-chest', rarity: 16},
-          {id: 'base:locked-chest', rarity: 11},
+          {id: 'base:locked-chest', rarity: 40},
           {id: 'base:magic-chest', rarity: 15},
 
           {id: 'base:healing-circle', rarity:35},

@@ -605,14 +605,15 @@
     }
     state.professionProgress[profession.id] = set;
   } else ::<= {
-    set.level += 1;
-    set.exp = 0;
-    set.expToNext = level2exp(:set.level);
     if (set.level%2==0) {
       @:nextArt = profession.arts[set.level-1];
       if (nextArt)
         state.professionArts->push(:nextArt);
     }
+    set.level += 1;
+    set.exp = 0;
+    set.expToNext = level2exp(:set.level);
+
   }
   
 }
@@ -814,6 +815,20 @@
       );
     }
   }
+
+  @:world = import(module:'game_singleton.world.mt');
+  if (world.party.isMember(:this)) {
+    @:foodEffect = world.party.getFoodEffectID();
+    if (foodEffect != empty) {
+      items->push(:foodEffect);
+      this.effectStack.add(
+        id:foodEffect,
+        from:this,
+        duration:Arts.A_LOT,
+        noNotify : true
+      );
+    }
+  }
   
   if (items->size > 0 && notify != empty)
     this.notifyEffect(
@@ -833,30 +848,30 @@
   );
 }
 
-@:reportGemChange::(state, this, oldGemArts) {
+@:reportArtsChange::(state, this, oldArts) {
   // remove existing gem arts
   @:oldEq = {};
-  foreach(oldGemArts) ::(k, v) {
+  foreach(oldArts) ::(k, v) {
     oldEq[v] = true;
   }
   
   @:newEq = {}
-  foreach(this.gemArts) ::(k, v) {
+  foreach(this.arts) ::(k, v) {
     newEq[v] = true;
   }
 
-  @:lostEq = oldGemArts->filter(::(value) <- newEq[value] != true);
+  @:lostEq = oldArts->filter(::(value) <- newEq[value] != true);
   if (lostEq->size > 0) 
     windowEvent.queueDisplay(
       lines : [
         this.name + ' no longer has access to these arts :',
-        ...(oldEq->map(::(value) <- ' - ' + Arts.database.find(:value.id).name))
+        ...(lostEq->map(::(value) <- ' - ' + Arts.database.find(:value.id).name))
         
       ]
     );
   
   
-  @:newlyEq = this.gemArts->filter(::(value) <- oldEq[value] != true);
+  @:newlyEq = this.arts->filter(::(value) <- oldEq[value] != true);
   if (newlyEq->size > 0) 
     windowEvent.queueDisplay(
       lines : [
@@ -1261,7 +1276,7 @@
     },
     
     
-    addOpinion ::(fullName, shortName, plural, pastTense, core) {
+    addOpinion ::(fullName, shortName, plural, pastTense, core, affect) {
       @:state = _.state;
       @:this = _.this;
       
@@ -1276,7 +1291,7 @@
           shortName = fullName;      
           
         state.opinions[fullName] = {
-          affect : random.integer(from:0, to:2),
+          affect : if (affect == empty) random.integer(from:0, to:2) else affect,
           shortName : shortName,
           statement : random.float(),
           emotion : random.float(),
@@ -1332,10 +1347,12 @@
         @:all = [];
         foreach(_.state.equips) ::(i, v) {
           when(v == empty) empty;
-          when(v.base.id == 'base:none') empty;      
-          when(v.inletArt == empty) empty;
+          when(v.base.id == 'base:none') empty;    
           
-          all->push(:v.inletArt);
+          foreach(v.gems) ::(k, g) {  
+            when(g.inletArt == empty) empty;
+            all->push(:g.inletArt);
+          }
         }
         return all;
       }
@@ -2169,7 +2186,6 @@
             @:oldHP = state.hp;
             state.hp -= damage.amount;
             if (state.hp < 0) state.hp = 0;
-            if (state.isDead || !alreadyKnockedOut)
               animateDamage(this, from:oldHP, to:state.hp, caption: '' + this.name + ' received ' + damage.amount + ' '+damageTypeName() + 'damage');
           } else ::<= {
             state.ap -= damage.amount;
@@ -2809,7 +2825,11 @@
     },
       
     ap : {
-      set ::(value) <- _.state.ap = value,
+      set ::(value) {
+        if (value < 0)
+          value = 0;
+        _.state.ap = value
+      },
       get :: {
         return _.state.ap;
       }
@@ -2925,7 +2945,7 @@
       @:this = _.this;
       this.recalculateStats();
       @:oldstats = StatSet.new();
-      @:oldGemArts = [...this.gemArts];
+      @oldArts = [...this.arts];
       oldstats.add(stats: this.stats);
 
       @olditem = state.equips[slot];
@@ -2937,10 +2957,11 @@
         error(detail:'Item does not enter the given slot.');
       }
 
-      if (olditem)
-        this.unequipItem(item:olditem, inventory);
+      if (olditem) {
+        this.unequipItem(item:olditem, inventory, silent);
+        oldArts = [...this.arts];
+      }
 
-      @:old = this.unequip(slot, silent:true);        
       this.addOpinion(
         fullName : 'the ' + item.name
       );
@@ -2981,9 +3002,6 @@
       if (inventory)
         inventory.remove(item);
 
-      if (olditem != empty && inventory)
-        inventory.add(item:olditem);
-
       
       this.recalculateStats();
 
@@ -2996,7 +3014,7 @@
         }
         oldstats.printDiff(prompt: '(Equipped: ' + item.name + ')', other:this.stats);
 
-        reportGemChange(state, this, oldGemArts);
+        reportArtsChange(state, this, oldArts);
             
                   
       }
@@ -3039,7 +3057,7 @@
     notifyGemSwap ::(oldGemArts) {
       @:state = _.state;
       @:this = _.this;
-      reportGemChange(this, state, oldGemArts);
+      reportArtsChange(this, state, oldArts:oldGemArts);
 
     },
       
@@ -3049,7 +3067,7 @@
       @:current = state.equips[slot];
       when (current == empty) empty;
       
-      @:oldGemArts = this.gemArts;
+      @:oldArts = this.arts;
       state.equipArts = state.equipArts->filter(::(value) <- value.source != current.worldID);
       state.equips[slot] = empty;        
       
@@ -3067,7 +3085,7 @@
 
 
                 
-      
+      breakpoint();
       if (inventory)
         inventory.add(:current);
 
@@ -3087,7 +3105,7 @@
       
       this.recalculateStats();
       if (silent != true)
-        reportGemChange(this, state, oldGemArts);
+        reportArtsChange(this, state, oldArts);
       return current;
     },
     unequipItem ::(item => Item.type, silent, inventory) {
@@ -3386,7 +3404,7 @@
       @:state = _.state;
       when(_.state.overrideInteractID != '') ::<= {
         @:Interaction = import(module:'game_database.interaction.mt');
-        Interaction.find(:state.overrideInteractID).emit(event:'onInteract', location, party);
+        Interaction.find(:state.overrideInteractID).interact(location, party);
       };
       
       (import(module:'game_function.interactperson.mt'))(
@@ -3563,11 +3581,24 @@
 
 
       }
-    
       
       @judge = state.judgementFood[food.edible.base.id];
-      when(judge != empty)  
-        judge.string;
+      @:opinionate ::{
+        this.addOpinion(
+          fullName: food.edible.base.name,
+          affect: match(true) {
+            (judge.rating <= 0.25): 0,
+            (judge.rating <= 0.75): 1,
+            default: 2
+          }
+        );
+      }
+    
+      
+      when(judge != empty) ::<= {
+        opinionate();
+        return judge.string;
+      }
         
       
       judge = {
@@ -3576,6 +3607,8 @@
       judge.string = ratingToString(:judge.rating)  
       state.judgementFood[food.edible.base.id] = judge;
       
+      
+      opinionate();
       return judge.string;
     },
       

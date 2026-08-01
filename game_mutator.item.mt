@@ -67,6 +67,15 @@
   TRINKET   : 4,
   TWOHANDED : 5
 }
+
+@:TYPE_NAMES = [
+  "L/R Hand",
+  "Armor",
+  "Amulet",
+  "L/R Ring",
+  "Trinket",
+  "Two-handed"
+]
   
 @:TRAIT = {
   BLUNT         : 2 << 0,
@@ -4255,7 +4264,7 @@ none.name = 'None';
           speaker : this.name + '',
           topWeight : 1,
           leftWeight: 0.5,
-          text : 'An inlet gem that, when set in an equipped item, grants an Art. Equip the Art through the Party Arts menu.\n' +
+          text : 'An inlet gem that, when set in an equipped item, grants an Art to use in battle.\n' +
                  'Shape: ' + InletSet.SLOT_NAMES[this.inletShape] + ', Value: ' + starsToString(:this),
           renderable : {
             render ::{
@@ -4277,7 +4286,7 @@ none.name = 'None';
           speaker : this.name + '',
           topWeight : 1,
           leftWeight: 0.5,
-          text : 'An inlet gem that, when set in an equipped item, grants an effect on the holder at the start of battle.\n' +
+          text : 'An inlet gem that, when set in an equipped item, grants an effect to the holder at the start of battle.\n' +
                  'Shape: ' + InletSet.SLOT_NAMES[this.inletShape] + ', Value: ' + starsToString(:this),
 
           renderable : {
@@ -4300,7 +4309,10 @@ none.name = 'None';
       
       windowEvent.queueMessageSet(
         speakers : [
-          this.name + ': Description'
+          this.name + ': (' + (if(this.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) 
+            'Description)' 
+          else 
+            TYPE_NAMES[this.base.equipType]+')')
         ],
         set : [
           this.description + '\n\n(Value: ' + starsToString(:this) + ')',
@@ -4368,20 +4380,29 @@ none.name = 'None';
       if (state.useEffects->filter(::(value) <- value != 'base:fling' && value != 'base:break-item')->size > 0)
         windowEvent.queueReader(
           prompt: this.name + ': Use Effects',
-          lines : [
-
-            
-            if (state.useEffects->size > 0) ::<= {
-              @out = '';
-              when (state.useEffects->keycount == 0) 'None.';
-              foreach(state.useEffects)::(i, effect) {
-                @:eff = Effect.find(id:effect);
-                out = out + ' - ' + eff.name + ': ' + eff.description;
+          lines : canvas.columnsToLines(
+            columns: ::<= {
+              @:out = [[], []];
+              
+              
+              if (state.useEffects->size > 0) ::<= {
+                when (state.useEffects->keycount == 0) 'None.';
+                foreach(state.useEffects)::(i, effect) {
+                  @:eff = Effect.find(id:effect);
+                  
+                  out[0]->push(:eff.name + ': ');
+                  out[1]->push(:eff.description);
+                }
+              } else {
+                out[0][0] = 'None.'
+                out[1][0] = ''
               }
               return out;
-            } else '',
-              
-          ]
+            },
+            leftJustifieds : [true, true],
+            spacing: 1             
+          )
+       
         )
       if ((state.base.traits & Item.TRAIT.STRANGE_TO_EQUIP) == 0) 
         windowEvent.queueReader(

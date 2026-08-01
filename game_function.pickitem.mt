@@ -32,7 +32,7 @@
   'Keys',
   'Misc',
   'Loot',
-  'All',
+  //'All',
 ]
 @:tabbedReqs = [
   Item.SORT_TYPE.USABLES,
@@ -44,7 +44,7 @@
   Item.SORT_TYPE.KEYS,
   Item.SORT_TYPE.MISC,
   Item.SORT_TYPE.LOOT,
-  empty
+  //empty
 ]
 
 
@@ -83,7 +83,6 @@ return ::(
   @items = []
   @picked;
   @cancelled = false;
-    
 
   @:prepTabbedChoices ::(args) {
     if (filter != empty) 
@@ -104,19 +103,19 @@ return ::(
     
     args.onGetMinHeight = ::<- STATIC_HEIGHT + 3;
     args.onGetMinWidth = ::{
-      @:oldFilter = filter;
-      filter = empty;
+      //@:oldFilter = filter;
+      //filter = empty;
       @min = 0;
       @:lists = listGenerator();
       foreach(lists[0]) ::(n, v) {
         @len = 4;
-        for(0, 3) ::(i) {
+        for(0, 2) ::(i) {
           len += lists[i][n]->length + 2;
         }
         if (len > min)
           min = len
       }
-      filter = oldFilter
+      //filter = oldFilter
       return min;
     }
     
@@ -178,31 +177,40 @@ return ::(
       return false;
     });
 
-    names = [...items]->map(to:::(value) <- 
-      if ((alternateNames != empty) && alternateNames[value])
+    names = [...items]->map(to:::(value) <-     
+
+      (if (value.faveMark != '')
+        '[' + value.faveMark + ']'
+      else
+       ''
+      ) +
+
+    
+      (if ((alternateNames != empty) && alternateNames[value])
         alternateNames[value]
       else 
         value.name
-    );
-    
-    @:amounts = items->map(to:::(value) <-
-      if (alreadyCounted[value.name]->type == Number && alreadyCounted[value.name] > 1)
-        '(x'+alreadyCounted[value.name]+')' 
-      else if (value.faveMark != '')
-        ' ' + value.faveMark
-      else
+      ) +
+      
+      (if (alreadyCounted[value.name]->type == Number && alreadyCounted[value.name] > 1)
+        '(x'+alreadyCounted[value.name]+')'
+      else 
         ''
+      )
+      
+
     );
     
+
     when(names->size == 0)
-      [[''], [''], ['']]
+      [[''], ['']]
     
     when(showRarity) ::<={
       @:rarities = items->map(::(value) <-
         value.starsString
       );
 
-      return [names, rarities, amounts];
+      return [names, rarities];
     
     }
     @:prices = items->map(to:::(value) <- 
@@ -212,8 +220,7 @@ return ::(
         gold(:value)
     )
     
-
-    return [names, prices, amounts];
+    return [names, prices];
   }
 
   windowEvent.queueNestedResolve(
@@ -230,7 +237,7 @@ return ::(
         jumpTag: 'pickItem',
         separator: '|',
         onGetFooter : onGetFooter,
-        leftJustified : [true, if(showRarity)true else false, true],
+        leftJustified : [true, if(showRarity)true else false],
         pageAfter: STATIC_HEIGHT+2,
         header : header,
         onCancel::{cancelled = true;},

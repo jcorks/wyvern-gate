@@ -2908,7 +2908,7 @@ Arts.database.newEntry(
     notifCommit : '$1 casts Cleanse on $2!',
     notifFail : Arts.NO_NOTIF,
     targetMode : TARGET_MODE.ONE,
-    description: "Removes all status ailments and most negative effects.",
+    description: "Removes up to 2 negative effects or status ailment.",
     keywords : ['base:ailments'],
     durationTurns: 0,
     kind : KIND.ABILITY,
@@ -2919,12 +2919,28 @@ Arts.database.newEntry(
     baseDamage ::(level, user) {},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {
       @:Effect = import(module:'game_database.effect.mt');
+      @:effects = targets[0].effectStack.getAll()->filter(
+        ::(value) <- 
+          ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
+          ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
+      ) 
+      
+      
+      when(effects->size == 0)
+        windowEvent.queueMessage(:'Cleanse had no effect!');
+
+      @effect0 = random.pickArrayItem(:effects);
+      @effect1;
+      
+      if (effects->size > 1) {
+        effect1 = random.pickArrayItem(:effects->filter(::(value) <- value != effect0));
+      }
+
       windowEvent.queueCustom(
         onEnter :: {
           targets[0].removeEffectsByFilter(
-            ::(value) <- 
-              ((Effect.find(:value.id).traits & Effect.TRAIT.AILMENT) != 0) ||
-              ((Effect.find(:value.id).traits & Effect.TRAIT.DEBUFF) != 0)
+            ::(value) <- value == effect0 ||
+                         value == effect1
           );
         }
       );
@@ -12201,10 +12217,10 @@ Arts.database.newEntry(
     rarity : RARITY.UNCOMMON,
     baseDamage ::(level, user){},
     onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
-      user.addEffect(from:user, id:'base:poisoned', durationTurns:4);
+      targets[0].addEffect(from:user, id:'base:poisoned', durationTurns:4);
       if (random.flipCoin()) ::<= {
-        user.addEffect(from:user, id:'base:berserk', durationTurns:4);
-        user.addEffect(from:user, id:'base:funny-smell', durationTurns:4);
+        targets[0].addEffect(from:user, id:'base:berserk', durationTurns:4);
+        targets[0].addEffect(from:user, id:'base:funny-smell', durationTurns:4);
       }      
     }
   }

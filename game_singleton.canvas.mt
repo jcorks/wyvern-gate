@@ -350,9 +350,16 @@ return class(
         minWidth,
         notchText,
         x,
-        y
-      ) {
-        @:WINDOW_BUFFER = 4;
+        y,
+        bufferVertical,
+        bufferHorizontal,
+        disableFrame
+      ) { 
+        if (bufferVertical   == empty) bufferVertical = 1;
+        if (bufferHorizontal == empty) bufferHorizontal = 1;
+
+        @:WINDOW_BUFFER_HORIZONTAL = 2 + 2*bufferHorizontal;
+        @:WINDOW_BUFFER_VERTICAL   = 2 + 2*bufferVertical;
       
         if (leftWeight == empty) leftWeight = 0.5;
         if (topWeight  == empty) topWeight  = 0.5;
@@ -361,7 +368,7 @@ return class(
         if (maxWidth != empty)
           lines = this.refitLines(
             input:lines, 
-            maxWidth: (CANVAS_WIDTH - WINDOW_BUFFER) * maxWidth
+            maxWidth: (CANVAS_WIDTH - WINDOW_BUFFER_HORIZONTAL) * maxWidth
           );
       
 
@@ -380,26 +387,26 @@ return class(
             width = v->length;
         }
         
-        @left   = if (x != empty) x else ((this.width - (width+WINDOW_BUFFER))*leftWeight)->floor;
-        width   = width + WINDOW_BUFFER;
-        @top    = if (y != empty) y else ((this.height - (lines->keycount + WINDOW_BUFFER)) * topWeight)->floor;
-        @height = lines->keycount + WINDOW_BUFFER;
+        @left   = if (x != empty) x else ((this.width - (width+WINDOW_BUFFER_HORIZONTAL))*leftWeight)->floor;
+        width   = width + WINDOW_BUFFER_HORIZONTAL;
+        @top    = if (y != empty) y else ((this.height - (lines->keycount + WINDOW_BUFFER_VERTICAL)) * topWeight)->floor;
+        @height = lines->keycount + WINDOW_BUFFER_VERTICAL;
         
         if (top < 0) top = 0;
         if (left < 0) left = 0;
         
-        
-        this.renderFrame(top, left, width, height);
+        if (disableFrame != true)
+          this.renderFrame(top, left, width, height);
 
         // render text:
         
         foreach(lines)::(index, line) {
-          this.movePen(x: left+2, y: top+2+index);
+          this.movePen(x: left+1+bufferHorizontal, y: top+1+bufferVertical+index);
           this.drawText(text:line);
         }
 
         if (title != empty && title != '') ::<= {
-          this.movePen(x: left+2, y:top);
+          this.movePen(x: left+1+bufferHorizontal, y:top);
           this.drawText(text:'['+title+']');
         }
 
@@ -648,6 +655,7 @@ return class(
       
       thaw ::{
         frozen -= 1;
+        if (frozen < 0) frozen = 0;
       },
         
       commit ::(renderNow) {

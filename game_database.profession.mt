@@ -207,10 +207,10 @@ Profession.newEntry(data:{
   levelMinimum : 1,
   
   arts : [
-    'base:lunar-blessing',   //X make it night time
     'base:moonbeam',     //X attack enhanced by night time
-    'base:night-veil',     //X +100% Def if in night time
+    'base:lunar-blessing',   //X make it night time
     'base:moonsong',     //X HoT if in night time
+    'base:night-veil',     //X +100% Def if in night time
     'base:call-of-the-night',//X +60% ATK if in night time
     'base:lunacy',       //X Berserk: attacks random enemy instead of turn, +70% ATK and +70% DEF. only usable at night
   ],
@@ -242,10 +242,10 @@ Profession.newEntry(data:{
   levelMinimum : 1,
   
   arts : [
-    'base:solar-blessing', //X make it day time
     'base:sunbeam',    //X attack enhanced by day 
-    'base:dayshroud',    //X +100% Def if in day time   
+    'base:solar-blessing', //X make it day time
     'base:sol-attunement', //X +5% health every turn
+    'base:dayshroud',    //X +100% Def if in day time   
     'base:sunburst',     //X attack enhanced by day 
     'base:phoenix-soul'  //X autorevive once
   ],
@@ -373,11 +373,11 @@ Profession.newEntry(data:{
   levelMinimum : 1,
 
   arts : [
+    'base:counter',      //X auto-attack if hit (10 turns)
     'base:guard',        //X defend 2.0
     'base:proceed-with-caution', //X defense buff for team (10 turns)
     'base:mend',         //X heal other, no AP cost!!!! but weak
     'base:defend-other',     //X Defends another for 4 turns
-    'base:counter',      //X auto-attack if hit (10 turns)
     'base:coordination',     //X stat boost for every other in party with same profession 
     'base:perfect-guard',    //X Nullifies all damage for 3 turns
   ],
@@ -581,8 +581,8 @@ Profession.newEntry(data:{
   levelMinimum : 1,
 
   arts : [
-    'base:scavenge',
     'base:make-heal-potion',
+    'base:scavenge',
     'base:make-buff-potion',   //X -3 ingredient pack, +1 pink potion 
     'base:make-debuff-potion',   //X -3 ingredient pack, +1 cyan ption 
     'base:make-essence',  //X etc (poison)

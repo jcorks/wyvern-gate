@@ -44,7 +44,7 @@ return ::(inventory, shopkeep, onDone) {
     onHover ::(item) {
       hoveredItem = item;
     },
-    header : ['Item', 'Price', ''],
+    header : ['Item', 'Price'],
     onGetFooter ::<- '(Party has: ' + g(:party.inventory.gold)+')',
     
     renderable : {
@@ -87,9 +87,11 @@ return ::(inventory, shopkeep, onDone) {
           canvas.renderTextFrameGeneral(
             title: hoveredItem.name,
             lines: [
-              'Arts:',
+              'Art:',
+              '',
               ...getArtDesc(id1:hoveredItem.inletArt.base.id)
             ],
+            maxWidth: 0.4,
             leftWeight: 0,
             topWeight: 0.5
           )
@@ -102,8 +104,11 @@ return ::(inventory, shopkeep, onDone) {
             title: hoveredItem.name,
             lines: [
               'Effect:',
+              '',
+              Effect.find(:hoveredItem.inletEffect).name,
               Effect.find(:hoveredItem.inletEffect).description
             ],
+            maxWidth: 0.4,
             leftWeight: 0,
             topWeight: 0.5
           )
@@ -151,7 +156,11 @@ return ::(inventory, shopkeep, onDone) {
       
       windowEvent.queueChoices(
         prompt: item.name,
-        choices: ['Buy', 'Check', 'Compare Equipment'],
+        choices: if (item.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) 
+          ['Buy', 'Check', 'Compare Equipment']
+        else        
+          ['Buy', 'Check']
+        ,
         canCancel: true,
         onChoice::(choice) {
           when(choice == 0) empty;

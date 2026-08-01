@@ -489,8 +489,8 @@ Landmark.database.newEntry(
       {id: 'base:fountain', rarity:18},
       {id: 'base:potion-shop', rarity: 25},
       {id: 'base:wyvern-statue', rarity: 20},
-      {id: 'base:small-chest', rarity: 16},
-      {id: 'base:locked-chest', rarity: 11},
+      {id: 'base:small-chest', rarity: 30},
+      {id: 'base:locked-chest', rarity: 40},
       {id: 'base:magic-chest', rarity: 15},
 
       {id: 'base:healing-circle', rarity:35},
@@ -506,7 +506,6 @@ Landmark.database.newEntry(
       {id:'base:item'},
       {id:'base:item'},
       {id:'base:warp-point'},
-      {id:'base:warp-point'}
     ],
     mapHint:{
       layoutType: DungeonMap.LAYOUT_EPSILON
@@ -556,7 +555,8 @@ Landmark.database.newEntry(
       {id: 'base:potion-shop', rarity: 25},
       {id: 'base:wyvern-statue', rarity: 20},
       {id: 'base:locked-chest', rarity: 40},
-      {id: 'base:magic-chest', rarity: 30},
+      {id: 'base:locked-chest', rarity: 40},
+      {id: 'base:magic-chest', rarity: 50},
       {id: 'base:enchantment-stand', rarity: 15},
 
       {id: 'base:healing-circle', rarity:35},
@@ -567,7 +567,6 @@ Landmark.database.newEntry(
     ],
     requiredObjects : [
       {id: 'base:stairs-down'},
-      {id: 'base:locked-chest'},
       {id: 'base:item'},
       {id: 'base:item'},
       {id: 'base:warp-point'}

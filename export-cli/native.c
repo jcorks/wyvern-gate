@@ -430,7 +430,10 @@ static matteValue_t wyvern_gate__native__canvas__thaw(
 ) {
     matteStore_t * store = matte_vm_get_store(vm);
     WyvGateCanvas * cr = (WyvGateCanvas*)userData;
-    cr->freeze -= 1;    
+    cr->freeze -= 1;
+    if (cr->freeze < 0) 
+      cr->freeze = 0;
+          
     return matte_store_new_value(store);
 }
 
@@ -855,12 +858,29 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
     const matteValue_t * args,
     void * userData
 ) {
-    const int WINDOW_BUFFER = 4;
     
     WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
     
+    int bufferHorizontal = 1;
+    int bufferVertical   = 1;
     
+    if (matte_value_type(args[10]) != MATTE_VALUE_TYPE_EMPTY)
+        bufferVertical = matte_value_as_number(store, args[10]);
+
+    if (matte_value_type(args[11]) != MATTE_VALUE_TYPE_EMPTY)
+        bufferHorizontal = matte_value_as_number(store, args[11]);
+
+
+    int WINDOW_BUFFER_HORIZONTAL = 2 + 2*bufferHorizontal;
+    int WINDOW_BUFFER_VERTICAL = 2 + 2*bufferVertical;
+
+    int disableFrame = 0;
+    if (matte_value_type(args[12]) != MATTE_VALUE_TYPE_EMPTY)
+        disableFrame = matte_value_as_boolean(store, args[12]);
+
+
+        
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_OBJECT);
     float topWeight  = matte_value_type(args[2]) == MATTE_VALUE_TYPE_EMPTY ? 0.5 : matte_value_as_number(store, args[2]);
     float leftWeight = matte_value_type(args[3]) == MATTE_VALUE_TYPE_EMPTY ? 0.5 : matte_value_as_number(store, args[3]);
@@ -874,7 +894,7 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
             vm,
             cr,
             args[0],
-            (cr->width - WINDOW_BUFFER) * matte_value_as_number(store, args[4])
+            (cr->width - WINDOW_BUFFER_HORIZONTAL) * matte_value_as_number(store, args[4])
         );
     } else {
         lines = matte_array_create(sizeof(matteString_t*));
@@ -912,28 +932,29 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
     }
     
     
-    int left = hasX ? matte_value_as_number(store, args[8]) : (cr->width - (width + WINDOW_BUFFER)) * leftWeight;
-    width = width + WINDOW_BUFFER;
-    int top = hasY ? matte_value_as_number(store, args[9]) : (cr->height - (lines->size + WINDOW_BUFFER)) * topWeight;
-    int height = lines->size + WINDOW_BUFFER;
+    int left = hasX ? matte_value_as_number(store, args[8]) : (cr->width - (width + WINDOW_BUFFER_HORIZONTAL)) * leftWeight;
+    width = width + WINDOW_BUFFER_HORIZONTAL;
+    int top = hasY ? matte_value_as_number(store, args[9]) : (cr->height - (lines->size + WINDOW_BUFFER_VERTICAL)) * topWeight;
+    int height = lines->size + WINDOW_BUFFER_VERTICAL;
     
     if (top < 0) top = 0;
     if (left < 0) left = 0;
     
-    renderFrame(
-        cr,
-        top, left, width, height
-    );
+    if (disableFrame ==  0)
+        renderFrame(
+            cr,
+            top, left, width, height
+        );
     
     for(i = 0; i < lines->size; ++i) {
-        cr->penx = left+2;
-        cr->peny = top + 2 + i;
+        cr->penx = left+ 1+bufferHorizontal;
+        cr->peny = top + 1+bufferVertical + i;
         
         drawText(cr, matte_array_at(lines, matteString_t *, i));
     }
     
     if (title && matte_string_get_length(title) > 0) {
-        cr->penx = left+2;
+        cr->penx = left+1+bufferHorizontal;
         cr->peny = top;
         matteString_t * titleFull = matte_string_create_from_c_str(
             "[%s]",
@@ -1822,6 +1843,9 @@ static matteValue_t wyvern_gate__native__canvas(
         "notchText",
         "x",
         "y",
+        "bufferVertical",
+        "bufferHorizontal",
+        "disableFrame",
         NULL
     );
 

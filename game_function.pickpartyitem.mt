@@ -29,7 +29,7 @@ return ::(canCancel => Boolean, onPick => Function, keep, onCancel, leftWeight, 
   @:equippedBy = all[1];
   @:altNames = [];
 
-  @:inv = Inventory.new();
+  @:inv = Inventory.new(size:99999);
   foreach(items) ::(i, v) {
       @prefix = '';
       
@@ -37,7 +37,7 @@ return ::(canCancel => Boolean, onPick => Function, keep, onCancel, leftWeight, 
         prefix = equippedBy[i].name + ': ';
       }
       inv.add(:v);
-      altNames[i] = prefix + v.name;
+      altNames[v] = prefix + v.name;
   }
   
   @:pickItem = import(:'game_function.pickitem.mt');

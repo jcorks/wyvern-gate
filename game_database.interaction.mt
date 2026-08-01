@@ -1377,7 +1377,7 @@ Interaction.newEntry(
         showPrices : true,
         //onGetPrompt:: <-  'Sell which? (current: ' + g(g:party.inventory.gold) + ')',
         goldMultiplier: Item.SELL_PRICE_MULTIPLIER,
-        header : ['Item', 'Price', ''],
+        header : ['Item', 'Price'],
         onPick::(item) {
           when(item == empty) empty;
 
@@ -1639,10 +1639,9 @@ Interaction.newEntry(
       if (seller == empty) {
         seller = ::? {
           foreach(location.landmark.locations) ::(k, v) {
-            if (v.base.id == 'base:person-static') {
-              if (v.base.ownedBy.profession.id == 'base:trader') {
-                send(:v.base.ownedBy);
-              }
+            if (v.base.id == 'base:shop') {
+              breakpoint();
+              send(:v.ownedBy);
             }
           }
         }      
@@ -2154,28 +2153,40 @@ Interaction.newEntry(
 
 
             world.loadIsland(key, onDone::(island) {
-              windowEvent.queueCustom(
+              @:gate = world.island.landmarks->filter(::(value) <- value.base.id == 'base:wyvern-gate')[0];
+              when(gate == empty)
+                error(:'Visiting an island in this manner requires a wyvern gate to exist on the target island.');
+              
+              windowEvent.queueNestedResolve(
                 renderable : {
                   render ::<- canvas.fill()
                 },
-                onLeave :: {
-                  world.island.visit();
-                  @:landmarkMaybe = world.island.landmarks->filter(::(value) <- value.base.id == 'base:wyvern-gate');
-                  if (landmarkMaybe->size > 0) {
-                    world.island.map.setPointer(x:landmarkMaybe[0].x, y:landmarkMaybe[0].y);
-                  } else {
-                    if (world.island.landmarks->size > 0) {
-                      world.island.map.setPointer(x:world.island.landmarks[0].x, y:world.island.landmarks[0].y);
-
-                    } else {
-                      error(:'Visiting an island in this manner requires a wyvern gate to exist on the target island.');
+                onEnter ::{
+                
+                  canvas.freeze();
+                  world.island.visit()
+                  world.island.travel(
+                    skipAnimation: true,
+                    onLoad ::{
+                      gate.loadContent()
+                    },
+                    onReady::{
+                      gate.visit();
+                      gate.travel(
+                        startAnimationRenderable : {
+                          render ::<- canvas.fill()
+                        },
+                        onLoad ::(landmark){
+                          canvas.thaw();
+                          @:loc = gate.locations->filter(::(value) <- value.base.id == 'base:gate')[0];
+                          when(loc == empty)
+                            error(:'Visiting a wyvern-gate landmark without a gate location is unsupported when traveling in this manner.');
+                            
+                          gate.map.setPointer(x:loc.x, y:loc.y);
+                        }
+                      )
                     }
-                  }
-                  world.island.travel(startAnimationRenderable:{
-                    render::{
-                      canvas.fill();
-                    }
-                  });
+                  );
                 }
               )
             });

@@ -378,7 +378,7 @@ Island.database.newEntry(
         (1):::<= {
           assignSupportArts(
             entity,
-            professionLevel : 2
+            professionLevel : 3
           );
         },
         
@@ -438,7 +438,7 @@ Island.database.newEntry(
           
           assignSupportArts(
             entity,
-            professionLevel : 4
+            professionLevel : 6
           );
 
         },
@@ -486,7 +486,7 @@ Island.database.newEntry(
 
           assignSupportArts(
             entity,
-            professionLevel : 8,
+            professionLevel : 12,
             removeBasicCount : 4
           );
         }       
@@ -920,7 +920,6 @@ Island.database.newEntry(
           return world_;
         }
       },
-
 
       // enters the travel ui state, bringing the user to the 
       // interactive travel menu for this island.

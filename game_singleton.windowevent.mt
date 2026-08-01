@@ -40,12 +40,15 @@
   FADE_TO_BLACK : 1
 }
 
-@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth) <- 
+@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth, bufferHorizontal, bufferVertical, disableFrame) <- 
     canvas.renderTextFrameGeneral(
       leftWeight, 
       topWeight, 
       maxHeight,
       maxWidth,
+      disableFrame,
+      bufferVertical,
+      bufferHorizontal,
       lines:lines, 
       title:speaker, 
       minWidth,
@@ -53,7 +56,7 @@
 
 
 // Renders a text box using an animation
-@:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText) {
+@:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, bufferVertical, bufferHorizontal, disableFrame) {
   @width = 0;
   @height = lines->size;
   @frames = 0;  
@@ -87,6 +90,9 @@
       topWeight, 
       maxWidth,
       maxHeight,
+      disableFrame,
+      bufferHorizontal,
+      bufferVertical,
       lines:animateLines(), 
       title:speaker, 
       notchText:if(hasNotch != empty) (if (notchText == empty) "(next)" else notchText) else empty)
@@ -696,7 +702,8 @@
 
         if (data.hideWindow != true) ::<= {
           if (data.animationFrame == empty) ::<= {
-            data.renderState = RENDER_STATE.ANIMATING;
+            if (data.skipAnimation != true)
+              data.renderState = RENDER_STATE.ANIMATING;
             data.animationFrame = renderTextAnimation(
               lines: choicesModified,
               speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
@@ -704,8 +711,10 @@
               topWeight,
               maxWidth,
               maxHeight,
+              disableFrame : data.disableFrame,
               hasNotch : if (onGetFooter == empty) empty else true,
-              notchText : if (onGetFooter == empty) empty else onGetFooter() 
+              notchText : if (onGetFooter == empty) empty else onGetFooter(),
+              bufferVertical: if (choices->keycount > PAGE_SIZE || header != empty) 0 else 1
             )
           }      
 
@@ -718,14 +727,15 @@
               topWeight,
               maxWidth,
               maxHeight,
+              disableFrame : data.disableFrame,
               hasNotch : if (onGetFooter == empty) empty else true,
-              notchText : if (onGetFooter == empty) empty else onGetFooter() 
+              notchText : if (onGetFooter == empty) empty else onGetFooter(),
+              bufferVertical: if (choices->keycount > PAGE_SIZE || header != empty) 0 else 1
             )
           }
         }
         data.rendered = empty;
       }
-
 
       renderAction(data);
 
@@ -839,6 +849,7 @@
               ''
             ],
             speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+            disableFrame : data.disableFrame,
             leftWeight,
             topWeight,
             maxWidth,
@@ -1001,7 +1012,6 @@
             );            
             commitVisual(data);
           }
-          breakpoint();
           data.phase += 1
           return false;
         },
@@ -1227,6 +1237,7 @@
         data.animationFrame = renderTextAnimation(
           lines: choicesModified,
           speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+          disableFrame : data.disableFrame,
           leftWeight,
           topWeight,
           maxWidth,
@@ -1240,6 +1251,7 @@
         renderTextSingle(
           lines: choicesModified,
           speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+          disableFrame : data.disableFrame,
           leftWeight,
           topWeight,
           maxWidth,
@@ -1345,9 +1357,11 @@
 
           @:location = renderTextSingle(
             leftWeight: data.leftWeight, 
+            disableFrame : data.disableFrame,
             topWeight: data.topWeight, 
             maxWidth : data.maxWidth,
             maxHeight : data.maxHeight,
+            disableFrame : data.disableFrame,
             lines: progressLines(),
             speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
             //limitLines : data.pageAfter,
@@ -1382,6 +1396,7 @@
         
           renderTextSingle(
             leftWeight: data.leftWeight, 
+            disableFrame : data.disableFrame,
             topWeight: data.topWeight, 
             maxWidth : data.maxWidth,
             maxHeight : data.maxHeight,
@@ -1478,6 +1493,7 @@
           maxWidth : data.maxWidth,
           maxHeight : data.maxHeight,
           minWidth : data.minWidth,
+          disableFrame : data.disableFrame,
           lines: data.lines->subset(from:data.iter, to:end),
           speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
           hasNotch: true,
@@ -1621,7 +1637,6 @@
       },
       
       rollQueue ::{
-        breakpoint();
         ::? {
           forever ::{
             when(!canResolveNext()) send();
@@ -1678,7 +1693,8 @@
           renderable, 
           onLeave,
           setID,
-          autoSkipAfterFrames
+          autoSkipAfterFrames,
+          disableFrame
       ) {
         if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
         // first: split the text.
@@ -1711,6 +1727,7 @@
           pageAfter,
           onLeave,
           setID,
+          disableFrame,
           autoSkipAfterFrames
         );        
       },
@@ -1770,6 +1787,7 @@
         onLeave, 
         skipAnimation,
         setID,
+        disableFrame,
         autoSkipAfterFrames
       ) {
         when(requestAutoSkip) ::<= {
@@ -1802,6 +1820,7 @@
               pageAfter: pageAfter,
               prompt: prompt,
               onLeave: onLeave,
+              disableFrame : disableFrame,
               mode: CHOICE_MODE.DISPLAY,
               renderable: renderable,
               skipAnimation : skipAnimation,
@@ -2119,10 +2138,12 @@
         onCancel, 
         pageAfter, 
         hideWindow,
+        disableFrame,
         horizontalFlow,
         onInput,
         onGetFooter,
-        onFrameRendered
+        onFrameRendered,
+        skipAnimation
       ) {
         pushResolveQueueTop(fns:[::{
           choiceStackPush(value:{
@@ -2139,6 +2160,7 @@
             canCancel: canCancel,
             defaultChoice: defaultChoice,
             hideWindow : hideWindow,
+            disableFrame : disableFrame,
             onChoice: onChoice,
             onHover: onHover,
             onLeave : onLeave,
@@ -2157,6 +2179,7 @@
             onGetChoices : onGetChoices,
             onGetChoicesMatch : onGetChoicesMatch,
             onFrameRendered : onFrameRendered,
+            skipAnimation : skipAnimation,
             framebufferID : canvas.newFramebuffer()
           });
         }]);
@@ -2184,6 +2207,7 @@
         jumpTag, 
         onLeave, 
         onCancel,
+        disableFrame,
         onFrameRendered
       ) {
 
@@ -2206,6 +2230,7 @@
             keep: keep,
             onGetPrompt : onGetPrompt,
             renderable:renderable,
+            disableFrame : disableFrame,
             jumpTag : jumpTag,
             onFrameRendered : onFrameRendered,
             framebufferID : canvas.newFramebuffer()
@@ -2290,6 +2315,7 @@
         onLeave, 
         onKept,
         onCancel,
+        disableFrame,
         onFrameRendered
       ) {
         pushResolveQueueTop(fns:[::{
@@ -2308,6 +2334,7 @@
             onChoice : onChoice,
             onLeave : onLeave,
             keep : keep,
+            disableFrame : disableFrame,
             renderable:renderable,
             onKept : onKept,
             onFrameRendered : onFrameRendered,

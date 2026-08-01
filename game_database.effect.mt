@@ -148,6 +148,46 @@ Effect.newEntry(
 
 Effect.newEntry(
   data : {
+    name : 'Starving',
+    id: 'base:starving',
+    description: 'An insatiable hunger overtakes the affected. -1 AP every turn.',
+    tier : 3,
+    stackable: false,
+    traits : TRAIT.DEBUFF,
+    stats: StatSet.new(),
+    events : {
+      onNextTurn ::(from, item, holder, duration) {        
+        windowEvent.queueMessage(
+          text: holder.name + '\'s hunger slows them down!'
+        );
+        holder.ap -= 1;
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
+    name : 'Satisfied',
+    id: 'base:satisfied',
+    description: 'The affected is very satisfied. +1 AP every turn.',
+    tier : 1,
+    stackable: false,
+    traits : TRAIT.BUFF,
+    stats: StatSet.new(),
+    events : {
+      onNextTurn ::(from, item, holder, duration) {        
+        windowEvent.queueMessage(
+          text: holder.name + ' is feeling satisfied!'
+        );
+        holder.ap += 1;
+      }
+    }
+  }
+)
+
+Effect.newEntry(
+  data : {
     name : 'Brace',
     id: 'base:brace',
     description: 'Reduces incoming damage by 50%.',
@@ -6109,8 +6149,14 @@ Effect.newEntry(
           empty;
           
         @:instance = import(:'game_singleton.instance.mt');
-        world.island.visit(restorePos:true);
         windowEvent.queueMessage(text:'The party teleported out of the area.');
+        windowEvent.queueCustom(
+          onEnter ::{
+            world.island.visit();
+            world.island.travel();
+          }
+        );
+
       }
     }
   }
@@ -6145,7 +6191,7 @@ Effect.newEntry(
             canCancel:true, 
             pageAfter:12,
             showRarity:true,
-            header : ['Item', 'Value', ''],
+            header : ['Item', 'Value'],
             onPick::(item) {
               @:choiceItem = item;
               when(choiceItem == empty) empty;

@@ -611,6 +611,10 @@ foreach(EVENTS) ::(k, v) {
           ]
         });
         
+        @:windowEvent = import(module:'game_singleton.windowevent.mt');
+        when(items->size == 0) 
+          windowEvent.queueMessage(text:'No current Effects active.');
+        
         descriptiveList(
           items,
           canCancel,

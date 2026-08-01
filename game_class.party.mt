@@ -169,7 +169,7 @@
             when(item == empty) empty;
             when(item.base.id == 'base:none') empty;
             
-            when(filter != empty && ! filter(value:item)) empty;
+            when(filter != empty && ! filter(value:item)) empty
 
             items->push(:item);
             equippedBy->push(:member);
@@ -454,13 +454,8 @@
       
       leaveDungeon ::(landmark) {
         state.inDungeon = false;
-        
+        /*
         windowEvent.queueNestedResolve(
-          renderable : {
-            render ::{
-              canvas.fill();
-            }
-          },
           
           onEnter ::{
             windowEvent.queueMessage(
@@ -532,9 +527,9 @@
                 }
               );
             }
-            */
           }
         );
+          */
       },
       
       
@@ -545,7 +540,6 @@
         @:level:: {
           @remainingForLevel = state.guildEXPtoNext - state.guildEXP;
           @val = state.guildEXP;
-          breakpoint();
           animateBar(
             from: state.guildEXP,
             to:   state.guildEXP + exp,
@@ -614,6 +608,13 @@
         state.hunger.eat();
       },
       
+      getFoodEffectID ::{
+        @:world = import(module:'game_singleton.world.mt');
+        when (world.scenario.base.ignoreHunger != true)
+          state.hunger.getFoodEffectID();
+        return empty;
+      },
+      
       setGuildTeamName ::(name) {
         state.guildTeamName = name;
         state.guildRank = 0;
@@ -650,6 +651,7 @@
 
 // hunger helper class 
 @:HUNGER_LEVELS = [
+  [1, 'The party is like. SO full.'],
   [0.55, 'The party is starting to get hungry.'],
   [0.4,  'The party is hungry.'],
   [0.3,  'The party is quite hungry.'],
@@ -678,20 +680,27 @@ Hunger = LoadableClass.create(
         party = parent;
       },
       
+      getFoodEffectID ::{
+        when(state.tummy <= 0.04)  'base:starving';
+        when(state.tummy >= 0.82)  'base:satisfied';
+        return empty;
+      },
+      
       step ::{
         @:rateToLevel::(rate) <-
           ::? {
             foreach(HUNGER_LEVELS) ::(i, val) {
-              when(rate > val[0]) send(:i)
+              when(
+                rate > val[0]
+              ) send(:i)
             }     
             return HUNGER_LEVELS->size-1;     
           }
         
         @:before = rateToLevel(:state.tummy);
-        @:after  = rateToLevel(:state.tummy - 0.0001);
+        @:after  = rateToLevel(:state.tummy - 0.00015);
         
-        state.tummy -= 0.0001
-        breakpoint();
+        state.tummy -= 0.00015
         
         if (before != after) {
           windowEvent.queueMessage(
@@ -759,7 +768,11 @@ Hunger = LoadableClass.create(
               
               state.tummy = 0.55 + (totalFilling / 2) * 0.1;
               if (state.tummy > 1) state.tummy = 1;
-              
+
+              if (state.tummy >= 0.82) 
+                windowEvent.queueMessage(
+                  text: 'The party is very satisfied.'
+                );
                             
               party.gainProfessionExp(
                 exp:Entity.PROF_EXP_PER_KNOCKOUT * totalNutrients,
@@ -773,6 +786,7 @@ Hunger = LoadableClass.create(
               
             }
             @:food = foods[0];
+            party.inventory.remove(:food);
             foods->remove(:0);
             
             windowEvent.queueMessage(
@@ -792,7 +806,7 @@ Hunger = LoadableClass.create(
                         '"' + rating + '"'
                       ],
                       maxWidth : canvas.width / party.members->size,
-                      leftWeight: iter * 0.5
+                      topWeight: iter * 0.25
                     );
                     
                     iter += 1;
@@ -818,7 +832,7 @@ Hunger = LoadableClass.create(
         }
         
         
-        when (state.tummy > HUNGER_LEVELS[0][0]) 
+        when (state.tummy > HUNGER_LEVELS[1][0]) 
           windowEvent.queueMessage(
             text: 'The party is not currently hungry.'
           )
