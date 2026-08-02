@@ -6,7 +6,7 @@
 @:StatSet = import(module:'game_class.statset.mt');
 @:LoadableClass = import(module:'game_singleton.loadableclass.mt');
 
-@:ROOM_MAX_ENTITY = 5;
+@:ROOM_MAX_ENTITY = 1;
 @:REACHED_DISTANCE = 1.5;
 @:AGGRESSIVE_DISTANCE = 5;
 

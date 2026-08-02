@@ -3724,7 +3724,7 @@ none.name = 'None';
   },
   
   interface : {
-    defaultLoad::(base, creationHint, qualityHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, artsHint, forceEnchant, forceEnchantCount, forceNeedsAppraisal) {
+    defaultLoad::(base, creationHint, qualityHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, artsHint, forceEnchant, forceEnchantCount, forceNeedsAppraisal, forceSlotCount) {
       @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
       @:ItemQuality = import(module:'game_database.itemquality.mt');
       @:ItemColor = import(module:'game_database.itemcolor.mt');
@@ -3892,22 +3892,41 @@ none.name = 'None';
       
       
       
-      if (base.hasTraits(:TRAIT.HAS_INLET_SLOTS)) ::<= {
-        @:slotCount = match(tier) {
-          (0):
-            random.pickArrayItem(:[
-              0, 1
-            ]),
-          (1): 
-            random.pickArrayItem(:[
-              0, 0, 1, 1, 1, 2, 3
-            ]),
-            
-          (2): random.integer(from:0, to:4),
-          (3): random.integer(from:1, to:4),
-          default: random.integer(from:3, to:4)
-        }
-        
+      if (forceSlotCount != empty || base.hasTraits(:TRAIT.HAS_INLET_SLOTS)) ::<= {
+        @:slotCount = if (forceSlotCount) forceSlotCount => Number 
+          else if (base.equipType == TYPE.HAND ||
+                base.equipType == TYPE.ARMOR ||
+                base.equipType == TYPE.TWOHANDED) 
+            (match(tier) {
+              (0):
+                random.pickArrayItem(:[
+                  0, 1
+                ]),
+              (1): 
+                random.pickArrayItem(:[
+                  0, 0, 1, 1, 1, 2, 3
+                ]),
+                
+              (2): random.integer(from:0, to:4),
+              (3): random.integer(from:1, to:5),
+              default: random.integer(from:2, to:6)
+            })
+          else match(tier) {
+            (0):
+              random.pickArrayItem(:[
+                0, 1
+              ]),
+            (1, 2):
+              random.pickArrayItem(:[
+                0, 0, 1, 1, 1, 2, 2
+              ]),
+            default:
+              random.pickArrayItem(:[
+                0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 4
+              ]);
+          }
+        ;
+              
         
         
         if (slotCount > 0) ::<= {
@@ -3915,7 +3934,7 @@ none.name = 'None';
           state.inletSlotData = import(:'game_class.inletset.mt').new(size:slotCount);          
           
           if (random.flipCoin()) {
-            this.fillInletSlots(count:random.integer(from:1, to:3));
+            this.fillInletSlots(count:random.pickArrayItem(:[1, 1, 1, 1, 1, 1, 1, 2]));
           }
             
         }

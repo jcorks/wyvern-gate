@@ -3054,10 +3054,10 @@
     },
     
     // used by inlet set to notify of a gem swap rather than unequipping and reequipping the item
-    notifyGemSwap ::(oldGemArts) {
+    checkNotifyArtsChange ::(oldArts) {
       @:state = _.state;
       @:this = _.this;
-      reportArtsChange(this, state, oldArts:oldGemArts);
+      reportArtsChange(this, state, oldArts);
 
     },
       

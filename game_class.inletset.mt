@@ -251,7 +251,7 @@
                   // equip
                   when(choice == 1) ::<= {
                     @:old = slot.inset;
-                    @:oldGemArts = user.gemArts
+                    @:oldArts = [...user.arts]
                     if (slot.inset)
                       inv.add(:slot.inset);
                     inv.remove(:item);
@@ -263,7 +263,7 @@
                     );
 
                     if (user.hasEquipped(:onItem)) {
-                      user.notifyGemSwap(oldGemArts);
+                      user.checkNotifyArtsChange(oldArts);
                       user.recalculateStats();
                     }                
                   }
@@ -312,20 +312,21 @@
                   this.renderSlotInfo(:slot);
                 }
               },  
-              choices : ['Swap', 'Remove', 'Check'],
+              choices : ['Swap', 'Take Out', 'Check'],
               onChoice ::(choice) {
                 when(choice == 1) equipInlet(slot);
                 
 
                 when (choice == 2) ::<= {
-                 @:oldGemArts = user.gemArts
+                 @:oldArts = user.arts
      
                   if (slot.inset)
                     inv.add(:slot.inset);
                   slot.inset = empty;
-                  if (user.hasEquipped(:item))
+                  if (user.hasEquipped(:item)) ::<= {
                     user.recalculateStats();
-                  user.notifyGemSwap(oldGemArts);
+                    user.checkNotifyArtsChange(oldArts);
+                  }
                 }
 
                 

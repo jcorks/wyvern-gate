@@ -920,6 +920,42 @@ Island.database.newEntry(
           return world_;
         }
       },
+      
+      // Combines island.travel and landmark.travel in one seamless operation
+      // The mechanics of the arguments follow travel()
+      travelIntoLandmark::(landmark, onLoad, onReady, startAnimationRenderable) {
+        if (startAnimationRenderable == empty)
+          startAnimationRenderable = {
+            render ::<- canvas.fill()
+          }
+
+        windowEvent.queueCustom(
+          renderable : startAnimationRenderable,
+          onLeave ::{
+            canvas.freeze();
+            this.travel(
+              skipAnimation: true,
+              onLoad ::{
+                landmark.loadContent()
+              },
+              onReady::{
+                landmark.visit();
+                landmark.travel(
+                  startAnimationRenderable,
+                  onLoad ::(landmark){
+                    canvas.thaw();
+                    if (onLoad) onLoad();
+                  },
+                  
+                  onReady
+                )
+              }
+            );
+
+          }
+        )       
+        windowEvent.forceResolveNext();
+      },
 
       // enters the travel ui state, bringing the user to the 
       // interactive travel menu for this island.
@@ -972,9 +1008,6 @@ Island.database.newEntry(
           }
           landmark.visit();              
           landmark.travel();
-          if (windowEvent.canJumpToTag(name:'LandmarkInteraction')) ::<= {
-            windowEvent.jumpToTag(name:'LandmarkInteraction', goBeforeTag:true, doResolveNext:true);
-          }                       
         }
 
 

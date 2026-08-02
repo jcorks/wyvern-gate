@@ -901,7 +901,7 @@ Hunger = LoadableClass.create(
                         'Have a meal of' + ::<= {
                           @out = '';
                           foreach(selected->keys) ::(i, food) {
-                            out = out + ', ' + (if(i == selected->keys->size-1) 'and ' else '') + food.name
+                            out = out + (if(i == 0) ' ' else ', ') + (if(i == selected->keys->size-1) 'and ' else '') + food.name
                           }
                           return out;
                         } + '?'

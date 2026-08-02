@@ -843,11 +843,12 @@ return {
         });  
       }
 
-
-      world.island.travel();       
-      if (world.landmark) ::<= {
-        world.landmark.travel();
-      }       
+      world.island.visit()
+      if (world.landmark == empty)
+        world.island.travel()     
+      else ::<= {
+        world.island.travelIntoLandmark(landmark:world.landmark);     
+      }
       
       
       
@@ -3318,7 +3319,8 @@ return {
                           ),
                           rngEnchantHint:true, 
                           colorHint:'base:red', 
-                          materialHint: 'base:gold'
+                          materialHint: 'base:gold',
+                          forceSlotCount: 2
                         );
                         item.enchantLimit = 10;
                         @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
@@ -3572,7 +3574,8 @@ return {
                             rngEnchantHint:true, 
                             colorHint:'base:blue', 
                             materialHint:'base:mythril', 
-                            qualityHint:'base:masterwork'
+                            qualityHint:'base:masterwork',
+                            forceSlotCount: 3
                           );
                           @:ItemEnchant = import(module:'game_mutator.itemenchant.mt');
                           prize.enchantLimit = 12;

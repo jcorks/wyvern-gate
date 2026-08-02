@@ -2157,38 +2157,21 @@ Interaction.newEntry(
               when(gate == empty)
                 error(:'Visiting an island in this manner requires a wyvern gate to exist on the target island.');
               
-              windowEvent.queueNestedResolve(
-                renderable : {
-                  render ::<- canvas.fill()
+              
+              world.island.travelIntoLandmark(
+                landmark:gate,
+                onLoad ::{
+                  gate.loadContent();
+                  @:loc = gate.locations->filter(::(value) <- value.base.id == 'base:gate')[0];
+                  when(loc == empty)
+                    error(:'Visiting a wyvern-gate landmark without a gate location is unsupported when traveling in this manner.');
+                    
+                  gate.map.setPointer(x:loc.x, y:loc.y);
                 },
-                onEnter ::{
                 
-                  canvas.freeze();
-                  world.island.visit()
-                  world.island.travel(
-                    skipAnimation: true,
-                    onLoad ::{
-                      gate.loadContent()
-                    },
-                    onReady::{
-                      gate.visit();
-                      gate.travel(
-                        startAnimationRenderable : {
-                          render ::<- canvas.fill()
-                        },
-                        onLoad ::(landmark){
-                          canvas.thaw();
-                          @:loc = gate.locations->filter(::(value) <- value.base.id == 'base:gate')[0];
-                          when(loc == empty)
-                            error(:'Visiting a wyvern-gate landmark without a gate location is unsupported when traveling in this manner.');
-                            
-                          gate.map.setPointer(x:loc.x, y:loc.y);
-                        }
-                      )
-                    }
-                  );
+                onReady ::{
                 }
-              )
+              );
             });
           });
         }
@@ -3544,6 +3527,14 @@ Interaction.newEntry(
               }
             }
           )
+          
+          foreach(party.members) ::(k, v) {
+            v.heal(amount:v.stats.HP);
+          }
+          
+          windowEvent.queueMessage(
+            text: 'The party feels refreshed.'
+          );
         }
       );
     }

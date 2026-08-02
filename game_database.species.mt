@@ -1967,7 +1967,7 @@ Species.newEntry(data:{
 
   
   baseStats : StatSet.new(
-    HP:   99,
+    HP:   66,
     AP:   99,
     ATK:  30,
     INT:  1,
@@ -2090,7 +2090,7 @@ Species.newEntry(data:{
 
   
   baseStats : StatSet.new(
-    HP:   100,
+    HP:   70,
     AP:   2,
     ATK:  4,
     INT:  5,

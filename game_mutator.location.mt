@@ -555,7 +555,26 @@ Location.database.newEntry(data:{
 
 })
 
-
+::<= {
+@:restock = ::(location){
+  location.inventory.clear();
+  location.data.discount = random.integer(from:20, to:50);
+  location.inventory.add(item:
+    Item.new(
+      base:Item.database.getRandomFiltered(
+        filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) /*&&
+                  location.ownedBy.level >= value.levelMinimum
+                  && value.tier <= location.landmark.island.tier*/ 
+                  // specials are wild.
+      ),
+      forceNeedsAppraisal : false,
+      rngEnchantHint:true
+    )
+  );
+  @:item = location.inventory.items[0];
+  location.data.originalPrice = (Item.BUY_PRICE_MULTIPLIER* item.price)->floor
+  location.data.discountPrice = (Item.BUY_PRICE_MULTIPLIER * item.price * (1 - 0.01*location.data.discount))->floor
+}
 Location.database.newEntry(data:{
   id: 'base:shop-special',
   name: 'Special!',
@@ -578,22 +597,14 @@ Location.database.newEntry(data:{
   
   events : {
     onCreate ::(location) {
-      location.data.discount = random.integer(from:20, to:50);
-      location.inventory.add(item:
-        Item.new(
-          base:Item.database.getRandomFiltered(
-            filter:::(value) <- value.hasNoTrait(:Item.TRAIT.UNIQUE) /*&&
-                      location.ownedBy.level >= value.levelMinimum
-                      && value.tier <= location.landmark.island.tier*/ 
-                      // specials are wild.
-          ),
-          forceNeedsAppraisal : false,
-          rngEnchantHint:true
-        )
-      );
-      @:item = location.inventory.items[0];
-      location.data.originalPrice = (Item.BUY_PRICE_MULTIPLIER* item.price)->floor
-      location.data.discountPrice = (Item.BUY_PRICE_MULTIPLIER * item.price * (1 - 0.01*location.data.discount))->floor
+      restock(location);
+    },
+    onIncrementTime::(location) {
+      @:world = import(module:'game_singleton.world.mt');
+      if (world.time == world.TIME.MIDNIGHT) ::<= {
+        @:items = random.scrambled(:location.inventory.items);
+        restock(location);
+      }
     },
   
     onPartyEnter ::(location) {
@@ -620,7 +631,7 @@ Location.database.newEntry(data:{
   
 
 })
-
+}
 
 
 
@@ -675,6 +686,8 @@ Location.database.newEntry(data:{
         )
       );
     }  
+    
+    location.data.shopkeepRestocked = true;
   }
 
   Location.database.newEntry(data:{
@@ -716,6 +729,18 @@ Location.database.newEntry(data:{
       onFirstInteract ::(location) {
         restockShop(location);
       },
+
+      onInteract ::(location) {
+        if (location.data.shopkeepRestocked == true) {
+          location.data.shopkeepRestocked = false;
+          
+          windowEvent.queueMessage(
+            text: '"We have new items in stock."',
+            speaker: location.ownedBy.name
+          );
+        }
+      },
+
       onIncrementTime::(location) {
         @:world = import(module:'game_singleton.world.mt');
         if (world.time == world.TIME.MIDNIGHT) ::<= {
