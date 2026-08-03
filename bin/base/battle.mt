@@ -1,0 +1,1163 @@
+/*
+  Wyvern Gate, a procedural, console-based RPG
+  Copyright (C) 2023, Johnathan Corkery (jcorkery@umich.edu)
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+@:class = import(module:'Matte.Core.Class');
+@:windowEvent = import(module:'core/windowevent.mt');
+@:canvas = import(module:'core/graphics/canvas.mt');
+@:StatSet = import(module:'base/util/statset.mt');
+@:battlemenu = import(module:'base/widgets/battlemenu.mt');
+@:random = import(module:'core/random.mt');
+@:Party = import(module:'base/party.mt');
+@:correctA = import(module:'base/util/correcta.mt');
+@:StateFlags = import(module:'base/entity/stateflags.mt');
+@:Arts = import(module:'base/arts.mt');
+@:g = import(module:'base/util/g.mt');
+@:Entity = import(module:'base/entity.mt');
+@:displayHP = import(:'base/util/displayhp.mt');
+@:AP_COST = 2;
+
+
+
+
+@:battleLoot ::(rngLoot, defeated, landmark, party, finishEnd) {
+
+  @:Item = import(module:'base/item.mt');
+
+
+  @:forcedAcquisition = [];
+  foreach(defeated) ::(k, enemy) {
+    @:inv = enemy.forceDrop;
+    if (inv != empty)
+      forcedAcquisition->push(value:inv);
+  }
+
+  foreach(forcedAcquisition) ::(i, inv) {
+    foreach(inv.items) ::(n, item) {
+      windowEvent.queueMessage(text: 'The party acquired ' + correctA(word:item.name) + '.');
+      party.inventory.add(item);
+    }
+    if (inv.gold > 0) ::<= {
+      windowEvent.queueMessage(text: 'The party acquired ' + g(g:inv.gold) + '.');
+      party.addGoldAnimated(
+        amount:inv.gold,
+        onDone::{}
+      );
+    }
+  }
+    
+    
+    
+    
+    
+  windowEvent.queueCustom(
+    onEnter ::{},
+    onLeave ::{
+      finishEnd();      
+    }
+  );
+
+}
+
+
+@:Battle = class(
+
+  define:::(this) {  
+    // array of arrays of entities 
+    // each group is a set of allies. all other group members are 
+    // potential enemies  
+    @groups;
+    @ent2group;
+    @group2party;
+    @winningGroup;
+    
+    @:enemyAIs = [];
+    @onEnemyTurn_;
+    @onAllyTurn_;
+    @landmark_;
+    @active = false;
+    @ended;
+    @entityTurn;
+    @onTurn_;
+    @onAct_;
+    @defeated;
+    @backgroundID;
+    @onFinish = [];
+    @queuedCallbacks = [];
+    @banished = [];
+    @storage = {};
+    
+  
+    // some actions last multiple turns.
+    // indexed by Entity.
+    @actions = {} 
+    @turn = [];
+    @turnIndex = 0;
+    @redraw;
+    @party_;
+    @turnPoppable = [];
+    @turnCount = 0;
+    
+    @result;
+    @externalRenderable;
+    @battleEnd;
+    @onEnd_;
+    @lastNext;
+    @onTurnPrep_;
+    
+    @:requestRedrawBG ::{
+      if (!windowEvent.invalidateCache(:'VisitLandmark')) 
+        windowEvent.invalidateCache(:'VisitIsland');    
+      windowEvent.invalidateCache(:'Battle');
+    }
+    
+    @:getAllies::(ent) {
+      @:v = ent2group[ent];
+      when(v == empty) [];
+      return [...v];
+    }
+
+    @:finishEnd :: {
+      breakpoint();
+      groups = [];
+      onEnd_(result);      
+      foreach(onFinish) ::(k, v) {
+        v(:result);
+      }      
+      storage = {};
+      onFinish = [];        
+    }
+
+    @:getEnemies::(ent) {   
+      @:out = [];
+      foreach(groups->filter(by::(value) <- value->findIndex(value:ent) == -1)) ::(k, group) {
+        foreach(group) ::(i, ent) {
+          out->push(value:ent);
+        }
+      }   
+      return out;
+    }
+    
+    @:getAll::{
+      @:out = {};
+      foreach(groups) ::(k, v) {
+        foreach(v) ::(k, m) {
+          out->push(:m);
+        }
+      }
+      return out;
+    }
+
+    // defeated enemies were removed from their active groups
+    //
+    @:getEnemiesDefeated::(ent) {
+      when(winningGroup == empty)
+        error(detail:'This can only be called upon a team winning');
+      @:out = getEnemies(ent);
+      foreach(defeated->keys) ::(k, enemy) {
+        if (ent2group[enemy] != ent2group[ent])
+          out->push(value:enemy);
+      }
+      return out;
+    }
+
+    
+    @:checkRemove :: {
+      // see if anyone died
+      @removed = [];
+      foreach(turn)::(index, entity) {          
+        when(entity.isDead == false && entity.requestsRemove == false) empty;
+        if (group2party[ent2group[entity]] && entity.isDead) ::<= {
+          @:world = import(module:'base/world.mt')
+          world.scenario.emit(event:'onDeath', entity);
+        }
+        @:group  = ent2group[entity];
+        entity.battleEnd();
+        
+        @index = group->findIndex(value:entity);
+        if (index != -1) ::<= {
+          defeated[group[index]] = true;
+          group->remove(key:index);
+        }
+        if (group->size == 0)
+          groups->remove(key:groups->findIndex(value:group));
+
+        index = turnPoppable->findIndex(value:entity);
+        if (index != -1) turnPoppable->remove(key:index);
+        removed->push(value:entity);
+      }
+      
+      foreach(removed) ::(i, ent) {
+        @:ind = turn->findIndex(value:ent);
+        if (ind != -1)
+          turn->remove(key:ind);
+      }
+                
+    }
+    
+    @:endTurn ::{
+      entityTurn.endTurn(battle:this);
+      turnIndex+=1;
+      checkRemove();  
+      if (turnPoppable->keycount == 0) ::<= {    
+
+
+        winningGroup = empty;
+        @everyoneWipedOut = true;
+        ::? {
+          foreach(groups) ::(k, group) {
+            @groupAlive = ::? {
+              foreach(group) ::(i, entity) {
+                if (!entity.isIncapacitated())
+                  send(message:true);
+              }
+              return false;
+            }
+            
+            
+            
+            if (groupAlive) ::<= {
+              everyoneWipedOut = false;
+            
+              if (winningGroup == empty)
+                winningGroup = group
+              // more than one group still alive, no winning team.
+              else ::<= {
+                winningGroup = empty;
+                send();
+              }
+            }
+          }
+        }
+
+
+        
+        if (winningGroup != empty || everyoneWipedOut) ::<= {
+          ended = true;
+          foreach(groups) ::(k, group) {
+            foreach(group) ::(i, ent) {
+              ent.battleEnd();
+            }
+          }          
+        }     
+      }
+      windowEvent.queueCustom(
+        onEnter ::{
+          windowEvent.jumpToTag(
+            name:'Battle'
+          )
+        }
+      );
+    }
+    
+    @:nextTurn ::{
+    
+      when (turnPoppable->keycount == 0) empty;
+      if (onTurnPrep_) onTurnPrep_();
+      
+      @:next = :: {
+
+        // from a battle cancel
+        when (ended) empty;
+
+        @:ent = turnPoppable[0];
+        turnPoppable->remove(key:0);
+        entityTurn = ent;
+
+        @:world = import(module:'base/world.mt');
+        for(0, 6) ::{
+          world.incrementTime(isStep:true);
+        }
+
+        
+        // act turn can signal to not act
+        when(!ent.actTurn()) ::<={
+          endTurn();
+        }
+
+        // may have died this turn.
+        when (!ent.canActThisTurn()) ::<={
+          endTurn();
+        }
+        requestRedrawBG();
+        windowEvent.queueMessage(
+          text: 'It is now ' + ent.name + '\'s turn.'
+        );
+        
+        // multi turn actions
+        if (actions[ent]) ::<= {
+          @:action = actions[ent];
+          action.turnIndex += 1;
+          
+          
+          this.entityCommitAction(action:actions[ent]);
+          
+        } else ::<= {
+          // normal turn: request action from the act function
+          // given by the caller
+          @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
+          if (onTurn_) onTurn_(battle:this, entity:ent, landmark:landmark_);
+          act(
+            battle:this,
+            user:ent,
+            landmark:landmark_
+          );
+        }        
+        if (onAct_) onAct_();
+      }
+      
+      lastNext = next;
+
+      
+      windowEvent.queueNestedResolve(
+        onEnter : next 
+      );
+    }
+    
+    @:initTurn ::{
+      when(ended) empty;
+      
+      if (windowEvent.log != empty)
+        windowEvent.log->push(:'-- TURN ' + (turnCount+1) + ' --');
+      
+      turnCount+=1;
+      
+      // first reset stats according to current effects 
+      foreach(turn)::(index, entity) {
+        entity.startTurn();
+      }
+
+      // then handle initial callbacks if any 
+      foreach(queuedCallbacks) ::(k, v) {
+        v.nTurns -= 1;
+        when (v.nTurns > 0) empty;
+        v.fn();
+        queuedCallbacks->remove(:v);
+      }
+      
+      // then resort based on speed
+      turn->setSize(size:0);
+      foreach(groups) ::(k, group) {
+        foreach(group) ::(i, ent) {
+          turn->push(value:ent);
+        }
+      }  
+      turn = random.scrambled(:turn);
+      @:Effect = import(module:'base/entity/effect.mt');  
+      turn->sort(
+        comparator:::(a, b) {
+          when ((a.effectStack.traits & Effect.TRAIT.ALWAYS_FIRST) != 0)
+            false
+          when ((b.effectStack.traits & Effect.TRAIT.ALWAYS_FIRST) != 0)
+            true
+
+        
+          return a.stats.SPD < b.stats.SPD;
+        }
+      );
+      
+      turnPoppable = [...turn];
+      
+      // then do turns.
+      // Every turn returns a BattleAction:
+      // includes an ability and targetset
+      turnIndex = 0;
+    }
+  
+
+    
+    
+    @:renderTurnOrder  :: {
+      @:lines = [];
+      @width = 0;
+      foreach(turn)::(index, entity) {
+        @line = (if(turnIndex == index) '--> ' else '  ') + entity.name + (if(entity.isIncapacitated()) ' (down)' else '');
+        lines->push(value:line);        
+        if (width < line->length)
+          width = line->length;
+      }    
+      width+= 4;
+      @:top = 0;
+      @:left = canvas.width - (width);
+      @:height = lines->keycount+4;
+      
+      canvas.renderFrame(
+        top, left, width, height
+      );
+      
+      canvas.movePen(y:top, x:left+2);
+      canvas.drawText(text:'[Turn Order]');
+      
+      foreach(lines)::(index, line) {
+        canvas.movePen(y:top+index+2, x:left+2);
+        canvas.drawText(text:line);
+      }
+    }
+        
+    @:renderFrac::(isDead, value, outOf) {
+      when (outOf > 99 || value < 0) 
+        '?? / ??';
+        
+      return 
+        (if (isDead) '--' else (if (value < 10) ''+value+' ' else ''+value))
+        + ' / ' +
+        (if (outOf < 10) ''+outOf+' ' else ''+outOf)
+    }
+    @:renderStatusBox::{
+      
+        
+      @lines = [];
+      @:ent2line = {};
+      
+      foreach(groups) ::(k, group) {
+        if (k != 0) ::<= {
+          if (groups->size <= 2) ::<= {
+            lines->push(value:'');
+            lines->push(value:'  - vs -   ');
+            lines->push(value:''); 
+          } else ::<= {
+            lines->push(value:'  - vs -   ');          
+          }
+                   
+        }
+        foreach(group)::(index, ally) {
+          ent2line[ally] = lines->size;
+          if (Entity.isDisplayedHurt(entity:ally)) ::<= {
+            lines->push(value:' ////////// ' + '  ' + ally.name);// + ' - Lv ' + ally.level);
+            lines->push(value:'HP: ' + 'X  / X ' + '  AP: ' + 'X  / X');
+          } else ::<= {
+            lines->push(value:ally.renderHP() + '  ' + ally.name);// + ' - Lv ' + ally.level);
+            lines->push(value:
+              'HP: ' + renderFrac(isDead:ally.isDead, value:ally.hp, outOf:ally.stats.HP) + 
+              '  AP: ' + renderFrac(isDead:ally.isDead, value:ally.ap, outOf:ally.stats.AP));          
+          }
+        }
+      }
+      
+
+      /*
+      foreach(enemies_)::(index, enemy) {
+        lines->push(value:enemy.renderHP() + '  ' + enemy.name);// + ' - Lv ' + enemy.level);
+        lines->push(value:'HP: ' + enemy.hp + ' / ' + enemy.stats.HP);
+      }*/
+
+
+      @:height = lines->keycount+4;
+      @width = 0;
+      @top = canvas.height/2 - height/2;   
+      foreach(lines)::(index, text) <-
+        if (text->length > width) 
+          width = text->length
+      ;
+      
+      
+      
+      canvas.renderFrame(
+        top:top,
+        left:0,
+        width:width + 4,
+        height:height
+      );
+      
+      foreach(lines)::(index, line) {
+        canvas.movePen(x:2, y:top+index+2);
+        canvas.drawText(text:line);
+      }
+      
+      // grouping and display of effects
+      /*
+      foreach(groups) ::(k, group) {
+        foreach(group)::(index, ally) {
+          @:Effect = import(module:'base/entity/effect.mt');  
+          when (ally.effectStack == empty) empty;
+          when (ally.effectStack.getAll()->size == 0) empty;
+          @:pieces = [];
+          
+          @:categories = {
+            ('?'): 0,
+            ('+'): 0,
+            ('-'): 0,
+            ('!'): 0
+          };
+          
+          foreach(ally.effectStack.getAll()) ::(k, v) {
+            @:eff = Effect.find(:v.id);
+            
+            categories[Effect.TRAITS_TO_DOMINANT_SYMBOL(:eff.traits)] += 1;
+          }
+          
+          // to preserve order
+          foreach(['!', '+', '-', '?']) ::(k, v) {
+            when(categories[v] == 0) empty;
+            pieces->push(:
+              v + 'x' + (if (categories[v] > 9) '*' else categories[v]) + ' '
+            );
+          }
+          
+          canvas.movePen(x:width + 6, y:top+2+ent2line[ally]);
+          canvas.drawText(text:String.combine(:pieces));
+          
+        }
+      }
+      */
+      
+    }
+    
+
+
+    
+    
+    this.interface = {
+      partyWon :: {
+        when(result == empty) false;
+        return ::? {
+          foreach(result) ::(k, ent) {
+            if (party_.isMember(entity:ent))
+              send(message:true);
+          }
+          return false;
+        }  
+      },
+      
+      queueTurnCallback::(
+        callback,
+        nTurns
+      ) {
+        queuedCallbacks->push(:{
+          fn : callback,
+          nTurns : nTurns
+        });
+      },
+      
+      cancel ::{
+        foreach(groups) ::(k, group) {
+          foreach(group) ::(i, ent) {
+            ent.battleEnd();
+          }
+        }          
+        breakpoint();
+        windowEvent.stopRecordLog();
+        active = false;
+        ended = true;      
+
+        finishEnd();
+        if (windowEvent.canJumpToTag(name:'Battle'))                      
+          windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);          
+      },
+    
+      start ::(
+        party => Object,
+        npcBattle,
+      
+        allies => Object,
+        enemies => Object,
+        landmark => Object,
+        
+        onTurn,
+        onAct,
+        loot,
+        exp,
+        
+        renderable,
+        
+        onStart,
+        onTurnPrep,
+        skipResults,
+        
+        
+        onEnd => Function
+      ) {
+        storage = {};
+        onEnd_ = onEnd;
+        onTurnPrep_ = onTurnPrep;
+        @:world = import(module:'base/world.mt')
+        foreach(allies) ::(k, v) {
+          if (world.party.isMember(:v)) ::<= {
+            v.addOpinion(
+              fullName : 'the battle with ' + enemies[0].name,
+              shortName : 'the battle',
+              pastTense : true
+            );
+          }
+        }
+        turnCount = 0;
+        onFinish = [];
+        actions = {} 
+        defeated = {};
+        onTurn_ = onTurn;
+        onAct_ = onAct;
+        banished = [];
+        groups = [
+          [...allies],
+          [...enemies]
+        ];
+        ent2group = [];
+        group2party = [];
+        
+        foreach(allies) ::(i, ally) {
+          ent2group[ally] = groups[0];
+        }
+
+        foreach(enemies) ::(i, enemy) {
+          ent2group[enemy] = groups[1];
+        }
+        
+        if (npcBattle == empty)
+          group2party[groups[0]] = true;
+
+        
+        turn = [];
+        turnIndex = 0;
+        active = true;
+        windowEvent.startRecordLog();
+        ended = false;
+        externalRenderable = renderable;
+              
+        party_ = party;
+        foreach(groups) ::(i, group) {
+          foreach(group)::(index, ent) {
+            ent.battleStart(
+              battle: this
+            );
+          }
+        }
+
+        @:onAllyTurn = ::(battle, user, landmark, allies, enemies) {
+          if (party.leader == user)
+            battlemenu(
+              party:party_,
+              battle,
+              user,
+              landmark,
+              allies,
+              enemies 
+            )
+          else 
+            user.battleAI.takeTurn(battle);
+          ;
+        }
+        
+        
+        @:onEnemyTurn = ::(battle, user, landmark) {            
+          user.battleAI.takeTurn(battle);
+        }
+
+        if (npcBattle == empty) ::<= {
+          windowEvent.queueMessage(
+            text: if (groups[1]->keycount == 1) 
+              "You're confronted by someone!"
+            else 
+              "You're confronted by " + groups[1]->keycount + ' enemies!'
+          );  
+          
+          foreach(groups[1])::(index, enemy) {
+            windowEvent.queueMessage(
+              text: enemy.name + ' blocks your path!'
+            );          
+          }
+        }
+        onAllyTurn_ = onAllyTurn;
+        onEnemyTurn_ = onEnemyTurn;
+        landmark_ = landmark;
+        
+        
+        
+        foreach(groups) ::(i, group) {
+          foreach(group)::(index, ent) {
+            turn->push(value:ent);
+          }
+        }
+        
+        turn->sort(
+          comparator:::(a, b) {
+            return a.stats.SPD <
+                 b.stats.SPD;
+          }
+        );
+ 
+        @:queueFriends ::{
+          @chance = 0;
+          if (world.party.members->size == 1) ::<= {
+            breakpoint();
+            if (world.party.firstEncounter) ::<= {
+              chance = 100;
+              world.party.firstEncounter = false;
+            } else ::<= {
+              chance = 70 - (party.denyJoinPartyCount*15);
+              if (chance < 5) chance = 5;
+            }
+          }
+          if (world.party.members->size == 2) chance = 2;
+          
+          when (random.try(percentSuccess:chance) == false) empty;        
+          @enemies = getEnemiesDefeated(ent:party.members[0])->filter(::(value) <- party.isMember(:value) == false);
+          when(enemies->size == 0) empty;
+          @:potentialFriend = random.pickArrayItem(:enemies);
+          @:drawn = random.pickArrayItem(:world.party.members);
+          windowEvent.queueNestedResolve(
+            onEnter ::{
+              potentialFriend.heal(amount:potentialFriend.stats.HP, silent:true);
+              windowEvent.queueMessage(text:potentialFriend.name + ' gets back up...');
+              windowEvent.queueMessage(text:potentialFriend.name + ' and ' + drawn.name + '\'s auras feel drawn to each other.');
+              windowEvent.queueAskBoolean(
+                prompt:'Invite ' + potentialFriend.name + ' to join the party?',
+                defaultChoice: false,
+                
+                onChoice::(which) {
+                  when(which == true) ::<= {
+                    @:anonName = potentialFriend.name;
+                    potentialFriend.nickname = '';
+                    windowEvent.queueMessage(text:potentialFriend.name + ' joins the party!');
+                    
+                    party.add(:potentialFriend);
+                    party.denyJoinPartyCount = 0;
+                  }
+                  
+                  windowEvent.queueMessage(text:potentialFriend.name + ' quietly walks away into the distance.');
+                  party.denyJoinPartyCount += 1;
+                }
+              );
+            }
+          );
+        }
+ 
+        battleEnd = ::{
+          @:startEnd ::(message) {
+            breakpoint();
+            active = false;
+            windowEvent.stopRecordLog();
+
+            windowEvent.queueMessage(
+              text: message
+            );
+            if (windowEvent.canJumpToTag(name:'Battle'))                      
+              windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);          
+
+          }
+        
+
+          result = winningGroup;
+          
+          
+          
+          
+          when (npcBattle != empty || skipResults == true) ::<= {
+            startEnd(message:'The battle is over.');
+            finishEnd();
+          } 
+
+
+          if (this.partyWon()) ::<= {      
+
+            startEnd(
+              message: 'The battle is won.'
+            );
+            
+            if (world.scenario.base.everyoneIsAFriend)
+              queueFriends();
+            
+            
+            party.gainProfessionExp(
+              exp:getEnemiesDefeated(ent:party.members[0])->size * Entity.PROF_EXP_PER_KNOCKOUT,
+              onDone::{
+
+                @:Entity = import(module:'base/entity.mt');
+                @hasWeapon = false;
+                foreach(party_.members)::(index, ally) {   
+                  @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                  if (wep.name != 'None' && wep.canGainIntuition()) 
+                    hasWeapon = true;
+                };
+
+
+
+                if (hasWeapon && random.try(percentSuccess:10)) ::<= {
+                
+                  @:ally = random.pickArrayItem(:party_.members);
+                  @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                  when (wep.name == 'None') empty;
+                  when (!wep.canGainIntuition()) empty;
+                
+                  windowEvent.queueMessage(text:ally.name + '\'s feels the ' + wep.name + '\'s power grow.');
+
+                  @:world = import(module:'base/world.mt')
+                  world.accoladeIncrement(name:'intuitionGained');
+                  @:choice = match(random.integer(from:1, to:3)) {
+                    // inward -> AP, INT, DEF
+                    (1): random.pickArrayItem(list:[1, 4, 3]),
+                    // skyward -> DEX, SPD, LUK 
+                    (2): random.pickArrayItem(list:[6, 7, 5]),
+                    // forward -> ATK, HP 
+                    (3): random.pickArrayItem(list:[2, 0])
+                  };
+
+
+                  ally.recalculateStats();
+                  @:oldAllyStats = StatSet.new();
+                  oldAllyStats.load(serialized:ally.stats.save());
+                  @:stats = wep.stats;               
+                  @:oldStats = StatSet.new();
+                  oldStats.add(stats);
+                  stats.add(stats:StatSet.new(
+                    HP: if (choice == 0) 25 else 0,
+                    AP: if (choice == 1) 25 else 0,
+                    ATK: if (choice == 2) 25 else 0,
+                    DEF: if (choice == 3) 25 else 0,
+                    INT: if (choice == 4) 25 else 0,
+                    LUK: if (choice == 5) 25 else 0,
+                    DEX: if (choice == 6) 25 else 0,
+                    SPD: if (choice == 7) 25 else 0
+                  ));
+                    
+                  oldStats.printDiffRate(other:stats, prompt:wep.name);
+                  ally.recalculateStats();
+                  oldAllyStats.printDiff(other:ally.stats, prompt:ally.name);
+                }
+
+                battleLoot(
+                  rngLoot : loot,
+                  defeated:getEnemiesDefeated(ent:party.members[0]),
+                  landmark, 
+                  party, 
+                  finishEnd
+                );              
+              }
+            );
+          } else ::<= {
+            startEnd(
+              message: 'The battle is lost.'
+            );
+
+            windowEvent.queueCustom(onEnter::{
+              onEnd(result); 
+            });             
+          }
+        }
+
+
+        @started = false;
+        windowEvent.queueNestedResolve(
+          onEnter :: {
+            windowEvent.queueCustom(
+              keep: true,
+              jumpTag: 'Battle',
+              onEnter :: {
+              },
+              onLeave ::{
+              },
+              
+              renderable : {
+                render ::{
+                  ////canvas.fill();
+                  this.render()
+                }
+              },
+              onUpdate::{
+                requestRedrawBG();
+
+                when(ended) ::<= {
+                  if (windowEvent.hasAnyQueued() == false) ::<= {
+                    battleEnd();                
+                  }
+                }
+
+              
+              
+                if (!started && onStart) ::<= {
+                  onStart();
+                  started = true;
+                }
+                
+                if (turnPoppable->keycount == 0)
+                  initTurn();  
+                nextTurn();
+              }
+            );
+          }
+        );
+
+        return this;      
+      },    
+    
+      result : {
+        get ::<- result
+      },
+      
+      getAllies ::(entity) {
+        return getAllies(ent:entity)
+      },
+
+      getEnemies ::(entity) {
+        return getEnemies(ent:entity)
+      },
+      
+      addOnFinishCallback ::(cb) {
+        onFinish->push(:cb);
+      },
+      
+      
+      turnIndex : {
+        get ::<- turnIndex
+      },
+      
+      getMembers :: {
+        @:out = [];
+        foreach(groups) ::(k, group) {
+          foreach(group) ::(i, ent) {
+            out->push(value:ent);
+          }
+        }   
+        return out;
+      },
+      
+      isMember ::(entity) <- ::? {
+        foreach(groups) ::(k, group) {
+          foreach(group) ::(i, ent) {
+            if (ent == entity) send(:true);
+          }
+        }
+        return false;       
+      },
+
+      requestRedrawBG : requestRedrawBG,
+
+      
+      isActive : {
+        get ::<- active
+      },
+      
+      landmark : {
+        get ::<- landmark_
+      },
+      
+      banished : {
+        get ::<- [...banished]
+      },
+      
+      banish ::(entity) {
+        banished->push(:entity);
+        this.evict(:entity);
+      },
+      
+      evict ::(entity) {
+        
+        @:group  = ent2group[entity];
+
+        @index = group->findIndex(value:entity);
+        if (index != -1) ::<= {
+          defeated[group[index]] = true;
+          group->remove(key:index);
+        }
+        if (group->size == 0)
+          groups->remove(key:groups->findIndex(value:group));
+
+        index = turnPoppable->findIndex(value:entity);
+        if (index != -1) turnPoppable->remove(key:index);
+        
+        @:ind = turn->findIndex(value:entity);
+        if (ind != -1)
+          turn->remove(key:ind);
+          
+        windowEvent.queueMessage(
+          text: entity.name + ' was evicted from battle.'
+        );
+      },
+      
+      storage : {
+        get ::<- storage
+      },
+      
+      join ::(group, sameGroupAs) {
+
+        @:newGroup = if (sameGroupAs != empty)
+          ent2group[sameGroupAs]
+        else 
+          []
+          
+          
+
+        if (party_.isMember(entity:group[0]))
+          group2party[newGroup] = true;
+
+        foreach(group) ::(i, entity) {
+          @:banishIndex = banished->findIndex(:entity);
+          if (banishIndex > -1)
+            banished->remove(:banishIndex);
+            
+          newGroup->push(value:entity);
+          ent2group[entity] = newGroup;
+        }
+        if (sameGroupAs == empty)
+          groups->push(value:newGroup);
+          
+        foreach(group) ::(i, entity) {
+          when(turn->findIndex(value:entity) != -1) 
+            error(detail: 'Tried to join battle when was already a part of the battle');
+          windowEvent.queueMessage(text:entity.name + ' joins the fray!');
+          entity.battleStart(battle:this);
+          entity.startTurn();
+        }
+      },
+      
+      render :: {
+        renderStatusBox();
+        renderTurnOrder();
+      },
+
+      
+      entityCommitAction::(action, from) {
+        @:entAct = if (from != empty) from else entityTurn;
+        @originalAction = action;
+        // failsafe. not normally needed.
+        when (!entAct.canActThisTurn())
+          endTurn();
+          
+        requestRedrawBG();
+        this.commitFreeAction(action, from, onDone::{
+            windowEvent.queueCustom(
+              onEnter ::{
+                endTurn();
+              }
+            );
+        });
+        
+      },
+      
+      commitFreeAction::(action, from, onDone) {
+        @:entAct = if (from != empty) from else entityTurn;
+        when(entAct.effectStack.emitEvent(
+          name : 'onPreAction',
+          action : action
+        )->filter(::(value) <- value.ret ==false)->size > 0) empty;
+        requestRedrawBG();
+          
+        
+        @:passesCheck ::{
+          @:art = Arts.database.find(:action.card.id);
+          when(art.traits & Arts.TRAIT.SUPPORT == 0) true;
+          return false;
+        }
+          
+        @:requiresAP = ((Arts.database.find(:action.card.id).traits & Arts.TRAIT.COSTLESS) == 0);
+          
+        when (requiresAP && entAct.ap < AP_COST) ::<= {
+          @:art = Arts.database.find(:action.card.id);
+          windowEvent.queueMessage(
+            text: entAct.name + ' tried to use the Art ' + art.name + ' but couldn\'t muster the mental strength!'
+          );
+        }
+        if (requiresAP)
+          entAct.ap -= AP_COST;
+          
+          
+          
+        @:Entity = import(module:'base/entity.mt');
+        @:world = import(module:'base/world.mt');
+        
+        @pendingChoices = [];
+        @:art = Arts.database.find(id:action.card.id);
+        if (world.party != empty && ((art.traits & Arts.TRAIT.CAN_BLOCK) != 0) && action.targets->size > 0) ::<= {
+          pendingChoices = [...action.targets]->filter(by::(value) <- world.party.leader == value);
+        }
+      
+        @:finish ::(useArtReturn) {
+
+
+
+          if (art.kind == Arts.KIND.ABILITY || art.kind == Arts.KIND.SPECIAL) ::<= {
+            entAct.flags.add(flag:StateFlags.WENT);
+            if (art.name != 'Wait' &&
+              art.name != 'Use Item')
+              entAct.flags.add(flag:StateFlags.ABILITY);
+
+            if (art.durationTurns > 0) ::<= {
+              
+              if (actions[entAct] == action && (action.turnIndex >= art.durationTurns || useArtReturn == Arts.CANCEL_MULTITURN)) ::<= {
+                actions[entAct] = empty;
+              } else if (useArtReturn != Arts.CANCEL_MULTITURN) ::<= {
+                actions[entAct] = action;
+              }
+            }
+
+            entAct.effectStack.emitEvent(
+              name : 'onPostAction',
+              action : action
+            )
+
+            onDone();
+          }        
+        }
+      
+        
+        @:doAction ::{
+          
+          @:art = Arts.database.find(id:action.card.id);
+        
+          requestRedrawBG();
+          @:ret = entAct.useArt(
+            art:action.card,
+            level: 1,
+            targets:action.targets,
+            targetParts:action.targetParts,
+            turnIndex : action.turnIndex,
+            extraData : action.extraData
+          );
+
+          windowEvent.queueCustom(
+            onEnter ::{
+              finish(:ret);           
+              requestRedrawBG();
+            }
+          );
+        }
+
+      
+        //windowEvent.onResolveAll(
+        windowEvent.queueNestedResolve(
+          onEnter :: {
+
+            // entAct.deck was likely BLASTED due to death
+            when (active == false || entAct == empty) 
+              empty;
+
+            action.card.revealArt(
+              user:entAct,
+              prompt: entAct.name + ' uses the Art: ' + art.name + '!'
+            );
+            
+            windowEvent.queueCustom(
+              onEnter :: {
+                requestRedrawBG();
+                // react here
+                windowEvent.queueCustom(
+                  onEnter ::{
+                    requestRedrawBG();
+                    when (!entAct.canActThisTurn())
+                      endTurn();
+                    doAction();
+                  }
+                );
+              }
+            
+            )
+          }
+        );
+      },
+    }
+  }
+);
+
+return Battle;

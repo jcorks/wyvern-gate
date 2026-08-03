@@ -1,0 +1,229 @@
+@:windowEvent = import(module:'core/windowevent.mt');
+@:world = import(module:'base/world.mt');
+@:canvas = import(module:'core/graphics/canvas.mt');
+@:random = import(module:'core/random.mt');
+@:StatSet = import(module:'base/util/statset.mt');
+
+
+@:levelUp::(item, user, onDone) {
+  breakpoint();
+  @:statChoices = [
+    'ATK',
+    'INT',
+    'DEF',
+    'SPD',
+    'DEX'
+  ];         
+
+
+  windowEvent.queueChoices(
+    prompt: 'Choose a stat to improve.',
+    choices: [...statChoices]->map(to:::(value)<- value + ' (+' + item.equipModBase[value] + ')'),
+    onChoice::(choice) {
+      when(choice == 0) empty;
+      @stat = statChoices[choice-1];
+
+      
+
+
+      world.accoladeIncrement(name:'itemImprovements');                    
+                    
+      @:oldStats = item.equipModBase;
+      @:newStats = StatSet.new();
+      @:state = oldStats.save();
+      state[stat] += 1;
+      newStats.load(serialized:state);
+      
+      oldStats.printDiff(
+        other:newStats,
+        prompt: 'New stats: ' + item.name
+      );
+
+      @:state = item.improvement.stats.save();
+      state[stat] += 1;
+      item.improvement.stats.load(:state);
+      
+      
+      if (user != empty) ::<= {
+        @:oldStats = StatSet.new();
+        @equiper = user;
+        oldStats.load(serialized:equiper.stats.save());
+        
+        @slot = equiper.unequipItem(item, silent:true);
+        equiper.equip(item, slot, silent:true);
+        
+        oldStats.printDiff(
+          other: equiper.stats,
+          prompt: equiper.name + ': New stats'
+        )
+      }   
+      
+      windowEvent.queueCustom(
+        onEnter :: {
+          onDone();
+        }
+      );
+
+    }
+  );
+
+}
+
+
+@:addExpAnimated::(item, user, other, exp, onDone) {
+  breakpoint();
+  @remainingForLevel = item.improvement.expToNext - item.improvement.exp;
+  
+  
+  @:animateBar = import(:'base/widgets/animatebar.mt');
+  @current = 0;
+  animateBar(
+    from: item.improvement.exp,
+    to:   item.improvement.exp + exp,
+    max:  item.improvement.expToNext,
+    
+    onGetPauseFinish:: <- true,
+    onFinish ::{  
+      @:remaining = exp - (item.improvement.expToNext - item.improvement.exp);
+      @:oldLevel = item.improvement.improvements;
+      item.improvement.improve(:exp);      
+      when (oldLevel != item.improvement.improvements) ::<= {
+        windowEvent.queueMessage(
+          text: 'Item: Level up!'
+        );
+        windowEvent.queueCustom(
+          onEnter :: {      
+            levelUp(
+              item : item,
+              user : user,
+              onDone :: {
+                addExpAnimated(item, other, exp:remaining, onDone);
+              }
+            );
+          }
+        );
+      }
+      windowEvent.queueCustom(
+        onEnter :: {
+          onDone();
+        }
+      );
+         
+    },
+    
+    onGetCaption      ::<- 'Item level: ' + item.improvement.improvements,
+    onGetSubcaption   ::<- 'Exp to next level: ' + (remainingForLevel - (current - item.improvement.exp)),
+    onGetSubsubcaption::<- '                  +' + (exp - (current - item.improvement.exp)),
+    
+    onGetLeftWeight::<- 0.5,
+    onGetTopWeight::<- 0.5,
+    
+    onNewValue ::(value) {
+      current = value->ceil;
+    }
+  );
+}
+
+
+@:improve::(item, user) {
+  breakpoint();
+  @:party = import(module:'base/world.mt').party;
+          
+  @:others = party.inventory.items->filter(by:::(value) <- value.material == item.material && value != item);
+  when(others->keycount == 0) ::<= {
+    windowEvent.queueMessage(
+      text: 'The party has no other items that are of the material ' + item.material.name
+    );
+  }
+          
+
+  
+  windowEvent.queueChoices(
+    prompt: 'Choose an item to use as material.',
+    choices:[...others]->map(to:::(value) <- value.name),
+    canCancel:true,
+    onChoice::(choice) {
+      when (choice == 0) empty;
+      @:other = others[choice-1];
+      windowEvent.queueMessage(
+        text: 'Once complete, this will destroy ' + other.name + '.'
+      );
+
+      @exp = other.equipMod.sum + other.equipModBase.sum*50;
+      if (exp < 35) exp = 35;
+      windowEvent.queueAskBoolean(
+        prompt: 'Use ' + other.name + ' to give ' + exp + ' EXP to ' + item.name + '?',
+        onChoice::(which) {
+          when(which == false) empty;           
+              
+          party.inventory.remove(item:other);
+          
+          addExpAnimated(
+            item,
+            user,
+            other,
+            exp,
+            onDone ::{
+              windowEvent.queueAskBoolean(
+                prompt: 'Improve again?',
+                onChoice::(which) {
+                  when (which == false) empty;
+                  improve(item, user);
+                }
+              );
+            }
+          );
+        }
+      );                
+    }
+  
+  );
+}
+
+
+
+return ::(user, item, inBattle) {
+  @:party = import(module:'base/world.mt').party;
+
+  when(item.material == empty) ::<= {
+    windowEvent.queueMessage(
+      text: 'Only items with a specified material can be improved.'
+    );                                              
+  }
+  
+  
+  @:StatSet = import(module:'base/util/statset.mt'); 
+  when (!party.isMember(entity:user)) ::<= {
+    windowEvent.queueMessage(
+      text: user.name + '\'s ' + item.name + ' can only be improved if they\'re in the party.'
+    );                                    
+  }
+  
+  if (inBattle == true) ::<= {
+    @:complainer = random.pickArrayItem(list:party.members->filter(by::(value) <- value != user));
+    @:Personality = import(module:'base/entity/personality.mt');
+    @:personality = complainer.personality;
+    windowEvent.queueMessage(
+      speaker: complainer.name,
+      text: '"' + random.pickArrayItem(list:personality.phrases[Personality.SPEECH_EVENT.INAPPROPRIATE_TIME]) + '"'
+    );            
+  }
+  
+  when(item.improvement.left == 0) ::<= {
+    windowEvent.queueMessage(
+      text: item.name + ' cannot be improved any further.'
+    );                        
+  }
+  
+  windowEvent.queueMessage(
+    text: item.name + ' can be improved by attempting to combine it with another item of the same material. Once the process is complete, the other item is lost, and this item is given EXP. Once enough EXP is accumulated, the item improved will gain additional base stats.'
+  );
+  
+  windowEvent.queueAskBoolean(
+    prompt:'Improve ' + item.name + '?',
+    onChoice::(which) {
+      when(which == false) empty; 
+      improve(item, user);
+    }
+  );
+}
