@@ -16,9 +16,13 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+@instanceRef = empty;
+
 @:readonly ::(object) {
   @:output = {};
   foreach(object) ::(k, v) {
+    when(v->type == String && v == 'INSTANCE_REF')
+      output[k] = {get ::<- instanceRef}
     output[k] = {get ::<- v}
   }
   output->setIsInterface(enabled:true);
@@ -26,6 +30,9 @@
 }
 
 @:WyvernGate = readonly(:{
+  __instance_finished ::(instance) {
+    instanceRef = instance;
+  },
   Core : readonly(:{
     Data : readonly(:{
       DatabaseItemMutator : import(:'core/data/databaseitemmutatorclass.mt'),
@@ -55,7 +62,7 @@
   // Not needed
   //Boot : import(:'base/boot.mt'),
   Entity : import(:'base/entity.mt'),
-  Instance : import(:'base/instance.mt'),
+  Instance : 'INSTANCE_REF',
   Item : import(:'base/item.mt'),
   NameGen : import(:'base/namegen.mt'),
   Party : import(:'base/party.mt'),
@@ -102,7 +109,7 @@
   }),
   Map : readonly(:{
     Dungeon : import(:'base/map/dungeon.mt'),
-    Landmark : import(:'base/map/dungeon.mt'),
+    Landmark : import(:'base/map/landmark.mt'),
     Island : import(:'base/map/island.mt'),
     // no need for public
     //Large

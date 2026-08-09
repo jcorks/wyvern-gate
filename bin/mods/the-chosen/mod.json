@@ -5,6 +5,18 @@
   "author": "Rasa",
   "website": "https://github.com/jcorks/wyvern-gate",
   "files" : [
+    "accolades.mt",
+    "database_effect.mt",
+    "database_interaction.mt",
+    "database_island.mt",
+    "database_item.mt",
+    "database_landmark.mt",
+    "database_location.mt",
+    "database_profession.mt",
+    "database_scene.mt",
+    "database_species.mt",
+    "interactionsperson.mt",
+    "intro.mt",
     "main.mt"
   ],
   "JSONdata" : [],

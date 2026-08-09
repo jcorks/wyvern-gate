@@ -18,7 +18,7 @@
 
 // database loading 
 
-import(:'wyvern-gate.mt')
+@:WyvernGate = import(:'wyvern-gate.mt')
 
 @:Arts = import(module:'base/arts.mt');
 @:hud = import(:'core/graphics/hud.mt');
@@ -189,7 +189,7 @@ import(module:'base/accolade/newrecord.mt');
     }
   );        
 }
-return class(
+@:Instance = class(
   name: 'Wyvern.Instance',
   define:::(this) {
     @onSaveState;
@@ -1370,3 +1370,6 @@ return empty;
     }
   }
 ).new();
+
+WyvernGate.__instance_finished(:Instance);
+return Instance
