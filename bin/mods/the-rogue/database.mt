@@ -31,7 +31,7 @@
 @:Inventory = import(module:'base/item/inventory.mt');
 @:world = import(module:'base/world.mt');
 @:pickItem = import(:'base/widgets/pickitem.mt');
-@:Interaction = import(module:'base/interaction/interaction.mt');
+@:Interaction = import(module:'base/interaction.mt');
 
 
 

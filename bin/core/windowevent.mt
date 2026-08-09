@@ -1749,11 +1749,16 @@
         if (maxHeight == empty) ::<= {
           maxHeight = canvas.height-5;
         }
-        if (maxHeight >= lines->size) maxHeight = lines->size;
-
-        if (maxWidth == empty) ::<= {
-          maxWidth = canvas.width - 4;
+        when (maxHeight >= lines->size) ::<= {
+          WindowEvent.queueMessage(
+            speaker:prompt,
+            text:String.combine(:lines->map(::(value) <- value + '\n')),
+            maxHeight,
+            maxWidth,
+            onLeave
+          )
         }
+
 
       
         pushResolveQueueTop(fns:[::{

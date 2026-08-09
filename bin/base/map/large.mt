@@ -66,7 +66,7 @@
           @status = Async.Worker.State.Unknown
         
           @:worker = Async.Worker.new(
-            module: 'game_async.largemapgen.mt',
+            module: 'base/map/large.async.mt',
             input
           );        
           
@@ -136,7 +136,7 @@
           message: 'Generating island... This may take a while and may freeze for a sec.',
           do:: {   
             handleResults(:importModule(
-                module: 'game_async.largemapgen.mt',
+                module: 'base/map/large.async.mt',
                 noCache: true,
                 parameters : {
                   input : input               

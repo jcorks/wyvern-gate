@@ -351,7 +351,7 @@ IslandEvent.database.newEntry(
                 when(world.battle.partyWon()) empty;
                 windowEvent.queueCustom(
                   onEnter::{
-                    @:instance = import(module:'game_singleton.instance.mt');
+                    @:instance = import(module:'base/instance.mt');
                     instance.gameOver(reason:'The party was wiped out.');
                   }
                 );        

@@ -18,8 +18,7 @@
 
 // database loading 
 
-
-import(:'base/preload.mt');
+import(:'wyvern-gate.mt')
 
 @:Arts = import(module:'base/arts.mt');
 @:hud = import(:'core/graphics/hud.mt');
@@ -37,48 +36,16 @@ import(:'base/preload.mt');
 @:canvas = import(module:'core/graphics/canvas.mt');
 @:Landmark = import(module:'base/map/landmark.mt');
 @:Island = import(module:'base/map/island.mt');
-@:Interaction = import(module:'base/interaction/interaction.mt');
+@:Interaction = import(module:'base/interaction.mt');
 @:Item = import(module:'base/item.mt');
 @:namegen = import(module:'base/namegen.mt');
 @:LargeMap = import(module:'base/map/large.mt');
 @:Scenario = import(module:'base/scenario.mt');
 @:sound = import(module:'core/sound.mt');
 
-import(module:'base/widgets/pickpartyitem.mt');
-import(module:'base/widgets/itemimprove.mt');
-
-
-/* make sure base loadable classes are available */
-
-import(module:'base/util/statset.mt');
-import(module:'base/battle/ai.mt');
-import(module:'base/item/inventory.mt');
-import(module:'core/map.mt');
-import(module:'base/party.mt');
-import(module:'base/entity/stateflags.mt');
-
-
-
-import(module:'base/entity.mt');
-import(module:'base/map/island.mt');
-
 @:loading = import(module:'base/widgets/loading.mt');
 @:random = import(:'core/random.mt');
 
-
-import(module:'base/event/landmark/mobilemushroom.mt');
-import(module:'base/event/landmark/flamingskull.mt')
-import(module:'base/event/landmark/skeleton.mt')
-import(module:'base/event/landmark/goldslime.mt')
-import(module:'base/event/landmark/creatureencounters.mt')
-import(module:'base/event/landmark/gnome.mt')
-import(module:'base/event/landmark/giantflea.mt')
-import(module:'base/event/landmark/monolith.mt')
-
-import(module:'base/map/structure.mt');
-import(:'base/item/improvement.mt')
-import(:'base/map/location/portal.mt')
-import(:'base/item/edible.mt');
 
 @:distance::(x0, y0, x1, y1) {
   @xd = x1 - x0;
@@ -277,6 +244,8 @@ return class(
             error(detail: 'An error occurred while loading the mod ' + mod.id + ':' + message.summary + '\n\n');
           }
         }
+        if (result == empty)
+          error(:'The mod ' + mod.id + ' didnt return a mod Object. It should return an object containing onGameStartup() and onDatabaseStartup() to define the mods behavior.');
 
         modMainOrdered->push(value:result);
 
@@ -288,6 +257,9 @@ return class(
       
       
       foreach(modMainOrdered) ::(i, modMain) {
+      
+        if (modMain.onGameStartup == empty)
+          error(:'mod ' + modMain.name + '(' + modMain.id + ') does not contain an onGameStartup function. This is required!');
         modMain.onGameStartup();
       }
     }
@@ -388,7 +360,6 @@ return class(
       settings.animations = true;
       settings.effects = true;
       settings.hud = true;
-      settings.mods = false;
     }    
 
 
@@ -420,21 +391,6 @@ return class(
                   this.defaultSettings();
               }
             ),
-
-          'Mods', ::<-
-            windowEvent.queueAskBoolean(
-              onGetPrompt::<- 'Toggle Mod loading? (currently: ' + (if(settings.mods) 'Enabled' else 'Disabled') + ')',
-              onChoice::(which) {
-                when(which == false) empty;
-                settings.mods = !settings.mods;
-                this.updateSettings();
-
-                windowEvent.queueMessage(
-                  text: 'A restart of the program is required for this to take effect.'
-                )
-              }
-            ),
-          
 
           'Animations', ::<-          
             windowEvent.queueAskBoolean(
@@ -667,7 +623,7 @@ return class(
 
 
 /*
-import(:'game_function.tabbedchoices.mt')(
+import(:'base/widgets/tabbedchoices.mt')(
   onGetTabs ::<- [
     'Enemies',
     'Allies',
@@ -963,7 +919,7 @@ return empty;
                 this.resetDatabase();
 
 
-                @:enterName = import(module:'game_function.name.mt');
+                @:enterName = import(module:'base/widgets/name.mt');
 
                 @choices = Scenario.database.getAll();
                 choices->sort(comparator:::(a, b) {
@@ -1009,7 +965,7 @@ return empty;
                             
                             
                             'Set world seed...', ::{
-                              @:enterName = import(module:'game_function.name.mt');
+                              @:enterName = import(module:'base/widgets/name.mt');
 
                               windowEvent.queueChoices(
                                 onGetPrompt::<- 'Current seed: ' + if (
@@ -1108,7 +1064,7 @@ return empty;
             @:modNames = [];
             @:modList = [];
             
-            foreach(mods) ::(k, mod) {
+            foreach(mods->sort(::(a, b) <- a.name < b.name)) ::(k, mod) {
               modNames->push(value:mod.name);
               modList->push(value:mod);
             }
@@ -1121,21 +1077,27 @@ return empty;
                 choices: modNames,
                 onChoice ::(choice) {
                   @:mod = modList[choice-1];
-                  windowEvent.queueMessage(
-                    speaker: 'Mod info...',
-                    text: 
-                      'Name  : ' + mod.name + '\n'+
-                      '     (' + mod.id + ')\n' +
-                      'Author  : ' + mod.author + '\n' +
-                      'Website : ' + mod.website + '\n\n' +
-                      mod.description + 
-                      '\n\nDepends on ' + mod.loadFirst->size + ' mods:\n' + ::<= {
-                        @out = '';
-                        foreach(mod.loadFirst) ::(i, depends) {
-                          out = out + ' - ' + depends + '\n'
+                  windowEvent.queueReader(
+                    prompt: 'Mod info...',
+                    lines: [
+                      'Name    : ' + mod.name + '',
+                      '         (' + mod.id + ')' ,
+                      'Author  : ' + mod.author + '',
+                      'Website : ' + mod.website + '',
+                      '',
+                      mod.description,
+                      '',
+                      ...(if (mod.loadFirst->size == 0) [] else [
+                        'Depends on ' + mod.loadFirst->size + ' mods:',
+                        ::<= {
+                          @out = [];
+                          foreach(mod.loadFirst) ::(i, depends) {
+                            out->push(:out + ' - ' + depends)
+                          }
+                          return out;
                         }
-                        return out;
-                      }
+                      ])
+                    ]
                   )
                 }
               );
@@ -1166,25 +1128,31 @@ return empty;
         windowEvent.clearAll(
           onReady ::{
 
-            if (settings.mods == true) ::<= {
-              ::? {
-                mods = preloadMods();
-              } => {
-                onError ::(message) {
-                  windowEvent.queueMessage(
-                    text: "Could not preload mods: " + message.summary
-                  )
-                  mods = {};
-                }
+            ::? {
+              mods = preloadMods();
+            } => {
+              onError ::(message) {
+                windowEvent.queueReader(
+                  lines: ["Could not preload mods: ", ...(message.summary->split(:'\n'))]
+                )
+                mods = {};
               }
+            }
+            
+            ::? {
               loadMods(mods);
-            } else
-              mods = [];
+            } => {
+              onError ::(message) {
+                windowEvent.queueReader(
+                  lines: ["Could not load mods: ", ...(message.summary->split(:'\n'))]
+                )
+              }
+            }
 
             sound.playBGM(name:'boot', loop:false);
          
             
-            (import(:'base/scene/boot.mt'))(          
+            (import(:'base/boot.mt'))(          
               onBooted :: {
                 sound.playBGM(name:"title", loop:false)
                 

@@ -228,7 +228,7 @@ Location.database.newEntry(data:{
               },
               
               (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = import(module:'base/instance.mt');
                 instance.gameOver(reason:'The party was wiped out.');
               }
             }
@@ -297,7 +297,7 @@ Location.database.newEntry(data:{
               },
               
               (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = import(module:'base/instance.mt');
                 instance.gameOver(reason:'The party was wiped out.');
               }
             }
@@ -374,7 +374,7 @@ Location.database.newEntry(data:{
               },
               
               (Battle.RESULTS.ENEMIES_WIN): ::<= {
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = import(module:'base/instance.mt');
                 instance.gameOver(reason:'The party was wiped out.');
               }
             }
@@ -2369,7 +2369,7 @@ Location.database.newEntry(data:{
           location.data.alreadyWon = true;
           when(world.battle.partyWon()) empty;
             
-          @:instance = import(module:'game_singleton.instance.mt');
+          @:instance = import(module:'base/instance.mt');
           instance.gameOver(reason:'The party was wiped out.');
         }
       );      
@@ -2739,7 +2739,7 @@ Location.database.newEntry(data:{
       
         @world = import(module:'base/world.mt');
         @party = world.party;      
-        @:Interaction = import(module:'base/interaction/interaction.mt');
+        @:Interaction = import(module:'base/interaction.mt');
 
       
         @:aggress::(location, party) {

@@ -75,6 +75,12 @@
 
 @:Battle = class(
 
+  statics : {
+    Action : {get ::<- import(:'base/battle/action.mt')},
+    AI : {get ::<- import(:'base/battle/ai.mt')},
+    Tutorial : {get ::<- import(:'base/battle/tutorial.mt')}
+  },
+
   define:::(this) {  
     // array of arrays of entities 
     // each group is a set of allies. all other group members are 

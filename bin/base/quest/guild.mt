@@ -398,7 +398,7 @@
             text: '"Ah, before we continue, your guild team must have a name to register."'
           );            
           
-          @:name = import(:"game_function.name.mt");
+          @:name = import(:"base/widgets/name.mt");
           name(
             prompt: 'Enter your guild team name:',
             onDone::(name) {

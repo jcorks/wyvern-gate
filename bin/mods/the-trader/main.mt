@@ -18,6 +18,7 @@
 @:Accolade = import(module:'base/accolade.mt');
 @:romanNum = import(module:'base/util/romannumerals.mt');
 @:Arts = import(:'base/arts.mt');
+@:Scenario = import(:'base/scenario.mt');
 
 
 @:WORK_ORDER__SPACE = 1;
@@ -192,7 +193,7 @@
       },
       
       setTitle ::{
-        @:nameFn = import(module:'game_function.name.mt');
+        @:nameFn = import(module:'base/widgets/name.mt');
         nameFn(
           prompt: state.member.name + '\'s title:',
           onDone ::(name) {
@@ -685,7 +686,7 @@
           jumpTag : 'courierReport',
           onEnter ::{
 
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             @world = import(module:'base/world.mt');
             @:currentLandmark = world.landmark;
             @:Landmark = import(module:'base/map/landmark.mt');
@@ -1005,7 +1006,7 @@
       },
       
       dayStart ::{
-        @:instance = import(module:'game_singleton.instance.mt');
+        @:instance = import(module:'base/instance.mt');
         @world = import(module:'base/world.mt');
         @party = world.party;      
         
@@ -1453,7 +1454,7 @@
     
       dayEnd::(onDone) {
         @:onDoneReal ::{
-          @:instance = import(module:'game_singleton.instance.mt');
+          @:instance = import(module:'base/instance.mt');
           @:loading = import(module:'base/widgets/loading.mt');
           loading(
             message: 'Ending day...',
@@ -1768,7 +1769,7 @@
 
               when (cost > currentG)
                 Scene.start(id:'thetrader:scene_bankrupt', onDone::{          
-                  @:instance = import(module:'game_singleton.instance.mt');
+                  @:instance = import(module:'base/instance.mt');
                   instance.gameOver(reason:'You\'re no longer chosen by the Wyvern of Fortune.');
                 });    
                   
@@ -2232,7 +2233,7 @@
               this.preflightCheckStart(
                 onDone :: {
                   @world = import(module:'base/world.mt');
-                  @:instance = import(module:'game_singleton.instance.mt');
+                  @:instance = import(module:'base/instance.mt');
                   world.loadIslandID(id:state.islandID, onDone::(island) {
                     world.island.travel();
 
@@ -2588,7 +2589,7 @@
         @world = import(module:'base/world.mt');
 
         // find shop
-        @:instance = import(module:'game_singleton.instance.mt');
+        @:instance = import(module:'base/instance.mt');
         //instance.visitIsland();
         @:landmark = world.island.landmarks->filter(by::(value) <- value.worldID == state.cityID)[0];
         @:location = landmark.locations->filter(by::(value) <- value.worldID == state.shopID)[0];
@@ -3067,7 +3068,7 @@
 
 
 
-return {
+@TheTrader = {
   name : 'The Trader',
   id : 'rasa:thetrader',
   events : {
@@ -3076,7 +3077,7 @@ return {
         text: 'This scenario autosaves on the end of each day. Manual saves will not be possible.'
       );
     
-      @:instance = import(module:'game_singleton.instance.mt');
+      @:instance = import(module:'base/instance.mt');
       @:story = import(module:'base/story.mt');
       @world = import(module:'base/world.mt');
       @:LargeMap = import(module:'base/map/large.mt');
@@ -3244,7 +3245,7 @@ return {
     onDeath ::(data, entity) {
       @:world = import(module:'base/world.mt')
       when (entity == world.party.members[0]) ::<= {
-        @:instance = import(module:'game_singleton.instance.mt');
+        @:instance = import(module:'base/instance.mt');
         instance.gameOver(reason:
           'The Trader ' + entity.name + '\'s journey comes to an end...'      
         );
@@ -3530,7 +3531,7 @@ return {
   },
   
   databaseOverrides ::{
-    @:Interaction = import(module:'base/interaction/interaction.mt');
+    @:Interaction = import(module:'base/interaction.mt');
   
     // Overridden
     Interaction.newEntry(
@@ -3552,7 +3553,7 @@ return {
             location.targetLandmark.loadContent();
             location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
           }
-          @:instance = import(module:'game_singleton.instance.mt');
+          @:instance = import(module:'base/instance.mt');
           
           
           @:trader = world.scenario.data.trader;          
@@ -3655,7 +3656,7 @@ return {
               enemies: e,
               landmark: {},
               onEnd::(result) {
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = import(module:'base/instance.mt');
                 if (!world.battle.partyWon()) 
                   instance.gameOver(reason:'The party was wiped out.');
                 
@@ -4175,7 +4176,7 @@ return {
           ['', 'Magic lifts you off your feet and transports you to a new land...'],
           ::(location, landmark, doNext) {
             @:world = import(module:'base/world.mt');
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             @:Landmark = import(module:'base/map/landmark.mt');
 
             @:d = Landmark.new(
@@ -4207,7 +4208,7 @@ return {
           ['', 'The Wyvern\'s magic lifts you off your feet and transports you home...'],
           ::(location, landmark, doNext) {
             @:world = import(module:'base/world.mt');
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
 
 
             world.island.visit(atGate:true);        
@@ -4234,7 +4235,7 @@ return {
           ['', 'The Wyvern\'s magic lifts you off your feet and transports you home...'],
           ::(location, landmark, doNext) {
             @:world = import(module:'base/world.mt');
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
 
 
             world.island.visit(atGate:true);        
@@ -4258,8 +4259,8 @@ return {
           ['Shiikaakael, Wyvern of Fortune', 'I\'m unable to fathom how are able to even carry that with you! 250,000G is enough to swim in, even for a creature such as me!'],
           ['Shiikaakael, Wyvern of Fortune', '...Well. You have earned it. Here is your wish.'],
           ::(location, landmark, doNext) {
-            @:instance = import(module:'game_singleton.instance.mt');
-            @:enter = import(module:'game_function.name.mt');
+            @:instance = import(module:'base/instance.mt');
+            @:enter = import(module:'base/widgets/name.mt');
             enter(
               prompt: 'What is your wish?',
               onDone ::(name) {
@@ -4286,7 +4287,7 @@ return {
           ['', 'In a violent flash of light, the Wyvern\'s magic lifts you off your feet and transports you home...'],
           ::(location, landmark, doNext) {
             @:world = import(module:'base/world.mt');
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
 
 
             world.island.visit(atGate:true);        
@@ -4304,5 +4305,15 @@ return {
   },
   onSaveLoad ::(data) {
     data.trader.dayStart();
+  }
+}
+
+
+return { 
+  onGameStartup ::{
+  },
+
+  onDatabaseStartup :: {
+    Scenario.database.newEntry(data:TheTrader);
   }
 }

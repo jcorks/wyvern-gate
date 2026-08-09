@@ -1,10 +1,11 @@
-@:Item = import(module:'base/item.mt');
-@:windowEvent = import(module:'core/windowevent.mt');
-@:Scenario = import(module:'base/scenario.mt');
-@:commonInteractions = import(module:'base/interaction/common.mt');
-@:Effect = import(module:'base/entity/effect.mt');
-@:random = import(module:'core/random.mt');
-import(:'base/widgets/descriptivelist.mt');
+@:wyvern = import(:'wyvern-gate.mt');
+
+@:Item = wyvern.Item
+@:windowEvent = wyvern.Core.WindowEvent
+@:Scenario = wyvern.Scenario
+@:commonInteractions = wyvern.Interaction.Common
+@:Effect = wyvern.Entity.Effect
+@:random = wyvern.Core.Random
 
 
 return { 
@@ -20,12 +21,12 @@ return {
         // Called when first starting the scenario.
         onBegin ::(data) {
 
-          @:world = import(module:'base/world.mt');
-          @:instance = import(module:'game_singleton.instance.mt');
+          @:world = wyvern.World
+          @:instance = wyvern.Instance
 
-          @:Entity = import(module:'base/entity.mt');
-          @:Species = import(module:'base/entity/species.mt');
-          @:Profession = import(module:'base/entity/profession.mt');
+          @:Entity = wyvern.Entity
+          @:Species = wyvern.Species
+          @:Profession = wyvern.Profession
       
 
           @:keyhome = Item.new(
@@ -116,7 +117,7 @@ return {
               
               
               if (data.randomAdditionalArtsCount->type == Number) ::<= {
-                @:Arts = import(module:'base/arts.mt');
+                @:Arts = wyvern.Arts
                 for(0, data.randomAdditionalArtsCount) ::(i) {
                   ent.supportArts->push(:
                     Arts.new(base:Arts.database.getRandomFiltered(::(value) <- 
@@ -185,7 +186,7 @@ return {
               
               },
               onEnd ::(result) {          
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = wyvern.Instance
                 instance.quitRun();
               }
             );        

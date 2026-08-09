@@ -12950,6 +12950,8 @@ Arts.database.newEntry(
 Arts = databaseItemMutatorClass.create(  
   name : 'Wyvern.Arts',
   statics : {
+    Deck : {get ::<- import(:'base/arts/deck.mt')},
+    Term : {get ::<- import(:'base/arts/term.mt')},  
     NO_NOTIF : {get ::<- '[[]]'}, 
     FAIL : {get ::<- '[[]]'},
     TARGET_MODE : {get::<- TARGET_MODE},

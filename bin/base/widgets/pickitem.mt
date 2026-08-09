@@ -260,7 +260,7 @@ return ::(
       
       if (tabbed) ::<= {
         prepTabbedChoices(:args);
-        (import(:'game_function.tabbedchoices.mt'))(*args);
+        (import(:'base/widgets/tabbedchoices.mt'))(*args);
       } else 
         choicesColumns(*args);
 

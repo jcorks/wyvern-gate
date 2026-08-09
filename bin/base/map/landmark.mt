@@ -918,7 +918,7 @@ Landmark.database.newEntry(
     legendName: '',
     symbol : '$',
     rarity : 40,        
-    landmarkType : TYPE.BLUEPRINT_SINGLE(:'roomtest.json'),
+    landmarkType : TYPE.BLUEPRINT_SINGLE(:'assets/maps/roomtest.json'),
 
     traits :
       TRAIT.PEACEFUL |
@@ -956,7 +956,7 @@ Landmark.database.newEntry(
     legendName: '',
     symbol : '',
     rarity : 40,        
-    landmarkType : TYPE.BLUEPRINT_SINGLE(:'home.json'),
+    landmarkType : TYPE.BLUEPRINT_SINGLE(:'assets/maps/home.json'),
 
     traits :
       TRAIT.PEACEFUL |
@@ -1018,7 +1018,7 @@ Landmark.database.newEntry(
     legendName: '',
     symbol : '',
     rarity : 40,        
-    landmarkType : TYPE.BLUEPRINT_SINGLE(:'home-chosen.json'),
+    landmarkType : TYPE.BLUEPRINT_SINGLE(:'assets/maps/home-chosen.json'),
 
     traits :
       TRAIT.PEACEFUL |
@@ -1685,7 +1685,7 @@ Landmark.database.newEntry(
 
         @:hud = import(:'core/graphics/hud.mt');
         @:windowEvent = import(module:'core/windowevent.mt');
-        @:partyOptions = import(module:'game_function.partyoptions.mt');
+        @:partyOptions = import(module:'base/widgets/partyoptions.mt');
         @:Island = import(module:'base/map/island.mt');
 
 

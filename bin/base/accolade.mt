@@ -23,6 +23,10 @@
 return struct(
   name: 'Wyvern.Accolade',
   
+  statics : {
+    NewRecord : {get::<-import(module:'base/accolade/newrecord.mt')}
+  },
+  
   items : {
     // The message / name of the accolade to display.
     //Usually a silly / cheeky quote from the dev

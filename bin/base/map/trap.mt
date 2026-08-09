@@ -62,7 +62,7 @@
       exact: true
     );
 
-    @:instance = import(module:'game_singleton.instance.mt');
+    @:instance = import(module:'base/instance.mt');
     
     instance.visitLandmark(landmark:location.targetLandmark);
   },
@@ -127,7 +127,7 @@
       landmark: {},
       onEnd::(result){
         if (!world.battle.partyWon())::<= {
-          @:instance = import(module:'game_singleton.instance.mt');
+          @:instance = import(module:'base/instance.mt');
           instance.gameOver(reason:'The party was wiped out');
         }      
       }
@@ -170,7 +170,7 @@
           if (!member.isIncapacitated())
             all = false
         }
-        @:instance = import(module:'game_singleton.instance.mt');
+        @:instance = import(module:'base/instance.mt');
         
         if (all)
           instance.gameOver(reason:'The party was wiped out.')

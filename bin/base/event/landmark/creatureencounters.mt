@@ -9,7 +9,7 @@
 @:ROOM_MAX_ENTITY = 3;
 @:REACHED_DISTANCE = 1.5;
 @:AGGRESSIVE_DISTANCE = 5;
-@:MAX_ENCOUNTERS = 5;
+@:MAX_ENCOUNTERS = 2;
 
 
 @:DungeonEncounters = LoadableClass.create(

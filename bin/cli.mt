@@ -381,16 +381,43 @@ instance.mainMenu(
     enterNewLocation(
       path: './',
       action::(filesystem) {
-        foreach(filesystem.directoryContents) ::(k, v) {
-          if (v.name->contains(:'.json')) {
-            ::? {
-              loaded[v.name] = filesystem.readJSON(:v.path);
-            } => {
-              onError ::<- 
-                error(detail:v.path + ' could not be opened.')
+        @:items = [];
+        @:getRelPath = :: {
+          @out = ''
+          foreach(items) ::(k, v) {
+            out = out + v + '/'
+          }        
+          return out;
+        }
+        
+        @:enterDir ::(dir) {                
+          @:oldCwd = filesystem.cwd;
+          filesystem.cwd = dir;
+          items->push(:dir);
+
+      
+          foreach(filesystem.directoryContents) ::(k, v) {
+            when (v.isFile == false)
+              enterDir(:v.name);
+              
+            if (v.name->contains(:'.json')) {
+              ::? {
+                breakpoint();
+                loaded[getRelPath()+v.name] = filesystem.readJSON(:v.path);
+              } => {
+                onError ::(message) {
+                  error(detail:v.path + ' could not be opened.')
+                }
+              }
             }
           }
+          filesystem.cwd = oldCwd;
+          items->pop
         }
+        
+
+        
+        enterDir(:'assets');
       }
     );  
     
@@ -428,7 +455,7 @@ instance.mainMenu(
           )
         } => {
           onError::(message) {
-            error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':' + message.detail);
+            error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':\n' + message.detail);
           }
         }
       }
@@ -441,7 +468,7 @@ instance.mainMenu(
           )
         } => {
           onError::(message) {
-            error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':' + message.detail);
+            error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':\n' + message.detail);
           }
         }
       }      

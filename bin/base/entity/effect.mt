@@ -6148,7 +6148,7 @@ Effect.newEntry(
         when(world.party.isMember(:holder) == false)
           empty;
           
-        @:instance = import(:'game_singleton.instance.mt');
+        @:instance = import(:'base/instance.mt');
         windowEvent.queueMessage(text:'The party teleported out of the area.');
         windowEvent.queueCustom(
           onEnter ::{

@@ -31,10 +31,11 @@
 @:Inventory = import(module:'base/item/inventory.mt');
 @:world = import(module:'base/world.mt');
 @:pickItem = import(:'base/widgets/pickitem.mt');
+@:Scenario = import(:'base/scenario.mt');
 
-@:theRogueInitDatabase = import(:'game_scenario.therogue.database.mt');
-@:theRogueClass        = import(:'game_scenario.therogue.class.mt');
-@:characterCreator     = import(:'game_scenario.therogue.charactercreator.mt');
+@:theRogueInitDatabase = import(:'wyvern-gate.rasa.therogue/database.mt');
+@:theRogueClass        = import(:'wyvern-gate.rasa.therogue/class.mt');
+@:characterCreator     = import(:'wyvern-gate.rasa.therogue/charactercreator.mt');
 
 
 /*
@@ -69,10 +70,6 @@ completion:
 
 
 @:DATA_KEY = 'therogue';
-
-
-
-
 
 
 
@@ -151,7 +148,7 @@ completion:
       theRogue.context = data[DATA_KEY];  
     
       @world = import(module:'base/world.mt');
-      @:instance = import(module:'game_singleton.instance.mt');
+      @:instance = import(module:'base/instance.mt');
       world.island.travel();       
       if (world.landmark) ::<= {
         world.landmark.travel();
@@ -162,7 +159,7 @@ completion:
     onDeath ::(data, entity){},
     onBegin ::(data) {
     
-      @:instance = import(module:'game_singleton.instance.mt');
+      @:instance = import(module:'base/instance.mt');
       @:story = import(module:'base/story.mt');
       @world = import(module:'base/world.mt');
       @:LargeMap = import(module:'base/map/large.mt');
@@ -207,4 +204,13 @@ completion:
   }
 }
 
-return theRogue;
+return { 
+  onGameStartup ::{
+  },
+
+  onDatabaseStartup :: {
+
+    Scenario.database.newEntry(data:theRogue)
+  }
+}
+

@@ -340,7 +340,7 @@ return {
           ],
           onChoice::(choice) {
             when(choice == 2) empty;
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             instance.quitRun();
           }
         );      
@@ -352,7 +352,7 @@ return {
       filter ::(island, landmark) <- landmark == empty,
       keepInteractionMenu : true,
       select::(island, landmark) {
-        @:instance = import(module:'game_singleton.instance.mt');
+        @:instance = import(module:'base/instance.mt');
         @:loading = import(module:'base/widgets/loading.mt');
         loading(
           message : 'Saving world...',
@@ -370,7 +370,7 @@ return {
       filter ::(island, landmark) <- true,
       keepInteractionMenu : true,
       select::(island, landmark) {
-        @:instance = import(module:'game_singleton.instance.mt');
+        @:instance = import(module:'base/instance.mt');
         @:loading = import(module:'base/widgets/loading.mt');
         loading(
           message : 'Quick saving...',
@@ -395,7 +395,7 @@ return {
       select::(island, landmark) {
         @:world = import(module:'base/world.mt');
       
-        @:instance = import(:'game_singleton.instance.mt')
+        @:instance = import(:'base/instance.mt')
         instance.optionsMenu();
       }
     )
@@ -493,7 +493,7 @@ return {
       keepInteractionMenu : true,
       filter::(island, landmark) <- true,
       select::(island, landmark) {
-        (import(module:'game_function.partyoptions.mt'))();
+        (import(module:'base/widgets/partyoptions.mt'))();
       }
     ),
 

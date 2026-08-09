@@ -350,7 +350,7 @@ Island.database.newEntry(
 
     // augments an entity based on the current tier
     @augmentTiered = ::(entity) {
-      @:instance = import(:'game_singleton.instance.mt');
+      @:instance = import(:'base/instance.mt');
       @:Arts = import(module:'base/arts.mt');
 
       // Assigns support arts for every entity.

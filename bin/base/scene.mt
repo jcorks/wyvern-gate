@@ -121,7 +121,7 @@ Scene.newEntry(
           onEnd::(result){
           
             if (!world.battle.partyWon())::<= {
-              @:instance = import(module:'game_singleton.instance.mt');
+              @:instance = import(module:'base/instance.mt');
               instance.gameOver(reason:'The party was wiped out.');
             }
 

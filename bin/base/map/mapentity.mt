@@ -252,7 +252,7 @@ MapEntity.Task.database.newEntry(
           when(!world.battle.partyWon()) ::<= {
             @:windowEvent = import(module:'core/windowevent.mt');
 
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             instance.gameOver(reason: 'The party has been wiped out.');
           }
           
@@ -484,7 +484,7 @@ MapEntity.Task.database.newEntry(
                 );
               }
                 
-              @:instance = import(module:'game_singleton.instance.mt');
+              @:instance = import(module:'base/instance.mt');
               instance.gameOver(reason:'The Wyvern Specter claims the items as the Shrine\'s possessions.');
             }
           );

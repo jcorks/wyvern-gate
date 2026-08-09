@@ -1,0 +1,15 @@
+{
+  "id": "wyvern-gate.rasa.therogue",
+  "name": "Scenario: The Rogue",
+  "description": "The starting scenario",
+  "author": "Rasa",
+  "website": "https://github.com/jcorks/wyvern-gate",
+  "files" : [
+    "main.mt",
+    "class.mt",
+    "database.mt",
+    "charactercreator.mt"
+  ],
+  "JSONdata" : [],
+  "loadFirst" : []
+}

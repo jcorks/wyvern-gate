@@ -341,7 +341,7 @@ Quest.database.newEntry(
           ],
           landmark: {},
           onEnd::(result) {
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             if (!world.battle.partyWon()) 
               instance.gameOver(reason:'The party was wiped out.');
           }
@@ -630,6 +630,9 @@ Quest.database.newEntry(
 @:Quest = databaseItemMutatorClass.create(
   name : 'Wyvern.Quest',
   statics : {
+    Guild : {
+      get ::<- import(:'base/quest/guild.mt')
+    },
     RANK : {
       get ::<- RANK
     },

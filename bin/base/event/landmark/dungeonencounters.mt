@@ -6,10 +6,10 @@
 @:LoadableClass = import(module:'core/data/loadableclass.mt');
 
 
-@:ROOM_MAX_ENTITY = 6;
+@:ROOM_MAX_ENTITY = 2;
 @:REACHED_DISTANCE = 1.5;
 @:AGGRESSIVE_DISTANCE = 5;
-@:MAX_ENCOUNTERS = 30;
+@:MAX_ENCOUNTERS = 3;
 
 
 @:DungeonEncounters = LoadableClass.create(

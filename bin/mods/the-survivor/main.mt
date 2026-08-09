@@ -17,3 +17,8 @@ TODO!
 - win 5 times in a row
 - each win tier ++
 */
+
+return {
+  onGameStartup::{},
+  onDatabaseStartup::{}
+}

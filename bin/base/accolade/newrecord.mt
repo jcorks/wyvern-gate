@@ -73,7 +73,7 @@ return ::(wish) {
       );
 
       
-      @:instance = import(module:'game_singleton.instance.mt');
+      @:instance = import(module:'base/instance.mt');
       instance.queueCredits();
       
       

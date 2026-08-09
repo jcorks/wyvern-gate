@@ -32,7 +32,7 @@ Book.newEntry(
     id : 'base:how-to-fight',
     author : 'Guildmaster Tsahlothi',
     onGetContents :: {
-      import(:'game_function.battletutorial.mt')();
+      import(:'base/battle/tutorial.mt')();
       return "That's about all it says.";
     }
   }

@@ -1,0 +1,12 @@
+{
+  "id": "wyvern-gate.rasa.thechosen",
+  "name": "Scenario: The Chosen",
+  "description": "The starting scenario",
+  "author": "Rasa",
+  "website": "https://github.com/jcorks/wyvern-gate",
+  "files" : [
+    "main.mt"
+  ],
+  "JSONdata" : [],
+  "loadFirst" : []
+}

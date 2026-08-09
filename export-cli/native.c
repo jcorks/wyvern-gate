@@ -295,9 +295,42 @@ static void sleep_a_little() {
     WaitForSingleObject(timer, INFINITE); 
     CloseHandle(timer); 
 }
+
+static const char * get_canonical_cwd() {
+    #define MAX_STR_LEN 1024
+    static char * path = NULL;
+    if (path == NULL) {
+        path = malloc(MAX_STR_LEN+1);
+        GetCurrentDirectory(MAX_STR_LEN, path);
+    }
+    return path;
+}
+
+#define DIR_SEPARATOR '\\'
+
+
+
+
 #else 
+
+
+
+
+
+
+
 static void sleep_a_little() {
     usleep(1000*30);
+}
+
+static const char * get_canonical_cwd() {
+    #define MAX_STR_LEN 1024
+    static char * path = NULL;
+    if (path == NULL) {
+        path = malloc(MAX_STR_LEN+1);
+        getcwd(path, MAX_STR_LEN);
+    }
+    return path;
 }
 #endif
 
@@ -325,6 +358,7 @@ static matteValue_t wyvern_gate__native__getchWait(
   
 }
 
+#define DIR_SEPARATOR '/'
 
 
 
@@ -2057,9 +2091,9 @@ static matteValue_t wyvern_gate__native__canvas(
 }
 
 
-
-
 void wyvern_gate_add_native(matte_t * m) {
+
+
     matte_add_external_function(
         m,
         "wyvern_gate__native__bfs",

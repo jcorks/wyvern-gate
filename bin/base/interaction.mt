@@ -179,7 +179,7 @@ Interaction.newEntry(
             ]
           );
 
-          @:instance = import(module:'game_singleton.instance.mt');
+          @:instance = import(module:'base/instance.mt');
 
           if (party.members->size == 1) ::<= {
             windowEvent.queueMessage(
@@ -435,7 +435,7 @@ Interaction.newEntry(
               enemies: [talkee],
               landmark: {},
               onEnd::(result) {
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = import(module:'base/instance.mt');
                 when(!world.battle.partyWon()) 
                   instance.gameOver(reason:'The party was wiped out.');
               
@@ -617,7 +617,7 @@ Interaction.newEntry(
                     );
                     windowEvent.jumpToTag(name:'pickItem', doResolveNext: true, goBeforeTag: true);
                     
-                    @:gamblist = import(module:'game_singleton.gamblist.mt');
+                    @:gamblist = import(module:'base/gambling/gamblist.mt');
                     gamblist.playGame(onFinish::(partyWins) {
                       when(!partyWins) ::<= {
                         windowEvent.queueMessage(
@@ -789,7 +789,7 @@ Interaction.newEntry(
             enemies: [talkee],
             landmark: {},
             onEnd::(result) {
-              @:instance = import(module:'game_singleton.instance.mt');
+              @:instance = import(module:'base/instance.mt');
               when(!world.battle.partyWon())
                 instance.gameOver(reason:'The party was wiped out.');
             
@@ -1355,7 +1355,7 @@ Interaction.newEntry(
           enemies: [location.ownedBy],
           landmark: {},
           onEnd::(result) {
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             if (!world.battle.partyWon()) 
               instance.gameOver(reason:'The party was wiped out.');
           }
@@ -1513,7 +1513,7 @@ Interaction.newEntry(
           enemies: [location.ownedBy],
           landmark: {},
           onEnd::(result) {
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             if (!world.battle.partyWon()) 
               instance.gameOver(reason:'The party was wiped out.');
           }
@@ -1669,7 +1669,7 @@ Interaction.newEntry(
           enemies: [seller],
           landmark: {},
           onEnd::(result) {
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             if (!world.battle.partyWon()) 
               instance.gameOver(reason:'The party was wiped out.');
           }
@@ -1733,7 +1733,7 @@ Interaction.newEntry(
       }
       
 
-      @:pickArt = import(:'game_function.pickart.mt');
+      @:pickArt = import(:'base/widgets/pickart.mt');
       pickArt(
         onGetList::<- location.data.arts,
         keep: true,
@@ -2149,7 +2149,7 @@ Interaction.newEntry(
           windowEvent.queueCustom( 
             onEnter::{
             @:Landmark = import(module:'base/map/landmark.mt');
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
 
 
             world.loadIsland(key, onDone::(island) {
@@ -2259,7 +2259,7 @@ Interaction.newEntry(
       
       windowEvent.queueCustom(
         onEnter:: {
-          @:instance = import(module:'game_singleton.instance.mt');
+          @:instance = import(module:'base/instance.mt');
           location.targetLandmark.visit(onLoad::(landmark) <- location.targetLandmarkEntry);
         }
       )
@@ -2327,7 +2327,7 @@ Interaction.newEntry(
               enemies: v.data.entities,
               landmark: {},
               onEnd::(result) {
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = import(module:'base/instance.mt');
                 if (!world.battle.partyWon()) 
                   instance.gameOver(reason:'The party was wiped out.');
 
@@ -2387,7 +2387,7 @@ Interaction.newEntry(
         location.targetLandmark.loadContent();
         location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
       }
-      @:instance = import(module:'game_singleton.instance.mt');
+      @:instance = import(module:'base/instance.mt');
 
       location.targetLandmark.visit(onLoad::(landmark)<-location.targetLandmarkEntry);
       canvas.clear();
@@ -2483,7 +2483,7 @@ Interaction.newEntry(
           enemies: e,
           landmark: {},
           onEnd::(result) {
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             if (!world.battle.partyWon()) 
               instance.gameOver(reason:'The party was wiped out.');
 
@@ -3732,6 +3732,11 @@ Interaction.newEntry(
 
 @:Interaction = Database.new(
   name : 'Wyvern.Interaction',
+  statics : {
+    Common : {get ::<- import(:'base/interaction/common.mt')},
+    MenuEntry : {get ::<- import(:'base/interaction/menuentry.mt')}
+    
+  },
   attributes : {
     name : String,
     id : String,

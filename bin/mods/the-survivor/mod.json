@@ -1,0 +1,12 @@
+{
+  "id": "wyvern-gate.rasa.thesurvivor",
+  "name": "Scenario: The Survivor",
+  "description": "The second scenario; a part of the base game.",
+  "author": "Rasa",
+  "website": "https://github.com/jcorks/wyvern-gate",
+  "files" : [
+    "main.mt"
+  ],
+  "JSONdata" : [],
+  "loadFirst" : []
+}

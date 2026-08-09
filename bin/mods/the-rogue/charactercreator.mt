@@ -31,7 +31,7 @@
 @:Inventory = import(module:'base/item/inventory.mt');
 @:world = import(module:'base/world.mt');
 @:pickItem = import(:'base/widgets/pickitem.mt');
-@:Interaction = import(module:'base/interaction/interaction.mt');
+@:Interaction = import(module:'base/interaction.mt');
 
 return ::(onDone) {
   windowEvent.queueMessage(
@@ -57,7 +57,7 @@ return ::(onDone) {
         onGetPrompt::<- 'Name: ' + name,
         choicesMatch : [
           'Choose one for me', ::<- name = namegen.person(),
-          'Enter name...', ::<- name = (import(:'game_function.name.mt'))()
+          'Enter name...', ::<- name = (import(:'base/widgets/name.mt'))()
         ],
         canCancel : true
 

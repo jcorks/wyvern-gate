@@ -1,3 +1,4 @@
+
 @:class = import(module:'Matte.Core.Class');
 @:Database = import(module:'core/data/database.mt');
 @:StatSet = import(module:'base/util/statset.mt');
@@ -19,6 +20,7 @@
 @:romanNum = import(module:'base/util/romannumerals.mt');
 @:ParticleEmitter = import(module:'core/graphics/particle.mt');
 @:Arts = import(:'base/arts.mt');
+@:Scenario = import(:'base/scenario.mt');
 
 
 
@@ -133,7 +135,7 @@
           onEnd::(result) {
             when(world.battle.partyWon()) empty;
               
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             instance.gameOver(reason:'The party was wiped out.');
           }
         );          
@@ -268,14 +270,14 @@
 
 
 
-return {
+@:TheChosen = {
   name : 'The Chosen',
   id : 'rasa:thechosen',
   skipName : false,
   everyoneIsAFriend : true,
   events : {
   onBegin ::(data) {
-    @:instance = import(module:'game_singleton.instance.mt');
+    @:instance = import(module:'base/instance.mt');
     @:story = import(module:'base/story.mt');
     @world = import(module:'base/world.mt');
     @:LargeMap = import(module:'base/map/large.mt');
@@ -808,7 +810,7 @@ return {
       @world = import(module:'base/world.mt');
       @:story = import(module:'base/story.mt');
       @:Scene = import(module:'base/scene.mt');            
-      @:instance = import(module:'game_singleton.instance.mt');
+      @:instance = import(module:'base/instance.mt');
       // the changeling
       when (world.party.members->size == 0) ::<= {
         Scene.start(id:'thechosen:scene_intro_changeling', onDone::{        
@@ -1044,7 +1046,7 @@ return {
           when(world.battle.partyWon()) ::<= { 
           };
             
-          @:instance = import(module:'game_singleton.instance.mt');
+          @:instance = import(module:'base/instance.mt');
           instance.gameOver(reason:'The party was wiped out.');
         }
       );
@@ -1270,7 +1272,7 @@ return {
   },
   
   databaseOverrides ::{
-    @:Interaction = import(module:'base/interaction/interaction.mt');
+    @:Interaction = import(module:'base/interaction.mt');
     
     Interaction.newEntry(:{
       name : 'Sentimental Box',
@@ -1400,7 +1402,7 @@ return {
               location.targetLandmark.loadContent();
               location.targetLandmarkEntry = location.targetLandmark.getRandomEmptyPosition();
             }
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
 
             location.targetLandmark.visit()
             location.targetLandmark.map.setPointer(
@@ -1460,7 +1462,7 @@ return {
                   
                   windowEvent.queueCustom(
                     onEnter::{
-                      @:instance = import(module:'game_singleton.instance.mt');
+                      @:instance = import(module:'base/instance.mt');
                       world.island.visit();
                       world.island.travel();
                     }
@@ -1517,7 +1519,7 @@ return {
           
           windowEvent.queueCustom(
             onEnter:: {
-              @:instance = import(module:'game_singleton.instance.mt');
+              @:instance = import(module:'base/instance.mt');
               location.targetLandmark.visit();
               location.targetLandmark.map.setPointer(
                 x:location.targetLandmarkEntry.x,
@@ -3109,7 +3111,7 @@ return {
                 onEnd ::(result) {
                   when(world.battle.partyWon()) empty;
                     
-                  @:instance = import(module:'game_singleton.instance.mt');
+                  @:instance = import(module:'base/instance.mt');
                   instance.gameOver(reason:'The party was wiped out.');
                 }
               );
@@ -3150,7 +3152,7 @@ return {
                 
                 windowEvent.queueCustom(
                   onEnter::{
-                    @:instance = import(module:'game_singleton.instance.mt');
+                    @:instance = import(module:'base/instance.mt');
                     instance.gameOver(reason:'The party was wiped out.');
                   }
                 );
@@ -3231,9 +3233,9 @@ return {
               renderable:{render::{canvas.fill();}},
               text: 'You are teleported away...'
             );
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
             windowEvent.queueCustom(onEnter::{
-              windowEvent.jumpToTag(name:'VisitIsland');
+              world.island.travel();
               instance.unlockScenarios();
               instance.unlockSeeds();
             });            
@@ -3398,7 +3400,9 @@ return {
                   text: 'You are teleported away...'
                 );
 
-                windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
+                windowEvent.queueCustom(onEnter::{
+                  world.island.travel();                
+                });            
               }
             );
           }
@@ -3433,7 +3437,7 @@ return {
                 
                 windowEvent.queueCustom(
                   onEnter::{
-                    @:instance = import(module:'game_singleton.instance.mt');
+                    @:instance = import(module:'base/instance.mt');
                     instance.gameOver(reason:'The party was wiped out.');
                   }
                 );
@@ -3507,8 +3511,10 @@ return {
               renderable:{render::{canvas.fill();}},
               text: 'You are teleported away...'
             );
-            @:instance = import(module:'game_singleton.instance.mt');
-            windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
+            @:instance = import(module:'base/instance.mt');
+            windowEvent.queueCustom(onEnter::{
+              world.island.travel();                
+            });            
           }
         ]
       }
@@ -3545,7 +3551,7 @@ return {
                   speaker: 'Ziikaettaal',
                   text: 'Prepare yourself.',
                   onLeave::{
-                    @:dice = import(module:'game_function.dice.mt');
+                    @:dice = import(module:'base/gambling/dice.mt');
                     dice(
                       onFinish::(partyWins) {
                       
@@ -3633,7 +3639,9 @@ return {
                   text: 'You are teleported away...'
                 );
 
-                windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
+                windowEvent.queueCustom(onEnter::{
+                  world.island.travel();                
+                });            
               }
             );
           }
@@ -3670,7 +3678,7 @@ return {
                 
                 windowEvent.queueCustom(
                   onEnter::{
-                    @:instance = import(module:'game_singleton.instance.mt');
+                    @:instance = import(module:'base/instance.mt');
                     instance.gameOver(reason:'The party was wiped out.');
                   }
                 );
@@ -3762,8 +3770,10 @@ return {
               renderable:{render::{canvas.fill();}},
               text: 'You are teleported away...'
             );
-            @:instance = import(module:'game_singleton.instance.mt');
-            windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
+            @:instance = import(module:'base/instance.mt');
+            windowEvent.queueCustom(onEnter::{
+              world.island.travel();                
+            });            
           }
         ]
       }
@@ -4002,7 +4012,9 @@ return {
                   text: 'You are teleported away...'
                 );
 
-                windowEvent.queueCustom(onEnter::{windowEvent.jumpToTag(name:'VisitIsland');});            
+                windowEvent.queueCustom(onEnter::{
+                  world.island.travel();                
+                });            
               }
             );
           }
@@ -4042,7 +4054,7 @@ return {
                 
                 windowEvent.queueCustom(
                   onEnter::{
-                    @:instance = import(module:'game_singleton.instance.mt');
+                    @:instance = import(module:'base/instance.mt');
                     instance.gameOver(reason:'The party was wiped out.');
                   }
                 );
@@ -4178,8 +4190,8 @@ return {
           ['Shaarraeziil', 'Alas! You have done a great job.'],
           ['Shaarraeziil', 'Now.. What is your wish?'],
           ::(location, landmark, doNext) {
-            @:instance = import(module:'game_singleton.instance.mt');
-            @:enter = import(module:'game_function.name.mt');
+            @:instance = import(module:'base/instance.mt');
+            @:enter = import(module:'base/widgets/name.mt');
             enter(
               prompt: 'What is your wish?',
               onDone ::(name) {
@@ -4262,7 +4274,7 @@ return {
 
             windowEvent.queueCustom(
               onEnter :: {
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = import(module:'base/instance.mt');
                 world.loadIsland(key, onDone::(island) {
                   world.island.visit();
                   @:which = world.island.landmarks->filter(::(value) <- value.base.id == 'base:wyvern-gate');
@@ -4281,7 +4293,7 @@ return {
 
 
             
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
 
             world.loadIsland(key, onDone::(island) {
               world.island.visit();
@@ -4313,7 +4325,7 @@ return {
                 when(which == false) ::<= {
                   doNext();  
                 }
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = import(module:'base/instance.mt');
                 @:world = import(module:'base/world.mt');
                 @:landmark = Landmark.new(
                   island : location.landmark.island,
@@ -4334,7 +4346,7 @@ return {
 
 
 
-            @:instance = import(module:'game_singleton.instance.mt');
+            @:instance = import(module:'base/instance.mt');
 
             @:canvas = import(module:'core/graphics/canvas.mt');
             windowEvent.queueMessage(
@@ -4344,7 +4356,7 @@ return {
 
             windowEvent.queueCustom(
               onEnter :: {
-                @:instance = import(module:'game_singleton.instance.mt');
+                @:instance = import(module:'base/instance.mt');
                 world.loadIsland(key, onDone::(island) {
                   world.island.visit();
                   @:which = world.island.landmarks->filter(::(value) <- value.base.id == 'base:wyvern-gate');
@@ -4375,8 +4387,8 @@ return {
           ::(location, landmark, doNext) {
             @:world = import(module:'base/world.mt')
             world.accoladeEnable(name:'acceptedQuest');
-            @:instance = import(module:'game_singleton.instance.mt');
-            @:enter = import(module:'game_function.name.mt');
+            @:instance = import(module:'base/instance.mt');
+            @:enter = import(module:'base/widgets/name.mt');
             enter(
               prompt: 'What is your wish?',
               onDone ::(name) {
@@ -4983,4 +4995,14 @@ return {
     }) 
   }    
   
+}
+
+
+return { 
+  onGameStartup ::{
+  },
+
+  onDatabaseStartup :: {
+    Scenario.database.newEntry(data:TheChosen);
+  }
 }

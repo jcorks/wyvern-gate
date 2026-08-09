@@ -30,11 +30,11 @@
 
 
 
-@:canvas = import(module:'game_singleton.canvas.mt');
+@:canvas = import(module:'core/graphics/canvas.mt');
 @:class = import(module:'Matte.Core.Class');
-@:random = import(module:'game_singleton.random.mt');
-@:Landmark = import(module:'game_mutator.landmark.mt');
-@:Map = import(module:'game_class.map.mt');
+@:random = import(module:'core/random.mt');
+@:Landmark = import(module:'base/map/landmark.mt');
+@:Map = import(module:'core/map.mt');
 
 @:mapSizeW  = 38;
 @:mapSizeH  = 16;
@@ -87,7 +87,7 @@
     @:xSeed = BUFFER_SPACE + (random.number() * width)->round;
     @:ySeed = BUFFER_SPACE + (random.number() * height)->round;
     @:radius = random.integer(from:SEED_RADIUS_MIN, to:SEED_RADIUS_MAX);; 
-    @:distanceFn = import(:'game_function.distance.mt');
+    @:distanceFn = import(:'base/util/distance.mt');
     
     @:info = {
       x : xSeed,
@@ -122,7 +122,7 @@
     @:xSeed = (random.number() * width)->round;
     @:ySeed = (random.number() * height)->round;
     @:radius = 20 + random.number()*50; 
-    @:distanceFn = import(:'game_function.distance.mt');
+    @:distanceFn = import(:'base/util/distance.mt');
     
     @:added = {};
   
@@ -605,7 +605,7 @@
     ['Finalizing terrain (2/2)...', generateTerrain_cleanup],
     ['Connecting islands...', generateTerrain_connect],
   ]        
-  @:loading = import(:'game_function.loading.mt');
+  @:loading = import(:'base/widgets/loading.mt');
   foreach(phases) ::(k, phase) {
     if (AsyncWorker)
       AsyncWorker.sendToParent(:phase[0]);

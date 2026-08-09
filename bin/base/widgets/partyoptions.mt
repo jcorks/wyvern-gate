@@ -535,7 +535,7 @@ return ::{
                                 windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
                             
                             
-                              @:name = import(module:"game_function.name.mt");
+                              @:name = import(module:"base/widgets/name.mt");
                               name(
                                 prompt: 'New item name:',
                                 onDone::(name) {
@@ -597,7 +597,7 @@ return ::{
                         choiceActions->push(::{
                           when (!in.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
                             windowEvent.queueMessage(text:member.in.name + ' cannot be renamed.');
-                          @:name = import(module:"game_function.name.mt");
+                          @:name = import(module:"base/widgets/name.mt");
                           name(
                             prompt: 'New item name:',
                             onDone::(name) {

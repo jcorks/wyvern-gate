@@ -22,13 +22,14 @@
 
 
 @:reset ::{
+  /*
   Scenario.database.newEntry(
     data : import(module:'mods/the-chosen/main.mt')
   )   
   Scenario.database.newEntry(
     data : import(module:'mods/the-trader/main.mt')
   )   
-  /*
+  
   Scenario.database.newEntry(
     data : import(module:'game_scenario.therogue.mt')
   ) 

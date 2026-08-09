@@ -913,6 +913,16 @@
 @:Entity = LoadableClass.createLight(
   name : 'Wyvern.Entity', 
   statics : {
+    Damage : {get ::<- import(:'base/entity/damage.mt')},
+    Effect : {get ::<- import(:'base/entity/effect.mt')},
+    EffectStack : {get ::<- import(:'base/entity/effectstack.mt')},
+    Personality : {get ::<- import(:'base/entity/personality.mt')},
+    Quality : {get ::<- import(:'base/entity/quality.mt')},
+    Profession : {get ::<- import(:'base/entity/profession.mt')},
+    Species : {get ::<- import(:'base/entity/species.mt')},
+    StateFlags : {get ::<- import(:'base/entity/stateflags.mt')},
+    
+  
     PROF_EXP_PER_KNOCKOUT : {get::<- PROF_EXP_PER_KNOCKOUT},
     EQUIP_SLOTS : {get::<- EQUIP_SLOTS},
     DAMAGE_TARGET : {get::<- DAMAGE_TARGET},
@@ -1382,7 +1392,7 @@
     editLoadout :: {
       @:state = _.state;
       @:this = _.this;
-      @:pickArt = import(:'game_function.pickart.mt');
+      @:pickArt = import(:'base/widgets/pickart.mt');
       
       
       
@@ -1530,7 +1540,7 @@
       }
 
       
-      @:pickArt = import(:'game_function.pickart.mt');
+      @:pickArt = import(:'base/widgets/pickart.mt');
       pickArt(categories, prompt, canCancel:true);
     },    
 
@@ -2269,7 +2279,7 @@
             // something got you while in the wild outside of battle, huh?
             // sorry....
             when (this.battle == empty && nextLead == empty) ::<= {
-              @:instance = import(module:'game_singleton.instance.mt');
+              @:instance = import(module:'base/instance.mt');
               instance.gameOver(reason:'No one is able to be leader...');              
             }
             if (nextLead != empty) ::<= {
@@ -3129,7 +3139,7 @@
       @:this = _.this;
 
     
-      @:tabbedChoices = import(:'game_function.tabbedchoices.mt');
+      @:tabbedChoices = import(:'base/widgets/tabbedchoices.mt');
       @:choices = [
         [...enemies],
         [...allies]
@@ -3403,11 +3413,11 @@
       @:this = _.this;
       @:state = _.state;
       when(_.state.overrideInteractID != '') ::<= {
-        @:Interaction = import(module:'base/interaction/interaction.mt');
+        @:Interaction = import(module:'base/interaction.mt');
         Interaction.find(:state.overrideInteractID).interact(location, party);
       };
       
-      (import(module:'game_function.interactperson.mt'))(
+      (import(module:'base/widgets/interactperson.mt'))(
         this, party, location, onDone, skipIntro
       );
     },

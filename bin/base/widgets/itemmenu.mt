@@ -102,7 +102,7 @@ return ::(
 
 
 
-          @:tabbedChoices = import(:'game_function.tabbedchoices.mt');
+          @:tabbedChoices = import(:'base/widgets/tabbedchoices.mt');
           @choice = tabbedChoices(
             leftWeight: if (leftWeight == empty) 1 else leftWeight,
             topWeight: if (topWeight == empty) 1 else topWeight,
@@ -268,7 +268,7 @@ return ::(
         when (!choiceItem.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
           windowEvent.queueMessage(text:choiceItem.name + ' cannot be renamed.');
         
-        @:name = import(module:"game_function.name.mt");
+        @:name = import(module:"base/widgets/name.mt");
         name(
           prompt: 'Item name:',
           canCancel : true,

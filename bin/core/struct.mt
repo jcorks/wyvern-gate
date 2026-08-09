@@ -19,6 +19,7 @@
 
 return ::(
   name => String,
+  statics,
   items => Object,
   readOnly
 ) {
@@ -80,6 +81,8 @@ return ::(
               }
       }
       
+      
+      
       out->setAttributes(
         attributes : {
           '[]' : reactor,
@@ -94,6 +97,13 @@ return ::(
       return out;
     }
   }
+  if (statics != empty) {
+    foreach(statics) ::(k, v) {
+      int[k] = v;
+    }
+  }
+    
+  
   int->setIsInterface(enabled:true);
   return int;
   

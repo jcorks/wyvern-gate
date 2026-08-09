@@ -1,21 +1,24 @@
-@:Item = import(module:'base/item.mt');
-@:windowEvent = import(module:'core/windowevent.mt');
-@:Scenario = import(module:'base/scenario.mt');
-@:Arts = import(module:'base/arts.mt');
-@:commonInteractions = import(module:'base/interaction/common.mt');
-@:Effect = import(module:'base/entity/effect.mt');
-@:random = import(module:'core/random.mt');
+@:WyvernGate = import(:'wyvern-gate.mt');
 
-@:world = import(module:'base/world.mt');
-@:instance = import(module:'game_singleton.instance.mt');
 
-@:Entity = import(module:'base/entity.mt');
-@:Species = import(module:'base/entity/species.mt');
-@:Profession = import(module:'base/entity/profession.mt');
-@:EnterNumber = import(module:'base/widgets/number.mt');
+@:Item = WyvernGate.Item
+@:windowEvent = WyvernGate.Core.WindowEvent
+@:Scenario = WyvernGate.Scenario
+@:Arts = WyvernGate.Arts
 
-@:canvas = import(module:'core/graphics/canvas.mt');
-@:StatSet = import(module:'base/util/statset.mt');
+@:Effect = WyvernGate.Entity.Effect
+@:random = WyvernGate.Core.Random
+
+@:world = WyvernGate.World
+@:instance = WyvernGate.Instance;
+
+@:Entity = WyvernGate.Entity
+@:Species = WyvernGate.Entity.Species
+@:Profession = WyvernGate.Entity.Profession
+@:EnterNumber = WyvernGate.Widgets.Number
+
+@:canvas = WyvernGate.Core.Graphics.Canvas
+@:StatSet = WyvernGate.Util.StatSet
 
 
 
@@ -25,7 +28,6 @@
   windowEvent.invalidateCache(:MAIN_TAG);
 }
 
-import(:'base/widgets/descriptivelist.mt');
 
 @:addEntity ::(data, ent){
   ent.data.tier = world.island.tier;
@@ -362,12 +364,12 @@ return {
       // List of interactions available when controlling the party 
       // in a battle.
       interactionsBattle : [
-        commonInteractions.battle.attack,
-        commonInteractions.battle.arts,
-        commonInteractions.battle.check,
-        commonInteractions.battle.item,
-        commonInteractions.battle.wait,
-        commonInteractions.battle.log,
+        WyvernGate.Interaction.Common.battle.attack,
+        WyvernGate.Interaction.Common.battle.arts,
+        WyvernGate.Interaction.Common.battle.check,
+        WyvernGate.Interaction.Common.battle.item,
+        WyvernGate.Interaction.Common.battle.wait,
+        WyvernGate.Interaction.Common.battle.log,
       ],
       
       // List of general options available, such as quitting the game.

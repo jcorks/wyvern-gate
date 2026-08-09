@@ -731,7 +731,7 @@
         }        
 
         if (newHour && state.time == TIME.EVENING) ::<= {
-          @:instance = import(:'game_singleton.instance.mt');
+          @:instance = import(:'base/instance.mt');
           if (instance.y) ::<= {
             windowEvent.queueMessage(
               text: '"What a horrible night to have a curse."'
@@ -802,7 +802,7 @@
       save ::{
         State.startRootSerializeGuard();
         // first load
-        @:instance = import(:'game_singleton.instance.mt');
+        @:instance = import(:'base/instance.mt');
         @save = instance.getSaveDataRaw();
         if (save == empty)
           save = {};
@@ -843,7 +843,7 @@
 
       loadIslandID ::(id, islandGenTraits, skipSave, onDone => Function) {
         // first load existing save. The save has all the current islands 
-        @:instance = import(:'game_singleton.instance.mt');
+        @:instance = import(:'base/instance.mt');
 
         @save = if (skipSave != true)
           instance.getSaveDataRaw();
@@ -939,7 +939,7 @@
         State.startRootSerializeGuard();
         ::<= {
           if (!State.weightCheck(:serialized)) ::<= {
-            @:instance = import(:'game_singleton.instance.mt');
+            @:instance = import(:'base/instance.mt');
             instance.x = true;
           }
         

@@ -3410,7 +3410,7 @@ Item.database.newEntry(data : {
         }
 
         @:story = import(:'base/story.mt');
-        @:capitalize = import(:'game_function.capitalize.mt');
+        @:capitalize = import(:'base/util/capitalize.mt');
         item.name = random.pickArrayItem(:keyQualifiers) + ' Key (Tier '+ tier + ')';
         item.price += 4420 * tier;
         item.setIslandGenTraits(
@@ -3635,6 +3635,19 @@ none.name = 'None';
 @:Item = databaseItemMutatorClass.createLight(
   name : 'Wyvern.Item',  
   statics : {
+    
+    ApparelMaterial : {get::<-import(:'base/item/apparelmaterial.mt')},
+    Book : {get::<-import(:'base/item/book.mt')},
+    Color  : {get::<-import(:'base/item/color.mt')},
+    Design : {get::<-import(:'base/item/design.mt')},
+    Edible  : {get::<-import(:'base/item/edible.mt')},
+    Enchant : {get::<-import(:'base/item/enchant.mt')},
+    Improvement : {get::<-import(:'base/item/improvement.mt')},
+    InletSet : {get::<-import(:'base/item/inletset.mt')},
+    Inventory : {get::<-import(:'base/item/inventory.mt')},
+    Material : {get::<-import(:'base/item/material.mt')},
+    Quality : {get::<-import(:'base/item/quality.mt')},
+  
     TYPE : {get::<-TYPE},
     TRAIT : {get::<-TRAIT},
     USE_TARGET_HINT : {get::<-USE_TARGET_HINT},
