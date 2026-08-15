@@ -137,6 +137,7 @@ WyvernGate.Entity.Quality
 WyvernGate.Entity.Profession
 WyvernGate.Entity.Species
 WyvernGate.Entity.StateFlags
+WyvernGate.Map.Location.Portal
 WyvernGate.Interaction.Common
 WyvernGate.Interaction.MenuEntry
 WyvernGate.Item.ApparelMaterial

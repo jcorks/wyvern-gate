@@ -37,6 +37,9 @@ WINDOW * nc = NULL;
 
 
 
+
+
+
 // represents the external map
 typedef struct {
     // width of the map;
@@ -366,6 +369,44 @@ static matteValue_t wyvern_gate__native__getchWait(
 
 
 
+static matteValue_t wyvern_gate__native__writeDataFileText(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    matteStore_t * store = matte_vm_get_store(vm);
+
+    CHECK_ARG(args[0], MATTE_VALUE_TYPE_STRING);
+    CHECK_ARG(args[1], MATTE_VALUE_TYPE_STRING);
+
+    const matteString_t * name = matte_value_string_get_string_unsafe(store, args[0]);
+    if (
+        matte_string_test_contains(name, MATTE_VM_STR_CAST(vm, "..")) ||
+        matte_string_test_contains(name, MATTE_VM_STR_CAST(vm, "/")) ||
+        matte_string_test_contains(name, MATTE_VM_STR_CAST(vm, "\\"))
+    ) {
+        assert(!"Illegal file name.");
+        return matte_store_new_value(store);
+    }
+  
+    matteString_t * path = matte_string_create_from_c_str(
+        "%s%c%s%c%s",
+        get_canonical_cwd(),
+        DIR_SEPARATOR,
+        "userdata",
+        DIR_SEPARATOR,
+        matte_string_get_c_str(name)
+    );
+    
+    FILE * f = fopen(matte_string_get_c_str(path), "wb");
+    fprintf(f, "%s", matte_string_get_c_str(matte_value_string_get_string_unsafe(store, args[1])));
+    fclose(f);
+
+    return matte_store_new_value(store);
+    
+    
+}
 
 
 
@@ -2092,7 +2133,7 @@ static matteValue_t wyvern_gate__native__canvas(
 
 
 void wyvern_gate_add_native(matte_t * m) {
-
+    get_canonical_cwd();
 
     matte_add_external_function(
         m,
@@ -2128,6 +2169,16 @@ void wyvern_gate_add_native(matte_t * m) {
         NULL
     );
 
+    matte_add_external_function(
+        m,
+        "wyvern_gate__native__writeDataFileText",
+        wyvern_gate__native__writeDataFileText,
+        NULL,
+        
+        "name",
+        "string",
+        NULL
+    );
 
 }
 

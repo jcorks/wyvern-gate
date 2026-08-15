@@ -2491,7 +2491,8 @@ Effect.newEntry(
           text: from.name + ' flung the ' + item.name + ' at ' + holder.name + '!'
         );
 
-        item.throwOut();
+        if (holder.battle != empty)
+          item.throwOut();
         
         windowEvent.queueCustom(
           onEnter::{
@@ -2510,9 +2511,14 @@ Effect.newEntry(
                 ),
                 dodgeable: true                  
               );
-            }            
+            }   
           }
         );
+        
+        if (holder.battle != empty)
+          windowEvent.queueMessage(
+            text: 'The ' + item.name + ' was lost after flinging!'
+          );
 
       }
     }

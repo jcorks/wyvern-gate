@@ -7,6 +7,28 @@
 
 
 
+
+@:ItemSpecter = import(module:'base/event/landmark/itemspecter.mt');
+@:Beast   = import(module:'base/event/landmark/thebeast.mt');
+@:DungeonEncounters = import(module:'base/event/landmark/dungeonencounters.mt');
+@:FlamingSkull  = import(module:'base/event/landmark/flamingskull.mt');
+@:Gnome = import(module:'base/event/landmark/gnome.mt');
+@:Skeleton = import(module:'base/event/landmark/skeleton.mt');
+@:TreasureGolem = import(module:'base/event/landmark/treasuregolem.mt');
+@:TheMirror = import(module:'base/event/landmark/themirror.mt');
+@:GoldSlime = import(module:'base/event/landmark/goldslime.mt');
+@:CreatureEncounters = import(module:'base/event/landmark/creatureencounters.mt')
+@:Mimic = import(module:'base/event/landmark/mimic.mt');
+@:Slime = import(module:'base/event/landmark/slime.mt');
+@:CaveBat = import(module:'base/event/landmark/cavebat.mt');
+@:TheSnakeSiren = import(module:'base/event/landmark/thesnakesiren.mt');
+@:Shadowling = import(module:'base/event/landmark/shadowling.mt');
+@:MobileMushroom = import(module:'base/event/landmark/mobilemushroom.mt');
+@:GiantFlea = import(module:'base/event/landmark/giantflea.mt');
+@:Monolith = import(module:'base/event/landmark/monolith.mt');
+@:Chair = import(module:'base/event/landmark/chair.mt');
+
+
 @:KIND = {
   HOSTILE : 1,
   PEACEFUL : 2,
@@ -21,7 +43,6 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 0,
     startup ::(parent, x, y) {
-      @:ItemSpecter = import(module:'base/event/landmark/itemspecter.mt');
       @:a = ItemSpecter.new(parent);
       return a;
     },
@@ -44,7 +65,6 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 0,
     startup ::(parent, x, y) {
-      @:DungeonEncounters = import(module:'base/event/landmark/dungeonencounters.mt');
       // TODO: make dungeon encounters loadable
       @:a = DungeonEncounters.new(parent);   
       return a;
@@ -68,8 +88,7 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 1,
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/thebeast.mt');
-      @:a = b.new(parent);
+      @:a = Beast.new(parent);
       return a;
     },
     
@@ -92,8 +111,7 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 1,
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/flamingskull.mt');
-      @:a = b.new(parent);
+      @:a = FlamingSkull.new(parent);
       return a;
     },
 
@@ -116,8 +134,7 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 1,
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/gnome.mt');
-      @:a = b.new(parent);
+      @:a = Gnome.new(parent);
       return a;
     },
 
@@ -139,8 +156,7 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 0,
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/skeleton.mt');
-      @:a = b.new(parent);
+      @:a = Skeleton.new(parent);
       return a;
     },
     events : {
@@ -161,8 +177,7 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 3,
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/themirror.mt');
-      @:a = b.new(parent);
+      @:a = TheMirror.new(parent);
       return a;
     },
     
@@ -185,8 +200,7 @@ LandmarkEvent.database.newEntry(
     tier : 1,
     kind : KIND.HOSTILE,
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/treasuregolem.mt');
-      @:a = b.new(parent);
+      @:a = TreasureGolem.new(parent);
       return a;
     },
 
@@ -208,8 +222,7 @@ LandmarkEvent.database.newEntry(
     tier : 0,
     kind : KIND.HOSTILE,
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/goldslime.mt');
-      @:a = b.new(parent);
+      @:a = GoldSlime.new(parent);
       return a;
     },
 
@@ -232,8 +245,7 @@ LandmarkEvent.database.newEntry(
     tier : 0,
     kind : KIND.HOSTILE,
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/creatureencounters.mt');
-      @:a = b.new(parent);
+      @:a = CreatureEncounters.new(parent);
       return a;
     },
 
@@ -255,8 +267,7 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 1,
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/mimic.mt');
-      @:a = b.new(parent);
+      @:a = Mimic.new(parent);
       return a;
     },
 
@@ -278,8 +289,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:slimequeen',
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/slime.mt');
-      @:a = b.new(parent);
+      @:a = Slime.new(parent);
       return a;
     },
     kind : KIND.HOSTILE,
@@ -304,8 +314,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:cave-bat',
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/cavebat.mt');
-      @:a = b.new(parent);
+      @:a = CaveBat.new(parent);
       return a;
     },
     kind : KIND.HOSTILE,
@@ -329,8 +338,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:the-snakesiren',
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/thesnakesiren.mt');
-      @:a = b.new(parent);
+      @:a = TheSnakeSiren
       return a;
     },
     kind : KIND.HOSTILE,
@@ -353,8 +361,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:shadowling',
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/shadowling.mt');
-      @:a = b.new(parent);
+      @:a = Shadowling.new(parent);
       return a;
     },
     kind : KIND.HOSTILE,
@@ -378,8 +385,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:mobile-mushroom',
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/mobilemushroom.mt');
-      @:a = b.new(parent);
+      @:a = MobileMushroom.new(parent);
       return a;
     },
     kind : KIND.HOSTILE,
@@ -402,8 +408,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:giant-flea',
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/giantflea.mt');
-      @:a = b.new(parent);
+      @:a = GiantFlea.new(parent);
       return a;
     },
     kind : KIND.HOSTILE,
@@ -424,8 +429,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:monolith',
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/monolith.mt');
-      @:a = b.new(parent);
+      @:a = Monolith.new(parent);
       return a;
     },
     kind : KIND.HOSTILE,
@@ -447,8 +451,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:chair',
     startup ::(parent, x, y) {
-      @:b = import(module:'base/event/landmark/chair.mt');
-      @:a = b.new(parent);
+      @:a = Chair.new(parent);
       return a;
     },
     kind : KIND.HOSTILE,

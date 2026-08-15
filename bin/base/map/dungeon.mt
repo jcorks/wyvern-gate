@@ -49,10 +49,10 @@
   @cavities = [];
   @:areas = [];
   
-  @ROOM_AREA_SIZE = random.integer(from:4, to:7); // was 5
+  @ROOM_AREA_SIZE = random.integer(from:4, to:5); // was 5
   @ROOM_AREA_SIZE_LARGE = random.integer(from:4, to:9);// was 9
   @ROOM_AREA_VARIANCE = random.integer(from:1, to: 3)*0.2; // was 0.2
-  @ROOM_SIZE = random.integer(from:35, to:45); //50;
+  @ROOM_SIZE = random.integer(from:30, to:38); //50;
   @ROOM_EMPTY_AREA_COUNT = random.integer(from:12, to: 18); //13;
   ;
   @:spaceIndex = map.addScenerySymbol(:' ');

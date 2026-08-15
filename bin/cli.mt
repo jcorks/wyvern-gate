@@ -28,6 +28,7 @@
 @:time = import(module:'Matte.System.Time');
 @:Filesystem = import(module:'Matte.System.Filesystem');
 @:renderLines = getExternalFunction(:'wyvern_gate__native__canvas__renderLines');
+@:write = getExternalFunction(:'wyvern_gate__native__writeDataFileText');
 
 
 
@@ -67,8 +68,8 @@ windowEvent.errorHandler = ::<= {
     ]; 
     
     
-    Filesystem.writeString(
-      path:  'ERROR.LOG',
+    write(
+      name:  'ERROR.LOG',
       string: String.combine(:lines->map(::(value) <- value + '\n'))
     );
   }
@@ -302,9 +303,9 @@ instance.mainMenu(
         when (data->type == String && data == '') 
           filesystem.remove(path: 'save_' + slot);
         
-        filesystem.writeJSON(
-          path: 'save_' + slot,
-          object: data
+        write(
+          name: 'save_' + slot,
+          string: JSON.encode(:data)
         );
       }
     );
@@ -312,7 +313,7 @@ instance.mainMenu(
   
   onListSlots ::{
     return enterNewLocation(
-      path: './',
+      path: 'userdata',
       action::(filesystem) {
         @:out = {};
         foreach(filesystem.directoryContents) ::(k, file) {
@@ -332,7 +333,7 @@ instance.mainMenu(
   ) {
     return ::? {
       return enterNewLocation(
-        path: './',
+        path: 'userdata',
         action::(filesystem) {
           return filesystem.readJSON(
             path: 'save_' + slot
@@ -349,10 +350,10 @@ instance.mainMenu(
   onLoadSettings ::{
     return ::? {
       return enterNewLocation(
-        path: './',
+        path: 'userdata',
         action::(filesystem) {
           return filesystem.readString(
-            path: 'settings'
+            path: 'settings.json'
           );
         }
       );
@@ -364,15 +365,10 @@ instance.mainMenu(
   },
   
   onSaveSettings ::(data){
-    enterNewLocation(
-      path: './',
-      action::(filesystem) {
-        filesystem.writeString(
-          path: 'settings',
-          string: data
-        );
-      }
-    );  
+    write(
+      name: 'settings.json',
+      string: data
+    );
   },
   
   preloadJSON ::{
