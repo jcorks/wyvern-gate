@@ -606,7 +606,7 @@
     state.professionProgress[profession.id] = set;
   } else ::<= {
     if (set.level%2==0) {
-      @:nextArt = profession.arts[set.level-1];
+      @:nextArt = profession.arts[(set.level/2)->floor];
       if (nextArt)
         state.professionArts->push(:nextArt);
     }
@@ -1140,21 +1140,15 @@
             )
           );
 
-        when(random.try(percentSuccess:30))
+        when(random.try(percentSuccess:50))
           state.inventory.add(item:
             Item.new(
-              base: Item.database.getRandomFiltered(
-                filter:::(value) <- 
-                  value.hasNoTrait(:Item.TRAIT.UNIQUE) && 
-                  value.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS)
-                  && value.tier <= island.tier
-              ),
-              rngEnchantHint:true
+              base:Item.database.find(:'base:inlet-gem')
             )
           );
 
 
-        if (random.try(percentSuccess:0.2 + island.tier*2)) ::<= {
+        if (random.try(percentSuccess:5 + island.tier*2)) ::<= {
           @itemMaterials = [
             'base:mythril',
             'base:quicksilver',
@@ -3095,7 +3089,6 @@
 
 
                 
-      breakpoint();
       if (inventory)
         inventory.add(:current);
 

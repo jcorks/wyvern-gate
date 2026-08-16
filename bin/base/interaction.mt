@@ -1464,7 +1464,10 @@ Interaction.newEntry(
     keepInteractionMenu : true,
     isAvailable ::(location, party) <- true,
     interact ::(location, party) {
-      @:cost = (200 + 30*(party.inventory.maxItems - 10)**1.3)->floor;
+      when(party.inventory.maxItems > 100)
+        windowEvent.queueMessage(text: 'The party\'s bag is the max size already.');
+    
+      @:cost = (200 + 30*(party.inventory.maxItems - 15)**1.3)->floor;
       windowEvent.queueMessage(text: 'The shopkeep offers to exchange your bag for a larger one. This new one will hold 5 additional items, making the capacity ' + (party.inventory.maxItems + 5) + ' items. This upgrade will cost ' + g(g:cost) +'.');
       when(party.inventory.gold < cost)
         windowEvent.queueMessage(text: 'The party cant afford to upgrade their bag.');
@@ -1473,7 +1476,7 @@ Interaction.newEntry(
         onChoice::(which) {
           when(which == false) empty;
           
-          party.inventory.maxItems += 5;
+          party.inventory.maxItems += 10;
           windowEvent.queueMessage(text: 'The party\'s bag can now hold ' + party.inventory.maxItems + ' items.');
           party.addGoldAnimated(amount:-cost, onDone::{});
         }

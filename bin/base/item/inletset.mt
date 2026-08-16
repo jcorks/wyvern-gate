@@ -312,13 +312,15 @@
                   this.renderSlotInfo(:slot);
                 }
               },  
-              choices : ['Swap', 'Take Out', 'Check'],
+              choices : ['Swap', 'Put in Inventory', 'Check'],
               onChoice ::(choice) {
                 when(choice == 1) equipInlet(slot);
                 
 
                 when (choice == 2) ::<= {
-                 @:oldArts = user.arts
+                  when(inv.isFull)
+                    windowEvent.queueMessage(text:'The party\'s inventory is full.'); 
+                  @:oldArts = user.arts
      
                   if (slot.inset)
                     inv.add(:slot.inset);

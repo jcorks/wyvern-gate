@@ -264,11 +264,15 @@ return ::{
           );
           world.party.inventory.add(:keyother);
 
-
+          /*
           keyother = Item.new(
             base: Item.database.find(id:'base:knowledge-stone')
           );
           world.party.inventory.add(:keyother);
+          */
+          instance.unlockScenarios();
+          instance.unlockSeeds();
+
 
 
           windowEvent.queueMessage(
@@ -277,9 +281,8 @@ return ::{
           );
           @:instance = import(module:'base/instance.mt');
           windowEvent.queueCustom(onEnter::{
+
             world.island.travel();
-            instance.unlockScenarios();
-            instance.unlockSeeds();
           });            
         }
       ]

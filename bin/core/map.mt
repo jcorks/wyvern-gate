@@ -1460,6 +1460,8 @@ Map =  LoadableClass.create(
       },
 
       isLocationVisible ::(x, y) {
+        when(scenery[x+y*width] & IS_OBSCURED_MASK) false;
+      
         return if (paged) ::<= {
           @:regionX = ((pointer.x+0) / mapSizeW)->floor;
           @:regionY = ((pointer.y+0) / mapSizeH)->floor;

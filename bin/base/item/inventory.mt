@@ -106,12 +106,12 @@
       initialize ::{
       },
       
-      defaultLoad::(size) {
+      defaultLoad::(size, items, gold) {
         state.maxItems = 10;
         if (size != empty)
           this.maxItems = size;            
-        state.items = [];
-        state.gold = 0;
+        state.items = if (items != empty) items else [];
+        state.gold = if (gold == empty) 0 else gold;
       },
       
       add::(item) {

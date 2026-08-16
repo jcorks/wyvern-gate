@@ -302,6 +302,7 @@
         windowEvent.queueMessage(
           text: 'It is now ' + ent.name + '\'s turn.'
         );
+        if (onAct_) onAct_();
         
         // multi turn actions
         if (actions[ent]) ::<= {
@@ -322,7 +323,6 @@
             landmark:landmark_
           );
         }        
-        if (onAct_) onAct_();
       }
       
       lastNext = next;
@@ -1012,6 +1012,7 @@
         foreach(group) ::(i, entity) {
           when(turn->findIndex(value:entity) != -1) 
             error(detail: 'Tried to join battle when was already a part of the battle');
+          breakpoint();
           windowEvent.queueMessage(text:entity.name + ' joins the fray!');
           entity.battleStart(battle:this);
           entity.startTurn();

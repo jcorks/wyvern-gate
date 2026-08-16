@@ -295,6 +295,8 @@ for(0, 70) ::(i) {
             canvas.freeze();
             world.island.visit()
             world.island.travel(onReady::{
+              
+              world.island.map.setPointer(x:town.x, y:town.y);
               town.visit();
               town.travel(
                 skipAnimation: true,

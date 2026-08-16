@@ -4,30 +4,10 @@
 @:class = import(module:'Matte.Core.Class');
 @:databaseItemMutatorClass = import(module:'core/data/databaseitemmutatorclass.mt');
 @:random = import(module:'core/random.mt');
-
-
-
-
-@:ItemSpecter = import(module:'base/event/landmark/itemspecter.mt');
-@:Beast   = import(module:'base/event/landmark/thebeast.mt');
-@:DungeonEncounters = import(module:'base/event/landmark/dungeonencounters.mt');
-@:FlamingSkull  = import(module:'base/event/landmark/flamingskull.mt');
-@:Gnome = import(module:'base/event/landmark/gnome.mt');
-@:Skeleton = import(module:'base/event/landmark/skeleton.mt');
-@:TreasureGolem = import(module:'base/event/landmark/treasuregolem.mt');
-@:TheMirror = import(module:'base/event/landmark/themirror.mt');
-@:GoldSlime = import(module:'base/event/landmark/goldslime.mt');
-@:CreatureEncounters = import(module:'base/event/landmark/creatureencounters.mt')
-@:Mimic = import(module:'base/event/landmark/mimic.mt');
-@:Slime = import(module:'base/event/landmark/slime.mt');
-@:CaveBat = import(module:'base/event/landmark/cavebat.mt');
-@:TheSnakeSiren = import(module:'base/event/landmark/thesnakesiren.mt');
-@:Shadowling = import(module:'base/event/landmark/shadowling.mt');
-@:MobileMushroom = import(module:'base/event/landmark/mobilemushroom.mt');
-@:GiantFlea = import(module:'base/event/landmark/giantflea.mt');
-@:Monolith = import(module:'base/event/landmark/monolith.mt');
-@:Chair = import(module:'base/event/landmark/chair.mt');
-
+@:Encounter = import(module:'base/event/landmark/encounter.mt');
+@:Inventory = import(module:'base/item/inventory.mt');
+@:Item = import(module:'base/item.mt');
+@:Entity = import(module:'base/entity.mt');
 
 @:KIND = {
   HOSTILE : 1,
@@ -42,10 +22,34 @@ LandmarkEvent.database.newEntry(
     id: 'base:item-specter',
     kind : KIND.HOSTILE,
     tier : 0,
-    startup ::(parent, x, y) {
-      @:a = ItemSpecter.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        symbol : 'x',
+        speciesID : 'base:wyvern-specter',
+        professionID : 'base:wyvern-specter',
+        maxEncounters : if (parent.landmark.floor == 0 || parent.landmark.floor%3 != 0) 0 else 3,
+        maxSimultaneousEncounters : 3,
+        membersPerTeam : if (parent.landmark.island.tier > 2 && random.try(percentSuccess:35)) 2 else 1,
+        townsfolk: false,
+        name : 'the Wyvern Specter',
+        
+        upkeepTasks : [
+          'base:specter'
+        ],
+        
+        forceDrop : Inventory.new(
+          items : [
+            Item.new(base:Item.database.find(:'base:life-crystal'))
+          ]
+        ),
+        
+        enterPhrases : [
+          'Something\'s off... It\'s not safe here.',
+          'Do you feel that? Something... different... is here.',
+        ]
+      )
+    ,
     
     events : {
       onStep ::(data, landmark) {
@@ -65,8 +69,60 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 0,
     startup ::(parent, x, y) {
-      // TODO: make dungeon encounters loadable
-      @:a = DungeonEncounters.new(parent);   
+      @:landmark = parent.landmark;
+      @:a = if (random.try(percentSuccess:10)) 
+        Encounter.new(
+        parent,
+          symbol : '*',
+          
+          maxEncounters : if (parent.landmark.floor == 0) 0 else 10,
+          maxSimultaneousEncounters : 5,
+          membersPerTeam : if (landmark.island.tier > 2 && random.try(percentSuccess:35)) 2 else 1,
+          townsfolk: true,
+          
+          
+          upkeepTasks : [
+            'base:dungeonencounters-roam',
+            'base:aggressive',
+            'base:exit'
+          ],
+          
+          deathTasks : [
+            'base:to-body'
+          ],
+          
+          enterPhrases : [
+            'There seems to be a lot of commotion around on this floor...',
+            'What? It sounds like a large battle nearby...'
+          ]
+        )
+      else 
+        Encounter.new(
+        parent,
+          symbol : '*',
+          
+          maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
+          maxSimultaneousEncounters : random.integer(from:1, to:2),
+          membersPerTeam : if (landmark.island.tier > 2 && random.try(percentSuccess:35)) 2 else 1,
+          townsfolk: true,
+          
+          
+          upkeepTasks : [
+            'base:dungeonencounters-roam',
+            'base:aggressive',
+            'base:exit'
+          ],
+          
+          deathTasks : [
+            'base:to-body'
+          ],
+          
+          enterPhrases : [
+            'Are those foosteps? Be careful.',
+            'Hmm. Footsteps nearby.',
+            'What? Footsteps?'
+          ]
+        );  
       return a;
     },
     
@@ -87,10 +143,35 @@ LandmarkEvent.database.newEntry(
     id: 'base:the-beast',
     kind : KIND.HOSTILE,
     tier : 1,
-    startup ::(parent, x, y) {
-      @:a = Beast.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Dungeon Beast',
+        symbol : 'B',
+        speciesID : 'base:beast',
+        professionID : 'base:beast',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : 1,
+        membersPerTeam : 1,
+        townsfolk: false,
+        
+        
+        upkeepTasks : [
+          'base:thebeast-roam',
+          'base:aggressive',
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ],
+
+        
+        enterPhrases : [
+          'That was definitely a roar or snarl just now. Something\'s near.',
+          'Something heavy is stomping nearby.',
+        ]
+      )
+    ,
     
     events : {      
       onStep ::(data, landmark) {
@@ -110,10 +191,30 @@ LandmarkEvent.database.newEntry(
     id: 'base:flaming-skull',
     kind : KIND.HOSTILE,
     tier : 1,
-    startup ::(parent, x, y) {
-      @:a = FlamingSkull.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Flaming Skull',
+        symbol : '@',
+        speciesID : 'base:flaming-skull',
+        professionID : 'base:flaming-skull',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
+        maxSimultaneousEncounters : if (random.try(percentSuccess:20)) 2 else 1,
+        membersPerTeam : 1,
+        townsfolk: false,
+        
+        
+        upkeepTasks : [
+          'base:thebeast-roam',
+          'base:aggressive',
+          'base:flamingskull-particle'
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
 
     events : {
       onStep ::(data, landmark) {
@@ -133,10 +234,29 @@ LandmarkEvent.database.newEntry(
     id: 'base:gnome',
     kind : KIND.HOSTILE,
     tier : 1,
-    startup ::(parent, x, y) {
-      @:a = Gnome.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Gnome',
+        symbol : 'g',
+        speciesID : 'base:gnome',
+        professionID : 'base:gnome',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
+        maxSimultaneousEncounters : if (random.try(percentSuccess:20)) 2 else 1,
+        membersPerTeam : 1,
+        townsfolk: false,
+        
+        
+        upkeepTasks : [
+          'base:dungeonencounters-roam',
+          'base:aggressive',
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
 
     events : {
       onStep ::(data, landmark) {
@@ -155,10 +275,29 @@ LandmarkEvent.database.newEntry(
     id: 'base:skeleton',
     kind : KIND.HOSTILE,
     tier : 0,
-    startup ::(parent, x, y) {
-      @:a = Skeleton.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Skeleton',
+        symbol : '#',
+        speciesID : 'base:skeleton',
+        professionID : 'base:skeleton',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
+        maxSimultaneousEncounters : if (random.try(percentSuccess:40)) 2 else 1,
+        membersPerTeam : 1,
+        townsfolk: false,
+        
+        
+        upkeepTasks : [
+          'base:dungeonencounters-roam',
+          'base:aggressive',
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
     events : {
       onStep ::(data, landmark) {
         data.step();
@@ -177,8 +316,35 @@ LandmarkEvent.database.newEntry(
     kind : KIND.HOSTILE,
     tier : 3,
     startup ::(parent, x, y) {
-      @:a = TheMirror.new(parent);
-      return a;
+      @:world = import(module:'base/world.mt');
+
+      return Encounter.new(
+        parent,
+        name : 'the Mirror',
+        symbol : 'Ø',
+        teamArchetype : world.party.members->map(::(value) {
+          @:state = value.save();
+          state.name = state.name + ' (clone)';
+          return Entity.new(parent, state)
+        }),
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : 1,
+        townsfolk: false,
+        forceDrop : Inventory.new(
+          items : [
+            Item.new(base:Item.database.find(:'base:life-crystal'))
+          ]
+        ),
+
+        upkeepTasks : [
+          'base:dungeonencounters-roam',
+          'base:aggressive',
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
     },
     
     events : {
@@ -199,10 +365,31 @@ LandmarkEvent.database.newEntry(
     id: 'base:treasure-golem',
     tier : 1,
     kind : KIND.HOSTILE,
-    startup ::(parent, x, y) {
-      @:a = TreasureGolem.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Treasure Golem',
+        symbol : '$',
+        speciesID : 'base:treasure-golem',
+        professionID : 'base:treasure-golem',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : 1,
+        membersPerTeam : 1,
+        townsfolk: false,
+        
+        forceDrop : Inventory.new(
+          gold: 900 + (random.number()*200)->floor
+        ),
+        
+        upkeepTasks : [
+          'base:aggressive-slow',
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
 
     events : {
       onStep ::(data, landmark) {
@@ -221,10 +408,40 @@ LandmarkEvent.database.newEntry(
     id: 'base:gold-slime',
     tier : 0,
     kind : KIND.HOSTILE,
-    startup ::(parent, x, y) {
-      @:a = GoldSlime.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Gold Slime',
+        symbol : 's',
+        speciesID : 'base:gold-slime',
+        professionID : 'base:gold-slime',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : 1,
+        membersPerTeam : 1,
+        townsfolk: false,
+        
+        forceDrop : Inventory.new(
+          items : [
+            Item.new(
+              base : Item.database.getRandomFiltered(::(value) <- 
+                value.hasTraits(:Item.TRAIT.CAN_BE_APPRAISED)
+              ),
+              forceNeedsAppraisal : true 
+            )
+          ]
+        ),
+        
+        upkeepTasks : [
+          'base:exit',
+          'base:defensive',
+          'base:dungeonencounters-roam',
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
 
     events : {
       onStep ::(data, landmark) {
@@ -244,10 +461,25 @@ LandmarkEvent.database.newEntry(
     id: 'base:creature-encounters',
     tier : 0,
     kind : KIND.HOSTILE,
-    startup ::(parent, x, y) {
-      @:a = CreatureEncounters.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        symbol : '{',
+        teamArchetype : [parent.landmark.island.newHostileCreature()],
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : 1,
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:dungeonencounters-roam',
+          'base:aggressive',
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
 
     events : {
       onStep ::(data, landmark) {
@@ -266,10 +498,26 @@ LandmarkEvent.database.newEntry(
     id: 'base:mimic',
     kind : KIND.HOSTILE,
     tier : 1,
-    startup ::(parent, x, y) {
-      @:a = Mimic.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Mimic',
+        symbol : '\\',
+        speciesID : 'base:mimic',
+        professionID : 'base:mimic',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : 1,
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:mimic-place-stairs'
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
 
     events : {
       onStep ::(data, landmark) {
@@ -288,12 +536,35 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:slimequeen',
-    startup ::(parent, x, y) {
-      @:a = Slime.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Slime Queen',
+        symbol : 'O',
+        speciesID : 'base:slimequeen',
+        professionID : 'base:slimequeen',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : 1,
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:thebeast-roam',
+          'base:aggressive',
+          'base:slime-queen-make-slimelings',
+        ],
+        
+        friendSpecies : [
+          'base:slimeling',
+          'base:slimequeen'
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
     kind : KIND.HOSTILE,
-    tier : 1,
+    tier : 0,
 
     events : {
       onStep ::(data, landmark) {
@@ -313,10 +584,27 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:cave-bat',
-    startup ::(parent, x, y) {
-      @:a = CaveBat.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Cave Bat',
+        symbol : 'b',
+        speciesID : 'base:cave-bat',
+        professionID : 'base:cave-bat',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
+        maxSimultaneousEncounters : 2,
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:thebeast-roam',
+          'base:aggressive',
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
     kind : KIND.HOSTILE,
     tier : 0,
 
@@ -338,14 +626,33 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:the-snakesiren',
     startup ::(parent, x, y) {
-      @:a = TheSnakeSiren
-      return a;
+      // dud
+      when(random.try(percentSuccess:70)) empty
+      return Encounter.new(
+        name : 'the Snake Siren',
+        symbol : 'S',
+        speciesID : 'base:snake-siren',
+        professionID : 'base:snake-siren',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : 1,
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:thebeast-roam',
+          'base:aggressive',
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
     },
     kind : KIND.HOSTILE,
     tier : 2,
 
     events : {
       onStep ::(data, landmark) {
+        when(data == empty) empty;
         data.step();
       }
     },
@@ -360,10 +667,32 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:shadowling',
-    startup ::(parent, x, y) {
-      @:a = Shadowling.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Shadowling',
+        symbol : '.',
+        speciesID : 'base:shadowling',
+        professionID : 'base:shadowling',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
+        maxSimultaneousEncounters : 2,
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:thebeast-roam',
+          'base:aggressive',
+          'base:shadow'
+        ],
+        
+        enterPhrases : [
+          'Your mind feels fuzzy.'
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
     kind : KIND.HOSTILE,
     tier : 0,
 
@@ -384,10 +713,27 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:mobile-mushroom',
-    startup ::(parent, x, y) {
-      @:a = MobileMushroom.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Mobile Mushroom',
+        symbol : 't',
+        speciesID : 'base:mobile-mushroom',
+        professionID : 'base:mobile-mushroom',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
+        maxSimultaneousEncounters : 2,
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:thebeast-roam',
+          'base:aggressive'
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
     kind : KIND.HOSTILE,
     tier : 0,
 
@@ -407,10 +753,27 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:giant-flea',
-    startup ::(parent, x, y) {
-      @:a = GiantFlea.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Giant Flea',
+        symbol : 'f',
+        speciesID : 'base:giant-flea',
+        professionID : 'base:giant-flea',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
+        maxSimultaneousEncounters : 2,
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:dungeonencounters-roam',
+          'base:aggressive'
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
     kind : KIND.HOSTILE,
     tier : 0,
     events : {
@@ -428,10 +791,27 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:monolith',
-    startup ::(parent, x, y) {
-      @:a = Monolith.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Monolith',
+        symbol : ']',
+        speciesID : 'base:monolith',
+        professionID : 'base:monolith',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : 1,
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:thebeast-roam',
+          'base:aggressive'
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
     kind : KIND.HOSTILE,
     tier : 1,
     events : {
@@ -450,10 +830,26 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:chair',
-    startup ::(parent, x, y) {
-      @:a = Chair.new(parent);
-      return a;
-    },
+    startup ::(parent, x, y) <-
+      Encounter.new(
+        parent,
+        name : 'the Chair',
+        symbol : 'n',
+        speciesID : 'base:wyvern-specter',
+        professionID : 'base:wyvern-specter',
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
+        maxSimultaneousEncounters : random.integer(from:1, to:2),
+        townsfolk: false,
+        
+        upkeepTasks : [
+          'base:aggressive-no-party'
+        ],
+        
+        deathTasks : [
+          'base:to-body'
+        ]
+      )
+    ,
     kind : KIND.HOSTILE,
     tier : 0,
 

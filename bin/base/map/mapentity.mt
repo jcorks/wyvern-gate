@@ -7,6 +7,8 @@
 @:databaseItemMutatorClass = import(module:'core/data/databaseitemmutatorclass.mt');
 @:random = import(module:'core/random.mt');
 @:Map = import(module:'core/map.mt');
+@:Location = import(module:'base/map/location.mt');
+
 /*
   Some tasks to implement:
     "fight" -> when with party, fights normal, when with npc v npc, does damage to both every step.
@@ -30,6 +32,163 @@
 @:Entity = import(module:'base/entity.mt');
 
 
+MapEntity.Task.database.newEntry(
+  data : {
+    id: 'base:slime-queen-make-slimelings',
+    startup ::{
+
+    },
+    
+    do ::(data, mapEntity) {
+      @entities = mapEntity.controller.mapEntities->filter(by::(value) <- value.tag == 'slimeling');
+
+      when (entities->size <= 5) empty;
+      when(random.try(percentSuccess:97)) empty
+
+      @:windowEvent = import(module:'core/windowevent.mt');
+      @:landmark = mapEntity.controller.landmark;
+
+
+      @:beast = landmark.island.newInhabitant(
+        professionHint : 'base:slimeling',
+        speciesHint : 'base:slimeling'
+      );
+      beast.name = 'the Slimeling';
+      beast.supportArts = [];      
+
+      
+      beast.unequipAll(silent:true);
+      beast.heal(amount:9999, silent:true); 
+      beast.healAP(amount:9999, silent:true);   
+
+      @ents = [beast]
+   
+
+      @:ref = landmark.mapEntityController.add(
+        x:mapEntity.x, 
+        y:mapEntity.y, 
+        symbol:'o',
+        entities : ents,
+        tag : 'slimeling'
+      );
+      ref.addUpkeepTask(id:'base:thebeast-roam');
+      ref.addUpkeepTask(id:'base:aggressive');
+      ref.addDeathTask(id:'base:to-poison');
+      
+      ref.addFriendSpecies(:'base:slimeling')
+      ref.addFriendSpecies(:'base:slimequeen')
+
+
+    }
+  }
+);
+
+
+MapEntity.Task.database.newEntry(
+  data : {
+    id: 'base:mimic-place-stairs',
+    startup ::{
+      return {
+        added : false
+      }
+    },
+    
+    do ::(data, mapEntity) {
+      when(data.added == true) empty;
+      data.added = true;
+      
+      @:location = Location.new(
+        landmark: mapEntity.controller.landmark,
+        base : Location.database.find(:'base:stairs-down-fake')
+      )
+      
+      location.x = mapEntity.position.x;
+      location.y = mapEntity.position.y;
+      mapEntity.controller.landmark.addLocation(
+        location
+      )
+    }
+  }
+);
+
+
+MapEntity.Task.database.newEntry(
+  data : {
+    id: 'base:goldslime-particle',
+    startup ::{
+      return {
+        emitter : import(:'core/graphics/particle.mt').new(
+          directionMin : 0,
+          directionMax : 360,
+
+          directionDeltaMin : -5,
+          directionDeltaMax : 10,
+      
+          speedMin : 0.02,
+          speedMax : 0.09,
+          
+          speedDeltaMin : 0.03,
+          speedDeltaMax : 0.05,
+
+          characters : ['$', '$', '$', '*', '.'],
+          charactersRepeat : false,
+          
+          lifeMax : 5,
+          lifeMin : 3    
+        )
+      }
+    },
+    
+    do ::(data, mapEntity) {
+      @:v = mapEntity;
+      @:map = mapEntity.controller.map;
+      @mapPos = mapEntity.position;
+      @:pos = mapEntity.controller.landmark.map.mapCoordinatesToScreen(*mapPos);
+      data.emitter.move(x:pos.x, y:pos.y);
+      data.emitter.start(emitCount:1);
+      data.emitter.stop();
+    }
+  }
+);
+
+MapEntity.Task.database.newEntry(
+  data : {
+    id: 'base:flamingskull-particle',
+    startup ::{
+      return {
+        emitter : import(:'core/graphics/particle.mt').new(
+          directionMin : -110,
+          directionMax : -80,
+
+          directionDeltaMin : -1,
+          directionDeltaMax : 2,
+      
+          speedMin : 0.3,
+          speedMax : 1,
+          
+          speedDeltaMin : 0.03,
+          speedDeltaMax : 0.05,
+
+          characters : ['▓', '▓', '▒', '░', '▒', '░', '░'],
+          charactersRepeat : false,
+          
+          lifeMax : 4,
+          lifeMin : 1    
+        )
+      }
+    },
+    
+    do ::(data, mapEntity) {
+      @:v = mapEntity;
+
+      @mapPos = v.position;
+      @:pos = mapEntity.controller.landmark.map.mapCoordinatesToScreen(*mapPos);
+      data.emitter.move(x:pos.x, y:pos.y);
+      data.emitter.start(emitCount:1);
+      data.emitter.stop();
+    }
+  }
+);
 
 
 // roams to random areas with the following triggers:
@@ -390,7 +549,14 @@ MapEntity.Task.database.newEntry(
     }
     return items;
   }
-  
+
+  @:isSpecter ::(mapEntity) <- ::? {
+    foreach(mapEntity.entities) ::(k, v) {
+      if (v.species.id == 'base:wyvern-specter') send(:true)
+    }
+    
+    return false;
+  }  
   
   @:encounterSpecter ::(mapEntity) {
   
@@ -563,7 +729,7 @@ MapEntity.Task.database.newEntry(
         @tooClose = false;
         ::? {
           foreach(mapEntity.controller.mapEntities) ::(k, ent) {
-            when(ent.tag != 'specter') empty;
+            when(isSpecter(:ent)) empty;
             
             specters->push(value:ent);
             when(ent == mapEntity) empty;
@@ -604,7 +770,7 @@ MapEntity.Task.database.newEntry(
 
         // get new routes and also squabble
         @:item = map.getItem(data:mapEntity);
-        @:nearby = getAllNearby(mapEntity, map)->filter(by::(value) <- value.tag != 'specter');
+        @:nearby = getAllNearby(mapEntity, map)->filter(by::(value) <- isSpecter(:value));
         @closestDist = 1000000;
         @closest;
         @squabbled = false;
@@ -1282,17 +1448,7 @@ MapEntity.Task = databaseItemMutatorClass.create(
   }
 );
 
-import(module:'base/event/landmark/thebeast.mt');
-import(module:'base/event/landmark/cavebat.mt');
-import(module:'base/event/landmark/dungeonencounters.mt');
-import(module:'base/event/landmark/itemspecter.mt');
-import(module:'base/event/landmark/themirror.mt');
-import(module:'base/event/landmark/treasuregolem.mt');
-import(module:'base/event/landmark/thesnakesiren.mt');
-import(module:'base/event/landmark/mimic.mt');
-import(module:'base/event/landmark/slime.mt');
-import(module:'base/event/landmark/chair.mt');
-import(module:'base/event/landmark/shadowling.mt');
+
 
 
 

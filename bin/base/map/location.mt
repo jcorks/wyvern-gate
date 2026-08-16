@@ -2210,15 +2210,9 @@ Location.database.newEntry(data:{
 
     onCreate ::(location) {
       @world = import(module:'base/world.mt');  
-      if (world.party.inDungeon) ::<= {
-        foreach(location.ownedBy.inventory.items)::(i, item) {
-          location.inventory.add(:item);
-        }
-      } else ::<= {
-        foreach(location.ownedBy.inventory.items)::(i, item) {
-          location.inventory.add(:item);
-        }    
-      }
+      foreach(location.ownedBy.inventory.items)::(i, item) {
+        location.inventory.add(:item);
+      }    
 
       location.ownedBy.inventory.clear();
     }
@@ -2735,7 +2729,6 @@ Location.database.newEntry(data:{
       },
       
       interact ::{
-        breakpoint();
       
         @world = import(module:'base/world.mt');
         @party = world.party;      

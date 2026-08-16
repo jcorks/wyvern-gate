@@ -9,7 +9,6 @@
 @:LandmarkEvent = WyvernGate.Event.Landmark
 @:Location = WyvernGate.Map.Location
 
-breakpoint();
 return ::{
   Landmark.database.newEntry(
     data: {
@@ -61,7 +60,7 @@ return ::{
       legendName: 'Shrine',
       symbol : 'M',
       rarity : 100000,    
-      minObjects : 1,
+      minObjects : 0,
       maxObjects : 2,
       landmarkType : Landmark.TYPE.DUNGEON,
       traits : 
@@ -69,7 +68,7 @@ return ::{
         Landmark.TRAIT.POINT_OF_NO_RETURN |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 0,
+      minEvents : 1,
       maxEvents : 2,
       eventPreference : LandmarkEvent.KIND.HOSTILE,
 
@@ -94,7 +93,6 @@ return ::{
 
       ],
       requiredObjects : [
-        {id: 'thechosen:stairs-down'},
         {id: 'thechosen:stairs-down'},
         {id: 'base:item'},
         {id: 'base:item'}

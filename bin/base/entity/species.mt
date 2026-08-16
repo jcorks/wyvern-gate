@@ -221,52 +221,6 @@ Species.newEntry(data:{
   ]
 })
 
-Species.newEntry(data:{
-  name : 'Kitsune',
-  id : 'base:kitsune',
-  rarity : 10,
-  description: 'A canid race.',
-  growth : StatSet.new(
-    HP : 2,
-    AP : 5,
-    ATK: 2,
-    DEF: 1,
-    INT: 8,
-    LUK: 3,
-    SPD: 7,
-    DEX: 8
-  ),
-  levelPenalty : 0,  
-
-  
-  baseStats : StatSet.new(
-    HP  : 1,
-    AP  : 1,
-    ATK : 1,
-    DEF : 1,
-    INT : 1,
-    LUK : 1,
-    DEX : 1
-  ),
-
-
-  qualities : [
-    'base:snout',
-    'base:fur',
-    'base:eyes',
-    'base:ears',
-    'base:face',
-    'base:tail',
-    'base:body'
-  ],
-  swarms : false,
-  overrideBattleAI : empty,
-  
-  canBlock : true,
-  traits : 0,
-  passives : [
-  ]
-})  
 
 Species.newEntry(data:{
   name : 'Tiger',
@@ -1819,7 +1773,7 @@ Species.newEntry(data:{
     windowEvent.queueMessage(
       speaker: entity.name,
       text:[
-        '...',
+        '...hooho...',
         '...Ho hOo!',
         '...Hah!! Ho..'
       ][entity.data.turn%3]
@@ -1829,7 +1783,7 @@ Species.newEntry(data:{
     @:whosLeft = battle.getEnemies(:entity)->filter(::(value) <- value.isIncapacitated() == false);
 
       
-    if (entity.data.turn % 3 == 0) ::<= {
+    if (whosLeft->size > 0 && entity.data.turn % 3 == 0) ::<= {
       if (random.try(percentSuccess:33)) ::<= {
 
         commitBattleActions(:[
@@ -1878,7 +1832,7 @@ Species.newEntry(data:{
     entity.data.turn += 1;
     entity.ap += 2;
   },  
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -1942,7 +1896,7 @@ Species.newEntry(data:{
     
     entity.ap += 2;
   },  
-  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
   passives : [
   ]
 })
@@ -1986,6 +1940,16 @@ Species.newEntry(data:{
     @:Entity = import(module:'base/entity.mt');        
     @:whosLeft = battle.getEnemies(:entity)->filter(::(value) <- value.isIncapacitated() == false);
 
+    when(whosLeft->size == 0)
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+      
+      
     if (random.try(percentSuccess:40)) ::<= {
 
       commitBattleActions(:[
@@ -2056,7 +2020,7 @@ Species.newEntry(data:{
     SPD:  1,
     DEX:  1
   ),
-  levelPenalty : 4,  
+  levelPenalty : 3,  
 
 
   qualities : [
@@ -2070,6 +2034,51 @@ Species.newEntry(data:{
     'base:the-beast'
   ]
 })
+
+
+
+Species.newEntry(data:{
+  name : 'Snake Siren',
+  id : 'base:snake-siren',
+  rarity : 2000000000000,
+  description: 'Force of nature',
+  growth : StatSet.new(
+    HP : 6,
+    AP : 10,
+    ATK: 4,
+    DEF: 10,
+    INT: 10,
+    LUK: 10,
+    SPD: 10,
+    DEX: 10
+  ),
+
+  
+  baseStats : StatSet.new(
+    HP:   140,
+    AP:   999,
+    ATK:  14,
+    INT:  30,
+    DEF:  10,
+    LUK:  6,
+    SPD:  100,
+    DEX:  7
+  ),
+  levelPenalty : 3,  
+
+
+  qualities : [
+  ],
+  swarms : true,
+  canBlock : false,
+  overrideBattleAI : empty,
+  
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
+  passives : [
+    'base:the-beast'
+  ]
+})
+
 
 Species.newEntry(data:{
   name : 'Slime Queen',

@@ -62,12 +62,12 @@
       },
       defaultLoad ::{      
         state.members = [];
-        state.inventory = Inventory.new(size:40);
+        state.inventory = Inventory.new(size:50);
         state.hunger = Hunger.new(parent:this);
       },
       reset ::{
         state.members = [];
-        state.inventory = Inventory.new(size:40);
+        state.inventory = Inventory.new(size:50);
       },
       
       leader : {
@@ -101,7 +101,7 @@
         // cant talk to us, BUT. is friendly :)
         @:Species = import(module:'base/entity/species.mt');
         if (member.species.traits & Species.TRAIT.NO_COMMON_SPEAK)
-          member.nickname = 'Friendly ' + member.name
+          member.nickname = member.name + ' (Friendly)'
         
         foreach(state.members) ::(k, v) {
           v.addOpinion(

@@ -1454,7 +1454,8 @@ Landmark.database.newEntry(
       for(0, random.integer(from:base.minEvents, to:base.maxEvents)) ::(i) {
         @which = LandmarkEvent.database.getRandomFiltered(
           ::(value) <- value.kind == base.eventPreference &&
-                       alreadyEvents->findIndex(:value.id) == -1
+                       alreadyEvents->findIndex(:value.id) == -1 &&
+                       value.tier <= island_.tier
         )
         when(which == empty) empty;
         alreadyEvents->push(:which.id);

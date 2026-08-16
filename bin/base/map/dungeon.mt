@@ -49,11 +49,11 @@
   @cavities = [];
   @:areas = [];
   
-  @ROOM_AREA_SIZE = random.integer(from:4, to:5); // was 5
-  @ROOM_AREA_SIZE_LARGE = random.integer(from:4, to:9);// was 9
+  @ROOM_AREA_SIZE = random.integer(from:3, to:5); // was 5
+  @ROOM_AREA_SIZE_LARGE = random.integer(from:4, to:8);// was 9
   @ROOM_AREA_VARIANCE = random.integer(from:1, to: 3)*0.2; // was 0.2
-  @ROOM_SIZE = random.integer(from:30, to:38); //50;
-  @ROOM_EMPTY_AREA_COUNT = random.integer(from:12, to: 18); //13;
+  @ROOM_SIZE = random.integer(from:25, to:30); //50;
+  @ROOM_EMPTY_AREA_COUNT = random.integer(from:10, to: 15); //13;
   ;
   @:spaceIndex = map.addScenerySymbol(:' ');
 
@@ -313,8 +313,8 @@
   @:areas = [];
   @:spaceIndex = map.addScenerySymbol(:' ');
   
-  @:AREA_SIZE = 7; 
-  @:MINIMUM_AREA_COUNT = 4;
+  @:AREA_SIZE = 5; 
+  @:MINIMUM_AREA_COUNT = 8;
   
   @:AREA_GAP = random.pickArrayItem(
     list: [
@@ -333,8 +333,8 @@
   );
   
   
-  @:AREA_WIDTH  = random.integer(from:5, to:6);
-  @:AREA_HEIGHT = random.integer(from:5, to:6);
+  @:AREA_WIDTH  = random.integer(from:3, to:5);
+  @:AREA_HEIGHT = random.integer(from:3, to:4);
 
   @gridNodes = [];  
   
@@ -540,9 +540,10 @@
   
   // now, make sure that ALL nodes are connected one way or another
   @:ensureOneGroup = ::{
-  
     @groupIndex = 0;
     @groups = [];
+
+    
     // starting from a node, forms a group of all nodes connected to that node.
     @:makeGroup = ::(initialNode) {
       @:index = groupIndex;
@@ -568,6 +569,7 @@
     }
     
     // Form groups
+    breakpoint()
     @iter = 0;
     for(0, AREA_HEIGHT) ::(y) {
       for(0, AREA_WIDTH) ::(x) {
@@ -584,6 +586,7 @@
       when(a->keycount > b->keycount)  1;
       return 0;
     });
+    breakpoint()
     
     // reset indices.
     foreach(groups) ::(index, group) {
@@ -591,6 +594,7 @@
         member.groupIndex = index;
       }
     }
+    breakpoint()
     
     
     @:leader = groups[groups->keycount-1];
@@ -601,6 +605,8 @@
     
     @:merge = ::{
       return ::? {
+        breakpoint()
+
         @nonLeaderCount = 0;
         @:leaderIndex = leader[0].groupIndex;
         @iter = 0;
@@ -668,7 +674,7 @@
           iter += 1;
         }
       }
-
+      breakpoint()
       when(!restart) send();
       
       // ensureOneGroup failed, meaning there were 
@@ -703,11 +709,21 @@
   
   
   // make areas and pathways
+  
   for(0, AREA_HEIGHT) ::(y) {
     for(0, AREA_WIDTH) ::(x) {
       @:node = gridNodes[x + y*AREA_WIDTH];
+
+
+      @centerX = x * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + (AREA_SIZE/2)->floor + GEN_OFFSET;
+      @centerY = y * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + (AREA_SIZE/2)->floor + GEN_OFFSET;
+
+
       
       when(isEmpty(node)) empty;
+
+  
+
       
       // areas are boxes
       when(node.isArea) ::<= {
@@ -759,33 +775,47 @@
         if (node.waysOpen[NORTH]) ::<= {
           xOpen = left + (width / 2)->floor
           yOpen = top;  
+          map.disableWall(x:xOpen, y:yOpen);  
+          map.setSceneryIndex(
+            x:xOpen, y:yOpen,
+            symbol: spaceIndex      
+          );
         }
         if (node.waysOpen[SOUTH]) ::<= {
           xOpen = left + (width / 2)->floor
           yOpen = top + height-1; 
+          map.disableWall(x:xOpen, y:yOpen);  
+          map.setSceneryIndex(
+            x:xOpen, y:yOpen,
+            symbol: spaceIndex      
+          );
         } 
         if (node.waysOpen[EAST]) ::<= {
           xOpen = left + width -1;
           yOpen = top + (height / 2)->floor;  
+          map.disableWall(x:xOpen, y:yOpen);  
+          map.setSceneryIndex(
+            x:xOpen, y:yOpen,
+            symbol: spaceIndex      
+          );
         }
         if (node.waysOpen[WEST]) ::<= {
           xOpen = left
           yOpen = top + (height / 2)->floor;  
+          map.disableWall(x:xOpen, y:yOpen);  
+          map.setSceneryIndex(
+            x:xOpen, y:yOpen,
+            symbol: spaceIndex      
+          );
         }
         
         
-        map.disableWall(x:xOpen, y:yOpen);  
-        map.setSceneryIndex(
-          x:xOpen, y:yOpen,
-          symbol: spaceIndex      
-        );
+
 
 
       }
-      
+
       // else its a path
-      @centerX = x * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + (AREA_SIZE/2)->floor + GEN_OFFSET;
-      @centerY = y * (AREA_SIZE + AREA_GAP*2) + AREA_GAP + (AREA_SIZE/2)->floor + GEN_OFFSET;
 
 
       //start with the junction
@@ -954,9 +984,11 @@
       
     }
   }
+
   
   
   // Finally, fill in gaps
+  
   for(0, AREA_HEIGHT) ::(y) {
     for(0, AREA_WIDTH) ::(x) {
       @node = gridNodes[x + y*AREA_WIDTH];
@@ -1015,7 +1047,7 @@
         }
       }      
     }
-  }  
+  }
 
   
   map.obscure();  

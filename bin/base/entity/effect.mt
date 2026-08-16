@@ -4282,13 +4282,18 @@ Effect.newEntry(
     events : {
       onAffliction ::(from, item, holder) {
         @:target = from;
-        target.addEffect(id:'base:latched', from:holder, durationTurns:1, noNotify:true);      
+        target.addEffect(id:'base:latched', from:holder, durationTurns:1);      
       },
 
 
       onNextTurn ::(from, item, holder, duration) {        
         @:target = from;
         
+        when(from.hp <= 0) ::<= {
+          holder.removeEffectsByFilter(::(value) <- value.id == 'base:latching');
+          return false;
+        }
+
 
         windowEvent.queueMessage(text: holder.name + ' continues to drain ' + target.name + '\'s blood!');
         @:health = (target.stats.HP * 0.15)->ceil;
@@ -4304,7 +4309,7 @@ Effect.newEntry(
           dodgeable : false,
           exact : true
         );
-        target.addEffect(id:'base:latched', from:holder, durationTurns:1, noNotify:true);
+        target.addEffect(id:'base:latched', from:holder, durationTurns:1);
         holder.heal(amount:health);
         
         return false;

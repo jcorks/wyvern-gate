@@ -1609,7 +1609,8 @@ Profession.newEntry(data:{
   
   arts : [
     'base:explosion',
-    'base:flare'
+    'base:flare',
+    'base:gnome-call'
   ],
   passives : [
   ]

@@ -398,7 +398,6 @@ instance.mainMenu(
               
             if (v.name->contains(:'.json')) {
               ::? {
-                breakpoint();
                 loaded[getRelPath()+v.name] = filesystem.readJSON(:v.path);
               } => {
                 onError ::(message) {
