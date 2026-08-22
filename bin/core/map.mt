@@ -970,6 +970,7 @@ Map =  LoadableClass.create(
         scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
       },
 
+
       fillSceneryIndexRectangle ::(
         symbol => Number,
         x => Number,
@@ -1309,6 +1310,19 @@ Map =  LoadableClass.create(
       getPathTo::(data, x, y, useBFS) {
         @:ent = retrieveItem(data);      
         return this.getPath(fromX:ent.x, fromY:ent.y,toX:x, toY:y, useBFS);
+      },
+
+      updateItem ::(
+        data,
+        traits,
+        symbol,
+        name
+      ) {
+        @:item = retrieveItem(data);      
+        item.traits = traits;
+        item.symbol = symbol;
+        if (name != empty)
+          item.name = name;
       },
       
       moveItem::(data, x, y) {

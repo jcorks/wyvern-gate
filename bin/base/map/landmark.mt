@@ -183,6 +183,12 @@ Landmark.database.newEntry(
         symbol: '$',
         id: 'base:shop-inside'
       },
+      {
+        name : 'Tavern',
+        symbol: '&',
+        id: 'base:tavern-inside'
+      },
+
       /*    
       {id:'base:arts-tecker'},
       {id:'base:school'},
@@ -249,6 +255,14 @@ Landmark.database.newEntry(
         symbol: '$',
         id: 'base:shop-inside'
       },
+
+
+      {
+        name : 'Tavern',
+        symbol: '&',
+        id: 'base:tavern-inside'
+      },
+
       /*    
       {id:'base:arts-tecker'},
       {id:'base:school'},
@@ -357,6 +371,12 @@ Landmark.database.newEntry(
         symbol: '$',
         id: 'base:shop-inside'
       },            
+      {
+        name : 'Tavern',
+        symbol: '&',
+        id: 'base:tavern-inside'
+      },
+
       /*
       'base:auction-house',
       'base:arts-tecker',
@@ -946,7 +966,40 @@ Landmark.database.newEntry(
   }
 )
 
+Landmark.database.newEntry(
+  data: {
+    name: 'Tavern: Inside',
+    id: 'base:tavern-inside',
+    legendName: '',
+    symbol : '&',
+    rarity : 40,        
+    landmarkType : TYPE.BLUEPRINT_SINGLE(:'assets/maps/tavern.json'),
 
+    traits :
+      TRAIT.PEACEFUL |
+      TRAIT.UNIQUE |
+      TRAIT.CAN_SAVE |
+      TRAIT.NOTHING_HIDDEN |
+      TRAIT.STRUCTURE_BUSINESS,
+    minEvents : 0,
+    maxEvents : 0,
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+    minObjects : 0,
+    maxObjects : 0,
+    possibleObjects : [
+    ],
+    requiredObjects : [
+    ],
+    requiredEvents : [
+    ],
+    mapHint: {
+    },
+    events : {
+    }
+    
+  }
+)
 
 
 Landmark.database.newEntry(
@@ -1786,14 +1839,17 @@ Landmark.database.newEntry(
             
             @:lines = [];
             foreach(nearbySet)::(index, arr) {
+              when(arr.interactive == false) empty;
               lines->push(value:arr.name);
             }
-            canvas.renderTextFrameGeneral(
-              leftWeight: 1,
-              topWeight: 1,
-              lines,
-              title: 'Arrived at:'
-            );
+            
+            if (lines->size > 0)
+              canvas.renderTextFrameGeneral(
+                leftWeight: 1,
+                topWeight: 1,
+                lines,
+                title: 'Arrived at:'
+              );
           }
         };
         
@@ -1885,6 +1941,11 @@ Landmark.database.newEntry(
             fullName : 'the ' + landmark.name
           );
         }
+        foreach(this.locations) ::(k, v) {
+          v.base.emit(event:'onLandmarkEnter', location:v);
+        }
+
+
       },
       
       
@@ -2117,6 +2178,9 @@ Landmark.database.newEntry(
       },
       
       leave ::{
+        foreach(this.locations) ::(k, v) {
+          v.base.emit(event:'onLandmarkLeave', location:v);
+        }
         state.base.emit(event:'onLeave', landmark:this, island:this.island)
         setNearby(:[]);
       },

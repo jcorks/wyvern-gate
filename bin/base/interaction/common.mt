@@ -598,7 +598,7 @@ return {
       filter::(island, landmark) <- landmark != empty,
       select::(island, landmark) {
         @:world = import(module:'base/world.mt');
-        world.party.eat();
+        world.party.hunger.eat();
       }    
     ),
     

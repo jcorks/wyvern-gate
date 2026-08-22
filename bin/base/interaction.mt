@@ -397,7 +397,7 @@ Interaction.newEntry(
     id :  'base:talk',
     name : 'Talk',
     keepInteractionMenu : false,
-    isAvailable ::(location, party) <- true,
+    isAvailable ::(location, party) <- location.ownedBy != empty,
     interact ::(location, party) {
       // jumps to the prev menu lock
       @choices = [];
@@ -473,7 +473,62 @@ Interaction.newEntry(
 )
 
 
+Interaction.newEntry(
+  data : {
+    name: 'Buy Meal',
+    id :  'base:eat:tavern',
+    keepInteractionMenu : true,
+    isAvailable ::(location, party) <- true,
+    interact ::(location, party) {
+      @:world = import(module:'base/world.mt');
+      when (party.hunger.canEat == false)
+        windowEvent.queueMessage(text:"The party isn\'t hungry enough to eat.");
 
+      when (location.peaceful == false) ::<= {
+        windowEvent.queueMessage(
+          speaker: 'Bartender',
+          text: "Nope. Not servin' ya. Get out."
+        );
+      }
+      
+      
+      if (location.data.mealSpecial == empty ||
+          location.data.mealSpecialDay != world.day) {
+        location.data.mealSpecial = Item.new(
+          base: Item.database.find(:'base:basic-food')
+        );
+        location.data.mealSpecialDay = world.day;
+        @:qualifier = [
+          'Baked',
+          'Spiced',
+          'Special',
+          'Salted'
+        ]
+        location.data.mealSpecial.name = random.pickArrayItem(:qualifier) + ' ' + location.data.mealSpecial.name;
+      }
+
+
+      @:costPerPlate = (location.data.mealSpecial.price * Item.BUY_PRICE_MULTIPLIER*1.3)->floor
+      windowEvent.queueMessage(
+        speaker: 'Bartender',
+        text: '"Today\'s special is ' + location.data.mealSpecial.name + '. It\'s '+ g(:costPerPlate) + ' per plate."' 
+      );
+
+      
+      windowEvent.queueAskBoolean(
+        prompt: 'Order the meal?',
+        onChoice::(which) {
+          when(which  == false) empty;
+          when (party.inventory.gold < costPerPlate)
+            windowEvent.queueMessage(text:'Not enough gold...');
+
+          party.inventory.subtractGold(:costPerPlate);
+          party.hunger.eatThese(:[location.data.mealSpecial]);
+        }
+      ); 
+    }
+  }
+);
 
 Interaction.newEntry(
   data : {
@@ -492,13 +547,13 @@ Interaction.newEntry(
       }
       
       windowEvent.queueAskBoolean(
-        prompt: 'Buy a drink? (1G)',
+        prompt: 'Buy a drink? (5G)',
         onChoice::(which) {
           when(which  == false) empty; 
       when (party.inventory.gold < 5)
         windowEvent.queueMessage(text:'Not enough gold...');
       
-        party.inventory.subtractGold(amount:1);
+        party.inventory.subtractGold(amount:5);
         world.accoladeIncrement(name:'drinksTaken');                    
         
         windowEvent.queueMessage(

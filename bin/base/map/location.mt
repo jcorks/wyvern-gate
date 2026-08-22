@@ -1069,15 +1069,13 @@ Location.database.newEntry(data:{
   rarity: 100,
   ownVerb : 'run',
   symbol: '&',
-  traits: 0,//TRAIT.STRUCTURE_LARGE,
+  traits: TRAIT.EXTENDED_INTERACT_RANGE,
 
   descriptions: [
-    "A modest tavern with a likely rich history.",
   ],
   interactions : [
     'base:drink:tavern',
-    'base:quest-guild',
-    'base:examine'
+    'base:eat:tavern',
   ],
   
   aggressiveInteractions : [
@@ -1093,6 +1091,121 @@ Location.database.newEntry(data:{
     }
   }
 })
+
+
+Location.database.newEntry(data:{
+  name: 'Guildmaster',
+  id: 'base:guildmaster',
+  rarity: 100,
+  ownVerb : 'run',
+  symbol: '&',
+  traits: TRAIT.EXTENDED_INTERACT_RANGE,
+
+  descriptions: [
+  ],
+  interactions : [
+    'base:quest-guild',
+  ],
+  
+  aggressiveInteractions : [
+    'base:steal',
+    'base:vandalize',      
+  ],
+
+
+  
+  events : {
+  }
+})
+
+
+Location.database.newEntry(data:{
+  name: 'Tavern Seat',
+  id: 'base:tavern-seat',
+  rarity: 100,
+  ownVerb : 'holding',
+  symbol: 'n',
+  traits: 0,//TRAIT.STRUCTURE_LARGE,
+
+  descriptions: [
+  ],
+  interactions : [
+    'base:talk',
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  events : {
+    onLandmarkEnter ::(location) {
+      @:world = import(module:'base/world.mt');
+      when (location.data.lastTimeChecked == world.time) empty;
+      
+      // gather all seats (including selt);
+      @:Map = import(module:'core/map.mt');        
+      @:map = location.landmark.map;
+      @:seats = random.scrambled(:
+        location.landmark.locations->filter(
+          ::(value) <- value.base.id == 'base:tavern-seat'
+        )
+      );
+      
+      // the first seat acts as a controller for all the seats.
+      @:fillIdeal = [
+        5,  // <- dawn
+        5,
+        5,
+        10,
+        25, // <- noon
+        30,
+        50,
+        70, // <- sunset
+        90,
+        80,
+        60,
+        40, // <- midnight
+        30,
+        10
+      ][world.time];
+      
+      @fill = random.range(from:fillIdeal-10, to:fillIdeal+10);
+      if (fill < 5)  fill = 5;
+      if (fill > 90) fill = 90;
+      
+      @fillCount = ((fill / 100) * seats->size)->floor;
+      for(0, fillCount) ::(i) {
+        @:seat = seats[i];
+        map.updateItem(
+          data: seat,
+          traits : Map.TRAIT.HAS_HALO | Map.TRAIT.DISCOVERED,
+          symbol : '*'
+        );
+        seat.ownedBy = location.landmark.island.newInhabitant();
+        seat.ownedBy.adventurous = true;
+        seat.data.lastTimeChecked = world.time
+        seat.interactive = true;
+      }
+      
+      for(fillCount, seats->size) ::(i) {
+        @:seat = seats[i];      
+        
+        map.updateItem(
+          data: seat,
+          traits : Map.TRAIT.DISCOVERED,
+          symbol : ''
+        );
+        
+        seat.ownedBy = empty;
+        seat.interactive = false;
+        seat.data.lastTimeChecked = world.time
+      } 
+    }
+  }
+})
+
+
 
 Location.database.newEntry(data:{
   name: 'Arena',
@@ -2400,7 +2513,8 @@ Location.database.newEntry(data:{
     aggressiveInteractions : empty,
     symbol : '',
     halo : false,
-    portal : empty
+    portal : empty,
+    interactive : true
   },
   statics : {
     TRAIT : {get::<- TRAIT},
@@ -2472,6 +2586,14 @@ Location.database.newEntry(data:{
       // is not any longer. This includes if the party entered  
       // and and left the landmark entirely.
       'onPartyLeave',
+      
+      // If the location is present when the party enters the 
+      // landmark, this callback is emitted
+      'onLandmarkEnter',
+      
+      // If the location is present when the party leaves the landmark,
+      // this event is emitted.
+      'onLandmarkLeave'
     ]
   ),
   
@@ -2674,7 +2796,7 @@ Location.database.newEntry(data:{
         }
       },
       
-      canInteract ::<- state.interactions->size > 0,
+      canInteract ::<- state.interactive && state.interactions->size > 0,
       
       // per location mod data.
       data : {
@@ -2694,6 +2816,13 @@ Location.database.newEntry(data:{
       halo : {
         get ::<- state.halo,
         set ::(value) <- state.halo = value
+      },
+      
+      // if false, disables all landmark visit interactivity.
+      // the default is true.
+      interactive : {
+        get ::<- state.interactive,
+        set ::(value) <- state.interactive = value
       },
       
       

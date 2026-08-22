@@ -603,9 +603,9 @@
           state.hunger.step();
         }
       },
-      
-      eat ::{
-        state.hunger.eat();
+            
+      hunger : {
+        get ::<- state.hunger
       },
       
       getFoodEffectID ::{
@@ -686,6 +686,10 @@ Hunger = LoadableClass.create(
         return empty;
       },
       
+      canEat : {
+        get ::<- state.tummy <= HUNGER_LEVELS[1][0]
+      },
+      
       step ::{
         @:rateToLevel::(rate) <-
           ::? {
@@ -709,128 +713,128 @@ Hunger = LoadableClass.create(
         }
       },
       
-      eat ::{
-        @:eatThese::(foods) {
-          @totalNutrients = 0;
-          @totalFilling = 0;
-          @:eatNext::() {
-            when(foods->size == 0) ::<= {
-              @:starsToString::(stars) {
-                @out = '';
-                for(0, stars) ::(i) {
-                  if (i%5 == 0 && i > 0)
-                    out = out + ' '  
-                  out = out + '*';
-                }
-                return out;
+      eatThese::(foods) {
+        @totalNutrients = 0;
+        @totalFilling = 0;
+        @:eatNext::() {
+          when(foods->size == 0) ::<= {
+            @:starsToString::(stars) {
+              @out = '';
+              for(0, stars) ::(i) {
+                if (i%5 == 0 && i > 0)
+                  out = out + ' '  
+                out = out + '*';
               }
-              
-              if (totalNutrients < 0) totalNutrients = 0;
-              if (totalFilling < 1) totalFilling = 1;
-
-              @:RATINGS_FILLING = [
-                [3, 'Not very filling.'],
-                [6, 'Pretty filling.'],
-                [9, 'Very hearty.'],
-                [11, 'MAX']
-              ]
-
-              @:RATINGS_NUTRIENTS = [
-                [3, 'Not very nutritional.'],
-                [6, 'Pretty nutrient-rich.'],
-                [9, 'Very healthy.'],
-                [11, 'MAX']
-              ]
-
-
-              @:nutrientsToRating::<-
-                ::? {
-                  foreach(RATINGS_NUTRIENTS) ::(i, val) {
-                    when(totalNutrients < val[0]) send(:i)
-                  }     
-                  return RATINGS_NUTRIENTS->size-1;     
-                }
-
-              @:fillingToRating::<-
-                ::? {
-                  foreach(RATINGS_FILLING) ::(i, val) {
-                    when(totalFilling < val[0]) send(:i)
-                  }     
-                  return RATINGS_FILLING->size-1;     
-                }
-
-              
-              windowEvent.queueMessage(
-                text: 'The meal is finished.\n\n'+
-                  'Nutrients : ' + RATINGS_NUTRIENTS[nutrientsToRating()][1] + '\n' +
-                  'Filling   : ' + RATINGS_FILLING[fillingToRating()][1]
-              );
-              
-              state.tummy = 0.55 + (totalFilling / 2) * 0.1;
-              if (state.tummy > 1) state.tummy = 1;
-
-              if (state.tummy >= 0.82) 
-                windowEvent.queueMessage(
-                  text: 'The party is very satisfied.'
-                );
-                            
-              party.gainProfessionExp(
-                exp:Entity.PROF_EXP_PER_KNOCKOUT * totalNutrients,
-                onDone ::{
-                  //windowEvent.jumpToTag(name:'EATFOOD', goBeforeTag:true);
-                }
-              )
-              
-              
-              
-              
+              return out;
             }
-            @:food = foods[0];
-            party.inventory.remove(:food);
-            foods->remove(:0);
             
-            windowEvent.queueMessage(
-              text: 'The party shared the ' + food.name + '.'
-            );
-            
-            
-            windowEvent.queueMessage(
-              renderable : {
-                render ::{
-                  @iter = 0;
-                  foreach(party.members) ::(k, member) {
-                    @:rating = member.judgeFood(:food);
-                    canvas.renderTextFrameGeneral(
-                      title: member.name,
-                      lines : [
-                        '"' + rating + '"'
-                      ],
-                      maxWidth : canvas.width / party.members->size,
-                      topWeight: iter * 0.25
-                    );
-                    
-                    iter += 1;
-                  }
-                }
-              },
-              topWeight: 1,
-              text: 'Eating: ' + food.name
-            )
-            totalFilling += food.edible.fillingRating
-            totalNutrients += food.edible.nutrientRating;
-            
-            
-            
-            windowEvent.queueCustom(
-              onEnter::{
-                eatNext();
+            if (totalNutrients < 0) totalNutrients = 0;
+            if (totalFilling < 1) totalFilling = 1;
+
+            @:RATINGS_FILLING = [
+              [3, 'Not very filling.'],
+              [6, 'Pretty filling.'],
+              [9, 'Very hearty.'],
+              [11, 'MAX']
+            ]
+
+            @:RATINGS_NUTRIENTS = [
+              [3, 'Not very nutritional.'],
+              [6, 'Pretty nutrient-rich.'],
+              [9, 'Very healthy.'],
+              [11, 'MAX']
+            ]
+
+
+            @:nutrientsToRating::<-
+              ::? {
+                foreach(RATINGS_NUTRIENTS) ::(i, val) {
+                  when(totalNutrients < val[0]) send(:i)
+                }     
+                return RATINGS_NUTRIENTS->size-1;     
               }
+
+            @:fillingToRating::<-
+              ::? {
+                foreach(RATINGS_FILLING) ::(i, val) {
+                  when(totalFilling < val[0]) send(:i)
+                }     
+                return RATINGS_FILLING->size-1;     
+              }
+
+            
+            windowEvent.queueMessage(
+              text: 'The meal is finished.\n\n'+
+                'Nutrients : ' + RATINGS_NUTRIENTS[nutrientsToRating()][1] + '\n' +
+                'Filling   : ' + RATINGS_FILLING[fillingToRating()][1]
             );
+            
+            state.tummy = 0.55 + (totalFilling / 2) * 0.1;
+            if (state.tummy > 1) state.tummy = 1;
+
+            if (state.tummy >= 0.82) 
+              windowEvent.queueMessage(
+                text: 'The party is very satisfied.'
+              );
+                          
+            party.gainProfessionExp(
+              exp:Entity.PROF_EXP_PER_KNOCKOUT * totalNutrients,
+              onDone ::{
+                //windowEvent.jumpToTag(name:'EATFOOD', goBeforeTag:true);
+              }
+            )
+            
+            
+            
+            
           }
+          @:food = foods[0];
+          party.inventory.remove(:food);
+          foods->remove(:0);
           
-          eatNext();
+          windowEvent.queueMessage(
+            text: 'The party shared the ' + food.name + '.'
+          );
+          
+          
+          windowEvent.queueMessage(
+            renderable : {
+              render ::{
+                @iter = 0;
+                foreach(party.members) ::(k, member) {
+                  @:rating = member.judgeFood(:food);
+                  canvas.renderTextFrameGeneral(
+                    title: member.name,
+                    lines : [
+                      '"' + rating + '"'
+                    ],
+                    maxWidth : canvas.width / party.members->size,
+                    topWeight: iter * 0.25
+                  );
+                  
+                  iter += 1;
+                }
+              }
+            },
+            topWeight: 1,
+            text: 'Eating: ' + food.name
+          )
+          totalFilling += food.edible.fillingRating
+          totalNutrients += food.edible.nutrientRating;
+          
+          
+          
+          windowEvent.queueCustom(
+            onEnter::{
+              eatNext();
+            }
+          );
         }
-        
+          
+        eatNext();
+      },
+      
+      eat ::{
         
         when (state.tummy > HUNGER_LEVELS[1][0]) 
           windowEvent.queueMessage(
@@ -913,7 +917,7 @@ Hunger = LoadableClass.create(
                 
                 onChoice::(which) {
                   when(which == false) empty;
-                  eatThese(:selected->keys);
+                  this.eatThese(:selected->keys);
                 }
               );  
             } 
