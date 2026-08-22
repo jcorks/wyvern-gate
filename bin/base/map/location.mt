@@ -38,7 +38,11 @@
 
   // Whether this location can be symbolically considered an 
   // exit out of a landmark. Mostly used for dungeons.
-  EXIT_HINT : 8  
+  EXIT_HINT : 8,
+  
+  // Whether the location should be interractable outside of 
+  // its normal range. This is usefor, for example, in shops 
+  EXTENDED_INTERACT_RANGE : 16
 
 }
 
@@ -717,7 +721,7 @@ Location.database.newEntry(data:{
 
 
     
-    traits : 0,
+    traits : TRAIT.EXTENDED_INTERACT_RANGE,
     events : {
       onCreate ::(location) {
         @:Profession = import(module:'base/entity/profession.mt');

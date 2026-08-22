@@ -772,7 +772,11 @@ Map =  LoadableClass.create(
             if (items != empty && items->keycount > 0) ::<= {
               @:discovered = (items[items->keycount-1].traits & Map.TRAIT.DISCOVERED) != 0;
               
-              if (discovered == true && ((items[items->keycount-1].traits & Map.TRAIT.HAS_HALO) != 0)) {
+              if (
+                discovered == true && 
+                ((items[items->keycount-1].traits & Map.TRAIT.HAS_HALO) != 0) &&
+                distance(x0:mapSizeW/2, y0:mapSizeH/2, x1:x, y1:y) < 7
+              ) {
                 targets->push(:{x:x, y:y, itemX:itemX, itemY:itemY});
               }
               importantItems->push(:{
@@ -1449,13 +1453,13 @@ Map =  LoadableClass.create(
 
       getNamedItemsUnderPointer :: {
         @:out = this.itemsAt(x:pointer.x, y:pointer.y);
-        when(out == empty) empty;
+        when(out == empty) [];
         return out->filter(by:::(value) <- value.name != empty);
       },
 
       getNamedItemsUnderPointerRadius ::(radius) {
         @:out = this.getItemsUnderPointerRadius(radius);  
-        when(out == empty) empty;
+        when(out == empty) [];
         return out->filter(by:::(value) <- value.name != empty);
       },
 

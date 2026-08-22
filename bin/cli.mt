@@ -19,7 +19,7 @@
 //@:Random = import(module:'core/random.mt');
 
 
-
+breakpoint()
 
 @:canvas = import(:'core/graphics/canvas.mt');
 @:instance = import(module:'base/instance.mt');
@@ -29,6 +29,8 @@
 @:Filesystem = import(module:'Matte.System.Filesystem');
 @:renderLines = getExternalFunction(:'wyvern_gate__native__canvas__renderLines');
 @:write = getExternalFunction(:'wyvern_gate__native__writeDataFileText');
+
+
 
 
 

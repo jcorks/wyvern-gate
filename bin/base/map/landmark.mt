@@ -1701,7 +1701,7 @@ Landmark.database.newEntry(
         
         @stepCount = 0;
         @choiceActions = [];
-
+        @locationsNearby = [];
         @:landmarkChoices = ::{
           @landmarkOptions;
           windowEvent.queueChoices(
@@ -1716,14 +1716,15 @@ Landmark.database.newEntry(
               
               choiceActions = [];
               @:choices = [];
-              @locationAt = landmark.map.getNamedItemsUnderPointerRadius(:3);
-              if (locationAt != empty) ::<= {
-                foreach(locationAt)::(i, loc) {
-                  if (loc.data.canInteract()) ::<= {
+
+              
+              if (locationsNearby != empty) ::<= {
+                breakpoint();
+                foreach(locationsNearby)::(i, loc) {
+                  if (loc.canInteract()) ::<= {
                     choices->push(value:'Check ' + loc.name);
                     choiceActions->push(::{
-                      locationAt = loc.data;
-                      locationAt.interact();                  
+                      loc.interact();                  
                     });
                   }
                 }
@@ -1849,8 +1850,11 @@ Landmark.database.newEntry(
             }
             
             // cancel if we've arrived somewhere
-            @:locations = landmark.map.getNamedItemsUnderPointerRadius(:3)->map(::(value) <- value.data)
-            setNearby(:locations->filter(::(value) <- value.base.hasNoTrait(:Location.TRAIT.INVISIBLE)));
+            locationsNearby = [
+              ...landmark.map.getNamedItemsUnderPointerRadius(:7)->filter(::(value) <- value.data.base.hasTraits(:Location.TRAIT.EXTENDED_INTERACT_RANGE)),
+              ...landmark.map.getNamedItemsUnderPointerRadius(:3)->filter(::(value) <- value.data.base.hasNoTrait (:Location.TRAIT.EXTENDED_INTERACT_RANGE))
+            ]->map(::(value) <- value.data);
+            setNearby(:locationsNearby->filter(::(value) <- value.base.hasNoTrait(:Location.TRAIT.INVISIBLE)));
           }        
         )      
         if (skipAnimation == true)
