@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "matte/src/matte.h"
-#include "matte/src/matte_vm.h"
-#include "matte/src/matte_store.h"
-#include "matte/src/matte_string.h"
-#include "matte/src/matte_array.h"
+#include "../matte/src/matte.h"
+#include "../matte/src/matte_vm.h"
+#include "../matte/src/matte_store.h"
+#include "../matte/src/matte_string.h"
+#include "../matte/src/matte_array.h"
 
 #define SETTINGS_MASK 0x110000
 #define IS_WALLED_MASK 0x010000

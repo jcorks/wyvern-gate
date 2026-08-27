@@ -1,4 +1,4 @@
-importScripts("matte.js", "driver.js");
+importScripts("matte.js", "driver.js", "filelist.js");
 
 Worker = (function() {
     const lines = [];

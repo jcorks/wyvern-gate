@@ -3554,15 +3554,15 @@
         when(this.species.hasTraits(:Species.TRAIT.NO_COMMON_SPEAK))
           '...'
       
-        when(rating < 0.08) random.pickArrayItem(:[
-          'I really did not like that.',
+        when(rating < 0.03) random.pickArrayItem(:[
+          'I\'d rather not have more of that.',
         ]);
 
-        when(rating < 0.25) random.pickArrayItem(:[
+        when(rating < 0.18) random.pickArrayItem(:[
           'I didn\'t like it much.',
         ]);
 
-        when(rating < 0.75) random.pickArrayItem(:[
+        when(rating < 0.80) random.pickArrayItem(:[
           'Well, that was alright.',
           'That wasn\'t bad at all.',
           'I quite liked that.',
@@ -3570,7 +3570,7 @@
           'I\'d have that again.',
         ]);
 
-        when(rating < 0.25) random.pickArrayItem(:[
+        when(rating < 0.97) random.pickArrayItem(:[
           'That was amazing!',
           'Wow, that was great!',
         ]);

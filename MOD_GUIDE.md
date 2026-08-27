@@ -42,14 +42,14 @@ Major concepts / Architecture
 ------------
 
 Wyvern Gate is a completely text-based game. It renders all characters 
-to a canvas (see game_singleton.canvas.mt for the lower-level implementation), which 
+to a canvas (see /bin/core/graphics/canvas.mt for the lower-level implementation), which 
 is a simple collection of lines of text before delivering it to the 
 host environment, whether thats a terminal, a webpage renderer, or 
 an OpenGL text renderer.
 
 
 While the canvas handles that at the lower level, actual operations in the 
-game are done with the windowEvent singleton (see game_singleton.windowevent.mt).
+game are done with the windowEvent singleton (see /bin/core/windowevent.mt).
 windowEvent provides the basic mechanism to introduce windowed visuals that 
 react to user input. windowEvent will cover most of your interaction and display needs. When desired,
 windowEvent windows allow for custom graphics, which is when the lower-level 
@@ -82,8 +82,8 @@ When using windowEvent, there are common window types that you queue:
 - `windowEvent.queueChoices()` can queue a window that allows a user to choose among a scrollable 
   list of choices. Like queueAskBoolean(), the response function will often queue additional window requests
 
-- `windowEvent.queueNoDisplay()` is a special window that doesnt, by default, do anything. It is meant to be 
-  a way to provide custom windowing features and even things such as animations. queueNoDisplay provides an empty 
+- `windowEvent.queueCustom()` is a special window that doesnt, by default, do anything. It is meant to be 
+  a way to provide custom windowing features and even things such as animations. queueCustom provides an empty 
   window that can, optionally, immediately go to the next window. This can be convenient to introduce callbacks 
   that happen in order after certain windows.
   
@@ -116,10 +116,10 @@ complex setups will be harder to debug. Try to keep your windowing systems as si
 --------------------------------
 
 
-Maps (game_class.map.mt) are the classes the provide the backbone of the movement mechanics, allowing for 
+Map (bin/core/map.mt) is the class that provides the backbone of the movement mechanics, allowing for 
 tile-based character graphics, movement and storage of elements in a grid structure,
 dynamic changing of viewing within this grid, and even wall-sensitive path finding. 
-Any time a player is able to move, it is displayed on a map.
+Any time a player is able to move, it is displayed on a Map instance.
 
 
 Because maps are used ubiquitously throughout the program for the dungeon crawling aspect,
@@ -130,10 +130,10 @@ within the game. This structure of the major active game components is as follow
 `(instance) -> (world) -> (island + map) -> (landmark + map) -> location`
 
 In this tree structure, the following rules hold true.
-- A world (game_singleton.world.mt) can hold information for multiple islands. Only one island is "active" at a time, and there exists only one world in the game at a time.
-- An island (game_class.island.mt) has its own map that is displayed when relevant. It can hold many landmarks, and each landmark is displayed as a tile on the island's map.
-- A landmark (game_mutator.landmark.mt has its own map this is displayed when relevant. It can hold many locations, and each location is displayed as a tile on the landmark's map.
-- A location (game_mutator.landmark.mt)
+- A world (bin/base/world.mt) can hold information for multiple islands. Only one island is "active" at a time, and there exists only one world in the game at a time.
+- An island (bin/base/map/island.mt) has its own map that is displayed when relevant. It can hold many landmarks, and each landmark is displayed as a tile on the island's map.
+- A landmark (bin/base/map/landmark.mt) has its own map this is displayed when relevant. It can hold many locations, and each location is displayed as a tile on the landmark's map.
+- A location (bin/base/map/location.mt) has no map, but usually represents an interactve object within the landmark map.
 
 In this tree structure, islands, landmarks, and locations are able to reference their 
 parent. instance and world do not need such structures, as worlds and instances are singletons, and only one exists at a time.
@@ -143,21 +143,22 @@ parent. instance and world do not need such structures, as worlds and instances 
 ------------
 
 Throughout the game, many things require repetitive structures because many different instances of them exist.
-These are controlled by Databases. Many database instances are used throughout the program. Each file containing 
-a database is prefixed with `game_database.` so databases are clearly visible.
+These are controlled by Databases. Many database instances are used throughout the program.
 
 When created, Databases contain a name and a set of typed traits that database entries must follow.
-Consider this database from game_database.material.mt:
+Consider this database from bin/base/item/material.mt:
 
 ```
 @:Material = Database.new(
     name : 'Wyvern.Material',
-    traits : {
+    attributes : {
         name : String,
+        id : String,
         rarity : Number,
         tier : Number,
         description : String,
         statMod : StatSet.type, // percentages
+        enchantLimit : Number,
         pricePercentMod : Number
     },
     reset            
@@ -165,8 +166,8 @@ Consider this database from game_database.material.mt:
 ```
 
 
-In this database, entries can have a name, rarity, tier, description, stats, and a price modifier. Each 
-traits is checked against the type that is labeled, so if a new material is defined and the rarity is 
+In this database, entries can have a name, id, rarity, tier, description, stats, an enchantment limit hint, and a price modifier. Each 
+property is checked against the type that is labeled, so if a new material is defined and the rarity is 
 not set, or is set to be something other than a Number, an error is thrown.
 
 Here is an example database entry:
@@ -175,6 +176,7 @@ Here is an example database entry:
 Material.newEntry(
     data : {
         name : 'Iron',
+        id : 'base:iron',
         description : 'The iron used gives it a solid grey color.',
         rarity : 13,
         tier : 0,
@@ -183,6 +185,7 @@ Material.newEntry(
             ATK: 20,
             SPD: -5
         ),
+        enchantLimit: 4,
         pricePercentMod: 35
     }
 )
@@ -192,6 +195,9 @@ The data argument is populated with the static data that the database entry will
 intended to be "static" in that their contents will not change. Database entries, however, can be removed 
 and added to as needed.
 
+Pay special attention to the id property. Every Database layout contains an id property. As opposed to 
+the name property, which is also common, the id property is intended to uniquely define a database 
+entry WITHIN its database. This can be used within mods to, for example, create a specific kind of Item.
 
 **NOTE:** take caution when adding and removing database entries, as saving / loading are sensitive to 
 them. If loading a save with an unknown database entry, this will throw an error, as the game 
@@ -206,7 +212,7 @@ in Wyvern Gate as "Mutators".
 
 
 Mutators always have a "base" Database item associated with it, along with some custom data that is intended 
-to change per-instance on its own. One example of this is an Item (game_mutator.item.mt) which has a base 
+to change per-instance on its own. One example of this is an Item (bin/base/item.mt) which has a base 
 and additional data.
 
 Consider a common example of an item: A `Durable Iron Shortsword`. For this item, it contains the Database Item 
@@ -232,13 +238,13 @@ that can affect all scenarios, even the base ones.
 --------
 
 When saving and loading data, the program has designated what content gets stored naturally through its construction
-using State (game_class.state.mt) instances. Usually states are not made directly, but are part of LoadableClasses, which 
-(game_singleton.loadableclass.mt) use States to define exactly what data gets saved and where. Loadable classes 
+using State (bin/core/data/state.mt) instances. Usually states are not made directly, but are part of LoadableClasses, which 
+(bin/core/data/loadableclass.mt) use States to define exactly what data gets saved and where. Loadable classes 
 also allow for default or custom save / load behavior.
 
 
 LoadableClasses follow a tree hierarchy, where, if a LoadableClass is part of the State of something,
-it will also dump its state as a child when saving. This conveniently provides an automatic saving and loading 
+it will also dump its state as a child when saving. This conveniently provides an automatic saving and loading serialization
 feature. All Mutators are LoadableClasses, so you can follow any mutator to get a feel for LoadableClass.
 
 The key features are 
@@ -262,13 +268,13 @@ These are small notes that might help you understand some aspects better:
   Tiers primarily are used in the default scenarios for items, dungeon layouts, and dangerousness of encounters. For built in 
   things such as chests and shopkeeps, they will be sensitive to the tier upon creation.
 
-- Entities (game_class.entity.mt) are the individuals of the world. They are typically associated with a location 
+- Entities (bin/base/entity.mt) are the individuals of the world. They are typically associated with a location 
   which they may own, or they may be freely created and destroyed, such as normal encounters. Entities follow the same 
   rules for player characters and world characters. Even the Wyverns are entities. Look at the file for the 
-  aspects of entities 
+  aspects of entities; there are a lot.
   
 - The party instance governs what the party has access to, mainly its members and the inventory. Its a class 
-  (game_class.party.mt), but the world instance contains the single party instance for the entire game.
+  (bin/base/party.mt), but the world instance contains the single party instance for the entire game.
   
 
   

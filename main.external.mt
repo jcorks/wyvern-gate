@@ -18,11 +18,11 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-@:Entity = import(module:'game_class.entity.mt');
-@:Random = import(module:'game_singleton.random.mt');
+@:Entity = import(module:'base/entity.mt');
+@:Random = import(module:'core/random.mt');
 
-@:canvas = import(module:'game_singleton.canvas.mt');
-@:instance = import(module:'game_singleton.instance.mt');
+@:canvas = import(module:'core/graphics/canvas.mt');
+@:instance = import(module:'base/instance.mt');
 
 
 
@@ -199,19 +199,54 @@ instance.mainMenu(
 
 
 
-
-
-
-// user code calls the returned function every frame
-return ::{
-  @val = external_getInput();
-  windowEvent.commitInput(input:val);
+@:printMacro ::{
+  @:macro = windowEvent.getMacro();
+  when(macro == empty) empty;
   
-  if (canvasChanged) ::<= {
-    rerender();
+  print(:'\n\n[');
+  foreach(macro) ::(k, v) {
+    print(:'  {input: windowEvent.CURSOR_ACTIONS.' + 
+      (
+        match(v.input) {
+          (windowEvent.CURSOR_ACTIONS.LEFT): 'LEFT',
+          (windowEvent.CURSOR_ACTIONS.UP): 'UP',
+          (windowEvent.CURSOR_ACTIONS.RIGHT): 'RIGHT',
+          (windowEvent.CURSOR_ACTIONS.DOWN): 'DOWN',
+          (windowEvent.CURSOR_ACTIONS.CONFIRM): 'CONFIRM',
+          (windowEvent.CURSOR_ACTIONS.CANCEL): 'CANCEL',
+          default: '???'
+        }
+      ) + ', waitFrames: ' +
+      (
+        v.waitFrames
+      ) + '},'
+    );
   }
-
+  print(:']');
 }
 
 
 
+
+// user code calls the returned function every frame
+@LOOP_DONE = false;
+@:mainLoop = ::{
+  // standard event loop
+  ::? {
+    forever ::{
+      when(LOOP_DONE) ::<= {
+        printMacro();
+        send();
+      }
+      
+      @val = external_getInput();
+      windowEvent.commitInput(input:val);
+      
+      
+      if (canvasChanged) ::<= {
+        rerender();  
+      }
+    }    
+  } 
+}
+if (mainLoop != empty) mainLoop();
