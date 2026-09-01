@@ -846,7 +846,7 @@ return empty;
                   jumpTag : 'quickSave',
                   prompt: 'Save : ' + name,
                   choices : [
-                    'Load Quick Save',
+                    'Load quick save',
                     'Load normal save'
                   ],
                   
@@ -856,7 +856,7 @@ return empty;
                     );
                     windowEvent.queueAskBoolean(
                       prompt: if (choice == 1)
-                        'Load Quick Save?'
+                        'Load quick save?'
                       else 
                         'Load normal save?',
                         
@@ -1338,6 +1338,7 @@ return empty;
       
       
       savestate ::(nameOverride, saveOverride) {
+        breakpoint();
         when((world.saveName == empty || world.saveName == '') && 
              (nameOverride == empty   || nameOverride == '')) empty;
         onSaveState(

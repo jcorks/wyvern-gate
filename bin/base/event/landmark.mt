@@ -837,8 +837,8 @@ LandmarkEvent.database.newEntry(
         symbol : 'n',
         speciesID : 'base:wyvern-specter',
         professionID : 'base:wyvern-specter',
-        maxEncounters : if (parent.landmark.floor == 0) 0 else 2,
-        maxSimultaneousEncounters : random.integer(from:1, to:2),
+        maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
+        maxSimultaneousEncounters : random.integer(from:1, to:1),
         townsfolk: false,
         
         upkeepTasks : [

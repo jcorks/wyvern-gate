@@ -399,10 +399,15 @@ static matteValue_t wyvern_gate__native__writeDataFileText(
         matte_string_get_c_str(name)
     );
     
-    FILE * f = fopen(matte_string_get_c_str(path), "wb");
-    fprintf(f, "%s", matte_string_get_c_str(matte_value_string_get_string_unsafe(store, args[1])));
-    fclose(f);
-
+    
+    const char * str = matte_string_get_c_str(matte_value_string_get_string_unsafe(store, args[1]));
+    if (!strcmp(str, "")) {
+        remove(matte_string_get_c_str(path));
+    } else {
+        FILE * f = fopen(matte_string_get_c_str(path), "wb");
+        fprintf(f, "%s", str);
+        fclose(f);
+    }
     return matte_store_new_value(store);
     
     

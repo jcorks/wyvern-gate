@@ -25,8 +25,8 @@ return {
           @:instance = wyvern.Instance
 
           @:Entity = wyvern.Entity
-          @:Species = wyvern.Species
-          @:Profession = wyvern.Profession
+          @:Species = wyvern.Entity.Species
+          @:Profession = wyvern.Entity.Profession
       
 
           @:keyhome = Item.new(
@@ -86,7 +86,6 @@ return {
                 ent.autoLevelProfession(:ent.profession);
               }
               ent.equipAllProfessionArts();  
-              ent.supportArts = []; 
               
               
               ent.data.sourceImport = data;

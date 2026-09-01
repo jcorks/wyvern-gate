@@ -333,6 +333,30 @@
 
 
 @:notifyEffect ::(this, state, isAdding, effectIDs) {
+  @:enact = if (windowEvent.skipDisplayWindows)
+    ::(line){
+      if (windowEvent.log != empty)
+        windowEvent.log->push(:line);
+    }
+  else
+    ::(line){
+      windowEvent.queueMessage(text:line);
+    }
+
+  foreach(effectIDs) ::(k, id) {
+    @:effect = Effect.find(id:id);
+    enact(:
+      if (isAdding)
+        '++  ' + this.name + ' now has the Effect "' + effect.name + '": ' + effect.description
+      else
+        '--  ' + this.name + ' lost the Effect "' + effect.name + '"'
+    );
+  } 
+
+  /*
+  
+  // window event of effects. Might be too much, so its being semi-retired
+  
   @:alreadyPosted = {};
   @needsUpdate = false;
   @:getSummary ::(id) {
@@ -369,6 +393,7 @@
     prompt: this.name + ' - Effects Changed!',
     lines: canvas.refitLines(input:lines)
   );
+  */
 }
 
 @:statUp ::(level, growth => Number) {
@@ -468,6 +493,7 @@
   }
   
   @:maxHP = displayHP(:this.stats.HP);
+  @skip = 0;
   windowEvent.queueCustom(
     onEnter ::{
       when (hp <= 1) empty;
@@ -481,7 +507,12 @@
       match(input) {
         (windowEvent.CURSOR_ACTIONS.CONFIRM,
          windowEvent.CURSOR_ACTIONS.CANCEL):
-        hp = 0
+        if (skip == 0) {
+          hp = 0
+          skip = 1
+        } else if (skip == 1) {
+          skip = 2;
+        }
       }
     },
     animationFrame ::{  
@@ -501,21 +532,11 @@
       hp = hp * 0.9;
 
       when(hp->abs <= 0.15)
-        windowEvent.ANIMATION_FINISHED;
+        if (skip == 2) windowEvent.ANIMATION_FINISHED else empty;
     }
   );
-    
-  windowEvent.queueDisplay(
-    leftWeight: 0.5,
-    topWeight : 0.5,
-    skipAnimation: true,
-    lines : [
-      caption,
-      '',
-      canvas.renderBarAsString(width:40, fillFraction: (to) / this.stats.HP),
-      'HP: ' + (if (maxHP == '??') '??' else to) + ' / ' + displayHP(:this.stats.HP)
-    ]        
-  );    
+  
+  
 
 }
 
@@ -1626,9 +1647,10 @@
     canUseAbilities :: {
       when(_.this.isIncapacitated()) false;
       when(_.canActThisTurn == false) false;
-      return _.this.effectStack.getAllByFilter( 
+      when(_.this.effectStack.getAllByFilter( 
         ::(value) <- Effect.find(:value.id).hasTraits(:Effect.TRAIT.CANT_USE_ABILITIES)
-      )->size == 0
+      )->size != 0) false;
+      return true;      
     },
 
     canUseReactions :: {
@@ -3190,6 +3212,18 @@
       when (abilitiesUsedBattle != empty && ((art.traits & Arts.TRAIT.ONCE_PER_BATTLE) != 0) && abilitiesUsedBattle[art.id] == true) windowEvent.queueMessage(
         text: this.name + " tried to use " + art.name + ", but already was used and could not be used!"
       );
+
+      @:showStopper = if(this.effectStack == empty) 
+        [] 
+          else 
+        this.effectStack.getAllByFilter( 
+          ::(value) <- Effect.find(:value.id).hasTraits(:Effect.TRAIT.CANT_USE_ABILITIES_SOMETIMES)
+        );
+      
+      when (art.id != 'base:wait'&& showStopper->size > 0 && random.flipCoin() == true) 
+        windowEvent.queueMessage(text: 'The Effect ' + Effect.find(:showStopper[0].id).name + ' happened to prevent the Art ' + art.name + ' from use!')
+
+
       if (abilitiesUsedBattle) abilitiesUsedBattle[art.id] = true;
 
           

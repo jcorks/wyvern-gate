@@ -578,6 +578,8 @@ Location.database.newEntry(data:{
   @:item = location.inventory.items[0];
   location.data.originalPrice = (Item.BUY_PRICE_MULTIPLIER* item.price)->floor
   location.data.discountPrice = (Item.BUY_PRICE_MULTIPLIER * item.price * (1 - 0.01*location.data.discount))->floor
+
+  item.price = item.price * (1 - 0.01*location.data.discount)->floor
 }
 Location.database.newEntry(data:{
   id: 'base:shop-special',
@@ -2901,8 +2903,10 @@ Location.database.newEntry(data:{
                 onChoice::(which) {
                   when(which == false) empty;
                   interaction.interact(location, party);                                        
-                  if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
+                  if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract')) {
+                    this.landmark.invalidateTravelCache();
                     windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
+                  }
                 }
               );
             }
@@ -2961,8 +2965,10 @@ Location.database.newEntry(data:{
             when(choice-1 >= interactionNames->size) ::<= {
               @:interaction = scenarioInteractions[choice-(1+interactionNames->size)];
               interaction.select(location:this)
-              if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract'))
+              if (!interaction.keepInteractionMenu && windowEvent.canJumpToTag(name:'LocationInteract')) {
+                this.landmark.invalidateTravelCache();
                 windowEvent.jumpToTag(name:'LocationInteract', goBeforeTag:true, doResolveNext:true);
+              }
             }
             
             @:interaction = Interaction.find(id:this.interactions[choice-1])

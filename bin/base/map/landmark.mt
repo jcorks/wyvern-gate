@@ -1044,7 +1044,6 @@ Landmark.database.newEntry(
         foreach(landmark.locations) ::(k, loc) {
           when (loc.base.id == 'base:portal' && loc.hasPortal) ::<= {
             @:targetLocation = landmark.island.findLocation(:loc.portal.destinationWorldID);
-            breakpoint();
             
             @:items = targetLocation.landmark.map.itemsAt(x:targetLocation.x, y:targetLocation.y);
             when(items == empty) empty;
@@ -1456,7 +1455,6 @@ Landmark.database.newEntry(
         setupLocations(:[...base.requiredObjects, ...selected]);
 
         if (base.hasTraits(:Landmark.TRAIT.DUNGEON_FORCE_ENTRANCE)) ::<= {
-          breakpoint();
           state.map.setPointer(x:entrance.x, y:entrance.y);
         } else {
           this.movePointerToRandomArea();        
@@ -1716,6 +1714,16 @@ Landmark.database.newEntry(
         );
         return location;
       },
+      
+      // Shortcut to invalidate 
+      invalidateTravelCache ::{
+        windowEvent.invalidateCache(
+          :'LANDMARK_VISIT' + this.worldID
+        );
+        windowEvent.invalidateCache(
+          :'LANDMARK_TRAVEL'
+        );
+      },
 
 
       // enters the travel ui state, bringing the user to the 
@@ -1749,12 +1757,20 @@ Landmark.database.newEntry(
         @:island = this.island;                    
         
         windowEvent.removeTag(:jumpTag)
-
-
         
         @stepCount = 0;
         @choiceActions = [];
         @locationsNearby = [];
+
+
+        @:refreshNearby::{
+          locationsNearby = [
+            ...landmark.map.getNamedItemsUnderPointerRadius(:7)->filter(::(value) <- value.data.base.hasTraits(:Location.TRAIT.EXTENDED_INTERACT_RANGE)),
+            ...landmark.map.getNamedItemsUnderPointerRadius(:3)->filter(::(value) <- value.data.base.hasNoTrait (:Location.TRAIT.EXTENDED_INTERACT_RANGE))
+          ]->map(::(value) <- value.data);
+          setNearby(:locationsNearby->filter(::(value) <- value.base.hasNoTrait(:Location.TRAIT.INVISIBLE)));
+        }
+
         @:landmarkChoices = ::{
           @landmarkOptions;
           windowEvent.queueChoices(
@@ -1765,6 +1781,8 @@ Landmark.database.newEntry(
             canCancel:true,
             jumpTag:'LANDMARK_TRAVEL',
             onGetChoices ::{
+              breakpoint();
+              refreshNearby();
               landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island, landmark));
               
               choiceActions = [];
@@ -1772,7 +1790,6 @@ Landmark.database.newEntry(
 
               
               if (locationsNearby != empty) ::<= {
-                breakpoint();
                 foreach(locationsNearby)::(i, loc) {
                   if (loc.canInteract()) ::<= {
                     choices->push(value:'Check ' + loc.name);
@@ -1906,11 +1923,7 @@ Landmark.database.newEntry(
             }
             
             // cancel if we've arrived somewhere
-            locationsNearby = [
-              ...landmark.map.getNamedItemsUnderPointerRadius(:7)->filter(::(value) <- value.data.base.hasTraits(:Location.TRAIT.EXTENDED_INTERACT_RANGE)),
-              ...landmark.map.getNamedItemsUnderPointerRadius(:3)->filter(::(value) <- value.data.base.hasNoTrait (:Location.TRAIT.EXTENDED_INTERACT_RANGE))
-            ]->map(::(value) <- value.data);
-            setNearby(:locationsNearby->filter(::(value) <- value.base.hasNoTrait(:Location.TRAIT.INVISIBLE)));
+            refreshNearby();
           }        
         )      
         if (skipAnimation == true)

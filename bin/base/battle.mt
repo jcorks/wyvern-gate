@@ -174,6 +174,7 @@
         error(detail:'This can only be called upon a team winning');
       @:out = getEnemies(ent);
       foreach(defeated->keys) ::(k, enemy) {
+        when (!enemy.isIncapacitated())empty;
         if (ent2group[enemy] != ent2group[ent])
           out->push(value:enemy);
       }
@@ -215,6 +216,9 @@
     }
     
     @:endTurn ::{
+
+
+   
       entityTurn.endTurn(battle:this);
       turnIndex+=1;
       checkRemove();  
@@ -253,11 +257,13 @@
         
         if (winningGroup != empty || everyoneWipedOut) ::<= {
           ended = true;
+          startMessageCapture();
           foreach(groups) ::(k, group) {
             foreach(group) ::(i, ent) {
               ent.battleEnd();
             }
           }          
+          endMessageCapture(:'End of battle.');
         }     
       }
       windowEvent.queueCustom(
@@ -268,14 +274,12 @@
         }
       );
     }
-    
     @:nextTurn ::{
     
       when (turnPoppable->keycount == 0) empty;
       if (onTurnPrep_) onTurnPrep_();
       
       @:next = :: {
-
         // from a battle cancel
         when (ended) empty;
 
@@ -302,27 +306,32 @@
         windowEvent.queueMessage(
           text: 'It is now ' + ent.name + '\'s turn.'
         );
-        if (onAct_) onAct_();
         
-        // multi turn actions
-        if (actions[ent]) ::<= {
-          @:action = actions[ent];
-          action.turnIndex += 1;
-          
-          
-          this.entityCommitAction(action:actions[ent]);
-          
-        } else ::<= {
-          // normal turn: request action from the act function
-          // given by the caller
-          @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
-          if (onTurn_) onTurn_(battle:this, entity:ent, landmark:landmark_);
-          act(
-            battle:this,
-            user:ent,
-            landmark:landmark_
-          );
-        }        
+        windowEvent.queueCustom(
+          onEnter :: {
+            if (onAct_) onAct_();
+            
+            // multi turn actions
+            if (actions[ent]) ::<= {
+              @:action = actions[ent];
+              action.turnIndex += 1;
+              
+              
+              this.entityCommitAction(action:actions[ent]);
+              
+            } else ::<= {
+              // normal turn: request action from the act function
+              // given by the caller
+              @:act = if (group2party[ent2group[ent]]) onAllyTurn_ else onEnemyTurn_;
+              if (onTurn_) onTurn_(battle:this, entity:ent, landmark:landmark_);
+              act(
+                battle:this,
+                user:ent,
+                landmark:landmark_
+              );
+            }        
+          }
+        );
       }
       
       lastNext = next;
@@ -334,10 +343,13 @@
     }
     
     @:initTurn ::{
-      when(ended) empty;
+      when(ended) 
+        startMessageCapture()
       
-      if (windowEvent.log != empty)
+      if (windowEvent.log != empty) {
         windowEvent.log->push(:'-- TURN ' + (turnCount+1) + ' --');
+      }
+      startMessageCapture()
       
       turnCount+=1;
       
@@ -522,6 +534,25 @@
       
     }
     
+
+    @logStart        
+    @:startMessageCapture::{
+      when(windowEvent.skipDisplayWindows) error();
+      logStart = windowEvent.log->size;
+      windowEvent.skipDisplayWindows = true;
+    }        
+    
+    @:endMessageCapture ::(caption) {
+      if (windowEvent.skipDisplayWindows == false) error();
+      @:lines = windowEvent.log->subset(from:logStart, to:windowEvent.log->size-1);
+      windowEvent.skipDisplayWindows = false;          
+      when(lines->size == 0) empty;
+      windowEvent.queueReader(
+        prompt: caption,
+        animateLines: true,
+        lines
+      );
+    }
 
 
     
@@ -887,8 +918,11 @@
                   started = true;
                 }
                 
-                if (turnPoppable->keycount == 0)
-                  initTurn();  
+
+                if (turnPoppable->keycount == 0) {
+                  initTurn();   // starts message capture internally
+                  endMessageCapture(:'Turn start')
+                }
                 nextTurn();
               }
             );
@@ -1045,6 +1079,7 @@
       
       commitFreeAction::(action, from, onDone) {
         @:entAct = if (from != empty) from else entityTurn;
+        @:art = Arts.database.find(:action.card.id);
         when(entAct.effectStack.emitEvent(
           name : 'onPreAction',
           action : action
@@ -1053,7 +1088,6 @@
           
         
         @:passesCheck ::{
-          @:art = Arts.database.find(:action.card.id);
           when(art.traits & Arts.TRAIT.SUPPORT == 0) true;
           return false;
         }
@@ -1080,7 +1114,7 @@
           pendingChoices = [...action.targets]->filter(by::(value) <- world.party.leader == value);
         }
       
-        @:finish ::(useArtReturn) {
+        @:finishFreeAction ::(useArtReturn) {
 
 
 
@@ -1104,11 +1138,26 @@
               action : action
             )
 
-            onDone();
-          }        
+            windowEvent.queueCustom(
+              onEnter ::<- 
+                endMessageCapture(:entityTurn.name + '\'s Art: ' + art.name)
+            );
+            
+            windowEvent.queueCustom(
+              onEnter ::{
+                onDone();              
+              }
+            );
+
+
+          } else {
+            windowEvent.queueCustom(
+              onEnter ::<- 
+                endMessageCapture(:entityTurn.name + '\'s Art: ' + art.name)
+            );
+          }     
         }
       
-        
         @:doAction ::{
           
           @:art = Arts.database.find(id:action.card.id);
@@ -1125,7 +1174,8 @@
 
           windowEvent.queueCustom(
             onEnter ::{
-              finish(:ret);           
+
+              finishFreeAction(:ret);           
               requestRedrawBG();
             }
           );
@@ -1144,10 +1194,13 @@
               user:entAct,
               prompt: entAct.name + ' uses the Art: ' + art.name + '!'
             );
+
+
             
             windowEvent.queueCustom(
               onEnter :: {
-                requestRedrawBG();
+                requestRedrawBG();  
+                startMessageCapture();
                 // react here
                 windowEvent.queueCustom(
                   onEnter ::{
@@ -1158,10 +1211,11 @@
                   }
                 );
               }
-            
             )
           }
         );
+        
+        
       },
     }
   }

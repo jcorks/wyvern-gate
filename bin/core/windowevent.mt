@@ -162,6 +162,7 @@
     @errorHandler;
     @log_;
     @hadInputLast = false;
+    @skipDisplayWindows;
     
     resolveQueues->push(:{
       queue : {}
@@ -1243,8 +1244,6 @@
           maxWidth,
           maxHeight
         ); 
-
-
       }
 
       data.thisRender = ::{
@@ -1304,6 +1303,7 @@
     );    
     @:commitInput_display ::(data, input) {
       when (requestAutoSkip) true;
+      when (skipDisplayWindows) true;
 
     
 
@@ -1382,7 +1382,6 @@
             commitInput_display_emitter.stop();
             return ANIMATION_FINISHED;
           }
-
         }
       }
       if (data.thisRender == empty) ::<= {
@@ -1478,6 +1477,52 @@
         data.rendered = empty;
       }   
       
+      @animLineIter = 0;
+      @animCharIter = 0;
+      @iterRate = 2;
+      if (data.animateLines && data.animationFrame == empty) {
+        data.renderState = RENDER_STATE.ANIMATING;
+        data.animationFrame = ::{
+          @bulk = {};
+          @:currentLine = data.lines[animLineIter];
+          
+          if (animLineIter > 0)
+            bulk = data.lines->subset(from:0, to:animLineIter-1)
+            
+          breakpoint();
+          bulk->push(:currentLine->substr(
+            from:(currentLine->length-1)-animCharIter, 
+              to: currentLine->length-1
+          ));
+          @:info = renderTextSingle(
+            leftWeight: data.leftWeight, 
+            topWeight: data.topWeight, 
+            maxWidth : data.maxWidth,
+            maxHeight : data.maxHeight,
+            minWidth : data.minWidth,
+            disableFrame : data.disableFrame,
+            lines: bulk,
+            speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+            hasNotch: true            
+            //limitLines : data.pageAfter,
+          );        
+          
+          if (animCharIter >= currentLine->length-1) {
+            animLineIter += 1;
+            animCharIter = 0;
+            breakpoint();
+          } else {
+            animCharIter += iterRate;
+            if (animCharIter >= currentLine->length)
+              animCharIter = currentLine->length-1;
+            breakpoint();
+          }
+          
+          when (animLineIter >= data.lines->size)
+            ANIMATION_FINISHED
+        }
+      }
+      
       data.thisRender = ::{
         @:fraction = (data.iter / (data.lines->size - data.maxHeight - 1));
         
@@ -1537,7 +1582,8 @@
         (CURSOR_ACTIONS.CONFIRM, 
          CURSOR_ACTIONS.CANCEL): ::<= {
           when (data.renderState == RENDER_STATE.ANIMATING) ::<= {
-            data.renderState = RENDER_STATE.DONE;
+            iterRate *= 2;
+            //data.renderState = RENDER_STATE.DONE;
             return false;
           } 
 
@@ -1636,6 +1682,12 @@
         get ::<- log_
       },
       
+      skipDisplayWindows : {
+        get ::<- skipDisplayWindows,
+        set ::(value) <- skipDisplayWindows = value,
+      },
+
+      
       rollQueue ::{
         ::? {
           forever ::{
@@ -1703,18 +1755,18 @@
         //text = text->replace(keys:['\n'], with: '\n');
         //@:words = text->split(token:' ');
 
-          if (log_) ::<= {
-            log_->push(:'[]  '+text);
-            /*
-            @:st = [];
-            foreach(data.lines) ::(k, l) {
-              st->push(:l);
-              st->push(:'\n');
-            }
-            
-            record->push(:'--'+String.combine(:st));
-            */
+        if (log_ != empty && requestAutoSkip == false) ::<= {
+          log_->push(:'.   '+text);
+          /*
+          @:st = [];
+          foreach(data.lines) ::(k, l) {
+            st->push(:l);
+            st->push(:'\n');
           }
+          
+          record->push(:'--'+String.combine(:st));
+          */
+        }
         
 
         this.queueDisplay(
@@ -1741,6 +1793,7 @@
         // disable normal scrolling.
         hasPages, 
         startAtBottom,
+        animateLines,
 
         maxWidth,
         maxHeight,
@@ -1748,15 +1801,6 @@
       ) {
         if (maxHeight == empty) ::<= {
           maxHeight = canvas.height-5;
-        }
-        when (maxHeight >= lines->size) ::<= {
-          WindowEvent.queueMessage(
-            speaker:prompt,
-            text:String.combine(:lines->map(::(value) <- value + '\n')),
-            maxHeight,
-            maxWidth,
-            onLeave
-          )
         }
 
 
@@ -1766,6 +1810,7 @@
             startAtBottom : startAtBottom,
             mode: CHOICE_MODE.READER,
             prompt: prompt,
+            animateLines : animateLines,
             lines : canvas.refitLines(input: lines, maxWidth),
             hasPages : hasPages,
             maxHeight : maxHeight,
@@ -1795,9 +1840,10 @@
         disableFrame,
         autoSkipAfterFrames
       ) {
-        when(requestAutoSkip) ::<= {
+        when(requestAutoSkip || skipDisplayWindows) ::<= {
           if (onLeave) onLeave();
         }
+
         
         if (lines == empty) lines = [];
 
