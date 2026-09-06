@@ -18,6 +18,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+@:JSON = import(module:'Matte.Core.JSON');
 @:Entity = import(module:'base/entity.mt');
 @:Random = import(module:'core/random.mt');
 
@@ -39,7 +40,7 @@
 
 // Called when telling the external device that 
 // JSON from the environment is needed
-@:external_preloadJSON = getExternalFunction(name:'external_preloadJSON');
+@:external_preloadJSONText = getExternalFunction(name:'external_preloadJSONText');
 
 
 
@@ -103,11 +104,16 @@
 // Takes the name of a sound and whether to loop
 @external_onPlayBGM    = getExternalFunction(name:'external_onPlayBGM');
 
+// Sets the loop iterator
+@external_setLoopIter    = getExternalFunction(name:'external_setLoopIter');
+
+
+// Gets the list of mod dir roots for mod loading and alias settings
+@external_getModDirs = getExternalFunction(name:'external_getModDirs');
 
 
 
-
-@:windowEvent = import(module:'game_singleton.windowevent.mt');
+@:windowEvent = import(module:'core/windowevent.mt');
 windowEvent.errorHandler = ::<= {
   @count = 0;
   return ::(message) {
@@ -129,6 +135,7 @@ windowEvent.errorHandler = ::<= {
     external_onCommitText(a:line);
   }
   external_onEndCommit();
+  print(:'New line request 3');
   canvasChanged = false;  
 }
 
@@ -139,6 +146,12 @@ canvas.onCommit = ::(lines, renderNow){
     rerender();
 }
 
+@:jsonPreloaded = external_preloadJSONText();
+
+foreach(jsonPreloaded) ::(k, v) {
+  print(:'Preloaded JSON: ' + k);
+  jsonPreloaded[k] = JSON.decode(:v)
+}
 
 instance.mainMenu(
   canvasHeight: 24,
@@ -177,11 +190,87 @@ instance.mainMenu(
   },
   
   preloadJSON :: {
-    return external_preloadJSON();
+    return {...jsonPreloaded};
   },
 
   preloadMods :: {
-    return [];
+    @:mods = [];
+
+    @:jsonTypes = {
+      name : String,
+      description : String,
+      author : String,
+      website : String,
+      files : Object,
+      JSONdata : Object,
+      loadFirst : Object
+    }
+    
+    @:checkTypes ::(root, json) {
+      foreach(jsonTypes) ::(name, type) {
+        when(json[name]->type != type)
+          error(detail:root + ': mod.json: "' + name + '" must be a ' + String(from:type) + '!');
+      }
+    }
+    
+    
+    @:preload ::(root, json) {
+      foreach(json.files) ::(i, file) {
+        ::? {
+          importModule(
+            module:root+'/'+file,
+            alias:json.id + '/' + file,
+            preloadOnly: true 
+          )
+        } => {
+          onError::(message) {
+            error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':\n' + message.detail);
+          }
+        }
+      }
+      
+      foreach(json.JSONdata) ::(i, file) {
+        ::? {
+          setModule(
+            name:json.id + '/' + file,
+            value : jsonPreloaded(:root+'/'+file)
+          )
+        } => {
+          onError::(message) {
+            error(detail: 'Could not preload / compile ' + json.name + '/' + file + ':\n' + message.detail);
+          }
+        }
+      }      
+    }
+    
+
+    @:loadModJSON ::(root) {
+      @:json = ::? {
+        @:data = jsonPreloaded[root+'/mod.json'];
+        
+        if (data == empty)
+          error();
+        return data;
+      } => {
+        onError ::(message) {
+          error(detail: 'Could not read or parse mod.json file within ' + root + '!');
+        }
+      }
+      
+      checkTypes(root, json);
+      preload(root, json);
+      mods->push(value:json);
+    }
+    ::? {
+      foreach(external_getModDirs()) ::(k, root) {
+        loadModJSON(root);
+      }
+    } => {
+      onError ::(message) {
+        error(detail:message.summary);
+      }
+    }
+    return mods; 
   },
 
   onLoadState :::(
@@ -230,23 +319,17 @@ instance.mainMenu(
 
 // user code calls the returned function every frame
 @LOOP_DONE = false;
-@:mainLoop = ::{
-  // standard event loop
-  ::? {
-    forever ::{
-      when(LOOP_DONE) ::<= {
-        printMacro();
-        send();
-      }
-      
-      @val = external_getInput();
-      windowEvent.commitInput(input:val);
-      
-      
-      if (canvasChanged) ::<= {
-        rerender();  
-      }
-    }    
-  } 
-}
-if (mainLoop != empty) mainLoop();
+external_setLoopIter(::{
+  when(LOOP_DONE) ::<= {
+    printMacro();
+    send();
+  }
+  
+  @val = external_getInput();
+  windowEvent.commitInput(input:val);    
+  
+  if (canvasChanged) ::<= {
+    rerender();  
+  }
+
+})

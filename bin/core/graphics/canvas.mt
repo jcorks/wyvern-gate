@@ -646,7 +646,7 @@ return class(
           }    
           currentFrame = oldFrame
         } 
-        //pushToScreen();
+        pushToScreen();
       },
       
       freeze ::{

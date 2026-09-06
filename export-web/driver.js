@@ -35,8 +35,12 @@
     const mattePreloadedBytecode = {};
 
     const matte = Matte.newVM(
-        function(name) {
-            return mattePreloadedBytecode[name];
+        function(name, alias) {
+            var out = mattePreloadedBytecode[alias];
+            if (out == undefined) {
+                return mattePreloadedBytecode[name];
+            }
+            return out;
         },
         function(value) {
             console.log(value);
@@ -123,6 +127,51 @@
         if (val == null) return matte.store.createEmpty();
         return matte.store.createNumber(val);
     });
+    
+    var modList = [];
+    matte.setExternalFunction('external_getModDirs', [], function(fn, args) {
+        const vals = [];
+        for(var i = 0; i < modList.length; ++i) {
+            vals.push(matte.store.createString(modList[i]));
+        }
+        return matte.store.createObjectArray(vals);
+    });    
+
+
+    var loopFn;
+    matte.setExternalFunction('external_setLoopIter', [], function(fn, args) {
+        if (loopFn != undefined) return;
+        
+        loopFn = args[0];
+        setInterval(function() {
+          matte.callFunction(loopFn, [], []);
+        }, 30); //1000 * (1 / 40.0))
+    });
+
+
+
+    matte.setExternalFunction('external_preloadJSONText', [], function(fn, args) {
+        const vals = matte.store.createObject();
+        const keysRaw = Object.keys(mattePreloadedBytecode);
+        const dec = new TextDecoder("utf-8")
+        for(var i = 0; i < keysRaw.length; ++i) {
+            if (keysRaw[i].search('.json') != -1) {
+                matte.store.valueObjectSet(
+                    vals,
+                    matte.store.createString(
+                        keysRaw[i]
+                    ),
+                    matte.store.createString(
+                        dec.decode(mattePreloadedBytecode[keysRaw[i]])
+                    ),
+                    0
+                );
+            }
+        }
+        return vals;
+        
+    });
+
 
     matte.setExternalFunction('external_onQuit', [], function(fn, args) {
         Worker.quit();
@@ -255,10 +304,19 @@
     var task = setInterval(function() {
         if (matteListIndex != matteList.length) {             
             const mod = matteList[matteListIndex++]; 
+            
+            if (mod.search('mods/') == 0) {
+                const endBits = mod.substring(5);
+                const endLen = endBits.search('/');
+                const modPath = 'mods/'+endBits.substring(0, endLen);
+                
+                console.log('MOD: ' + modPath);
+                modList.push(modPath);
+            }
+            
             readBinary(mod, function(data) {
                 console.log('Loading ' + mod);
                 mattePreloadedBytecode[mod] = data;
-
                 
                 loadedCount++;
             });
@@ -266,12 +324,7 @@
         
         if (loadedCount == matteList.length) {
             clearInterval(task);
-            const update = matte.import('main.external.mt');
-            
-            
-            setInterval(function() {
-                matte.callFunction(update, [], []);
-            }, 30);
+            matte.import('main.external.mt');
         }
     });
 

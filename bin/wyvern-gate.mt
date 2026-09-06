@@ -83,7 +83,11 @@
     DisplayHP : import(:'base/util/displayhp.mt'),
     Distance : import(:'base/util/distance.mt'),    
     G : import(:'base/util/g.mt'),    
-    LogTimer : import(:'base/util/logtimer.mt'),
+    LogTimer : (::? {
+      return import(:'base/util/logtimer.mt')
+    } => {
+      onError::(message) <- empty
+    }),
     RomanNumerals : import(:'base/util/romannumerals.mt'),
     StatSet : import(:'base/util/statset.mt'),
   }),

@@ -31,10 +31,11 @@ var postMessageWorker = function(data) {
         matteWorker.postMessage(JSON.stringify(data));
 };
 
+
 (function() {
 
 
-    
+
 
     
 
@@ -75,6 +76,20 @@ var postMessageWorker = function(data) {
 
     // this isnt fit for a "realtime" game as it would 
     // eat inputs and is not flexible with axes
+    var repeaterFinish = [];
+    const repeaterInputController = function(input) {
+        var intervalID;
+        var timeoutID = setTimeout(function() {
+            intervalID = setInterval(function() {
+                postMessageWorker(input);
+            }, 80);
+        }, 300);
+        
+        return function() {
+            clearInterval(intervalID);
+            clearTimeout(timeoutID);    
+        }
+    };
     var getGamepadInput = function() {
         if (currentGamepad == null) return;
         
@@ -101,13 +116,27 @@ var postMessageWorker = function(data) {
         }
 
         for(var i = 0; i < 6; ++i) {
-            if (gamepadThisState[i] == true && gamepadLastState[i] == false) LAST_INPUT = i;    
+            if (gamepadThisState[i] == true && gamepadLastState[i] == false) {
+                console.log('PRESS ' + i);
+                postMessageWorker(i);
+            }
+            
+            if (gamepadThisState[i] == true && gamepadLastState[i] == true) {
+                if (repeaterFinish[i] == null) {
+                    repeaterFinish[i] = repeaterInputController(i);
+                    console.log('REPEAT START' + i);
+                }
+            }
+            
+            if (gamepadThisState[i] == false) {
+                if (repeaterFinish[i] != null) {
+                    console.log('REPEAT END' + i);
+                    repeaterFinish[i]();
+                    repeaterFinish[i] = null;
+                }
+            }
         }
-        
-        if (LAST_INPUT != -1) {
-            console.log(LAST_INPUT);
-            LAST_INPUT = -1;
-        }        
+
     }
 
 
@@ -227,9 +256,27 @@ var startGame = function(touch) {
     fullscreenEnter(body);
     
 
+
+
     // resize canvas
 
+    const repeaterInput = function(element, input) {
+        postMessageWorker(input);
 
+        var intervalID;
+        var timeoutID = setTimeout(function() {
+            intervalID = setInterval(function() {
+                postMessageWorker(input);
+            }, 80);
+        }, 300);
+        
+        const refID = element.addEventListener('mouseup', function(e) {
+            element.removeEventListener('mouseup', refID);
+            clearInterval(intervalID);
+            clearTimeout(timeoutID);
+        });    
+
+    };
     
     window.setTimeout(function() {
     
@@ -342,21 +389,6 @@ var startGame = function(touch) {
     
 
 
-    const repeaterInput = function(element, input) {
-        postMessageWorker(input);
-
-        var intervalID;
-        var timeoutID = setTimeout(function() {
-            intervalID = setInterval(function() {
-                postMessageWorker(input);
-            }, 80);
-        }, 300);
-        const refID = element.addEventListener('mouseup', function(e) {
-            element.removeEventListener('mouseup', refID);
-            clearInterval(intervalID);
-            clearTimeout(timeoutID);
-        });    
-    }
 
     if (!isTouchScreen) {
         document.getElementById('arrow-left').addEventListener('mousedown', function(e) {
