@@ -137,8 +137,8 @@
   'Rare',
   'Common',
   'Ancient',
-  'Great',
-  'Minor'
+  'Greater',
+  'Lesser'
 ]
 
 @:gemMaterials = [
@@ -3864,7 +3864,7 @@ none.name = 'None';
           });
           
           
-          if (world.island.tier == 0 && random.try(percentSuccess:50))
+          if (world.island.tier == 0 && random.try(percentSuccess:50) && forceEnchant != true)
             enchantCount = 0;
             
           

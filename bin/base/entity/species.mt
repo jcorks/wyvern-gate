@@ -1280,7 +1280,7 @@ Species.newEntry(data:{
   qualities : [
 
   ],
-  swarms : false,
+  swarms : true,
   canBlock : false,
   overrideBattleAI ::(entity, battle, commitBattleActions) {
     entity.ap += 2;

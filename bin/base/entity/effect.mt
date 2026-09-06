@@ -35,6 +35,9 @@
   CANT_USE_ABILITIES : 128,
   CANT_USE_EFFECTS   : 256,
   CANT_USE_REACTIONS : 512,
+  
+  // 50% chance for any ability aside from Wait to fail
+  CANT_USE_ABILITIES_SOMETIMES : 1024,
 };
 
 
@@ -3456,9 +3459,9 @@ Effect.newEntry(
   data : {
     name : 'Stunned',
     id : 'base:stunned',
-    description: 'Unable to use Ability Arts.',
+    description: '50% chance for ability Art usage to fail.',
     stackable: false,
-    traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
+    traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES_SOMETIMES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     tier: 4,
     events : {
@@ -4161,10 +4164,10 @@ Effect.newEntry(
   data : {
     name : 'Frozen',
     id : 'base:frozen',
-    description: 'Unable to use Ability Arts.',
+    description: '50% chance for ability Art usage to fail.',
     stackable: false,
     tier: 4,
-    traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
+    traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES_SOMETIMES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(),
     events : {
       onNextTurn ::(from, item, holder, duration) {        
@@ -4187,10 +4190,10 @@ Effect.newEntry(
   data : {
     name : 'Paralyzed',
     id : 'base:paralyzed',
-    description: 'SPD base -10. Unable to use Ability Arts.',
+    description: 'SPD base -10. 50% chance for ability Art usage to fail.',
     stackable: false,
     tier: 4,
-    traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
+    traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES_SOMETIMES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
       SPD: -10
     ),
@@ -4216,10 +4219,10 @@ Effect.newEntry(
   data : {
     name : 'Mesmerized',
     id : 'base:mesmerized',
-    description: 'SPD,DEF base -4. Unable to use Ability Arts.',
+    description: 'SPD,DEF base -4. 50% chance for ability Art usage to fail.',
     stackable: false,
     tier: 4,
-    traits : TRAIT.DEBUFF,
+    traits : TRAIT.DEBUFF | TRAIT.CANT_USE_ABILITIES_SOMETIMES,
     stats: StatSet.new(
       SPD: -4,
       DEF: -4
@@ -4245,9 +4248,9 @@ Effect.newEntry(
   data : {
     name : 'Wrapped',
     id : 'base:wrapped',
-    description: 'Unable to use Abilities.',
+    description: '50% chance for ability Art usage to fail.',
     stackable: false,
-    traits : TRAIT.SPECIAL | TRAIT.CANT_USE_ABILITIES,
+    traits : TRAIT.SPECIAL | TRAIT.CANT_USE_ABILITIES_SOMETIMES,
     tier: 4,
     stats: StatSet.new(
     ),
@@ -4327,16 +4330,13 @@ Effect.newEntry(
   data : {
     name : 'Latched',
     id : 'base:latched',
-    description: 'Unable to act.',
+    description: '50% chance for ability Art usage to fail.',
     stackable: false,
-    traits : TRAIT.SPECIAL,
+    traits : TRAIT.SPECIAL | TRAIT.CANT_USE_ABILITIES_SOMETIMES | TRAIT.CANT_USE_REACTIONS,
     tier: 4,
     stats: StatSet.new(
     ),
     events : {
-      onNextTurn ::(from, item, holder, duration) {        
-        return false;
-      }
     }
   }
 ) 
@@ -4346,10 +4346,10 @@ Effect.newEntry(
   data : {
     name : 'Petrified',
     id : 'base:petrified',
-    description: 'Unable to use Ability Arts. DEF base -4',
+    description: '50% chance for ability Art usage to fail. DEF base -4',
     tier: 4,
     stackable: false,
-    traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES | TRAIT.CANT_USE_REACTIONS,
+    traits : TRAIT.AILMENT | TRAIT.CANT_USE_ABILITIES_SOMETIMES | TRAIT.CANT_USE_REACTIONS,
     stats: StatSet.new(
       DEF: -4
     ),

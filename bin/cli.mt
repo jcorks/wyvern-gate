@@ -301,13 +301,10 @@ instance.mainMenu(
     enterNewLocation(
       path: './',
       action::(filesystem) {
-        breakpoint();
-        when (data->type == String && data == '') 
-          filesystem.remove(path: 'save_' + slot);
-        
+        breakpoint();        
         write(
           name: 'save_' + slot,
-          string: JSON.encode(:data)
+          string: if (data->type == String) data else JSON.encode(:data)
         );
       }
     );
