@@ -99,6 +99,7 @@
     @entityTurn;
     @onTurn_;
     @onAct_;
+    @onEvict_;
     @defeated;
     @backgroundID;
     @onFinish = [];
@@ -137,7 +138,6 @@
     }
 
     @:finishEnd :: {
-      breakpoint();
       groups = [];
       onEnd_(result);      
       foreach(onFinish) ::(k, v) {
@@ -266,13 +266,6 @@
           endMessageCapture(:'End of battle.');
         }     
       }
-      windowEvent.queueCustom(
-        onEnter ::{
-          windowEvent.jumpToTag(
-            name:'Battle'
-          )
-        }
-      );
     }
     @:nextTurn ::{
     
@@ -307,7 +300,7 @@
           text: 'It is now ' + ent.name + '\'s turn.'
         );
         
-        windowEvent.queueCustom(
+        windowEvent.queueNestedResolve(
           onEnter :: {
             if (onAct_) onAct_();
             
@@ -330,6 +323,11 @@
                 landmark:landmark_
               );
             }        
+          },
+          
+          onLeave ::{
+            endTurn();
+
           }
         );
       }
@@ -544,9 +542,9 @@
     
     @:endMessageCapture ::(caption) {
       if (windowEvent.skipDisplayWindows == false) error();
-      @:lines = windowEvent.log->subset(from:logStart, to:windowEvent.log->size-1);
       windowEvent.skipDisplayWindows = false;          
-      when(lines->size == 0) empty;
+      when(logStart == windowEvent.skipDisplayWindows || windowEvent.log == empty) empty;
+      @:lines = windowEvent.log->subset(from:logStart, to:windowEvent.log->size-1);
       windowEvent.queueReader(
         prompt: caption,
         animateLines: true,
@@ -585,12 +583,10 @@
             ent.battleEnd();
           }
         }          
-        breakpoint();
         windowEvent.stopRecordLog();
         active = false;
         ended = true;      
 
-        finishEnd();
         if (windowEvent.canJumpToTag(name:'Battle'))                      
           windowEvent.jumpToTag(name:'Battle', goBeforeTag:true, doResolveNext:true);          
       },
@@ -615,10 +611,12 @@
         skipResults,
         
         
-        onEnd => Function
+        onEnd => Function,
+        onEvict
       ) {
         storage = {};
         onEnd_ = onEnd;
+        onEvict_ = onEvict;
         onTurnPrep_ = onTurnPrep;
         @:world = import(module:'base/world.mt')
         foreach(allies) ::(k, v) {
@@ -728,7 +726,6 @@
         @:queueFriends ::{
           @chance = 0;
           if (world.party.members->size == 1) ::<= {
-            breakpoint();
             if (world.party.firstEncounter) ::<= {
               chance = 100;
               world.party.firstEncounter = false;
@@ -773,7 +770,6 @@
  
         battleEnd = ::{
           @:startEnd ::(message) {
-            breakpoint();
             active = false;
             windowEvent.stopRecordLog();
 
@@ -1014,6 +1010,7 @@
         windowEvent.queueMessage(
           text: entity.name + ' was evicted from battle.'
         );
+        if (onEvict_ != empty) onEvict_(entity);
       },
       
       storage : {
@@ -1046,7 +1043,6 @@
         foreach(group) ::(i, entity) {
           when(turn->findIndex(value:entity) != -1) 
             error(detail: 'Tried to join battle when was already a part of the battle');
-          breakpoint();
           windowEvent.queueMessage(text:entity.name + ' joins the fray!');
           entity.battleStart(battle:this);
           entity.startTurn();
@@ -1067,13 +1063,7 @@
           endTurn();
           
         requestRedrawBG();
-        this.commitFreeAction(action, from, onDone::{
-            windowEvent.queueCustom(
-              onEnter ::{
-                endTurn();
-              }
-            );
-        });
+        this.commitFreeAction(action, from);
         
       },
       
@@ -1142,12 +1132,7 @@
               onEnter ::<- 
                 endMessageCapture(:entityTurn.name + '\'s Art: ' + art.name)
             );
-            
-            windowEvent.queueCustom(
-              onEnter ::{
-                onDone();              
-              }
-            );
+            if (onDone != empty) onDone();
 
 
           } else {
@@ -1201,13 +1186,15 @@
               onEnter :: {
                 requestRedrawBG();  
                 startMessageCapture();
+                
+                windowEvent.queueMessage(text:entAct.name + ' uses the Art: ' + art.name + '!');
+                
                 // react here
                 windowEvent.queueCustom(
                   onEnter ::{
                     requestRedrawBG();
-                    when (!entAct.canActThisTurn())
-                      endTurn();
-                    doAction();
+                    when (entAct.canActThisTurn())
+                      doAction();
                   }
                 );
               }

@@ -959,6 +959,10 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
     if (matte_value_type(args[12]) != MATTE_VALUE_TYPE_EMPTY)
         disableFrame = matte_value_as_boolean(store, args[12]);
 
+    int titleRight = 0;
+    if (matte_value_type(args[13]) != MATTE_VALUE_TYPE_EMPTY)
+        titleRight = matte_value_as_boolean(store, args[13]);
+
 
         
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_OBJECT);
@@ -1034,7 +1038,11 @@ static matteValue_t wyvern_gate__native__canvas__renderTextFrameGeneral(
     }
     
     if (title && matte_string_get_length(title) > 0) {
-        cr->penx = left+1+bufferHorizontal;
+        if (titleRight) {
+            cr->penx = left+width-(1+bufferHorizontal+(WINDOW_BUFFER_HORIZONTAL/2)+matte_string_get_length(title));
+        } else {
+            cr->penx = left+1+bufferHorizontal;
+        }
         cr->peny = top;
         matteString_t * titleFull = matte_string_create_from_c_str(
             "[%s]",
@@ -1926,6 +1934,7 @@ static matteValue_t wyvern_gate__native__canvas(
         "bufferVertical",
         "bufferHorizontal",
         "disableFrame",
+        "titleRight",
         NULL
     );
 

@@ -20,21 +20,31 @@
 
 @:renderPrompt::(tabs, selected, lastTabState) {
   @line = '';
-  @found = false;
+  
   @:hasItems = ::(v) <- lastTabState[v] != empty && lastTabState[v]->size > 0
+  @:filtered = tabs->filter(::(value) <- hasItems(:value));
+  selected = filtered->findIndex(:tabs[selected]);
+  
+  foreach(tabs->filter(::(value) <- hasItems(:value))) ::(k, v) {
+    @distance = (k-selected);
+    
+    when(distance < 0) empty;
+      /*
+      line = line + match(distance) {
+        (-1):     '[<-',
+        (-2, -3): '[<',
+        default:  '['
+      };
+      */
 
-  foreach(tabs) ::(k, v) {
-    when(hasItems(v) == false) empty;
+    when(distance > 0)
+      line = line + match(distance) {
+        (1):     '->]',
+        (2, 3):   ']',
+        default:   ']'
+      };
 
-    when(found == true) 
-      line = line + '[>]';
-
-    if (k == selected) ::<= {
-      line = line + '[  ' + (tabs[selected]) + '  ]' 
-      found = true;
-    }
-    else
-      line = line + '[<]';
+    line = line + '<<< ' + (tabs[selected]) + '  ]' 
   }
   
   

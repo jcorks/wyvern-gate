@@ -577,7 +577,7 @@ return {
           party:world.party, 
           limitedMenu:true,
           topWeight:0.5,
-          leftWeight:0.5,
+          leftWeight:1,
           onAct::(action) {
             when(action == empty) empty;
             firstAwake.useArt(
@@ -678,7 +678,7 @@ return {
   person : {
     fetchQuestStart : InteractionMenuEntry.new(
       name: 'Need something?',
-      keepInteractionMenu : true,
+      keepInteractionMenu : false,
       filter ::(entity) {
         @:world = import(module:'base/world.mt');
         @:party = world.party;

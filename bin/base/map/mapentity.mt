@@ -405,6 +405,12 @@ MapEntity.Task.database.newEntry(
           landmark.step(); // convenient!
         },
         
+        // run away, banish, etc
+        onEvict::(member) {
+          if (mapEntity.entites->findIndex(:member) != -1)
+            mapEntity.remove();
+        },
+        
         onEnd::(result) {
           @:Location = import(module:'base/map/location.mt');
           @:Species = import(module:'base/entity/species.mt');

@@ -26,140 +26,149 @@
 @:Arts = import(module:'base/arts.mt');
 @:Effect = import(module:'base/entity/effect.mt');
 
+@:buy ::(item, price, shopkeep, inventory) {
+  @:world = import(module:'base/world.mt');
+  @:party = world.party;
+  when(world.party.inventory.isFull) ::<= {
+    windowEvent.queueMessage(text: 'The party\'s inventory is full.');
+  }
+    
+  world.accoladeIncrement(name:'buyCount');
+  if (price < 1) ::<= {
+    if (shopkeep != empty)
+      windowEvent.queueMessage(
+        speaker: shopkeep.name,
+        text:'"You really want this? It\'s basically worthless, but I\'ll still sell it to you if you want."'
+      )
+    world.accoladeEnable(name:'boughtWorthlessItem');
+    price = 1;
+  }
 
-return ::(inventory, shopkeep, onDone) {
+  when (party.inventory.gold < price)
+    windowEvent.queueMessage(text:'The party cannot afford this.');
+  party.addGoldAnimated(
+    amount:-price,
+    onDone :: {
+      inventory.remove(item);
+
+      if (price > 2000) ::<= {
+        world.accoladeEnable(name:'boughtItemOver2000G');
+      }
+      
+      
+      windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
+      party.inventory.add(item);                
+    }
+  ) 
+}
+
+@:sell ::(item, price, shopkeep, inventory){
+  @:world = import(module:'base/world.mt');
+  @:party = world.party;
+  when ((item.base.traits & Item.TRAIT.KEY_ITEM) != 0)
+    windowEvent.queueMessage(
+      text:'You feel unable to give this away.'
+    )
+  when ((item.base.traits & Item.TRAIT.PRICELESS) != 0)
+    windowEvent.queueMessage(
+      speaker: shopkeep.name,
+      text:'"I\'m unable to buy this from you.'
+    )
+
+
+
+  if (price < 1) ::<= {
+    windowEvent.queueMessage(
+      speaker: shopkeep.name,
+      text:'"Technically, this is worthless, but I thought I\'d do you a favor and take it off your hands."'
+    )
+    world.accoladeEnable(name:'soldWorthlessItem');
+    price = 1;
+  }
+  if (price > 9999) ::<= {
+    windowEvent.queueMessage(
+      speaker: shopkeep.name,
+      text:'"This item is too expensive to sell to me. I can\'t even tell how much it\'s worth!"'
+    )
+    windowEvent.queueMessage(
+      speaker: shopkeep.name,
+      text:'"I\'d recommend trying to sell it at an Auction House. Most cities should have one."'
+    )
+
+    windowEvent.queueMessage(
+      speaker: shopkeep.name,
+      text:'"Alternatively, I can take it off your hands for 9,999G. Just be aware it is likely worth much more than that."'
+    )
+
+
+    price = 9999;
+  }
+
+
+  windowEvent.queueAskBoolean(
+    prompt:'Sell the ' + item.name + ' for ' + g(g:price) + '?',
+    onChoice::(which) {
+      when(which == false) empty;
+
+      world.accoladeIncrement(name:'sellCount');
+
+      if (item.name->contains(key:'Wyvern Key of'))
+        world.accoladeEnable(name:'gotRidOfWyvernKey');    
+
+
+      if (price > 500) ::<= {
+        world.accoladeEnable(name:'soldItemOver500G');
+      }
+
+      
+      windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + g(g:price) + '.');
+
+      party.addGoldAnimated(
+        amount:price,
+        onDone::{}
+      );
+      party.inventory.remove(item);              
+      inventory.add(item);
+    }
+  )
+}
+
+return ::(inventory, shopkeep, onDone, sellMode) {
+  if (sellMode == empty) sellMode = false;
+  @:PRICE_MOD = if (sellMode) Item.SELL_PRICE_MULTIPLIER else Item.BUY_PRICE_MULTIPLIER
   @:world = import(module:'base/world.mt');
   @:party = world.party;
   @hoveredItem;
   pickItem(
     tabbed: true,
-    inventory,
+    inventory:if (sellMode) party.inventory else inventory,
     canCancel: true,
     leftWeight: 1,
     topWeight: 0.5,
     showPrices : true,
     ignorePriceCeiling : true,
     //onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',
-    goldMultiplier: Item.BUY_PRICE_MULTIPLIER,
+    goldMultiplier: PRICE_MOD,
     onHover ::(item) {
       hoveredItem = item;
     },
     header : ['Item', 'Price'],
     onGetFooter ::<- '(Party has: ' + g(:party.inventory.gold)+')',
     
-    renderable : {
-      render ::{
-        when(hoveredItem == empty) empty;
-        
-
-
-        
-        @:getArtDesc ::(id1, id2) {
-          @:toParts = ::(id) {
-            when(id == empty) ['[None]', '']
-            @:art = Arts.new(base:Arts.database.find(:id));
-            art.charge = 0;
-            @:list = Arts.renderListItem(:art);
-            return [' ' + list[0], list[1]];
-          }
-          
-          @:parts0 = toParts(:id1);
-          @:parts1 = toParts(:id2);
-          
-          return canvas.columnsToLines(
-            columns : [
-              [
-                parts0[0],
-                parts1[0]
-              ],
-              [
-                parts0[1],
-                parts1[1]              
-              ]
-            ],
-            
-            leftJustifieds : [true, true]
-          );
-        }
-        
-        when(hoveredItem.inletArt != empty) ::<= {
-          breakpoint();
-          canvas.renderTextFrameGeneral(
-            title: hoveredItem.name,
-            lines: [
-              'Art:',
-              '',
-              ...getArtDesc(id1:hoveredItem.inletArt.base.id)
-            ],
-            maxWidth: 0.4,
-            leftWeight: 0,
-            topWeight: 0.5
-          )
-        }
-
-
-        when(hoveredItem.inletEffect != empty) ::<= {
-          breakpoint();
-          canvas.renderTextFrameGeneral(
-            title: hoveredItem.name,
-            lines: [
-              'Effect:',
-              '',
-              Effect.find(:hoveredItem.inletEffect).name,
-              Effect.find(:hoveredItem.inletEffect).description
-            ],
-            maxWidth: 0.4,
-            leftWeight: 0,
-            topWeight: 0.5
-          )
-        }
-
-        when(hoveredItem.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) empty;
-
-        
-        
-        canvas.renderTextFrameGeneral(
-          title: 'Summary:',
-          lines: [
-            'Stat boosts:',
-            ...(hoveredItem.stats.descriptionRateLines->map(::(value) <- ' ' + value)),
-            
-            ...([if (hoveredItem.inletSlotSet != empty)
-              '' + hoveredItem.inletSlotSet.size + ' gem slot' + if (hoveredItem.inletSlotSet.size == 1) '.' else 's.'
-            else 
-              ''])
-
-          ],
-          leftWeight: 0,
-          topWeight: 0
-        )
-
-        canvas.renderTextFrameGeneral(
-          title: 'Summary:',
-          lines: [
-            'Arts:',
-            ...getArtDesc(id1:hoveredItem.arts[0],
-                          id2:hoveredItem.arts[1])
-          ],
-          leftWeight: 0,
-          topWeight: 1
-        )
-
-      }
-    },
+    
     
     onCancel : if (onDone) onDone else empty,
     
     onPick::(item) {
       when(item == empty) empty;
-      @price = (item.price * Item.BUY_PRICE_MULTIPLIER)->ceil;
+      @price = (item.price * PRICE_MOD)->ceil;
       
       windowEvent.queueChoices(
         prompt: item.name,
-        choices: if (item.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) 
-          ['Buy', 'Check', 'Compare Equipment']
+        choices: if (!item.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) 
+          [if (sellMode) 'Sell' else 'Buy', 'Check', 'Compare Equipment']
         else        
-          ['Buy', 'Check']
+          [if (sellMode) 'Sell' else 'Buy', 'Check']
         ,
         canCancel: true,
         onChoice::(choice) {
@@ -168,37 +177,9 @@ return ::(inventory, shopkeep, onDone) {
           match(choice-1) {
             // buy
             (0)::<= {
-              when(world.party.inventory.isFull) ::<= {
-                windowEvent.queueMessage(text: 'The party\'s inventory is full.');
-              }
-                
-              world.accoladeIncrement(name:'buyCount');
-              if (price < 1) ::<= {
-                if (shopkeep != empty)
-                  windowEvent.queueMessage(
-                    speaker: shopkeep.name,
-                    text:'"You really want this? It\'s basically worthless, but I\'ll still sell it to you if you want."'
-                  )
-                world.accoladeEnable(name:'boughtWorthlessItem');
-                price = 1;
-              }
 
-              when (party.inventory.gold < price)
-                windowEvent.queueMessage(text:'The party cannot afford this.');
-              party.addGoldAnimated(
-                amount:-price,
-                onDone :: {
-                  inventory.remove(item);
+              (if (sellMode) sell else buy)(item, price, shopkeep, inventory)
 
-                  if (price > 2000) ::<= {
-                    world.accoladeEnable(name:'boughtItemOver2000G');
-                  }
-                  
-                  
-                  windowEvent.queueMessage(text: 'Bought ' + correctA(word:item.name));
-                  party.inventory.add(item);                
-                }
-              ) 
             },
             // check
             (1)::<= {

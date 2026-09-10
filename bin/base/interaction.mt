@@ -1421,90 +1421,10 @@ Interaction.newEntry(
       when (world.time < world.TIME.MORNING || world.time > world.TIME.EVENING)
         windowEvent.queueMessage(text: 'The shop appears to be closed at this hour..');              
 
-
-      @:pickItem = import(module:'base/widgets/pickitem.mt');
-      pickItem(
-        inventory:party.inventory,
-        tabbed: true,
-        canCancel: true,
-        leftWeight: 0.5,
-        topWeight: 0.5,
-        showPrices : true,
-        //onGetPrompt:: <-  'Sell which? (current: ' + g(g:party.inventory.gold) + ')',
-        goldMultiplier: Item.SELL_PRICE_MULTIPLIER,
-        header : ['Item', 'Price'],
-        onPick::(item) {
-          when(item == empty) empty;
-
-
-          when ((item.base.traits & Item.TRAIT.KEY_ITEM) != 0)
-            windowEvent.queueMessage(
-              text:'You feel unable to give this away.'
-            )
-          when ((item.base.traits & Item.TRAIT.PRICELESS) != 0)
-            windowEvent.queueMessage(
-              speaker: location.ownedBy.name,
-              text:'"I\'m unable to buy this from you.'
-            )
-
-
-
-          @price = (item.price * (Item.SELL_PRICE_MULTIPLIER))->ceil;
-          if (price < 1) ::<= {
-            windowEvent.queueMessage(
-              speaker: location.ownedBy.name,
-              text:'"Technically, this is worthless, but I thought I\'d do you a favor and take it off your hands."'
-            )
-            world.accoladeEnable(name:'soldWorthlessItem');
-            price = 1;
-          }
-          if (price > 9999) ::<= {
-            windowEvent.queueMessage(
-              speaker: location.ownedBy.name,
-              text:'"This item is too expensive to sell to me. I can\'t even tell how much it\'s worth!"'
-            )
-            windowEvent.queueMessage(
-              speaker: location.ownedBy.name,
-              text:'"I\'d recommend trying to sell it at an Auction House. Most cities should have one."'
-            )
-
-            windowEvent.queueMessage(
-              speaker: location.ownedBy.name,
-              text:'"Alternatively, I can take it off your hands for 9,999G. Just be aware it is likely worth much more than that."'
-            )
-
-
-            price = 9999;
-          }
-
-
-          windowEvent.queueAskBoolean(
-            prompt:'Sell the ' + item.name + ' for ' + g(g:price) + '?',
-            onChoice::(which) {
-              when(which == false) empty;
-
-              world.accoladeIncrement(name:'sellCount');
-
-              if (item.name->contains(key:'Wyvern Key of'))
-                world.accoladeEnable(name:'gotRidOfWyvernKey');    
-
-
-              if (price > 500) ::<= {
-                world.accoladeEnable(name:'soldItemOver500G');
-              }
-
-              
-              windowEvent.queueMessage(text: 'Sold the ' + item.name + ' for ' + g(g:price) + '.');
-
-              party.addGoldAnimated(
-                amount:price,
-                onDone::{}
-              );
-              party.inventory.remove(item);              
-              location.inventory.add(item);
-            }
-          )
-        }
+      import(:'base/widgets/buyinventory.mt')(
+        inventory:location.inventory,
+        shopkeep: location.ownedBy,
+        sellMode: true
       );
     },
     

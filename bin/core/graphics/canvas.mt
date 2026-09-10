@@ -31,7 +31,6 @@
 // when scenes get heavy, like in battle.
 @native = ::? {
   @:a = getExternalFunction(:'wyvern_gate__native__canvas')();
-  
   a.EFFECT_FINISHED = EFFECT_FINISHED;
   a.width = CANVAS_WIDTH;
   a.height = CANVAS_HEIGHT;
@@ -343,6 +342,7 @@ return class(
       renderTextFrameGeneral::(
         lines,
         title,
+        titleRight,
         topWeight,
         leftWeight,
         maxWidth,
@@ -406,8 +406,13 @@ return class(
         }
 
         if (title != empty && title != '') ::<= {
-          this.movePen(x: left+1+bufferHorizontal, y:top);
+          if (titleRight == true) {
+            this.movePen(x: left+width-(1+bufferHorizontal+(WINDOW_BUFFER_HORIZONTAL/2)->floor+title->length), y:top);
+          } else {
+            this.movePen(x: left+1+bufferHorizontal, y:top);
+          }
           this.drawText(text:'['+title+']');
+
         }
 
         if (notchText != empty) ::<= {

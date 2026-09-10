@@ -260,7 +260,7 @@ Quest.database.newEntry(
         );
         landmark.symbol = 'X';
         landmark.legendName = quest.name;
-        
+        landmark.loadContent();
         @:loc = landmark.getRandomEmptyPosition();
         
         @:item = Location.new(

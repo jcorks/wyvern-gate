@@ -20,6 +20,8 @@
 @:choicesColumns = import(module:'base/widgets/choicescolumns.mt');
 @:g = import(module:'base/util/g.mt');
 @:Item = import(:'base/item.mt');
+@:canvas = import(module:'core/graphics/canvas.mt');
+@:Effect = import(module:'base/entity/effect.mt');
 
 // needed to preserve order
 @:tabbedReqKeys = [
@@ -83,7 +85,7 @@ return ::(
   @items = []
   @picked;
   @cancelled = false;
-
+  @hoveredChoice = 0;
   @:prepTabbedChoices ::(args) {
     if (filter != empty) 
       error(:"Sorry, buddy: The pickitem interface only supports tabs when a filter isnt set!");
@@ -130,12 +132,15 @@ return ::(
 
     if (args.onHover) ::<= {
       args.onHover = ::(choice, tab) {
+        hoveredChoice = choice;
         when(choice == 0) empty;
         listGenerator(); // refresh items list
         picked = items[choice-1];
         when(picked == empty) empty;
         onHover(item:picked)    
       }
+    } else {
+      args.onHover = ::(choice, tab) <- hoveredChoice = choice
     }
     
   }  
@@ -229,6 +234,7 @@ return ::(
         windowEvent.queueMessage(text: "The inventory is empty.");
       }
       @:args = {
+        promptRight: true,
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
         prompt: if (prompt == empty) 'Choose an item:' else prompt => String,
@@ -243,12 +249,119 @@ return ::(
         onCancel::{cancelled = true;},
         onHover : if (onHover)
           ::(choice) {
+
             when(choice == 0) empty;
             onHover(item:items[choice-1])
           }
         else 
           empty,
-        renderable : renderable,
+        renderable : {
+          render :: {
+            @:Arts = import(module:'base/arts.mt');
+            breakpoint();
+
+            @:choice = hoveredChoice;
+            @hoveredItem = items[choice-1];
+            when(hoveredItem == empty) empty;
+            
+
+
+            
+            @:getArtDesc ::(id1, id2) {
+              @:toParts = ::(id) {
+                when(id == empty) ['[None]', '']
+                @:art = Arts.new(base:Arts.database.find(:id));
+                art.charge = 0;
+                @:list = Arts.renderListItem(:art);
+                return [' ' + list[0], list[1]];
+              }
+              
+              @:parts0 = toParts(:id1);
+              @:parts1 = toParts(:id2);
+              
+              return canvas.columnsToLines(
+                columns : [
+                  [
+                    parts0[0],
+                    parts1[0]
+                  ],
+                  [
+                    parts0[1],
+                    parts1[1]              
+                  ]
+                ],
+                
+                leftJustifieds : [true, true]
+              );
+            }
+            
+            when(hoveredItem.inletArt != empty) ::<= {
+              breakpoint();
+              canvas.renderTextFrameGeneral(
+                title: hoveredItem.name,
+                lines: [
+                  'Art:',
+                  '',
+                  ...getArtDesc(id1:hoveredItem.inletArt.base.id)
+                ],
+                maxWidth: 0.4,
+                leftWeight: 0,
+                topWeight: 0.5
+              )
+            }
+
+
+            when(hoveredItem.inletEffect != empty) ::<= {
+              breakpoint();
+              canvas.renderTextFrameGeneral(
+                title: hoveredItem.name,
+                lines: [
+                  'Effect:',
+                  '',
+                  Effect.find(:hoveredItem.inletEffect).name,
+                  Effect.find(:hoveredItem.inletEffect).description
+                ],
+                maxWidth: 0.4,
+                leftWeight: 0,
+                topWeight: 0.5
+              )
+            }
+
+            when(hoveredItem.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) empty;
+
+            
+            
+            canvas.renderTextFrameGeneral(
+              title: 'Summary:',
+              lines: [
+                'Stat boosts:',
+                ...(hoveredItem.stats.descriptionRateLines->map(::(value) <- ' ' + value)),
+                
+                ...([if (hoveredItem.inletSlotSet != empty)
+                  '' + hoveredItem.inletSlotSet.size + ' gem slot' + if (hoveredItem.inletSlotSet.size == 1) '.' else 's.'
+                else 
+                  ''])
+
+              ],
+              leftWeight: 0,
+              topWeight: 0
+            )
+
+            canvas.renderTextFrameGeneral(
+              title: 'Summary:',
+              lines: [
+                'Arts:',
+                ...getArtDesc(id1:hoveredItem.arts[0],
+                              id2:hoveredItem.arts[1])
+              ],
+              leftWeight: 0,
+              topWeight: 1
+            )
+            breakpoint();
+
+            if (renderable != empty) renderable.render()
+          }
+        },
         onGetChoices ::<- listGenerator(),
         keep: if (keep == empty) true else keep,
         onChoice ::(choice, tab) {

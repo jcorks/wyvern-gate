@@ -40,7 +40,7 @@
   FADE_TO_BLACK : 1
 }
 
-@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth, bufferHorizontal, bufferVertical, disableFrame) <- 
+@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth, bufferHorizontal, bufferVertical, disableFrame, speakerRight) <- 
     canvas.renderTextFrameGeneral(
       leftWeight, 
       topWeight, 
@@ -51,12 +51,13 @@
       bufferHorizontal,
       lines:lines, 
       title:speaker, 
+      titleRight:speakerRight,
       minWidth,
       notchText:if(hasNotch != empty) (if (notchText == empty) "(next)" else notchText) else empty)
 
 
 // Renders a text box using an animation
-@:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, bufferVertical, bufferHorizontal, disableFrame) {
+@:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, bufferVertical, bufferHorizontal, disableFrame, speakerRight) {
   @width = 0;
   @height = lines->size;
   @frames = 0;  
@@ -95,6 +96,7 @@
       bufferVertical,
       lines:animateLines(), 
       title:speaker, 
+      titleRight: speakerRight,
       notchText:if(hasNotch != empty) (if (notchText == empty) "(next)" else notchText) else empty)
       
     when(frames == FRAME_COUNT_RENDER_TEXT)
@@ -708,6 +710,7 @@
             data.animationFrame = renderTextAnimation(
               lines: choicesModified,
               speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+              speakerRight : data.promptRight,
               leftWeight,
               topWeight,
               maxWidth,
@@ -724,6 +727,7 @@
             renderTextSingle(
               lines: choicesModified,
               speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+              speakerRight : data.promptRight,
               leftWeight,
               topWeight,
               maxWidth,
@@ -833,6 +837,7 @@
                 ''
               ],
               speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+              speakerRight : data.promptRight,
               leftWeight,
               topWeight,
               maxWidth,
@@ -850,6 +855,7 @@
               ''
             ],
             speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+            speakerRight : data.promptRight,
             disableFrame : data.disableFrame,
             leftWeight,
             topWeight,
@@ -1238,6 +1244,7 @@
         data.animationFrame = renderTextAnimation(
           lines: choicesModified,
           speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+          speakerRight : data.promptRight,
           disableFrame : data.disableFrame,
           leftWeight,
           topWeight,
@@ -1250,6 +1257,7 @@
         renderTextSingle(
           lines: choicesModified,
           speaker: if (data.onGetPrompt == empty) prompt else data.onGetPrompt(),
+          speakerRight : data.promptRight,
           disableFrame : data.disableFrame,
           leftWeight,
           topWeight,
@@ -1364,6 +1372,7 @@
             disableFrame : data.disableFrame,
             lines: progressLines(),
             speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+            speakerRight : data.promptRight,
             //limitLines : data.pageAfter,
             hasNotch: true
           );
@@ -1401,6 +1410,7 @@
             maxHeight : data.maxHeight,
             lines: data.lines,
             speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+            speakerRight : data.promptRight,
             //limitLines : data.pageAfter,
             hasNotch: true
           );
@@ -1479,8 +1489,86 @@
       
       @animLineIter = 0;
       @animCharIter = 0;
-      @iterRate = 2;
+      
+      if (data.readerRender == empty) {
+        if (data.leftWeight == empty) data.leftWeight = 0.5;
+        if (data.topWeight == empty) data.topWeight = 0.5;
+        data.shakeAmount = 0;
+        @:getTag ::(showFull, fraction) {
+          when (data.renderState == RENDER_STATE.ANIMATING) '(...)'
+          when (data.firstPress == false) '(continue)'
+
+          when (showFull) '(next)';
+          return 
+            'Scroll ' + ((fraction*100)->round) + '%' + 
+              (if (fraction != 1) '[v]' else '') + 
+              (if (fraction != 0) '[^]' else '')        
+        }        
+        
+      
+        data.readerRender = ::(lines) {
+          if (data.shakeAmount > 0) {
+            data.shakeAmount *= 0.2;
+            data.rendered = empty;
+          }
+
+          @:fraction = (data.iter / (lines->size - data.maxHeight - 1));
+          
+          @:end = if (data.iter+data.maxHeight >= lines->size) 
+            lines->size-1 
+          else
+            data.iter+data.maxHeight
+            
+          @:showFull = data.iter == 0 && end == lines->size-1;
+          @:info = renderTextSingle(
+            leftWeight: data.leftWeight + (data.shakeAmount * (Number.random()-0.5)), 
+            topWeight: data.topWeight + (data.shakeAmount * (Number.random()-0.5)), 
+            maxWidth : data.maxWidth,
+            maxHeight : data.maxHeight,
+            minWidth : data.minWidth,
+            disableFrame : data.disableFrame,
+            lines: lines->subset(from:data.iter, to:end),
+            speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
+            speakerRight : data.promptRight,
+            hasNotch: true,
+            notchText : getTag(showFull, fraction)
+            
+            //limitLines : data.pageAfter,
+          );
+          
+          // showing the full thing.
+          when (showFull) empty;
+
+          // render scrollbar
+          @space = info.height - 4;
+          @scrollHeight = ((data.maxHeight / lines->size) * space)->floor;
+          @scrollStart = 
+            (space - scrollHeight) *                     // total space available
+            fraction
+          ;
+
+          @endX = info.left+info.width-1;
+
+          
+          for(0, space->round) ::(i) {
+            canvas.movePen(x:endX, y:i+2);
+            canvas.drawChar(text: '░');
+          }
+
+          for(scrollStart->round, (scrollStart + scrollHeight)->round) ::(i) {
+            canvas.movePen(x:endX, y:i+2);
+            canvas.drawChar(text: '▓');
+          }
+        }
+        
+        data.thisRender = ::{
+          data.readerRender(:data.lines);
+        }        
+      }
+
+      
       if (data.animateLines && data.animationFrame == empty) {
+        data.iterRate = 2;
         data.renderState = RENDER_STATE.ANIMATING;
         data.animationFrame = ::{
           @bulk = {};
@@ -1489,11 +1577,13 @@
           if (animLineIter > 0)
             bulk = data.lines->subset(from:0, to:animLineIter-1)
             
-          breakpoint();
           bulk->push(:currentLine->substr(
             from:(currentLine->length-1)-animCharIter, 
               to: currentLine->length-1
           ));
+          
+          data.readerRender(:bulk);
+          /*
           @:info = renderTextSingle(
             leftWeight: data.leftWeight, 
             topWeight: data.topWeight, 
@@ -1505,87 +1595,61 @@
             speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
             hasNotch: true            
             //limitLines : data.pageAfter,
-          );        
+          );*/        
           
+          animCharIter += data.iterRate;
+          if (animCharIter >= currentLine->length) {
+            animCharIter = currentLine->length-1;
+          }
+
           if (animCharIter >= currentLine->length-1) {
             animLineIter += 1;
             animCharIter = 0;
-            breakpoint();
-          } else {
-            animCharIter += iterRate;
-            if (animCharIter >= currentLine->length)
-              animCharIter = currentLine->length-1;
-            breakpoint();
+            // for now
+            //data.shakeAmount += 0.05 * (bulk->size);
+            @:end = if (data.iter+data.maxHeight >= bulk->size) 
+              bulk->size-1 
+            else
+              data.iter+data.maxHeight
+            @:showFull = data.iter == 0 && end == bulk->size-1;
+            if (showFull == false)
+              data.iter += 1;
+          }          
+
+          when (animLineIter >= data.lines->size) ::<= {
+            data.shakeAmount = 0;
+            return ANIMATION_FINISHED
           }
-          
-          when (animLineIter >= data.lines->size)
-            ANIMATION_FINISHED
+
+
+
         }
       }
       
-      data.thisRender = ::{
-        @:fraction = (data.iter / (data.lines->size - data.maxHeight - 1));
-        
-        @:end = if (data.iter+data.maxHeight >= data.lines->size) 
-          data.lines->size-1 
-        else
-          data.iter+data.maxHeight
-          
-          
-        @:info = renderTextSingle(
-          leftWeight: data.leftWeight, 
-          topWeight: data.topWeight, 
-          maxWidth : data.maxWidth,
-          maxHeight : data.maxHeight,
-          minWidth : data.minWidth,
-          disableFrame : data.disableFrame,
-          lines: data.lines->subset(from:data.iter, to:end),
-          speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
-          hasNotch: true,
-          notchText : 'Scroll ' + ((fraction*100)->round) + '%' + 
-            (if (fraction != 1) '[v]' else '') + 
-            (if (fraction != 0) '[^]' else '')
-          
-          //limitLines : data.pageAfter,
-        );
-        
-        // showing the full thing.
-        when (data.iter == 0 && end == data.lines->size-1) empty;
 
-        // render scrollbar
-        @space = info.height - 4;
-        @scrollHeight = ((data.maxHeight / data.lines->size) * space)->floor;
-        @scrollStart = 
-          (space - scrollHeight) *                     // total space available
-          fraction
-        ;
-
-        @endX = info.left+info.width-1;
-
-        
-        for(0, space->round) ::(i) {
-          canvas.movePen(x:endX, y:i+2);
-          canvas.drawChar(text: '░');
-        }
-
-        for(scrollStart->round, (scrollStart + scrollHeight)->round) ::(i) {
-          canvas.movePen(x:endX, y:i+2);
-          canvas.drawChar(text: '▓');
-        }
-
-      }
+      
       
 
+      
       renderAction(data);   
       
       return match(input) {
         (CURSOR_ACTIONS.CONFIRM, 
          CURSOR_ACTIONS.CANCEL): ::<= {
           when (data.renderState == RENDER_STATE.ANIMATING) ::<= {
-            iterRate *= 2;
+            data.iterRate *= 2;
+            data.firstPress = false;
             //data.renderState = RENDER_STATE.DONE;
             return false;
           } 
+
+          // animators require pressing twice.
+          when(data.firstPress == false) ::<= {
+            data.rendered = empty; // redraw
+            data.firstPress = true;
+            return false;
+          }
+            
 
           sound.playSFX(:if (input == CURSOR_ACTIONS.CONFIRM) "confirm" else "cancel");
 
@@ -1701,6 +1765,7 @@
       // messages to display
       queueMessageSet::(
           speakers, 
+          speakerRight,
           set => Object, 
           leftWeight, 
           topWeight, 
@@ -1715,6 +1780,7 @@
           when(text == '' || text == empty) empty;
           this.queueMessage(
             speaker: speakers[i],
+            speakerRight,
             text,
             leftWeight,
             topWeight,
@@ -1736,6 +1802,7 @@
       // to the user.
       queueMessage::(
           speaker, 
+          speakerRight,
           text, 
           leftWeight, 
           topWeight, 
@@ -1773,6 +1840,7 @@
           leftWeight, topWeight,
           maxWidth,
           maxHeight,
+          promptRight : speakerRight,
           prompt:speaker,
           renderable,
           lines : if (text == empty) empty else canvas.refitLines(input:[text]),
@@ -1828,6 +1896,7 @@
       // lines should be an array of strings.
       queueDisplay::(
         prompt, lines, 
+        promptRight,
         pageAfter, 
         leftWeight, 
         topWeight, 
@@ -1870,6 +1939,7 @@
               lines : linesOut,
               pageAfter: pageAfter,
               prompt: prompt,
+              promptRight : promptRight,
               onLeave: onLeave,
               disableFrame : disableFrame,
               mode: CHOICE_MODE.DISPLAY,
@@ -2094,7 +2164,14 @@
           if (next() != false) 
             this.queueCustom(
               onEnter ::<- doNextPhase()
-            );       
+            )     
+          else {
+            if (onFinish != empty) {
+              finished = true;
+              breakpoint();
+              onFinish(:false);
+            }          
+          }
         }      
         this.queueNestedResolve(
           renderable,
@@ -2103,8 +2180,10 @@
           },
           onFrameRendered : onFrameRendered,
           onLeave ::{
-            if (onFinish != empty && finished == false)
+            if (onFinish != empty && finished == false) ::<= {
+              breakpoint();
               onFinish(:false);
+            }
           }
         );
       },
@@ -2166,6 +2245,7 @@
       queueChoices::(
         choices, 
         prompt, 
+        promptRight,
         leftWeight, 
         topWeight, 
         maxWidth,
@@ -2211,6 +2291,7 @@
             canCancel: canCancel,
             defaultChoice: defaultChoice,
             hideWindow : hideWindow,
+            promptRight : promptRight,
             disableFrame : disableFrame,
             onChoice: onChoice,
             onHover: onHover,
@@ -2244,6 +2325,7 @@
         defaultValue => Number, 
         increments => Number, 
         prompt, 
+        promptRight,
         leftWeight, 
         topWeight, 
         maxWidth,
@@ -2273,6 +2355,7 @@
             topWeight: topWeight,
             maxWidth : maxWidth,
             maxHeight : maxHeight,
+            promptRight : promptRight,
             canCancel: canCancel,
             defaultValue: defaultValue,
             onChoice: onChoice,
@@ -2353,6 +2436,7 @@
       queueChoiceColumns::(
         choices, 
         prompt, 
+        promptRight,
         itemsPerRow,
         leftWeight, 
         topWeight, 
@@ -2377,6 +2461,7 @@
             prompt: prompt,
             jumpTag : jumpTag,
             itemsPerRow: itemsPerRow,
+            promptRight : promptRight,
             leftWeight : leftWeight,
             topWeight : topWeight,
             maxWidth : maxWidth,
@@ -2396,6 +2481,7 @@
       },      
       queueCursorMove ::(
         prompt, 
+        promptRight,
         leftWeight, 
         topWeight, 
         maxWidth,
@@ -2414,6 +2500,7 @@
             canCancel: canCancel,
             mode: CHOICE_MODE.CURSOR_MOVE,
             prompt: prompt,
+            promptRight : promptRight,
             leftWeight: leftWeight,
             topWeight: topWeight,
             maxWidth : maxWidth,
@@ -2521,8 +2608,9 @@
       },
 
       // ask yes or no immediately.
-      queueAskBoolean::(prompt, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt, defaultChoice, onFrameRendered) {
+      queueAskBoolean::(prompt, promptRight, leftWeight, topWeight, onChoice => Function, renderable, onLeave, onGetPrompt, defaultChoice, onFrameRendered) {
         return this.queueChoices(prompt, choices:['Yes', 'No'], canCancel:false, onLeave:onLeave, topWeight, onFrameRendered, leftWeight,
+          promptRight,
           defaultChoice: if (defaultChoice == true) 0 else 1,
           onChoice::(choice){
             onChoice(which: choice == 1);

@@ -22,8 +22,7 @@ return ::{
         Landmark.TRAIT.PEACEFUL |
         Landmark.TRAIT.EPHEMERAL |
         Landmark.TRAIT.POINT_OF_NO_RETURN,
-      minEvents : 0,
-      maxEvents : 0,
+      eventCounts : [0],
       eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
       minObjects : 2,
@@ -68,12 +67,10 @@ return ::{
         Landmark.TRAIT.POINT_OF_NO_RETURN |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 1,
-      maxEvents : 2,
+      eventCounts : [0, 2, 1, 0, 2],
       eventPreference : LandmarkEvent.KIND.HOSTILE,
 
       requiredEvents : [
-        'base:creature-encounters'
       ],
       possibleObjects : [
   //          {id: 'Stairs Down', rarity:1},
@@ -126,8 +123,8 @@ return ::{
         Landmark.TRAIT.POINT_OF_NO_RETURN |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 1,
-      maxEvents : 3,
+      eventCounts : [0, 2, 1, 2, 2],
+
       eventPreference : LandmarkEvent.KIND.HOSTILE,
 
 
@@ -185,8 +182,8 @@ return ::{
         Landmark.TRAIT.POINT_OF_NO_RETURN |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 1,
-      maxEvents : 3,
+      eventCounts : [0, 3, 2, 1, 3],
+
       eventPreference : LandmarkEvent.KIND.HOSTILE,
 
       requiredEvents : [
@@ -238,17 +235,17 @@ return ::{
       symbol : 'M',
       legendName: 'Shrine',
       rarity : 100000,    
+      eventCounts : [0, 3, 2, 1, 3],
+
+      landmarkType : Landmark.TYPE.DUNGEON,
       minObjects : 2,
       maxObjects : 4,
-      landmarkType : Landmark.TYPE.DUNGEON,
-
       traits : 
         Landmark.TRAIT.UNIQUE |
         Landmark.TRAIT.POINT_OF_NO_RETURN |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 1,
-      maxEvents : 5,
+      eventCounts : [0, 3, 2, 1, 3],
       eventPreference : LandmarkEvent.KIND.HOSTILE,
 
 
@@ -310,8 +307,7 @@ return ::{
         Landmark.TRAIT.PEACEFUL |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 0,
-      maxEvents : 0,
+      eventCounts : [0],
       eventPreference : LandmarkEvent.KIND.PEACEFUL,
       landmarkType : Landmark.TYPE.DUNGEON,
 
@@ -353,8 +349,8 @@ return ::{
         Landmark.TRAIT.PEACEFUL |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 0,
-      maxEvents : 0,
+      eventCounts : [0],
+
       eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
 
@@ -394,8 +390,8 @@ return ::{
         Landmark.TRAIT.PEACEFUL |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 0,
-      maxEvents : 0,
+      eventCounts : [0],
+
       eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
       requiredEvents : [
@@ -434,8 +430,8 @@ return ::{
         Landmark.TRAIT.PEACEFUL |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 0,
-      maxEvents : 0,
+      eventCounts : [0],
+
       eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
       requiredEvents : [
@@ -477,8 +473,8 @@ return ::{
         Landmark.TRAIT.POINT_OF_NO_RETURN |
         Landmark.TRAIT.EPHEMERAL,
 
-      minEvents : 1,
-      maxEvents : 6,
+      eventCounts : [0, 2, 3, 4, 2, 3],
+
       eventPreference : LandmarkEvent.KIND.HOSTILE,
 
 
@@ -533,8 +529,7 @@ return ::{
         Landmark.TRAIT.POINT_OF_NO_RETURN |
         Landmark.TRAIT.PEACEFUL,
 
-      minEvents : 0,
-      maxEvents : 0,
+      eventCounts : [0],
       eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
 

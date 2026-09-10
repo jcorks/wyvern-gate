@@ -775,7 +775,7 @@ LandmarkEvent.database.newEntry(
       )
     ,
     kind : KIND.HOSTILE,
-    tier : 0,
+    tier : 1,
     events : {
       onStep ::(data, landmark) {
         data.step();
@@ -851,7 +851,7 @@ LandmarkEvent.database.newEntry(
       )
     ,
     kind : KIND.HOSTILE,
-    tier : 0,
+    tier : 2,
 
 
     events : {

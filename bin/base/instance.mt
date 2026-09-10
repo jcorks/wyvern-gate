@@ -909,7 +909,6 @@ return empty;
         
           choiceNames->push(value:'New');
           choiceActions->push(value:::{
-            
             loading(
               message: 'Loading scenarios...',
               do ::{
@@ -1150,6 +1149,9 @@ return empty;
             }
 
             sound.playBGM(name:'boot', loop:false);
+         
+            
+            
          
             
             (import(:'base/boot.mt'))(          

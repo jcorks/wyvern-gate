@@ -562,7 +562,7 @@ Location.database.newEntry(data:{
 ::<= {
 @:restock = ::(location){
   location.inventory.clear();
-  location.data.discount = random.integer(from:20, to:50);
+  location.data.discount = (random.integer(from:20, to:70)/5)->floor * 5;
   location.inventory.add(item:
     Item.new(
       base:Item.database.getRandomFiltered(
@@ -576,10 +576,10 @@ Location.database.newEntry(data:{
     )
   );
   @:item = location.inventory.items[0];
-  location.data.originalPrice = (Item.BUY_PRICE_MULTIPLIER* item.price)->floor
-  location.data.discountPrice = (Item.BUY_PRICE_MULTIPLIER * item.price * (1 - 0.01*location.data.discount))->floor
+  location.data.originalPrice = (Item.BUY_PRICE_MULTIPLIER* item.price)->ceil
+  location.data.discountPrice = (Item.BUY_PRICE_MULTIPLIER * (item.price * (1 - 0.01*location.data.discount))->floor)->ceil
 
-  item.price = item.price * (1 - 0.01*location.data.discount)->floor
+  item.price = (item.price * (1 - 0.01*location.data.discount))->floor
 }
 Location.database.newEntry(data:{
   id: 'base:shop-special',

@@ -159,8 +159,7 @@ Landmark.database.newEntry(
     rarity : 100000,
     minObjects : 7,
     maxObjects : 15,
-    minEvents : 0,
-    maxEvents : 3,
+    eventCounts : [0, 1, 2, 3],
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
     landmarkType : TYPE.STRUCTURE,
     traits : 
@@ -225,8 +224,8 @@ Landmark.database.newEntry(
     rarity : 100000,
     minObjects : 4,
     maxObjects : 6,
-    minEvents : 0,
-    maxEvents : 3,
+    eventCounts : [0, 1, 2, 3],
+
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
     landmarkType : TYPE.STRUCTURE,
     traits : 
@@ -299,8 +298,7 @@ Landmark.database.newEntry(
     rarity : 100000,
     minObjects : 7,
     maxObjects : 15,
-    minEvents : 0,
-    maxEvents : 3,
+    eventCounts : [0],
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
     landmarkType : TYPE.STRUCTURE,
     traits : 
@@ -342,8 +340,8 @@ Landmark.database.newEntry(
       TRAIT.PEACEFUL |
       TRAIT.GUARDED |
       TRAIT.CAN_SAVE,
-    minEvents : 2,
-    maxEvents : 6,
+    eventCounts : [2, 3, 4, 5],
+
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
     landmarkType : TYPE.STRUCTURE,
@@ -413,9 +411,8 @@ Landmark.database.newEntry(
     rarity : 5,
     minObjects : 10,
     maxObjects : 15,
-    minEvents : 0,
-    maxEvents : 0,
-    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+    eventCounts : [1],
+    eventPreference : LandmarkEvent.KIND.HOSTILE,
 
     traits : 
       TRAIT.PEACEFUL |
@@ -452,8 +449,7 @@ Landmark.database.newEntry(
     rarity : 10,
     minObjects : 4,
     maxObjects : 10,
-    minEvents : 0,
-    maxEvents : 0,
+    eventCounts : [0],
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
     traits : 
@@ -497,8 +493,7 @@ Landmark.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.POINT_OF_NO_RETURN |
       TRAIT.EPHEMERAL,
-    minEvents : 2,
-    maxEvents : 7,
+    eventCounts : [1, 2, 4, 3],
     eventPreference : LandmarkEvent.KIND.HOSTILE,
 
     landmarkType : TYPE.DUNGEON,
@@ -562,8 +557,8 @@ Landmark.database.newEntry(
       TRAIT.UNIQUE |
       TRAIT.POINT_OF_NO_RETURN |
       TRAIT.EPHEMERAL,
-    minEvents : 2,
-    maxEvents : 7,
+    eventCounts : [0, 1, 2, 3, 6],
+
     eventPreference : LandmarkEvent.KIND.HOSTILE,
 
     landmarkType : TYPE.DUNGEON,
@@ -614,8 +609,8 @@ Landmark.database.newEntry(
     rarity : 100000,    
     minObjects : 2,
     maxObjects : 2,
-    minEvents : 0,
-    maxEvents : 0,
+    eventCounts : [0],
+
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
     traits : 
@@ -660,8 +655,8 @@ Landmark.database.newEntry(
     traits : 
       TRAIT.UNIQUE |
       TRAIT.PEACEFUL,
-    minEvents : 0,
-    maxEvents : 0,
+    eventCounts : [0],
+
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
     landmarkType : TYPE.DUNGEON,
@@ -711,8 +706,8 @@ Landmark.database.newEntry(
       TRAIT.GUARDED |
       TRAIT.CAN_SAVE |
       TRAIT.DUNGEON_FORCE_ENTRANCE,
-    minEvents : 0,
-    maxEvents : 3,
+    eventCounts : [0, 1, 2, 3],
+
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
     requiredEvents : [
@@ -750,8 +745,7 @@ Landmark.database.newEntry(
     traits :
       TRAIT.PEACEFUL |
       TRAIT.CAN_SAVE,
-    minEvents : 0,
-    maxEvents : 3,
+    eventCounts : [0, 1, 2, 3],
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
       
     possibleObjects : [
@@ -791,8 +785,7 @@ Landmark.database.newEntry(
     traits :
       TRAIT.PEACEFUL |
       TRAIT.CAN_SAVE,
-    minEvents : 0,
-    maxEvents : 3,
+    eventCounts : [0, 1, 2, 3],
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
       
     minObjects : 5,
@@ -847,8 +840,7 @@ Landmark.database.newEntry(
     traits :
       TRAIT.EPHEMERAL |
       TRAIT.DUNGEON_FORCE_ENTRANCE,
-    minEvents : 0,
-    maxEvents : 1,
+    eventCounts : [0, 1],
     eventPreference : LandmarkEvent.KIND.HOSTILE,
 
     minObjects : 3,
@@ -898,8 +890,7 @@ Landmark.database.newEntry(
     traits :
       TRAIT.EPHEMERAL |
       TRAIT.DUNGEON_FORCE_ENTRANCE,
-    minEvents : 0,
-    maxEvents : 1,
+    eventCounts : [0, 1],
     eventPreference : LandmarkEvent.KIND.HOSTILE,
 
     minObjects : 0,
@@ -946,8 +937,7 @@ Landmark.database.newEntry(
       TRAIT.CAN_SAVE |
       TRAIT.NOTHING_HIDDEN |
       TRAIT.STRUCTURE_BUSINESS,
-    minEvents : 0,
-    maxEvents : 0,
+    eventCounts : [0],
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
     minObjects : 0,
@@ -981,8 +971,8 @@ Landmark.database.newEntry(
       TRAIT.CAN_SAVE |
       TRAIT.NOTHING_HIDDEN |
       TRAIT.STRUCTURE_BUSINESS,
-    minEvents : 0,
-    maxEvents : 0,
+    eventCounts : [0],
+
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
     minObjects : 0,
@@ -1017,8 +1007,8 @@ Landmark.database.newEntry(
       TRAIT.CAN_SAVE |
       TRAIT.NOTHING_HIDDEN |
       TRAIT.STRUCTURE_RESIDENTIAL,
-    minEvents : 0,
-    maxEvents : 0,
+    eventCounts : [0],
+
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
     minObjects : 0,
@@ -1078,8 +1068,8 @@ Landmark.database.newEntry(
       TRAIT.CAN_SAVE |
       TRAIT.NOTHING_HIDDEN |
       TRAIT.STRUCTURE_RESIDENTIAL,
-    minEvents : 0,
-    maxEvents : 0,
+    eventCounts : [0],
+
     eventPreference : LandmarkEvent.KIND.PEACEFUL,
 
     minObjects : 0,
@@ -1328,8 +1318,7 @@ Landmark.database.newEntry(
       legendName : String,
       symbol : String,
       rarity: Number,
-      minEvents : Number,
-      maxEvents : Number,
+      eventCounts: Object, // array of number of events. the true number of events are picked from this list.
       eventPreference : Number,
       minObjects : Number,
       maxObjects : Number,
@@ -1502,7 +1491,7 @@ Landmark.database.newEntry(
       }
       
       // TODO: repeats? make this unique?
-      for(0, random.integer(from:base.minEvents, to:base.maxEvents)) ::(i) {
+      for(0, random.pickArrayItem(:base.eventCounts)) ::(i) {
         @which = LandmarkEvent.database.getRandomFiltered(
           ::(value) <- value.kind == base.eventPreference &&
                        alreadyEvents->findIndex(:value.id) == -1 &&
@@ -1781,7 +1770,6 @@ Landmark.database.newEntry(
             canCancel:true,
             jumpTag:'LANDMARK_TRAVEL',
             onGetChoices ::{
-              breakpoint();
               refreshNearby();
               landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island, landmark));
               
