@@ -545,6 +545,9 @@
       windowEvent.skipDisplayWindows = false;          
       when(logStart == windowEvent.skipDisplayWindows || windowEvent.log == empty) empty;
       @:lines = windowEvent.log->subset(from:logStart, to:windowEvent.log->size-1);
+
+      when(lines->size == 0) empty;
+
       windowEvent.queueReader(
         prompt: caption,
         animateLines: true,

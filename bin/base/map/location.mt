@@ -1603,7 +1603,35 @@ Location.database.newEntry(data:{
 }) 
 
 
+Location.database.newEntry(data:{
+  name: 'Dark Tree',
+  id: 'base:dark-tree',
+  rarity: 1000000000000,
+  ownVerb : '',
+  symbol: 'Y',
+  traits: 0,
 
+
+  descriptions: [
+  ],
+  interactions : [
+    'base:chop-dark-tree'
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  events : {    
+    onCreate ::(location) {
+      location.landmark.map.enableWall(
+        x : location.x,
+        y : location.y
+      );
+    }
+  }
+}) 
     
 Location.database.newEntry(data:{
   name: 'Barred Door',
@@ -1634,6 +1662,8 @@ Location.database.newEntry(data:{
     }
   }
 }) 
+
+
 
 
 Location.database.newEntry(data:{

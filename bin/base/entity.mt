@@ -1049,6 +1049,7 @@
       @:world = import(module:'base/world.mt');
       @:state = _.state;
       @:this = _.this;
+      
 
       state.innateEffects = innateEffects;
       state.affinity = random.pickArrayItem(:Damage.TYPE->values);
@@ -1139,8 +1140,10 @@
       state.growth.mod(stats:state.species.growth);
       state.growth.mod(stats:state.personality.growth.scale(:0.2));
       state.growth.mod(stats:state.profession.growth);
-      for(0, levelHint)::(i) {
-        this.autoLevel();        
+      if (levelHint != empty) {
+        for(0, levelHint)::(i) {
+          this.autoLevel();        
+        }
       }
       state.inventory = Inventory.new(size:10);
       if (faveWeapon)

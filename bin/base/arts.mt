@@ -1173,7 +1173,56 @@ Arts.database.newEntry(
 ) 
 
 
+Arts.database.newEntry(
+  data: {
+    name: 'Summon Drone',
+    id : 'base:call-dark-bee',
+    notifCommit : '$1 vibrates!',
+    notifFail : '...But nothing happened!',
+    targetMode : TARGET_MODE.NONE,
+    description: "Calls a Dark Bee to come and join the fight on the user\'s side.",
+    keywords : [],
+    durationTurns: 0,
+    kind : KIND.ABILITY,
+    traits : 0,
+    rarity : RARITY.EPIC,
+    usageHintAI : USAGE_HINT.OFFENSIVE,
+    shouldAIuse ::(user, reactTo, enemies, allies) {},
+    baseDamage ::(level, user) {},
+    onAction: ::(level, user, targets, turnIndex, targetParts, extraData) {      
+      
+      @:world = import(module:'base/world.mt');
+    
+      @:beast = world.island.newInhabitant(
+        speciesHint : 'base:dark-bee',
+        professionHint : 'base:dark-bee'
+      );
+      beast.name = 'the Dark Bee';
+      beast.supportArts = [];      
+      for(0, 20) ::(i) {
+        beast.autoLevelProfession(:beast.profession);
+      }
+      beast.equipAllProfessionArts();  
 
+      
+      beast.unequipAll(silent:true);
+      beast.heal(amount:9999, silent:true); 
+      beast.healAP(amount:9999, silent:true);   
+      @battle = user.battle;
+      
+      windowEvent.queueCustom(
+        onEnter :: {
+
+          battle.join(
+            group: [beast],
+            sameGroupAs:user
+          );
+        }
+      )
+                    
+    }
+  }
+) 
 
 
 Arts.database.newEntry(

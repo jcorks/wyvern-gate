@@ -287,9 +287,154 @@ Interaction.newEntry(
       )
     }    
   }
-
 )
 
+
+Interaction.newEntry(
+  data : {
+    id :  'base:chop-dark-tree',
+    name : 'Chop down tree',
+    keepInteractionMenu : false,
+    isAvailable ::(location, party) <- true,
+    interact ::(location, party) {
+      @:Entity = import(module:'base/entity.mt');
+      @:Damage = import(module:'base/entity/damage.mt');
+      @:world = import(module:'base/world.mt')
+      windowEvent.queueMessage(
+        text: 'The ominous tree beckons you to chop it down.'
+      );
+      
+      windowEvent.queueChoices(
+        prompt: 'Who chops it down?',
+        canCancel: true,
+        
+        choices: [...party.members]->map(to:::(value) <- value.name),
+        onChoice::(choice) {
+          when(choice == 0) empty;
+          @whom = party.members[choice-1];
+          @:ent = Entity.new(
+            professionHint: 'base:blacksmith',
+            speciesHint: 'base:cave-bat'
+          );
+          
+          ent.name = "the Dark Tree";
+          @:stats = ent.stats.save();
+          stats.HP = 10;
+          ent.stats.load(:stats);
+          ent.hp = 10;
+          
+          windowEvent.queueMessage(text:whom.name + ' attempts to chop down the tree.');
+          
+          if (random.flipCoin()) ::<= {
+
+            ent.damage(
+              attacker:whom, 
+              damage: Damage.new(
+                amount:10, 
+                damageType:Damage.TYPE.PHYS, 
+                damageClass:Damage.CLASS.HP,
+                traits : Damage.TRAIT.UNBLOCKABLE
+              ), 
+              dodgeable: false, 
+              exact: true
+            );
+          
+          } else ::<= {
+        
+            ent.damage(
+              attacker:whom, 
+              damage: Damage.new(
+                amount:5, 
+                damageType:Damage.TYPE.PHYS, 
+                damageClass:Damage.CLASS.HP,
+                traits : Damage.TRAIT.UNBLOCKABLE
+              ), 
+              dodgeable: false, 
+              exact: true
+            );
+
+
+            windowEvent.queueMessage(text:whom.name + ' swings again.');
+
+            ent.damage(
+              attacker:whom, 
+              damage: Damage.new(
+                amount:5, 
+                damageType:Damage.TYPE.PHYS, 
+                damageClass:Damage.CLASS.HP,
+                traits : Damage.TRAIT.UNBLOCKABLE
+              ), 
+              dodgeable: false, 
+              exact: true
+            );
+          }
+        
+          windowEvent.queueMessage(text: 'The tree was chopped down.');
+                    
+          
+          windowEvent.queueCustom(
+            onEnter ::{
+              @:map = location.landmark.map;
+              map.disableWall(x:location.x, y:location.y)
+              map.removeItem(:location);
+
+              @:val = random.number();
+              // Bees!
+              when (val > 0.9) ::<={
+                windowEvent.queueMessage(text: 'Huh...? A nest fell out of the tree!');
+                @:nest = Entity.new(
+                  professionHint: 'base:dark-nest',
+                  speciesHint: 'base:dark-nest'
+                )
+                nest.name = 'the Dark Nest'
+                nest.heal(amount:9999, silent:true); 
+                nest.healAP(amount:9999, silent:true);   
+              
+                windowEvent.queueCustom(
+                  onEnter ::{
+                    world.battle.start(
+                      party,              
+                      allies: party.members,
+                      enemies: [
+                        nest
+                      ],
+                      landmark: {},
+                      onEnd::(result) {
+                        @:instance = import(module:'base/instance.mt');
+                        when(!world.battle.partyWon()) 
+                          instance.gameOver(reason:'The party was wiped out.');
+                      }
+                    );                
+                  }
+                );
+              }
+              
+              // ring :)
+              when (val > 0.5) ::<={
+                windowEvent.queueMessage(text: 'Huh...? Something shiny fell out of the tree...');
+                windowEvent.queueCustom(
+                  onEnter ::{
+                    @:item = Item.new(
+                      base:Item.database.find(id:'base:ring'),
+                      rngEnchantHint:true, 
+                      forceEnchant:true
+                    )
+                  
+                    lootget(items:[item]);
+                    party.inventory.add(:item);
+                  }
+                );
+              }
+              windowEvent.queueMessage(text: 'Huh...? Nothing fell out of the tree...');
+            }
+          ); 
+          
+          
+        }
+      )
+    }    
+  }
+)
 
 Interaction.newEntry(
   data : {

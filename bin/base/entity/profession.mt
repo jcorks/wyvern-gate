@@ -1769,6 +1769,66 @@ Profession.newEntry(data:{
   ]
 }) 
 
+
+Profession.newEntry(data:{
+  name: 'Dark Nest',
+  id : 'base:dark-nest',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 7,
+    INT: 7,
+    DEF: 7,
+    SPD: 7,
+    LUK: 7,
+    DEX: 7
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:call-dark-bee'         
+  ],
+  passives : [
+  ]
+}) 
+
+
+Profession.newEntry(data:{
+  name: 'Dark Bee',
+  id : 'base:dark-bee',
+  traits : 0,
+  weaponAffinity: 'base:none',
+  description : "", 
+  levelMinimum : 100,
+
+  growth: StatSet.new(
+    HP:  7,
+    AP:  7,
+    ATK: 7,
+    INT: 7,
+    DEF: 7,
+    SPD: 7,
+    LUK: 7,
+    DEX: 7
+  ),
+  minKarma : 0,
+  maxKarma : 50,
+  learnable : false,
+  
+  arts : [
+    'base:poison-attack'
+  ],
+  passives : [
+  ]
+}) 
+
 }
 
 @:Profession = Database.new(

@@ -2489,6 +2489,126 @@ Species.newEntry(data:{
     'base:banishing-touch'
   ]
 })
+
+Species.newEntry(data:{
+  name : 'Dark Nest',
+  id : 'base:dark-nest',
+  rarity : 2000000000000,
+  description: 'beeeeeeeeeeeeeessssss!!!!.',
+  growth : StatSet.new(
+    HP : 20,
+    AP : 1,
+    ATK: 1,
+    DEF: 1,
+    INT: 1,
+    LUK: 1,
+    SPD: 1,
+    DEX: 4
+  ),
+  levelPenalty : 3,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 35,
+    AP  : 10,
+    ATK : 1,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    DEX : 1
+  ),
+
+
+  qualities : [
+
+  ],
+  swarms : false,
+  canBlock : false,
+  overrideBattleAI ::(entity, battle, commitBattleActions) {
+    entity.ap += 2;
+    if (entity.data.beeCount == empty) {
+      entity.data.beeCount = 8;
+    }
+    
+    when(entity.data.beeCount == 0) ::<= {
+      windowEvent.queueMessage(text: entity.name + ' is quiet.');
+      commitBattleActions(:[BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:wait')),
+        targets: [],
+        turnIndex : 0,
+        targetParts : [],
+        extraData: {}
+      )])
+    }
+
+
+    windowEvent.queueMessage(text: entity.name + ' rustles!');
+    
+    
+    
+
+    @:Entity = import(module:'base/entity.mt');        
+    entity.data.beeCount-=1;
+    commitBattleActions(:[
+      BattleAction.new(
+        card: Arts.new(base:Arts.database.find(id:'base:call-dark-bee')),
+        turnIndex : 0,
+        targets: [
+        ],
+        targetParts : [
+        ],
+        extraData: {}            
+      )      
+    ]);
+  }, 
+  
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
+  passives : [
+  ]
+})
+
+
+Species.newEntry(data:{
+  name : 'Dark Bee',
+  id : 'base:dark-bee',
+  rarity : 2000000000000,
+  description: 'beeeeeeeeeeeeeessssss!!!!.',
+  growth : StatSet.new(
+    HP : 20,
+    AP : 6,
+    ATK: 7,
+    DEF: 4,
+    INT: 2,
+    LUK: 1,
+    SPD: 7,
+    DEX: 10
+  ),
+  levelPenalty : 3,  
+
+  
+  baseStats : StatSet.new(
+    HP  : 12,
+    AP  : 13,
+    ATK : 13,
+    DEF : 1,
+    INT : 1,
+    LUK : 1,
+    SPD : 13,
+    DEX : 13
+  ),
+
+
+  qualities : [
+
+  ],
+  swarms : false,
+  canBlock : false,
+  overrideBattleAI : empty,
+  traits : TRAIT.SPECIAL | TRAIT.NO_DEFAULT_EQUIPS | TRAIT.NO_COMMON_SPEAK,
+  passives : [
+  ]
+})
+
 }
 
 

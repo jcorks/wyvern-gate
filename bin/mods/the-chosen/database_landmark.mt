@@ -71,6 +71,7 @@ return ::{
       eventPreference : LandmarkEvent.KIND.HOSTILE,
 
       requiredEvents : [
+      
       ],
       possibleObjects : [
   //          {id: 'Stairs Down', rarity:1},

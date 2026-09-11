@@ -21,6 +21,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:item-specter',
     kind : KIND.HOSTILE,
+    rarity : 100,
     tier : 0,
     startup ::(parent, x, y) <-
       Encounter.new(
@@ -67,6 +68,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:dungeon-encounters',
     kind : KIND.HOSTILE,
+    rarity : 100,
     tier : 0,
     startup ::(parent, x, y) {
       @:landmark = parent.landmark;
@@ -143,6 +145,7 @@ LandmarkEvent.database.newEntry(
     id: 'base:the-beast',
     kind : KIND.HOSTILE,
     tier : 1,
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -191,6 +194,7 @@ LandmarkEvent.database.newEntry(
     id: 'base:flaming-skull',
     kind : KIND.HOSTILE,
     tier : 1,
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -234,6 +238,7 @@ LandmarkEvent.database.newEntry(
     id: 'base:gnome',
     kind : KIND.HOSTILE,
     tier : 1,
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -275,6 +280,7 @@ LandmarkEvent.database.newEntry(
     id: 'base:skeleton',
     kind : KIND.HOSTILE,
     tier : 0,
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -315,6 +321,7 @@ LandmarkEvent.database.newEntry(
     id: 'base:the-mirror',
     kind : KIND.HOSTILE,
     tier : 3,
+    rarity : 100,
     startup ::(parent, x, y) {
       @:world = import(module:'base/world.mt');
 
@@ -364,6 +371,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:treasure-golem',
     tier : 1,
+    rarity : 100,
     kind : KIND.HOSTILE,
     startup ::(parent, x, y) <-
       Encounter.new(
@@ -407,6 +415,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:gold-slime',
     tier : 0,
+    rarity : 1000,
     kind : KIND.HOSTILE,
     startup ::(parent, x, y) <-
       Encounter.new(
@@ -460,6 +469,7 @@ LandmarkEvent.database.newEntry(
   data : {
     id: 'base:creature-encounters',
     tier : 0,
+    rarity : 100,
     kind : KIND.HOSTILE,
     startup ::(parent, x, y) <-
       Encounter.new(
@@ -498,6 +508,7 @@ LandmarkEvent.database.newEntry(
     id: 'base:mimic',
     kind : KIND.HOSTILE,
     tier : 1,
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -565,6 +576,7 @@ LandmarkEvent.database.newEntry(
     ,
     kind : KIND.HOSTILE,
     tier : 0,
+    rarity : 200,
 
     events : {
       onStep ::(data, landmark) {
@@ -584,6 +596,7 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:cave-bat',
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -625,6 +638,7 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:the-snakesiren',
+    rarity : 200,
     startup ::(parent, x, y) {
       // dud
       when(random.try(percentSuccess:70)) empty
@@ -667,6 +681,7 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:shadowling',
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -713,6 +728,7 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:mobile-mushroom',
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -753,6 +769,7 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:giant-flea',
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -791,6 +808,7 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:monolith',
+    rarity : 100,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -830,6 +848,7 @@ LandmarkEvent.database.newEntry(
 LandmarkEvent.database.newEntry(
   data : {
     id: 'base:chair',
+    rarity : 800,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
@@ -872,6 +891,7 @@ LandmarkEvent.database.newEntry(
     id: 'base:funny-tiles',
     kind : KIND.HOSTILE ,
     tier : 0,
+    rarity : 100,
     startup ::(parent, x, y) {
       when(random.try(percentSuccess:85)) empty;
     
@@ -919,6 +939,43 @@ LandmarkEvent.database.newEntry(
 );
 
 
+LandmarkEvent.database.newEntry(
+  data : {
+    id: 'base:dark-tree',
+    kind : KIND.HOSTILE ,
+    tier : 0,
+    rarity : 400,
+    startup ::(parent, x, y) {
+      @:landmark = parent.landmark;
+      @:map = parent.landmark.map;
+      @:Location = import(module:'base/map/location.mt');
+    
+      for(0, random.integer(from:5, to:8)) ::(i) {
+        @:area = map.getRandomEmptyArea();
+        landmark.addLocation(
+          location : Location.new(
+            landmark: landmark,
+            base: Location.database.find(id:
+              'base:dark-tree'
+            ),
+            x:area.x + (area.width/2)->floor,
+            y:area.y + (area.height/2)->floor
+          )
+        )
+      }
+    },
+
+
+    events : {},
+    
+    isActive ::(data) {
+      return false;
+    }
+  }
+);
+
+
+
 
 }
 
@@ -939,6 +996,7 @@ LandmarkEvent.database.newEntry(
     attributes : {
       id : String,
       startup : Function,
+      rarity: Number,
       tier : Number,
       kind : Number,
       events : Object,
