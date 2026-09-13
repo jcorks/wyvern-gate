@@ -591,7 +591,7 @@ const Settings = {
         objectData_element.addEventListener('click', function(ev) {
           const pattern = canvas.getPattern();
           const which = pattern.objects[objectPulldown_element.value];
-          const data = window.prompt("Enter the JSON data string for this object to be available during runtime.");          
+          const data = window.prompt("Enter the JSON data string for this object to be available during runtime.", which.data != undefined ? JSON.stringify(which.data) : undefined);          
           try {
             which.data = JSON.parse(data);
             pattern.commitChange();

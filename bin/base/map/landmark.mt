@@ -347,7 +347,11 @@ Landmark.database.newEntry(
     landmarkType : TYPE.STRUCTURE,
     requiredEvents : [],
     possibleObjects : [
-      {id:'base:home', rarity: 1},
+      {
+        name : 'Home',
+        symbol: ' ',
+        id:'base:home-inside', rarity:20
+      },
       //{id:'inn', rarity: 3},
       //{id:'guild', rarity: 25}
       //{id:'tavern', rarity: 100}

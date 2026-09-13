@@ -458,7 +458,7 @@ instance.mainMenu(
         ::? {
           setModule(
             name:json.id + '/' + file,
-            value : JSON.decode(:Filesystem.readBytes(:file))
+            value : JSON.decode(:Filesystem.readString(:file))
           )
         } => {
           onError::(message) {

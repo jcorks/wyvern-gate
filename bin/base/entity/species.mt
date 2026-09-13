@@ -2526,7 +2526,8 @@ Species.newEntry(data:{
   canBlock : false,
   overrideBattleAI ::(entity, battle, commitBattleActions) {
     entity.ap += 2;
-    if (entity.data.beeCount == empty) {
+    if (battle.getFightID() != entity.data.lastFight) {
+      entity.data.lastFight = battle.getFightID()
       entity.data.beeCount = 8;
     }
     

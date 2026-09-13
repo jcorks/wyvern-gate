@@ -152,7 +152,6 @@ return ::(inventory, shopkeep, onDone, sellMode) {
     onHover ::(item) {
       hoveredItem = item;
     },
-    header : ['Item', 'Price'],
     onGetFooter ::<- '(Party has: ' + g(:party.inventory.gold)+')',
     
     

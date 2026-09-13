@@ -333,7 +333,6 @@ return ::(
     canCancel:true, 
     pageAfter:12,
     showRarity:true,
-    header : ['Item', 'Value'],
     prompt: if (limitedMenu) 'Inventory...' else (user.name + ' - Choosing...'),
     onGetFooter ::<- '(Party has: ' + g(:party.inventory.gold)+')',
     onPick::(item) {

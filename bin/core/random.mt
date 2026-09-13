@@ -17,6 +17,11 @@
 */ 
 @:class = import(module:'Matte.Core.Class');
 
+@:hex = [
+  '0', '1', '2', '3', '4', '5',
+  '6', '7', '8', '9', 'a', 'b',
+  'c', 'd', 'e', 'f'
+]
 
 return class(
   name : 'Wyvern.random',
@@ -291,6 +296,18 @@ return class(
 
       pickTableItem::(table) {
         return table[this.pickArrayItem(list:table->keys)];
+      },
+      
+      uuid :: {
+        @:makeChunk ::(len) {
+          @out = '';
+          for(0, len) ::(i) {
+            out = out + hex[this.integer(from:0, to:15)];
+          }
+          return out;
+        }
+        
+        return makeChunk(:8)+'-'+makeChunk(:4)+'-4'+makeChunk(:3)+'-'+makeChunk(:4)+'-'+makeChunk(:12);
       },
       
       scrambled::(list) {

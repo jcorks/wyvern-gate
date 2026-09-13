@@ -155,7 +155,9 @@ for(0, 70) ::(i) {
       choices->push(value:p0);
     }
 
-
+    world.party.bank.add(item:Item.new(
+      base:Item.database.find(id:'thechosen:sentimental-box')
+    ));
 
     // debug
       /*
@@ -284,7 +286,7 @@ for(0, 70) ::(i) {
           }
         
           @somewhere = random.scrambled(:island.map.areas)[0]
-          
+
      
           
           instance.savestate();
@@ -294,7 +296,7 @@ for(0, 70) ::(i) {
           //Scene.start(id:'thechosen:scene_wyvernlight1_quest', onDone ::{
             canvas.freeze();
             world.island.visit()
-            world.island.travel(onReady::{
+            world.island.travel(skipAnimation:true, onReady::{
               
               world.island.map.setPointer(x:town.x, y:town.y);
               town.visit();

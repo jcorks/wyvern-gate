@@ -95,10 +95,9 @@ const AreaSet = {
             const p0 = canvas.mapPositionToClient(area.x, area.y);
             const p1 = canvas.mapPositionToClient(area.x + area.w, area.y + area.h);
             
-            if (p0 == undefined && p1 == undefined) {
+            if (p0 == undefined || p1 == undefined) {
               area.overlay.hide();
             } else {
-              area.overlay.show();
               area.overlay.setP0(p0.x, p0.y);
               area.overlay.setP1(p1.x, p1.y);
             }

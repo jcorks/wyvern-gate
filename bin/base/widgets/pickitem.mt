@@ -51,6 +51,7 @@
 
 
 
+
 @:STATIC_HEIGHT = 10;
 
 
@@ -75,17 +76,33 @@ return ::(
   showPrices, 
   showRarity,
   goldMultiplier, 
-  header,
+  extraHeader,
+  extraLeftJustified,
   tabbed,
-  onGetHeader,
   onGetFooter,
-  includeLoot
+  includeLoot,
+  onGetExtraColumns
 ) {
   @names = []
   @items = []
   @picked;
   @cancelled = false;
   @hoveredChoice = 0;
+  @tabCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // lazy,
+  @headerReal = [];
+  
+  @:getCondensedTabs ::{
+    @:out = [];
+    foreach(tabbedReqKeys) ::(k, v) {
+      if (tabCounts[k] != 0) 
+        out->push(:v);
+    }
+    return out;
+  }
+
+  if (showPrices == true && showRarity == true)
+    error(:'Only prices or rarity can be shown at the same time. You can do custom stuff if youd like instead.');
+
   @:prepTabbedChoices ::(args) {
     if (filter != empty) 
       error(:"Sorry, buddy: The pickitem interface only supports tabs when a filter isnt set!");
@@ -93,13 +110,16 @@ return ::(
     args->remove(:'prompt');
     args.columns = true;
 
-    args.onGetTabs = ::{
-      return tabbedReqKeys
-    }
+
+
+    args.onGetTabs = ::<- getCondensedTabs()
     
     @:preTag = args.onGetChoices;
     args.onGetChoices = ::(tab) {
-      filter = ::(value) <- tabbedReqs[tab] == empty || value.base.sortType == tabbedReqs[tab];
+      filter = ::(value) { 
+        @:name = getCondensedTabs()[tab];
+        return value.base.sortType == tabbedReqs[tabbedReqKeys->findIndex(:name)];
+      }
       return preTag();
     }
     
@@ -123,6 +143,7 @@ return ::(
     
     
     args.onChoice = ::(choice, tab) {
+      
       when(choice == 0) empty;
       listGenerator(); // refresh items list
       picked = items[choice-1];
@@ -164,14 +185,21 @@ return ::(
     else 
       [...inventory.items]
     
+    tabCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // lazy,
+    foreach(items) ::(k, value) {
+      tabCounts[tabbedReqs->findIndex(:value.base.sortType)] += 1;
+    
+    }
     
     if (filter != empty)
       items = items->filter(by:filter)
-      
+
+    breakpoint();
     when(items->size == 0)
       empty;
 
     @:alreadyCounted = [];
+
 
     items = items->filter(::(value) {
       when(value.base.hasNoTrait(:Item.TRAIT.STACKABLE)) true;
@@ -182,10 +210,11 @@ return ::(
       return false;
     });
 
+
     names = [...items]->map(to:::(value) <-     
 
       (if (value.faveMark != '')
-        '[' + value.faveMark + ']'
+        '[' + value.faveMark + '] '
       else
        ''
       ) +
@@ -206,27 +235,53 @@ return ::(
 
     );
     
+    headerReal = ['Item'];
 
-    when(names->size == 0)
-      [[''], ['']]
-    
-    when(showRarity) ::<={
-      @:rarities = items->map(::(value) <-
-        value.starsString
-      );
 
-      return [names, rarities];
     
+    @:data = [
+      ...(
+        ::<= {
+          when(names->size == 0) ::<= {
+            headerReal->push(:''); // technically wrong
+            return [[''], ['']]
+          }
+
+          when(showRarity) ::<={
+            @:rarities = items->map(::(value) <-
+              value.starsString
+            );
+            headerReal->push(:'Value');
+            return [names, rarities];
+          
+          }
+          @:prices = items->map(to:::(value) <-
+            if (showPrices != true) 
+              ''
+            else
+              gold(:value)
+          )
+          headerReal->push(:'Price');
+          return [names, prices]
+        }
+      ),
+      
+      // custom
+      ...(if (onGetExtraColumns != empty) {
+        headerReal = [...headerReal, ...extraHeader];
+        return onGetExtraColumns(:items)
+      } else 
+        [])
+    ]
+    
+    if (data->size != headerReal->size) {
+      error(:'Miscount between header size and generated list size. Check your onGetColumns() return value and the preset header.');
     }
-    @:prices = items->map(to:::(value) <- 
-      if (showPrices != true) 
-        ''
-      else
-        gold(:value)
-    )
-    
-    return [names, prices];
+    return data;
+
   }
+
+  listGenerator()
 
   windowEvent.queueNestedResolve(
     onEnter :: {
@@ -243,13 +298,13 @@ return ::(
         jumpTag: 'pickItem',
         separator: '|',
         onGetFooter : onGetFooter,
-        leftJustified : [true, if(showRarity)true else false],
+        leftJustified : [true, if(showRarity)true else false, ...(if(extraLeftJustified == empty) [] else extraLeftJustified)],
         pageAfter: STATIC_HEIGHT+2,
-        header : header,
+        header : headerReal,
         onCancel::{cancelled = true;},
         onHover : if (onHover)
           ::(choice) {
-
+            hoveredChoice = choice
             when(choice == 0) empty;
             onHover(item:items[choice-1])
           }
@@ -258,7 +313,6 @@ return ::(
         renderable : {
           render :: {
             @:Arts = import(module:'base/arts.mt');
-            breakpoint();
 
             @:choice = hoveredChoice;
             @hoveredItem = items[choice-1];
@@ -296,7 +350,6 @@ return ::(
             }
             
             when(hoveredItem.inletArt != empty) ::<= {
-              breakpoint();
               canvas.renderTextFrameGeneral(
                 title: hoveredItem.name,
                 lines: [
@@ -312,7 +365,6 @@ return ::(
 
 
             when(hoveredItem.inletEffect != empty) ::<= {
-              breakpoint();
               canvas.renderTextFrameGeneral(
                 title: hoveredItem.name,
                 lines: [
@@ -357,7 +409,6 @@ return ::(
               leftWeight: 0,
               topWeight: 1
             )
-            breakpoint();
 
             if (renderable != empty) renderable.render()
           }

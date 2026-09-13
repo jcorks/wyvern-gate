@@ -19,6 +19,8 @@
 @:romanNum = import(module:'base/util/romannumerals.mt');
 @:Arts = import(:'base/arts.mt');
 @:Scenario = import(:'base/scenario.mt');
+@:pickItem = import(:'base/widgets/pickitem.mt');
+
 
 
 @:WORK_ORDER__SPACE = 1;
@@ -40,13 +42,16 @@
 @:pickItemStock = ::(*args) {
   @:choicesColumns = import(module:'base/widgets/choicescolumns.mt');
   @items = []
-  choicesColumns(
-    leftWeight: args.leftWeight => Number,
-    topWeight:  args.topWeight => Number,
+  
+  pickItem(
+    leftWeight: 1,
+    topWeight:  0.5,
     prompt: args.prompt => String,
     onGetPrompt: args.onGetPrompt,
+    showPrices:true,
+    goldMultiplier: args.goldMultiplier,
     canCancel: args.canCancel,
-    jumpTag: 'pickItem',
+    inventory: args.inventory,
     onHover : if (args.onHover)
       ::(choice) {
         when(choice == 0) empty;
@@ -54,51 +59,26 @@
       }
     else 
       empty,
-    renderable : args.renderable,
-    onGetChoices ::{
-
+    onGetExtraColumns ::(items) {
       @:popular   = args.traderState.popular
       @:unpopular   = args.traderState.unpopular;
 
-      
-      items =  
-        [...args.inventory.items]
-      ;
-    
-      @:names = [...items]->map(to:::(value) {
-        return value.name;
-      });
-      
-      @:gold = [...items]->map(to:::(value) {
-        @go = value.price * args.goldMultiplier;
-        go = go->ceil;
-        return if (go < 1)
-          '?G' /// ooooh mysterious!
-        else
-          g(g:go);      
-      });
-      
-      @:popularList = [...items]->map(to:::(value) {
-        when(popular->findIndex(value:value.base.id) != -1) 'High'
-        when(unpopular->findIndex(value:value.base.id) != -1) 'Low'
-        return ' '
-      })
-      
-      if (names->keycount == 0) ::<={
-        windowEvent.queueMessage(text: "The inventory is empty.");
-      }
       return [
-        names,
-        popularList,
-        gold,
-      ];
+        items->map(to:::(value) {
+          when(popular->findIndex(value:value.base.id) != -1) 'High'
+          when(unpopular->findIndex(value:value.base.id) != -1) 'Low'
+          return ' '
+        })
+      ]
     },
-    header : ['Item', 'Popularity', 'Worth', ],
-    leftJustified : [true, true, false],
+    extraHeader : ['Popularity'],
+    extraLeftJustified : [true],
+
+    tabbed: true,
+    renderable : args.renderable,
     keep:true,
-    onChoice ::(choice) {
-      when(choice == 0) args.onPick();
-      args.onPick(item:items[choice-1]);
+    onPick ::(item) {
+      args.onPick(item:item);
     }
   );
 };
@@ -177,6 +157,7 @@
     title : 'Employee'
   },
   define ::(this, state) {
+  
   
     this.interface = {
       defaultLoad ::(member, rate) {
@@ -534,11 +515,11 @@
     // world ID for the city where the shop resides 
     cityID : -1,
     
-    // inventory of the shop.
-    shopInventory : empty,
-    
-    // world ID for the shop that is owned by the player.
+    // world ID for the shop entrance (so in the city) that is owned by the player.
     shopID : -1,
+    
+    // world ID for the internals of the shop that is owned by the player
+    shopInsideID : -1,
     
     // world ID for the island where the shop owned by the player resides.
     islandID : -1,
@@ -643,8 +624,43 @@
   },
   
   define::(this, state) {
+
+    @:travelShop = ::(ready) {
+      @world = import(module:'base/world.mt');
+      canvas.freeze();
+      world.island.visit()
+      world.island.travel(skipAnimation:true, onReady::{
+        @:town = world.island.findLandmark(:state.cityID);
+        world.island.map.setPointer(x:town.x, y:town.y);
+        town.visit();
+        town.travel(
+          skipAnimation: true,
+          onReady ::(landmark) {
+            @:which = world.island.findLocation(:state.shopID);
+            town.map.setPointer(x: which.x, y: which.y);
+            which.portal.use(
+              skipAnimation : true,
+              onLoad::{
+
+              },
+              onReady :: {
+                windowEvent.queueCustom(
+                  onEnter ::{
+                    canvas.thaw();
+                    ready();
+                  }
+                );
+    
+              }
+            )
+          }
+        )
+      })    
+    }  
+  
+  
     this.interface = {
-      defaultLoad::(city, shop) {
+      defaultLoad::(city, shop, shopInside) {
         @:Inventory = import(module:'base/item/inventory.mt');
         state.hirees = [];
         state.ledger = [];
@@ -654,11 +670,11 @@
         state.propertiesForSale = [];
         state.cityID = city.worldID;
         state.shopID = shop.worldID;
+        state.shopInsideID = shopInside.worldID
         state.islandID = city.island.worldID;
         @world = import(module:'base/world.mt');
         state.startingG = world.party.inventory.gold;
-        state.shopInventory = Inventory.new();
-        state.shopInventory.maxItems = 10;
+        world.party.bank.maxItems = 10;
       },
       
       startingG : {
@@ -688,6 +704,7 @@
 
             @:instance = import(module:'base/instance.mt');
             @world = import(module:'base/world.mt');
+            @party = world.party;      
             @:currentLandmark = world.landmark;
             @:Landmark = import(module:'base/map/landmark.mt');
             if (currentLandmark != empty && currentLandmark.base.hasTraits(:Landmark.TRAIT.POINT_OF_NO_RETURN) == true) ::<= {
@@ -709,7 +726,7 @@
               );
               
               if (state.workOrder == WORK_ORDER__SPACE)
-                state.shopInventory.maxItems += 5
+                party.bank.maxItems += 5
               else
                 state.additionalStorefrontCount += 1;
 
@@ -770,9 +787,13 @@
                 );
                 hasNews = true;
                 world.island.tier += 1;
+                world.island.level += 1;
               } else             
-                if (state.days % 10 == 0)
+                if (state.days % 10 == 0) {
                   world.island.tier += 1;
+                  world.island.level += 1;
+                }
+              
             }
 
             if (state.recession < 0)
@@ -1034,35 +1055,53 @@
 
 
         windowEvent.queueMessage(
-          text: 'You travel back to your shop.'
+          text: 'You travel back to your shop.',
+          renderable : {
+            render ::{
+              canvas.fill(:'`');
+            }
+          }
         );
 
         
         @:doStart :: {
-          windowEvent.queueChoices(
-            prompt:'Today I will:',
-            choicesMatch : [
-              'Open shop...', ::<- this.openShop(),
-              'Explore...', ::<- this.explore(),
-              'Wait until tomorrow', ::<-
-                windowEvent.queueAskBoolean(
-                  prompt: 'Wait until tomorrow?',
-                  onChoice::(which) {
-                    when(which) 
-                      this.preflightCheckStart(onDone::{
-                        this.finishDay();                      
-                      });
-                  }
-                )
-            ],
-            renderable : {
-              render ::{
-                canvas.fill(:'`');
+        
+          travelShop(::{
+            foreach(world.landmark.locations) ::(k, loc) {
+              if (loc.base.id == 'base:bed') {
+                world.landmark.map.setPointer(
+                  x: loc.x,
+                  y: loc.y
+                );
               }
-            },
-            keep:true,
-            jumpTag: 'day-start'
-          );        
+            }        
+
+            windowEvent.queueChoices(
+              prompt:'Today I will:',
+              choicesMatch : [
+                'Open shop...', ::<- this.openShop(),
+                'Explore...', ::<- this.explore(),
+                'Wait until tomorrow', ::<-
+                  windowEvent.queueAskBoolean(
+                    prompt: 'Wait until tomorrow?',
+                    onChoice::(which) {
+                      when(which) 
+                        this.preflightCheckStart(onDone::{
+                          this.finishDay();                      
+                        });
+                    }
+                  )
+              ],
+              renderable : {
+                render ::{
+                  canvas.fill(:'`');
+                }
+              },
+              keep:true,
+              jumpTag: 'day-start'
+            );      
+          });
+  
         }        
         
         
@@ -1336,14 +1375,16 @@
       },
       
       simulateShopkeep::(shopkeeper) {
-        when(state.shopInventory.items->size == 0) {
+        @world = import(module:'base/world.mt');
+        @party = world.party;      
+        when(party.bank.items->size == 0) {
           gained : -1,
           sold : [],
           prices : [],
           markup : []          
         };
         @maxPerHour = (
-          (state.shopInventory.items->size / 6)
+          (party.bank.items->size / 6)
         )->ceil;
         
           
@@ -1351,7 +1392,6 @@
           maxPerHour = 5;
 
         @gained = 0;
-        @world = import(module:'base/world.mt');
 
         @:popular   = state.popular;
         @:unpopular   = state.unpopular;
@@ -1379,8 +1419,8 @@
 
 
             for(0, shoppers) ::(n) {
-              when(state.shopInventory.items->size == 0) send();
-              @:sold = random.removeArrayItem(list:state.shopInventory.items);
+              when(party.bank.items->size == 0) send();
+              @:sold = random.removeArrayItem(list:party.bank.items);
 
               
               @isPopular = ::<= {          
@@ -1439,7 +1479,7 @@
               itemsPrice->push(value:g(g:price));
               itemsMarkup->push(value:if (markup == 0) '--' else (if (markup < 0)''+markup else '+'+markup)+'%');
               itemsPopular->push(value:if (isPopular) 'High' else (if (isUnpopular) 'Low' else ''));
-              state.shopInventory.remove(item:sold);
+              party.bank.remove(item:sold);
             }                  
           }
         }
@@ -1520,16 +1560,19 @@
 
               } else ::<= {
                 if (!world.party.inventory.isFull) ::<= {
-                  @itemsFound = "Items found by " + hiree.entity.name + ':\n\n';
+                  @itemsFound = ["Items found by " + hiree.entity.name + ':'];
+                  itemsFound->push(:'')
+                  itemsFound->push(:'')
                   foreach(spoils) ::(i, item) {
                     if (!world.party.inventory.isFull) ::<= {
-                      itemsFound = itemsFound + "- " + item.name + '\n'
+                      itemsFound->push(:"- " + item.name);
                       hiree.earned += (item.price / STANDARD_REDUCTION_PRICE)->floor;
                       world.party.inventory.add(item);
                     }
                   }
-                  windowEvent.queueMessage(
-                    text:itemsFound
+                  windowEvent.queueReader(
+                    animateLines: true,
+                    lines:itemsFound
                   );   
                 }
                 if (world.party.inventory.isFull)
@@ -1657,11 +1700,11 @@
           // called once all the event based stuff is done.
           @:wrapUp = ::{
             @:endWrapUp :: {
-              @status = "Todays profit:\n";
+              @status = ["Todays profit:"];
               
               @earnings = world.party.inventory.gold - state.startingG;
-              status = status + "  Earnings   : "+ (if (earnings < 0) g(g:earnings) else "+" + g(g:earnings)) + "\n\n";
-
+              status->push(:"  Earnings   : "+ (if (earnings < 0) g(g:earnings) else "+" + g(g:earnings)));
+              status->push(:'');
 
               @:Landmark = import(module:'base/map/landmark.mt');
               @:Location = import(module:'base/map/location.mt');
@@ -1689,7 +1732,7 @@
               world.party.inventory.addGold(amount:rent);
               @investments = rent;
               if (rent > 0)
-                status = status + "  Rent       : +" + g(g:rent) + "\n";
+                status->push(:"  Rent       : +" + g(g:rent));
               
 
               rent = 0;
@@ -1721,10 +1764,9 @@
               world.party.inventory.addGold(amount:rent);
               investments += rent;
               if (rent != 0)
-                status = status + "  Businesses : " + (if (rent >= 0) '+' + g(g:rent) else g(g:rent)) + "\n";
+                status->push(:"  Businesses : " + (if (rent >= 0) '+' + g(g:rent) else g(g:rent)));
 
 
-              status 
 
               @cost = 0;
               foreach(state.hirees) ::(i, hiree) {
@@ -1733,10 +1775,10 @@
                 hiree.spent += hiree.contractRate;
                 hiree.daysEmployed += 1;
               }
-              status = status + "  Contracts  : -" + g(g:cost) + "\n";
+              status->push(:"  Contracts  : -" + g(g:cost));
               
               cost += state.upkeep;
-              status = status + "  Upkeep     : -" + g(g:state.upkeep) + "\n";
+              status->push(:"  Upkeep     : -" + g(g:state.upkeep));
               
               @currentG = world.party.inventory.gold
               @:profit = (earnings + investments) - cost;
@@ -1746,9 +1788,9 @@
               if (state.days % 2 == 0 && profit > 0) 
                 state.upkeep += (profit * 0.01)->floor;
               
-              status = status + "_________________________________\n";
-              status = status + "  Profit     : " + (if (profit < 0) g(g:profit) else "+" + g(g:profit)) + "\n\n";
-              
+              status->push(:"_________________________________");
+              status->push(:"  Profit     : " + (if (profit < 0) g(g:profit) else "+" + g(g:profit)));
+              status->push(:'');              
 
               world.party.inventory.subtractGold(amount:cost);
 
@@ -1763,9 +1805,9 @@
 
 
               if (cost > currentG)
-                status = status + "Remaining: [BANKRUPT]"
+                status->push(:"Remaining: [BANKRUPT]")
               else 
-                status = status + "Remaining: " + g(g:world.party.inventory.gold)
+                status->push(:"Remaining: " + g(g:world.party.inventory.gold))
 
               when (cost > currentG)
                 Scene.start(id:'thetrader:scene_bankrupt', onDone::{          
@@ -1825,7 +1867,7 @@
               }
               
               state.startingG = world.party.inventory.gold;        
-              windowEvent.queueMessage(text:status, pageAfter:14);
+              windowEvent.queueReader(animateLines:true, lines:status);
               
               windowEvent.queueCustom(
                 onEnter ::{
@@ -2138,6 +2180,7 @@
       
       preflightCheckStart::(onDone, isShopkeeping) {
         @world = import(module:'base/world.mt');
+        @party = world.party;      
 
         @preflightCheckStart_hireeInPartyWhenShopKeeping :: {
           when(isShopkeeping != true) nextChain();
@@ -2188,7 +2231,7 @@
 
         @:preflightCheckStart_shopkeepingwithnostock :: {
           when(isShopkeeping == empty) nextChain();
-          when(state.shopInventory.items->size != 0) nextChain();
+          when(party.bank.items->size != 0) nextChain();
           
           windowEvent.queueMessage(
             text: 'You\'ve chosen to open up shop, but have not stocked your shop yet with items from your inventory. (You have ' + world.party.inventory.items->size + ' item(s) in your inventory to stock the shop with.)'
@@ -2225,6 +2268,8 @@
       },
       
       explore ::{
+        @world = import(module:'base/world.mt');
+        @party = world.party;      
         windowEvent.queueChoices(
           prompt: 'What next?',
           choicesMatch : [
@@ -2232,43 +2277,30 @@
             'Start exploring!', ::<-
               this.preflightCheckStart(
                 onDone :: {
-                  @world = import(module:'base/world.mt');
                   @:instance = import(module:'base/instance.mt');
-                  world.loadIslandID(id:state.islandID, onDone::(island) {
-                    world.island.travel();
 
-                    foreach(state.hirees) ::(k, hiree) {
-                      if (hiree.role == ROLES.IN_PARTY)
-                        hiree.addToParty();
-                    }
+                  foreach(state.hirees) ::(k, hiree) {
+                    if (hiree.role == ROLES.IN_PARTY)
+                      hiree.addToParty();
+                  }
 
-                    
-                    @:landmarks = world.island.landmarks;
-                    @:city = landmarks[landmarks->findIndexCondition(::(value) <- value.worldID == state.cityID)];
-                    
-                    @:locations = city.locations;
-                    @:shop = locations[locations->findIndexCondition(::(value) <- value.worldID == state.shopID)]
-
-                    
-                    city.visit(
-                      where: ::(landmark)<- shop
-                    );        
-
-                    windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
-                  });
+                  windowEvent.jumpToTag(name:'day-start', goBeforeTag:true, doResolveNext:true);
                 }
               )
           ],
           keep:true,
           canCancel: true
-        );      
+        );              
+
       },
       
       stockShop ::{
         @world = import(module:'base/world.mt');
+        @party = world.party;      
 
         @:shopInventory ::{
-          when(state.shopInventory.items->size == 0)
+          breakpoint();
+          when(party.bank.items->size == 0)
             windowEvent.queueMessage(
               text: 'The shop has no items stocked. You have to stock it from your inventory first.'
             );
@@ -2276,20 +2308,27 @@
           pickItemStock(
             prompt: 'Current shop stock:',
             traderState : state,
-            inventory: state.shopInventory,
+            inventory: party.bank,
             canCancel: true,
             goldMultiplier: 1 / STANDARD_REDUCTION_PRICE, // standard rate
-            topWeight: 0.5,
-            leftWeight: 0.5,
             onPick ::(item) {
               windowEvent.queueChoices(
                 prompt: item.name,
                 leftWeight: 1,
                 canCancel: true,
-                choices: [
-                  'Check',
-                  'Move to inventory'
-                ],
+                choices: 
+                  if (item.inletSlotSet != empty) 
+                    [
+                      'Check',
+                      'Move to inventory',
+                      'Gems...'
+                    ]
+                  
+                  else
+                    [
+                      'Check',
+                      'Move to inventory'
+                    ],
                 
                 onChoice::(choice) {
                   when(choice == 0) empty;
@@ -2305,9 +2344,12 @@
                         ); 
                       }
 
-                      state.shopInventory.remove(item);
+                      party.bank.remove(item);
                       world.party.inventory.add(item);
-                    }           
+                    },    
+                    (3): ::<= {
+                      item.inletSlotSet.equip(user:party.members[0], item);   
+                    }
                   }
                 }
               );
@@ -2331,18 +2373,23 @@
             inventory: world.party.inventory,
             canCancel: true,
             goldMultiplier: 1 / STANDARD_REDUCTION_PRICE,
-            topWeight: 0.5,
-            leftWeight: 0.5,
             onPick ::(item) {
               windowEvent.queueChoices(
                 prompt: item.name,
                 leftWeight: 1,
                 canCancel: true,
-                choices: [
-                  'Stock in shop',
-                  'Check'
-                ],
-                
+                choices: if (item.inletSlotSet != empty) 
+                  [
+                    'Stock in shop',
+                    'Check',
+                    'Gems...'
+                  ]
+                else
+                  [
+                    'Stock in shop',
+                    'Check'
+                  ],
+                  
                 onChoice::(choice) {
                   when(choice == 0) empty;
                   match(choice) {                    
@@ -2354,7 +2401,7 @@
                         )
                     
                     
-                      when (state.shopInventory.isFull) ::<= {
+                      when (party.bank.isFull) ::<= {
                         windowEvent.queueMessage(
                           text: 
                           if (state.sellingLevel >= LEVEL_UPGRADE_SHOP0)
@@ -2365,13 +2412,14 @@
                       }
 
                       world.party.inventory.remove(item);
-                      state.shopInventory.add(item);
+                      party.bank.add(item);
                     },
                     (2): ::<= {
                       item.describe();
+                    },
+                    (3): ::<= {
+                      item.inletSlotSet.equip(user:party.members[0], item);   
                     }
-                    
-                            
                   }
                 }
               );
@@ -2587,6 +2635,7 @@
 
       startShopDay :: {
         @world = import(module:'base/world.mt');
+        @party = world.party;      
 
         // find shop
         @:instance = import(module:'base/instance.mt');
@@ -2603,6 +2652,8 @@
 
 
 
+
+        
         windowEvent.queueCustom(
           keep:true,
           renderable:landmark.map,
@@ -2618,7 +2669,7 @@
             );
 
             @maxPerHour = (
-              (state.shopInventory.items->size / 4.5)
+              (party.bank.items->size / 4.5)
             )->ceil;
             
             if (maxPerHour < 3)
@@ -2646,7 +2697,7 @@
                 );          
               }
                 
-              when(state.shopInventory.items->size == 0) ::<= {
+              when(party.bank.items->size == 0) ::<= {
                 windowEvent.queueMessage(
                   text: 'The shop has no more items to sell for the day.',
                   onLeave :: {
@@ -2698,12 +2749,12 @@
             
             @:nextShopper ::{
               when(shopperList->size == 0) finishHour();
-              when(state.shopInventory.items->size == 0) finishHour();
+              when(party.bank.items->size == 0) finishHour();
               @:shopper = shopperList->pop;
 
               shopper.anonymize();
               
-              @:item = random.pickArrayItem(list:state.shopInventory.items);
+              @:item = random.pickArrayItem(list:party.bank.items);
               
               windowEvent.queueMessage(
                 speaker: shopper.name,
@@ -2729,7 +2780,7 @@
                     windowEvent.queueMessage(
                       text: shopper.name + ' bought the ' + item.name + ' for ' + g(g:price) + '.'
                     );
-                    state.shopInventory.remove(item);
+                    party.bank.remove(item);
                     
 
                     
@@ -2781,7 +2832,9 @@
       
       upgradeShop ::{ 
         @:upgradeShop_space = ::{
-          @:current = state.shopInventory.maxItems;
+          @:world = import(module:'base/world.mt');
+          @party = world.party;      
+          @:current = party.bank.maxItems;
           
           when (state.workOrder != 0)
             windowEvent.queueMessage(
@@ -2939,7 +2992,11 @@
             ,
             
             'Start the day!', ::<-
-              this.preflightCheckStart(onDone::{this.startShopDay();}, isShopkeeping:true)        
+              this.preflightCheckStart(onDone::{
+                travelShop(::{
+                  this.startShopDay()
+                });
+              }, isShopkeeping:true)        
           ],
           keep:true,
           canCancel: true
@@ -3150,83 +3207,76 @@
         
         
         
-        // setup shop
         @:city = island.landmarks->filter(by::(value) <- value.base.id == 'thetrader:city')[0];      
-        @:shop = city.locations->filter(by::(value) <- value.base.id == 'thetrader:shop')[0];
-        shop.ownedBy = empty;
+        city.loadContent();
+        @:shopEntrance = city.locations->filter(::(value) <- value.portal != empty && value.portal.destinationLandmarkDatabaseID == 'thetrader:shop')[0];
+        city.map.setPointer(x: shopEntrance.x, y: shopEntrance.y);
+        city.visit();
 
-        data.trader = TraderState.new(
-          city,
-          shop
-        );
-        party.inventory.add(item:
-          Item.new(
-            base:Item.database.find(id:'base:gold-pouch'),
-            from:p0
-          )
-        );
+        // force loading of the shop internals since we'll be spawning in there for out-and-about stuff
+        shopEntrance.portal.use(
+          skipAnimation : true,
+          onLoad::{
+            data.trader = TraderState.new(
+              city,
+              shop:shopEntrance,
+              shopInside : world.landmark
+            )
 
-        @:basicArts = [
-          'base:pebble',
-          'base:agility',
-          'base:quick-shield',
-          'base:wyvern-prayer'
-        ];
+            party.inventory.add(item:
+              Item.new(
+                base:Item.database.find(id:'base:gold-pouch'),
+                from:p0
+              )
+            );
 
-        p0.supportArts = [...basicArts]->map(::(value) <- Arts.new(base:Arts.database.find(:value)));;
-
-
-          
-          /*
-          //party.inventory.addGold(amount:250000);
-          party.inventory.addGold(amount:2500);
-          
-          world.island.tier = 3;
-          
-          
-          
-          data.trader.addHiree(
-            entity: world.island.newInhabitant(),
-            rate:117
-          );
-          data.trader.addHiree(
-            entity: world.island.newInhabitant(),
-            rate:103
-          );
-          data.trader.addHiree(
-            entity: world.island.newInhabitant(),
-            rate:157
-          );
               
-          party.inventory.add(item:
-            Item.new(
-              base:Item.database.find(id:'Shipment'),
-              from:p0
-            )
-          );
+              /*
+              //party.inventory.addGold(amount:250000);
+              party.inventory.addGold(amount:2500);
+              
+              world.island.tier = 3;
+              
+              
+              
+              data.trader.addHiree(
+                entity: world.island.newInhabitant(),
+                rate:117
+              );
+              data.trader.addHiree(
+                entity: world.island.newInhabitant(),
+                rate:103
+              );
+              data.trader.addHiree(
+                entity: world.island.newInhabitant(),
+                rate:157
+              );
+                  
+              party.inventory.add(item:
+                Item.new(
+                  base:Item.database.find(id:'Shipment'),
+                  from:p0
+                )
+              );
 
-          party.inventory.add(item:
-            Item.new(
-              base:Item.database.find(id:'Crate'),
-              from:p0
-            )
-          );
-          */
-          
+              party.inventory.add(item:
+                Item.new(
+                  base:Item.database.find(id:'Crate'),
+                  from:p0
+                )
+              );
+              */
+              
 
-        @somewhere = LargeMap.getAPosition(map:island.map);
-        island.map.setPointer(
-          x: somewhere.x,
-          y: somewhere.y
-        );         
-        instance.savestate();
-        @:Scene = import(module:'base/scene.mt');
-        Scene.start(id:'thetrader:scene_intro', onDone::{          
-          data.trader.dayStart();        
-        });    
-        
-        
-      
+            world.island.map.setPointer(x:city.x, y:city.y);
+         
+            instance.savestate();
+            @:Scene = import(module:'base/scene.mt');
+            Scene.start(id:'thetrader:scene_intro', onDone::{          
+              data.trader.dayStart();        
+            });    
+          }
+        )
       });
     },
 
@@ -3539,7 +3589,8 @@
         name : 'Explore Pit',
         id :  'base:explore-pit',
         keepInteractionMenu : false,
-        onInteract ::(location, party) {
+        isAvailable ::<- true,
+        interact ::(location, party) {
           @:world = import(module:'base/world.mt');
 
           if (location.targetLandmark == empty) ::<={
@@ -3589,7 +3640,8 @@
         name : 'Steal',
         id :  'thetrader:steal_wyvern',
         keepInteractionMenu : false,
-        onInteract ::(location, party) {
+        isAvailable ::<- true,
+        interact ::(location, party) {
           @:Entity = import(module:'base/entity.mt');
         
           // the steal attempt happens first before items 
@@ -3693,8 +3745,8 @@
         ],
         minAdditionalLandmarkCount : 0,
         maxAdditionalLandmarkCount : 0,
-        minSize : 40,//80,
-        maxSize : 60, //130,
+        minSize : 50,//80,
+        maxSize : 80, //130,
         events : [
           'base:bbq',
           'base:weather:1',
@@ -3732,13 +3784,17 @@
           Landmark.TRAIT.GUARDED |
           Landmark.TRAIT.PEACEFUL | 
           Landmark.TRAIT.CAN_SAVE,
-        minEvents : 0,
-        maxEvents : 0,
+        eventCounts : [0],
+        events : {},
         eventPreference : LandmarkEvent.KIND.PEACEFUL,
         landmarkType : Landmark.TYPE.STRUCTURE,
         requiredEvents : [],
         possibleObjects : [
-          {id:'base:home', rarity: 1},
+          {
+            name : 'Home',
+            symbol: ' ',
+            id:'base:home-inside', rarity:20
+          },
           //{id:'inn', rarity: 3},
           //{id:'guild', rarity: 25}
           //{id:'tavern', rarity: 100}
@@ -3750,14 +3806,23 @@
             symbol: '$',
             id: 'base:shop-inside'
           },
-          //'thetrader:shop',
+          {
+            name : 'Your Shop',
+            symbol: '$',
+            id: 'thetrader:shop'
+          },
           {
             name : 'Shop',
             symbol: '$',
             id: 'base:shop-inside'
           },
+          {
+            name : 'Tavern',
+            symbol: '&',
+            id: 'base:tavern-inside'
+          },
+
           //'base:arts-tecker',
-          //'base:tavern',
           //'base:arena',
           //'base:inn',
           //'base:school',
@@ -3771,16 +3836,47 @@
           roomAreaSizeLarge: 7,
           emptyAreaCount: 18,
           wallCharacter : '|'
-        },
-        onCreate ::(landmark, island){},
-        onIncrementTime ::(landmark, island){},
-        onStep ::(landmark, island) {},
-        onVisit ::(landmark, island) {}
-        
+        }
       }
     )
 
     @:DungeonMap = import(module:'base/map/dungeon.mt');
+
+
+    Landmark.database.newEntry(
+      data: {
+        name: 'Your Shop: Inside',
+        id: 'thetrader:shop',
+        legendName: '',
+        symbol : '$',
+        rarity : 40,        
+        landmarkType : Landmark.TYPE.BLUEPRINT_SINGLE(:'wyvern-gate.rasa.thetrader/thetrader-shop.json'),
+
+        traits :
+          Landmark.TRAIT.PEACEFUL |
+          Landmark.TRAIT.UNIQUE |
+          Landmark.TRAIT.CAN_SAVE |
+          Landmark.TRAIT.NOTHING_HIDDEN |
+          Landmark.TRAIT.STRUCTURE_BUSINESS,
+        eventCounts : [0],
+        eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+        minObjects : 0,
+        maxObjects : 0,
+        possibleObjects : [
+        ],
+        requiredObjects : [
+        ],
+        requiredEvents : [
+        ],
+        mapHint: {
+        },
+        events : {
+        }
+        
+      }
+    )
+
 
     Landmark.database.newEntry(
       data: {
@@ -3793,10 +3889,10 @@
           Landmark.TRAIT.UNIQUE |
           Landmark.TRAIT.POINT_OF_NO_RETURN |
           Landmark.TRAIT.EPHEMERAL,
-        minEvents: 1,
-        maxEvents: 4,
+        eventCounts : [0, 1, 2, 3, 1, 2, 3],
         eventPreference : LandmarkEvent.KIND.HOSTILE,
-            
+        events : {},
+
         minObjects : 2,
         maxObjects : 4,
         landmarkType : Landmark.TYPE.DUNGEON,
@@ -3847,9 +3943,9 @@
         traits : 
           Landmark.TRAIT.UNIQUE |
           Landmark.TRAIT.PEACEFUL,
-        minEvents : 0,
-        maxEvents : 0,
+        eventCounts : [0],
         eventPreference : LandmarkEvent.KIND.PEACEFUL,
+        events : {},
 
         minObjects : 2,
         maxObjects : 2,
@@ -3859,7 +3955,11 @@
         possibleObjects : [
         ],
         requiredObjects : [
-          'thetrader:fortune-throne',
+          {
+            name: 'Wyvern Throne',
+            symbol: 'W',
+            id: 'thetrader:fortune-throne'
+          }
         ],
         
         mapHint : {
@@ -3898,83 +3998,76 @@
       aggressiveInteractions : [
         'thetrader:steal_wyvern'
       ],
-
+      traits : 0,
 
       
       minOccupants : 0,
       maxOccupants : 0,
-      
-      onFirstInteract ::(location) {
-      },
-      onInteract ::(location) {
-        return true;
+      events : {
+        onFirstInteract ::(location) {
+        },
+        onInteract ::(location) {
+          return true;
 
-      },      
-      
-      onCreate ::(location) {
-        location.name = 'Wyvern Throne';
-        @:Profession = import(module:'base/entity/profession.mt');
-        @:Species = import(module:'base/entity/species.mt');
-        @:Story = import(module:'base/story.mt');
-        @:Scene = import(module:'base/scene.mt');
-        @:StatSet = import(module:'base/util/statset.mt');
-
-        @:world = import(module:'base/world.mt');         
-        @:key = Item.new(base:Item.database.find(id:'base:wyvern-key'));
-        @:namegen = import(module:'base/namegen.mt');
-        @:name = namegen.island();
-        key.setIslandGenTraits(
-          levelHint: world.island.level + 1 + (world.island.level * 1.2)->ceil,
-          nameHint: name,
-          tierHint: world.island.tier + 1,
-          extraLandmarks : [
-            'base:lost-shrine',
-          ]
-        ); 
-        key.name = 'Key to ' + name  + ' '+romanNum(value:world.island.tier + 1);
-
-        location.inventory.add(
-          item:key
-        );
+        },      
         
-        location.ownedBy = location.landmark.island.newInhabitant(
-          speciesHint : 'base:wyvern',
-          professionHint : 'base:wyvern'
-        );
-        location.ownedBy.name = 'Wyvern of Fortune';
-        for(0, 20) ::(i) {
-          location.ownedBy.autoLevelProfession(:location.ownedBy.profession);
-        }
-        location.ownedBy.equipAllProfessionArts();          
+        onCreate ::(location) {
+          location.name = 'Wyvern Throne';
+          @:Profession = import(module:'base/entity/profession.mt');
+          @:Species = import(module:'base/entity/species.mt');
+          @:Story = import(module:'base/story.mt');
+          @:Scene = import(module:'base/scene.mt');
+          @:StatSet = import(module:'base/util/statset.mt');
 
-        
-        location.ownedBy.overrideInteract = ::(party, location, onDone) {
-          @:world = import(module:'base/world.mt');
-          @:trader = world.scenario.data.trader;
+          @:world = import(module:'base/world.mt');         
+          @:key = Item.new(base:Item.database.find(id:'base:wyvern-key'));
+          @:namegen = import(module:'base/namegen.mt');
+          @:name = namegen.island();
+          key.setIslandGenTraits(
+            levelHint: world.island.level + 1 + (world.island.level * 1.2)->ceil,
+            nameHint: name,
+            tierHint: world.island.tier + 1,
+            extraLandmarks : [
+              'base:lost-shrine',
+            ]
+          ); 
+          key.name = 'Key to ' + name  + ' '+romanNum(value:world.island.tier + 1);
 
-          Scene.start(id:'thetrader:scene_gold1-' + trader.goldTier, onDone::{}, location, landmark:location.landmark);
-          trader.goldTier += 1;
+          location.inventory.add(
+            item:key
+          );
+          
+          location.ownedBy = location.landmark.island.newInhabitant(
+            speciesHint : 'base:wyvern',
+            professionHint : 'base:wyvern'
+          );
+          location.ownedBy.name = 'Wyvern of Fortune';
+          for(0, 20) ::(i) {
+            location.ownedBy.autoLevelProfession(:location.ownedBy.profession);
+          }
+          location.ownedBy.equipAllProfessionArts();          
+
+          
+          location.ownedBy.overrideInteract = ::(party, location, onDone) {
+            @:world = import(module:'base/world.mt');
+            @:trader = world.scenario.data.trader;
+
+            Scene.start(id:'thetrader:scene_gold1-' + trader.goldTier, onDone::{}, location, landmark:location.landmark);
+            trader.goldTier += 1;
+          }
+          location.ownedBy.stats.load(serialized:StatSet.new(
+            HP:   400,
+            AP:   999,
+            ATK:  15,
+            INT:  5,
+            DEF:  11,
+            LUK:  8,
+            SPD:  25,
+            DEX:  11
+          ).save());
+          location.ownedBy.heal(amount:9999, silent:true); 
+          location.ownedBy.healAP(amount:9999, silent:true); 
         }
-        location.ownedBy.stats.load(serialized:StatSet.new(
-          HP:   400,
-          AP:   999,
-          ATK:  15,
-          INT:  5,
-          DEF:  11,
-          LUK:  8,
-          SPD:  25,
-          DEX:  11
-        ).save());
-        location.ownedBy.heal(amount:9999, silent:true); 
-        location.ownedBy.healAP(amount:9999, silent:true); 
-      },
-      
-      onIncrementTime::(location, time) {
-      
-      },
-      
-      onStep ::(location, entities) {
-      
       }
     })
   
@@ -3987,7 +4080,8 @@
       symbol: '$',
       onePerLandmark : false,
       minStructureSize : 1,
-
+      events : {},
+      traits: 0,
       descriptions: [
         "Your trading shop. It has served you well over the years.",
       ],
@@ -4183,8 +4277,11 @@
               base:Landmark.database.find(id:'thetrader:fortune-wyvern-dimension')
             );
             d.visit();
-            d.travel();
-            doNext();
+            d.travel(
+              onReady ::(landmark) {
+                doNext();              
+              }
+            );
           }
         ]
       }

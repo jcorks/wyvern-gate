@@ -3,7 +3,7 @@
 @:canvas = import(module:'core/graphics/canvas.mt');
 @:random = import(module:'core/random.mt');
 @:StatSet = import(module:'base/util/statset.mt');
-
+@:pickItem = import(module:'base/widgets/pickitem.mt');
 
 @:levelUp::(item, user, onDone) {
   breakpoint();
@@ -128,23 +128,26 @@
 @:improve::(item, user) {
   breakpoint();
   @:party = import(module:'base/world.mt').party;
+  @:itemFilter = ::(value) <- value.material == item.material && value != item;
           
-  @:others = party.inventory.items->filter(by:::(value) <- value.material == item.material && value != item);
+  @:others = party.inventory.items->filter(by:itemFilter);
   when(others->keycount == 0) ::<= {
     windowEvent.queueMessage(
       text: 'The party has no other items that are of the material ' + item.material.name
     );
   }
           
-
-  
-  windowEvent.queueChoices(
+  pickItem(
     prompt: 'Choose an item to use as material.',
-    choices:[...others]->map(to:::(value) <- value.name),
-    canCancel:true,
-    onChoice::(choice) {
-      when (choice == 0) empty;
-      @:other = others[choice-1];
+    tabbed: true,
+    inventory: party.inventory.clone(:itemFilter),
+    canCancel: true,
+    showRarity: true,
+    showPrices: false,
+    
+    onPick::(item) {
+      @:other = item;
+
       windowEvent.queueMessage(
         text: 'Once complete, this will destroy ' + other.name + '.'
       );
@@ -174,9 +177,8 @@
             }
           );
         }
-      );                
+      );        
     }
-  
   );
 }
 

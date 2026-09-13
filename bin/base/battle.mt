@@ -105,6 +105,7 @@
     @onFinish = [];
     @queuedCallbacks = [];
     @banished = [];
+    @fightID = '00000000-0000-0000-0000-000000000000';
     @storage = {};
     
   
@@ -617,6 +618,7 @@
         onEnd => Function,
         onEvict
       ) {
+        fightID = random.uuid();
         storage = {};
         onEnd_ = onEnd;
         onEvict_ = onEvict;
@@ -946,6 +948,9 @@
       addOnFinishCallback ::(cb) {
         onFinish->push(:cb);
       },
+      
+      // Every new battle, this ID changes, identifying the fight uniquely
+      getFightID ::<- fightID,
       
       
       turnIndex : {

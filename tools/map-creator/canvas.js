@@ -854,6 +854,8 @@ const Canvas = {
         x -= iterX;
         y -= iterY;
         
+        if (y < 0 || y >= lines.length) return undefined;
+        
         let c = lines[y].getChar(x).getBoundingClientRect();
         return {
           x : c.left,

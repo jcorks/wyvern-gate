@@ -139,10 +139,11 @@
         return true;
       },
       
-      clone:: {
+      clone::(filter)  {
+        if (filter == empty) filter = ::(value)<- true;
         @:out = Inventory.new();
         out.maxItems = state.maxItems;
-        foreach([...state.items, ...(if(state.loot)state.loot  else [])]) ::(k, item) {
+        foreach([...state.items, ...(if(state.loot)state.loot  else [])]->filter(by:filter)) ::(k, item) {
           out.add(item);
         }
 

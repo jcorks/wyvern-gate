@@ -1552,10 +1552,7 @@ Location.database.newEntry(data:{
   
   events : {  
     onCreate ::(location) {
-      @:world = import(module:'base/world.mt');        
-      world.party.bank.add(item:Item.new(
-        base:Item.database.find(id:'thechosen:sentimental-box')
-      ));
+
     }
   }
 }) 
