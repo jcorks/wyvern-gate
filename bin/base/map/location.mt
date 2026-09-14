@@ -1143,7 +1143,7 @@ Location.database.newEntry(data:{
   events : {
     onLandmarkEnter ::(location) {
       @:world = import(module:'base/world.mt');
-      when (location.data.lastTimeChecked == world.time) empty;
+      when (location.data.lastTimeChecked == world.time && location.data.lastDayChecked == world.day) empty;
       
       // gather all seats (including selt);
       @:Map = import(module:'core/map.mt');        
@@ -1187,6 +1187,7 @@ Location.database.newEntry(data:{
         seat.ownedBy = location.landmark.island.newInhabitant();
         seat.ownedBy.adventurous = true;
         seat.data.lastTimeChecked = world.time
+        seat.data.lastDayChecked = world.day
         seat.interactive = true;
       }
       
@@ -1202,6 +1203,7 @@ Location.database.newEntry(data:{
         seat.ownedBy = empty;
         seat.interactive = false;
         seat.data.lastTimeChecked = world.time
+        seat.data.lastDayChecked = world.day
       } 
     }
   }

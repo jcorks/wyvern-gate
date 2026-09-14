@@ -2383,7 +2383,12 @@ Interaction.newEntry(
       windowEvent.queueCustom(
         onEnter:: {
           @:instance = import(module:'base/instance.mt');
-          location.targetLandmark.visit(onLoad::(landmark) <- location.targetLandmarkEntry);
+          location.targetLandmark.visit();
+          location.targetLandmark.map.setPointer(
+            x:location.targetLandmarkEntry.x,
+            y:location.targetLandmarkEntry.y
+          );
+          location.targetLandmark.travel();
         }
       )
     },
@@ -2512,8 +2517,12 @@ Interaction.newEntry(
       }
       @:instance = import(module:'base/instance.mt');
 
-      location.targetLandmark.visit(onLoad::(landmark)<-location.targetLandmarkEntry);
-      canvas.clear();
+      location.targetLandmark.visit();
+      location.targetLandmark.map.setPointer(
+        x:location.targetLandmarkEntry.x,
+        y:location.targetLandmarkEntry.y
+      );
+      location.targetLandmark.travel();
     }
   }
 )      

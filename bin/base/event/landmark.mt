@@ -643,6 +643,7 @@ LandmarkEvent.database.newEntry(
       // dud
       when(random.try(percentSuccess:70)) empty
       return Encounter.new(
+        parent,
         name : 'the Snake Siren',
         symbol : 'S',
         speciesID : 'base:snake-siren',

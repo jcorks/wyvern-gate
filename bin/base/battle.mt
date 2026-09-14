@@ -190,7 +190,7 @@
         when(entity.isDead == false && entity.requestsRemove == false) empty;
         if (group2party[ent2group[entity]] && entity.isDead) ::<= {
           @:world = import(module:'base/world.mt')
-          world.scenario.emit(event:'onDeath', entity);
+          world.scenario.base.emit(event:'onDeath', entity);
         }
         @:group  = ent2group[entity];
         entity.battleEnd();
@@ -253,7 +253,14 @@
             }
           }
         }
-
+        startMessageCapture();
+        foreach(groups) ::(k, group) {
+          foreach(group) ::(i, ent) {
+            if (ent.effectStack)
+              ent.effectStack.endTurn();
+          }
+        }
+        endMessageCapture(:'End of battle turn.');
 
         
         if (winningGroup != empty || everyoneWipedOut) ::<= {
@@ -536,7 +543,7 @@
 
     @logStart        
     @:startMessageCapture::{
-      when(windowEvent.skipDisplayWindows) error();
+      when(windowEvent.skipDisplayWindows) empty;
       logStart = windowEvent.log->size;
       windowEvent.skipDisplayWindows = true;
     }        
@@ -667,6 +674,7 @@
         externalRenderable = renderable;
               
         party_ = party;
+        startMessageCapture();
         foreach(groups) ::(i, group) {
           foreach(group)::(index, ent) {
             ent.battleStart(
@@ -674,6 +682,7 @@
             );
           }
         }
+        endMessageCapture(:'Battle start!');
 
         @:onAllyTurn = ::(battle, user, landmark, allies, enemies) {
           if (party.leader == user)

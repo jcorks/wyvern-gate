@@ -1642,9 +1642,8 @@
       @:state = _.state;
       @:this = _.this;
       @:equips = state.equips;
-      if (this.effectStack)
-        this.effectStack.endTurn();
     },
+    
     
     
     

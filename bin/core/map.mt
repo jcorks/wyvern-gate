@@ -479,6 +479,9 @@ Map =  LoadableClass.create(
     @:bfsPath::(start, goal, corners) {
       start = aStarNewNode(x:start.x, y:start.y);
       goal = aStarNewNode(x:goal.x, y:goal.y);    
+      
+      when (start == empty || goal == empty) empty;
+      
       @:getNeighbors = if (corners)
         aStarGetNeighborsCorners
       else 

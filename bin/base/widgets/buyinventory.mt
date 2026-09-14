@@ -146,7 +146,7 @@ return ::(inventory, shopkeep, onDone, sellMode) {
     leftWeight: 1,
     topWeight: 0.5,
     showPrices : true,
-    ignorePriceCeiling : true,
+    ignorePriceCeiling : if (sellMode) false else true,
     //onGetPrompt:: <-  'Buy which? (current: ' + g(g:party.inventory.gold) + ')',
     goldMultiplier: PRICE_MOD,
     onHover ::(item) {

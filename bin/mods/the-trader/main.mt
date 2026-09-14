@@ -366,8 +366,13 @@
                     other.nickname = correctA(word:other.name);
                     
                   } else ::<= {
-                    @:TheBeast = import(module:'base/event/landmark/thebeast.mt');
-                    other = TheBeast.createEntity();
+                    @:beast = world.island.newInhabitant(
+                      speciesHint : 'base:beast',
+                      professionHint : 'base:beast'
+                    );
+                    beast.heal(amount:9999, silent:true); 
+                    beast.healAP(amount:9999, silent:true);   
+                    other = beast;
                   } 
                     
                   state.lastAttackedBy = other.name;
@@ -780,6 +785,9 @@
 
 
             if (state.days % 5 == 0) ::<= {
+              if (state.days%3 == 0)
+                world.island.level += 1;
+  
               if (world.island.tier < 5) ::<= {
                 windowEvent.queueMessage(
                   speaker: 'Courier',
@@ -787,11 +795,9 @@
                 );
                 hasNews = true;
                 world.island.tier += 1;
-                world.island.level += 1;
               } else             
                 if (state.days % 10 == 0) {
                   world.island.tier += 1;
-                  world.island.level += 1;
                 }
               
             }
@@ -1058,7 +1064,7 @@
           text: 'You travel back to your shop.',
           renderable : {
             render ::{
-              canvas.fill(:'`');
+              canvas.fill();
             }
           }
         );
@@ -3584,6 +3590,21 @@
     @:Interaction = import(module:'base/interaction.mt');
   
     // Overridden
+    
+    Interaction.newEntry(data:{
+      name : 'Talk',
+      id : 'thetrader:wyvern-throne',
+      keepInteractionMenu: false,
+      isAvailable::<- true,
+      interact ::(location, party) {
+        @:world = import(module:'base/world.mt');
+        @:trader = world.scenario.data.trader;
+
+        Scene.start(id:'thetrader:scene_gold1-' + trader.goldTier, onDone::{}, location, landmark:location.landmark);
+        trader.goldTier += 1;
+      }
+    });
+    
     Interaction.newEntry(
       data : {
         name : 'Explore Pit',
@@ -3628,8 +3649,12 @@
           
           
 
-          location.targetLandmark.visit(onLoad::(landmark)<-location.targetLandmarkEntry);
-          canvas.clear();
+          location.targetLandmark.visit();
+          location.targetLandmark.map.setPointer(
+            x:location.targetLandmarkEntry.x,
+            y:location.targetLandmarkEntry.y
+          );
+          location.targetLandmark.travel();
         }
       }
     )    
@@ -3893,11 +3918,11 @@
         eventPreference : LandmarkEvent.KIND.HOSTILE,
         events : {},
 
-        minObjects : 2,
-        maxObjects : 4,
+        minObjects : 1,
+        maxObjects : 3,
         landmarkType : Landmark.TYPE.DUNGEON,
         requiredEvents : [
-          'base:dungeon-encounters',
+          'base:item-specter',
         ],
         possibleObjects : [
     //          {id: 'Stairs Down', rarity:1},
@@ -3905,9 +3930,8 @@
           {id: 'base:potion-shop', rarity: 17},
           {id: 'base:enchantment-stand', rarity: 18},
           {id: 'base:wyvern-statue', rarity: 15},
-          {id: 'base:small-chest', rarity: 16},
-          {id: 'base:locked-chest', rarity: 11},
-          {id: 'base:magic-chest', rarity: 15},
+          {id: 'base:magic-chest', rarity: 80},
+          {id: 'base:small-chest', rarity: 17},
 
           {id: 'base:healing-circle', rarity:35},
 
@@ -3916,12 +3940,11 @@
 
         ],
         requiredObjects : [
-          'base:stairs-down',
-          'base:locked-chest',
-          'base:small-chest',
-          'base:small-chest',
-          'base:warp-point',
-          'base:warp-point'
+          {id:'base:stairs-down'},
+          {id:'base:item'},
+          {id:'base:item'},
+          {id:'base:warp-point'},
+
         ],
         mapHint:{
           layoutType: DungeonMap.LAYOUT_DELTA
@@ -4048,13 +4071,7 @@
           location.ownedBy.equipAllProfessionArts();          
 
           
-          location.ownedBy.overrideInteract = ::(party, location, onDone) {
-            @:world = import(module:'base/world.mt');
-            @:trader = world.scenario.data.trader;
-
-            Scene.start(id:'thetrader:scene_gold1-' + trader.goldTier, onDone::{}, location, landmark:location.landmark);
-            trader.goldTier += 1;
-          }
+          location.ownedBy.overrideInteractID = 'thetrader:wyvern-throne'
           location.ownedBy.stats.load(serialized:StatSet.new(
             HP:   400,
             AP:   999,
@@ -4238,7 +4255,7 @@
           ['???', 'Congratulations! For I, Shiikaakael, the Wyvern of Fortune, have chosen YOU for a once-in-a-lifetime opportunity.'],
           ['Shiikaakael, Wyvern of Fortune', 'You see, my hoard of treasure is looking a bit... small. I require riches.'],
           ['Shiikaakael, Wyvern of Fortune', 'If you bring me gold, I will grant you a wish. Anything you like. Doesn\'t that sound wonderful?'],
-          ['Shiikaakael, Wyvern of Fortune', 'Bring me.... Hummm... Let us say, 10,000G and a wish shall be yours.'],
+          ['Shiikaakael, Wyvern of Fortune', 'Bring me.... Hummm... Let us say, 10,000G of mortal money and a wish shall be yours.'],
           ['Shiikaakael, Wyvern of Fortune', 'Your meager, drab existence as a simple trader is no more! Now you have something to drive you!'],
           ['Shiikaakael, Wyvern of Fortune', 'Go forth, mortal! Get riches! Exploit! Your wish awaits!'],
         ]
@@ -4296,7 +4313,7 @@
           ['Shiikaakael, Wyvern of Fortune', '...'],
           ['Shiikaakael, Wyvern of Fortune', '.......'],
           ['Shiikaakael, Wyvern of Fortune', '..........'],
-          ['Shiikaakael, Wyvern of Fortune', 'I\'ll be honest. 10,000G looks a tad... smaller... in person than I was hoping.'],
+          ['Shiikaakael, Wyvern of Fortune', 'I\'ll be honest. 10,000G of mortal currency looks a tad... smaller... in person than I was hoping.'],
           ['Shiikaakael, Wyvern of Fortune', 'Surely, you are capable of much more! Let me think...'],
           ['Shiikaakael, Wyvern of Fortune', '...Perhaps If you came back with 80,000G! Yes! That would be wonderful.'],
           ['Shiikaakael, Wyvern of Fortune', 'Obedient mortal, I have decided. Keep your 10,000G. Instead, I will come for you when you have 80,000G. This feels much more befitting of the cost of a wish, does it not?'],
@@ -4308,7 +4325,8 @@
             @:instance = import(module:'base/instance.mt');
 
 
-            world.island.visit(atGate:true);        
+            world.island.visit();        
+            world.island.travel();        
           }
         ]
       }
@@ -4335,7 +4353,8 @@
             @:instance = import(module:'base/instance.mt');
 
 
-            world.island.visit(atGate:true);        
+            world.island.visit();        
+            world.island.travel();        
           }
         ]
       }
@@ -4387,7 +4406,9 @@
             @:instance = import(module:'base/instance.mt');
 
 
-            world.island.visit(atGate:true);        
+            world.island.visit();        
+            world.island.travel();        
+      
             @:world = import(module:'base/world.mt');
             @:party = world.party;
             @:trader = world.scenario.data.trader;

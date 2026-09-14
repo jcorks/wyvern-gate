@@ -242,11 +242,6 @@ return ::(
     @:data = [
       ...(
         ::<= {
-          when(names->size == 0) ::<= {
-            headerReal->push(:''); // technically wrong
-            return [[''], ['']]
-          }
-
           when(showRarity) ::<={
             @:rarities = items->map(::(value) <-
               value.starsString
@@ -255,14 +250,16 @@ return ::(
             return [names, rarities];
           
           }
-          @:prices = items->map(to:::(value) <-
-            if (showPrices != true) 
-              ''
-            else
+          
+          when(showPrices) ::<= {
+            @:prices = items->map(to:::(value) <-
               gold(:value)
-          )
-          headerReal->push(:'Price');
-          return [names, prices]
+            )
+            headerReal->push(:'Price');
+            return [names, prices]
+          }
+          
+          return [names];
         }
       ),
       
