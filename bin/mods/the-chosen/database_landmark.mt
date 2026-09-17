@@ -319,6 +319,7 @@ return ::{
       ],
       requiredObjects : [
         {id: 'thechosen:throne-fire'},
+        {id: 'base:revival-circle'}
       ],
       
       mapHint : {
@@ -361,6 +362,7 @@ return ::{
       ],
       requiredObjects : [
         {id: 'thechosen:throne-ice'},
+        {id: 'base:revival-circle'}
       ],
       
       mapHint : {
@@ -401,6 +403,7 @@ return ::{
       ],
       requiredObjects : [
         {id: 'thechosen:throne-thunder'},
+        {id: 'base:revival-circle'}
       ],
       
       mapHint : {
@@ -441,6 +444,7 @@ return ::{
       ],
       requiredObjects : [
         {id: 'thechosen:throne-light'},
+        {id: 'base:revival-circle'}
       ],
       
       mapHint : {

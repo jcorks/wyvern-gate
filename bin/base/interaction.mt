@@ -3364,6 +3364,40 @@ Interaction.newEntry(
 
 Interaction.newEntry(
   data : {
+    name : 'Revive',
+    id :  'base:revival-circle',
+    keepInteractionMenu : false,
+    isAvailable ::(location, party) <- true,
+    interact ::(location, party) {        
+      @:world = import(module:'base/world.mt');
+      windowEvent.queueMessage(text:'The party goes within the revival circle.');
+
+      @revived = false 
+      foreach(world.party.members) ::(index, member) {
+        if (member.isDead) {
+          member.revive();
+          revived = true;
+        }
+      }
+      
+      when(revived == false) 
+        windowEvent.queueMessage(
+          text: 'Nothing happened.'
+        );
+      
+      windowEvent.queueMessage(text:
+        random.pickArrayItem(list:[
+          'The party feels tingly.'
+        ])
+      );
+    }
+  }
+) 
+
+
+
+Interaction.newEntry(
+  data : {
     name : 'Approach',
     id :  'base:pray-statue',
     keepInteractionMenu : false,

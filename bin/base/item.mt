@@ -3287,6 +3287,7 @@ Item.database.newEntry(
               ((value.traits & Arts.TRAIT.SPECIAL) == 0) &&
               (value.rarity < Arts.RARITY.EPIC)
             ));
+            art.charge = 0;
           } else { 
             effect = Effect.getRandomFiltered(::(value) <- 
               value.hasNoTrait(:Effect.TRAIT.INSTANTANEOUS | Effect.TRAIT.SPECIAL) &&

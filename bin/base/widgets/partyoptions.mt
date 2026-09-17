@@ -62,11 +62,17 @@ return ::{
         
         canvas.movePen(x: x+3, y: top + 2);
         canvas.drawText(text: member.name + ' - (' + tag + ')' + (if (party.leader == member) ' - Leader' else ''));
-        canvas.movePen(x: x+3, y: top + 3);
-        canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '  AP: ' + member.stats.AP);
-        canvas.movePen(x: x+3, y: top + 4);
-        canvas.drawText(text: 'Weapon: ' + member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).name);
-        
+        if (member.isDead) {
+          canvas.movePen(x: x+3, y: top + 3);
+          canvas.drawText(text: '...');
+          canvas.movePen(x: x+3, y: top + 4);
+          canvas.drawText(text: 'Weapon: ' + member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).name);
+        } else {
+          canvas.movePen(x: x+3, y: top + 3);
+          canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '  AP: ' + member.stats.AP);
+          canvas.movePen(x: x+3, y: top + 4);
+          canvas.drawText(text: 'Weapon: ' + member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).name);
+        }
         top += height;
         
         
@@ -388,6 +394,10 @@ return ::{
 
             // Equip / unequip
             (3):::<= {
+              when(member.isDead)
+                windowEvent.queueMessage(
+                  text: member.name + ' is unable to change equipment right now.'
+                );
               @Entity = import(module:'base/entity.mt');
 
               @slotToName::(slot) {

@@ -305,6 +305,7 @@ foreach(EVENTS) ::(k, v) {
       },
       
       addInnate::(id, item, from) {
+        when(holder.isDead) empty;
         @:Item = import(module:'base/item.mt');
         if (item == empty) item = Item.NONE;
         @:Arts = import(module:'base/arts.mt');
@@ -348,6 +349,7 @@ foreach(EVENTS) ::(k, v) {
       getAll : getAll,
       
       add::(id, duration => Number, item, from, noNotify) {
+        when(holder.isDead) empty;
         @effect = Effect.find(:id);
         if (effect.hasTraits(:Effect.TRAIT.INSTANTANEOUS))
           duration = 0;

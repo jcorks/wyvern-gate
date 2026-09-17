@@ -671,7 +671,8 @@ Landmark.database.newEntry(
     ],
     requiredObjects : [
       {id: 'base:large-chest'},
-      {id: 'base:ladder'}
+      {id: 'base:ladder'},
+      {id: 'base:revival-circle'}
     ],
     
     mapHint : {

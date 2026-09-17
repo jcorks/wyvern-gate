@@ -566,8 +566,7 @@
         lines : [
           this.name,
           '',
-          canvas.renderBarAsString(width:40, fillFraction: 0),
-          'HP: ' + '0 ' + ' / ' + displayHP(:this.stats.HP)
+          '------ DEAD ------'
         ]
       );
       frame += 1;
@@ -1616,11 +1615,11 @@
       // flat bonus
       if (weaponAffinity) ::<= {
         state.stats.modRate(stats:StatSet.new(
-          ATK: 60,
-          DEF: 60,
-          SPD: 60,
-          INT: 60,
-          DEX: 60
+          ATK: 35,
+          DEF: 35,
+          SPD: 35,
+          INT: 35,
+          DEX: 35
         ))
       }
 
@@ -1642,8 +1641,13 @@
       @:state = _.state;
       @:this = _.this;
       @:equips = state.equips;
+      if (this.effectStack)
+        this.effectStack.endTurn();
+
     },
     
+    endWholeBattleTurn ::{
+    },
     
     
     
@@ -1727,8 +1731,14 @@
       
     name : {
       get :: {
-        when (_.state.nickname != '') _.state.nickname;
-        return _.state.name;
+        @:state = _.state  
+        @:base = ::<= {
+          when (state.nickname != '') state.nickname;
+          return state.name;
+        }
+        
+        when(state.isDead) 'the ghost of ' + base;
+        return base;
       },
       
       set ::(value => String) {
@@ -2338,6 +2348,7 @@
     heal ::(amount => Number, isShield, silent) {
       @:state = _.state;
       @:this = _.this;
+      when(this.isDead) empty;
       if (state.hp > state.stats.HP) state.hp = state.stats.HP;
       when(isShield == empty && state.hp >= state.stats.HP) empty;
 
@@ -2416,7 +2427,7 @@
       
       
     isIncapacitated :: {
-      return _.state.hp <= 0;
+      return _.state.isDead || _.state.hp <= 0;
     },
       
     isDead : {
@@ -2585,6 +2596,7 @@
     gainProfessionExp ::(profession, exp, silent, onDone) {
       @:state = _.state;
       @:this = _.this;
+      when(state.isDead) onDone();
       expUpProfession(
         state,
         this,
@@ -2598,6 +2610,8 @@
     autoLevelProfessionPlayer ::(profession, onDone) {
       @:state = _.state;
       @:this = _.this;
+      when(state.isDead) onDone();
+      
       
       profession = if (profession == empty) this.profession else profession
       
@@ -2660,19 +2674,35 @@
     data : {
       get ::<- _.state.data
     },
+    
+    revive ::(silent) {
+      @:state = _.state;
+      @:this = _.this;
+      when(this.isDead == false) empty;
+      this.isDead = false;
+      
+      
+      if (silent != true) {
+        windowEvent.queueMessage(
+          text: this.name + ' was brought back into their corporeal form.'
+        );
+      }
+    },
 
     // happens once the dying effect is removed
     killFinalize::(from, silent) {
       @:world = import(module:'base/world.mt');
       @:state = _.state;
       @:this = _.this;
-    
+
       if (from != empty) ::<= {
         from.effectStack.emitEvent(
           name : 'onKill',
           to: this
         );
       }
+      @:world = import(module:'base/world.mt')
+      world.scenario.death(entity:this);
 
       state.flags.add(flag:StateFlags.DIED);
       state.isDead = true;        
@@ -2687,8 +2717,20 @@
         }
       }
 
-      if (silent != true)
+      if (_.this.effectStack != empty)
+        _.this.effectStack.clear(all:true);
+
+      if (silent != true) {
         animateDeath(:this);
+        windowEvent.queueMessage(
+          speaker: this.name,
+          text: '"I feel.. so faint..."'
+        );
+        windowEvent.queueMessage(
+          text: this.name + ' body has left this plane, but their soul remains as a ghost.'
+        );
+
+      }
     },
 
       
@@ -2697,11 +2739,11 @@
       @:this = _.this;
       state.hp = 0;
       
-     when (this.effectStack == empty)
-        this.killFinalize(from, silent:true);
+      when (this.effectStack == empty)
+        this.killFinalize(from, silent);
 
       if (this.effectStack.getAllByFilter(::(value) <- value.id == 'base:dying')->size == 0)
-        this.addEffect(from, id:'base:dying', durationTurns:2);
+        this.addEffect(from, id:'base:dying', durationTurns:1);
     },
     
     addEffect::(from => Object, id => String, durationTurns => Number, item, innate) {
@@ -2843,7 +2885,10 @@
 
     
     hp : {
-      set ::(value) <- _.state.hp = value,
+      set ::(value) {
+        when (_.this.isDead) empty;
+        _.state.hp = value
+      },
       get :: {
         return _.state.hp;
       }
@@ -2972,6 +3017,12 @@
     equip ::(item => Item.type, slot, silent, inventory) {
       @:state = _.state;
       @:this = _.this;
+      when(this.isDead) ::<= {
+        when(silent != true)
+          windowEvent.queueMessage(text: this.name + ' is dead and cannot equip anything.');
+      }
+      
+    
       this.recalculateStats();
       @:oldstats = StatSet.new();
       @oldArts = [...this.arts];
@@ -3093,6 +3144,11 @@
     unequip ::(slot => Number, silent, inventory) {
       @:state = _.state;
       @:this = _.this;
+      when(this.isDead) ::<= {
+        when(silent != true)
+          windowEvent.queueMessage(text: this.name + ' is dead and cannot unequip anything.');
+      }
+
       @:current = state.equips[slot];
       when (current == empty) empty;
       
@@ -3475,7 +3531,14 @@
     describeQualities ::{
       @:state = _.state;
       @:this = _.this;
-      when (state.qualityDescription != '') state.qualityDescription;
+      when (state.qualityDescription != '') 
+        if (state.isDead)
+          state.qualityDescription
+            ->replace(key:' is ', with:' was ')
+            ->replace(key:' are ', with: ' were ')
+            ->replace(key:' have ', with: ' had ')
+        else
+          state.qualityDescription;
       
       @qualities = state.qualitiesHint;
       
@@ -3565,7 +3628,7 @@
         
       }
       state.qualityDescription = out;
-      return out;
+      return this.describeQualities();
     },
    
     statModComparisonToLines ::{

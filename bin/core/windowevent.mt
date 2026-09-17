@@ -632,7 +632,6 @@
         
         choicesModified->setSize(size:0);
         
-        
         if (choices->keycount > PAGE_SIZE) ::<= {
           @initialLine = if (cursorPageTop > 0) lineTop else 
             if (header == empty)
@@ -681,6 +680,7 @@
               (if (cursorPos == index) ' }-' else '   ')
             );
           }
+          breakpoint();
         }
         
         
@@ -718,7 +718,7 @@
               disableFrame : data.disableFrame,
               hasNotch : if (onGetFooter == empty) empty else true,
               notchText : if (onGetFooter == empty) empty else onGetFooter(),
-              bufferVertical: if (choices->keycount > PAGE_SIZE || header != empty) 0 else 1
+              bufferVertical: if (choices->keycount > PAGE_SIZE) 0 else 1
             )
           }      
 
@@ -735,7 +735,7 @@
               disableFrame : data.disableFrame,
               hasNotch : if (onGetFooter == empty) empty else true,
               notchText : if (onGetFooter == empty) empty else onGetFooter(),
-              bufferVertical: if (choices->keycount > PAGE_SIZE || header != empty) 0 else 1
+              bufferVertical: if (choices->keycount > PAGE_SIZE) 0 else 1
             )
           }
         }

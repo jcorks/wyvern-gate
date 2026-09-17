@@ -194,7 +194,6 @@ return ::(
     if (filter != empty)
       items = items->filter(by:filter)
 
-    breakpoint();
     when(items->size == 0)
       empty;
 

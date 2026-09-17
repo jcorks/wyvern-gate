@@ -270,6 +270,7 @@ return ::{
           );
           world.party.inventory.add(:keyother);
           */
+          @:instance = import(module:'base/instance.mt');
           instance.unlockScenarios();
           instance.unlockSeeds();
 
@@ -279,7 +280,6 @@ return ::{
             renderable:{render::{canvas.fill();}},
             text: 'You are teleported away...'
           );
-          @:instance = import(module:'base/instance.mt');
           windowEvent.queueCustom(onEnter::{
 
             world.island.travel();

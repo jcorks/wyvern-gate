@@ -801,14 +801,15 @@ Hunger = LoadableClass.create(
             renderable : {
               render ::{
                 @iter = 0;
-                foreach(party.members) ::(k, member) {
+                @:mems = party.members->filter(::(value) <- value.isDead == false);
+                foreach(mems) ::(k, member) {
                   @:rating = member.judgeFood(:food);
                   canvas.renderTextFrameGeneral(
                     title: member.name,
                     lines : [
                       '"' + rating + '"'
                     ],
-                    maxWidth : canvas.width / party.members->size,
+                    maxWidth : canvas.width / mems->size,
                     topWeight: iter * 0.25
                   );
                   

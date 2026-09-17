@@ -1850,8 +1850,11 @@
 
               // return to pool
               foreach(state.hirees) ::(i, hiree) {
-                if (world.party.isMember(entity:hiree.entity))
+                if (world.party.isMember(entity:hiree.entity)) {
                   hiree.returnFromParty();
+                  if (hiree.entity.isDead)
+                    hiree.role = ROLES.WAITING;
+                }
                 hiree.dayFinished();
               }
               
@@ -1950,6 +1953,8 @@
       },
       
       changeRole::(hiree) {
+
+      
         windowEvent.queueChoices(
           prompt: "Do what?",
           choices : [
@@ -1962,6 +1967,11 @@
           topWeight: 0.5,
           canCancel: true,
           onChoice ::(choice) {
+          when (hiree.entity.isDead && (choice-1 == ROLES.DISPATCHED || choice-1 == ROLES.SHOPKEEP))
+            windowEvent.queueMessage(
+              text: hiree.entity.name + '\'s ghostly body isn\'t able to do that task.'
+            );
+
             when(choice-1 == ROLES.IN_PARTY && [...state.hirees]->filter(by::(value) <- value.role == ROLES.IN_PARTY)->size == 2) ::<= {
               windowEvent.queueMessage(
                 text: 'You already have 2 hirees set to join your party. This is the maximum amount.'

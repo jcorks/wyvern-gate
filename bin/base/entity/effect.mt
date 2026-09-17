@@ -6202,7 +6202,6 @@ Effect.newEntry(
             canCancel:true, 
             pageAfter:12,
             showRarity:true,
-            header : ['Item', 'Value'],
             onPick::(item) {
               @:choiceItem = item;
               when(choiceItem == empty) empty;

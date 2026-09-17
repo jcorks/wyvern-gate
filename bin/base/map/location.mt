@@ -1948,6 +1948,32 @@ Location.database.newEntry(data:{
 
 
 Location.database.newEntry(data:{
+  name: 'Revival Circle',
+  id: 'base:revival-circle',
+  rarity: 999999,
+  ownVerb : '',
+  symbol: 'O',
+  traits: TRAIT.ONE_PER_LANDMARK,
+
+  descriptions: [
+    'An inscribed circle that brings back spirits to their corporeal form.'
+  ],
+  interactions : [
+    'base:revival-circle'
+  ],
+  
+  aggressiveInteractions : [
+  ],
+
+
+  
+  events : {
+  }
+
+});
+
+
+Location.database.newEntry(data:{
   name: 'Wyvern Statue',
   id: 'base:wyvern-statue',
   rarity: 4,

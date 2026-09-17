@@ -135,7 +135,7 @@
     @:getAllies::(ent) {
       @:v = ent2group[ent];
       when(v == empty) [];
-      return [...v];
+      return v->filter(::(value) <- value.isDead == false);
     }
 
     @:finishEnd :: {
@@ -155,7 +155,7 @@
           out->push(value:ent);
         }
       }   
-      return out;
+      return out->filter(::(value) <- value.isDead == false);
     }
     
     @:getAll::{
@@ -165,7 +165,7 @@
           out->push(:m);
         }
       }
-      return out;
+      return out->filter(::(value) <- value.isDead == false);
     }
 
     // defeated enemies were removed from their active groups
@@ -187,11 +187,9 @@
       // see if anyone died
       @removed = [];
       foreach(turn)::(index, entity) {          
-        when(entity.isDead == false && entity.requestsRemove == false) empty;
-        if (group2party[ent2group[entity]] && entity.isDead) ::<= {
-          @:world = import(module:'base/world.mt')
-          world.scenario.base.emit(event:'onDeath', entity);
-        }
+        @:world = import(module:'base/world.mt');
+        @:shouldRemove = (entity.isDead && world.party.isMember(:entity) == false) || entity.requestsRemove;
+        when(!shouldRemove) empty;
         @:group  = ent2group[entity];
         entity.battleEnd();
         
@@ -253,14 +251,6 @@
             }
           }
         }
-        startMessageCapture();
-        foreach(groups) ::(k, group) {
-          foreach(group) ::(i, ent) {
-            if (ent.effectStack)
-              ent.effectStack.endTurn();
-          }
-        }
-        endMessageCapture(:'End of battle turn.');
 
         
         if (winningGroup != empty || everyoneWipedOut) ::<= {
@@ -1027,7 +1017,7 @@
         windowEvent.queueMessage(
           text: entity.name + ' was evicted from battle.'
         );
-        if (onEvict_ != empty) onEvict_(entity);
+        if (onEvict_ != empty) onEvict_(member:entity);
       },
       
       storage : {
