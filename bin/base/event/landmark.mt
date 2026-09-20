@@ -953,6 +953,7 @@ LandmarkEvent.database.newEntry(
     
       for(0, random.integer(from:5, to:8)) ::(i) {
         @:area = map.getRandomEmptyArea();
+        when(area.isOccupied) empty;
         landmark.addLocation(
           location : Location.new(
             landmark: landmark,
@@ -963,6 +964,7 @@ LandmarkEvent.database.newEntry(
             y:area.y + (area.height/2)->floor
           )
         )
+        area.occupy();
       }
     },
 

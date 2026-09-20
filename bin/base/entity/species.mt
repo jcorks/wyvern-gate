@@ -2099,7 +2099,7 @@ Species.newEntry(data:{
 
   
   baseStats : StatSet.new(
-    HP:   70,
+    HP:   40,
     AP:   2,
     ATK:  4,
     INT:  5,
@@ -2243,7 +2243,7 @@ Species.newEntry(data:{
   rarity : 2000000000000,
   description: 'Force of nature',
   growth : StatSet.new(
-    HP : 6,
+    HP : 0,
     AP : 5,
     ATK: 3,
     DEF: 4,
@@ -2256,7 +2256,7 @@ Species.newEntry(data:{
 
   
   baseStats : StatSet.new(
-    HP:   13,
+    HP:   6,
     AP:   999,
     ATK:  1,
     INT:  30,
@@ -2274,7 +2274,7 @@ Species.newEntry(data:{
   overrideBattleAI ::(entity, battle, commitBattleActions) {
     @:Entity = import(module:'base/entity.mt');  
     
-    when(random.try(percentSuccess:10)) ::<= {
+    when(random.try(percentSuccess:20)) ::<= {
       windowEvent.queueMessage(text:'The gold slime melted into a puddle and ran away!');
       commitBattleActions(:[BattleAction.new(
         card: Arts.new(base:Arts.database.find(id:'base:see-ya')),

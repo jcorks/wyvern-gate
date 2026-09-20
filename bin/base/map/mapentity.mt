@@ -407,7 +407,7 @@ MapEntity.Task.database.newEntry(
         
         // run away, banish, etc
         onEvict::(member) {
-          if (mapEntity.entites->findIndex(:member) != -1)
+          if (mapEntity.entities->findIndex(:member) != -1)
             mapEntity.remove();
         },
         

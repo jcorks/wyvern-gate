@@ -1436,7 +1436,7 @@ Profession.newEntry(data:{
   levelMinimum : 100,
 
   growth: StatSet.new(
-    HP:  20,
+    HP:  0,
     AP:  20,
     ATK: 20,
     INT: 20,

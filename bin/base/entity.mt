@@ -599,21 +599,17 @@
 
 
   @:level2exp ::(level) {
-    @:ct = profession.arts->size*2;
-    @:MAX_DEFEATS = 15;
-    // y = mx + b
-    // y - mx = b
-    // m = ((y1 - mx1)-y0) / (-x0)
-    // -x0m = y1 - mx1 - y0
-    // mx1 - x0m = y1 - y0
-    // x1 - x0 = (y1 - y0) / m
-    // x1 - x0 / y1 - y0 = 1 / m
-    // y1 - y0 / x1 - x0 = m
+    @ct = match(level) {
+     (0): 1, 
+     (1): 3, 
+     (2): 4.5, 
+     (3): 6, 
+     (4): 8, 
+     (5): 13, 
+     default: 15
+    }
     
-    @:m = (MAX_DEFEATS - 2) / (ct - 0);
-    @:b = MAX_DEFEATS - m*ct;
-    
-    return ((m*level*2 + b)*PROF_EXP_PER_KNOCKOUT)->floor;
+    return (ct*PROF_EXP_PER_KNOCKOUT)->floor;
   }
 
   
@@ -2623,6 +2619,17 @@
       );
     },
     
+    // clears profession arts and resets the level back to 1
+    resetProfessionArts ::{
+      @:this = _.this;
+      @:state = _.state;
+      state.equippedProfessionArts = [];
+      state.professionArts = [];
+      state.professionProgress = [];
+
+      this.autoLevelProfession();    
+    },
+
     
     removeAllProfessionArts ::{
       @:state = _.state;

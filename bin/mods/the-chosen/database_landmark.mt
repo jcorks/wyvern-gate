@@ -67,7 +67,7 @@ return ::{
         Landmark.TRAIT.POINT_OF_NO_RETURN |
         Landmark.TRAIT.EPHEMERAL,
 
-      eventCounts : [0, 2, 1, 0, 2],
+      eventCounts : [0, 2, 1, 1, 2],
       eventPreference : LandmarkEvent.KIND.HOSTILE,
 
       requiredEvents : [

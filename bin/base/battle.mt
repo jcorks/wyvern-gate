@@ -759,7 +759,7 @@
                     @:anonName = potentialFriend.name;
                     potentialFriend.nickname = '';
                     windowEvent.queueMessage(text:potentialFriend.name + ' joins the party!');
-                    
+                    potentialFriend.resetProfessionArts();
                     party.add(:potentialFriend);
                     party.denyJoinPartyCount = 0;
                   }
