@@ -258,7 +258,9 @@ return {
       // number of knockouts is displayed.
       reportCard :: {
         return '';
-      }
+      },
+      
+      experimental : true
     });    
 
   }

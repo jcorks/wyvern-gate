@@ -680,7 +680,6 @@
               (if (cursorPos == index) ' }-' else '   ')
             );
           }
-          breakpoint();
         }
         
         

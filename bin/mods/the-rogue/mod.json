@@ -1,7 +1,7 @@
 {
   "id": "wyvern-gate.rasa.therogue",
   "name": "Scenario: The Rogue",
-  "description": "The starting scenario",
+  "description": "Experimental, upcoming scenario. Not currently working!",
   "author": "Rasa",
   "website": "https://github.com/jcorks/wyvern-gate",
   "files" : [

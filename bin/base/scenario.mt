@@ -104,7 +104,11 @@
         
         // A function to return a small table of stats once a new record (game complete) 
         // is reached. If no such data makes sense, this can simply return an empty string.
-        reportCard : Function
+        reportCard : Function,
+        
+        // If false, the scenario will appear in the normal scenario list.
+        // If true, the scenario will, instead, appear in an "experiments" category instead.
+        experimental : Boolean
       },
       
       reset,

@@ -159,7 +159,8 @@ return ::{
 
 
   @turn1 = [
-    {nested: true,text:"Welcome to the battle tutorial. This will explain the basics of how to engage enemies."},
+    {nested: true},
+      {text:"Welcome to the battle tutorial. This will explain the basics of how to engage enemies."},
       {text:"This is the screen that you will see when fighting enemies."},
       {wait:true},
       {text:"Fighting is done in turns. The top right box shows the order determined for each combatant to take a turn. "},
@@ -227,8 +228,8 @@ return ::{
     
     {nested:true, waitFrames:10},
       {text:"And finally, the Arts command is where the leader can choose to use any Art currently equipped.", topWeight: 0.6},
-      {text:"Equipped Arts come from different sources, such as the currently equipped weapon, the profession, and learnable support Arts.", topWeight: 0.6},
-      {text:"As you fight, you will gain additional supporting Arts that you can customize your loadout with in the Party menu outside of battle.", topWeight: 0.6},
+      {text:"Equipped Arts come from different sources, such as the currently equipped weapon, the profession, and equipment gems.", topWeight: 0.6},
+      {text:"The Arts available for each member can be viewed in the Party menu outside of battle.", topWeight: 0.6},
       {text:"Let\'s choose the Arts option.", topWeight: 0.6},
     {endNested:true},
 
@@ -323,9 +324,9 @@ return ::{
       {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:60},
       {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:60},
       {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:100},
-      {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:60},
+      {input:windowEvent.CURSOR_ACTIONS.CONFIRM, waitFrames:170},
     ]},
-    {nested:true, waitFrames:10},
+    {nested:true, waitFrames:20},
       {text:'Now that you know the basics, try to play out the rest of the battle.'},
       {callback ::<- world.battle.requestRedrawBG()},
     {endNested:true}

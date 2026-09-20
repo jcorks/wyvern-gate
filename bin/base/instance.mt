@@ -201,7 +201,7 @@ import(module:'base/accolade/newrecord.mt');
     // the main.mt results of all mods, ordered based on dependency
     @:modMainOrdered = [];
 
-
+    @experiments = [];
 
 
     
@@ -220,7 +220,7 @@ import(module:'base/accolade/newrecord.mt');
       
       @:loaded = {}; // by name
       @:loading = {}; // by name, for circ dep
-      
+      experiments = [];
       
       // loads a single mod in order, detected circular dependencies.
       @:loadMod ::(mod) {
@@ -229,6 +229,7 @@ import(module:'base/accolade/newrecord.mt');
           error(detail: 'Circular dependency of mods detected! First circular dependency: ' + mod.id);
           
         loading[mod.id] = true;
+        
         
         // load prereqs
         foreach(mod.loadFirst) ::(i, first) {
@@ -906,9 +907,7 @@ return empty;
           }
         
         
-        
-          choiceNames->push(value:'New');
-          choiceActions->push(value:::{
+          @:enterScenarios ::(experimental) {
             loading(
               message: 'Loading scenarios...',
               do ::{
@@ -920,18 +919,26 @@ return empty;
 
                 @:enterName = import(module:'base/widgets/name.mt');
 
-                @choices = Scenario.database.getAll();
+                @choices = Scenario.database.getAll()->filter(::(value) <- value.experimental == false);
+                breakpoint();
                 choices->sort(comparator:::(a, b) {
                   when(a.name < b.name) -1;
                   when(a.name > b.name)  1;
                   return 0;
                 });
                 @choiceNames = [...choices]->map(to::(value) <- value.name);
+
+                @experiments = Scenario.database.getAll()->filter(::(value) <- value.experimental == true);
+                if (experiments->size > 0) {
+                  choiceNames->push(:'Experiment...');
+                }
                 
-                if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
+                @:chosenOnly = settings.unlockedScenarios == false || settings.unlockedScenarios == empty;
+                if (chosenOnly) ::<= {
                   choices = [Scenario.database.find(id:'rasa:thechosen')];
                   choiceNames = ['The Chosen'];
                 }
+                
                 
                 
                 windowEvent.queueChoices(
@@ -943,9 +950,11 @@ return empty;
                       canvas.fill();
                     }
                   },
+                  keep : true,
                   onChoice::(choice) {
                     when(choice <= 0) empty;
-                    @:scenario = Scenario.new(base:choices[choice-1]);
+                    @scenario;
+
 
                     @:startNewWorld = ::(name){
                       
@@ -991,70 +1000,106 @@ return empty;
                       this.startNew(name, scenario);
                       //this.startInstance();              
                     }
-                    when(scenario.base.skipName) 
-                      startNewWorld(:'');
 
-                    enterName(
-                      prompt: 'Enter a file name.',
-                      canCancel: true,
-                      renderable : {
-                        render :: {
-                          canvas.fill();
-                        }  
-                      },
-                      onDone ::(name){
-                        @:currentFiles = onListSlots();
+                    
+                    @:initScenario ::{
+                      
+                      
+                      when(scenario.base.skipName) 
+                        startNewWorld(:'');
 
-                        when(name->charAt(:0) == ' ' || name == ' ')
-                          windowEvent.queueMessage(
-                            text:'That world name is invalid. It cannot start with spaces.',
-                            renderable : {
-                              render ::{
-                                canvas.fill();
-                              }
-                            }
-                          );                        
+                      enterName(
+                        prompt: 'Enter a file name.',
+                        canCancel: true,
+                        renderable : {
+                          render :: {
+                            canvas.fill();
+                          }  
+                        },
+                        onDone ::(name){
+                          @:currentFiles = onListSlots();
 
-
-                        when (currentFiles->findIndex(value:name) != -1) ::<= {
-                          windowEvent.queueMessage(
-                            text:'There\'s already a file named ' + name,
-                            renderable : {
-                              render ::{
-                                canvas.fill();
-                              }
-                            }
-                          );
-                          windowEvent.queueAskBoolean(
-                            prompt: 'Overwrite ' + name + '?',
-                            renderable : {
-                              render ::{
-                                canvas.fill();
-                              }
-                            },
-                            onChoice ::(which) {
-                              when(!which) empty;
-                              pointOfNoReturn(
-                                do::{ 
-                                  startNewWorld(name)
+                          when(name->charAt(:0) == ' ' || name == ' ')
+                            windowEvent.queueMessage(
+                              text:'That world name is invalid. It cannot start with spaces.',
+                              renderable : {
+                                render ::{
+                                  canvas.fill();
                                 }
-                              )
+                              }
+                            );                        
+
+
+                          when (currentFiles->findIndex(value:name) != -1) ::<= {
+                            windowEvent.queueMessage(
+                              text:'There\'s already a file named ' + name,
+                              renderable : {
+                                render ::{
+                                  canvas.fill();
+                                }
+                              }
+                            );
+                            windowEvent.queueAskBoolean(
+                              prompt: 'Overwrite ' + name + '?',
+                              renderable : {
+                                render ::{
+                                  canvas.fill();
+                                }
+                              },
+                              onChoice ::(which) {
+                                when(!which) empty;
+                                pointOfNoReturn(
+                                  do::{ 
+                                    startNewWorld(name)
+                                  }
+                                )
+                              }
+                            );
+                          }
+                        
+                          pointOfNoReturn(
+                            do::{ 
+                              startNewWorld(name);
                             }
                           );
                         }
+                      )
+                    }
+
+
+                    // Experiments
+                    when(chosenOnly == false && choice == choiceNames->size) ::<= {
+                      windowEvent.queueMessage(
+                        text: 'These are mods labeled as experiments. Usually experiments are either incomplete, or are tools used to evaluate the game. Only use if you know what you\'re doing! Or if you\'re nosy...'
+                      );
                       
-                        pointOfNoReturn(
-                          do::{ 
-                            startNewWorld(name);
-                          }
-                        );
-                      }
-                    )
+                      @:expChoiceNames = experiments->map(::(value) <- value.name);
+                      windowEvent.queueChoices(
+                        prompt: 'Experiments',
+                        choices : expChoiceNames,
+                        canCancel: true,
+                        keep : true,
+                        onChoice::(choice) {
+                          scenario = Scenario.new(base:experiments[choice-1]);
+                          initScenario();
+                        }
+                      );
+                    }
+
+                    scenario = Scenario.new(base:choices[choice-1]);                    
+                    initScenario();
                   }
                 );  
               }  
-            )      
-          });
+            ) 
+          }
+
+        
+        
+          choiceNames->push(value:'New');
+          choiceActions->push(value:: <- enterScenarios())
+
+
           
           
           if (mods->size != 0) ::<= {

@@ -327,7 +327,9 @@
     import(:'wyvern-gate.rasa.thechosen/database_island.mt')();
     import(:'wyvern-gate.rasa.thechosen/database_species.mt')();
     import(:'wyvern-gate.rasa.thechosen/database_profession.mt')();
-  }
+  },
+
+  experimental : false
 }
 
 

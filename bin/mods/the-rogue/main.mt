@@ -138,6 +138,8 @@ completion:
   reportCard :: {
     return '';
   },
+  
+  experimental : true,
 
   events : {
     // Called when a new day starts
