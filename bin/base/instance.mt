@@ -53,14 +53,7 @@
   return (xd**2 + yd**2)**0.5;
 }
 @:JSON = import(module:'Matte.Core.JSON');
-@:GIT_COMMIT = ::? {
-  return import(module:'GIT_COMMIT');
-} => {
-  onError::(message) {
-    return '<unknown>';
-  }
-}
-@:VERSION = '0.4.0a - ' + GIT_COMMIT;
+@:VERSION = '0.4.1a';
 @:QUICK_SAVE_SUFFIX = '-qs';
 @world = import(module:'base/world.mt');
 import(module:'base/accolade/newrecord.mt');
@@ -189,19 +182,63 @@ import(module:'base/accolade/newrecord.mt');
     }
   );        
 }
+
+
+
+
+
 @:Instance = class(
   name: 'Wyvern.Instance',
   define:::(this) {
-    @onSaveState;
-    @onLoadState;
     @settings;
-    @onSaveSettings_;
     @save = 0;
     
     // the main.mt results of all mods, ordered based on dependency
     @:modMainOrdered = [];
 
     @experiments = [];
+
+    @writeDataText_;
+    @readDataText_;
+    @listDataText_;
+
+
+    @:onSaveState ::(
+      slot,
+      data
+    ) {
+      writeDataText_(
+        name: 'save_' + slot,
+        string: if (data->type == String) data else JSON.encode(:data)
+      );
+    };
+      
+    @:onListSlots ::{
+      @:out = {};
+      foreach(listDataText_()) ::(k, file) {
+        when(!file->contains(key:'save_')) empty; // main or junk
+        @:v = file->split(token:'_')[1];
+        when (v == empty) empty;
+        out->push(:v);
+      }
+
+      return out;
+    }
+
+    @:onLoadState ::(
+      slot
+    ) {
+      @:text = readDataText_(:'save_'+slot);
+      when (text != empty)
+        JSON.decode(:text);
+    }
+      
+    @:onLoadSettings ::<- readDataText_(:'settings.json');
+    @:onSaveSettings ::(data) <- writeDataText_(name:'settings.json', string:data);      
+
+
+
+
 
 
     
@@ -312,8 +349,7 @@ import(module:'base/accolade/newrecord.mt');
       DEBUGGING : 64
     };
     @features_ = 0;
-    @onLoadSettings_;
-    
+    @commit = "";
 
     
     @:colorMenu::(onChange, prompt, value)  {
@@ -378,7 +414,7 @@ import(module:'base/accolade/newrecord.mt');
       
       optionsMenu:: {
         init();
-        foreach(JSON.decode(string:onLoadSettings_())) ::(k, v) {
+        foreach(JSON.decode(string:onLoadSettings())) ::(k, v) {
           settings[k] = v;
         }
 
@@ -573,27 +609,62 @@ import(module:'base/accolade/newrecord.mt');
         windowEvent.autoSkipAnimations = !settings.animations;
         canvas.showEffects = settings.effects;
         hud.enable = settings.hud;
-        onSaveSettings_(data:JSON.encode(object:settings));      
+        onSaveSettings(data:JSON.encode(object:settings));      
       },
+      
+      writeDataText : {get ::<- writeDataText_},
+      readDataText : {get ::<- readDataText_},
+      listDataText : {get ::<- listDataText_},
 
       mainMenu ::(
         canvasWidth => Number,
         canvasHeight=> Number,
         features => Number,
-        onSaveState => Function, // for saving,
-        onLoadState => Function,
-        onListSlots => Function,
+        
+        writeDataText => Function,
+        readDataText => Function,
+        listDataText => Function,
+
+
         preloadMods => Function,
         preloadJSON => Function, //[name] = Json object in directory
-        onSaveSettings => Function,
-        onLoadSettings => Function,
         onPlaySFX => Function,
         onPlayBGM => Function, // if name is unrecognized, will halt playing music.
         onQuit => Function
       ) {
       
 
-      
+        writeDataText_ = writeDataText;
+        readDataText_ = readDataText;
+        listDataText_ = listDataText;
+
+        commit = readDataText(name:'version_commit')->replace(key:'\n', with:'');
+        
+        windowEvent.errorHandler = ::<= {
+          @lines = ['Wyvern Gate, commit ' + if (commit == '') "<unknown>" else commit];
+
+          return ::(message) {
+            lines = [
+              ...lines,
+              '--',
+              '--',
+              'NEW ERROR:',
+              '--',
+              '--',
+              ...message.summary->split(token:'\n')
+            ]; 
+            
+            
+            writeDataText_(
+              name:  'ERROR.LOG',
+              string: String.combine(:lines->map(::(value) <- value + '\n'))
+            );
+          }
+        }
+
+
+
+        
         foreach(preloadJSON()) ::(k, v) {
         
           setModule(name:k, value:v);
@@ -603,13 +674,8 @@ import(module:'base/accolade/newrecord.mt');
           nativeSFX: onPlaySFX,
           nativeBGM: onPlayBGM
         )
-        onLoadSettings_ = onLoadSettings;
         features_ = features;
         canvas.resize(width:canvasWidth, height:canvasHeight);
-        this.onSaveState = onSaveState;
-        this.onLoadState = onLoadState;    
-        
-        onSaveSettings_ = onSaveSettings;
         settings = onLoadSettings();
         if (settings == empty) ::<= {
           settings = {}
@@ -1235,7 +1301,7 @@ return empty;
                       
                       
                       
-                      @:loc = 'https://github.com/jcorks/wyvern-gate/ (' + VERSION + ')'              
+                      @:loc = 'https://github.com/jcorks/wyvern-gate/ (' + VERSION + ' - ' + commit + ')'              
                       canvas.movePen(
                         x: canvas.width / 2 - loc->length / 2,
                         y: canvas.height - 2
@@ -1346,7 +1412,7 @@ return empty;
       unlockScenarios :: {
         if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
           settings.unlockedScenarios = true;
-          onSaveSettings_(data:JSON.encode(object:settings));
+          onSaveSettings(data:JSON.encode(object:settings));
           
           windowEvent.queueMessage(
             text: "Alternate scenarios of gameplay now unlocked. You can start a new game at anytime to try them."
@@ -1357,7 +1423,7 @@ return empty;
       unlockSeeds :: {
         if (settings.unlockedSeeds == false || settings.unlockedSeeds == empty) ::<= {
           settings.unlockedSeeds = true;
-          onSaveSettings_(data:JSON.encode(object:settings));
+          onSaveSettings(data:JSON.encode(object:settings));
           
           windowEvent.queueMessage(
             text: "World RNG seeding is now unlocked. You can set seeds on world creation to recreate the conditions for a world. The RNG is used across all gameplay aspects of that world."
@@ -1369,13 +1435,6 @@ return empty;
       
 
         
-      
-      onSaveState : {
-        set ::(value) <- onSaveState = value
-      },
-      onLoadState : {
-        set ::(value) <- onLoadState = value
-      },
       
       quicksave :: {
         this.savestate(

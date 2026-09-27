@@ -28,8 +28,11 @@ breakpoint()
 @:time = import(module:'Matte.System.Time');
 @:Filesystem = import(module:'Matte.System.Filesystem');
 @:renderLines = getExternalFunction(:'wyvern_gate__native__canvas__renderLines');
-@:write = getExternalFunction(:'wyvern_gate__native__writeDataFileText');
 
+
+@:write = getExternalFunction(:'wyvern_gate__native__writeDataText');
+@:read = getExternalFunction(:'wyvern_gate__native__readDataText');
+@:list = getExternalFunction(:'wyvern_gate__native__listDataText');
 
 
 
@@ -53,29 +56,7 @@ breakpoint()
   }
 }
 
-windowEvent.errorHandler = ::<= {
-  @lines = ['Wyvern Gate, commit ' + (::? {return import(module:'GIT_COMMIT');} => {onError::(message) <- '<unknown>'})];
-  if (Filesystem.exists(:'ERROR.LOG'))
-    Filesystem.remove(:'ERROR.LOG');
 
-  return ::(message) {
-    lines = [
-      ...lines,
-      '--',
-      '--',
-      'NEW ERROR (d'+time.date.day + ' m' + time.date.month + ', ' + time.date.year+'):',
-      '--',
-      '--',
-      ...message.summary->split(token:'\n')
-    ]; 
-    
-    
-    write(
-      name:  'ERROR.LOG',
-      string: String.combine(:lines->map(::(value) <- value + '\n'))
-    );
-  }
-}
 
 @MOD_DIR = './mods';
 
@@ -294,81 +275,11 @@ instance.mainMenu(
   canvasWidth: 80,
   canvasHeight: 22,
   features: 0,
-  onSaveState :::(
-    slot,
-    data
-  ) {
-    enterNewLocation(
-      path: './',
-      action::(filesystem) {
-        breakpoint();        
-        write(
-          name: 'save_' + slot,
-          string: if (data->type == String) data else JSON.encode(:data)
-        );
-      }
-    );
-  },
   
-  onListSlots ::{
-    return enterNewLocation(
-      path: 'userdata',
-      action::(filesystem) {
-        @:out = {};
-        foreach(filesystem.directoryContents) ::(k, file) {
-          when(!file.name->contains(key:'save_')) empty; // main or junk
-          @:v = file.name->split(token:'_')[1];
-          when (v == empty) empty;
-          out->push(:v);
-        }
-
-        return out;
-      }
-    );
-  },
-
-  onLoadState :::(
-    slot
-  ) {
-    return ::? {
-      return enterNewLocation(
-        path: 'userdata',
-        action::(filesystem) {
-          return filesystem.readJSON(
-            path: 'save_' + slot
-          );
-        }
-      );
-    } => {
-      onError::(message) {
-        return empty;
-      }
-    }
-  },
+  writeDataText : write,
+  readDataText : read,
+  listDataText : list,
   
-  onLoadSettings ::{
-    return ::? {
-      return enterNewLocation(
-        path: 'userdata',
-        action::(filesystem) {
-          return filesystem.readString(
-            path: 'settings.json'
-          );
-        }
-      );
-    } => {
-      onError::(message) {
-        return empty;
-      }
-    }
-  },
-  
-  onSaveSettings ::(data){
-    write(
-      name: 'settings.json',
-      string: data
-    );
-  },
   
   preloadJSON ::{
     @:loaded = {};

@@ -69,28 +69,24 @@
         return matte.store.createEmpty();        
     });
 
-    matte.setExternalFunction('external_onSaveState', ['a', 'b'], function(fn, args) {
-        const slot = args[0];
+    matte.setExternalFunction('external_onSaveState', ['name', 'string'], function(fn, args) {
+        const name = args[0];
         Worker.save(
-            'wyvernslot'+slot,
-            Matte.objectToJSON(args[1])
+            name,
+            args[1]
         );
         return matte.store.createEmpty();            
     });
-    
-    matte.setExternalFunction('external_onSaveSettings', ['a'], function(fn, args) {
-        Worker.save(
-            'wyvernsettings',
-            args[0]
-        );
-    });
-    
-    matte.setExternalFunction('external_onLoadSettings', [], function(fn, args) {
-        return matte.store.createString(Worker.loadSettings());
-    });
+
+      
+    matte.setExternalFunction('external_onLoadState', ['name'], function(fn, args) {
+        const s = Worker.load(args[0]);
+        if (s == undefined) return matte.store.createString('');
+        return matte.store.createString(s);
+    });      
 
     matte.setExternalFunction('external_onListSlots', ['a', 'b'], function(fn, args) {
-        const names = Worker.listSaveSlots();
+        const names = Worker.list();
         const argsA = [];
         
         for(var i = 0; i < names.length; ++i) {
@@ -113,12 +109,7 @@
     });    
     
 
-      
-    matte.setExternalFunction('external_onLoadState', ['a'], function(fn, args) {
-        const s = Worker.getSlot(args[0]);
-        if (s == '' || !s) return matte.store.createEmpty();
-        return Matte.JSONtoObject(s);    
-    });      
+
 
 
     matte.setExternalFunction('external_getInput', [], function(fn, args) {
@@ -128,9 +119,10 @@
         return matte.store.createNumber(val);
     });
     
-    var modList = [];
+    var modListSrc = {};
     matte.setExternalFunction('external_getModDirs', [], function(fn, args) {
         const vals = [];
+        const modList = Object.keys(modListSrc)
         for(var i = 0; i < modList.length; ++i) {
             vals.push(matte.store.createString(modList[i]));
         }
@@ -311,7 +303,7 @@
                 const modPath = 'mods/'+endBits.substring(0, endLen);
                 
                 console.log('MOD: ' + modPath);
-                modList.push(modPath);
+                modListSrc[modPath] = true;
             }
             
             readBinary(mod, function(data) {

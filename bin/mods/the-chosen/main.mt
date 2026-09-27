@@ -79,15 +79,16 @@
           filename,
         
           titles : [
-            'Name', 'ID', 'Battle only?', 'Flags', 'Stackable?', 'Addt. block points', 'HP', 'AP', 'ATK', 'DEF', 'INT', 'SPD', 'LUK', 'DEX', 'Description'
+            'Name', 'ID', 'Tier', 'Traits', 'Stackable?', 'Description', 'HP', 'AP', 'ATK', 'DEF', 'INT', 'SPD', 'LUK', 'DEX'
           ],
           
           fieldFormatters : {
             ('Name') ::(item) <- item.name,
             ('ID') ::(item) <- item.id,
-            ('Flags') ::(item) {
+            ('Tier') ::(item) <- item.tier,
+            ('Traits') ::(item) {
               @:traits = [];
-              @trait = item.flags;
+              @trait = item.traits;
               ::? {
                 @iter = 0;
                 forever ::{
@@ -97,7 +98,15 @@
                     traits->push(:match(iter) {
                       (0): 'Ailment',
                       (1): 'Buff',
-                      (2): 'Debuff'
+                      (2): 'Debuff',
+                      (3): 'Special',
+                      (4): 'Always First',
+                      (5): 'Revival',
+                      (6): 'Instantaneous',
+                      (7): 'Cant use Abilities',
+                      (8): 'Cant use Effects',
+                      (9): '(unused 9)',
+                      (10): 'Cant use Abilities 50% of the time'
                     });
                     traits->push(:',');
                   }
@@ -107,16 +116,15 @@
               return String.combine(:traits);
             },
             ('Stackable?') ::(item) <- if (item.stackable) 'yes' else 'no',
-            ('Addt. block points') ::(item) <- if (item.blockPoints == 0) '--' else ''+item.blockPoints,
-            ('HP') ::(item) <- if (item.stats.HP == 0) '--' else '%' + item.stats.HP,
-            ('AP') ::(item) <- if (item.stats.AP == 0) '--' else '%' + item.stats.AP,
-            ('ATK') ::(item) <- if (item.stats.ATK == 0) '--' else '%' + item.stats.ATK,
-            ('DEF') ::(item) <- if (item.stats.DEF == 0) '--' else '%' + item.stats.DEF,
-            ('INT') ::(item) <- if (item.stats.INT == 0) '--' else '%' + item.stats.INT,
-            ('SPD') ::(item) <- if (item.stats.SPD == 0) '--' else '%' + item.stats.SPD,
-            ('LUK') ::(item) <- if (item.stats.LUK == 0) '--' else '%' + item.stats.LUK,
-            ('DEX') ::(item) <- if (item.stats.DEX == 0) '--' else '%' + item.stats.DEX,
-            ('Description') ::(item) <- item.description
+            ('Description') ::(item) <- item.description,
+            ('HP') ::(item) <- if (item.stats.HP == 0) '--' else '' + item.stats.HP,
+            ('AP') ::(item) <- if (item.stats.AP == 0) '--' else '' + item.stats.AP,
+            ('ATK') ::(item) <- if (item.stats.ATK == 0) '--' else '' + item.stats.ATK,
+            ('DEF') ::(item) <- if (item.stats.DEF == 0) '--' else '' + item.stats.DEF,
+            ('INT') ::(item) <- if (item.stats.INT == 0) '--' else '' + item.stats.INT,
+            ('SPD') ::(item) <- if (item.stats.SPD == 0) '--' else '' + item.stats.SPD,
+            ('LUK') ::(item) <- if (item.stats.LUK == 0) '--' else '' + item.stats.LUK,
+            ('DEX') ::(item) <- if (item.stats.DEX == 0) '--' else '' + item.stats.DEX,
           }
         );
       }
@@ -134,9 +142,8 @@
           filename,
           //sort      
           titles : [
-            'Name', 'ID', 'Kind', 'Traits', 'Rarity',  'Target mode', 'AI Usage Hint', 'Description', 'Art Specs', 'Deck Role', 'Keywords', 'Keyword Definitions'
+            'Name', 'ID', 'Kind', 'Traits', 'Charge',  'Target mode', 'AI Usage Hint', 'Description',  'Keywords', 'Keyword Definitions'
           ],
-          
           fieldFormatters : {
             ('Description') ::(item) <- item.description,
             ('Keywords') ::(item) <- 
@@ -151,15 +158,13 @@
             },
 
 
-            ('Rarity')::(item) <- 
+            ('Charge')::(item) <- 
               match(item.rarity) {
-                (Arts.RARITY.COMMON): 'Common',
-                (Arts.RARITY.UNCOMMON): 'Uncommon',
-                (Arts.RARITY.RARE): 'Rare',
-                (Arts.RARITY.EPIC): 'Epic'
+                (Arts.RARITY.COMMON): '2',
+                (Arts.RARITY.UNCOMMON): '3',
+                (Arts.RARITY.RARE): '4',
+                (Arts.RARITY.EPIC): '5'
               },
-            ('Art Specs')::(item) <- '',
-            ('Deck Role')::(item) <- '',
                         
             ('AI Usage Hint') ::(item) <- 
               match(item.usageHintAI) {

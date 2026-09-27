@@ -519,7 +519,8 @@ return {
             which = choice;
           },
           renderable : {
-            render ::{
+            render ::{  
+              when(quests->size == 0) empty;
               quests[which-1].renderPrompt(showCompleteness:true, leftWeight:0, topWeight: 0.5);
             }
           },

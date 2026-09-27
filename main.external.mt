@@ -66,14 +66,6 @@
 // return: array of strings
 @:external_onListSlots   = getExternalFunction(name:'external_onListSlots');
 
-// Called when saving settings.
-// arg: JSON string 
-@:external_onSaveSettings = getExternalFunction(name:'external_onSaveSettings');
-
-// Called when loading settings.
-// return: JSON string
-@:external_onLoadSettings = getExternalFunction(name:'external_onLoadSettings');
-
 // Called when quitting.
 // arg: none 
 // return: none
@@ -157,28 +149,21 @@ instance.mainMenu(
   canvasHeight: 24,
   canvasWidth: 80,
   features : 0,
-    
-  onSaveState :::(
-    slot,
-    data
-  ) {
-    external_onSaveState(a:slot, b:data);
-  },
 
-  onListSlots ::{
-    return external_onListSlots();
-  },
   
   onQuit ::{
     external_onQuit();
   },
 
-  onLoadSettings ::{
-    return external_onLoadSettings();
+  readDataText ::(name){
+    return external_onLoadState(name);
   },
   
-  onSaveSettings ::(data) {
-    external_onSaveSettings(a:data);
+  writeDataText ::(name, string) {
+    external_onSaveState(name, string);
+  },
+  listDataText ::{
+    return external_onListSlots();
   },
   
   onPlaySFX ::(name) {
@@ -233,7 +218,7 @@ instance.mainMenu(
         ::? {
           setModule(
             name:json.id + '/' + file,
-            value : jsonPreloaded(:root+'/'+file)
+            value : jsonPreloaded[root+'/'+file]
           )
         } => {
           onError::(message) {
@@ -271,19 +256,8 @@ instance.mainMenu(
       }
     }
     return mods; 
-  },
-
-  onLoadState :::(
-    slot
-  ) {
-    return ::? {
-      return external_onLoadState(a:slot);
-    } => {
-      onError:::(detail) {
-        return empty;
-      }
-    }
   }
+
 );
 
 

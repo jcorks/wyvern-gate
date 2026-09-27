@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 #include "../matte/src/matte.h"
 #include "../matte/src/matte_vm.h"
 #include "../matte/src/matte_store.h"
@@ -36,8 +37,15 @@ WINDOW * nc = NULL;
 #endif
 
 
-
-
+// directory processing
+#ifdef __WIN32__
+#include <windows.h>
+#else
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
 
 
 // represents the external map
@@ -365,11 +373,46 @@ static matteValue_t wyvern_gate__native__getchWait(
 
 
 
+static matteString_t * wyvern_gate__native__get_clean_path(matteVM_t * vm, const matteString_t * name) {
+    char * str = strdup(matte_string_get_c_str(name));
+    {
+        char * iter = str;
+        while(*iter) {
+            *iter = tolower(*iter);
+            iter++;
+        }
+    }
+    if (
+        strstr(str, "..") ||
+        strstr(str, "/") ||
+        strstr(str, "\\") ||
+        strstr(str, ".exe") ||
+        strstr(str, ".bat") ||
+        strstr(str, ".sh") ||
+        strstr(str, ".msi") ||
+        strstr(str, ".dmg") ||
+        strstr(str, ".apk")
+    ) {
+        assert(!"Illegal file name.");
+        free(str);
+        return NULL;
+    }
+    free(str);
+  
+    return matte_string_create_from_c_str(
+        "%s%c%s%c%s",
+        get_canonical_cwd(),
+        DIR_SEPARATOR,
+        "userdata",
+        DIR_SEPARATOR,
+        matte_string_get_c_str(name)
+    );
+
+}
 
 
 
-
-static matteValue_t wyvern_gate__native__writeDataFileText(
+static matteValue_t wyvern_gate__native__writeDataText(
     matteVM_t * vm,
     matteValue_t fn,
     const matteValue_t * args,
@@ -381,32 +424,16 @@ static matteValue_t wyvern_gate__native__writeDataFileText(
     CHECK_ARG(args[1], MATTE_VALUE_TYPE_STRING);
 
     const matteString_t * name = matte_value_string_get_string_unsafe(store, args[0]);
-    if (
-        matte_string_test_contains(name, MATTE_VM_STR_CAST(vm, "..")) ||
-        matte_string_test_contains(name, MATTE_VM_STR_CAST(vm, "/")) ||
-        matte_string_test_contains(name, MATTE_VM_STR_CAST(vm, "\\"))
-    ) {
-        assert(!"Illegal file name.");
-        return matte_store_new_value(store);
-    }
-  
-    matteString_t * path = matte_string_create_from_c_str(
-        "%s%c%s%c%s",
-        get_canonical_cwd(),
-        DIR_SEPARATOR,
-        "userdata",
-        DIR_SEPARATOR,
-        matte_string_get_c_str(name)
-    );
-    
-    
-    const char * str = matte_string_get_c_str(matte_value_string_get_string_unsafe(store, args[1]));
-    if (!strcmp(str, "")) {
-        remove(matte_string_get_c_str(path));
-    } else {
-        FILE * f = fopen(matte_string_get_c_str(path), "wb");
-        fprintf(f, "%s", str);
-        fclose(f);
+    matteString_t * path = wyvern_gate__native__get_clean_path(vm, name);
+    if (path != NULL) {
+        const char * str = matte_string_get_c_str(matte_value_string_get_string_unsafe(store, args[1]));
+        if (!strcmp(str, "")) {
+            remove(matte_string_get_c_str(path));
+        } else {
+            FILE * f = fopen(matte_string_get_c_str(path), "wb");
+            fprintf(f, "%s", str);
+            fclose(f);
+        }
     }
     return matte_store_new_value(store);
     
@@ -415,6 +442,123 @@ static matteValue_t wyvern_gate__native__writeDataFileText(
 
 
 
+static matteValue_t wyvern_gate__native__readDataText(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    matteStore_t * store = matte_vm_get_store(vm);
+
+    CHECK_ARG(args[0], MATTE_VALUE_TYPE_STRING);
+
+    const matteString_t * name = matte_value_string_get_string_unsafe(store, args[0]);
+    matteString_t * path = wyvern_gate__native__get_clean_path(vm, name);
+    if (path == NULL) {
+        matteString_t * str = matte_string_create_from_c_str("%s", "");
+        matteValue_t v = matte_store_new_value(store);
+        matte_value_into_string(store, &v, str);
+        matte_string_destroy(str);
+        return v;
+    }
+    
+    
+    FILE * f = fopen(matte_string_get_c_str(path), "rb");
+    if (f == NULL) {
+        matteString_t * str = matte_string_create_from_c_str("%s", "");
+        matteValue_t v = matte_store_new_value(store);
+        matte_value_into_string(store, &v, str);
+        matte_string_destroy(str);
+        return v;
+    }
+    matteArray_t * arr = matte_array_create(1);
+    char * b = malloc(4096);
+    uint32_t count;
+    while((count = fread(b, 1, 4096, f))) {
+        matte_array_push_n(arr, b, count);
+    }
+    fclose(f);
+    char end = 0;
+    matte_array_push(arr, end);
+    free(b);
+    
+    matteString_t * str = matte_string_create_from_c_str("%s", arr->data);
+    matte_array_destroy(arr);
+    matteValue_t v = matte_store_new_value(store);
+    matte_value_into_string(store, &v, str);
+    matte_string_destroy(str);
+    return v;
+}
+
+
+
+static matteValue_t wyvern_gate__native__listDataText(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    matteStore_t * store = matte_vm_get_store(vm);
+    matteArray_t * linesOut = matte_array_create(sizeof(matteValue_t));
+    uint32_t i;
+
+
+    #ifdef __WIN32__
+        matteString_t * path = matte_string_create_from_c_str(
+            "%s%c%s%c%s",
+            get_canonical_cwd(),
+            DIR_SEPARATOR,
+            "userdata",
+            DIR_SEPARATOR,
+            "*"
+        );
+
+        WIN32_FIND_DATAA sinfo = {};
+        HANDLE * d = (HANDLE*)FindFirstFileA(matte_string_get_c_str(path), &sinfo);
+        if (d) {
+            while ((FindNextFile(d, &sinfo))) {
+                if (sinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) continue;
+                matteValue_t line = matte_store_new_value(store);
+                matteString_t * file = matte_string_create_from_c_str("%s", sinfo.cFileName);
+                matte_value_into_string(store, &line, file);
+                matte_array_push(linesOut, line);
+                matte_string_destroy(file);
+            }
+            FindClose(d);
+        }
+    #else 
+        matteString_t * path = matte_string_create_from_c_str(
+            "%s%c%s%c",
+            get_canonical_cwd(),
+            DIR_SEPARATOR,
+            "userdata",
+            DIR_SEPARATOR
+        );
+
+        struct stat sinfo;
+        DIR * d = opendir(matte_string_get_c_str(path));
+        if (d) {
+            struct dirent * dent;
+            while ((dent = readdir(d))) {
+                matteString_t * fullPath = matte_string_create_from_c_str("%s%s", matte_string_get_c_str(path), dent->d_name);
+                if (!stat(matte_string_get_c_str(fullPath), &sinfo) && S_ISREG(sinfo.st_mode)) {
+                    matteValue_t line = matte_store_new_value(store);
+                    matteString_t * file = matte_string_create_from_c_str("%s", dent->d_name);
+                    matte_value_into_string(store, &line, file);
+                    matte_array_push(linesOut, line);
+                    matte_string_destroy(file);
+                }
+                matte_string_destroy(fullPath);
+            }
+            closedir(d);
+        }
+    #endif
+    matte_string_destroy(path);
+
+    matteValue_t linesOutV = matte_store_new_value(store);
+    matte_value_into_new_object_array_ref(store, &linesOutV, linesOut);
+    return linesOutV;
+}
 
 
 
@@ -2185,14 +2329,34 @@ void wyvern_gate_add_native(matte_t * m) {
 
     matte_add_external_function(
         m,
-        "wyvern_gate__native__writeDataFileText",
-        wyvern_gate__native__writeDataFileText,
+        "wyvern_gate__native__writeDataText",
+        wyvern_gate__native__writeDataText,
         NULL,
         
         "name",
         "string",
         NULL
     );
+
+    matte_add_external_function(
+        m,
+        "wyvern_gate__native__readDataText",
+        wyvern_gate__native__readDataText,
+        NULL,
+        
+        "name",
+        NULL
+    );
+
+    matte_add_external_function(
+        m,
+        "wyvern_gate__native__listDataText",
+        wyvern_gate__native__listDataText,
+        NULL,
+        NULL
+    );
+
+
 
 }
 

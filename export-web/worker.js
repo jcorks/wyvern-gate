@@ -34,25 +34,12 @@ Worker = (function() {
             return out;
         },
         
-        listSaveSlots : function() {
-            const allNames = Object.keys(saves);
-            const allNamesOut = [];
-            for(var i = 0; i < allNames.length; ++i) {
-                if (allNames[i].indexOf('wyvernslot') == 0) {
-                    allNamesOut.push(allNames[i].substring(
-                        10
-                    ))
-                }
-            }
-            
-            return allNamesOut;
+        list : function() {
+            return Object.keys(saves);
         },
         
-        getSlot : function(name) {
-            return saves['wyvernslot'+name];
-        },
-        loadSettings : function(name) {
-            return saves['wyvernsettings'];
+        load : function(name) {
+            return saves[name];
         },
 
     

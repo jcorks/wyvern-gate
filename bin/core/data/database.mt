@@ -224,9 +224,8 @@
           }
           strings->push(:'\n');
         };
-        
-        @:Filesystem = import(:'Matte.System.Filesystem');
-        Filesystem.writeString(path:filename, string:String.combine(:strings));
+        @:instance = import(:'base/instance.mt');
+        instance.writeDataText(name:filename, string:String.combine(:strings));
       },
 
       

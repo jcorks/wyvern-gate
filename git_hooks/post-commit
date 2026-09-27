@@ -1,3 +1,4 @@
 #!/bin/sh
-LOC="`git rev-parse --git-dir`/../GIT_COMMIT"
-echo "return \"`git rev-parse --short HEAD`\"" > "$LOC"
+echo "Updating version tag..."
+LOC="`git rev-parse --git-dir`/../bin/userdata/version_commit"
+echo "`git rev-parse --short HEAD`" > "$LOC"
