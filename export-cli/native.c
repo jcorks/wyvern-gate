@@ -275,7 +275,7 @@ static char getch_unbuffered() {
         retrievedTerm = 1;
         struct termios termN = term0;
         termN.c_lflag &= ~ICANON;
-        termN.c_lflag |= ECHO;
+        termN.c_lflag &= ~ECHO;
         termN.c_cc[VMIN] = 0;
         termN.c_cc[VTIME] = 0;
         
@@ -285,7 +285,7 @@ static char getch_unbuffered() {
     char cstr[2] = {};
     cstr[1] = 0;
     read(0, &cstr[0], 1);
-    
+
     if (retrievedTerm) {
         tcsetattr(0, TCSANOW, &term0);        
         setvbuf(stdin, NULL, _IOLBF, BUFSIZ);
@@ -296,11 +296,11 @@ static char getch_unbuffered() {
 
 
 #ifdef __WIN32__
-static void sleep_a_little() {
+static void sleep_a_little(int w) {
     HANDLE timer; 
     LARGE_INTEGER ft; 
 
-    ft.QuadPart = -(30*1000*10); // Convert to 100 nanosecond interval, negative value indicates relative time
+    ft.QuadPart = -(w*1000*10); // Convert to 100 nanosecond interval, negative value indicates relative time
     timer = CreateWaitableTimer(NULL, TRUE, NULL); 
     SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0); 
     WaitForSingleObject(timer, INFINITE); 
@@ -330,8 +330,8 @@ static const char * get_canonical_cwd() {
 
 
 
-static void sleep_a_little() {
-    usleep(1000*30);
+static void sleep_a_little(int w) {
+    usleep(1000*w);
 }
 
 static const char * get_canonical_cwd() {
@@ -352,21 +352,24 @@ static matteValue_t wyvern_gate__native__getchWait(
     const matteValue_t * args,
     void * userData
 ) {
+    int waitMS = -1;
     char c[2] = {};
     matteStore_t * store = matte_vm_get_store(vm);
-    for(;;) {
-        c[0] = getch_unbuffered();
-        
-        if (c[0] != 0) {
-            matteValue_t v = matte_store_new_value(store);
-            matte_value_into_string(store, &v, MATTE_VM_STR_CAST(vm, c));
-            return v;
-        }
-        sleep_a_little();
-    }
     
-    return matte_store_new_value(store);
-  
+    if (matte_value_type(args[0]) == MATTE_VALUE_TYPE_NUMBER) {
+        waitMS = matte_value_as_number(store, args[0]);
+    }
+
+
+
+    c[0] = getch_unbuffered();
+    
+    matteValue_t v = matte_store_new_value(store);
+    matte_value_into_string(store, &v, MATTE_VM_STR_CAST(vm, c));
+    if (waitMS > 0)
+        sleep_a_little(waitMS);
+
+    return v;
 }
 
 #define DIR_SEPARATOR '/'
@@ -2314,6 +2317,7 @@ void wyvern_gate_add_native(matte_t * m) {
         "wyvern_gate__native__getchWait",
         wyvern_gate__native__getchWait,
         NULL,
+        "wait",
         
         NULL
     );

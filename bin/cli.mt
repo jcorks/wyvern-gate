@@ -42,14 +42,15 @@ breakpoint()
 } => {
   onError::(message) {
     // fallback simple CPU reduction
-    return :: {
+    return ::(wait) {
       ::? {
         forever :: {
           lastVal = console.getch(unbuffered:true);
           if (lastVal != empty && lastVal != '')
             send();
 
-          Time.sleep(milliseconds:30);
+          if (wait != empty)
+            Time.sleep(milliseconds:wait);
         }
       }    
     }  
@@ -83,13 +84,12 @@ breakpoint()
   //time.sleep(milliseconds:1000 * (1 / 40.0));
 }
 canvas.onCommit = ::(lines, renderNow){
-
   currentCanvas = lines;
   canvasChanged = true;
   if (renderNow != empty)
     rerender();
 }
-
+/*
 @:refitCanvasCLI::{
       
   console.clear();
@@ -101,7 +101,7 @@ canvas.onCommit = ::(lines, renderNow){
 
   ::? {
     forever ::{
-      @ch = console.getch(unbuffered:true);
+      @ch = getchWait()
       if (ch != empty) {
         send();
       }
@@ -110,10 +110,10 @@ canvas.onCommit = ::(lines, renderNow){
 
   ::? {
     @target = '';
-    @ch = console.getch(unbuffered:true);
+    @ch = getchWait()
 
     forever ::{
-      @ch = console.getch(unbuffered:true);
+      @ch = getchWait()
       //console.println(:"ch: " + ch);
       when(ch == empty) send();
       when (ch == 'R') ::<= {
@@ -139,69 +139,67 @@ canvas.onCommit = ::(lines, renderNow){
 
   canvas.resize(width:w, height:h);
 }
+*/
 
 
 
 @:console = import(module:'Matte.System.ConsoleIO');
 @:Time = import(module:'Matte.System.Time');
 @msResize = 0 ;
+@history = [];
 @lastVal = empty;
 @:pollInput = ::{
-    
+  @val;
   @command = '';
-  @:getPiece = ::{
-    @:ch = if (lastVal != empty) ::<= {
-      @out = lastVal;
-      lastVal = empty;
-      return out;
-    } else console.getch(unbuffered:true);
-    when (ch == empty || ch == '') '';
-    return ch->charCodeAt(index:0);
-  }
-  
-  command = '' + getPiece() + getPiece() + getPiece();
-  
-  // ansi terminal actions
-  @:CURSOR_ACTIONS = {
-    '279165': 1, // up,
-    '279166': 3, // down
-    '279168': 0, // left,
-    '279167': 2, // right
-
-    '75': 0, // left 
-    '72': 1, // up
-    '77': 2, // right 
-    '80': 3, // down
-    
-    '122': 4, // confirm (z),
-    '120': 5, // cancel (x)
-    
-    '10': 4, // confirm (enter),
-    '32': 4, // confirm (space)
-    
-  }
-  @val = CURSOR_ACTIONS[command];
-
-
-  
-  if (val == empty) ::<= {
-    /*
-    if (Time.getTicks() > msResize+2000) ::<= {
-      refitCanvasCLI();
-      windowEvent.commitInput(forceRedraw:true);    
-      msResize = Time.getTicks();
+  @:getPieces = ::<- ::? {
+    forever ::{
+      @:ch = getchWait();
+      when (ch == empty || ch == '') send();
+      history->push(:ch->charCodeAt(:0));
     }
-    */
   }
+  getPieces();
+  
+
+  
+  if (history->size > 2) {
+    breakpoint();
+    command = String.combine(:history->map(::(value) <- ''+value));
+    
+    // ansi terminal actions
+    if (command->search(:'279165') != -1) val = 1; // up,
+    if (command->search(:'279166') != -1) val = 3; // down,
+    if (command->search(:'279168') != -1) val = 0; // left,
+    if (command->search(:'279167') != -1) val = 2; // right,
+
+    if (val != empty) {
+      breakpoint();
+      history = [];
+    }
+  }
+
+  if (history->size > 0) {
+    val = match(' '->setCharCodeAt(index:0, value:history[history->size-1])) {
+      ('z', ' ', '.', 'a', '['): 4,
+      ('x', '/', 'b', ']'): 5
+    }
+    if (val != empty)
+      history = [];
+  }
+
 
   // clears current line
   console.put(:"\x1b[2K");
-
   if (val == empty) ::<= {
     Time.sleep(milliseconds:30);
     // now wait till we get some input to save some CPU huh!
     if (windowEvent.needsCommit == false) ::<= {
-      lastVal = getchWait();
+      @ch = getchWait(:30);
+      if (ch == empty || ch == '') {
+        
+      } else {
+        history->push(:ch->charCodeAt(:0));
+      }
     }
 
     
