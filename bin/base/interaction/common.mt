@@ -514,6 +514,7 @@ return {
           prompt: 'Quests:',
           canCancel: true,
           keep : true,
+          jumpTag : 'QUEST_MENU',
           onGetChoices ::<- quests->map(::(value) <- value.name),
           onHover ::(choice) {
             which = choice;
@@ -531,11 +532,13 @@ return {
                 prompt: 'Give up on ' + quest.name + '?',
                 onChoice::(which) {
                   when(which == false) empty;
-                  
+                  quest.quit();
                   world.party.quests->remove(key:world.party.quests->findIndex(:quest));
                   windowEvent.queueMessage(
                     text: 'The quest ' + quest.name + ' was removed from the quest list.'
                   );
+                  
+                  windowEvent.jumpToTag(name:'QUEST_MENU', goBeforeTag:true);
                 }
               );
             };

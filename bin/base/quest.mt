@@ -75,7 +75,7 @@ Quest.database.newEntry(
         @:pos = island.getAPosition();
         @:landmark = Landmark.new(
           island : island,
-          base: Landmark.database.find(:'base:forest-generic'),
+          base: Landmark.database.find(:'base:forest-item-generic'),
           x : pos.x,
           y : pos.y
         );
@@ -126,11 +126,12 @@ Quest.database.newEntry(
           speaker: issuer.name,
           text: '"Here, I would like you to have this."'
         );
-
-              
-        
+      },
+      onFinish ::(quest, issuer) {
         world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
       }
+
+
     },
   
     // Whether the quest is complete and able to be taken back 
@@ -353,7 +354,7 @@ Quest.database.newEntry(
 
       },
       
-      onTurnIn ::(quest, issuer) {
+      onFinish ::(quest, issuer) {
         world.island.removeLandmark(:world.island.landmarks->filter(::(value) <- value.worldID == quest.data.landmarkID)[0]);
       }
     },
@@ -726,7 +727,10 @@ Quest.database.newEntry(
       'onIncrementTime',
       
       // The action to do when a landmark is entered.
-      'onLandmarkEnter'      
+      'onLandmarkEnter',
+      
+      // Cleanup after the quest is removed, whether given up or turned in
+      'onFinish',
           
     ]
   ),
@@ -803,6 +807,10 @@ Quest.database.newEntry(
         state.base.emit(event:'onLandmarkEnter', quest:this, landmark:landmark);
       },
       
+      quit :: {
+        state.base.emit(event:'onFinish', quest:this)
+      },
+      
       nextHour ::<- state.base.emit(event:'onNextHour', quest:this),
       
       turnIn ::(issuer) {
@@ -824,6 +832,7 @@ Quest.database.newEntry(
           party.inventory.add(:item);
         }
         state.rewardItems = [];
+        state.base.emit(event:'onFinish', quest:this, issuer);
         windowEvent.queueCustom(
           onEnter::{
             party.addGoldAnimated(amount:state.rewardG);

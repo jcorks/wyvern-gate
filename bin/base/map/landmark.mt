@@ -885,6 +885,50 @@ Landmark.database.newEntry(
 Landmark.database.newEntry(
   data: {
     name: 'Hidden Forest Cave',
+    id: 'base:forest-item-generic',
+    legendName: 'Forest',
+    symbol : 'T',
+    rarity : 40,        
+    peaceful: true,
+    landmarkType : TYPE.DUNGEON,
+
+    traits :
+      TRAIT.DUNGEON_FORCE_ENTRANCE,
+    eventCounts : [0, 1],
+    eventPreference : LandmarkEvent.KIND.HOSTILE,
+
+    minObjects : 0,
+    maxObjects : 1,
+    possibleObjects : [
+      {id: 'base:small-chest', rarity:1},
+    ],
+    requiredObjects : [
+
+    ],
+    requiredEvents : [
+    ],
+    mapHint: {
+      roomSize: 60,
+      wallCharacter: 'Y',
+      roomAreaSize: 7,
+      roomAreaSizeLarge: 14,
+      emptyAreaCount: 25,
+      undefinedCharacter: '~'
+    },
+    events : {
+      onVisit ::(landmark, island) {
+        windowEvent.queueMessage(
+          text:"This place seems to shift before you..."
+        );    
+      }
+    }    
+  }
+)
+
+
+Landmark.database.newEntry(
+  data: {
+    name: 'Hidden Forest Cave',
     id: 'base:forest-generic',
     legendName: 'Forest',
     symbol : 'T',
@@ -893,7 +937,7 @@ Landmark.database.newEntry(
     landmarkType : TYPE.DUNGEON,
 
     traits :
-      TRAIT.EPHEMERAL |
+      TRAIT.EPHEMERAL | 
       TRAIT.DUNGEON_FORCE_ENTRANCE,
     eventCounts : [0, 1],
     eventPreference : LandmarkEvent.KIND.HOSTILE,
@@ -1732,7 +1776,12 @@ Landmark.database.newEntry(
       // for the starting visual for the transition animation.
       //
       // skipAnimation is whether to skip the transition from the travel
-      travel ::(onLoad, onReady, startAnimationRenderable, skipAnimation) {      
+      travel ::(onLoad, onReady, startAnimationRenderable, skipAnimation) {  
+        @:windowEvent = import(module:'core/windowevent.mt');
+        if (windowEvent.autoSkipAnimations)
+          skipAnimation = true    
+
+
         @:world = import(module:'base/world.mt');
         if (world.landmark != this) ::<= {
           error(:'The current landmark isnt the one being traveled to!')
@@ -1740,7 +1789,6 @@ Landmark.database.newEntry(
         @:jumpTag = 'LANDMARK_VISIT' + this.worldID;
 
         @:hud = import(:'core/graphics/hud.mt');
-        @:windowEvent = import(module:'core/windowevent.mt');
         @:partyOptions = import(module:'base/widgets/partyoptions.mt');
         @:Island = import(module:'base/map/island.mt');
 

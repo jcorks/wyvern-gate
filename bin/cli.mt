@@ -102,7 +102,9 @@ canvas.onCommit = ::(lines, renderNow){
   ::? {
     forever ::{
       @ch = console.getch(unbuffered:true);
-      if (ch != empty) send();
+      if (ch != empty) {
+        send();
+      }
     }
   }
 
@@ -192,15 +194,16 @@ canvas.onCommit = ::(lines, renderNow){
     */
   }
 
-
+  // clears current line
+  console.put(:"\x1b[2K");
 
   if (val == empty) ::<= {
     Time.sleep(milliseconds:30);
     // now wait till we get some input to save some CPU huh!
     if (windowEvent.needsCommit == false) ::<= {
       lastVal = getchWait();
-
     }
+
     
   }
   return val;   

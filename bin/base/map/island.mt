@@ -972,6 +972,9 @@ Island.database.newEntry(
       //
       // skipAnimation is whether to skip the transition from the travel
       travel ::(onLoad, onReady, startAnimationRenderable, skipAnimation) {  
+        if (windowEvent.autoSkipAnimations)
+          skipAnimation = true    
+
         @:world = import(module:'base/world.mt');
         @:island = this;
         @:sound = import(module:'core/sound.mt');
