@@ -19,7 +19,6 @@
 //@:Random = import(module:'core/random.mt');
 
 
-breakpoint()
 
 @:canvas = import(:'core/graphics/canvas.mt');
 @:instance = import(module:'base/instance.mt');
@@ -144,6 +143,7 @@ canvas.onCommit = ::(lines, renderNow){
 
 
 @:console = import(module:'Matte.System.ConsoleIO');
+
 @:Time = import(module:'Matte.System.Time');
 @msResize = 0 ;
 @history = [];
@@ -163,7 +163,6 @@ canvas.onCommit = ::(lines, renderNow){
 
   
   if (history->size > 2) {
-    breakpoint();
     command = String.combine(:history->map(::(value) <- ''+value));
     
     // ansi terminal actions
@@ -173,7 +172,6 @@ canvas.onCommit = ::(lines, renderNow){
     if (command->search(:'279167') != -1) val = 2; // right,
 
     if (val != empty) {
-      breakpoint();
       history = [];
     }
   }

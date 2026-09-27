@@ -263,23 +263,63 @@ static char getch_unbuffered() {
     return c;
 }
 #else
+#include <signal.h>
 #include <termios.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/time.h>
-static char getch_unbuffered() {
-    int retrievedTerm = 0;
-    struct termios term0 = {};
-    if (!tcgetattr(0, &term0)) {
-        retrievedTerm = 1;
-        struct termios termN = term0;
-        termN.c_lflag &= ~ICANON;
-        termN.c_lflag &= ~ECHO;
-        termN.c_cc[VMIN] = 0;
-        termN.c_cc[VTIME] = 0;
-        
-        tcsetattr(0, TCSANOW, &termN);
+
+static struct termios term0 = {};
+static int retrievedTerm = 0;
+
+static void getch_cleanup() {
+  puts("\x1b");
+  puts("c");
+  if (retrievedTerm) {
+      tcsetattr(0, TCSANOW, &term0);        
+  }
+}
+
+static void getch_cleanup_and_exit(int nu) { 
+  getch_cleanup();
+  exit(1);
+}
+
+static char getch_unbuffered(matte_t * m) {
+    if (!retrievedTerm) {
+        if (!tcgetattr(0, &term0)) {
+            if (matte_debugging_is_enabled(m) == 0) {
+                // turn off cursor
+                puts("\x1b");
+                puts("[?25l");
+            }
+            struct sigaction handler = {};
+            handler.sa_handler = getch_cleanup_and_exit;
+            retrievedTerm = 1;
+            struct termios termN = term0;
+            termN.c_lflag &= ~ICANON;
+            
+            // prevents typed characters / special characters from appearing
+            if (matte_debugging_is_enabled(m)) {
+                termN.c_lflag &= ~ECHO;
+            }
+            termN.c_cc[VMIN] = 0;
+            termN.c_cc[VTIME] = 0;
+            
+            tcsetattr(0, TCSANOW, &termN);
+
+
+            sigaction(SIGABRT, &handler, NULL);
+            sigaction(SIGSEGV, &handler, NULL);
+            sigaction(SIGKILL, &handler, NULL);
+            sigaction(SIGINT,  &handler, NULL);
+            sigaction(SIGILL,  &handler, NULL);
+            
+            atexit(getch_cleanup);
+
+
+        }
         setvbuf(stdin, NULL, _IONBF, 0);
     }
     char cstr[2] = {};
@@ -287,7 +327,6 @@ static char getch_unbuffered() {
     read(0, &cstr[0], 1);
 
     if (retrievedTerm) {
-        tcsetattr(0, TCSANOW, &term0);        
         setvbuf(stdin, NULL, _IOLBF, BUFSIZ);
     }    
     return cstr[0];
@@ -354,6 +393,7 @@ static matteValue_t wyvern_gate__native__getchWait(
 ) {
     int waitMS = -1;
     char c[2] = {};
+    matte_t * m = userData;
     matteStore_t * store = matte_vm_get_store(vm);
     
     if (matte_value_type(args[0]) == MATTE_VALUE_TYPE_NUMBER) {
@@ -362,7 +402,7 @@ static matteValue_t wyvern_gate__native__getchWait(
 
 
 
-    c[0] = getch_unbuffered();
+    c[0] = getch_unbuffered(m);
     
     matteValue_t v = matte_store_new_value(store);
     matte_value_into_string(store, &v, MATTE_VM_STR_CAST(vm, c));
@@ -2316,9 +2356,10 @@ void wyvern_gate_add_native(matte_t * m) {
         m,
         "wyvern_gate__native__getchWait",
         wyvern_gate__native__getchWait,
-        NULL,
-        "wait",
+        m,
         
+        
+        "wait",
         NULL
     );
 
