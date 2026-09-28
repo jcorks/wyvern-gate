@@ -60,7 +60,8 @@ return ::(
   @frame = 0;
   @current = from;
   @destination = if (to < max) to else max;
-
+  if (pauseStart == empty)
+    pauseStart = true;
 
   if (pauseStart) 
     windowEvent.queueDisplay(
