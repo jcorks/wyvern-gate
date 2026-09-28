@@ -816,6 +816,7 @@
       noNotify : true
     );
   }
+  
 
 
   foreach(state.equips) ::(i, item) {
@@ -829,6 +830,10 @@
         duration:Arts.A_LOT,
         noNotify : true
       );
+    }
+    
+    foreach(item.enchants) ::(index, enchant) {
+      enchant.battleStart(from:this, item);
     }
   }
 

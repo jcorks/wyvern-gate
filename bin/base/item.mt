@@ -3277,8 +3277,7 @@ Item.database.newEntry(
         @art = item.data.inletArt
         @effect = item.data.inletEffect
 
-        if (item.data.inletShape == empty &&
-            item.data.inletArt == empty) {
+        if (art == empty && effect == empty) {
             
             
           if (random.try(percentSuccess:65)) {
@@ -3738,7 +3737,7 @@ none.name = 'None';
   },
   
   interface : {
-    defaultLoad::(base, creationHint, qualityHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, artsHint, forceEnchant, forceEnchantCount, forceNeedsAppraisal, forceSlotCount) {
+    defaultLoad::(base, creationHint, qualityHint, materialHint, apparelHint, rngEnchantHint, colorHint, designHint, artsHint, forceEnchant, forceEnchantCount, forceNeedsAppraisal, forceSlotCount, data) {
       @:ItemEnchant = import(module:'base/item/enchant.mt');
       @:ItemQuality = import(module:'base/item/quality.mt');
       @:ItemColor = import(module:'base/item/color.mt');
@@ -3773,7 +3772,7 @@ none.name = 'None';
       state.price = base.basePrice;
       state.price *= 1.05 * state.base.weight;
 
-      state.data = {};
+      state.data = if (data == empty) ({}) else ({...data});
       state.needsAppraisal = if (forceNeedsAppraisal != empty) forceNeedsAppraisal
         else if (base.hasTraits(:TRAIT.CAN_BE_APPRAISED) && random.try(percentSuccess::<= {
           @chance = 0.2 + tier*1.5;
@@ -4258,7 +4257,9 @@ none.name = 'None';
       }
     },
     
-
+    enchants : {
+      get ::<- [..._.state.enchants]
+    },
     
     stars : {
       get ::<- getStars(:_.this)

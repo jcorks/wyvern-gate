@@ -174,6 +174,14 @@
         }
       },
       
+      battleStart ::(from, item){
+        breakpoint();
+        when(state.event != '') empty;
+        from.addEffect(
+          from, id: state.effectID, durationTurns: Arts.A_LOT, item
+        );
+      },
+      
       processEvent ::(*args) {
         @:world = import(module:'base/world.mt');
         when(state.event == '') empty;
