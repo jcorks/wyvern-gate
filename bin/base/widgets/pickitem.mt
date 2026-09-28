@@ -97,6 +97,7 @@ return ::(
       if (tabCounts[k] != 0) 
         out->push(:v);
     }
+    
     return out;
   }
 

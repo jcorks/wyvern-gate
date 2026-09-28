@@ -15,7 +15,7 @@
 // Provided by native.c, binds native function implementations 
 // (external functions) to the runtime.
 void wyvern_gate_add_native(matte_t * m);
-
+char * wyvern_gate_get_debug_stdin(matte_t * m);
 
 
 // returns whether the given args contains a string.
@@ -30,6 +30,7 @@ static int contains_arg(int argc, char ** argv, const char * hint) {
 
 
 
+
 // Sets up Matte runtime and runs cli.mt
 int main(int argc, char ** argv) {
     #ifdef __WIN32__
@@ -41,7 +42,11 @@ int main(int argc, char ** argv) {
     
     wyvern_gate_add_native(m);
     
-    matte_set_io(m, NULL, NULL, NULL); // standard IO is fine
+    // standard IO is fine, mostly. 
+    // Stdin needs mod since the CLI version does some terminal trickery
+    matte_set_io(m, wyvern_gate_get_debug_stdin, NULL, NULL); 
+    
+    
     matte_set_importer(m, NULL, NULL); // standard file import is fine
 
     matteVM_t * vm = matte_get_vm(m);

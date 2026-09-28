@@ -136,7 +136,7 @@
       text: 'The party has no other items that are of the material ' + item.material.name
     );
   }
-          
+  @:itemSrc = item; 
   pickItem(
     prompt: 'Choose an item to use as material.',
     tabbed: true,
@@ -144,9 +144,11 @@
     canCancel: true,
     showRarity: true,
     showPrices: false,
+    keep : false,
     
     onPick::(item) {
       @:other = item;
+      item = itemSrc;
 
       windowEvent.queueMessage(
         text: 'Once complete, this will destroy ' + other.name + '.'

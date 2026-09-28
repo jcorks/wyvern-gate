@@ -2429,7 +2429,11 @@
     isDead : {
       get :: {
         return _.state.isDead;
-      }   
+      },
+      
+      set ::(value)  {
+        _.state.isDead = value;
+      }
     },
       
     gainExp ::(amount => Number, chooseStat, afterLevel) {

@@ -100,6 +100,7 @@ return ::(*args) {
   @:realOnGetChoices = args.onGetChoices;
 
   args.onGetChoices = :: {
+    tabs = args.onGetTabs();
     foreach(tabs) ::(k, v) {
       @:all = realOnGetChoices(:k)
       lastTabState[v] = all;

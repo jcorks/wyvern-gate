@@ -273,6 +273,23 @@ static char getch_unbuffered() {
 static struct termios term0 = {};
 static int retrievedTerm = 0;
 
+char * wyvern_gate_get_debug_stdin(matte_t * m) {
+    struct termios termN = {};
+    if (retrievedTerm) {
+        tcgetattr(0, &termN);
+        tcsetattr(0, TCSANOW, &term0);
+    }
+
+    printf("wyvgate> ");
+    char * line = (char*)matte_allocate(256+1);;
+    fgets(line, 256, stdin);
+
+    if (retrievedTerm) {
+        tcsetattr(0, TCSANOW, &termN);
+    }
+    return line;
+}
+
 static void getch_cleanup() {
   puts("\x1b");
   puts("c");
@@ -301,9 +318,7 @@ static char getch_unbuffered(matte_t * m) {
             termN.c_lflag &= ~ICANON;
             
             // prevents typed characters / special characters from appearing
-            if (matte_debugging_is_enabled(m)) {
-                termN.c_lflag &= ~ECHO;
-            }
+            termN.c_lflag &= ~ECHO;
             termN.c_cc[VMIN] = 0;
             termN.c_cc[VTIME] = 0;
             
@@ -317,10 +332,13 @@ static char getch_unbuffered(matte_t * m) {
             sigaction(SIGILL,  &handler, NULL);
             
             atexit(getch_cleanup);
-
-
         }
-        setvbuf(stdin, NULL, _IONBF, 0);
+        
+    }
+    
+    
+    if (retrievedTerm) {
+        setvbuf(stdin, NULL, _IONBF, 0);    
     }
     char cstr[2] = {};
     cstr[1] = 0;
@@ -391,23 +409,28 @@ static matteValue_t wyvern_gate__native__getchWait(
     const matteValue_t * args,
     void * userData
 ) {
-    int waitMS = -1;
+    int waitPlease = 0;
     char c[2] = {};
     matte_t * m = userData;
     matteStore_t * store = matte_vm_get_store(vm);
     
-    if (matte_value_type(args[0]) == MATTE_VALUE_TYPE_NUMBER) {
-        waitMS = matte_value_as_number(store, args[0]);
+    if (matte_value_type(args[0]) == MATTE_VALUE_TYPE_BOOLEAN) {
+        waitPlease = matte_value_as_boolean(store, args[0]);
     }
 
 
-
-    c[0] = getch_unbuffered(m);
+    if (waitPlease) {
+        while(c[0] == 0) {
+            c[0] = getch_unbuffered(m);
+            if (c[0] != 0) break;
+            sleep_a_little(30);
+        }
+    } else {
+      c[0] = getch_unbuffered(m);
+    }
     
     matteValue_t v = matte_store_new_value(store);
     matte_value_into_string(store, &v, MATTE_VM_STR_CAST(vm, c));
-    if (waitMS > 0)
-        sleep_a_little(waitMS);
 
     return v;
 }

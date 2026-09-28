@@ -50,7 +50,6 @@
         keep: true,
         pageAfter:12,
         showRarity:true,
-        header : ['Item', 'Value', ''],
         prompt: 'Discard which?',
         onGetFooter ::<- '(Need to discard :' + (this.items->keycount - this.maxItems) + ' items.)',
         onPick::(item) {

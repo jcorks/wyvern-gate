@@ -2095,7 +2095,7 @@ Item.database.newEntry(data : {
 
 
 Item.database.newEntry(data : {
-  name : "Battelaxe",
+  name : "Battleaxe",
   id : 'base:battleaxe',
   description: 'An axe meant for combat with a $design$ design. The end is tied with a $color$ fabric.',
   examine : 'A common choice for those who wish to cause harm and have the arm to back it up.',

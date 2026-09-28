@@ -154,7 +154,9 @@ canvas.onCommit = ::(lines, renderNow){
   @:getPieces = ::<- ::? {
     forever ::{
       @:ch = getchWait();
-      when (ch == empty || ch == '') send();
+      when (ch == empty || ch == '') ::<= {
+        send();
+      }
       history->push(:ch->charCodeAt(:0));
     }
   }
@@ -186,18 +188,15 @@ canvas.onCommit = ::(lines, renderNow){
   }
 
 
-  // clears current line
-  console.put(:"\x1b[2K");
+  
   if (val == empty) ::<= {
     Time.sleep(milliseconds:30);
     // now wait till we get some input to save some CPU huh!
     if (windowEvent.needsCommit == false) ::<= {
-      @ch = getchWait(:30);
-      if (ch == empty || ch == '') {
-        
-      } else {
-        history->push(:ch->charCodeAt(:0));
-      }
+    
+      // if true, waits until next character
+      @ch = getchWait(:true);
+      history->push(:ch->charCodeAt(:0));
     }
 
     
