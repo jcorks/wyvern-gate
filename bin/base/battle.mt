@@ -824,6 +824,7 @@
                 if (hasWeapon && random.try(percentSuccess:10)) ::<= {
                 
                   @:ally = random.pickArrayItem(:party_.members);
+                  when(ally.isDead) empty;
                   @:wep = ally.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                   when (wep.name == 'None') empty;
                   when (!wep.canGainIntuition()) empty;
