@@ -120,6 +120,7 @@ Island.database.newEntry(
     requiredLandmarks : [
       'base:town-start',
       'base:wyvern-gate',
+      'base:mine',
     ],
     possibleLandmarks : [
       
@@ -153,7 +154,8 @@ Island.database.newEntry(
     requiredLandmarks : [
       'base:wyvern-gate',
       'base:lost-shrine',
-      'base:city'
+      'base:city',
+      'base:mine',
     ],
     possibleLandmarks : [
       'base:town',

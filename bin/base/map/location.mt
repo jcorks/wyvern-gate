@@ -513,6 +513,85 @@ Location.database.newEntry(data:{
 
 
 Location.database.newEntry(data:{
+  name: 'Anvil',
+  id: 'base:anvil',
+  rarity: 100,
+  ownVerb: '???',
+  symbol: '╥',
+
+  descriptions: [
+  ],
+  
+  interactions : [
+    'base:improve-item',
+  ],
+  
+  aggressiveInteractions : [      
+  ],
+  
+  
+  traits : 0,
+  events : {}
+
+})
+
+
+
+Location.database.newEntry(data:{
+  id: 'base:flame',
+  name: 'Flame',
+  rarity: 100,
+  ownVerb: '???',
+  symbol: '',
+
+  descriptions: [
+  ],
+  
+  interactions : [
+  ],
+  
+  aggressiveInteractions : [
+  ],
+  
+  traits : 0,
+  events : {
+    onLandmarkStep ::(location, entities) {
+      if (location.data.emitter == empty)
+        location.data.emitter = import(:'core/graphics/particle.mt').new(
+          directionMin : -110,
+          directionMax : -80,
+
+          directionDeltaMin : -1,
+          directionDeltaMax : 2,
+      
+          speedMin : 0.3,
+          speedMax : 1,
+          
+          speedDeltaMin : 0.01,
+          speedDeltaMax : 0.05,
+
+          characters : ['▓', '▓', '▒', '░', '▒', '░', '░'],
+          charactersRepeat : false,
+          
+          lifeMax : 4,
+          lifeMin : 1    
+        )
+        
+      @:pos = location.landmark.map.mapCoordinatesToScreen(x:location.x, y:location.y);
+      location.data.emitter.move(x:pos.x, y:pos.y);
+      location.data.emitter.start(emitCount:1);
+    },
+    
+    onLandmarkLeave ::(location){
+      if (location.data.emitter)
+        location.data.emitter.stop();
+    },
+  }
+})
+
+
+
+Location.database.newEntry(data:{
   id: 'base:smelter',
   name: 'Smelter',
   rarity: 100,
@@ -1011,7 +1090,7 @@ Location.database.newEntry(data:{
 
 
   
-  traits : 0,
+  traits: TRAIT.EXTENDED_INTERACT_RANGE,
   events : {
     onFirstInteract ::(location) {
       @:Profession = import(module:'base/entity/profession.mt');
@@ -2650,7 +2729,10 @@ Location.database.newEntry(data:{
       
       // If the location is present when the party leaves the landmark,
       // this event is emitted.
-      'onLandmarkLeave'
+      'onLandmarkLeave',
+      
+      // When the party takes a step in the landmark at all.
+      'onLandmarkStep',
     ]
   ),
   

@@ -3395,6 +3395,44 @@ Interaction.newEntry(
 ) 
 
 
+Interaction.newEntry(
+  data : {
+    name : 'Improve Equipment',
+    id :  'base:improve-item',
+    keepInteractionMenu : false,
+    isAvailable ::(location, party) <- true,
+    interact ::(location, party) {        
+      import(module:'base/widgets/pickpartyitem.mt')(
+        filter ::(value) <- value.material != empty,
+        canCancel: true,
+        keep: true,
+        onPick ::(item, equippedBy) {
+          windowEvent.queueChoices(
+            prompt: item.name,
+            choices : [
+              'Check',
+              'Improve'
+            ],
+            canCancel: true,
+            keep: true,
+            onChoice::(choice) {
+              match(choice) {
+               (1): 
+                item.describe(),
+               (2): 
+                (import(module:'base/widgets/itemimprove.mt'))(inBattle: false, user:equippedBy, item)
+              }
+            }
+          );
+        
+        }
+      );
+      
+    
+    }
+  }
+) 
+
 
 Interaction.newEntry(
   data : {

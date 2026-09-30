@@ -16,6 +16,39 @@ const Settings = {
     var patterns = {
       Default : Pattern.new(canvas)
     };
+    const LOCAL_STORAGE_KEY = 'wyvern-gate-map-creator'
+    const getProjectDataNames = function() {
+      var b = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (b == undefined) {
+        return []
+      }
+      b = JSON.parse(b);
+      return Object.keys(b);
+    }
+    
+    
+    const saveProjectData = function(name, obj) {
+      var b = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (b == undefined) {
+        b = '{}';
+      }
+      b = JSON.parse(b);
+      const str = JSON.stringify(obj);
+      b[name] = str;
+      window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(b));
+    } 
+    
+    const loadProjectData = function(name) {
+      var b = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (b == undefined) {
+        return;
+      }
+      b = JSON.parse(b);
+      const ba = b[name];
+      return JSON.parse(ba);
+    
+    }
+    
 
     const makeLabel = function(str) {
       const out = document.createElement('div');
@@ -86,16 +119,14 @@ const Settings = {
     var undoRedo_set;
     
     const initProject = function() {
-      if (Object.keys(window.localStorage).length == 0) {
+      if (getProjectDataNames().length == 0) {
         const newP = Pattern.new(canvas);
         canvas.setPattern(newP);        
 
         const save = self.save();
-        const data = JSON.stringify(save);
-        
-        window.localStorage.setItem('Default', data);
+        saveProjectData('Default', save);
       }
-      const keys = Object.keys(window.localStorage);
+      const keys = getProjectDataNames();
       self.loadProjectName(keys[0]);
       rebuildProjectPulldown();
       
@@ -165,15 +196,16 @@ const Settings = {
           function() {
             if (window.confirm("Save the current map?")) {
               const save = self.save();
-              const data = JSON.stringify(save);
               
               const name = projectOptions_projectList_element.value
-              window.localStorage.setItem(name, data);              
+              saveProjectData(name, save);
             }
 
             const ch = window.prompt("Enter a name for the new, blank map.");
             if ((typeof ch) != 'string') return;
-            if (typeof window.localStorage.getItem(ch) == "string") {
+            
+            
+            if (getProjectDataNames().indexOf(ch) != -1) {
               if (!window.confirm("The map " + ch + " exists. Overwrite?")) {
                 return;
               }
@@ -185,8 +217,7 @@ const Settings = {
             const newP = patterns.Default;
             canvas.setPattern(newP);
             const save = self.save();
-            const data = JSON.stringify(save);
-            window.localStorage.setItem(ch, data);
+            saveProjectData(ch, data);
 
             rebuildProjectPulldown();
             self.loadProjectName(ch);
@@ -200,10 +231,8 @@ const Settings = {
           "Save",
           function() {
             const save = self.save();
-            const data = JSON.stringify(save);
-            
             const name = projectOptions_projectList_element.value
-            window.localStorage.setItem(name, data);
+            saveProjectData(name, save);
           }
         )
 
@@ -260,16 +289,15 @@ const Settings = {
                 
                 const ch = window.prompt("Enter a name for this map.");
                 if ((typeof ch) != 'string') return;
-                if (typeof window.localStorage.getItem(ch) == "string") {
+                if (getProjectDataNames().indexOf(ch) != -1) {
                   if (!window.confirm("The map " + ch + " exists. Overwrite?")) {
                     return;
                   }
                 }
 
                 try {
-                  window.localStorage.setItem(ch, value);
+                  saveProjectData(ch, JSON.parse(value));
                 } catch(e) {
-                  window.localStorage.removeItem(ch);
                   rebuildProjectPulldown();
                   self.loadProjectName(ch);
                   
@@ -410,7 +438,7 @@ const Settings = {
         }
         
         const rebuildProjectPulldown = function() {
-          const keys = Object.keys(window.localStorage);
+          const keys = getProjectDataNames();
           if (keys.length == 0) {
             setDropDownOptions(projectOptions_projectList_element, ['Default']);
           } else {
@@ -799,10 +827,7 @@ const Settings = {
       },
       
       loadProjectName : function(name) {
-        const str = window.localStorage.getItem(name);
-        if (typeof str != 'string') return;
-        
-        const obj = JSON.parse(str);
+        const obj = loadProjectData(name);
         self.load(obj);
         if (projectOptions_projectList_element.value != name)
           projectOptions_projectList_element.value = name;

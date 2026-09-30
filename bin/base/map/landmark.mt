@@ -187,6 +187,11 @@ Landmark.database.newEntry(
         symbol: '&',
         id: 'base:tavern-inside'
       },
+      {
+        name : 'Blacksmith',
+        symbol: '/',
+        id: 'base:blacksmith-inside'
+      },
 
       /*    
       {id:'base:arts-tecker'},
@@ -261,6 +266,12 @@ Landmark.database.newEntry(
         symbol: '&',
         id: 'base:tavern-inside'
       },
+      {
+        name : 'Blacksmith',
+        symbol: '/',
+        id: 'base:blacksmith-inside'
+      }
+
 
       /*    
       {id:'base:arts-tecker'},
@@ -378,6 +389,13 @@ Landmark.database.newEntry(
         symbol: '&',
         id: 'base:tavern-inside'
       },
+      {
+        name : 'Blacksmith',
+        symbol: '/',
+        id: 'base:blacksmith-inside'
+      }
+
+
 
       /*
       'base:auction-house',
@@ -979,6 +997,40 @@ Landmark.database.newEntry(
     symbol : '$',
     rarity : 40,        
     landmarkType : TYPE.BLUEPRINT_SINGLE(:'assets/maps/roomtest.json'),
+
+    traits :
+      TRAIT.PEACEFUL |
+      TRAIT.UNIQUE |
+      TRAIT.CAN_SAVE |
+      TRAIT.NOTHING_HIDDEN |
+      TRAIT.STRUCTURE_BUSINESS,
+    eventCounts : [0],
+    eventPreference : LandmarkEvent.KIND.PEACEFUL,
+
+    minObjects : 0,
+    maxObjects : 0,
+    possibleObjects : [
+    ],
+    requiredObjects : [
+    ],
+    requiredEvents : [
+    ],
+    mapHint: {
+    },
+    events : {
+    }
+    
+  }
+)
+
+Landmark.database.newEntry(
+  data: {
+    name: 'Blacksmith: Inside',
+    id: 'base:blacksmith-inside',
+    legendName: '',
+    symbol : '/',
+    rarity : 40,        
+    landmarkType : TYPE.BLUEPRINT_SINGLE(:'assets/maps/blacksmith.json'),
 
     traits :
       TRAIT.PEACEFUL |
@@ -2049,6 +2101,10 @@ Landmark.database.newEntry(
       step :: {
         state.base.emit(event:'onStep', landmark:this, island:this.island);
         state.mapEntityController.step();
+
+        foreach(this.locations) ::(k, v) {
+          v.base.emit(event:'onLandmarkStep', location:v);
+        }
 
         foreach(world.party.quests) ::(k, v) {
           v.step(landmark:this, island:this.island);

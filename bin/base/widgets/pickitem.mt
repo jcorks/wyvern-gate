@@ -279,7 +279,16 @@ return ::(
   }
 
   listGenerator()
-
+  when (items->size == 0)
+    if (filter != empty)
+      windowEvent.queueMessage(
+        text: 'No suitable items were found to be available.'
+      )
+    else
+      windowEvent.queueMessage(
+        text: 'No items were found.'
+      )
+  
   windowEvent.queueNestedResolve(
     onEnter :: {
       when(inventory.items->size == 0) ::<={

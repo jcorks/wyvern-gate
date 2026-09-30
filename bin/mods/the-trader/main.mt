@@ -3774,7 +3774,8 @@
           'thetrader:city',
           'base:town',
           'base:wyvern-gate',
-          'thetrader:eternal-shrine'
+          'thetrader:eternal-shrine',
+          'base:mine',
         ],
         possibleLandmarks : [
           
@@ -3857,6 +3858,13 @@
             symbol: '&',
             id: 'base:tavern-inside'
           },
+          {
+            name : 'Blacksmith',
+            symbol: '/',
+            id: 'base:blacksmith-inside'
+          },
+
+
 
           //'base:arts-tecker',
           //'base:arena',

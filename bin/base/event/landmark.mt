@@ -444,6 +444,7 @@ LandmarkEvent.database.newEntry(
           'base:exit',
           'base:defensive',
           'base:dungeonencounters-roam',
+          'base:goldslime-particle'
         ],
         
         deathTasks : [
