@@ -677,7 +677,7 @@ import(module:'base/accolade/newrecord.mt');
         features_ = features;
         canvas.resize(width:canvasWidth, height:canvasHeight);
         settings = onLoadSettings();
-        if (settings == empty) ::<= {
+        if (settings == empty || settings == "") ::<= {
           settings = {}
           this.defaultSettings();
         } else ::<= {
