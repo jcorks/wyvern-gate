@@ -186,6 +186,18 @@ return ::(
     else 
       [...inventory.items]
     
+    
+    when (items->size == 0) ::<={
+      // backout 
+      if (windowEvent.canJumpToTag(:'pickItem')) {
+        windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true);
+        windowEvent.queueMessage(text:'No items in inventory');    
+      }
+    }
+    
+
+      
+    
     tabCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // lazy,
     foreach(items) ::(k, value) {
       tabCounts[tabbedReqs->findIndex(:value.base.sortType)] += 1;
@@ -427,7 +439,6 @@ return ::(
           onPick(item:picked);
         }
       }
-      
       if (tabbed) ::<= {
         prepTabbedChoices(:args);
         (import(:'base/widgets/tabbedchoices.mt'))(*args);
