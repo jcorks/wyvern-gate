@@ -239,6 +239,12 @@ return ::{
         ['', 'The party received a normal key.'],     
         ['Kaedjaal', 'Visiting other mortal islands can help you find more to help you along your journey... But, it may be treacherous. Be prepared.'],
         ['Kaedjaal', '...'],
+        ['Kaedjaal', 'Ah, one last thing...'],
+        ['Kaedjaal', 'Your equipment... it is rather... feeble. You will have trouble if you don\'t improve your tools'],
+        ['', 'The Wyvern gentle taps your head. You feel a power awaken within you.'],
+        ['Kaedjaal', 'You may now summon an ethereal anvil to improve your equipment any time. You may find such a thing valuable on your journey.'],
+        ['', 'Item improvement can be accessed within the Party menu when selecting an item at any time, including during dungeons.'],
+        ['Kaedjaal', '...'],
         ['Kaedjaal', 'I suppose it is now time to return you. '],
         ['Kaedjaal', 'I hope you enjoyed this little visit. Come and see me any time.'],
         ['', 'Kaedjaal glows.'],
@@ -248,6 +254,7 @@ return ::{
             location.ownedBy.name = 'Kaedjaal, Wyvern of Fire';
           @:world = import(module:'base/world.mt');
           world.scenario.data.fireWyvernDefeated = true;
+          world.scenario.data.hasEtherealAnvil = true;
           @keyother = Item.new(
             base: Item.database.find(id:'thechosen:wyvern-key-of-ice')
           );

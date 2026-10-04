@@ -191,7 +191,7 @@ return ::(
       // backout 
       if (windowEvent.canJumpToTag(:'pickItem')) {
         windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true);
-        windowEvent.queueMessage(text:'No items in inventory');    
+        windowEvent.queueMessage(text:'No items left here...');    
       }
     }
     

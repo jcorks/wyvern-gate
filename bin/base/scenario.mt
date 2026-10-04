@@ -65,7 +65,6 @@
         ignoreHunger : Boolean,  
         
         
-        
         // provides the options one has when interacting with a person.
         // Each member is an InteractionMenuEntry. Each function is passed an Entity
         // The filter and onChoice accept the entity.

@@ -27,6 +27,7 @@ return ::(canCancel => Boolean, onPick => Function, keep, onCancel, leftWeight, 
   @:all = world.party.getAllItems();
   @:items = all[0]
   @:equippedBy = all[1];
+  @:equippedKeyed = {};
   @:altNames = [];
 
   @:inv = Inventory.new(size:99999);
@@ -34,6 +35,7 @@ return ::(canCancel => Boolean, onPick => Function, keep, onCancel, leftWeight, 
       @prefix = '';
       
       if (equippedBy[i] != empty) ::<= {
+        equippedKeyed[v] = equippedBy[i];
         prefix = equippedBy[i].name + ': ';
       }
       inv.add(:v);
@@ -55,7 +57,7 @@ return ::(canCancel => Boolean, onPick => Function, keep, onCancel, leftWeight, 
     keep:if (keep == empty) true else keep,
     onPick ::(item) {
       breakpoint();
-      onPick(item, equippedBy:equippedBy[item]);
+      onPick(item, equippedBy:equippedKeyed[item]);
     }
   );
 }

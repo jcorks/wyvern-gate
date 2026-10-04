@@ -3405,7 +3405,7 @@ Interaction.newEntry(
       import(module:'base/widgets/pickpartyitem.mt')(
         filter ::(value) <- value.material != empty,
         canCancel: true,
-        keep: true,
+        keep: false,
         onPick ::(item, equippedBy) {
           windowEvent.queueChoices(
             prompt: item.name,

@@ -35,6 +35,7 @@
 
 @:filterStat::(stats, stat) {
   @:s = stats[stat]  
+  when(s == 0) '--'
   return if(stat == 'HP' || stat == 'AP') 
     displayHP(:s)
   else 

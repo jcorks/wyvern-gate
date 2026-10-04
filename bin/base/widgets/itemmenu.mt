@@ -282,9 +282,11 @@ return ::(
     
     
     
-      'Improve', ::{
-        (import(module:'base/widgets/itemimprove.mt'))(user, item:choiceItem, inBattle);   
-      },
+      ...if (world.scenario.data.hasEtherealAnvil != false) [
+        'Improve', ::{
+          (import(module:'base/widgets/itemimprove.mt'))(user, item:choiceItem, inBattle);   
+        }
+      ] else [],
 
     
       ...if (choiceItem.inletSlotSet != empty) [

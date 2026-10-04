@@ -43,7 +43,7 @@
       state[stat] += 1;
       item.improvement.stats.load(:state);
       
-      
+      breakpoint();
       if (user != empty) ::<= {
         @:oldStats = StatSet.new();
         @equiper = user;
@@ -89,7 +89,7 @@
       item.improvement.improve(:exp);      
       when (oldLevel != item.improvement.improvements) ::<= {
         windowEvent.queueMessage(
-          text: 'Item: Level up!'
+          text: item.name + ': Level up!'
         );
         windowEvent.queueCustom(
           onEnter :: {      
@@ -111,7 +111,7 @@
          
     },
     
-    onGetCaption      ::<- 'Item level: ' + item.improvement.improvements,
+    onGetCaption      ::<- item.name + ': Lv ' + item.improvement.improvements,
     onGetSubcaption   ::<- 'Exp to next level: ' + (remainingForLevel - (current - item.improvement.exp)),
     onGetSubsubcaption::<- '                  +' + (exp - (current - item.improvement.exp)),
     
@@ -197,7 +197,7 @@ return ::(user, item, inBattle) {
   
   
   @:StatSet = import(module:'base/util/statset.mt'); 
-  when (!party.isMember(entity:user)) ::<= {
+  when (user != empty && !party.isMember(entity:user)) ::<= {
     windowEvent.queueMessage(
       text: user.name + '\'s ' + item.name + ' can only be improved if they\'re in the party.'
     );                                    

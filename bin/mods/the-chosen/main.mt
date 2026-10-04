@@ -19,6 +19,7 @@
   everyoneIsAFriend : true,
   events : {
     onBegin ::(data) {
+      data.hasEtherealAnvil = false;
       import(:'wyvern-gate.rasa.thechosen/intro.mt')();
     }, 
       

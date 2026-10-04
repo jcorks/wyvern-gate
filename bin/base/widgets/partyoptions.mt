@@ -596,9 +596,10 @@ return ::{
                       return if (in.base.id != 'base:none') ::<= {
                         choices->push(:'Check');
                         choiceActions->push(::<- in.describe());
-                        choices->push(:'Improve');
-                        choiceActions->push(::<- (import(module:'base/widgets/itemimprove.mt'))(inBattle: false, user:member, item:in));
-
+                        if (world.scenario.data.hasEtherealAnvil != false) {
+                          choices->push(:'Improve');
+                          choiceActions->push(::<- (import(module:'base/widgets/itemimprove.mt'))(inBattle: false, user:member, item:in));
+                        }
                         if (in.inletSlotSet != empty) ::<= {
                           choices->push(:'Gems...');                        
                           choiceActions->push(::<- in.inletSlotSet.equip(user:member, item:in));
