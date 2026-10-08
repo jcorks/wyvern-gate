@@ -90,15 +90,15 @@ return ::(
           }
           
           // in battle variant
-          @:all = [
-            [...world.battle.getEnemies(:user)],
-            [...world.battle.getAllies(:user)]
-          ]
+          @:all = {
+            ('Enemies'): [...world.battle.getEnemies(:user)],
+            ('Allies'):  [...world.battle.getAllies(:user)]
+          }
           
-          @:allNames = [
-            [...(world.battle.getEnemies(:user)->map(::(value) <- value.name))],
-            [...(world.battle.getAllies (:user)->map(::(value) <- value.name))]        
-          ]
+          @:allNames = {
+            ('Enemies'): [...(world.battle.getEnemies(:user)->map(::(value) <- value.name))],
+            ('Allies'):  [...(world.battle.getAllies (:user)->map(::(value) <- value.name))]        
+          }
 
 
 
@@ -106,11 +106,11 @@ return ::(
           @choice = tabbedChoices(
             leftWeight: if (leftWeight == empty) 1 else leftWeight,
             topWeight: if (topWeight == empty) 1 else topWeight,
-            onGetTabs::<- [
+            onGetTabNames::<- [
               'Enemies',
               'Allies'
             ],
-            onGetChoices::(tabIndex) <- allNames[tabIndex],
+            onGetChoiceTable::<- allNames,
             canCancel: true,
             keep: true,
             onChoice ::(choice, tab) {

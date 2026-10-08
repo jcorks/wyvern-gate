@@ -258,7 +258,7 @@ Effect.newEntry(
         when (possible->size == 0) empty;
 
         @:art = random.pickArrayItem(:possible);
-        windowEvent.queueMessage(:holder.name + '\'s ' + art.base.name + ' Art recharged by 1!');
+        windowEvent.queueMessage(text:holder.name + '\'s ' + art.base.name + ' Art recharged by 1!');
         art.charge = art.charge+1;
       }
     }
@@ -1169,7 +1169,7 @@ Effect.newEntry(
   data : {
     name : 'Wyvern\'s Aura',
     id : 'base:the-wyvern',
-    description: 'The auro of the Wyvern envelopes the affected. The swiftness and power of the affected makes them particularly hard to hit.',
+    description: 'The aura of the Wyvern envelopes the affected. The swiftness and power of the affected makes them particularly hard to hit.',
     tier : 4,
     stackable: false,
     traits : TRAIT.BUFF,

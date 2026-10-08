@@ -3230,23 +3230,23 @@
 
     
       @:tabbedChoices = import(:'base/widgets/tabbedchoices.mt');
-      @:choices = [
-        [...enemies],
-        [...allies]
-      ];
+      @:choices = {
+        ('Enemies'): [...enemies],
+        ('Allies'):  [...allies]
+      };
 
-      @:choiceNames = [
-         [...(enemies->map(to:::(value)<- value.name))],
-         [...(allies-> map(to:::(value)<- value.name))]
-      ]              
+      @:choiceNames = {
+         ('Enemies'): [...(enemies->map(to:::(value)<- value.name))],
+         ('Allies'):  [...(allies-> map(to:::(value)<- value.name))]
+      }
       
 
       @hovered;
       tabbedChoices(
         leftWeight: 1,
         topWeight: 1,
-        onGetTabs ::<- ['Enemies', 'Allies'],
-        onGetChoices::(tab) <- choiceNames[tab],
+        onGetTabNames ::<- ['Enemies', 'Allies'],
+        onGetChoiceTable:: <- choiceNames,
         canCancel: if (canCancel == empty) true else canCancel,
         renderable : {
           render :: {

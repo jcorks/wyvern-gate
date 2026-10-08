@@ -49,6 +49,14 @@
   //empty
 ]
 
+@:tabbedReqTypeToString = ::<= {
+  @:out = [];
+  foreach(tabbedReqKeys) ::(k, v) {
+    out[tabbedReqs[k]] = v;
+  }
+  return out;
+}
+
 
 
 
@@ -85,21 +93,16 @@ return ::(
 ) {
   @names = []
   @items = []
+  
+  // for tabbed choices, key 
+  @itemsCategorized = {};
+  @itemsCategorizedNames = {};
   @picked;
   @cancelled = false;
-  @hoveredChoice = 0;
-  @tabCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // lazy,
+  @hoveredItem;
   @headerReal = [];
+  @choiceList;
   
-  @:getCondensedTabs ::{
-    @:out = [];
-    foreach(tabbedReqKeys) ::(k, v) {
-      if (tabCounts[k] != 0) 
-        out->push(:v);
-    }
-    
-    return out;
-  }
 
   if (showPrices == true && showRarity == true)
     error(:'Only prices or rarity can be shown at the same time. You can do custom stuff if youd like instead.');
@@ -110,22 +113,13 @@ return ::(
 
     args->remove(:'prompt');
     args.columns = true;
-
-
-
-    args.onGetTabs = ::<- getCondensedTabs()
-    
-    @:preTag = args.onGetChoices;
-    args.onGetChoices = ::(tab) {
-      filter = ::(value) { 
-        @:name = getCondensedTabs()[tab];
-        return value.base.sortType == tabbedReqs[tabbedReqKeys->findIndex(:name)];
-      }
-      return preTag();
+    args.onGetTabNames = ::<- tabbedReqKeys
+    args.onGetChoiceTable = :: {
+      return choiceList;    
     }
     
     args.onGetMinHeight = ::<- STATIC_HEIGHT + 3;
-    args.onGetMinWidth = ::{
+    /*args.onGetMinWidth = ::{
       //@:oldFilter = filter;
       //filter = empty;
       @min = 0;
@@ -140,29 +134,25 @@ return ::(
       }
       //filter = oldFilter
       return min;
-    }
+    }*/
     
     
     args.onChoice = ::(choice, tab) {
-      
-      when(choice == 0) empty;
-      listGenerator(); // refresh items list
-      picked = items[choice-1];
-      when(picked == empty) empty;
+      generateChoiceList();
+      hoveredItem = itemsCategorized[tab][choice-1];
+      when(hoveredItem == empty) empty;
       onPick(item:picked)    
     }
 
     if (args.onHover) ::<= {
       args.onHover = ::(choice, tab) {
-        hoveredChoice = choice;
-        when(choice == 0) empty;
-        listGenerator(); // refresh items list
-        picked = items[choice-1];
-        when(picked == empty) empty;
+        generateChoiceList();
+        hoveredItem = itemsCategorized[tab][choice-1];
+        when(hoveredItem == empty) empty;
         onHover(item:picked)    
       }
     } else {
-      args.onHover = ::(choice, tab) <- hoveredChoice = choice
+      args.onHover = ::(choice, tab) <- hoveredItem = itemsCategorized[tab][choice-1]
     }
     
   }  
@@ -177,14 +167,24 @@ return ::(
     else
       g(g:go);
   }
+  
 
-  @:listGenerator = ::{
+  
+  @listCache = {};
+  @:generateChoiceList = ::{
     @:Item = import(:'base/item.mt'); 
   
     items = if (includeLoot)
       [...inventory.items, ...inventory.loot]
     else 
       [...inventory.items]
+    
+    if (filter != empty)
+      items = items->filter(by:filter)
+
+
+
+    breakpoint();
     
     
     when (items->size == 0) ::<={
@@ -194,21 +194,20 @@ return ::(
         windowEvent.queueMessage(text:'No items left here...');    
       }
     }
-    
 
-      
-    
-    tabCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // lazy,
-    foreach(items) ::(k, value) {
-      tabCounts[tabbedReqs->findIndex(:value.base.sortType)] += 1;
-    
-    }
-    
-    if (filter != empty)
-      items = items->filter(by:filter)
 
-    when(items->size == 0)
-      empty;
+    /*
+    // check if we can return the cache as-is
+    @:same = (listCache->size == items->size) && (::? {
+      foreach(listCache) ::(k, item) {
+        if (item != items[k])
+          send(:false);
+      }
+      return true;
+    })
+    when(same) listCache;
+    listCache = [...listCache]
+    */
 
     @:alreadyCounted = [];
 
@@ -223,74 +222,105 @@ return ::(
     });
 
 
-    names = [...items]->map(to:::(value) <-     
 
-      (if (value.faveMark != '')
-        '[' + value.faveMark + '] '
-      else
-       ''
-      ) +
-
-    
-      (if ((alternateNames != empty) && alternateNames[value])
-        alternateNames[value]
-      else 
-        value.name
-      ) +
-      
-      (if (alreadyCounted[value.name]->type == Number && alreadyCounted[value.name] > 1)
-        '(x'+alreadyCounted[value.name]+')'
-      else 
-        ''
-      )
-      
-
-    );
     
     headerReal = ['Item'];
 
 
-    
-    @:data = [
-      ...(
-        ::<= {
-          when(showRarity) ::<={
-            @:rarities = items->map(::(value) <-
-              value.starsString
-            );
-            headerReal->push(:'Value');
-            return [names, rarities];
-          
-          }
-          
-          when(showPrices) ::<= {
-            @:prices = items->map(to:::(value) <-
-              gold(:value)
-            )
-            headerReal->push(:'Price');
-            return [names, prices]
-          }
-          
-          return [names];
-        }
-      ),
-      
-      // custom
-      ...(if (onGetExtraColumns != empty) {
-        headerReal = [...headerReal, ...extraHeader];
-        return onGetExtraColumns(:items)
-      } else 
-        [])
-    ]
-    
-    if (data->size != headerReal->size) {
-      error(:'Miscount between header size and generated list size. Check your onGetColumns() return value and the preset header.');
+    if (showRarity) ::<={
+      headerReal->push(:'Value');
     }
-    return data;
+          
+    if (showPrices) ::<= {
+      headerReal->push(:'Price');
+    }
 
+    if (onGetExtraColumns != empty) {
+      headerReal = [...headerReal, ...extraHeader];
+    }
+
+
+    @:itemToChoiceEntry = ::(item) {
+      @:value = item;
+      @:name = (if (value.faveMark != '')
+          '[' + value.faveMark + '] '
+        else
+         ''
+        ) +
+
+      
+        (if ((alternateNames != empty) && alternateNames[value])
+          alternateNames[value]
+        else 
+          value.name
+        ) +
+        
+        (if (alreadyCounted[value.name]->type == Number && alreadyCounted[value.name] > 1)
+          '(x'+alreadyCounted[value.name]+')'
+        else 
+          ''
+        )
+      ;
+    
+
+      @:out = [name];
+      if (showRarity) ::<={
+        out->push(:value.starsString);
+      }
+
+      if (showPrices) ::<={
+        out->push(:gold(:value));
+      }
+        // custom
+      if (onGetExtraColumns != empty) {
+        headerReal = [...headerReal, ...extraHeader];
+      } 
+      return out
+    }
+
+    @data = {};
+    if (tabbed) {
+      itemsCategorized = {};
+      foreach(items) ::(k, v) {
+        @:tabName = tabbedReqTypeToString[v.base.sortType];
+        @cat = itemsCategorized[tabName];
+        if (cat == empty) {
+          cat = [];
+          itemsCategorized[tabName] = cat;
+        }
+        cat->push(:v);
+      }
+      
+      data = {};
+      foreach(itemsCategorized) ::(k, v) {
+        @cat = data[k];
+        if (cat == empty) {
+          cat = [];
+          data[k] = cat;
+        }
+        foreach(v) ::(index, item) {
+          foreach(itemToChoiceEntry(:item)) ::(k2, value) {
+            if (data[k][k2] == empty) {
+              data[k][k2] = [];
+            }
+            data[k][k2]->push(:value);
+          }
+        } 
+      }
+    } else {
+      foreach(items) ::(k, v) {
+        foreach(itemToChoiceEntry(:v)) ::(index, entry) {
+          if (data[index] == empty) {
+            data[index] = [];
+          }
+          data[index]->push(:entry);
+        } 
+      }
+    }
+    choiceList = data;
   }
 
-  listGenerator()
+  generateChoiceList()
   when (items->size == 0)
     if (filter != empty)
       windowEvent.queueMessage(
@@ -322,7 +352,7 @@ return ::(
         onCancel::{cancelled = true;},
         onHover : if (onHover)
           ::(choice) {
-            hoveredChoice = choice
+            hoveredItem = items[choice-1]
             when(choice == 0) empty;
             onHover(item:items[choice-1])
           }
@@ -332,8 +362,6 @@ return ::(
           render :: {
             @:Arts = import(module:'base/arts.mt');
 
-            @:choice = hoveredChoice;
-            @hoveredItem = items[choice-1];
             when(hoveredItem == empty) empty;
             
 
@@ -431,7 +459,10 @@ return ::(
             if (renderable != empty) renderable.render()
           }
         },
-        onGetChoices ::<- listGenerator(),
+        onGetChoices :: {
+          generateChoiceList();
+          return choiceList;
+        },
         keep: if (keep == empty) true else keep,
         onChoice ::(choice, tab) {
           when(choice == 0) empty;

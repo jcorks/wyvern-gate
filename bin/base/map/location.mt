@@ -2061,9 +2061,9 @@ Location.database.newEntry(data:{
   traits: 0,
 
   descriptions: [
-    'A statue depecting a forlorn wyvern holding their hands in the air in sorrow. It\'s very old.',
-    'A statue depecting a kneeling wyvern, looking to the sky. It\'s very old.',
-    'A statue depecting a wyvern with one wing in the air, and the other wrapping around themself. It\'s very old.',
+    'A statue depicting a forlorn wyvern holding their hands in the air in sorrow. It\'s very old.',
+    'A statue depicting a kneeling wyvern, looking to the sky. It\'s very old.',
+    'A statue depicting a wyvern with one wing in the air, and the other wrapping around themself. It\'s very old.',
   ],
   interactions : [
     'base:pray-statue'
@@ -2121,7 +2121,7 @@ Location.database.newEntry(data:{
   traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
-    'A makeshift wooden stand with a crude sign depecting a sheep selling clothing.'
+    'A makeshift wooden stand with a crude sign depicting a sheep selling clothing.'
   ],
   interactions : [
     'base:buy:shop',
@@ -2200,7 +2200,7 @@ Location.database.newEntry(data:{
   traits: TRAIT.ONE_PER_LANDMARK,
 
   descriptions: [
-    'A makeshift wooden stand with a crude sign depecting a drake-kin selling potions.'
+    'A makeshift wooden stand with a crude sign depicting a drake-kin selling potions.'
   ],
   interactions : [
     'base:buy:shop',

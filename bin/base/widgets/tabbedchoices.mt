@@ -18,14 +18,14 @@
 
 @:windowEvent = import(:"core/windowevent.mt");
 
-@:renderPrompt::(tabs, selected, lastTabState) {
+@:renderPrompt::(tabs, selected, tabNames) {
   @line = '';
+  @tabName = tabNames[selected]
   
-  @:hasItems = ::(v) <- lastTabState[v] != empty && lastTabState[v]->size > 0
-  @:filtered = tabs->filter(::(value) <- hasItems(:value));
-  selected = filtered->findIndex(:tabs[selected]);
-  
-  foreach(tabs->filter(::(value) <- hasItems(:value))) ::(k, v) {
+  @:hasItems = ::(v) <- tabs[v] != empty && tabs[v][0]->size > 0  
+  @:filtered = tabNames->filter(::(value) <- hasItems(:value));
+  selected = filtered->findIndex(value:tabName);
+  foreach(filtered) ::(k, v) {
     @distance = (k-selected);
     
     when(distance < 0) empty;
@@ -44,7 +44,7 @@
         default:   ']'
       };
 
-    line = line + '<<< ' + (tabs[selected]) + '  ]' 
+    line = line + '<<< ' + (filtered[selected]) + '  ]' 
   }
   
   
@@ -56,13 +56,14 @@
 
 
 return ::(*args) {
-  when (args.onGetTabs      == empty) error(detail:"onGetTabs is empty for tabbed choices!");
-  when (args.onGetChoices   == empty) error(detail:"onGetChoices is required for tabbed choices!");
-  when (args.onChoice       == empty) error(detail:"onChoice is required from tabbed choices!");
-  when (args.horizontalFlow != empty) error(detail:"horizontalFlow is not supported for tabbedchoices!");
+  when (args.onGetTabNames    == empty) error(detail:"onGetTabNames is empty for tabbed choices! This is used to determine the order of the tabs. It can be a superset of the available tabs");
+  when (args.onGetChoiceTable == empty) error(detail:"onGetChoiceTable is required for tabbed choices! This should ");
+  when (args.onChoice         == empty) error(detail:"onChoice is required from tabbed choices!");
+  when (args.horizontalFlow   != empty) error(detail:"horizontalFlow is not supported for tabbedchoices!");
   when (args.prompt != empty || args.onGetPrompt != empty)
     error(detail:"Prompt is overridden by tabbed choices!");
 
+  @:columns = args.columns;
   @widget = if (args.columns)
     import(:'base/widgets/choicescolumns.mt')
   else 
@@ -73,6 +74,16 @@ return ::(*args) {
   @lastInput = inputNext;
 
 
+  @:nextTab::(offset) {
+    if (offset == empty) offset = 1
+    if (tabNamesIndex + offset < 0)
+      tabNamesIndex += tabNames->size
+    tabNamesIndex = (tabNamesIndex + offset) % tabNames->size
+    breakpoint();
+    if (args.onChangeTabs)
+      args.onChangeTabs(:tabNamesIndex);
+  }
+
   @:onInput::(input) {
     when(input != inputNext &&
          input != inputPrev) empty;
@@ -80,41 +91,31 @@ return ::(*args) {
     lastInput = input;
 
     @offset = if (input == inputNext) 1 else -1;
-
-    if (tabIndex + offset < 0)
-      tabIndex += tabs->size
-    tabIndex = (tabIndex + offset) % tabs->size
-    if (args.onChangeTabs)
-      args.onChangeTabs(:tabIndex);
+    nextTab(offset);
   }
   
 
 
-  @tabs = args.onGetTabs();
-  @:lastTabState = {};
-  @tabIndex = 0;
+  @tabs;
+  @tabNames;
+  @tabNamesIndex = 0;
   if (args.onChangeTabs)
-    args.onChangeTabs(:tabIndex);
+    args.onChangeTabs(:tabNamesIndex);
   args.choices = empty;
 
-  @:realOnGetChoices = args.onGetChoices;
+  @:realOnGetChoices = args.onGetChoiceTable;
 
   args.onGetChoices = :: {
-    tabs = args.onGetTabs();
-    foreach(tabs) ::(k, v) {
-      @:all = realOnGetChoices(:k)
-      lastTabState[v] = all;
-    }
-
+    tabs = realOnGetChoices();
     @out;
-    @:origTab = tabIndex;
+    @:origTab = tabNamesIndex;
+    tabNames = args.onGetTabNames();
     ::? {
       forever ::{
-          out = lastTabState[tabs[tabIndex]];
-          realOnGetChoices(:tabIndex)
-          when (out != empty) send();
-          onInput(:lastInput);
-          when(origTab == tabIndex) send();
+        out = tabs[tabNames[tabNamesIndex]];
+        when (out != empty && out[0]->size > 0) send();
+        nextTab();
+        when(origTab == tabNamesIndex) send();
       }
     }
     return out;
@@ -122,24 +123,23 @@ return ::(*args) {
 
   @:realOnChoice = args.onChoice;
   args.onChoice = ::(choice) {
-    
-    realOnChoice(choice, tab:tabIndex);
+    realOnChoice(choice, tab:tabNames[tabNamesIndex]);
   }
 
   if (args.onHover) ::<= {
     @:realOnHover = args.onHover;
     args.onHover = ::(choice) {
-      realOnHover(choice, tab:tabIndex);
+      realOnHover(choice, tab:tabNames[tabNamesIndex]);
     }
   }
 
 
-
+  /*
   if (args.onGetMinWidth == empty)
     args.onGetMinWidth = ::() {
       @min = 0;
       foreach(tabs) ::(k, v) {
-        @:all = lastTabState[v];
+        @:all = if (columns) v[0] else v;
         foreach(all) ::(k, name) {
           if (min < name->length)
             min = name->length
@@ -147,21 +147,21 @@ return ::(*args) {
       }
       return min
     }
-
+*/
   if (args.onGetMinHeight == empty)
     args.onGetMinHeight = ::() {
-      @min = 0;
+      @min = 999
       foreach(tabs) ::(k, v) {
-        @:all = lastTabState[v];
+        @:all = if (columns) v[0] else v;
         if (min < all->size)
             min = all->size
         
       }
       return min;
     }
-
+  
   args.onGetPrompt = ::<-
-    renderPrompt(tabs, selected:tabIndex, lastTabState);
+    renderPrompt(tabs, selected:tabNamesIndex, tabNames);
   
   args.onInput = onInput;
 

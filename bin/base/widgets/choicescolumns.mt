@@ -31,7 +31,6 @@ return ::(*args) {
   
   @:convertToChoices::(columns => Object, header) {
 
-  
     @padBlock = [];
     @:padColumnRow::(text, size, leftJustified) {
       padBlock->setSize(size:0);

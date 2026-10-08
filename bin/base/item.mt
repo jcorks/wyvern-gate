@@ -3569,13 +3569,17 @@ none.name = 'None';
   @out = String.combine(strings:[
     if (state.coreDescription != '') state.coreDescription else base.description,
     ' ',
-    (if (state.arts == empty) '' else 'If equipped, ' + 
-      (if (state.arts[0] == state.arts[1])
-          'the Art "' + Arts.database.find(id:state.arts[0]).name + '" becomes available often in battle. '
-        else
-          'the Arts "' + Arts.database.find(id:state.arts[0]).name + '" and "' + Arts.database.find(id:state.arts[1]).name + '" become available in battle. '
+    (if (state.arts == empty) 
+      '' else (
+        'If equipped, ' + 
+          (if (state.arts[0] == state.arts[1])
+              'the Art "' + Arts.database.find(id:state.arts[0]).name + '" becomes available often in battle. '
+            else
+              'the Arts "' + Arts.database.find(id:state.arts[0]).name + '" and "' + Arts.database.find(id:state.arts[1]).name + '" become available in battle. '
+          )
+        ) + (if (state.arts[2] != empty) "It seems it unlocks a different Art as well. " else '')
       )
-    ),
+    ,
     if (state.size == -1) '' else 'It is ' + sizeToString(state) + '. ',
     if (state.hasEmblem) (
       if (base.hasTraits(:TRAIT.APPAREL)) 
