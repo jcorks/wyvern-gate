@@ -79,7 +79,6 @@ return ::(*args) {
     if (tabNamesIndex + offset < 0)
       tabNamesIndex += tabNames->size
     tabNamesIndex = (tabNamesIndex + offset) % tabNames->size
-    breakpoint();
     if (args.onChangeTabs)
       args.onChangeTabs(:tabNamesIndex);
   }

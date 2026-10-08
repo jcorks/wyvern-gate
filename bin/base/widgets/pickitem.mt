@@ -141,7 +141,7 @@ return ::(
       generateChoiceList();
       hoveredItem = itemsCategorized[tab][choice-1];
       when(hoveredItem == empty) empty;
-      onPick(item:picked)    
+      onPick(item:hoveredItem)    
     }
 
     if (args.onHover) ::<= {
@@ -149,7 +149,7 @@ return ::(
         generateChoiceList();
         hoveredItem = itemsCategorized[tab][choice-1];
         when(hoveredItem == empty) empty;
-        onHover(item:picked)    
+        onHover(item:hoveredItem)    
       }
     } else {
       args.onHover = ::(choice, tab) <- hoveredItem = itemsCategorized[tab][choice-1]
@@ -184,7 +184,6 @@ return ::(
 
 
 
-    breakpoint();
     
     
     when (items->size == 0) ::<={

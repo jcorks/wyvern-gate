@@ -472,7 +472,7 @@ foreach(EVENTS) ::(k, v) {
       
       
       emitEvent::(*args) {
-        when(events == false) empty;
+        when(events == false) [];
         @:name = args.name => String;
         when(eventLookup[name] == empty)
           error(:'Tried to emit an unrecognized event. What the heck is this thing?? (' + name + '?)');
