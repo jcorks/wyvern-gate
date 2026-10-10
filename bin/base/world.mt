@@ -575,6 +575,10 @@
       saveName : {        
         get :: {
           return state.saveName
+        },
+        
+        set ::(value) {
+          state.saveName = value
         }
       },
             

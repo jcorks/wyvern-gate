@@ -175,10 +175,9 @@
       },
       
       battleStart ::(from, item){
-        breakpoint();
         when(state.event != '') empty;
-        from.addEffect(
-          from, id: state.effectID, durationTurns: Arts.A_LOT, item
+        from.effectStack.add(
+          from, id: state.effectID, duration: Arts.A_LOT, item, noNotify:true
         );
       },
       

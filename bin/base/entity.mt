@@ -2762,7 +2762,7 @@
         this.addEffect(from, id:'base:dying', durationTurns:1);
     },
     
-    addEffect::(from => Object, id => String, durationTurns => Number, item, innate) {
+    addEffect::(from => Object, id => String, durationTurns => Number, item, innate, skipStatCheck) {
       @:state = _.state;
       @:this = _.this;
       
@@ -2806,7 +2806,8 @@
         );
       }
 
-      this.checkStatChanged();
+      if (skipStatCheck != true)
+        this.checkStatChanged();
 
 
       if (this.effectStack != empty) ::<= {
@@ -2889,6 +2890,7 @@
       }
       this.recalculateStats();
       if (StatSet.isDifferent(stats:oldStats, other:this.stats)) ::<= {
+        breakpoint();
         windowEvent.queueDisplay(
           prompt: this.name + ': stats changed!',
           lines: StatSet.diffToLines(
