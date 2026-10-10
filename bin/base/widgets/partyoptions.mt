@@ -477,6 +477,7 @@ return ::{
                         render ::{
                           menuRenderable.render();
                           when(hovered == empty) empty;
+                          when(hovered.needsAppraisal) empty;
 
                           @:currentStats = member.stats.clone();
                           @:withEquip = member.statsIfEquippedInstead(item:hovered, slot);
@@ -494,6 +495,11 @@ return ::{
                       onHover ::(item) <- hovered = item,
                       
                       onPick:::(item) {
+                        when(item.needsAppraisal) ::<= {
+                          windowEvent.queueMessage(
+                            text: 'The chaotic nature of the item prevents equipping. Appraising the item will solidify its presence.'
+                          );
+                        }
 
                         // unequip
                         when (item.base.id == 'base:placeholder') ::<= {
@@ -517,9 +523,9 @@ return ::{
                         windowEvent.queueChoices(
                           choices:
                             if (item.inletSlotSet == empty)
-                              ['Equip', 'Check', 'Rename', 'Compare']
+                              ['Equip', 'Check', 'Mark Favorite', 'Rename', 'Compare']
                             else
-                              ['Equip', 'Check', 'Rename', 'Compare', 'Gems...'],
+                              ['Equip', 'Check', 'Mark Favorite', 'Rename', 'Compare', 'Gems...'],
                           prompt: item.name,
                           canCancel: true,
                           leftWeight: 1,
@@ -537,12 +543,45 @@ return ::{
                               windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true, doResolveNext:true);
                             }
                             
-                            when(choice == 2) 
+                              
+                            when(choice == 2) ::<= {
+                              @:symbols = [
+                                'None',
+                                '&',
+                                '@',
+                                '!',
+                                '#',
+                                '$',
+                                '%',
+                                '^',
+                                '*',
+                                '+',
+                                '-'
+                              ]
+                              windowEvent.queueChoices(
+                                prompt: 'Mark with which symbol?',
+                                choices : symbols,
+                                canCancel : true,
+                                onChoice ::(choice) {
+                                  when(choice == 1)
+                                    item.faveMark = '';
+                                    
+                                  item.faveMark = symbols[choice-1];
+                                }
+                              );
+                            }
+
+                            when(choice == 3) 
                               item.describe();
 
-                            when(choice == 3) ::<= {
+                            when(choice == 4) ::<= {
                               when (!item.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
                                 windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
+
+                              when(item.needsAppraisal)
+                                windowEvent.queueMessage(
+                                  text: 'The chaotic nature of this item prevents renaming. Appraisal will help solidify its existence.'
+                                );                                              
                             
                             
                               @:name = import(module:"base/widgets/name.mt");
@@ -555,7 +594,7 @@ return ::{
                               );
                             }
 
-                            when(choice == 4) ::<= {
+                            when(choice == 5) ::<= {
                               @slot = member.getSlotsForItem(item)[0];
                               @currentEquip = member.getEquipped(slot);
                               
@@ -566,7 +605,7 @@ return ::{
                             }
 
 
-                            when(choice == 5) ::<= {
+                            when(choice == 6) ::<= {
                               item.inletSlotSet.equip(user:member, item:item);
                             }
                           }
@@ -604,10 +643,48 @@ return ::{
                           choices->push(:'Gems...');                        
                           choiceActions->push(::<- in.inletSlotSet.equip(user:member, item:in));
                         }
+                        
+                        choices->push(:'Mark Favorite');
+                        choiceActions->push(::{
+                          
+                          @:symbols = [
+                            'None',
+                            '&',
+                            '@',
+                            '!',
+                            '#',
+                            '$',
+                            '%',
+                            '^',
+                            '*',
+                            '+',
+                            '-'
+                          ]
+                          windowEvent.queueChoices(
+                            prompt: 'Mark with which symbol?',
+                            choices : symbols,
+                            canCancel : true,
+                            onChoice ::(choice) {
+                              when(choice == 1)
+                                in.faveMark = '';
+                                
+                              in.faveMark = symbols[choice-1];
+                            }
+                          );
+                                          
+                        });
+                        
                         choices->push(:'Rename');
                         choiceActions->push(::{
                           when (!in.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
                             windowEvent.queueMessage(text:member.in.name + ' cannot be renamed.');
+
+                          when(in.needsAppraisal)
+                            windowEvent.queueMessage(
+                              text: 'The chaotic nature of this item prevents renaming. Appraisal will help solidify its existence.'
+                            );                                              
+
+
                           @:name = import(module:"base/widgets/name.mt");
                           name(
                             prompt: 'New item name:',

@@ -207,7 +207,7 @@ return ::(
         ),
     
     
-      ...if (limitedMenu != true) 
+      ...if (limitedMenu != true && choiceItem.needsAppraisal == false) 
         [
           'Equip', ::{
             commitAction(action:BattleAction.new(
@@ -267,6 +267,11 @@ return ::(
       'Rename', ::{
         when (!choiceItem.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
           windowEvent.queueMessage(text:choiceItem.name + ' cannot be renamed.');
+
+        when(choiceItem.needsAppraisal)
+          windowEvent.queueMessage(
+            text: 'The chaotic nature of this item prevents renaming. Appraisal will help solidify its existence.'
+          );                                              
         
         @:name = import(module:"base/widgets/name.mt");
         name(

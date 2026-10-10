@@ -195,6 +195,11 @@ return ::(user, item, inBattle) {
     );                                              
   }
   
+  when(item.needsAppraisal)
+    windowEvent.queueMessage(
+      text: 'The chaotic nature of this item prevents improvement. Appraisal will help solidify its existence.'
+    );                                              
+  
   
   @:StatSet = import(module:'base/util/statset.mt'); 
   when (user != empty && !party.isMember(entity:user)) ::<= {

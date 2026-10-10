@@ -3787,7 +3787,7 @@ none.name = 'None';
 
       
       if (state.needsAppraisal)
-        state.price = 999;
+        state.price = 1;
       
       if (base.hasTraits(:TRAIT.HAS_SIZE))   
         assignSize(state);
@@ -4023,8 +4023,15 @@ none.name = 'None';
       
     name : {
       get :: {
-        when (_.state.customName != '') _.state.customName;
-        return _.state.base.name;
+        @state = _.state;
+        return (if (state.faveMark != '')
+          '[' + state.faveMark + '] '
+        else
+         ''
+        ) + ::<= {
+          when (state.customName != '') state.customName;
+          return state.base.name
+        }
       },
       
       set ::(value => String)  {
@@ -4088,6 +4095,7 @@ none.name = 'None';
         apparelHint : if ((base.traits & TRAIT.APPAREL) != 0) ApparelMaterial.getRandom().id
       );
       item.name = random.pickArrayItem(:keyQualifiers) + ' ' + base.name + (if(random.flipCoin()) '' else (' of ' + random.pickArrayItem(:keyThemes)));
+      item.faveMark = _.this.faveMark;
       _.state.appraisalCount += 1;
       return item;
     },
@@ -4483,7 +4491,10 @@ none.name = 'None';
     
     faveMark : {
       get ::<- _.state.faveMark,
-      set ::(value) <- _.state.faveMark = value
+      set ::(value) {
+        _.state.faveMark = value
+        recalculateName(state:_.state);
+      }
     },
     
     setUpInlet ::(stats, effect, art, slot) {

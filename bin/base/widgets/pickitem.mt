@@ -240,12 +240,7 @@ return ::(
 
     @:itemToChoiceEntry = ::(item) {
       @:value = item;
-      @:name = (if (value.faveMark != '')
-          '[' + value.faveMark + '] '
-        else
-         ''
-        ) +
-
+      @:name = ''+
       
         (if ((alternateNames != empty) && alternateNames[value])
           alternateNames[value]
@@ -426,33 +421,34 @@ return ::(
             when(hoveredItem.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) empty;
 
             
-            
-            canvas.renderTextFrameGeneral(
-              title: 'Summary:',
-              lines: [
-                'Stat boosts:',
-                ...(hoveredItem.stats.descriptionRateLines->map(::(value) <- ' ' + value)),
-                
-                ...([if (hoveredItem.inletSlotSet != empty)
-                  '' + hoveredItem.inletSlotSet.size + ' gem slot' + if (hoveredItem.inletSlotSet.size == 1) '.' else 's.'
-                else 
-                  ''])
+            if (hoveredItem.needsAppraisal == false) {
+              canvas.renderTextFrameGeneral(
+                title: 'Summary:',
+                lines: [
+                  'Stat boosts:',
+                  ...(hoveredItem.stats.descriptionRateLines->map(::(value) <- ' ' + value)),
+                  
+                  ...([if (hoveredItem.inletSlotSet != empty)
+                    '' + hoveredItem.inletSlotSet.size + ' gem slot' + if (hoveredItem.inletSlotSet.size == 1) '.' else 's.'
+                  else 
+                    ''])
 
-              ],
-              leftWeight: 0,
-              topWeight: 0
-            )
+                ],
+                leftWeight: 0,
+                topWeight: 0
+              )
 
-            canvas.renderTextFrameGeneral(
-              title: 'Summary:',
-              lines: [
-                'Arts:',
-                ...getArtDesc(id1:hoveredItem.arts[0],
-                              id2:hoveredItem.arts[1])
-              ],
-              leftWeight: 0,
-              topWeight: 1
-            )
+              canvas.renderTextFrameGeneral(
+                title: 'Summary:',
+                lines: [
+                  'Arts:',
+                  ...getArtDesc(id1:hoveredItem.arts[0],
+                                id2:hoveredItem.arts[1])
+                ],
+                leftWeight: 0,
+                topWeight: 1
+              )
+            }
 
             if (renderable != empty) renderable.render()
           }

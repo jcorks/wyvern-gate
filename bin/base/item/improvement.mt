@@ -60,8 +60,10 @@
           leveled = true;
         }
         
-        if (leveled)
+        if (leveled) {
+          item.price = (item.price * 1.08)->ceil
           item.recalculateName();
+        }
         return exp;
       },
 
