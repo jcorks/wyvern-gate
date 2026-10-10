@@ -642,7 +642,7 @@ return ::<= {
   
   result.random = random.save();
 
-  return JSON.encode(:result);  
+  return JSON.encode(object:result);  
 }
 
 

@@ -21,6 +21,23 @@
 @:renderPrompt::(tabs, selected, tabNames) {
   @line = '';
   @tabName = tabNames[selected]
+  @maxLen = 0;
+  foreach(tabNames) ::(k, v) {
+    if (v->length > maxLen)
+      maxLen = v->length;
+  }
+  @:pad = ::(str) {
+    @:strs = [];
+    for(0, maxLen/2 - str->length/2) ::(i) {
+      strs->push(:' ');
+    }
+    strs->push(:str);
+    for(maxLen/2 + str->length/2, maxLen) ::(i) {
+      strs->push(:' ');
+    }
+
+    return String.combine(:strs);
+  }
   
   @:hasItems = ::(v) <- tabs[v] != empty && tabs[v][0]->size > 0  
   @:filtered = tabNames->filter(::(value) <- hasItems(:value));
@@ -44,7 +61,7 @@
         default:   ']'
       };
 
-    line = line + '<<< ' + (filtered[selected]) + '  ]' 
+    line = line + '<<< ' + (pad(:filtered[selected])) + '  ]' 
   }
   
   
@@ -74,11 +91,29 @@ return ::(*args) {
   @lastInput = inputNext;
 
 
-  @:nextTab::(offset) {
+  @:nextTab::(offset) { 
+    when(tabNames->size == 1) empty;
+    
     if (offset == empty) offset = 1
-    if (tabNamesIndex + offset < 0)
-      tabNamesIndex += tabNames->size
-    tabNamesIndex = (tabNamesIndex + offset) % tabNames->size
+    
+    // the inverse of onGetChoices' use of nextTab forward.
+    // should combine at one point. Also hi, i havent been commenting much lately, 
+    // so im gonna try now!! yay!
+    if (offset < 0) {
+      @:origIndex = tabNamesIndex;
+      ::? {
+        forever ::{
+          tabNamesIndex-=1;
+          if (tabNamesIndex < 0) tabNamesIndex += tabNames->size;
+          @out = tabs[tabNames[tabNamesIndex]];
+          when (out != empty && out[0]->size > 0) send();
+          // bug of some kind if it happens
+          when(tabNamesIndex == origIndex) send();
+        }
+      }
+    } else {
+      tabNamesIndex = (tabNamesIndex + offset) % tabNames->size
+    }
     if (args.onChangeTabs)
       args.onChangeTabs(:tabNamesIndex);
   }
@@ -158,7 +193,6 @@ return ::(*args) {
       }
       return min;
     }
-  
   args.onGetPrompt = ::<-
     renderPrompt(tabs, selected:tabNamesIndex, tabNames);
   

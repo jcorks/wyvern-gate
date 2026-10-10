@@ -837,7 +837,7 @@
 
         // cleanup
         State.endRootSerializeGuard();
-        State.weightEmplace(:save);
+        //State.weightEmplace(:save);
         return save;        
       },
 
@@ -856,7 +856,7 @@
             island = alreadyLoaded 
           else ::<= {
             island = Island.new(base:Island.database.find(:'base:none'), createEmpty:true);
-            State.weightCheck(:which);
+            //State.weightCheck(:which);
             island.load(serialized:which);
           }
           
@@ -865,7 +865,7 @@
           if (skipSave != true) ::<= {
             save.world = state.save();
             save.rng = random.save();
-            State.weightEmplace(:save);
+            //State.weightEmplace(:save);
             instance.savestate(saveOverride:save);      
           }
           
@@ -938,10 +938,10 @@
       load ::(serialized) {
         State.startRootSerializeGuard();
         ::<= {
-          if (!State.weightCheck(:serialized)) ::<= {
+          /*if (!State.weightCheck(:serialized)) ::<= {
             @:instance = import(:'base/instance.mt');
             instance.x = true;
-          }
+          }*/
         
           if (serialized.rng != empty)
             random.load(:serialized.rng);

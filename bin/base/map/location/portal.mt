@@ -52,7 +52,6 @@
       state.destinationWorldID = targetPortal.worldID;
       
       targetPortal.data.linkedPortalLandmarkID = location.landmark.base.id;
-      breakpoint();
       targetPortal.portal.linkEnd(
         locationWorldID : location.worldID
       )
@@ -130,7 +129,6 @@
           startAnimationRenderable : currentLandmark.map,
           skipAnimation, 
           onLoad ::(landmark) { 
-            breakpoint();
             if (state.destinationWorldID == -1) ::<= {
               if (state.chainItems != empty) ::<= {
                 foreach(state.chainItems) ::(k, v) {

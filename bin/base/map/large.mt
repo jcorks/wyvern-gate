@@ -43,7 +43,7 @@
 
       create::(parent, sizeW, sizeH, symbols, onDone) {        
         @:JSON = import(:"Matte.Core.JSON");
-        @:input = JSON.encode(:{
+        @:input = JSON.encode(object:{
           sizeW : sizeW,
           sizeH : sizeH,
           symbols : symbols,

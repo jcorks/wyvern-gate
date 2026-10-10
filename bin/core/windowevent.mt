@@ -40,7 +40,7 @@
   FADE_TO_BLACK : 1
 }
 
-@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth, bufferHorizontal, bufferVertical, disableFrame, speakerRight) <- 
+@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth, bufferHorizontal, bufferVertical, disableFrame, speakerRight) <-
     canvas.renderTextFrameGeneral(
       leftWeight, 
       topWeight, 
@@ -289,22 +289,22 @@
             data.renderable.render()
 
           @:output = data.animationFrame();
-          if (output == ANIMATION_FINISHED) ::<= {
+          if (output == ANIMATION_FINISHED)
             data.renderState = RENDER_STATE.DONE;
-          }
+          
 
           commitVisual(data);
           
         } else ::<= {        
 
           @renderAgain = false;
-          if (data.renderable) ::<= {
+          if (data.renderable)
             renderAgain = (data.renderable.render()) == this.RENDER_AGAIN;    
-          }
           
-          if (data.thisRender) ::<= {
+          
+          if (data.thisRender)
             renderAgain = (data.thisRender()) == this.RENDER_AGAIN;    
-          }
+          
             
           if (renderOnly == empty && rerender != true)
             commitVisual(data);
@@ -312,6 +312,7 @@
           
           if (renderAgain == false)
             data.rendered = true;
+          
 
         }
       }
@@ -533,6 +534,8 @@
       
 
       @:choicesMatch = if (data.onGetChoicesMatch) data.onGetChoicesMatch() else data.choicesMatch;
+
+      if (data.jumpTag == 'pickItem' && data.rendered == empty) breakpoint();
       @:choices = if (choicesMatch == empty)
           if (data.onGetChoices) data.onGetChoices() else data.choices
         else

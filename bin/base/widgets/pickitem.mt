@@ -115,6 +115,7 @@ return ::(
     args.columns = true;
     args.onGetTabNames = ::<- tabbedReqKeys
     args.onGetChoiceTable = :: {
+      generateChoiceList();
       return choiceList;    
     }
     
@@ -138,21 +139,19 @@ return ::(
     
     
     args.onChoice = ::(choice, tab) {
-      generateChoiceList();
       hoveredItem = itemsCategorized[tab][choice-1];
       when(hoveredItem == empty) empty;
       onPick(item:hoveredItem)    
     }
 
-    if (args.onHover) ::<= {
-      args.onHover = ::(choice, tab) {
-        generateChoiceList();
-        hoveredItem = itemsCategorized[tab][choice-1];
-        when(hoveredItem == empty) empty;
+    args.onHover = ::(choice, tab) {
+      generateChoiceList();
+      hoveredItem = empty;
+      when(itemsCategorized[tab] == empty || itemsCategorized[tab]->size == 0) empty;
+      hoveredItem = itemsCategorized[tab][choice-1];
+      when(hoveredItem == empty) empty;
+      if (onHover)
         onHover(item:hoveredItem)    
-      }
-    } else {
-      args.onHover = ::(choice, tab) <- hoveredItem = itemsCategorized[tab][choice-1]
     }
     
   }  

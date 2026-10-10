@@ -209,7 +209,7 @@ import(module:'base/accolade/newrecord.mt');
     ) {
       writeDataText_(
         name: 'save_' + slot,
-        string: if (data->type == String) data else JSON.encode(:data)
+        string: if (data->type == String) data else JSON.encode(object:data, pretty:true)
       );
     };
       
@@ -609,7 +609,7 @@ import(module:'base/accolade/newrecord.mt');
         windowEvent.autoSkipAnimations = !settings.animations;
         canvas.showEffects = settings.effects;
         hud.enable = settings.hud;
-        onSaveSettings(data:JSON.encode(object:settings));      
+        onSaveSettings(data:JSON.encode(object:settings, pretty:true));      
       },
       
       writeDataText : {get ::<- writeDataText_},
@@ -684,7 +684,6 @@ import(module:'base/accolade/newrecord.mt');
           settings = JSON.decode(string:settings);
           this.updateSettings();
         }
-
 
 
 
@@ -1324,6 +1323,59 @@ return empty;
       },
 
       queueCredits :: {
+
+
+
+/*
+import(:'base/widgets/animatemultibar.mt')(
+  clients : [
+    {
+      title : 'ATK',
+      from: 10,
+      to: 80,
+      max: 100
+    },
+    {
+      title : 'DEF',
+      from: 30,
+      to: 75,
+      max: 100
+    },
+    {
+      title : 'INT',
+      from: 40,
+      to: 90,
+      max: 100
+    },
+    {
+      title : 'SPD',
+      from: 40,
+      to: 80,
+      max: 100
+    },
+    {
+      title : 'DEX',
+      from: 35,
+      to: 100,
+      max: 100
+    },
+
+  ],
+  onGetCaption      ::<- ': Lv ' + 2,
+  onGetSubcaption   ::<- 'Exp to next level: ',
+  onGetSubsubcaption::<- '                  ',
+  
+  onGetLeftWeight::<- 0.5,
+  onGetTopWeight::<- 0.5,
+  
+  onNewValue ::(value) {
+  }
+)
+*/
+
+
+
+
         windowEvent.queueMessage(
           text: 'A game by Johnathan "Rasa" Corkery\n'+
               'https://github.com/jcorks/\n\n' + 
@@ -1412,7 +1464,7 @@ return empty;
       unlockScenarios :: {
         if (settings.unlockedScenarios == false || settings.unlockedScenarios == empty) ::<= {
           settings.unlockedScenarios = true;
-          onSaveSettings(data:JSON.encode(object:settings));
+          onSaveSettings(data:JSON.encode(object:settings, pretty:true));
           
           windowEvent.queueMessage(
             text: "Alternate scenarios of gameplay now unlocked. You can start a new game at anytime to try them."
@@ -1423,7 +1475,7 @@ return empty;
       unlockSeeds :: {
         if (settings.unlockedSeeds == false || settings.unlockedSeeds == empty) ::<= {
           settings.unlockedSeeds = true;
-          onSaveSettings(data:JSON.encode(object:settings));
+          onSaveSettings(data:JSON.encode(object:settings, pretty:true));
           
           windowEvent.queueMessage(
             text: "World RNG seeding is now unlocked. You can set seeds on world creation to recreate the conditions for a world. The RNG is used across all gameplay aspects of that world."

@@ -36,6 +36,7 @@
 isTag[TAG__IS_DATABASE] = true;
 isTag[TAG__LOADABLE_CLASS] = true;
 isTag[TAG__SPARSE_ARRAY] = true;
+isTag[TAG__WEIGHT] = true;
 
 @ALREADY_SERIALIZED = empty;
 
