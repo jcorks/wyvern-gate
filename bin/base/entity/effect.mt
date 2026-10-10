@@ -775,8 +775,7 @@ Effect.newEntry(
         holder.removeFirstEffectByFilter(::(value) <- value.id == 'base:slingshot-block');
 
         windowEvent.queueMessage(text:holder.name + " is blocking!");
-        @:copy = Damage.new();
-        copy.load(:damage.save());
+        @:copy = Damage.clone(:damage);
         damage.amount = 2;
         @:Entity = import(module:'base/entity.mt');
         
@@ -832,8 +831,7 @@ Effect.newEntry(
         @:Entity = import(module:'base/entity.mt');
 
         windowEvent.queueMessage(text:holder.name + " is blocking!");
-        @:copy = Damage.new();
-        copy.load(:damage.save());
+        @:copy = Damage.clone(:damage);
         damage.amount = 0;
         
         holder.effectStack.emitEvent(
@@ -880,8 +878,7 @@ Effect.newEntry(
         @:Entity = import(module:'base/entity.mt');
 
         windowEvent.queueMessage(text:holder.name + " is blocking!");
-        @:copy = Damage.new();
-        copy.load(:damage.save());
+        @:copy = Damage.clone(:damage);
         damage.amount = 0;
         
         holder.effectStack.emitEvent(

@@ -74,6 +74,15 @@
     out.amount = amount;
     out.traits = if (traits == empty) 0 else traits;
     return out;
+  },
+  
+  clone ::(damage) {
+    @:out = Object.instantiate(type);
+    out.damageClass = damage.damageClass;
+    out.damageType = damage.damageType;
+    out.amount = damage.amount;
+    out.traits = damage.traits;
+    return out;
   }
 }
 

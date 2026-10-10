@@ -18,7 +18,7 @@
 
 @:windowEvent = import(:"core/windowevent.mt");
 
-@:renderPrompt::(tabs, selected, tabNames) {
+@:renderPrompt::(tabs, selected, tabNames, columns) {
   @line = '';
   @tabName = tabNames[selected]
   @maxLen = 0;
@@ -39,7 +39,7 @@
     return String.combine(:strs);
   }
   
-  @:hasItems = ::(v) <- tabs[v] != empty && tabs[v][0]->size > 0  
+  @:hasItems = ::(v) <- tabs[v] != empty && (if (columns) tabs[v][0]->size else tabs[v]->size) > 0  
   @:filtered = tabNames->filter(::(value) <- hasItems(:value));
   selected = filtered->findIndex(value:tabName);
   foreach(filtered) ::(k, v) {
@@ -106,7 +106,7 @@ return ::(*args) {
           tabNamesIndex-=1;
           if (tabNamesIndex < 0) tabNamesIndex += tabNames->size;
           @out = tabs[tabNames[tabNamesIndex]];
-          when (out != empty && out[0]->size > 0) send();
+          when (out != empty && (if (columns) out[0]->size > 0 else out->size > 0)) send();
           // bug of some kind if it happens
           when(tabNamesIndex == origIndex) send();
         }
@@ -147,7 +147,7 @@ return ::(*args) {
     ::? {
       forever ::{
         out = tabs[tabNames[tabNamesIndex]];
-        when (out != empty && out[0]->size > 0) send();
+        when (out != empty && (if (columns) out[0]->size > 0 else out->size > 0)) send();
         nextTab();
         when(origTab == tabNamesIndex) send();
       }
@@ -187,14 +187,14 @@ return ::(*args) {
       @min = 999
       foreach(tabs) ::(k, v) {
         @:all = if (columns) v[0] else v;
-        if (min < all->size)
+        if (all->size < min)
             min = all->size
         
       }
       return min;
     }
   args.onGetPrompt = ::<-
-    renderPrompt(tabs, selected:tabNamesIndex, tabNames);
+    renderPrompt(tabs, selected:tabNamesIndex, tabNames, columns);
   
   args.onInput = onInput;
 
