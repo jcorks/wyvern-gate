@@ -26,7 +26,7 @@
 @:JSON = import(module:'Matte.Core.JSON');
 @:time = import(module:'Matte.System.Time');
 @:Filesystem = import(module:'Matte.System.Filesystem');
-@:renderLines = getExternalFunction(:'wyvern_gate__native__canvas__renderLines');
+@:renderLines = getExternalFunction(:'wyvern_gate__native__renderLines');
 
 
 @:write = getExternalFunction(:'wyvern_gate__native__writeDataText');
@@ -67,13 +67,16 @@
 };
 
 @currentCanvas;
+@currentHints;
 @canvasChanged = false;
 
-@:rerender = ::{
+
+@:rerender = ::(colorHints) {
   console.clear();
   @:lines = currentCanvas;
   
-  renderLines(:lines)
+  breakpoint()
+  renderLines(lines, colorHints:currentHints)
   /*
   foreach(lines) ::(index, line) {
     console.println(message:line);
@@ -82,11 +85,12 @@
   canvasChanged = false;   
   //time.sleep(milliseconds:1000 * (1 / 40.0));
 }
-canvas.onCommit = ::(lines, renderNow){
+canvas.onCommit = ::(lines, colorHints, renderNow){
   currentCanvas = lines;
+  currentHints = colorHints;
   canvasChanged = true;
   if (renderNow != empty)
-    rerender();
+    rerender(colorHints);
 }
 /*
 @:refitCanvasCLI::{

@@ -664,6 +664,7 @@ typedef struct {
     matteValue_t onCommit;
     
     matteArray_t * effects;
+    matteValue_t colorHints;
 
 } WyvGateCanvas;
 
@@ -1449,18 +1450,107 @@ static matteValue_t wyvern_gate__native__canvas__printFramebuffer(
     return matte_store_new_value(store);
 }
 
-static matteValue_t wyvern_gate__native__canvas__renderLines(
+
+#define COLOR_FILTER_PREFIX "\x1b["
+#define COLOR_FILTER_PREFIX_END "m"
+#define COLOR_FILTER_SUFFIX "\x1b[37m"
+#define COLOR_FILTER_BUFFER_SIZE (2+1+2+4+1)
+
+// really basic string insert with no checking
+static char * str_insert(char * str, const char * sub) {
+    int sublen = strlen(sub);
+    memmove(str + sublen, str, strlen(str));
+    memcpy(str, sub, sublen);
+    return str + sublen;
+}
+
+const char * wyvern_gate__native__renderLines_color_filter(
+    matteVM_t * vm,
+    matteStore_t * store,
+    matteValue_t hints,
+    matteValue_t colors,
+    const matteString_t * line
+) {
+    
+    if (matte_value_type(hints) == MATTE_VALUE_TYPE_OBJECT) {
+        static char * output = NULL;
+        if (output != NULL) {
+            free(output);
+        }
+        uint32_t count = matte_value_object_get_number_key_count(store, hints);
+        // Precise worst case (if im doing it right, else Vulnerability Introduced)
+        output = calloc(
+            1, 
+            matte_string_get_utf8_length(line) + 
+            count*COLOR_FILTER_BUFFER_SIZE+1
+        );
+        memcpy(output, matte_string_get_utf8_data(line), matte_string_get_utf8_length(line));
+        
+        
+        uint32_t i;
+        for(i = 0; i < count; ++i) {
+            matteValue_t key = matte_value_object_access_index(store, hints, i);
+            CHECK_ARG(key, MATTE_VALUE_TYPE_STRING);
+            
+            const matteString_t * keystr = matte_value_string_get_string_unsafe(store, key);
+            char * s = strstr(output, matte_string_get_c_str(keystr));
+
+            // first occurrence 
+            if (s) {
+                matteValue_t indexVal = matte_value_object_access_string(store, colors, keystr);
+                if (matte_value_type(indexVal) == MATTE_VALUE_TYPE_NUMBER) {
+                    const char * color = "37";
+                    switch((int)matte_value_as_number(store, indexVal)) {
+                      case 0: color = "31"; break; // Red
+                      case 1: color = "32"; break; // Green              
+                      case 2: color = "33"; break; // Yellow           
+                      case 3: color = "34"; break; // Blue           
+                      case 4: color = "35"; break; // Magenta            
+                      case 5: color = "36"; break; // Cyan         
+
+                      case 6: color = "37"; break;                    
+
+                      case 7:  color = "90"; break; // Gray                   
+                      case 8:  color = "91"; break; // Bright red                   
+                      case 9:  color = "92"; break; // Bright green                
+                      case 10: color = "93"; break; // Bright yellow                
+                      case 11: color = "94"; break; // Bright blue                
+                      case 12: color = "95"; break; // Bright magenta               
+                      case 13: color = "96"; break; // Bright Cyan            
+                      default:;
+                    }
+                    
+                    s = str_insert(s, COLOR_FILTER_PREFIX);
+                    s = str_insert(s, color);
+                    s = str_insert(s, COLOR_FILTER_PREFIX_END);
+                    s += strlen(matte_string_get_c_str(keystr));
+                    str_insert(s, COLOR_FILTER_SUFFIX);
+                }
+            }
+        }
+        return output;
+    } else {
+        return matte_string_get_c_str(line);
+    }
+}
+
+static matteValue_t wyvern_gate__native__renderLines(
     matteVM_t * vm,
     matteValue_t fn,
     const matteValue_t * args,
     void * userData
 ) {
 
-    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
     matteStore_t * store = matte_vm_get_store(vm);
 
     CHECK_ARG(args[0], MATTE_VALUE_TYPE_OBJECT);
-
+    matteValue_t keys = matte_store_new_value(store);
+    
+    if (matte_value_type(args[1]) == MATTE_VALUE_TYPE_OBJECT) {
+        matte_store_recycle(store, keys);
+        keys = matte_value_object_keys(store, args[1]);
+        matte_value_object_push_lock(store, keys);
+    }
 
 
     uint32_t size = matte_value_object_get_number_key_count(store, args[0]);
@@ -1475,12 +1565,13 @@ static matteValue_t wyvern_gate__native__canvas__renderLines(
         #ifdef WYVERN_NCURSES
             mvaddstr(i, 0, matte_string_get_c_str(lineS));        
         #else
-            printf("%s\n", matte_string_get_c_str(lineS));
+            printf("%s\n", wyvern_gate__native__renderLines_color_filter(vm, store, keys, args[1], lineS));
         #endif
     }
     #ifdef WYVERN_NCURSES
         refresh();
     #endif
+    matte_value_object_pop_lock(store, keys);
 
     return matte_store_new_value(store);
 }
@@ -1564,6 +1655,26 @@ static matteValue_t wyvern_gate__native__canvas__drawChar(
     return matte_store_new_value(store);
 
 }
+
+
+static matteValue_t wyvern_gate__native__canvas__setColorHints(
+    matteVM_t * vm,
+    matteValue_t fn,
+    const matteValue_t * args,
+    void * userData
+) {
+    WyvGateCanvas * cr = (WyvGateCanvas *)userData;
+    matteStore_t * store = matte_vm_get_store(vm);
+    
+    matte_value_object_push_lock(store, args[0]);
+    matte_store_recycle(store, cr->colorHints);
+    matte_value_object_pop_lock(store, cr->colorHints);
+    cr->colorHints = args[0];
+    
+    return matte_store_new_value(store);
+
+}
+
 
 
 static matteValue_t wyvern_gate__native__canvas__drawRectangle(
@@ -1922,6 +2033,7 @@ static void pushToScreen(
             onCommit,
             
             "lines", lines_output,
+            "colorHints", cr->colorHints,
             "renderNow", renderNowV,
             NULL
         );    
@@ -1931,6 +2043,7 @@ static void pushToScreen(
             cr->m,
             onCommit,
             
+            "colorHints", cr->colorHints,
             "lines", lines_output,
             NULL
         );     
@@ -2043,7 +2156,7 @@ static matteValue_t wyvern_gate__native__canvas(
     cr->idStatePool = 0;
     cr->idStatePool_dead = matte_array_create(sizeof(uint32_t));
     cr->effects = matte_array_create(sizeof(matteValue_t));
-      
+    cr->colorHints = matte_store_new_value(store);
 
     matte_add_external_function(
         userData,
@@ -2206,11 +2319,11 @@ static matteValue_t wyvern_gate__native__canvas(
 
     matte_add_external_function(
         userData,
-        "wyvern_gate__native__canvas__renderLines",
-        wyvern_gate__native__canvas__renderLines,
+        "wyvern_gate__native__canvas__setColorHints",
+        wyvern_gate__native__canvas__setColorHints,
         cr,
         
-        "lines",
+        "hints",
         NULL
     );
 
@@ -2424,7 +2537,16 @@ void wyvern_gate_add_native(matte_t * m) {
         NULL
     );
 
-
+    matte_add_external_function(
+        m,
+        "wyvern_gate__native__renderLines",
+        wyvern_gate__native__renderLines,
+        NULL,
+        
+        "lines",
+        "colorHints",
+        NULL
+    );
 
 }
 

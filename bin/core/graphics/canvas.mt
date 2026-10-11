@@ -24,6 +24,26 @@
 @CANVAS_HEIGHT = 24;
 @:EFFECT_FINISHED = -1;
 
+
+@:COLOR = {
+  RED : 0,
+  GREEN : 1,
+  YELLOW : 2,
+  BLUE : 3,
+  MAGENTA : 4,
+  CYAN : 5,
+
+  WHITE : 6,
+
+  GRAY : 7,
+  BRIGHT_RED : 8,
+  BRIGHT_GREEN : 9,
+  BRIGHT_YELLOW : 10,
+  BRIGHT_BLUE : 11,
+  BRIGHT_MAGENTA : 12,
+  BRIGHT_CYAN : 13
+}
+
 /////////////////////////////////
 // See if we have a native (quick) implementation
 // If not, fallback on Matte implementation. 
@@ -62,7 +82,8 @@
   a.commit = getExternalFunction(:'wyvern_gate__native__canvas__commit');
   a.freeze = getExternalFunction(:'wyvern_gate__native__canvas__freeze');
   a.thaw = getExternalFunction(:'wyvern_gate__native__canvas__thaw');
-
+  a.setColorHints = getExternalFunction(:'wyvern_gate__native__canvas__setColorHints');
+  a.COLOR = COLOR;
 
   return a;  
 } => {
@@ -146,6 +167,7 @@ return class(
     @:noFrame = [];
     @currentFrame = noFrame;
     @currentSet;
+    @currentColorHints = {};
     
     @:composite :: {
       // painter's!
@@ -171,11 +193,16 @@ return class(
       
       onCommit(
         lines:lines_output,
+        colorHints : currentColorHints,
         renderNow        
       );     
     }
     
     this.interface = {
+      COLOR : {
+        get ::<- COLOR
+      },
+    
       reset ::{
         idStatePool = 0;
         idStatePool_dead = [];
@@ -578,7 +605,8 @@ return class(
             }
             return arr;
           },
-          id : id
+          id : id,
+          colorHints : {}
         }        
         frames[id] = frame;
         return id;
@@ -591,6 +619,21 @@ return class(
         currentFrame = frames[id].textArray;
         render();
         currentFrame = lastFrame;
+        
+      },
+      
+      // Given an object, assigns color hints to the renderer
+      // the hints object is string-keyed with color IDs
+      // This gives a very very crude way to apply coloring, where 
+      // any substring of the resultant assembled lines will have 
+      // its color set based on the assigned hint. For example:
+      /*
+        setColorHints(:{
+          ('house') : COLOR_HINTS.BLUE
+        });
+      */
+      setColorHints ::(hints) {
+        currentColorHints = hints
       },
       
       printFramebuffer ::(id => Number) {

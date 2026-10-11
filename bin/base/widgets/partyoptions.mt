@@ -543,8 +543,14 @@ return ::{
                               windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true, doResolveNext:true);
                             }
                             
+
+
+                            when(choice == 2) 
+                              item.describe();
+
+
                               
-                            when(choice == 2) ::<= {
+                            when(choice == 3) ::<= {
                               @:symbols = [
                                 'None',
                                 '&',
@@ -570,9 +576,6 @@ return ::{
                                 }
                               );
                             }
-
-                            when(choice == 3) 
-                              item.describe();
 
                             when(choice == 4) ::<= {
                               when (!item.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))

@@ -27,7 +27,6 @@
 @:correctA = import(module:'base/util/correcta.mt');
 @:romanNum = import(module:'base/util/romannumerals.mt');
 @:InletSet = import(:'base/item/inletset.mt');
-@:InletSet = import(:'base/item/inletset.mt');
 
 @:MAX_ENCHANT_GLOBAL = 10;
 
@@ -3460,14 +3459,43 @@ none.name = 'None';
 };
 
 
-@:recalculateName = ::(state) {  
+@:getStars::(item) {
+  when (item.data.stars != empty)
+    item.data.stars;
+  
+  @:price = Item.BUY_PRICE_MULTIPLIER * item.price;
+  when(item.base.id == 'base:none') 0;
+  when(price < 40)     1;
+  when(price < 90)     2;
+  when(price < 150)    3;
+  when(price < 300)    4;
+  when(price < 700)    5;
+  when(price < 1200)   6;
+  when(price < 2400)   7;
+  when(price < 5000)   8;
+  when(price < 8000)   9;
+  when(price < 10000)  10;
+  when(price < 100000) 11;
+  return 12;
+}
+@:valueToColor = ::(item) {
+  @:stars = getStars(:item);
+  when(stars <= 2) canvas.COLOR.WHITE
+  when(stars <= 4) canvas.COLOR.BRIGHT_GREEN
+  when(stars <= 6) canvas.COLOR.CYAN
+  when(stars <= 8) canvas.COLOR.MAGENTA
+  when(stars <= 10) canvas.COLOR.YELLOW
+  return canvas.BRIGHT_RED
+}
+
+@:recalculateName = ::(state, item){
   when(state.needsAppraisal) 
     state.customName = '???? ' + state.base.name;
 
   when (state.customPrefix != '') ::<= {
     state.customName = state.customPrefix + getEnchantTag(state);
     if (state.improvement != empty) {
-      if (state.improvements > 0) ::<= {
+      if (state.improvement.improvements > 0) ::<= {
         state.customName = state.customName +  '+'+(state.improvement.improvements);
       }
     }
@@ -3498,8 +3526,8 @@ none.name = 'None';
     }
   }
 
-
 }
+
 
 @:sizeToString ::(state) <- match(state.size) {
   (SIZE.SMALL)   : 'small',
@@ -3599,25 +3627,6 @@ none.name = 'None';
   return out;
 }
 
-@:getStars::(item) {
-  when (item.data.stars != empty)
-    item.data.stars;
-  
-  @:price = Item.BUY_PRICE_MULTIPLIER * item.price;
-  when(item.base.id == 'base:none') 0;
-  when(price < 40)     1;
-  when(price < 90)     2;
-  when(price < 150)    3;
-  when(price < 300)    4;
-  when(price < 700)    5;
-  when(price < 1200)   6;
-  when(price < 2400)   7;
-  when(price < 5000)   8;
-  when(price < 8000)   9;
-  when(price < 10000)  10;
-  when(price < 100000) 11;
-  return 12;
-}
 
 @:starsToString::(item) {
   when (item.needsAppraisal) '???';
@@ -3957,7 +3966,7 @@ none.name = 'None';
         }
       }
       base.emit(event:'onCreate', item:this, creationHint);
-      recalculateName(state:_.state);
+      recalculateName(state:_.state, item:this);
       state.stats.simplify();
       
       return this;
@@ -4024,19 +4033,21 @@ none.name = 'None';
     name : {
       get :: {
         @state = _.state;
-        return (if (state.faveMark != '')
-          '[' + state.faveMark + '] '
-        else
-         ''
-        ) + ::<= {
-          when (state.customName != '') state.customName;
-          return state.base.name
-        }
+        @this = _.this;
+        return
+          (if (state.faveMark != '')
+            '[' + state.faveMark + '] '
+          else
+           ''
+          ) + ::<= {
+            when (state.customName != '') state.customName;
+            return state.base.name
+          }
       },
       
       set ::(value => String)  {
         _.state.customPrefix = value;
-        recalculateName(state:_.state);
+        recalculateName(state:_.state, item:_.this);
       }
     },
     
@@ -4050,7 +4061,7 @@ none.name = 'None';
     },
     
     recalculateName ::{
-      recalculateName(state:_.state);
+      recalculateName(state:_.state, item:_.this);
     },
     
     needsAppraisal : {
@@ -4112,7 +4123,7 @@ none.name = 'None';
         state.stats.add(stats:state.quality.equipMod);
         state.price += (state.price * (state.quality.pricePercentMod/100));
 
-        recalculateName(state:_.state);
+        recalculateName(state:_.state, item:_.this);
       }
     },
       
@@ -4243,7 +4254,7 @@ none.name = 'None';
       state.enchants->push(value:mod);
       //if (description->contains(key:mod.description) == false)
       //  description = description + mod.description + ' ';
-      recalculateName(state:_.state);
+      recalculateName(state:_.state, item:_.this);
       state.price += mod.price * 1.1**(state.enchants->size);
       state.price = state.price->ceil;
       return true;
@@ -4493,7 +4504,7 @@ none.name = 'None';
       get ::<- _.state.faveMark,
       set ::(value) {
         _.state.faveMark = value
-        recalculateName(state:_.state);
+        recalculateName(state:_.state, item:_.this);
       }
     },
     
