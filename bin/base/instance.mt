@@ -1384,7 +1384,7 @@ import(:'base/widgets/animatemultibar.mt')(
               'https://github.com/jcorks/\n\n' + 
               'Additional Arts Design \n' +
               ' & Game Consultation   : Baph @lovelyabomination\n' +
-              'Additional support     : Adrian "Radscale" Hernik\n' +
+              'Additional Support     : Adrian "Radscale" Hernik\n' +
               'Playtesting            : Baph @lovelyabomination\n' +
               '                         Ashley Dron\n' +
               '                         Clover\n'

@@ -17,7 +17,7 @@ var initializeTextRenderer = function() {
     
     
     const BACKGROUND_COLOR = "#323232";
-    const FOREGROUND_COLOR = "#e4F5F5"
+    const FOREGROUND_COLOR = "#fefefe"
 
 
 
@@ -385,6 +385,7 @@ var initializeTextRenderer = function() {
             "}\n",
             
             // fragment shader        
+            /*
             "precision mediump float;\n"+
             "varying vec2 v_texcoord;\n"+
             "uniform sampler2D u_texture;\n"+
@@ -394,6 +395,33 @@ var initializeTextRenderer = function() {
             "    float apply = abs(sin(fragcoord.y) * 0.5 * 0.8);\n"+
             "    gl_FragColor = vec4(mix(texture2D(u_texture, v_texcoord).rgb, vec3(0.1), apply), 1.0);\n"+
             "}\n"
+            */
+            
+            // CRT v2 
+            // Still needs work, the apply isnt symmetrical for the cyan and magenta channels
+            "precision mediump float;\n"+
+            "varying vec2 v_texcoord;\n"+
+            "uniform sampler2D u_texture;\n"+
+            "uniform vec2 u_resolution;\n"+ 
+            "const float effectSaturation = 0.29;\n"+
+            "void main() {\n"+
+            "    float incrementX = (1.0 / u_resolution.x) * 1.8;\n"+
+            "    float incrementY = (1.0 / u_resolution.y) * 1.8;\n"+
+            "    vec3 baseColor   = texture2D(u_texture, v_texcoord).rgb;\n"+
+            "    vec3 baseColor11 = texture2D(u_texture, v_texcoord+vec2(incrementX, incrementY)).rgb;\n"+
+            "    vec3 baseColor00 = texture2D(u_texture, v_texcoord+vec2(-incrementX, -incrementY)).rgb;\n"+
+            "    vec2 fragcoord = v_texcoord*u_resolution.xy;\n"+
+            "    float apply = sin(fragcoord.y) * 0.5 + 1.0;\n"+
+            "    float applyX = (sin(fragcoord.x) * 0.5 + 1.0)*effectSaturation*0.01;\n"+
+            "    gl_FragColor = vec4("+
+            "       (1.0 - effectSaturation) * (baseColor) + "+
+            "       effectSaturation * ("+
+            "         vec3(0.4, 1.0, 1.0)*0.5*(apply) * baseColor00 +"+ 
+            "         vec3(1.0, 0.4, 1.0)*0.5*(1.0-apply) * baseColor11"+
+            "       ),1.0) + (vec4(applyX*0.1, applyX, applyX*0.1, 0.0));\n"+
+            "}\n"
+
+
         );
         
         
