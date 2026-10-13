@@ -33,7 +33,7 @@
   onPostAttackOther : ["After damaging a target", 'After Attack'],
   onPreAttacked : ["Before taking damage from an attack", 'Before being Attacked'],
   onPostAttacked : ["After taking damage from an attack", 'After being Attacked'],
-  //onRemoveEffect : ["When an effect is removed", 'On Effect Remove'],
+  onRemoveEffect : ["When an effect is removed", 'On Effect Remove'],
   //onEffectRemoveForced : ["When an effect is forcibly removed", 'On Effect Force Remove'],
   onPreDamaged : ["Right before getting damaged", 'Before Damaged'],
   onPostDamaged : ["After getting damaged", 'After Damaged'],
@@ -45,8 +45,8 @@
   onGotBlocked: ["Upon having the holder\'s attack blocked", 'Upon Getting Blocked'],
   onPreAction: ["Right before using an Art", 'Before Art'],
   onPostAction: ["After using an Art", 'After Art'],
-  //onPreAddEffect: ["Before a new effect is added to the holder", 'Before New Effect'],
-  //onPostAddEffect: ["After a new effect is added to the holder", 'After New Effect'],
+  onPreAddEffect: ["Before a new effect is added to the holder", 'Before New Effect'],
+  onPostAddEffect: ["After a new effect is added to the holder", 'After New Effect'],
   //onCritted: ["When hit with a critical hit", 'When Crit\'d'],
   //onCrit: ["When landing a critical hit", 'On Crit'],
   //onKill: ["Upon killing a target", 'After Murder'],
@@ -116,8 +116,12 @@
 
         
         if (state.event != '') ::<= {
-          state.conditionChance = (((random.number() * 100) / 5)->ceil) * 5
-          if (state.conditionChance < 33) state.conditionChance = 33;
+          if (state.event == 'onPreAddEffect' || state.event == 'onPostAddEffect' || state.event == 'onRemoveEffect') {
+            state.conditionChance = 33 
+          } else {
+            state.conditionChance = (((random.number() * 100) / 5)->ceil) * 5
+            if (state.conditionChance < 33) state.conditionChance = 33;
+          }
         }
         
         if (nameHint != empty) state.name = nameHint;
