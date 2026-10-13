@@ -40,24 +40,29 @@
   FADE_TO_BLACK : 1
 }
 
-@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth, bufferHorizontal, bufferVertical, disableFrame, speakerRight) <-
-    canvas.renderTextFrameGeneral(
-      leftWeight, 
-      topWeight, 
-      maxHeight,
-      maxWidth,
-      disableFrame,
-      bufferVertical,
-      bufferHorizontal,
-      lines:lines, 
-      title:speaker, 
-      titleRight:speakerRight,
-      minWidth,
-      notchText:if(hasNotch != empty) (if (notchText == empty) "(next)" else notchText) else empty)
+@:renderTextSingle::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, minWidth, bufferHorizontal, bufferVertical, disableFrame, speakerRight, colorHints) {
+  if (colorHints->type == Function)
+    canvas.setColorHints(:colorHints())
+  else
+    canvas.setColorHints(:colorHints);
 
+  return canvas.renderTextFrameGeneral(
+    leftWeight, 
+    topWeight, 
+    maxHeight,
+    maxWidth,
+    disableFrame,
+    bufferVertical,
+    bufferHorizontal,
+    lines:lines, 
+    title:speaker, 
+    titleRight:speakerRight,
+    minWidth,
+    notchText:if(hasNotch != empty) (if (notchText == empty) "(next)" else notchText) else empty)
+}
 
 // Renders a text box using an animation
-@:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, bufferVertical, bufferHorizontal, disableFrame, speakerRight) {
+@:renderTextAnimation ::(leftWeight, topWeight, maxWidth, maxHeight, lines, speaker, hasNotch, notchText, bufferVertical, bufferHorizontal, disableFrame, speakerRight, colorHints) {
   @width = 0;
   @height = lines->size;
   @frames = 0;  
@@ -86,6 +91,11 @@
   
   
   return ::{    
+    if (colorHints->type == Function)
+      canvas.setColorHints(:colorHints())
+    else
+      canvas.setColorHints(:colorHints);
+
     canvas.renderTextFrameGeneral(
       leftWeight, 
       topWeight, 
@@ -717,6 +727,7 @@
               topWeight,
               maxWidth,
               maxHeight,
+              colorHints : data.colorHints,
               disableFrame : data.disableFrame,
               hasNotch : if (onGetFooter == empty) empty else true,
               notchText : if (onGetFooter == empty) empty else onGetFooter(),
@@ -734,6 +745,7 @@
               topWeight,
               maxWidth,
               maxHeight,
+              colorHints : data.colorHints,
               disableFrame : data.disableFrame,
               hasNotch : if (onGetFooter == empty) empty else true,
               notchText : if (onGetFooter == empty) empty else onGetFooter(),
@@ -1372,6 +1384,7 @@
             maxWidth : data.maxWidth,
             maxHeight : data.maxHeight,
             disableFrame : data.disableFrame,
+            colorHints : data.colorHints,
             lines: progressLines(),
             speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
             speakerRight : data.promptRight,
@@ -1410,6 +1423,7 @@
             topWeight: data.topWeight, 
             maxWidth : data.maxWidth,
             maxHeight : data.maxHeight,
+            colorHints : data.colorHints,
             lines: data.lines,
             speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
             speakerRight : data.promptRight,
@@ -1533,7 +1547,8 @@
             speaker:if (data.onGetPrompt == empty) data.prompt else data.onGetPrompt(),
             speakerRight : data.promptRight,
             hasNotch: true,
-            notchText : getTag(showFull, fraction)
+            notchText : getTag(showFull, fraction),
+            colorHints : data.colorHints
             
             //limitLines : data.pageAfter,
           );
@@ -1815,7 +1830,8 @@
           onLeave,
           setID,
           autoSkipAfterFrames,
-          disableFrame
+          disableFrame,
+          colorHints
       ) {
         if (pageAfter == empty) pageAfter = MAX_LINES_TEXTBOX;
         // first: split the text.
@@ -1845,6 +1861,7 @@
           promptRight : speakerRight,
           prompt:speaker,
           renderable,
+          colorHints,
           lines : if (text == empty) empty else canvas.refitLines(input:[text]),
           pageAfter,
           onLeave,
@@ -1859,6 +1876,7 @@
       queueReader::(
         prompt, 
         lines, 
+        colorHints,
         // if true, will split text into pages and 
         // disable normal scrolling.
         hasPages, 
@@ -1886,6 +1904,7 @@
             maxHeight : maxHeight,
             maxWidth : maxWidth,
             onLeave : onLeave,
+            colorHints : colorHints,
             framebufferID : canvas.newFramebuffer()
           });
         }]); 
@@ -1909,6 +1928,7 @@
         skipAnimation,
         setID,
         disableFrame,
+        colorHints,
         autoSkipAfterFrames
       ) {
         when(requestAutoSkip || skipDisplayWindows) ::<= {
@@ -1934,6 +1954,7 @@
               linesOut->push(value:createBlankLine(width, header:if (more) '-More-' else ''));
             
             choiceStackPush(value:{
+              colorHints : colorHints,
               topWeight: topWeight,
               leftWeight : leftWeight,
               maxWidth : maxWidth,
@@ -2245,6 +2266,7 @@
       // Prompt will be displayed, like speaker in the message callback
       //
       queueChoices::(
+        colorHints,
         choices, 
         prompt, 
         promptRight,
@@ -2314,7 +2336,8 @@
             onGetChoicesMatch : onGetChoicesMatch,
             onFrameRendered : onFrameRendered,
             skipAnimation : skipAnimation,
-            framebufferID : canvas.newFramebuffer()
+            framebufferID : canvas.newFramebuffer(),
+            colorHints : colorHints
           });
         }]);
         return getResolveQueue()->size-1;

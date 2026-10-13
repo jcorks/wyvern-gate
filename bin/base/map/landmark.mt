@@ -1874,6 +1874,15 @@ Landmark.database.newEntry(
             keep:true,
             canCancel:true,
             jumpTag:'LANDMARK_TRAVEL',
+            colorHints ::{
+              @colorHints = {}
+              foreach(locationsNearby)::(index, arr) {
+                when(arr.interactive == false) empty;
+                if (arr.nameColorHint != empty)
+                  colorHints = {...colorHints, ...arr.nameColorHint};
+              }
+              return colorHints
+            },
             onGetChoices ::{
               refreshNearby();
               landmarkOptions = [...world.scenario.base.interactionsWalk]->filter(by::(value) <- value.filter(island, landmark));
@@ -1948,9 +1957,12 @@ Landmark.database.newEntry(
             nearbySet->sort(::(a, b) <- a.name < b.name)
             
             @:lines = [];
+            @colorHints = {}
             foreach(nearbySet)::(index, arr) {
               when(arr.interactive == false) empty;
               lines->push(value:arr.name);
+              if (arr.nameColorHint != empty)
+                colorHints = {...colorHints, ...arr.nameColorHint};
             }
             
             if (lines->size > 0)
@@ -1960,6 +1972,8 @@ Landmark.database.newEntry(
                 lines,
                 title: 'Arrived at:'
               );
+            if (colorHints->keycount > 0)
+              canvas.setColorHints(:colorHints);
           }
         };
         
@@ -2099,6 +2113,9 @@ Landmark.database.newEntry(
 
       // represents a step made within the landmark.
       step :: {
+        // error log mention todo? 
+        when(state.map == empty) empty;
+        
         state.base.emit(event:'onStep', landmark:this, island:this.island);
         state.mapEntityController.step();
 

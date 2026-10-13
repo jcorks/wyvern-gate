@@ -90,6 +90,8 @@
         quests[which-1].renderPrompt(showCompleteness:false, leftWeight:0, topWeight: 0.5);
       }
     },
+    colorHints ::<- Item.toColorHints(:quests[which-1].rewardItems),
+
     onChoice::(choice) {
       @:quest = quests[choice-1];
       
@@ -170,6 +172,7 @@
         quests[which-1].renderPrompt(showCompleteness:true, leftWeight:0, topWeight: 0.5);
       }
     },
+    colorHints ::<- Item.toColorHints(:quests[which-1].rewardItems),
     onChoice::(choice) {
       @:quest = quests[choice-1];
 

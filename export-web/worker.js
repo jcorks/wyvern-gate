@@ -54,12 +54,15 @@ Worker = (function() {
                 name: name,
                 data: data
             });
+            if (saves) {
+                saves[name] = data
+            }
         },
         
-        send : function() {
+        send : function(colorHints) {
             postMessageJSON({
                 command: 'lines',
-                data : lines
+                data : [lines, colorHints]
             });
             lineIter = 0;
         },

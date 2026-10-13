@@ -365,20 +365,22 @@
       }
     },
     
-    printDiff ::(other, prompt, renderable) {
+    printDiff ::(other, prompt, renderable, colorHints) {
       windowEvent.queueDisplay(
         prompt,
         pageAfter: 10,
         renderable,
+        colorHints,
         lines : StatSet.diffToLines(stats:_.this, other)      
       );
     },
       
-    printDiffRate ::(other, prompt) {
+    printDiffRate ::(other, prompt, colorHints) {
       windowEvent.queueDisplay(
         prompt,
         pageAfter: 10,
-        lines: StatSet.diffRateToLines(stats:_.this, other)
+        lines: StatSet.diffRateToLines(stats:_.this, other),
+        colorHints
       );
     },
       

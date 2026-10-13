@@ -21,6 +21,7 @@
 @:g = import(module:'base/util/g.mt');
 @:StatSet = import(module:'base/util/statset.mt');
 @:Arts = import(:'base/arts.mt');
+@:Item = import(module:'base/item.mt');
 
 
 
@@ -40,6 +41,7 @@ return ::{
       @:height = 7;
       @:width = canvas.width*(2/3);
       if (whom >= party.members->size) whom -= 1;
+      @:weps = [];
       foreach(party.members)::(index, member) {
         @x = (canvas.width - width) / 4;
         canvas.renderFrame(top, left: x, width, height);
@@ -62,17 +64,19 @@ return ::{
         
         canvas.movePen(x: x+3, y: top + 2);
         canvas.drawText(text: member.name + ' - (' + tag + ')' + (if (party.leader == member) ' - Leader' else ''));
+        @:wep = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
         if (member.isDead) {
           canvas.movePen(x: x+3, y: top + 3);
           canvas.drawText(text: '...');
           canvas.movePen(x: x+3, y: top + 4);
-          canvas.drawText(text: 'Weapon: ' + member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).name);
+          canvas.drawText(text: 'Weapon: ' + wep.name);
         } else {
           canvas.movePen(x: x+3, y: top + 3);
           canvas.drawText(text: member.renderHP() + 'HP: ' + member.hp + ' / ' + member.stats.HP + '  AP: ' + member.stats.AP);
           canvas.movePen(x: x+3, y: top + 4);
-          canvas.drawText(text: 'Weapon: ' + member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR).name);
+          canvas.drawText(text: 'Weapon: ' + wep.name);
         }
+        weps->push(:wep);
         top += height;
         
         
@@ -82,6 +86,7 @@ return ::{
       }
       canvas.movePen(x: ((canvas.width - width) / 2)+1, y: 1);  
       canvas.drawText(text:'[Party: (' + g(g:party.inventory.gold) + ', ' + party.inventory.items->keycount + ' items)]');   
+      canvas.setColorHints(:Item.toColorHints(:weps));
 
       when(!chosen) empty;
       @:member = party.members[whom]
@@ -102,7 +107,6 @@ return ::{
             
         )
       );
-
     
     }
   }
@@ -286,6 +290,7 @@ return ::{
     prompt: 'Choose a member.',
     jumpTag : 'CHOOSE_MEMBER',
     renderable : menuRenderable,
+
     canCancel: true,
     onLeave ::{
       /*windowEvent.queueTransition(
@@ -412,8 +417,8 @@ return ::{
                 }                  
               }
 
-              @:Item = import(module:'base/item.mt');
 
+              @equips = [];
               windowEvent.queueChoices(
                 leftWeight: 1,
                 topWeight: 1,
@@ -422,13 +427,15 @@ return ::{
                 renderable : menuRenderable,
                 canCancel: true,
                 pageAfter:15,
+                colorHints: ::<- Item.toColorHints(:equips),
                 onGetChoices:: {
                   @:choices = [];
+                  equips = [];
                   for(-1, Entity.EQUIP_SLOTS.TRINKET+1)::(i) {
                     @str = slotToName(slot:i);
-
+                    @item;
                     if (i <= Entity.EQUIP_SLOTS.HAND_LR) ::<= {
-                      @:item = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
+                      item = member.getEquipped(slot:Entity.EQUIP_SLOTS.HAND_LR);
                       if (i < Entity.EQUIP_SLOTS.HAND_LR) ::<= {   
                         str = str +  if (item.base.id == 'base:none') ('------') else item.name;
                       } else if (item.base.equipType == Item.TYPE.TWOHANDED) ::<= {
@@ -436,9 +443,10 @@ return ::{
                       }     
                     
                     } else ::<= {
-                      @:item = member.getEquipped(slot:i);
+                      item = member.getEquipped(slot:i);
                       str = str +  if (item.base.id == 'base:none') '------' else item.name;
                     }
+                    equips->push(:item);
                     choices->push(value:str);
                   }
                   return choices;
@@ -507,10 +515,12 @@ return ::{
                           if (item != empty && item.base.name != 'None') ::<= {
                             when(party.inventory.isFull)
                               windowEvent.queueMessage(
+                                colorHints : Item.toColorHint(:item),
                                 text: member.name + ' cannot unequip the ' + item.name + ' because the party\'s inventory is full.'
                               );
 
                             windowEvent.queueMessage(
+                              colorHints : Item.toColorHint(:item),
                               text: member.name + ' has unequipped the ' + item.name
                             );
                             member.unequipItem(item);
@@ -527,6 +537,7 @@ return ::{
                             else
                               ['Equip', 'Check', 'Mark Favorite', 'Rename', 'Compare', 'Gems...'],
                           prompt: item.name,
+                          colorHints : Item.toColorHint(:item),
                           canCancel: true,
                           leftWeight: 1,
                           topWeight: 1,
@@ -579,7 +590,10 @@ return ::{
 
                             when(choice == 4) ::<= {
                               when (!item.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
-                                windowEvent.queueMessage(text:item.name + ' cannot be renamed.');
+                                windowEvent.queueMessage(
+                                  colorHints : Item.toColorHint(:item),
+                                  text:item.name + ' cannot be renamed.'
+                                );
 
                               when(item.needsAppraisal)
                                 windowEvent.queueMessage(
@@ -602,6 +616,7 @@ return ::{
                               @currentEquip = member.getEquipped(slot);
                               
                               currentEquip.equipMod.printDiffRate(
+                                colorHints : Item.toColorHint(:[item, currentEquip]),
                                 prompt: currentEquip.name + ' -> ' + item.name,
                                 other:item.equipMod
                               );                                   
@@ -631,6 +646,7 @@ return ::{
                   windowEvent.queueChoices(
                     leftWeight: 1,
                     topWeight: 1,
+                    colorHints : Item.toColorHints(:member.getEquipped(slot)),
                     onGetChoices:: {
                       choices = ['Equip'];
                       choiceActions = [::<- equip()];

@@ -58,8 +58,17 @@
         return matte.store.createEmpty();        
     });
 
-    matte.setExternalFunction('external_onEndCommit', [],function(fn, args) {
-        Worker.send();
+    matte.setExternalFunction('external_onEndCommit', ['colorsHints'],function(fn, args) {
+        const colorHintsTranslate = {}
+        if (matte.store.valueIsEmpty(args[0]) == false) {
+            const keys = vm.store.valueObjectKeys(args[0]);
+            for(var i = 0; keys.length; ++i) {
+                const key = matte.store.valueAsString(keys[i]);
+                colorHintsTranslate[key] = matte.store.valueAsNumber(matte.store.valueObjectAccessString(args[0], key));
+            }
+        }
+    
+        Worker.send(colorHintsTranslate);
         return matte.store.createEmpty();            
     });
 

@@ -525,6 +525,7 @@ return {
               quests[which-1].renderPrompt(showCompleteness:true, leftWeight:0, topWeight: 0.5);
             }
           },
+          colorHints ::<- Item.toColorHints(:quests[which-1].rewardItems),
           onChoice::(choice) {
             @:quest = quests[choice-1];
             @:giveUp ::{
@@ -720,6 +721,7 @@ return {
               quest.renderPrompt();            
             }
           },
+          colorHints ::<- Item.toColorHints(:quest.rewardItems),
           topWeight : 1,
           prompt: 'Accept quest?',
           onChoice::(which) {

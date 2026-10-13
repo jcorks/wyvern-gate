@@ -757,7 +757,7 @@ Location.database.newEntry(data:{
     addMissing(id:'base:basic-food', minCount:10);
     addMissing(id:'base:wyvern-flower', minCount:1);
     
-    for(location.inventory.items->size, 60 + (location.ownedBy.level / 4)->ceil)::(i) {
+    for(location.inventory.items->size, 80 + (location.ownedBy.level / 4)->ceil)::(i) {
       // no weight, as the value scales
       location.inventory.add(item:
         Item.new(
@@ -1820,6 +1820,7 @@ Location.database.newEntry(data:{
 
 
       location.name = item.name;
+      location.nameColorHint = Item.toColorHints(:item);
       location.inventory.add(item:
         item
       );
@@ -2640,6 +2641,7 @@ Location.database.newEntry(data:{
     x : 0,
     y : 0,
     contested : false,
+    nameColorHint : empty,
     name : '',
     data : empty, // simple table
     visited : false,
@@ -2882,6 +2884,12 @@ Location.database.newEntry(data:{
         get::<- if (state.name == "") (if (state.ownedBy == empty) state.base.name else (state.ownedBy.name + "'s " + state.base.name)) else state.name,
         set::(value) <- state.name = value
       },
+      
+      nameColorHint : {
+        get::<- state.nameColorHint,
+        set::(value) <- state.nameColorHint = value
+      },
+      
       occupants : {
         get :: {
           return [...state.occupants];
@@ -3090,6 +3098,7 @@ Location.database.newEntry(data:{
           canCancel : true,
           keep: true,
           jumpTag: 'LocationInteract',
+          colorHints ::<- this.nameColorHint,
           onChoice::(choice) {
          
             when(choice == 0) empty;

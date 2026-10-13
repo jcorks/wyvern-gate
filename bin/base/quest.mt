@@ -767,6 +767,10 @@ Quest.database.newEntry(
         get ::<- state.rewardG
       },
       
+      rewardItems : {
+        get ::<- state.rewardItems
+      },
+      
       // creates the quest, returning the landmark 
       // for where the quest belongs
       accept ::(island, issuer) {
@@ -824,7 +828,8 @@ Quest.database.newEntry(
             '',
             ...state.rewardItems->map(::(value) <- ' - ' + value.name),
             ' - ' + g(:state.rewardG)
-          ]
+          ],
+          colorHints: Item.toColorHints(:state.rewardItems)
         );
         @:world = import(module:'base/world.mt');
         @:party = world.party;        

@@ -1,6 +1,7 @@
 @:canvas = import(module:'core/graphics/canvas.mt');
 @:correctA = import(module:'base/util/correcta.mt');
 @:windowEvent = import(module:'core/windowevent.mt');
+@:Item = import(module:'base/item.mt');
 
 
 return ::(whom, items) {
@@ -23,6 +24,7 @@ return ::(whom, items) {
   ]
 
   windowEvent.queueDisplay(
+    colorHints : Item.toColorHints(:items),
     lines
   );
 }

@@ -323,9 +323,10 @@ var startGame = function(touch) {
       
           switch(data.command) {
             case 'lines':
-              const lines = data.data;
-              for(var i = 0; i < data.data.length; ++i) {
-                  TextRenderer.setLine(i, data.data[i]);
+              const lines = data.data[0];
+              const colorHints = data.data[1];
+              for(var i = 0; i < lines.length; ++i) {
+                  TextRenderer.setLine(i, lines[i]);
               }
               TextRenderer.requestDraw();
               break;

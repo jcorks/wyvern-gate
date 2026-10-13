@@ -3481,11 +3481,11 @@ none.name = 'None';
 @:valueToColor = ::(item) {
   @:stars = getStars(:item);
   when(stars <= 2) canvas.COLOR.WHITE
-  when(stars <= 4) canvas.COLOR.BRIGHT_GREEN
-  when(stars <= 6) canvas.COLOR.CYAN
-  when(stars <= 8) canvas.COLOR.MAGENTA
+  when(stars <= 3) canvas.COLOR.BRIGHT_GREEN
+  when(stars <= 5) canvas.COLOR.BRIGHT_CYAN
+  when(stars <= 7) canvas.COLOR.MAGENTA
   when(stars <= 10) canvas.COLOR.YELLOW
-  return canvas.BRIGHT_RED
+  return canvas.COLOR.BRIGHT_RED
 }
 
 @:recalculateName = ::(state, item){
@@ -3648,6 +3648,25 @@ none.name = 'None';
 @:Item = databaseItemMutatorClass.createLight(
   name : 'Wyvern.Item',  
   statics : {
+  
+    // takes a single item or item list and generates 
+    // a color hint object
+    toColorHints ::(itemOrList) {
+      @:out = {};
+      @:toColorHint ::(item) {
+        out[item.name] = valueToColor(:item);
+      }
+      
+      // its a single item
+      when(itemOrList->size == 0) ::<= {
+        toColorHint(:itemOrList);
+        return out
+      }
+      foreach(itemOrList) ::(k, v) {
+        toColorHint(:v);
+      }      
+      return out;
+    },
     
     ApparelMaterial : {get::<-import(:'base/item/apparelmaterial.mt')},
     Book : {get::<-import(:'base/item/book.mt')},
@@ -3793,10 +3812,6 @@ none.name = 'None';
           return chance;
         })) true else false;
         
-
-      
-      if (state.needsAppraisal)
-        state.price = 1;
       
       if (base.hasTraits(:TRAIT.HAS_SIZE))   
         assignSize(state);
@@ -3810,34 +3825,7 @@ none.name = 'None';
       
       
       
-      if (base.hasTraits(:TRAIT.HAS_QUALITY)) ::<= {
-        // random chance to have a maker's emblem on it, indicating 
-        // made with love and care
-        if (random.try(percentSuccess:15)) ::<= {
-          state.hasEmblem = true;
-          state.stats.add(stats:StatSet.new(
-            ATK:25,
-            DEF:25,
-            SPD:25,
-            INT:25,
-            DEX:25          
-          ));
-          state.price *= 1.25;
-        } else 
-          state.hasEmblem = false;
-        
-        
-        if (random.try(percentSuccess:30) || (qualityHint != empty)) ::<= {
-          state.quality = if (qualityHint == empty)
-            ItemQuality.getRandomWeighted(
-              knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4              
-            )
-          else 
-            ItemQuality.find(id:qualityHint);
-          state.stats.add(stats:state.quality.equipMod);
-          state.price += (state.price * (state.quality.pricePercentMod/100));            
-        }
-      }
+
       
 
       if (base.hasTraits(:TRAIT.METAL)) ::<= {
@@ -3905,6 +3893,36 @@ none.name = 'None';
 
       if (state.apparel != empty) 
         state.price += state.price * (state.apparel.pricePercentMod / 100);
+
+
+      if (base.hasTraits(:TRAIT.HAS_QUALITY)) ::<= {
+        // random chance to have a maker's emblem on it, indicating 
+        // made with love and care
+        if (random.try(percentSuccess:15)) ::<= {
+          state.hasEmblem = true;
+          state.stats.add(stats:StatSet.new(
+            ATK:25,
+            DEF:25,
+            SPD:25,
+            INT:25,
+            DEX:25          
+          ));
+          state.price *= 1.25;
+        } else 
+          state.hasEmblem = false;
+        
+        
+        if (random.try(percentSuccess:30) || (qualityHint != empty)) ::<= {
+          state.quality = if (qualityHint == empty)
+            ItemQuality.getRandomWeighted(
+              knockout : if (world.island.tier > world.MAX_NORMAL_TIER) (world.island.tier  - world.MAX_NORMAL_TIER)*1.4              
+            )
+          else 
+            ItemQuality.find(id:qualityHint);
+          state.stats.add(stats:state.quality.equipMod);
+          state.price += (state.price * (state.quality.pricePercentMod/100));            
+        }
+      }
 
         
       state.price = (state.price)->ceil;
@@ -4311,7 +4329,8 @@ none.name = 'None';
       when (state.needsAppraisal)
         windowEvent.queueMessage(
           speaker : this.name + ': Description',
-          text : this.description
+          text : this.description,
+          colorHints : Item.toColorHints(:this)
         );
         
       
@@ -4323,6 +4342,7 @@ none.name = 'None';
           leftWeight: 0.5,
           text : 'An inlet gem that, when set in an equipped item, grants an Art to use in battle.\n' +
                  'Shape: ' + InletSet.SLOT_NAMES[this.inletShape] + ', Value: ' + starsToString(:this),
+          colorHints : Item.toColorHints(:this),
           renderable : {
             render ::{
               Arts.renderArt(
@@ -4343,6 +4363,7 @@ none.name = 'None';
           speaker : this.name + '',
           topWeight : 1,
           leftWeight: 0.5,
+          colorHints : Item.toColorHints(:this),
           text : 'An inlet gem that, when set in an equipped item, grants an effect to the holder at the start of battle.\n' +
                  'Shape: ' + InletSet.SLOT_NAMES[this.inletShape] + ', Value: ' + starsToString(:this),
 
@@ -4364,21 +4385,23 @@ none.name = 'None';
       }
 
       
-      windowEvent.queueMessageSet(
-        speakers : [
+      windowEvent.queueMessage(
+
+        colorHints : Item.toColorHints(:this),
+        speaker:
           this.name + ': (' + (if(this.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) 
             'Description)' 
           else 
-            TYPE_NAMES[this.base.equipType]+')')
-        ],
-        set : [
-          this.description + '\n\n(Value: ' + starsToString(:this) + ')',
-        ]
+            TYPE_NAMES[this.base.equipType]+')'),
+        text : 
+          this.description + '\n\n(Value: ' + starsToString(:this) + ')'
+        
       );
       
       
       if (this.enchantLimit > 0 && ((this.base.traits & Item.TRAIT.CAN_HAVE_ENCHANTMENTS) != 0))    
         windowEvent.queueReader(
+          colorHints : Item.toColorHints(:this),
           prompt: this.name + ': Enchantments',
           lines :            
             
@@ -4437,6 +4460,7 @@ none.name = 'None';
       if (state.useEffects->filter(::(value) <- value != 'base:fling' && value != 'base:break-item')->size > 0)
         windowEvent.queueReader(
           prompt: this.name + ': Use Effects',
+          colorHints : Item.toColorHints(:this),
           lines : canvas.columnsToLines(
             columns: ::<= {
               @:out = [[], []];
@@ -4463,6 +4487,7 @@ none.name = 'None';
         )
       if ((state.base.traits & Item.TRAIT.STRANGE_TO_EQUIP) == 0) 
         windowEvent.queueReader(
+          colorHints : Item.toColorHints(:this),
           prompt :
             this.name + ': Equip Stats'
           ,

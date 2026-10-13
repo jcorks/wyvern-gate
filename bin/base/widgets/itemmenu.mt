@@ -229,7 +229,8 @@ return ::(
             
             currentEquip.equipMod.printDiffRate(
               prompt: '(Equip) ' + currentEquip.name + ' -> ' + choiceItem.name,
-              other:choiceItem.equipMod
+              other:choiceItem.equipMod,
+              colorHints : Item.toColorHints(:[currentEquip, choiceItem])
             );     
           }
         ] else [],
@@ -346,6 +347,7 @@ return ::(
       when(item == empty) empty;
       
       windowEvent.queueChoices(
+        colorHints : Item.toColorHints(:item),
         leftWeight: if (leftWeight == empty) 1 else leftWeight,
         topWeight: if (topWeight == empty) 1 else topWeight,
         prompt: item.name,

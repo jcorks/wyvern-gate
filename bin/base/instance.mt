@@ -231,7 +231,8 @@ import(module:'base/accolade/newrecord.mt');
       @:text = readDataText_(:'save_'+slot);
       when (text == empty) empty
       @:w = JSON.decode(:text);
-      w.world.saveName = slot;
+      if (w.world != empty)
+          w.world.saveName = slot;
       return w;
     }
       

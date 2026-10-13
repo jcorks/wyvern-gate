@@ -330,6 +330,7 @@ return ::(
         windowEvent.queueMessage(text: "The inventory is empty.");
       }
       @:args = {
+        colorHints ::<- Item.toColorHints(:items),
         promptRight: true,
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,

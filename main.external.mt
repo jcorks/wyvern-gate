@@ -120,22 +120,21 @@ windowEvent.errorHandler = ::<= {
 @currentCanvas;
 @canvasChanged = false;
 
-@rerender = :: {
+@rerender = ::(colorHints) {
   @:lines = currentCanvas;
   external_onStartCommit();
   foreach(lines)::(index, line) {
     external_onCommitText(a:line);
   }
-  external_onEndCommit();
-  print(:'New line request 3');
+  external_onEndCommit(:colorHints);
   canvasChanged = false;  
 }
 
-canvas.onCommit = ::(lines, renderNow){
+canvas.onCommit = ::(lines, colorHints, renderNow){
   currentCanvas = lines;
   canvasChanged = true;
   if (renderNow != empty)
-    rerender();
+    rerender(:colorHints);
 }
 
 @:jsonPreloaded = external_preloadJSONText();

@@ -164,6 +164,7 @@ return ::(inventory, shopkeep, onDone, sellMode) {
       
       windowEvent.queueChoices(
         prompt: item.name,
+        colorHints : Item.toColorHints(:item),
         choices: if (!item.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) 
           [if (sellMode) 'Sell' else 'Buy', 'Check', 'Compare Equipment']
         else        
