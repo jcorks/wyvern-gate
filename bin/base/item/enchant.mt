@@ -87,7 +87,7 @@
   },
 
   define:::(this, state) {
-
+    @ALREADY_PROCESSING_EVENT;
     this.interface = {
       initialize::{},
       defaultLoad ::(base, eventHint, conditionChanceHint, effectIDHint, nameHint, descriptionHint) {      
@@ -180,6 +180,7 @@
       
       battleStart ::(from, item){
         when(state.event != '') empty;
+        ALREADY_PROCESSING_EVENT = {};
         from.effectStack.add(
           from, id: state.effectID, duration: Arts.A_LOT, item, noNotify:true
         );
@@ -191,9 +192,12 @@
         
         if (state.event == args.name) ::<= {
           when(!random.try(percentSuccess:state.conditionChance)) empty;
+          when (ALREADY_PROCESSING_EVENT == empty || ALREADY_PROCESSING_EVENT[state] == true) empty;
+          ALREADY_PROCESSING_EVENT[state] = true;
           args.holder.addEffect(
             from:args.holder, id: state.effectID, durationTurns: 1, item:args.item
           );
+          ALREADY_PROCESSING_EVENT->remove(key:state);
         }
       }
     }

@@ -1328,48 +1328,56 @@ return empty;
       queueCredits :: {
 
 
-
 /*
-import(:'base/widgets/animatemultibar.mt')(
-  clients : [
-    {
-      title : 'ATK',
-      from: 10,
-      to: 80,
-      max: 100
-    },
-    {
-      title : 'DEF',
-      from: 30,
-      to: 75,
-      max: 100
-    },
-    {
-      title : 'INT',
-      from: 40,
-      to: 90,
-      max: 100
-    },
-    {
-      title : 'SPD',
-      from: 40,
-      to: 80,
-      max: 100
-    },
-    {
-      title : 'DEX',
-      from: 35,
-      to: 100,
-      max: 100
-    },
+@:clients = [
+  {
+    title : 'ATK',
+    from: 10,
+    to: 830,
+    max: 100
+  },
+  {
+    title : 'DEF',
+    from: 30,
+    to: 735,
+    max: 100
+  },
+  {
+    title : 'INT',
+    from: 40,
+    to: 930,
+    max: 100
+  },
+  {
+    title : 'SPD',
+    from: 40,
+    to: 830,
+    max: 100
+  },
+  {
+    title : 'DEX',
+    from: 35,
+    to: 100,
+    max: 100
+  }
 
-  ],
+]
+import(:'base/widgets/animatemultibar.mt')(
+  clients,
   onGetCaption      ::<- ': Lv ' + 2,
   onGetSubcaption   ::<- 'Exp to next level: ',
   onGetSubsubcaption::<- '                  ',
   
   onGetLeftWeight::<- 0.5,
   onGetTopWeight::<- 0.5,
+  
+  onCompleteValue ::(client) {
+    return {
+      from: 0,
+      max: 100,
+      to: 100
+    }
+  },
   
   onNewValue ::(value) {
   }

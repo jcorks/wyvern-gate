@@ -369,17 +369,17 @@ LandmarkEvent.database.newEntry(
 
 LandmarkEvent.database.newEntry(
   data : {
-    id: 'base:treasure-golem',
+    id: 'base:golden-automaton',
     tier : 1,
     rarity : 100,
     kind : KIND.HOSTILE,
     startup ::(parent, x, y) <-
       Encounter.new(
         parent,
-        name : 'the Treasure Golem',
+        name : 'the Golden Automaton',
         symbol : '$',
-        speciesID : 'base:treasure-golem',
-        professionID : 'base:treasure-golem',
+        speciesID : 'base:golden-automaton',
+        professionID : 'base:golden-automaton',
         maxEncounters : if (parent.landmark.floor == 0) 0 else 1,
         maxSimultaneousEncounters : 1,
         membersPerTeam : 1,

@@ -2327,8 +2327,8 @@ Species.newEntry(data:{
 
 
 Species.newEntry(data:{
-  name : 'Treasure Golem',
-  id : 'base:treasure-golem',
+  name : 'Golden Automaton',
+  id : 'base:golden-automaton',
   rarity : 2000000000000,
   description: 'Looks like a chest! Not as friendly though.',
   growth : StatSet.new(

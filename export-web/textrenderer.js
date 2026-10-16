@@ -188,6 +188,25 @@ var initializeTextRenderer = function() {
         return program;
     }
 
+    const HINT_TO_RGB = [
+      [1.0, 0.4, 0.4] , // Red
+      [0.4, 1.0, 0.4] , // Green
+      [1.0, 0.8, 0.65], // Yellow
+      [0.4, 0.4, 1.0] , // Blue
+      [1.0, 0.4, 1.0] , // Magenta
+      [0.4, 1.0, 1.0] , // Cyan,
+      
+      [0.95, 0.95, 0.95], //white
+
+      [0.65, 0.65, 0.65], //gray
+      [1.0, 0.8, 0.8] , // Red
+      [0.8, 1.0, 0.8] , // Green
+      [1.0, 1.0, 0.8], // Yellow
+      [0.9, 0.9, 1.0] , // Blue
+      [1.0, 0.9, 1.0] , // Magenta
+      [0.9, 1.0, 1.0] , // Cyan
+    ]
+
 
     // creates a new mesh for a line of text.
     const newLineMesh = function(baseY, atlas) {
@@ -197,12 +216,15 @@ var initializeTextRenderer = function() {
 
         const posBuffer   = new Float32Array(LINE_MAX_VERTICES * 2);
         const texBuffer   = new Float32Array(LINE_MAX_VERTICES * 2);
+        const colBuffer   = new Float32Array(LINE_MAX_VERTICES * 3);
         var currentText   = ""; // used to skip recalculating line on repeats.
 
         const posGLBuffer = gl.createBuffer();
         const texGLBuffer = gl.createBuffer();
+        const colGLBuffer = gl.createBuffer();
 
         var numVertices = 0;
+        var colorHints;
         
 
         const reformBuffer = function() {            
@@ -216,7 +238,45 @@ var initializeTextRenderer = function() {
             const cWidth = atlas.charWidth();
             const cHeight = atlas.charHeight();
             
+            for(var i = 0; i < len*6*3; ++i) {
+                colBuffer[i] = 0.95;
+            }
+            
+            if (colorHints != undefined) {
+                const keys = Object.keys(colorHints);
+                for(var i = 0; i < keys.length; ++i) {
+                    const key = keys[i];
+                    const index = text.indexOf(key);
+                    if (index != -1) {
+                        const colorRGB = HINT_TO_RGB[colorHints[key]];
+                        var iter = 0;
+                        for(n = 0; n < len; ++n) {
+                            if (text[n] == ' ') {
+                                continue;
+                            }
+                            if (n != index) {
+                                iter += 6*3;
+                                continue;
+                            }
+                            for(var n = index; n < index+key.length; ++n) {
+                                if (text[n] == ' ') {
+                                    continue;
+                                }
+                                for(var m = 0; m < 6; ++m) {
+                                    colBuffer[iter++] = colorRGB[0];
+                                    colBuffer[iter++] = colorRGB[1];
+                                    colBuffer[iter++] = colorRGB[2];
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            
             for(var i = 0; i < len; ++i) {
+            
                 var letter = text[i];
                 if (letter == ' ') {
                     x += cWidth;
@@ -276,13 +336,16 @@ var initializeTextRenderer = function() {
             gl.bufferData(gl.ARRAY_BUFFER, posBuffer, gl.DYNAMIC_DRAW);
             gl.bindBuffer(gl.ARRAY_BUFFER, texGLBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, texBuffer, gl.DYNAMIC_DRAW);    
+            gl.bindBuffer(gl.ARRAY_BUFFER, colGLBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, colBuffer, gl.DYNAMIC_DRAW);    
         }
 
 
         return {
             // sets the text, reforming the buffer if needed
-            setText : function(text) {
+            setText : function(text, colHints) {
                 if (text == currentText) return;
+                colorHints = colHints
                 currentText = text;
                 return reformBuffer();
             },
@@ -293,7 +356,8 @@ var initializeTextRenderer = function() {
             // draws the line using the current program.
             draw : function(
                 posAttribIndex,
-                texAttribIndex
+                texAttribIndex,
+                colAttribIndex
             ) {
 
 
@@ -302,6 +366,10 @@ var initializeTextRenderer = function() {
 
                 gl.bindBuffer(gl.ARRAY_BUFFER, texGLBuffer);
                 gl.vertexAttribPointer(texAttribIndex, 2, gl.FLOAT, false, 0, 0);
+
+                gl.bindBuffer(gl.ARRAY_BUFFER, colGLBuffer);
+                gl.vertexAttribPointer(colAttribIndex, 3, gl.FLOAT, false, 0, 0);
+
 
                 gl.drawArrays(gl.TRIANGLES, 0, numVertices);
             },
@@ -405,8 +473,8 @@ var initializeTextRenderer = function() {
             "uniform vec2 u_resolution;\n"+ 
             "const float effectSaturation = 0.29;\n"+
             "void main() {\n"+
-            "    float incrementX = (1.0 / u_resolution.x) * 1.8;\n"+
-            "    float incrementY = (1.0 / u_resolution.y) * 1.8;\n"+
+            "    float incrementX = (1.0 / u_resolution.x) * 1.2;\n"+
+            "    float incrementY = (1.0 / u_resolution.y) * 1.2;\n"+
             "    vec3 baseColor   = texture2D(u_texture, v_texcoord).rgb;\n"+
             "    vec3 baseColor11 = texture2D(u_texture, v_texcoord+vec2(incrementX, incrementY)).rgb;\n"+
             "    vec3 baseColor00 = texture2D(u_texture, v_texcoord+vec2(-incrementX, -incrementY)).rgb;\n"+
@@ -513,19 +581,23 @@ var initializeTextRenderer = function() {
         // vertex shader
         "attribute vec4 a_position;\n"+
         "attribute vec2 a_texcoord;\n"+
+        "attribute vec3 a_color;\n"+
         "uniform mat4 u_matrix;\n"+
         "varying vec2 v_texcoord;\n"+
+        "varying vec3 v_color;\n"+
         "void main() {\n"+
         "  gl_Position = u_matrix * a_position;\n"+
         "  v_texcoord = a_texcoord;\n"+
+        "  v_color = a_color;\n"+
         "}\n",
         
         // fragment shader
         "precision mediump float;\n"+
         "varying vec2 v_texcoord;\n"+
+        "varying vec3 v_color;\n"+
         "uniform sampler2D u_texture;\n"+
         "void main() {\n"+
-        "   gl_FragColor = texture2D(u_texture, v_texcoord);\n"+
+        "   gl_FragColor = texture2D(u_texture, v_texcoord)*vec4(v_color, 1.0);\n"+
         "}\n"
     )
 
@@ -563,6 +635,7 @@ var initializeTextRenderer = function() {
 
     const posAttribIndex = gl.getAttribLocation(textProgram, 'a_position');
     const texAttribIndex = gl.getAttribLocation(textProgram, 'a_texcoord');
+    const colAttribIndex = gl.getAttribLocation(textProgram, 'a_color');
 
     const canvasElement = document.getElementById("canvas");
     const drawFrame = function() {
@@ -599,17 +672,20 @@ var initializeTextRenderer = function() {
 
         gl.enableVertexAttribArray(posAttribIndex);
         gl.enableVertexAttribArray(texAttribIndex);
+        gl.enableVertexAttribArray(colAttribIndex);
 
         
         for(var i = 0; i < lines.length; ++i) {
             lines[i].draw(
                 posAttribIndex,
-                texAttribIndex
+                texAttribIndex,
+                colAttribIndex
             );
         }    
 
         gl.disableVertexAttribArray(posAttribIndex);
         gl.disableVertexAttribArray(texAttribIndex);
+        gl.disableVertexAttribArray(colAttribIndex);
                 
         gl.flush();
         
@@ -623,8 +699,8 @@ var initializeTextRenderer = function() {
 
 
     TextRenderer =  {
-        setLine : function(line, text) {
-            lines[line].setText(text)
+        setLine : function(line, text, colorHints) {
+            lines[line].setText(text, colorHints)
         },
         
         dumpFont : function() {
@@ -632,6 +708,10 @@ var initializeTextRenderer = function() {
             for(var i = 0; i < lines.length; ++i) {
                 lines[i].reformBuffer();
             }
+        },
+        
+        setColorHints : function(ch) {
+            colorHints = ch;
         },
         
         requestDraw : function() {

@@ -9,7 +9,8 @@ return ::(whom, items) {
   
   when(items->size == 1) ::<= {
     windowEvent.queueMessage(
-      text: whom + ' found ' + correctA(word:items[0].name) + ' ' + items[0].starsString
+      text: whom + ' found ' + correctA(word:items[0].name) + ' ' + items[0].starsString,
+      colorHints : Item.toColorHints(:items)
     );
   }
   

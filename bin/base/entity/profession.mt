@@ -1330,8 +1330,8 @@ Profession.newEntry(data:{
 
 
 Profession.newEntry(data:{
-  name: 'Treasure Golem',
-  id : 'base:treasure-golem',
+  name: 'Golden Automaton',
+  id : 'base:golden-automaton',
   traits : 0,
   weaponAffinity: 'base:none',
   description : "", 

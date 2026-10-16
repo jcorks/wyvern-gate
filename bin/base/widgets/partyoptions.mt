@@ -515,12 +515,12 @@ return ::{
                           if (item != empty && item.base.name != 'None') ::<= {
                             when(party.inventory.isFull)
                               windowEvent.queueMessage(
-                                colorHints : Item.toColorHint(:item),
+                                colorHints : Item.toColorHints(:item),
                                 text: member.name + ' cannot unequip the ' + item.name + ' because the party\'s inventory is full.'
                               );
 
                             windowEvent.queueMessage(
-                              colorHints : Item.toColorHint(:item),
+                              colorHints : Item.toColorHints(:item),
                               text: member.name + ' has unequipped the ' + item.name
                             );
                             member.unequipItem(item);
@@ -537,7 +537,7 @@ return ::{
                             else
                               ['Equip', 'Check', 'Mark Favorite', 'Rename', 'Compare', 'Gems...'],
                           prompt: item.name,
-                          colorHints : Item.toColorHint(:item),
+                          colorHints : Item.toColorHints(:item),
                           canCancel: true,
                           leftWeight: 1,
                           topWeight: 1,
@@ -591,7 +591,7 @@ return ::{
                             when(choice == 4) ::<= {
                               when (!item.base.hasTraits(:Item.TRAIT.CAN_HAVE_ENCHANTMENTS))
                                 windowEvent.queueMessage(
-                                  colorHints : Item.toColorHint(:item),
+                                  colorHints : Item.toColorHints(:item),
                                   text:item.name + ' cannot be renamed.'
                                 );
 
@@ -616,7 +616,7 @@ return ::{
                               @currentEquip = member.getEquipped(slot);
                               
                               currentEquip.equipMod.printDiffRate(
-                                colorHints : Item.toColorHint(:[item, currentEquip]),
+                                colorHints : Item.toColorHints(:[item, currentEquip]),
                                 prompt: currentEquip.name + ' -> ' + item.name,
                                 other:item.equipMod
                               );                                   

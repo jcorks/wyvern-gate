@@ -61,9 +61,10 @@
     matte.setExternalFunction('external_onEndCommit', ['colorsHints'],function(fn, args) {
         const colorHintsTranslate = {}
         if (matte.store.valueIsEmpty(args[0]) == false) {
-            const keys = vm.store.valueObjectKeys(args[0]);
-            for(var i = 0; keys.length; ++i) {
-                const key = matte.store.valueAsString(keys[i]);
+            const keys = matte.store.valueObjectKeys(args[0]);
+            const len = matte.store.valueObjectGetNumberKeyCount(keys);
+            for(var i = 0; i < len; ++i) {
+                const key = matte.store.valueObjectAccessIndex(keys, i);
                 colorHintsTranslate[key] = matte.store.valueAsNumber(matte.store.valueObjectAccessString(args[0], key));
             }
         }

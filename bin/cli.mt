@@ -75,7 +75,6 @@
   console.clear();
   @:lines = currentCanvas;
   
-  breakpoint()
   renderLines(lines, colorHints:currentHints)
   /*
   foreach(lines) ::(index, line) {

@@ -326,7 +326,7 @@ var startGame = function(touch) {
               const lines = data.data[0];
               const colorHints = data.data[1];
               for(var i = 0; i < lines.length; ++i) {
-                  TextRenderer.setLine(i, lines[i]);
+                  TextRenderer.setLine(i, lines[i], colorHints);
               }
               TextRenderer.requestDraw();
               break;

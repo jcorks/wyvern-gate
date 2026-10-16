@@ -118,6 +118,7 @@ windowEvent.errorHandler = ::<= {
 
 
 @currentCanvas;
+@currentHints;
 @canvasChanged = false;
 
 @rerender = ::(colorHints) {
@@ -126,12 +127,13 @@ windowEvent.errorHandler = ::<= {
   foreach(lines)::(index, line) {
     external_onCommitText(a:line);
   }
-  external_onEndCommit(:colorHints);
+  external_onEndCommit(:currentHints);
   canvasChanged = false;  
 }
 
 canvas.onCommit = ::(lines, colorHints, renderNow){
   currentCanvas = lines;
+  currentHints = colorHints
   canvasChanged = true;
   if (renderNow != empty)
     rerender(:colorHints);
