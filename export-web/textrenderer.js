@@ -190,21 +190,21 @@ var initializeTextRenderer = function() {
 
     const HINT_TO_RGB = [
       [1.0, 0.4, 0.4] , // Red
-      [0.4, 1.0, 0.4] , // Green
+      [0.5, 1.0, 0.2] , // Green
       [1.0, 0.8, 0.65], // Yellow
       [0.4, 0.4, 1.0] , // Blue
       [1.0, 0.4, 1.0] , // Magenta
-      [0.4, 1.0, 1.0] , // Cyan,
+      [0.2, 0.8, 1.0] , // Cyan,
       
       [0.95, 0.95, 0.95], //white
 
       [0.65, 0.65, 0.65], //gray
-      [1.0, 0.8, 0.8] , // Red
-      [0.8, 1.0, 0.8] , // Green
-      [1.0, 1.0, 0.8], // Yellow
-      [0.9, 0.9, 1.0] , // Blue
-      [1.0, 0.9, 1.0] , // Magenta
-      [0.9, 1.0, 1.0] , // Cyan
+      [1.0, 0.6, 0.6] , // Red
+      [0.6, 1.0, 0.6] , // Green
+      [1.0, 1.0, 0.4], // Yellow
+      [0.55, 0.55, 1.0] , // Blue
+      [1.0, 0.7, 1.0] , // Magenta
+      [0.3, 1.0, 1.0] , // Cyan
     ]
 
 
@@ -239,37 +239,54 @@ var initializeTextRenderer = function() {
             const cHeight = atlas.charHeight();
             
             for(var i = 0; i < len*6*3; ++i) {
-                colBuffer[i] = 0.95;
+                colBuffer[i] = 1;
             }
             
             if (colorHints != undefined) {
-                const keys = Object.keys(colorHints);
+                var keys
+                if (colorHints['__order'] != undefined) 
+                    keys = colorHints['__order'] 
+                else 
+                    keys = Object.keys(colorHints);
+                    
+                const applyColor = function(index, key) {
+                  const colorRGB = HINT_TO_RGB[colorHints[key]];
+                  var iter = 0;
+                  var firstCheck = false;
+                  for(n = 0; n < len; ++n) {
+                      if (text[n] == ' ') {
+                          continue;
+                      }
+                      if (n != index) {
+                          iter += 6*3;
+                          continue;
+                      }
+
+                      // already claimed, skip
+                      if (colBuffer[iter] != 1.0 ||
+                          colBuffer[iter+1] != 1.0 ||
+                          colBuffer[iter+2] != 1.0) {
+                          return;
+                      }            
+                      for(var n = index; n < index+key.length; ++n) {
+                          if (text[n] == ' ') {
+                              continue;
+                          }
+                          for(var m = 0; m < 6; ++m) {
+                              colBuffer[iter++] = colorRGB[0];
+                              colBuffer[iter++] = colorRGB[1];
+                              colBuffer[iter++] = colorRGB[2];
+                          }
+                      }
+                      break;
+                  }                
+                }
+                    
                 for(var i = 0; i < keys.length; ++i) {
                     const key = keys[i];
                     const index = text.indexOf(key);
                     if (index != -1) {
-                        const colorRGB = HINT_TO_RGB[colorHints[key]];
-                        var iter = 0;
-                        for(n = 0; n < len; ++n) {
-                            if (text[n] == ' ') {
-                                continue;
-                            }
-                            if (n != index) {
-                                iter += 6*3;
-                                continue;
-                            }
-                            for(var n = index; n < index+key.length; ++n) {
-                                if (text[n] == ' ') {
-                                    continue;
-                                }
-                                for(var m = 0; m < 6; ++m) {
-                                    colBuffer[iter++] = colorRGB[0];
-                                    colBuffer[iter++] = colorRGB[1];
-                                    colBuffer[iter++] = colorRGB[2];
-                                }
-                            }
-                            break;
-                        }
+                        applyColor(index, key);
                     }
                 }
             }

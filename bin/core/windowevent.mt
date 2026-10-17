@@ -545,7 +545,6 @@
 
       @:choicesMatch = if (data.onGetChoicesMatch) data.onGetChoicesMatch() else data.choicesMatch;
 
-      if (data.jumpTag == 'pickItem' && data.rendered == empty) breakpoint();
       @:choices = if (choicesMatch == empty)
           if (data.onGetChoices) data.onGetChoices() else data.choices
         else

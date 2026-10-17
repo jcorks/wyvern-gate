@@ -65,7 +65,18 @@
             const len = matte.store.valueObjectGetNumberKeyCount(keys);
             for(var i = 0; i < len; ++i) {
                 const key = matte.store.valueObjectAccessIndex(keys, i);
-                colorHintsTranslate[key] = matte.store.valueAsNumber(matte.store.valueObjectAccessString(args[0], key));
+                const mv = matte.store.valueObjectAccessString(args[0], key);
+                
+                if (key == '__order') {
+                    const v = [];
+                    colorHintsTranslate['__order'] = v;
+                    const orderLen = matte.store.valueObjectGetNumberKeyCount(mv);
+                    for(var n = 0; n < orderLen; ++n) {
+                        v.push(matte.store.valueAsString(matte.store.valueObjectAccessIndex(mv, n)));
+                    }
+                } else {
+                    colorHintsTranslate[key] = matte.store.valueAsNumber(mv);
+                }
             }
         }
     

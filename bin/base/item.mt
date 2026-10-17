@@ -3488,6 +3488,7 @@ none.name = 'None';
   return canvas.COLOR.BRIGHT_RED
 }
 
+
 @:recalculateName = ::(state, item){
   when(state.needsAppraisal) 
     state.customName = '???? ' + state.base.name;
@@ -3653,8 +3654,22 @@ none.name = 'None';
     // a color hint object
     toColorHints ::(itemOrList) {
       @:out = {};
+      @:order = [];
+      @:added = {};
+      @:addOrder ::(str, col) {
+        when (out[str] != empty) empty;
+        out[str] = col;
+        order->push(:str);
+      }
+      
       @:toColorHint ::(item) {
-        out[item.name] = valueToColor(:item);
+        @:col = valueToColor(:item);
+        when(col == canvas.COLOR.WHITE) empty;
+
+
+        @:str = starsToString(:item);
+        addOrder(str, col);
+        addOrder(str:item.name, col);
       }
       
       // its a single item
@@ -3662,9 +3677,14 @@ none.name = 'None';
         toColorHint(:itemOrList);
         return out
       }
-      foreach(itemOrList) ::(k, v) {
-        toColorHint(:v);
+      
+      // sort so that higher stars get added before lower stars
+      @:sorted = [...itemOrList]->sort(::(a, b) <- getStars(:a) < getStars(:b))
+      foreach(sorted) ::(k, v) {
+        toColorHint(:v);       
       }      
+      out['__order'] = order;
+      breakpoint();
       return out;
     },
     

@@ -497,6 +497,12 @@ static matteValue_t wyvern_gate__native__writeDataText(
             remove(matte_string_get_c_str(path));
         } else {
             FILE * f = fopen(matte_string_get_c_str(path), "wb");
+            if (f == NULL) {
+                matteString_t * msg = matte_string_create_from_c_str("Could not save text data to %s\n", matte_string_get_c_str(path));
+                matte_vm_raise_error_string(vm, msg);
+                matte_string_destroy(msg);
+                return matte_store_new_value(store);
+            }
             fprintf(f, "%s", str);
             fclose(f);
         }
@@ -1497,6 +1503,11 @@ const char * wyvern_gate__native__renderLines_color_filter(
 
             // first occurrence 
             if (s) {
+                // check if already colored, skip if so
+                char * marker = s - 5;
+                if (marker >= output && marker[0] == '\x1b') continue;
+                
+                
                 matteValue_t indexVal = matte_value_object_access_string(store, colors, keystr);
                 if (matte_value_type(indexVal) == MATTE_VALUE_TYPE_NUMBER) {
                     const char * color = "37";
@@ -1547,8 +1558,14 @@ static matteValue_t wyvern_gate__native__renderLines(
     matteValue_t keys = matte_store_new_value(store);
     
     if (matte_value_type(args[1]) == MATTE_VALUE_TYPE_OBJECT) {
+        matteValue_t order = matte_value_object_access_string(store, args[1], MATTE_VM_STR_CAST(vm, "__order"));
+        int hasOrder = matte_value_type(order) == MATTE_VALUE_TYPE_OBJECT;
         matte_store_recycle(store, keys);
-        keys = matte_value_object_keys(store, args[1]);
+        if (hasOrder) {
+            keys = order;
+        } else {
+            keys = matte_value_object_keys(store, args[1]);
+        }
         matte_value_object_push_lock(store, keys);
     }
 
