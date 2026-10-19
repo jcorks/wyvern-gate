@@ -91,7 +91,7 @@ canvas.onCommit = ::(lines, colorHints, renderNow){
   if (renderNow != empty)
     rerender(colorHints);
 }
-/*
+
 @:refitCanvasCLI::{
       
   console.clear();
@@ -101,29 +101,21 @@ canvas.onCommit = ::(lines, colorHints, renderNow){
   @h;
 
 
-  ::? {
-    forever ::{
-      @ch = getchWait()
-      if (ch != empty) {
-        send();
-      }
-    }
-  }
 
   ::? {
     @target = '';
-    @ch = getchWait()
-
     forever ::{
       @ch = getchWait()
       //console.println(:"ch: " + ch);
-      when(ch == empty) send();
+      when(ch == empty) ::<= {
+        send();
+      }
       when (ch == 'R') ::<= {
         w = target;
         send();
       }
       when (ch == ';') ::<= {
-        h = target;
+        h = target->substr(from:target->length-2, to:target->length-1);
         target = '';
       }
       target = target + ch;
@@ -134,14 +126,21 @@ canvas.onCommit = ::(lines, colorHints, renderNow){
   when(w == empty || h == empty) empty;
   
   w = Number.parse(:w);
-  h = ((Number.parse(:h) / 2)->floor)*2 -2;
-
+  h = Number.parse(:h);
+  @:hAdjust = ((h / 2)->floor)*2 -2;
+  @:wAdjust = ((w / 2)->floor)*2 -2;
+  breakpoint();
+  when (w >= 80 && h >= 24) empty;
   when (canvas.width == w && canvas.height == h) empty;
 
 
-  canvas.resize(width:w, height:h);
+  canvas.resize(width:wAdjust, height:hAdjust);
+  
+  windowEvent.queueMessage(
+    text: 'Hello! Your terminal was detected as smaller than the standard 80x24 terminal size. The game may clip content that cannot fit, as it was designed for 80x24. Just wanted to let you know! <3'
+  );
 }
-*/
+
 
 
 
@@ -464,6 +463,6 @@ instance.mainMenu(
   */
 
 );
-
+refitCanvasCLI();
 
 if (mainLoop != empty) mainLoop();
