@@ -120,11 +120,13 @@
     },
     
     onPick::(item) {
+      @:other = item;
+      item = itemSrc;
       windowEvent.queueChoices(
         leftWeight: 0.5,
         topWeight: 0.5,
-        prompt: item.name,
-        colorHints : Item.toColorHints(:item),
+        prompt: other.name,
+        colorHints : Item.toColorHints(:other),
         canCancel : true,
         keep:true,
         choices: [
@@ -132,8 +134,6 @@
           'Sacrifice'
         ],
         onChoice::(choice) {
-          @:other = item;
-          item = itemSrc;
           when (choice == 0) empty;        
           when (choice == 1) other.describe();
           when (choice == 2) ::<= {
