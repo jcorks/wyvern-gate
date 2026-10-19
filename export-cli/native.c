@@ -882,6 +882,12 @@ static matteValue_t wyvern_gate__native__canvas__renderBarAsString(
       matte_string_get_char(matte_value_string_get_string_unsafe(store, args[3]), 0)
     ;
 
+
+    uint32_t auxFillCharacter = matte_value_type(args[5]) == MATTE_VALUE_TYPE_EMPTY ? 
+      '|'
+        :
+      matte_string_get_char(matte_value_string_get_string_unsafe(store, args[5]), 0)
+    ;
     
     
     double fillFraction = matte_value_as_number(store, args[1]);
@@ -904,6 +910,19 @@ static matteValue_t wyvern_gate__native__canvas__renderBarAsString(
     for(i = 0; i < numFilled; ++i) {
         matte_string_append_char(out, character);
     }
+     
+    if (matte_value_type(args[4]) == MATTE_VALUE_TYPE_NUMBER) {
+        double auxRatio = matte_value_as_number(store, args[4]);
+        if (auxRatio > 1) auxRatio = 1;
+        if (auxRatio < 0) auxRatio = 0;
+            
+        int numFilledAux = ((int)((width - 2) * (auxRatio))) - numFilled;
+        for(i = 0; i < numFilledAux; ++i) { 
+            matte_string_append_char(out, auxFillCharacter);
+        }
+        numFilled += numFilledAux;
+    }
+    
     for(i = 0; i < width - numFilled - 2; ++i) {
         matte_string_append_char(out, emptyChar); // low block
     }
@@ -2227,6 +2246,8 @@ static matteValue_t wyvern_gate__native__canvas(
         "fillFraction",
         "character",
         "emptyCharacter",
+        "auxFillFraction",
+        "auxFillCharacter",
         NULL
     );
 

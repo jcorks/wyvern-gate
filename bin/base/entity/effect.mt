@@ -6189,6 +6189,7 @@ Effect.newEntry(
           
 
         @:pickItem = import(:'base/widgets/pickitem.mt');
+        @:Item = import(:'base/item.mt');
       
         @:xferItems = ::(from, to, moveToName) {
           pickItem(
@@ -6206,6 +6207,7 @@ Effect.newEntry(
                 leftWeight: 0.5,
                 topWeight: 0.5,
                 prompt: choiceItem.name,
+                colorHints : Item.toColorHints(:choiceItem),
                 canCancel : true,
                 keep:true,
                 jumpTag : 'BANKING-ITEM',

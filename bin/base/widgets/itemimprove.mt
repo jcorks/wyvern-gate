@@ -4,129 +4,88 @@
 @:random = import(module:'core/random.mt');
 @:StatSet = import(module:'base/util/statset.mt');
 @:pickItem = import(module:'base/widgets/pickitem.mt');
+@:animateMultiBar = import(:'base/widgets/animatemultibar.mt');
+@:ImprovementStyle = import(:'base/item/improvementstyle.mt');
+@:Item = import(:'base/item.mt');
 
-@:levelUp::(item, user, onDone) {
-  breakpoint();
-  @:statChoices = [
-    'ATK',
-    'INT',
-    'DEF',
-    'SPD',
-    'DEX'
-  ];         
-
-
-  windowEvent.queueChoices(
-    prompt: 'Choose a stat to improve.',
-    choices: [...statChoices]->map(to:::(value)<- value + ' (+' + item.equipModBase[value] + ')'),
-    onChoice::(choice) {
-      when(choice == 0) empty;
-      @stat = statChoices[choice-1];
-
-      
-
-
-      world.accoladeIncrement(name:'itemImprovements');                    
-                    
-      @:oldStats = item.equipModBase;
-      @:newStats = StatSet.new();
-      @:state = oldStats.save();
-      state[stat] += 1;
-      newStats.load(serialized:state);
-      
-      oldStats.printDiff(
-        other:newStats,
-        prompt: 'New stats: ' + item.name
-      );
-
-      @:state = item.improvement.stats.save();
-      state[stat] += 1;
-      item.improvement.stats.load(:state);
-      
-      breakpoint();
-      if (user != empty) ::<= {
-        @:oldStats = StatSet.new();
-        @equiper = user;
-        oldStats.load(serialized:equiper.stats.save());
-        
-        @slot = equiper.unequipItem(item, silent:true);
-        equiper.equip(item, slot, silent:true);
-        
-        oldStats.printDiff(
-          other: equiper.stats,
-          prompt: equiper.name + ': New stats'
-        )
-      }   
-      
-      windowEvent.queueCustom(
-        onEnter :: {
-          onDone();
-        }
-      );
-
-    }
-  );
-
+@:expFromItem::(item) {
+  @exp = item.equipMod.sum + item.equipModBase.sum*50;
+  if (exp < 35) exp = 35;  
+  return exp;
 }
 
+@:generateClientEXPUp ::(item, style) {
+  @:exp = expFromItem(item);
+  @:out = {};
+  foreach(['ATK', 'INT', 'DEF', 'SPD', 'DEX']) ::(k, name) {
+    out[name] = ((style.stats[name] / 100.0) * exp)->ceil;
+  }
+  return out;
+}
 
-@:addExpAnimated::(item, user, other, exp, onDone) {
+@:generateClients ::(item, itemOther, style) {
+  @:expUp = generateClientEXPUp(item:itemOther, style);
+  @:clients = [];
+  @:curStats = item.improvement.stats;
+  foreach(['ATK', 'INT', 'DEF', 'SPD', 'DEX']) ::(k, name) {
+    clients->push(:{
+      stat: name,
+      title: name + ' (+' + curStats[name] +')',
+      from: item.improvement.getExp(:name),
+      to : item.improvement.getExp(:name) + expUp[name],
+      max: item.improvement.getExpToNext(:name)
+    }); 
+  }
+  return clients;
+}
+
+@:addExpAnimated::(item, user, other, clients, onDone, style) {
   breakpoint();
-  @remainingForLevel = item.improvement.expToNext - item.improvement.exp;
   
   
-  @:animateBar = import(:'base/widgets/animatebar.mt');
-  @current = 0;
-  animateBar(
-    from: item.improvement.exp,
-    to:   item.improvement.exp + exp,
-    max:  item.improvement.expToNext,
-    
-    onGetPauseFinish:: <- true,
-    onFinish ::{  
-      @:remaining = exp - (item.improvement.expToNext - item.improvement.exp);
-      @:oldLevel = item.improvement.improvements;
-      item.improvement.improve(:exp);      
-      when (oldLevel != item.improvement.improvements) ::<= {
-        windowEvent.queueMessage(
-          text: item.name + ': Level up!'
-        );
-        windowEvent.queueCustom(
-          onEnter :: {      
-            levelUp(
-              item : item,
-              user : user,
-              onDone :: {
-                addExpAnimated(item, other, exp:remaining, onDone);
-              }
-            );
-          }
-        );
-      }
-      windowEvent.queueCustom(
-        onEnter :: {
-          onDone();
-        }
-      );
-         
-    },
-    
-    onGetCaption      ::<- item.name + ': Lv ' + item.improvement.improvements,
-    onGetSubcaption   ::<- 'Exp to next level: ' + (remainingForLevel - (current - item.improvement.exp)),
-    onGetSubsubcaption::<- '                  +' + (exp - (current - item.improvement.exp)),
+  animateMultiBar.widget(
+    clients, 
+    onGetPauseFinish ::<- true,
+    pauseStart : true,
+
+    onGetCaption      ::<- item.name,
+    onGetSubcaption   ::<- '',
+    onGetSubsubcaption::<- '                  ',
     
     onGetLeftWeight::<- 0.5,
     onGetTopWeight::<- 0.5,
+    onCompleteValue ::(client) {
+      item.improvement.levelUp(stat:clients[client].stat)
+      style.onLevel(item, stat:clients[client].stat);
+      user.recalculateStats();
+      clients[client].to -= 100;
+      @:name = clients[client].stat
+      clients[client].title = name + ' (+' + item.improvement.stats[name] +')'
+      if (clients[client].to < 0)
+        clients[client].to = 0;
+      return {
+        from: 0,
+        to: clients[client].to,
+        max: 100,
+      }
+    },
     
-    onNewValue ::(value) {
-      current = value->ceil;
+    onFinish::(client, value) {
+      item.improvement.setExp(stat:clients[client].stat, exp:value)
     }
   );
+  
+  windowEvent.queueCustom(
+    onEnter ::{
+      onDone()
+    }
+  );
+
 }
 
 
-@:improve::(item, user) {
-  breakpoint();
+@:improve::(item, user, style) {
+
   @:party = import(module:'base/world.mt').party;
   @:itemFilter = ::(value) <- value.material == item.material && value != item;
           
@@ -137,16 +96,79 @@
     );
   }
   @:itemSrc = item; 
+  @itemOther;
   pickItem(
     prompt: 'Choose an item to use as material.',
     tabbed: true,
+    leftWeight: 1.0,
     inventory: party.inventory.clone(:itemFilter),
     canCancel: true,
-    showRarity: true,
+    showRarity: false,
     showPrices: false,
-    keep : false,
+    keep : true,
+    
+    renderable : {
+      render ::{
+        canvas.renderTextFrameGeneral(
+          lines: animateMultiBar.generateLines(:generateClients(item:itemSrc, itemOther, style)),
+          leftWeight: 0
+        )
+      }
+    },
+    onHover ::(item) {
+      itemOther = item;
+    },
     
     onPick::(item) {
+      windowEvent.queueChoices(
+        leftWeight: 0.5,
+        topWeight: 0.5,
+        prompt: item.name,
+        colorHints : Item.toColorHints(:item),
+        canCancel : true,
+        keep:true,
+        choices: [
+          'Check',
+          'Sacrifice'
+        ],
+        onChoice::(choice) {
+          @:other = item;
+          item = itemSrc;
+          when (choice == 0) empty;        
+          when (choice == 1) other.describe();
+          when (choice == 2) ::<= {
+            windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true);
+            windowEvent.queueAskBoolean(
+              colorHints : {...Item.toColorHints(:item), ...Item.toColorHints(:itemOther)},
+              prompt: 'Use ' + other.name + ' to give EXP to ' + item.name + '?',
+              onChoice::(which) {
+                when(which == false) empty;           
+                    
+                party.inventory.remove(item:other);
+                
+                addExpAnimated(
+                  item,
+                  user,
+                  other,
+                  style,
+                  clients: generateClients(item, itemOther:other, style),
+                  onDone ::{
+                    windowEvent.queueAskBoolean(
+                      prompt: 'Improve again?',
+                      onChoice::(which) {
+                        when (which == false) empty;
+                        improve(item, user, style);
+                      }
+                    );
+                  }
+                );
+              }
+
+            ); 
+          }
+        }
+      );
+      /*
       @:other = item;
       item = itemSrc;
 
@@ -154,36 +176,66 @@
         text: 'Once complete, this will destroy ' + other.name + '.'
       );
 
-      @exp = other.equipMod.sum + other.equipModBase.sum*50;
-      if (exp < 35) exp = 35;
-      windowEvent.queueAskBoolean(
-        prompt: 'Use ' + other.name + ' to give ' + exp + ' EXP to ' + item.name + '?',
-        onChoice::(which) {
-          when(which == false) empty;           
-              
-          party.inventory.remove(item:other);
-          
-          addExpAnimated(
-            item,
-            user,
-            other,
-            exp,
-            onDone ::{
-              windowEvent.queueAskBoolean(
-                prompt: 'Improve again?',
-                onChoice::(which) {
-                  when (which == false) empty;
-                  improve(item, user);
-                }
-              );
-            }
-          );
-        }
-      );        
+
+      
+      */       
     }
   );
 }
 
+@:statToStars = ::(stat) {
+  @:stars = [];
+  for(0, (stat/100)*7) ::(i) {
+    stars->push(:'*');
+  }
+  return String.combine(:stars);
+}
+
+@:pickStyle ::(onFinish) {
+  @:party = import(module:'base/world.mt').party;
+  windowEvent.queueMessage(
+    text: 'When improving an item, an improvement style must be chosen.'
+  );
+  @hovered
+  windowEvent.queueChoices(
+    prompt: 'Known styles:',
+    leftWeight: 1.0,
+    choices : party.improvementStyles->map(::(value) <- ImprovementStyle.find(:value).name),
+    onHover::(choice) {
+      hovered = party.improvementStyles[choice-1];
+    },
+    onChoice::(choice) {
+      onFinish(:ImprovementStyle.find(:hovered));
+    },
+    canCancel: true,
+    renderable : {
+      render ::{
+        @:style = ImprovementStyle.find(:hovered);
+        canvas.renderTextFrameGeneral(
+          leftWeight: 0.0,
+          maxWidth: (canvas.width/3)->floor,
+          lines : [
+            'Style: ' + style.name,
+            '',
+            style.description,
+            if (style.expMultiplier != 1) 'EXP Boost:' + (style.expMultiplier*100)->floor + '%' else '',
+            ... ::<= {
+              @:out = [];
+              foreach(StatSet.NAMES) ::(k, name) {
+                @:val = style.stats[name];
+                if (val != empty && val != 0) {
+                  out->push(:name + ': ' + statToStars(:val));
+                }
+              }
+              return out;
+            }
+          ]
+        );
+      }
+    }
+      
+  );
+}
 
 
 return ::(user, item, inBattle) {
@@ -191,7 +243,8 @@ return ::(user, item, inBattle) {
 
   when(item.material == empty) ::<= {
     windowEvent.queueMessage(
-      text: 'Only items with a specified material can be improved.'
+      text: 'Only items with a specified material can be improved.',
+      colorHints: Item.toColorHints(:item)
     );                                              
   }
   
@@ -201,10 +254,10 @@ return ::(user, item, inBattle) {
     );                                              
   
   
-  @:StatSet = import(module:'base/util/statset.mt'); 
   when (user != empty && !party.isMember(entity:user)) ::<= {
     windowEvent.queueMessage(
-      text: user.name + '\'s ' + item.name + ' can only be improved if they\'re in the party.'
+      text: user.name + '\'s ' + item.name + ' can only be improved if they\'re in the party.',
+      colorHints: Item.toColorHints(:item)
     );                                    
   }
   
@@ -220,19 +273,24 @@ return ::(user, item, inBattle) {
   
   when(item.improvement.left == 0) ::<= {
     windowEvent.queueMessage(
-      text: item.name + ' cannot be improved any further.'
+      text: item.name + ' cannot be improved any further.',
+      colorHints: Item.toColorHints(:item)
     );                        
   }
   
   windowEvent.queueMessage(
-    text: item.name + ' can be improved by attempting to combine it with another item of the same material. Once the process is complete, the other item is lost, and this item is given EXP. Once enough EXP is accumulated, the item improved will gain additional base stats.'
+    text: item.name + ' can be improved by attempting to combine it with another item of the same material. Once the process is complete, the other item is lost, and this item is given EXP. Once enough EXP is accumulated, the item improved will gain additional base stats.',
+      colorHints: Item.toColorHints(:item)
   );
   
   windowEvent.queueAskBoolean(
     prompt:'Improve ' + item.name + '?',
+    colorHints: Item.toColorHints(:item),
     onChoice::(which) {
       when(which == false) empty; 
-      improve(item, user);
+      pickStyle(onFinish::(style) {
+        improve(item, user, style)
+      })
     }
   );
 }

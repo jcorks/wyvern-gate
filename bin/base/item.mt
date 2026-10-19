@@ -2744,6 +2744,7 @@ Item.database.newEntry(data : {
       @:mat = Material.getRandomFiltered(::(value) <- value.tier <= world.island.tier);
       item.name = mat.name + ' Ingot';
       item.data.RAW_MATERIAL = mat.id;
+      item.material = Material.find(:mat.id);
       item.price += (((mat.tier)**1.4) * 240)->ceil;
     }
   }
@@ -4254,7 +4255,8 @@ none.name = 'None';
     
       
     material : {
-      get ::<- _.state.material
+      get ::<- _.state.material,
+      set ::(value) <- _.state.material = value
     },
     
     enchantLimit : {

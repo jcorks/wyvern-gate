@@ -245,7 +245,12 @@ return class(
       },
 
       
-      renderBarAsString ::(width, fillFraction, character, emptyCharacter) {
+      // Width is the total width 
+      // fillFraction is [0, 1] fill of the total width 
+      // character is the character to use as the fill 
+      // emptyCharacter is the character to use for unfilled bar portions 
+      // auxFillFraction is the [0, 1] fill of the entire bar. fillFraction and "overlap" it 
+      renderBarAsString ::(width, fillFraction, character, emptyCharacter, auxFillFraction, auxFillCharacter) {
         if (width == empty) width = 12;
         
         @ratio = fillFraction;;
@@ -260,9 +265,25 @@ return class(
         for(0, numFilled)::(i) {
           out = out+character;
         }
+        
+        if (auxFillFraction) {
+          @auxRatio = auxFillFraction;
+          if (auxRatio > 1) auxRatio = 1;
+          if (auxRatio < 0) auxRatio = 0;
+          
+          if (auxFillCharacter == empty) auxFillCharacter = '|'
+          @:numFilledAux = ((width - 2) * (auxRatio))->floor - numFilled;
+          breakpoint();
+          for(0, numFilledAux)::(i) { 
+            out = out+auxFillCharacter
+          }
+          numFilled += numFilledAux;
+        }
+        
         for(0, width - numFilled - 2)::(i) {
           out = out+if(emptyCharacter) emptyCharacter else '▁';
         }
+        
         return out + ' ';      
       },
 

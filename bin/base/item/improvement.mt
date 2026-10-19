@@ -11,15 +11,21 @@
 @:Improvement = LoadableClass.create(
   name: 'Wyvern.Item.Improvement',
   items : {
-    left : 0,
     improvements: 0,
-    exp : 0,
-    expToNext : 100,
+    left: 0,
     stats : empty
   },
   
   define::(this, state) {
     @item;
+      
+    @:newSet ::<- {
+      stat : 0,
+      exp : 0,
+      expToNext : 100,
+      stats : empty
+    }
+
     
     this.interface = {
       initialize ::(parent) {
@@ -28,11 +34,14 @@
       
       defaultLoad::(parent) {
         item = parent;
-        state.left = if (item.base.id == 'base:none') 0 else random.integer(from:10, to:25);
-        state.improvements = 0;
-        state.exp = 0;
-        state.stats = StatSet.new();        
+        state.stats = {};
+        foreach(StatSet.NAMES) ::(k, name) {
+          state.stats[name] = newSet();
+        }
+        
+        state.left = if (item.base.id == 'base:none') 0 else ((random.integer(from:25, to:50) / 5)->round*5);
       },
+      
 
       left : {
         get::<- state.left,
@@ -40,49 +49,31 @@
       },
       
       
-
-      improve ::(exp) {
-        @:chunk = if (state.exp + exp > state.expToNext) 
-          state.expToNext - state.exp
-        else 
-          exp;
-
-        state.exp += chunk;
-        exp -= chunk;
-        @leveled = false;
-        if (state.expToNext == state.exp) ::<= {
-          state.improvements += 1;
-          state.left -= 1;
-          if (state.left < 0)
-              state.left = 0;
-          state.expToNext = expToNextLevel(:state.improvements)->floor;
-          state.exp = 0;
-          leveled = true;
-        }
-        
-        if (leveled) {
-          item.price = (item.price * 1.08)->ceil
-          item.recalculateName();
-        }
-        return exp;
+      // doesnt check improvement limit, so you can work around it
+      levelUp ::(stat) {
+        state.improvements += 1;
+        state.left -= 1
+        if (state.left < 0) state.left = 0;
+        state.stats[stat].stat += 1;
+        item.price = (item.price * 1.05)->ceil
+        item.recalculateName();
       },
 
       improvements : {
         get::<- state.improvements,
       },
-      
-      exp : {
-        get ::<- state.exp
-      },
-      
-      expToNext : {
-        get ::<- state.expToNext
-      },  
-      
+      setExp ::(stat, exp) <- state.stats[stat].exp = exp,
+      getExp ::(stat) <- state.stats[stat].exp,
+      getExpToNext ::(stat) <- state.stats[stat].expToNext,
       stats : {
         get :: {
-          if (state.stats == empty) state.stats = StatSet.new();
-          return state.stats
+          @:inputs = {};
+          foreach(state.stats) ::(k, v) {
+            inputs[k] = v.stat
+          }
+          return StatSet.new(
+            *(inputs)
+          )
         }
       }
     }

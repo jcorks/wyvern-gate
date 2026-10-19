@@ -1124,7 +1124,7 @@ Interaction.newEntry(
       party.inventory.remove(item:ores[0]);
       party.inventory.remove(item:ores[1]);
       
-      @:metal = Item.new(base:Item.database.find(:'base-ingot'));            
+      @:metal = Item.new(base:Item.database.find(:'base:ingot'));            
       windowEvent.queueMessage(text: 'Smelted 2 ore chunks into ' + correctA(word:metal.name) + '!');
       party.inventory.add(item:metal);          
         

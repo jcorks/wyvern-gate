@@ -872,7 +872,7 @@ return empty;
               }
 
 
-              @:loadTrue ::(name, remove, onDone) {
+              @:loadTrue ::(name, saveName, remove, onDone) {
                 loading(
                   message: 'Loading scenario...',
                   do:: {
@@ -882,6 +882,7 @@ return empty;
                       do :: {
                         @:data = this.getSaveDataRaw(:name);
                         world.load(serialized:data);
+                        world.saveName = saveName;
                         setupDefaultHud();
                         
                         if (save > 0) ::<= {
@@ -934,11 +935,13 @@ return empty;
                           // quicksave!
                           if (choice == 1) 
                             loadTrue(
+                              saveName: name,
                               name: name+QUICK_SAVE_SUFFIX,
                               remove: true
                             )
                           else
                             loadTrue(
+                              saveName: name,
                               name,
                               onDone ::{
                                 this.savestate(saveOverride:'', nameOverride:name+QUICK_SAVE_SUFFIX);                              
@@ -968,7 +971,7 @@ return empty;
                   when (isQS[choice-1] == true)
                     loadQuickSave(:choices[choice-1]);
                   
-                  loadTrue(name:choices[choice-1]);
+                  loadTrue(name:choices[choice-1], saveName:choices[choice-1]);
                 }
               );          
             });
@@ -1328,41 +1331,41 @@ return empty;
       queueCredits :: {
 
 
-/*
+
 @:clients = [
   {
     title : 'ATK',
     from: 10,
     to: 830,
-    max: 100
+    max: 1000
   },
   {
     title : 'DEF',
     from: 30,
     to: 735,
-    max: 100
+    max: 1000
   },
   {
     title : 'INT',
     from: 40,
     to: 930,
-    max: 100
+    max: 1000
   },
   {
     title : 'SPD',
     from: 40,
     to: 830,
-    max: 100
+    max: 1000
   },
   {
     title : 'DEX',
     from: 35,
     to: 100,
-    max: 100
+    max: 1000
   }
 
 ]
-import(:'base/widgets/animatemultibar.mt')(
+import(:'base/widgets/animatemultibar.mt').widget(
   clients,
   onGetCaption      ::<- ': Lv ' + 2,
   onGetSubcaption   ::<- 'Exp to next level: ',
@@ -1370,8 +1373,15 @@ import(:'base/widgets/animatemultibar.mt')(
   
   onGetLeftWeight::<- 0.5,
   onGetTopWeight::<- 0.5,
-  
+  onGetPauseFinish ::<- true,
+
   onCompleteValue ::(client) {
+    if (clients[client].level == empty)
+      clients[client].level = 1;
+    clients[client].level += 1;
+    clients[client].title = ' ' + clients[client].level 
+    
+  
     return {
       from: 0,
       max: 100,
@@ -1382,7 +1392,7 @@ import(:'base/widgets/animatemultibar.mt')(
   onNewValue ::(value) {
   }
 )
-*/
+
 
 
 

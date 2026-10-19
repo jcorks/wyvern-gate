@@ -37,6 +37,7 @@
     members : empty,
     karma : 5500,
     arts : [],
+    styles : empty,
     denyJoinPartyCount : 0,
     queuedArts : [],
     leader : 0,
@@ -450,6 +451,19 @@
         windowEvent.queueMessage(
           text:"The party ventures into " + landmark.name + "..."
         );
+      },
+      
+      improvementStyles : {
+        get ::{
+          if (state.styles == empty)
+            state.styles = [
+              'base:balanced',
+              'base:forceful',
+              'base:careful'
+            ]
+          
+          return state.styles
+        }
       },
       
       leaveDungeon ::(landmark) {
