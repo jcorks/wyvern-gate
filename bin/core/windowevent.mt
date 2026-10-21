@@ -567,7 +567,14 @@
         
 
 
-        @:PAGE_SIZE = if (pageAfter == empty) 7 else pageAfter;
+        @PAGE_SIZE = if (pageAfter == empty) 7 else pageAfter;
+        if (data.maxHeight != empty) {
+          @:high = (data.maxHeight * canvas.height)->floor;
+          if (PAGE_SIZE > high)
+            PAGE_SIZE = high
+          breakpoint();
+        }
+        
         @:WIDTH = ::<= {
           @max = 0;
           foreach(choices)::(i, text) {
@@ -643,6 +650,10 @@
         } else data.choicesModified;
         
         choicesModified->setSize(size:0);
+
+
+
+
         
         if (choices->keycount > PAGE_SIZE) ::<= {
           @initialLine = if (cursorPageTop > 0) lineTop else 
@@ -682,6 +693,13 @@
             @:out = data.onGetMinHeight();
             if (count < out)
               count = out;
+          }
+          
+          if (data.maxHeight != empty) {
+            @:high = (data.maxHeight * canvas.height)->floor;
+            if (count > high) {
+              count = high
+            }
           }
 
 

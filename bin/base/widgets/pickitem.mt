@@ -89,7 +89,8 @@ return ::(
   tabbed,
   onGetFooter,
   includeLoot,
-  onGetExtraColumns
+  onGetExtraColumns,
+  maxHeight
 ) {
   @names = []
   @items = []
@@ -331,6 +332,7 @@ return ::(
       }
       @:args = {
         colorHints ::<- Item.toColorHints(:items),
+        maxHeight : maxHeight,
         promptRight: true,
         leftWeight: if (leftWeight == empty) 1 else leftWeight => Number,
         topWeight:  if (topWeight == empty)  1 else topWeight => Number,
@@ -359,98 +361,99 @@ return ::(
             when(hoveredItem == empty) empty;
             
 
-
+            ::<= {
             
-            @:getArtDesc ::(id1, id2) {
-              @:toParts = ::(id) {
-                when(id == empty) ['[None]', '']
-                @:art = Arts.new(base:Arts.database.find(:id));
-                art.charge = 0;
-                @:list = Arts.renderListItem(:art);
-                return [' ' + list[0], list[1]];
+              @:getArtDesc ::(id1, id2) {
+                @:toParts = ::(id) {
+                  when(id == empty) ['[None]', '']
+                  @:art = Arts.new(base:Arts.database.find(:id));
+                  art.charge = 0;
+                  @:list = Arts.renderListItem(:art);
+                  return [' ' + list[0], list[1]];
+                }
+                
+                @:parts0 = toParts(:id1);
+                @:parts1 = toParts(:id2);
+                
+                return canvas.columnsToLines(
+                  columns : [
+                    [
+                      parts0[0],
+                      parts1[0]
+                    ],
+                    [
+                      parts0[1],
+                      parts1[1]              
+                    ]
+                  ],
+                  
+                  leftJustifieds : [true, true]
+                );
               }
               
-              @:parts0 = toParts(:id1);
-              @:parts1 = toParts(:id2);
-              
-              return canvas.columnsToLines(
-                columns : [
-                  [
-                    parts0[0],
-                    parts1[0]
+              when(hoveredItem.inletArt != empty) ::<= {
+                canvas.renderTextFrameGeneral(
+                  title: hoveredItem.name,
+                  lines: [
+                    'Art:',
+                    '',
+                    ...getArtDesc(id1:hoveredItem.inletArt.base.id)
                   ],
-                  [
-                    parts0[1],
-                    parts1[1]              
-                  ]
-                ],
-                
-                leftJustifieds : [true, true]
-              );
+                  maxWidth: 0.4,
+                  leftWeight: 0,
+                  topWeight: 0.5
+                )
+              }
+
+
+              when(hoveredItem.inletEffect != empty) ::<= {
+                canvas.renderTextFrameGeneral(
+                  title: hoveredItem.name,
+                  lines: [
+                    'Effect:',
+                    '',
+                    Effect.find(:hoveredItem.inletEffect).name,
+                    Effect.find(:hoveredItem.inletEffect).description
+                  ],
+                  maxWidth: 0.4,
+                  leftWeight: 0,
+                  topWeight: 0.5
+                )
+              }
+
+              when(hoveredItem.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) empty;
+
+              
+              if (hoveredItem.needsAppraisal == false) {
+                canvas.renderTextFrameGeneral(
+                  title: 'Summary:',
+                  lines: [
+                    'Stat boosts:',
+                    ...(hoveredItem.stats.descriptionRateLines->map(::(value) <- ' ' + value)),
+                    
+                    ...([if (hoveredItem.inletSlotSet != empty)
+                      '' + hoveredItem.inletSlotSet.size + ' gem slot' + if (hoveredItem.inletSlotSet.size == 1) '.' else 's.'
+                    else 
+                      ''])
+
+                  ],
+                  leftWeight: 0,
+                  topWeight: 0
+                )
+
+                canvas.renderTextFrameGeneral(
+                  title: 'Summary:',
+                  lines: [
+                    'Arts:',
+                    ...getArtDesc(id1:hoveredItem.arts[0],
+                                  id2:hoveredItem.arts[1])
+                  ],
+                  leftWeight: 0,
+                  topWeight: 1
+                )
+              }
+
             }
-            
-            when(hoveredItem.inletArt != empty) ::<= {
-              canvas.renderTextFrameGeneral(
-                title: hoveredItem.name,
-                lines: [
-                  'Art:',
-                  '',
-                  ...getArtDesc(id1:hoveredItem.inletArt.base.id)
-                ],
-                maxWidth: 0.4,
-                leftWeight: 0,
-                topWeight: 0.5
-              )
-            }
-
-
-            when(hoveredItem.inletEffect != empty) ::<= {
-              canvas.renderTextFrameGeneral(
-                title: hoveredItem.name,
-                lines: [
-                  'Effect:',
-                  '',
-                  Effect.find(:hoveredItem.inletEffect).name,
-                  Effect.find(:hoveredItem.inletEffect).description
-                ],
-                maxWidth: 0.4,
-                leftWeight: 0,
-                topWeight: 0.5
-              )
-            }
-
-            when(hoveredItem.base.hasTraits(:Item.TRAIT.STRANGE_TO_EQUIP)) empty;
-
-            
-            if (hoveredItem.needsAppraisal == false) {
-              canvas.renderTextFrameGeneral(
-                title: 'Summary:',
-                lines: [
-                  'Stat boosts:',
-                  ...(hoveredItem.stats.descriptionRateLines->map(::(value) <- ' ' + value)),
-                  
-                  ...([if (hoveredItem.inletSlotSet != empty)
-                    '' + hoveredItem.inletSlotSet.size + ' gem slot' + if (hoveredItem.inletSlotSet.size == 1) '.' else 's.'
-                  else 
-                    ''])
-
-                ],
-                leftWeight: 0,
-                topWeight: 0
-              )
-
-              canvas.renderTextFrameGeneral(
-                title: 'Summary:',
-                lines: [
-                  'Arts:',
-                  ...getArtDesc(id1:hoveredItem.arts[0],
-                                id2:hoveredItem.arts[1])
-                ],
-                leftWeight: 0,
-                topWeight: 1
-              )
-            }
-
             if (renderable != empty) renderable.render()
           }
         },
@@ -465,6 +468,7 @@ return ::(
           onPick(item:picked);
         }
       }
+      breakpoint();
       if (tabbed) ::<= {
         prepTabbedChoices(:args);
         (import(:'base/widgets/tabbedchoices.mt'))(*args);

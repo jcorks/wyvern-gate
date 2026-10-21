@@ -9,7 +9,9 @@
 @:Item = import(:'base/item.mt');
 
 @:expFromItem::(item) {
-  @exp = item.equipMod.sum + item.equipModBase.sum*50;
+  when (item.base.id == 'base:ingot') 120
+
+  @exp = item.equipMod.sum + item.equipModBase.sum*50 + 15*item.stars;
   if (exp < 35) exp = 35;  
   return exp;
 }
@@ -42,15 +44,16 @@
 @:addExpAnimated::(item, user, other, clients, onDone, style) {
   breakpoint();
   
-  
+  @:oldStats = if (user) user.stats.clone() else empty;
   animateMultiBar.widget(
     clients, 
     onGetPauseFinish ::<- true,
     pauseStart : true,
+    
 
-    onGetCaption      ::<- item.name,
-    onGetSubcaption   ::<- '',
-    onGetSubsubcaption::<- '                  ',
+    onGetTitle      ::<- item.name,
+    onGetLinesAbove::<- ['*clang clang clang*'],
+    onGetColorHints ::<- Item.toColorHints(:item),
     
     onGetLeftWeight::<- 0.5,
     onGetTopWeight::<- 0.5,
@@ -77,6 +80,7 @@
   
   windowEvent.queueCustom(
     onEnter ::{
+      user.checkStatChanged(oldStats)
       onDone()
     }
   );
@@ -100,7 +104,9 @@
   pickItem(
     prompt: 'Choose an item to use as material.',
     tabbed: true,
-    leftWeight: 1.0,
+    leftWeight: 0.5,
+    maxHeight: 0.35,
+    topWeight: 1,
     inventory: party.inventory.clone(:itemFilter),
     canCancel: true,
     showRarity: false,
@@ -110,8 +116,14 @@
     renderable : {
       render ::{
         canvas.renderTextFrameGeneral(
-          lines: animateMultiBar.generateLines(:generateClients(item:itemSrc, itemOther, style)),
-          leftWeight: 0
+          title: 'Style: ' + style.name,
+          lines: [
+            itemOther.name + ' -> ' + expFromItem(:itemOther) + ' EXP',
+            ...animateMultiBar.generateLines(clients:generateClients(item:itemSrc, itemOther, style), width:22),
+            
+          ],
+          leftWeight: 0.5,
+          topWeight: 0
         )
       }
     },
@@ -137,12 +149,12 @@
           when (choice == 0) empty;        
           when (choice == 1) other.describe();
           when (choice == 2) ::<= {
-            windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true);
             windowEvent.queueAskBoolean(
               colorHints : {...Item.toColorHints(:item), ...Item.toColorHints(:itemOther)},
               prompt: 'Use ' + other.name + ' to give EXP to ' + item.name + '?',
               onChoice::(which) {
                 when(which == false) empty;           
+                windowEvent.jumpToTag(name:'pickItem', goBeforeTag:true);
                     
                 party.inventory.remove(item:other);
                 
@@ -185,8 +197,8 @@
 
 @:statToStars = ::(stat) {
   @:stars = [];
-  for(0, (stat/100)*7) ::(i) {
-    stars->push(:'*');
+  for(0, (stat/80)*14) ::(i) {
+    stars->push(:'-');
   }
   return String.combine(:stars);
 }
@@ -213,7 +225,7 @@
         @:style = ImprovementStyle.find(:hovered);
         canvas.renderTextFrameGeneral(
           leftWeight: 0.0,
-          maxWidth: (canvas.width/3)->floor,
+          maxWidth: 0.7,
           lines : [
             'Style: ' + style.name,
             '',
@@ -223,8 +235,10 @@
               @:out = [];
               foreach(StatSet.NAMES) ::(k, name) {
                 @:val = style.stats[name];
-                if (val != empty && val != 0) {
-                  out->push(:name + ': ' + statToStars(:val));
+                if (val != empty) {
+                  if (name->length == 2)
+                    name = name + ' ';
+                  out->push(:name + '| ' + statToStars(:val));
                 }
               }
               return out;

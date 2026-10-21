@@ -3685,7 +3685,6 @@ none.name = 'None';
         toColorHint(:v);       
       }      
       out['__order'] = order;
-      breakpoint();
       return out;
     },
     

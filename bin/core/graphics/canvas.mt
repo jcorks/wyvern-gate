@@ -272,7 +272,8 @@ return class(
           if (auxRatio < 0) auxRatio = 0;
           
           if (auxFillCharacter == empty) auxFillCharacter = '|'
-          @:numFilledAux = ((width - 2) * (auxRatio))->floor - numFilled;
+          @numFilledAux = ((width - 2) * (auxRatio))->floor - numFilled;
+          if (numFilledAux < 0) numFilledAux = 0;
           breakpoint();
           for(0, numFilledAux)::(i) { 
             out = out+auxFillCharacter

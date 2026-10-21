@@ -182,7 +182,7 @@ return ::(*args) {
       return min
     }
 */
-  if (args.onGetMinHeight == empty)
+  if (args.onGetMinHeight == empty && args.maxHeight == empty)
     args.onGetMinHeight = ::() {
       @min = 999
       foreach(tabs) ::(k, v) {

@@ -19,7 +19,9 @@
 @:canvas = import(module:'core/graphics/canvas.mt');
 
 
-@generateContent = ::(clients) {
+@generateContent = ::(clients, width) {
+  if (width == empty)
+    width = 30;
   @:bars = [];
   @:titles = [];
   foreach(clients) ::(k, v) {
@@ -41,8 +43,9 @@
 }
 
 return {
-  generateLines ::(clients) <- generateContent(:
-    clients->map(::(value) <- 
+  generateLines ::(clients, width) <- generateContent(
+    width: width,
+    clients: clients->map(::(value) <- 
       {
         current:value.from,
         destination: value.to,
@@ -81,17 +84,12 @@ return {
     // AFTER this is called.
     onFinish,
 
-    // Gets the string to display above the bar
-    onGetCaption,
-
-    // 
-    onGetCoCaption,
-
-    // Gets the caption to show below the bar
-    onGetSubcaption,
-
-    // Gets the caption to show below the subcaption.
-    onGetSubsubcaption,
+    // called when getting lines of text below and above the bars.
+    onGetLinesAbove,
+    onGetLinesBelow,
+    
+    // called when getting the prompt/title
+    onGetTitle,
 
     // Called every frame to get the left weight of the window
     onGetLeftWeight,
@@ -100,7 +98,9 @@ return {
     onGetTopWeight,
 
     // Called when a new approaching value is calculated.
-    onNewValue
+    onNewValue,
+    
+    onGetColorHints
   ) {
     foreach(clients) ::(k, v) {
       v.diff = v.from - v.to;
@@ -115,18 +115,15 @@ return {
 
     if (pauseStart) 
       windowEvent.queueDisplay(
+        prompt : if (onGetTitle) onGetTitle() else empty,
+        colorHints : onGetColorHints(),
         leftWeight: onGetLeftWeight(),
         topWeight : onGetTopWeight(),
         skipAnimation: true,
         lines : [
-          if (onGetCaption) onGetCaption() else '',
-          '',
-          if (onGetCoCaption) onGetCoCaption() else '',
-          
-          // the meat of it. it doesnt need to be meat. maybe some tofu or something idk
+          ...(if (onGetLinesAbove) onGetLinesAbove() else []),
           ...generateContent(clients),
-          if (onGetSubcaption) onGetSubcaption() else '',
-          if (onGetSubsubcaption) onGetSubsubcaption() else ''
+          ...(if (onGetLinesBelow) onGetLinesBelow() else []),
         ]
       );
 
@@ -153,16 +150,16 @@ return {
         }
         if (onGetPauseFinish != empty && onGetPauseFinish())
           windowEvent.queueDisplay(
+            prompt : if (onGetTitle) onGetTitle() else empty,
+            colorHints : onGetColorHints(),
             leftWeight: onGetLeftWeight(),
             topWeight : onGetTopWeight(),
             skipAnimation: true,
             lines : [
-              if (onGetCaption) onGetCaption() else '',
-              '',
-              if (onGetCoCaption) onGetCoCaption() else '',
+              ...(if (onGetLinesAbove) onGetLinesAbove() else []),
               ...generateContent(clients),
-              if (onGetSubcaption) onGetSubcaption() else '',
-              if (onGetSubsubcaption) onGetSubsubcaption() else ''
+              ...(if (onGetLinesBelow) onGetLinesBelow() else []),
+
             ]        
           );           
 
@@ -199,17 +196,18 @@ return {
         }
 
         canvas.renderTextFrameGeneral(
+          title : if (onGetTitle) onGetTitle() else empty,
           leftWeight: onGetLeftWeight(),
           topWeight : onGetTopWeight(),
+          
           lines : [
-            if (onGetCaption) onGetCaption() else '',
-            '',
-            if (onGetCoCaption) onGetCoCaption() else '',
+            ...(if (onGetLinesAbove) onGetLinesAbove() else []),
             ...generateContent(clients),
-            if (onGetSubcaption) onGetSubcaption() else '',
-            if (onGetSubsubcaption) onGetSubsubcaption() else ''
+            ...(if (onGetLinesBelow) onGetLinesBelow() else []),
+
           ]
         );
+        canvas.setColorHints(:onGetColorHints())
         frame += 1;
 
         return ::? {

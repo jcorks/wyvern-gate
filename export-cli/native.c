@@ -917,6 +917,7 @@ static matteValue_t wyvern_gate__native__canvas__renderBarAsString(
         if (auxRatio < 0) auxRatio = 0;
             
         int numFilledAux = ((int)((width - 2) * (auxRatio))) - numFilled;
+        if (numFilledAux < 0) numFilledAux = 0;
         for(i = 0; i < numFilledAux; ++i) { 
             matte_string_append_char(out, auxFillCharacter);
         }
