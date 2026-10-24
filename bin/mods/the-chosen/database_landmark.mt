@@ -81,6 +81,7 @@ return ::{
         {id: 'base:potion-shop', rarity: 100},
         {id: 'base:wyvern-statue', rarity: 15},
         {id: 'base:enchantment-stand', rarity: 35},
+        {id: 'base:wyvern-statue', rarity: 50},
 
 
         {id: 'base:healing-circle', rarity:30},
@@ -136,7 +137,7 @@ return ::{
       possibleObjects : [
   //          {id: 'Stairs Down', rarity:1},
         {id: 'base:fountain', rarity:18},
-        {id: 'base:wyvern-statue', rarity: 15},
+        {id: 'base:wyvern-statue', rarity: 45},
         {id: 'base:small-chest', rarity: 36},
         {id: 'base:locked-chest', rarity: 22},
         {id: 'base:magic-chest', rarity: 40},
@@ -195,7 +196,7 @@ return ::{
   //          {id: 'Stairs Down', rarity:1},
         {id: 'base:fountain', rarity:18},
         {id: 'base:potion-shop', rarity: 17},
-        {id: 'base:wyvern-statue', rarity: 15},
+        {id: 'base:wyvern-statue', rarity: 50},
         {id: 'base:locked-chest', rarity: 40},
         {id: 'base:magic-chest', rarity: 60},
 
@@ -258,7 +259,7 @@ return ::{
   //          {id: 'Stairs Down', rarity:1},
         {id: 'base:fountain', rarity:18},
         {id: 'base:potion-shop', rarity: 17},
-        {id: 'base:wyvern-statue', rarity: 15},
+        {id: 'base:wyvern-statue', rarity: 50},
         {id: 'base:small-chest', rarity: 16},
         {id: 'base:locked-chest', rarity: 40},
         {id: 'base:magic-chest', rarity: 15},

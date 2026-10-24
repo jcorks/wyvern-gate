@@ -525,7 +525,7 @@ Landmark.database.newEntry(
 //          {id: 'Stairs Down', rarity:1},
       {id: 'base:fountain', rarity:18},
       {id: 'base:potion-shop', rarity: 25},
-      {id: 'base:wyvern-statue', rarity: 20},
+      {id: 'base:wyvern-statue', rarity: 50},
       {id: 'base:small-chest', rarity: 30},
       {id: 'base:locked-chest', rarity: 40},
       {id: 'base:magic-chest', rarity: 15},
@@ -590,7 +590,7 @@ Landmark.database.newEntry(
 //          {id: 'Stairs Down', rarity:1},
       {id: 'base:fountain', rarity:18},
       {id: 'base:potion-shop', rarity: 25},
-      {id: 'base:wyvern-statue', rarity: 20},
+      {id: 'base:wyvern-statue', rarity: 60},
       {id: 'base:locked-chest', rarity: 40},
       {id: 'base:locked-chest', rarity: 40},
       {id: 'base:magic-chest', rarity: 50},
@@ -1468,6 +1468,32 @@ Landmark.database.newEntry(
     @island_;
 
     @:world = import(module:'base/world.mt');
+    
+    @onMapItemChange = ::(detail) {
+      when (windowEvent.getTopTag() == 'LANDMARK_VISIT' + this.worldID ||
+          windowEvent.getTopTag() == 'LANDMARK_VISIT') empty;
+      this.invalidateTravelCache();
+    } 
+    @:registerMapEvents ::{
+      state.map.events.installHook(
+        event: 'onSetItem',
+        hook : onMapItemChange
+      );
+      state.map.events.installHook(
+        event: 'onRemoveItem',
+        hook : onMapItemChange
+      );
+      state.map.events.installHook(
+        event: 'onMoveItem',
+        hook : onMapItemChange
+      );
+    }
+    
+    @:unregisterMapEvents ::{
+      state.map.events.uninstallHook(event: 'onSetItem', hook:onMapItemChange);
+      state.map.events.uninstallHook(event: 'onRemoveItem', hook:onMapItemChange);
+      state.map.events.uninstallHook(event: 'onMoveItem', hook:onMapItemChange);
+    }
 
 
     @:nearby = {};
@@ -1561,7 +1587,7 @@ Landmark.database.newEntry(
       } else ::<= {
         state.map = Map.new(parent:this);
       }
-
+      registerMapEvents();
 
       
       /*
@@ -1633,6 +1659,9 @@ Landmark.database.newEntry(
         if (island == empty)
           error(:'A landmark MUST be initialized with an island or parent.');
         island_ = island;
+        
+        if (state.map != empty)
+          registerMapEvents();
       },
 
       defaultLoad::(base, x, y, floorHint, data){
@@ -1720,6 +1749,8 @@ Landmark.database.newEntry(
       },
       
       unloadContent ::{
+        if (state.map != empty)
+          unregisterMapEvents();
         state.map = empty;
       },
       

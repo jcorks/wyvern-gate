@@ -64,7 +64,8 @@
 
     @:instance = import(module:'base/instance.mt');
     
-    instance.visitLandmark(landmark:location.targetLandmark);
+    location.targetLandmark.visit();
+    location.targetLandmark.travel();
   },
   
   // basic damage trap

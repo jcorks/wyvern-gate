@@ -20,6 +20,7 @@
 @:random = import(module:'core/random.mt');
 @:LoadableClass = import(module:'core/data/loadableclass.mt');
 @:State = import(module:'core/data/state.mt');
+@:EventSystem = import(module:'Matte.Core.EventSystem');
 @Map;
 
 @:StateType = State.create(
@@ -102,6 +103,8 @@
     @_h = 0;
     @data = empty;
     @isOccupied = false;
+
+    
     
     mapSizeH = canvas.height;
     mapSizeW = canvas.width;
@@ -187,7 +190,13 @@ Map =  LoadableClass.create(
   
   define:::(this, state) {
   
-  
+    @events = EventSystem.new();
+    events.events = {
+      onSetItem:::{},
+      onRemoveItem:::{},
+      onMoveItem :::{},
+      
+    }
     @itemIndex = [];
     @entities = [];
     @items = [];
@@ -890,6 +899,9 @@ Map =  LoadableClass.create(
       initialize ::(parent) {
         parent_ = parent;
       },
+      events : {
+        get ::<- events
+      },
       defaultLoad ::{},
       width : {
         get ::<- width,
@@ -1148,6 +1160,14 @@ Map =  LoadableClass.create(
         }
         loc->push(value:val);
         items->push(value:val);
+        events.emit(
+          event: 'onSetItem',
+          detail: {
+            x : x,
+            y : y,
+            data : data
+          }
+        );
         return {x:x, y:y}
       },
       
@@ -1231,8 +1251,17 @@ Map =  LoadableClass.create(
 
         if(itemsA->keycount == 0)
           itemIndex[item.x + (item.y)*(width)] = empty;  
-          
+        
         items = items->filter(by::(value) <- value.data != data);
+        events.emit(
+          event: 'onRemoveItem',
+          detail : {
+            x : item.x,
+            y : item.y,
+            data : data
+          }
+        )
+
       },
       
       
@@ -1344,6 +1373,14 @@ Map =  LoadableClass.create(
           itemIndex[ent.x + (ent.y)*(width)] = loc;
         }
         loc->push(value:ent);
+        events.emit(
+          event: 'onRemoveItem',
+          detail : {
+            x : x,
+            y : y,
+            data : data
+          }
+        )
       
       },    
       

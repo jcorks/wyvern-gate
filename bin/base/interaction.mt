@@ -3476,29 +3476,46 @@ Interaction.newEntry(
             ];
 
             // Good!
-            when(random.flipCoin()) ::<= {
+            
+            when(world.data['interaction_base:pray-statue'] == empty || random.flipCoin()) ::<= {
+              world.data['interaction_base:pray-statue'] = 'visited'
               windowEvent.queueMessage(text: 'The statue glows along with ' + whom.name + '.');
               windowEvent.queueMessage(text: whom.name + ' is met with a blessing.');
               
               
-              windowEvent.queueChoices(
-                choices: [...statChoices]->map(to:::(value) <- value + ' (' + whom.stats.save()[value] + ')'),
-                prompt: 'Pick a base stat to improve.',
-                canCancel : false,
-                onChoice::(choice) {
-                  @:oldStats = StatSet.new();
-                  oldStats.load(serialized:whom.stats.save());
-                  @:newState = whom.stats.save();
-                  newState[statChoices[choice-1]] += 3;
-                  whom.stats.load(serialized:newState);
-                  
-                  oldStats.printDiff(
-                    other:whom.stats,
-                    prompt: 'New stats: ' + whom.name
-                  );
-                }
-              );
+              @:ImprovementStyle = import(:'base/item/improvementstyle.mt');
+              @:table = {};
+              foreach(party.improvementStyles) ::(k, v) {
+                table[v] = true;
+              }
+              
+              @:styles = ImprovementStyle.getAllFiltered(::(value) <- table[value] != true);
 
+              if (styles->size == 0) {
+                windowEvent.queueChoices(
+                  choices: [...statChoices]->map(to:::(value) <- value + ' (' + whom.stats.save()[value] + ')'),
+                  prompt: 'Pick a base stat to improve.',
+                  canCancel : false,
+                  onChoice::(choice) {
+                    @:oldStats = StatSet.new();
+                    oldStats.load(serialized:whom.stats.save());
+                    @:newState = whom.stats.save();
+                    newState[statChoices[choice-1]] += 3;
+                    whom.stats.load(serialized:newState);
+                    
+                    oldStats.printDiff(
+                      other:whom.stats,
+                      prompt: 'New stats: ' + whom.name
+                    );
+                  }
+                );
+              } else {
+                @:style = random.pickArrayItem(:styles);
+                windowEvent.queueMessage(
+                  text: 'The party has acquired the improvement style \'' + style.name + '\'.'
+                );
+                party.improvementStyles->push(:style.id);
+              }
             };    
 
 
@@ -3516,33 +3533,16 @@ Interaction.newEntry(
             @:landed = whom.damage(
               attacker: statue,
               damage: Damage.new(
-                amount: 1,
+                amount: whom.hp - 1,
                 damageType: Damage.TYPE.NEUTRAL,
                 damageClass: Damage.CLASS.HP
               ),
               dodgeable : true,
-              critical : false
+              critical : false,
+              exact: true
             );
             
-            if (landed) ::<= {
 
-              windowEvent.queueMessage(text: whom.name + ' is met with a curse.');
-
-              @:oldStats = StatSet.new();
-              oldStats.load(serialized:whom.stats.save());
-              @:newState = {...whom.stats.save()};
-              @:stat = random.pickArrayItem(list:statChoices);
-              newState[stat] -= 2;
-              if (newState[stat] < 1)
-                newState[stat] = 1;
-                
-              whom.stats.load(serialized:newState);
-                
-              oldStats.printDiff(
-                other:whom.stats,
-                prompt: whom.name + ': No...'
-              );
-            }
 
           }
         );
@@ -3771,6 +3771,7 @@ Interaction.newEntry(
       }
       location.inventory.clear();
       location.landmark.removeLocation(:location);
+      
     }
   }
 ) 

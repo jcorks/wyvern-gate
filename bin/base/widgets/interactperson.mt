@@ -48,7 +48,8 @@ return ::(this, party, location, onDone, skipIntro) {
     )        
     windowEvent.queueCustom(
       onEnter ::{
-        onDone();
+        if (onDone != empty)
+          onDone();
       },
       onLeave ::{}
     );

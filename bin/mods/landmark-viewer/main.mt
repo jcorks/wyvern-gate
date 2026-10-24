@@ -22,9 +22,6 @@ return {
 
 
 
-
-      
-
           @:keyhome = Item.new(
             base: Item.database.find(id:'base:wyvern-key')
           );
@@ -45,7 +42,10 @@ return {
             key:keyhome, 
             skipSave:true,
             onDone ::(island){
-              @:allLandmarks = WyvernGate.Landmark.database.getAll()
+              WyvernGate.World.party.add(:WyvernGate.World.island.newInhabitant());
+              WyvernGate.World.party.add(:WyvernGate.World.island.newInhabitant());
+
+              @:allLandmarks = Landmark.database.getAll()
                 ->map(::(value) <- value.id)
               allLandmarks->sort(::(a, b) <- a < b);
                   
@@ -60,12 +60,13 @@ return {
                     width:0,
                     height:0
                   );
-                  island.addLandmark(:landmark);
-                  
-                  landmark.visit(where : if (landmark.map.areas->size > 0)
-                      ::(landmark)<- landmark.getRandomEmptyPosition()
-                    else empty
-                  );
+                  island.addLandmark(landmark);
+                                   
+                  landmark.loadContent();
+                  @:p = landmark.getRandomEmptyPosition()
+                  landmark.map.setPointer(x:p.x, y:p.y);                   
+                  landmark.visit();
+                  landmark.travel();
                 }
               );
             }
@@ -97,7 +98,14 @@ return {
       
       // List of interactions available when simply walking around at 
       // either the landmark or island level.
-      interactionsWalk : [],
+      interactionsWalk : [
+        WyvernGate.Interaction.Common.walk.check,
+        WyvernGate.Interaction.Common.walk.party,
+        WyvernGate.Interaction.Common.walk.quests,
+        WyvernGate.Interaction.Common.walk.inventory,
+        WyvernGate.Interaction.Common.walk.eatAMeal,
+        WyvernGate.Interaction.Common.walk.wait      
+      ],
       
       // List of interactions available when controlling the party 
       // in a battle.
@@ -111,7 +119,12 @@ return {
       ],
       
       // List of general options available, such as quitting the game.
-      interactionsOptions : [],
+      interactionsOptions : [
+        WyvernGate.Interaction.Common.options.save,
+        WyvernGate.Interaction.Common.options.quickSave,
+        WyvernGate.Interaction.Common.options.system,
+        WyvernGate.Interaction.Common.options.quit,        
+      ],
 
 
       // Function reserved for overriding database options. Good for database 

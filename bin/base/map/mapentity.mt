@@ -432,6 +432,7 @@ MapEntity.Task.database.newEntry(
 
     // get new routes and also squabble
     @:item = map.getItem(data:mapEntity);
+    when(item == empty) empty;
     @:nearby = getAllNearby(mapEntity, map);
     @closestDist = 1000000;
     @closest = empty;
@@ -1176,6 +1177,12 @@ MapEntity.Task.database.newEntry(
 
         when(isRemoved) empty;
 
+        when(::? {
+          foreach(state.entities) ::(k, v) {
+            if (v.battle != empty) send(:true);
+          }
+          return false;
+        }) empty;
 
         @:next = path[path->size-1];
         path->setSize(size:path->size-1);

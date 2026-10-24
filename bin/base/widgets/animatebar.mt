@@ -72,7 +72,7 @@ return ::(
         if (onGetCaption) onGetCaption() else '',
         '',
         if (onGetCoCaption) onGetCoCaption() else '',
-        canvas.renderBarAsString(width:40, fillFraction: (current) / max, auxFillFraction:current / destination),
+        canvas.renderBarAsString(width:40, fillFraction: (current) / max, auxFillFraction:destination / max),
         if (onGetSubcaption) onGetSubcaption() else '',
         if (onGetSubsubcaption) onGetSubsubcaption() else ''
       ]
@@ -103,7 +103,7 @@ return ::(
             if (onGetCaption) onGetCaption() else '',
             '',
             if (onGetCoCaption) onGetCoCaption() else '',
-            canvas.renderBarAsString(width:40, fillFraction: (current) / max, auxFillFraction:current / destination),
+            canvas.renderBarAsString(width:40, fillFraction: (current) / max, auxFillFraction:destination / max),
             if (onGetSubcaption) onGetSubcaption() else '',
             if (onGetSubsubcaption) onGetSubsubcaption() else ''
           ]        
@@ -134,7 +134,7 @@ return ::(
           if (onGetCaption) onGetCaption() else '',
           '',
           if (onGetCoCaption) onGetCoCaption() else '',
-          canvas.renderBarAsString(width:40, fillFraction: (current) / max, auxFillFraction:current / destination),
+          canvas.renderBarAsString(width:40, fillFraction: (current) / max, auxFillFraction:destination / max),
           if (onGetSubcaption) onGetSubcaption() else '',
           if (onGetSubsubcaption) onGetSubsubcaption() else ''
         ]

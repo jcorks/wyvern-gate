@@ -2429,7 +2429,9 @@
           }
         }      
       },
-      
+      getTopTag ::{
+        choiceStack[choiceStack->keycount-1].jumpTag;
+      },
       // removes a choice window currently in the stack with the name, if it exists
       // It only removes the first instance of the tag
       removeTag ::(name) {

@@ -11,7 +11,7 @@
 @:expFromItem::(item) {
   when (item.base.id == 'base:ingot') 120
 
-  @exp = item.equipMod.sum + item.equipModBase.sum*50 + 15*item.stars;
+  @exp = item.equipMod.sum + item.equipModBase.sum*50 + 15*item.stars + 15*item.improvement.improvements;
   if (exp < 35) exp = 35;  
   return exp;
 }

@@ -5332,7 +5332,7 @@ Effect.newEntry(
     stats: StatSet.new(),
     events : {
       onPreAttackOther ::(from, item, holder, to, damage, targetPart, overrideTarget, targetPart) {
-        @:id = match(damage.type) {
+        @:id = match(damage.damageType) {
           (Damage.TYPE.FIRE) : 'base:burning',
           (Damage.TYPE.ICE) : 'base:icy',
           (Damage.TYPE.THUNDER) : 'base:shock',

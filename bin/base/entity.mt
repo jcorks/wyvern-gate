@@ -2738,12 +2738,19 @@
 
       if (silent != true) {
         animateDeath(:this);
+        if (state.species.traits & Species.TRAIT.NO_COMMON_SPEAK) {
+          windowEvent.queueMessage(
+            speaker: this.name,
+            text: '"... ..."'
+          );        
+        } else {
+          windowEvent.queueMessage(
+            speaker: this.name,
+            text: '"I feel.. so faint..."'
+          );
+        }
         windowEvent.queueMessage(
-          speaker: this.name,
-          text: '"I feel.. so faint..."'
-        );
-        windowEvent.queueMessage(
-          text: this.name + ' body has left this plane, but their soul remains as a ghost.'
+          text: this.name + '\'s body has been left behind, but their soul remains as a ghost.'
         );
 
       }

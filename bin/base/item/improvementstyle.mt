@@ -72,6 +72,235 @@ ImprovementStyle.newEntry(
 )
 
 
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Sharp I',
+    id : 'base:sharpi',
+    description : 'Good for ATK.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      ATK: 55,
+      DEX: 35,
+      SPD: 15
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Sharp II',
+    id : 'base:sharpii',
+    description : 'Good for ATK.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      ATK: 75,
+      DEX: 35
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Sharp III',
+    id : 'base:sharpiii',
+    description : 'Good for ATK.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      ATK: 55
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+
+
+
+
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Hard I',
+    id : 'base:hardi',
+    description : 'Good for DEF.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      DEF: 55,
+      DEX: 35,
+      SPD: 15
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Hard II',
+    id : 'base:hardii',
+    description : 'Good for DEF.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      DEF: 75,
+      DEX: 35
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Hard III',
+    id : 'base:hardiii',
+    description : 'Good for DEF.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      DEF: 55
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Swift I',
+    id : 'base:swifti',
+    description : 'Good for SPD.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      INT: 15,
+      DEX: 35,
+      SPD: 55
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Swift II',
+    id : 'base:swiftii',
+    description : 'Good for SPD.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      SPD: 75,
+      DEX: 35
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Swift III',
+    id : 'base:swiftiii',
+    description : 'Good for SPD.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      SPD: 55
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+
+
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Wary I',
+    id : 'base:waryi',
+    description : 'Good for INT.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      SPD: 15,
+      DEX: 35,
+      INT: 55
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Wary II',
+    id : 'base:waryii',
+    description : 'Good for INT.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      INT: 75,
+      DEX: 35
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Wary III',
+    id : 'base:waryiii',
+    description : 'Good for INT.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      INT: 55
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+
+
+
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Precise I',
+    id : 'base:precisei',
+    description : 'Good for DEX.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      SPD: 15,
+      DEX: 35,
+      INT: 55
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Precise II',
+    id : 'base:preciseii',
+    description : 'Good for DEX.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      INT: 75,
+      DEX: 35
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+ImprovementStyle.newEntry(
+  data : {
+    name : 'Precise III',
+    id : 'base:preciseiii',
+    description : 'Good for DEX.',
+    expMultiplier : 1,
+    stats : StatSet.new(
+      INT: 55
+    ),
+    onLevel ::(item, stat) {}
+  }
+)
+
+
+
+
+
 }
 
 @:ImprovementStyle = Database.new(
