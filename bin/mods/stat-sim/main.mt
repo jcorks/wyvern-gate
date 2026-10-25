@@ -122,7 +122,7 @@
 
 
     for(0, professionLevel) ::(i) {
-      ent.autoLevelProfessionPlayer();
+      ent.autoLevelProfession();
     }
 
 

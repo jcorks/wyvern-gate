@@ -117,8 +117,8 @@
             core : true
           );
         }
-
-
+        if (member.owns)
+          member.owns.ownedBy = empty;
         state.members->push(value:member);
         
       },
@@ -261,33 +261,46 @@
       },
       
       gainProfessionExp::(exp, onDone) {
-        when(exp == 0)
-          windowEvent.queueCustom(
-            onLeave::{
-              onDone()
-            }
-          )
-          
-        @index = 0;
-        @:next :: {
-          when(index >= state.members->size) 
-            windowEvent.queueCustom(
-              onLeave::{
-                if (onDone)
-                  onDone()
-              }
-            )
-
-          state.members[index].gainProfessionExp(
-            exp,
-            onDone ::{
-              index += 1;
-              next();
-            }
-          );
-        }
+        @:clients = [];
+        foreach(state.members) ::(k, v) {
+          @:set = v.getProfessionProgress();
         
-        next()
+          @:client = {
+            title : 'Lv. ' + set.level + '(' + set.exp + ' / ' + set.expToNext + ')',
+            aboveTitle: v.profession.name + ' - ' + v.name,
+            from: set.exp,
+            to:   set.exp + exp,
+            max:  set.expToNext,
+            
+            member: v,
+            set : set
+          };
+          clients->push(:client); 
+        };
+        
+        (import(:'base/widgets/animatemultibar.mt')).widget(
+          clients,
+          onGetTitle ::<- 'Profession EXP Up!',
+          onGetLeftWeight ::<- 0.5,
+          onGetTopWeight ::<- 0.5,
+          onGetColorHints ::<- {},
+          onNewValue ::(client, value) {
+            @:set = clients[client].set
+            clients[client].title = 'Lv. ' + set.level + '(' + set.exp + ' / ' + set.expToNext + ')';
+            set.exp = value->floor
+          },
+          
+          onCompleteValue::(client) {
+            @:set = clients[client].set
+            clients[client].member.autoLevelProfessionPlayer();
+            
+            return {
+              from : 0,
+              to : exp,
+              max : set.expToNext
+            }
+          }
+        );
       },
       
       queueCollectSupportArt::(

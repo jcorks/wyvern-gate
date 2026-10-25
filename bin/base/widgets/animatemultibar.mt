@@ -25,6 +25,10 @@
   @:bars = [];
   @:titles = [];
   foreach(clients) ::(k, v) {
+    if (v.aboveTitle != empty) {
+      titles->push(:'');
+      bars->push(:v.aboveTitle);
+    }
     titles->push(:v.title);
     bars->push(:canvas.renderBarAsString(
       width:30, 
@@ -50,7 +54,8 @@ return {
         current:value.from,
         destination: value.to,
         max : value.max,
-        title : value.title
+        title : value.title,
+        aboveTitle : value.aboveTitle
       }
     )
   ),
@@ -59,7 +64,8 @@ return {
     // An array containing objects to define a bar within the multibar widget 
     // Each object should contain:
     /*  
-      title, // The displayed title of the bar shown to the user
+      aboveTitle, // The displayed title of the bar shown to the user, above
+      title, // The displayed title of the bar shown to the user, to the right
       from, // current value;
       to,   // destination value. While max will never be exceeded, this controls the growth rate of the value changing.
       max,  // full bar. value will never exceed this

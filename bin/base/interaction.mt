@@ -378,7 +378,11 @@ Interaction.newEntry(
               map.disableWall(x:location.x, y:location.y)
               map.removeItem(:location);
 
-              @:val = random.number();
+              @val = random.number();
+              if (world.data['interaction_base:chop-dark-tree'].visited == empty) {
+                val = 0.75;
+                world.data['interaction_base:chop-dark-tree'].visited = true;
+              }
               // Bees!
               when (val > 0.9) ::<={
                 windowEvent.queueMessage(text: 'Huh...? A nest fell out of the tree!');

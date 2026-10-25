@@ -594,7 +594,7 @@
 }
 
 
-@:levelUpProfession ::(this, state, profession) {
+@:levelUpProfession ::(this, state, profession, player) {
   @set = state.professionProgress[profession.id];
 
 
@@ -621,174 +621,117 @@
     }
     state.professionProgress[profession.id] = set;
   } else ::<= {
+    @newArt;
     if (set.level%2==0) {
-      @:nextArt = profession.arts[(set.level/2)->floor];
-      if (nextArt)
-        state.professionArts->push(:nextArt);
+      newArt = profession.arts[(set.level/2)->floor];
+      if (newArt) {
+        state.professionArts->push(:newArt);
+      }
     }
     set.level += 1;
     set.exp = 0;
     set.expToNext = level2exp(:set.level);
 
-  }
-  
-}
-
-@:expUpProfession ::(this, state, profession, exp, silent, onDone) {
-  @set = state.professionProgress[profession.id];
 
 
-  @:applyHPbonus ::{
-    @:newState = this.stats.save();
-    @amount = random.integer(from:2, to:4);
-    newState['HP'] += amount;
-    this.stats.load(serialized:newState);
-    this.heal(amount, silent:true);
-  }
-  
-  @:applyStatBonus::(which) {
-    @:newState = this.stats.save();
-    @amount = 1;
-    newState[which] += amount;
-    this.stats.load(serialized:newState);
-    this.heal(amount, silent:true);
+
+
+
+
+
+
+    when(player != true) empty;
+
+    @:applyHPbonus ::{
+      @:newState = this.stats.save();
+      @amount = random.integer(from:2, to:4);
+      newState['HP'] += amount;
+      this.stats.load(serialized:newState);
+      this.heal(amount, silent:true);
+    }
     
-  }
+    @:applyStatBonus::(which) {
+      @:newState = this.stats.save();
+      @amount = 1;
+      newState[which] += amount;
+      this.stats.load(serialized:newState);
+      this.heal(amount, silent:true);
+      
+    }    
+    
+    @:lines = [
+      'Level Up!',
+      this.name + ', the ' + profession.name + ' is now Level ' + set.level
+    ];
+    if (newArt)
+      lines->push(:'Learned: ' + Arts.database.find(:profession.arts[(set.level/2)->floor]).name);
+    
+    windowEvent.queueDisplay(lines);
+    if (newArt) ::<= {
+      if (state.equippedProfessionArts->size < MAX_PROFESSION_ART_COUNT) ::<= {
+        @:art = Arts.new(base:Arts.database.find(:profession.arts[(set.level/2)->floor]));
+        art.charge = 0;
+        state.equippedProfessionArts->push(:art);
 
-  if (set == empty) ::<= {
-    levelUpProfession(this, state, profession);
-    set = state.professionProgress[profession.id];
-  }
-  
-  if (silent == empty || silent == false) ::<= {
-    @:animateLevel::{
-      @curVal = exp;
-      @originalExpToNext = set.expToNext;
-      @originalExp = exp;      
-      @originalSetExp = set.exp;
-      
-      
-      if (exp >= set.expToNext) ::<= {
-        exp -= set.expToNext;
-        set.exp += set.expToNext;
-        set.expToNext = 0;
-      } else ::<= {
-        set.expToNext -= exp;
-        set.exp += exp;
-        exp = 0;
       }
-      
-      animateBar(
-        from: originalSetExp,
-        to:   set.exp,
-        max:  set.expToNext + set.exp,
-        
-        onGetPauseFinish ::<- true,
-        onFinish :: {
-          
-          if (set.expToNext == 0) ::<= {
-            levelUpProfession(this, state, profession);
-            @:lines = [
-              'Level Up!',
-              this.name + ', the ' + profession.name + ' is now Level ' + set.level
-            ];
-            @newArt = set.level%2==0 && profession.arts[(set.level/2)->floor] != empty;
+      windowEvent.queueMessage(
+        text: 'To view this new art, visit the Arts menu for ' + this.name + ' in the party menu.'
+      );
 
-            if (newArt)
-              lines->push(:'Learned: ' + Arts.database.find(:profession.arts[(set.level/2)->floor]).name);
-            
-            windowEvent.queueDisplay(lines);
-            if (newArt) ::<= {
-              if (state.equippedProfessionArts->size < MAX_PROFESSION_ART_COUNT) ::<= {
-                @:art = Arts.new(base:Arts.database.find(:profession.arts[(set.level/2)->floor]));
-                art.charge = 0;
-                state.equippedProfessionArts->push(:art);
-
-              }
-              windowEvent.queueMessage(
-                text: 'To view this new art, visit the Arts menu for ' + this.name + ' in the party menu.'
-              );
-
-            }
-            
-            
+    }
 
 
+
+    @:statChoices = [
+      'ATK',
+      'INT',
+      'DEF',
+      'SPD',
+      'DEX'
+    ];
+
+
+    windowEvent.queueNestedResolve(
+      onEnter ::{
+        windowEvent.queueChoices(
+          choices: 
+            [
+              ...[...statChoices]->map(to:::(value) <- value + ' (' + this.stats.save()[value] + ')'),
+              'Describe...'
+            ],
+          prompt: this.name + ' - Pick a stat+',
+          canCancel : false,
+          keep:true,
+          jumpTag : 'pick-a-stat+',
+          onChoice::(choice) {
+            when(choice == statChoices->size+1)
+              this.describe();
+              
+            windowEvent.jumpToTag(name:'pick-a-stat+', goBeforeTag:true);
             @:oldStats = StatSet.new();
             oldStats.load(serialized:this.stats.save());
-            
+            applyStatBonus(:statChoices[choice-1]);
             applyHPbonus();
-            @:statChoices = [
-              'ATK',
-              'INT',
-              'DEF',
-              'SPD',
-              'DEX'
-            ];
-
-              
-            windowEvent.queueChoices(
-              choices: [...statChoices]->map(to:::(value) <- value + ' (' + this.stats.save()[value] + ')'),
-              prompt: 'Pick a base stat to improve.',
-              canCancel : false,
-              onChoice::(choice) {
-
-                
-                applyStatBonus(:statChoices[choice-1]);
-
-                windowEvent.queueMessage(
-                  text: this.name + '\'s fortitude increased as well.'
-                );                
-                
-                oldStats.printDiff(
-                  other:this.stats,
-                  prompt: 'New stats: ' + this.name
-                );            
-                
-                when (set.level >= profession.arts->size) 
-                  if (onDone) onDone();
-                
-                animateLevel()
-              }
-            )
-          } else 
-            if (onDone) onDone();
-
-        },
-        onGetCaption       ::<- this.name + ', ' + profession.name + ': Level ' + set.level,
-        onGetSubcaption    ::{
-          @amount = (originalExpToNext-(curVal-originalSetExp));
-          if (amount < 0) amount = 0; 
-          return 'Exp to next: ' + amount + ' EXP'
-        },
-        onGetSubsubcaption ::<- '            +' + (originalExp - (curVal-originalSetExp)),
-        onGetLeftWeight:: <- 0.5,
-        onGetTopWeight:: <- 0.5,
-        
-        onNewValue ::(value) {
-          curVal = value->round;
-        }
-      );
-    }
-    
-    animateLevel();
-  } else ::<= {
-    ::? {
-      forever ::{
-        when(exp <= 0) send();
-        
-        if (exp >= set.expToNext) ::<= {
-          exp -= set.expToNext;
-          levelUpProfession(this, state, profession);
-          applyHPbonus();
-        } else ::<= {
-          set.exp += exp
-          set.expToNext -= exp
-          exp = 0;
-        }
+            
+            windowEvent.queueMessage(
+              text: this.name + '\'s fortitude increased as well.'
+            );                
+            
+            oldStats.printDiff(
+              other:this.stats,
+              prompt: 'New stats: ' + this.name
+            );            
+          }
+        )
       }
-    }
+    )
+
+
+
   }
+  
+  
+  
 }
 
 
@@ -1771,8 +1714,10 @@
     },
     
     getProfessionProgress ::(profession) {
+      if (profession == empty)
+        profession = _.this.profession
       when(_.state.professionProgress[profession.id] == empty) empty;
-      return {..._.state.professionProgress[profession.id]};
+      return _.state.professionProgress[profession.id];
     },
 
     profession : {
@@ -2598,35 +2543,14 @@
       levelUpProfession(this, state, profession:if (profession == empty) this.profession else profession);
     },
     
-    gainProfessionExp ::(profession, exp, silent, onDone) {
+    autoLevelProfessionPlayer ::(profession){
       @:state = _.state;
       @:this = _.this;
-      when(state.isDead) onDone();
-      expUpProfession(
-        state,
-        this,
-        profession : if (profession == empty) this.profession else profession,
-        exp, 
-        silent,
-        onDone
-      );
+      levelUpProfession(this, state, profession:if (profession == empty) this.profession else profession, player:true);
+    
     },
     
-    autoLevelProfessionPlayer ::(profession, onDone) {
-      @:state = _.state;
-      @:this = _.this;
-      when(state.isDead) onDone();
-      
-      
-      profession = if (profession == empty) this.profession else profession
-      
 
-      this.gainProfessionExp(
-        profession,
-        exp: state.professionProgress[profession.id].expToNext,
-        silent : true
-      );
-    },
     
     // clears profession arts and resets the level back to 1
     resetProfessionArts ::{

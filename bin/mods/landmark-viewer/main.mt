@@ -67,6 +67,8 @@ return {
                   landmark.map.setPointer(x:p.x, y:p.y);                   
                   landmark.visit();
                   landmark.travel();
+                  
+                  //WyvernGate.World.party.gainProfessionExp(exp:200);
                 }
               );
             }
