@@ -75,9 +75,7 @@ Quest.database.newEntry(
         @:pos = island.getAPosition();
         @:landmark = Landmark.new(
           island : island,
-          base: Landmark.database.find(:'base:forest-item-generic'),
-          x : pos.x,
-          y : pos.y
+          base: Landmark.database.find(:'base:forest-item-generic')
         );
         landmark.symbol = 'X';
         landmark.legendName = quest.name;
@@ -98,7 +96,7 @@ Quest.database.newEntry(
         quest.data.landmarkID = landmark.worldID;
         quest.data.itemName = quest.data.item.name;
         quest.data.item = empty;
-        island.addLandmark(landmark);
+        island.addLandmark(landmark, x:pos.x, y:pos.y);
         
         windowEvent.queueMessage(
           speaker: issuer.name,
@@ -255,9 +253,7 @@ Quest.database.newEntry(
         @:pos = island.getAPosition();
         @:landmark = Landmark.new(
           island : island,
-          base: Landmark.database.find(:'base:forest-generic'),
-          x : pos.x,
-          y : pos.y
+          base: Landmark.database.find(:'base:forest-generic')
         );
         landmark.symbol = 'X';
         landmark.legendName = quest.name;
@@ -273,7 +269,11 @@ Quest.database.newEntry(
         landmark.addLocation(location:item);
         
         quest.data.landmarkID = landmark.worldID;
-        island.addLandmark(landmark);  
+        island.addLandmark(
+          landmark,
+          x : pos.x,
+          y : pos.y
+        );  
       },
       
       onStep ::(quest, landmark, island) {

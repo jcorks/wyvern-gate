@@ -514,7 +514,7 @@
       }
     }
   }
-
+  
   for(0, map.height) ::(y) {
     for(0, map.width) ::(x) {
       @:scen = map.sceneryAt(x, y);

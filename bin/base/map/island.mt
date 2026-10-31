@@ -31,7 +31,7 @@
 @:databaseItemMutatorClass = import(module:'core/data/databaseitemmutatorclass.mt');
 @:Database = import(module:'core/data/database.mt');
 @:correctA = import(module:'base/util/correcta.mt');
-
+@:OverMap = import(module:'base/map/overmap.mt');
 
 @:CLIMATE = {
   WARM : 0,
@@ -102,7 +102,7 @@ Island.database.newEntry(
       
     ],
     possibleSceneryCharacters : [
-      '╿', '.', '`', '^', ','
+      '╿', '.', '^', ',', 'Y'
     ],
     traits : TRAIT.SPECIAL | TRAIT.EMPTY,
     
@@ -121,6 +121,16 @@ Island.database.newEntry(
       'base:town-start',
       'base:wyvern-gate',
       'base:mine',
+      'base:mine',
+      'base:mine',
+      'base:mine',
+      'base:mine',
+      'base:mine',
+      'base:mine',
+      'base:mine',
+      'base:mine',
+      'base:mine',
+
     ],
     possibleLandmarks : [
       
@@ -136,7 +146,7 @@ Island.database.newEntry(
       'base:encounter:normal'      
     ],
     possibleSceneryCharacters : [
-      '╿', '.', '`', '^', ','
+      '╿', '.', '^', ',', 'Y'
     ],
     traits : TRAIT.DIVERSE | TRAIT.SPECIAL,
     
@@ -175,7 +185,7 @@ Island.database.newEntry(
       'base:encounter:normal'
     ],
     possibleSceneryCharacters : [
-      '╿', '.', '`', '^', ',',
+      '╿', '.', '^', ',',
       ')', '(', ']', ']', '/',
       '+', '~', '=', '|', '>',
       '<', '*', '%', '-', '_'
@@ -206,24 +216,13 @@ Island.database.newEntry(
   }   
 
   return ::(map, island, base) {
-    @:loc = if (map.areas->size == 0)
-      ({x:0, y:0})
-    else
-      random.scrambled(:map.areas)[0];
-      
-      
-    @:x = loc.x;      
-    @:y = loc.y;      
     @:landmark = Landmark.new(
       island,
-      base,
-      x,
-      y
+      base
     );
-
-    if (x != 0 && y != 0)
-      clearScenery(map, x, y);
     island.addLandmark(landmark);
+    @:pos = island.getLandmarkPosition(:landmark);
+    clearScenery(map, x:pos.x, y:pos.y);
     return landmark;
   }
 }
@@ -315,6 +314,9 @@ Island.database.newEntry(
     // landmarks that are not part of the map.
     // added to when adding a landmark with the unmapped flag
     unmappedLandmarks : empty,
+    
+    // controller of the midmap
+    overmap : empty,
   },
   
   database : Database.new(
@@ -348,7 +350,87 @@ Island.database.newEntry(
     // current party
     @party_;
 
-    
+    @:bridgeAllLandmarks ::{
+      @:map = state.map;
+      @:bridged = [];
+      @:connected = {};
+      @:distance = import(module:'core/distance.mt');
+      @:createBridge = ::(from, to) {
+        @xfrom = from.x;
+        @xto   = to.x;
+
+        @yfrom = from.y;
+        @yto   = to.y;
+
+        @:freeSpace::(x, y, ch) {
+          //if (map.isWalled(x, y)) ::<= {
+            map.setSceneryIndex(x, y, symbol:ch);
+            bridged[''+x+','+y] = {x:x, y:y};
+            map.disableWall(x, y);
+          //}
+        }
+        
+        @:ew = map.addScenerySymbol(:'─');
+        @:ns = map.addScenerySymbol(:'│');
+
+
+        for(xfrom, xto) ::(x) {
+          freeSpace(x, y:yfrom, ch:ew)
+        }
+
+        for(yfrom, yto) ::(y) {
+          freeSpace(x:xto, y, ch:ns)
+        }
+      }   
+      
+      @:landmarks = this.landmarks;
+      breakpoint();
+      foreach(random.scrambled(:landmarks)) ::(k, self) {
+        when (connected[self] != empty) empty;
+
+        @:x = self.x;
+        @:y = self.y;
+        @closest = empty;
+        @closestDist = 999*999;
+  
+  
+        // initial connection is between self and the closest landmark
+        when(connected->keycount == 0) ::<= {
+          foreach(landmarks) ::(k, other) {
+            when(self == other) empty;
+            @:dist = distance(x0:x, y0:y, x1: other.x, y1: other.y);
+            if (dist < closestDist) {
+              closest = other;
+              closestDist = dist;
+            }
+          }      
+          connected[self] = true;
+          connected[closest] = true;
+          createBridge(from:self, to:closest);
+        }
+
+        foreach(connected) ::(other, t) {
+          when(self == other) empty;
+          @:dist = distance(x0:x, y0:y, x1: other.x, y1: other.y);
+          if (dist < closestDist) {
+            closest = other;
+            closestDist = dist;
+          }
+        }      
+
+          
+        foreach(bridged) ::(k, bridge) {
+          @:dist = distance(x0:x, y0:y, x1: bridge.x, y1: bridge.y);
+          if (dist < closestDist) {
+            closest = bridge;
+            closestDist = dist;
+          }
+        }
+
+        connected[self] = true;
+        createBridge(from:self, to:closest);
+      } 
+    }
 
     // augments an entity based on the current tier
     @augmentTiered = ::(entity) {
@@ -626,7 +708,8 @@ Island.database.newEntry(
           
           }
           
-          
+          bridgeAllLandmarks();
+          state.overmap = OverMap.new(parent:this);
           onDone(:state.map);        
         }
         
@@ -641,9 +724,7 @@ Island.database.newEntry(
           if (this.landmarks->size == 0) ::<= {
             @:landmark = Landmark.new(
               island:this,
-              base: Landmark.database.find(:'base:none'),
-              x:0,
-              y:0
+              base: Landmark.database.find(:'base:none')
             );
             this.addLandmark(landmark);          
           }
@@ -656,9 +737,17 @@ Island.database.newEntry(
           symbols:base.possibleSceneryCharacters,
           onDone ::(map) {
             state.map = map;
+            state.map.obscure();
+            // connect all known landmarks
             baseOnDone();
           }
         );
+
+
+
+
+
+
 
       },
 
@@ -798,20 +887,30 @@ Island.database.newEntry(
         }  
       },
       
-      addLandmark ::(landmark, unmapped) {
+      addLandmark ::(landmark, unmapped, x, y) {
         @:Map = import(module:'core/map.mt');
+    
         
         if (unmapped == true)
           state.unmappedLandmarks->push(:landmark)
         else
-          state.map.setItem(
-            data:landmark, 
-            x:landmark.x, 
-            y:landmark.y, 
-            traits : Map.TRAIT.HAS_HALO,
-            symbol:landmark.symbol, 
-            name:landmark.legendName
-          );
+          if (x == empty && y == empty)
+            state.map.setItem(
+              data:landmark, 
+              area: state.map.getRandomEmptyArea(),
+              traits : Map.TRAIT.HAS_HALO,
+              symbol:landmark.symbol, 
+              name:landmark.legendName
+            )          
+          else
+            state.map.setItem(
+              data:landmark, 
+              x,
+              y,
+              traits : Map.TRAIT.HAS_HALO,
+              symbol:landmark.symbol, 
+              name:landmark.legendName
+            );
       },
       
       removeLandmark ::(landmark) {
@@ -1203,6 +1302,139 @@ Island.database.newEntry(
         hasVisitIsland = true;
         
         
+      },
+      createChunk::(x, y) {
+        @:l =  Landmark.new(base:Landmark.database.find(id:'base:overmap-chunk'));
+        l.loadContent();
+        l.map.width = OverMap.CHUNK_SIZE;
+        l.map.height = OverMap.CHUNK_SIZE;
+        l.map.fillSceneryIndex(
+          symbol: l.map.addScenerySymbol(:state.map.sceneryAt(x, y))
+        );
+        
+        @:items = state.map.itemsAt(x, y);
+        if (items != empty && items->size > 0) {
+          l.map.setSceneryIndex(
+            x: (l.map.width/2)->floor,
+            y: (l.map.height/2)->floor,
+            symbol:l.map.addScenerySymbol(:
+              items[0].symbol
+            )
+          )
+        }
+        breakpoint();
+        l.name = this.name;
+        return l;
+      },
+      
+      getLandmarkPosition::(landmark) {
+        @:item = state.map.getItem(:landmark);
+        when(item == empty) empty;
+        return {
+          x : item.x,
+          y : item.y        
+        }
+      },
+      travelMidworld ::{
+        @:island = this;
+        state.overmap.movePointerTo(
+          x:state.map.pointerX*(OverMap.CHUNK_SIZE) + (OverMap.CHUNK_SIZE/2)->floor,
+          y:state.map.pointerY*(OverMap.CHUNK_SIZE) + (OverMap.CHUNK_SIZE/2)->floor
+        );
+        
+        @:showOverworld ::{
+          state.map.setPointer(
+            x:(state.overmap.pointerX / OverMap.CHUNK_SIZE)->floor,
+            y:(state.overmap.pointerY / OverMap.CHUNK_SIZE)->floor
+          );
+
+          @:underFoot = island.map.getNamedItemsUnderPointerRadius(radius:5);
+          
+          foreach(underFoot)::(i, arr) {
+            arr.data.discover();
+            island.map.discover(data:arr.data);                      
+          }
+          @:underunderFoot = island.map.getNamedItemsUnderPointer();
+
+          windowEvent.queueCursorMove(
+            leftWeight: 1,
+            topWeight: 1,
+            prompt: 'Map',
+            canCancel: true,
+            onMenu :: {
+            },
+            
+            renderable : {
+              render ::{
+                @:hud = import(module:'core/graphics/hud.mt');
+                island.map.render();
+                hud.render(island);
+                when(underFoot == empty || underFoot->size == 0) empty;
+
+
+                
+                @:lines = [];
+                foreach(underFoot)::(i, arr) {
+
+
+                  lines->push(value:arr.data.name);
+
+                  //island.map.setPointer(
+                  //  x: arr.x,
+                  //  y: arr.y
+                  //);
+                
+                }
+                
+                
+                
+                canvas.renderTextFrameGeneral(
+                  title: 'Nearby:',
+                  topWeight : 1,
+                  leftWeight : 1,
+                  lines
+                );
+              }
+            },
+            onMove ::(choice) {
+              
+            }
+          );        
+        }
+        
+        state.map.unobscureRadius(x:state.map.pointerX, y:state.map.pointerY, radius:3);
+        windowEvent.queueCursorMove(
+          leftWeight: 1,
+          topWeight: 1,
+          prompt: 'Traveling...',
+          onMenu :: {
+            showOverworld()
+          },
+          
+          renderable : {
+            render ::{
+              this.visit();
+              state.overmap.render();
+            }
+          },
+          onMove ::(choice) {
+            @:x = (state.overmap.pointerX / OverMap.CHUNK_SIZE)->floor
+            @:y = (state.overmap.pointerY / OverMap.CHUNK_SIZE)->floor
+
+            state.overmap.movePointerRelative(
+              x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
+              y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
+            );
+            @:xNext = (state.overmap.pointerX / OverMap.CHUNK_SIZE)->floor
+            @:yNext = (state.overmap.pointerY / OverMap.CHUNK_SIZE)->floor
+
+            
+            if (x != xNext || y != yNext)
+              state.map.unobscureRadius(x:xNext, y:yNext, radius:5);
+          }
+        );
+
+      
       }
     }
     

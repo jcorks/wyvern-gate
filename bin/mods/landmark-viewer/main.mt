@@ -29,7 +29,7 @@ return {
           keyhome.setIslandGenTraits(
             nameHint:'', 
             levelHint:6,
-            idHint: 'base:none',
+            idHint: 'base:starting-island',
             tierHint: 0  
           )
 
@@ -42,35 +42,42 @@ return {
             key:keyhome, 
             skipSave:true,
             onDone ::(island){
-              WyvernGate.World.party.add(:WyvernGate.World.island.newInhabitant());
-              WyvernGate.World.party.add(:WyvernGate.World.island.newInhabitant());
 
-              @:allLandmarks = Landmark.database.getAll()
-                ->map(::(value) <- value.id)
-              allLandmarks->sort(::(a, b) <- a < b);
-                  
-              windowEvent.queueChoices(
-                choices : allLandmarks->map(::(value) <- Landmark.database.find(:value).name),
-                prompt: 'Pick a landmark to generate.',
-                onChoice::(choice) {
-                  @:id = allLandmarks[choice-1];
-                  @:landmark = Landmark.new(
-                    island,
-                    base : Landmark.database.find(:id),
-                    width:0,
-                    height:0
-                  );
-                  island.addLandmark(landmark);
-                                   
-                  landmark.loadContent();
-                  @:p = landmark.getRandomEmptyPosition()
-                  landmark.map.setPointer(x:p.x, y:p.y);                   
-                  landmark.visit();
-                  landmark.travel();
-                  
-                  //WyvernGate.World.party.gainProfessionExp(exp:200);
-                }
-              );
+                WyvernGate.World.party.add(:WyvernGate.World.island.newInhabitant());
+                WyvernGate.World.party.add(:WyvernGate.World.island.newInhabitant());
+
+                @:allLandmarks = Landmark.database.getAll()
+                  ->map(::(value) <- value.id)
+                allLandmarks->sort(::(a, b) <- a < b);
+                    
+                windowEvent.queueChoices(
+                  choices : allLandmarks->map(::(value) <- Landmark.database.find(:value).name),
+                  prompt: 'Pick a landmark to generate.',
+                  onChoice::(choice) {
+                    @:id = allLandmarks[choice-1];
+                    @:landmark = Landmark.new(
+                      island,
+                      base : Landmark.database.find(:id),
+                      width:0,
+                      height:0
+                    );
+                    island.addLandmark(landmark);
+                    @:area = island.map.getRandomArea();
+                    island.map.setPointer(
+                      x: area.x + (area.width/2)->floor,
+                      y: area.y + (area.height/2)->floor
+                    );
+                    island.travelMidworld();
+                                     
+                    //landmark.loadContent();
+                    //@:p = landmark.getRandomEmptyPosition()
+                    //landmark.map.setPointer(x:p.x, y:p.y);                   
+                    //landmark.visit();
+                    //landmark.travel();
+                    
+                    //WyvernGate.World.party.gainProfessionExp(exp:200);
+                  }
+                );
             }
           ); 
         },

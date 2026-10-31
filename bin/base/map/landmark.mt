@@ -25,8 +25,6 @@
 
 @:StateType = State.create(
   items : {
-    x : 0,
-    y : 0,
     floorHint : 0,
     base : empty,
     isSparse : true  
@@ -149,6 +147,37 @@
 @:DungeonMap = import(module:'base/map/dungeon.mt');
 @:windowEvent = import(module:'core/windowevent.mt');
 @:LandmarkEvent = import(module:'base/event/landmark.mt');
+
+Landmark.database.newEntry(
+  data: {
+    name: 'OvermapChunk',
+    id: 'base:overmap-chunk',
+    legendName : '',
+    symbol : ' ',
+    rarity : 1,
+    minObjects : 0,
+    maxObjects : 0,
+    eventCounts : [0],
+    eventPreference : LandmarkEvent.KIND.HOSTILE,
+    landmarkType : TYPE.CUSTOM,
+    traits : 
+      TRAIT.CAN_SAVE,
+
+    requiredEvents : [],
+    possibleObjects : [
+    ],
+    requiredObjects : [
+    ],
+    mapHint : {
+      roomSize: import(:'base/map/overmap.mt').CHUNK_SIZE
+    },
+    events :{
+
+    }
+  }
+)
+
+
 
 Landmark.database.newEntry(
   data: {
@@ -1664,10 +1693,8 @@ Landmark.database.newEntry(
           registerMapEvents();
       },
 
-      defaultLoad::(base, x, y, floorHint, data){
+      defaultLoad::(base, floorHint, data){
         state.worldID = world.getNextID();
-        state.x = 0;
-        state.y = 0;
         state.floor = 0;
         state.steps = 0;
         state.events = [];
@@ -1679,8 +1706,6 @@ Landmark.database.newEntry(
           state.data = {};
 
         state.base = base;
-        state.x = if (x != empty) x else 0;
-        state.y = if (y != empty) y else 0;
         state.peaceful = base.hasTraits(:TRAIT.PEACEFUL)
 
         if (floorHint != empty) ::<= {
@@ -1707,8 +1732,6 @@ Landmark.database.newEntry(
           sparse.load(parent:this, serialized);
           this.defaultLoad(
             base: sparse.base,
-            x: sparse.x,
-            y: sparse.y,
             floorHint: sparse.floorHint
           )   
         } else ::<= {
@@ -1766,13 +1789,6 @@ Landmark.database.newEntry(
         }
       },
       
-      x : {
-        get ::<- state.x
-      },
-      
-      y : {
-        get ::<- state.y
-      },
       
       width : {
         get ::<- state.map.width
@@ -2140,6 +2156,14 @@ Landmark.database.newEntry(
 
       steps : {
         get ::<- state.steps
+      },
+      
+      x : {
+        get ::<- this.island.getLandmarkPosition(:this).x
+      },
+
+      y : {
+        get ::<- this.island.getLandmarkPosition(:this).y
       },
 
       // represents a step made within the landmark.

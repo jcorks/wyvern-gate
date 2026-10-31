@@ -75,8 +75,6 @@
 */
 
 @:THE_BIG_ONE = 100000000;
-@mapSizeW  = 50;
-@mapSizeH  = 18;
 @:SIGHT_RAY_LIMIT = 8;
 @:SIGHT_RAY_EPSILON = 0.4;
 
@@ -105,9 +103,6 @@
     @isOccupied = false;
 
     
-    
-    mapSizeH = canvas.height;
-    mapSizeW = canvas.width;
 
     this.interface = {
       defaultLoad::(x, y, width, height) {
@@ -581,7 +576,9 @@ Map =  LoadableClass.create(
     
     @:renderPaged ::{
       
-      
+      @mapSizeW  = canvas.width;
+      @mapSizeH  = canvas.height;
+
       @:left = canvas.width/2 - mapSizeW/2;
       @:top = canvas.height/2 - mapSizeH/2;
 
@@ -691,6 +688,9 @@ Map =  LoadableClass.create(
     }
     
     @:renderUnpaged ::{
+      @mapSizeW  = canvas.width;
+      @mapSizeH  = canvas.height;
+
       //@:Time = import(module:'Matte.System.Time');
       //@:ticks = Time.getTicks();
       @:left = canvas.width/2 - mapSizeW/2;
@@ -753,26 +753,40 @@ Map =  LoadableClass.create(
       @:targets = {};   
       @:importantItems = {};  
       
-      canvas.fill(:undefinedCharacter);
+      @itemXmin = pointer.x - mapSizeW/2;
+      @itemXmax = pointer.x + mapSizeW/2;
+
+      @itemYmin = pointer.y - mapSizeH/2;
+      @itemYmax = pointer.y + mapSizeH/2;
       
-      for(0, mapSizeH+1)::(y) {
-        for(0, mapSizeW+1)::(x) {
-          @itemX = ((x + pointer.x - mapSizeW/2))->floor;
-          @itemY = ((y + pointer.y - mapSizeH/2))->floor;
+      if (itemXmin < 0) itemXmin = 0;
+      if (itemYmin < 0) itemYmin = 0;
+      if (itemXmin > width) itemXmin = width;
+      if (itemYmin > height) itemYmin = height;
 
-          when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) empty
-          
+      if (itemXmax < 0) itemXmax = 0;
+      if (itemYmax < 0) itemYmax = 0;
+      if (itemXmax > width) itemXmax = width;
+      if (itemYmax > height) itemYmax = height;
 
-          @symbol = this.sceneryAt(x:itemX, y:itemY);
-          canvas.movePen(x:left + x, y:top + y);  
 
-          
+      
+      for(itemYmin, itemYmax)::(itemY) {
+        for(itemXmin, itemXmax)::(itemX) {
           
           //if (obscured[itemX][itemY])
           //  if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
           //    obscured[itemX][itemY] = false;
           
           when(scenery[itemX+itemY*width] & IS_OBSCURED_MASK) empty
+          @:x = itemX - pointer.x + mapSizeW/2;
+          @:y = itemY - pointer.y + mapSizeH/2;
+          @symbol = this.sceneryAt(x:itemX, y:itemY);
+          canvas.movePen(x:left + x, y:top + y);  
+          
+
+
+          
           
           @chosenChar = ::<= {
             
@@ -939,6 +953,9 @@ Map =  LoadableClass.create(
       },
       
       mapCoordinatesToScreen ::(x, y) {
+        @mapSizeW  = canvas.width;
+        @mapSizeH  = canvas.height;
+
         if (paged) ::<= {
           @:regionX = ((pointer.x+0) / mapSizeW)->floor;
           @:regionY = ((pointer.y+0) / mapSizeH)->floor;
@@ -1175,8 +1192,8 @@ Map =  LoadableClass.create(
         return retrieveItem(data);
       },
       
-      xMapToScreen::(x) <- x - pointer.x + mapSizeW/2,
-      yMapToScreen::(y) <- y - pointer.y + mapSizeH/2,
+      xMapToScreen::(x) <- x - pointer.x + canvas.width/2,
+      yMapToScreen::(y) <- y - pointer.y + canvas.height/2,
       
       getAllItemData::{
         @:out = {};
@@ -1204,11 +1221,12 @@ Map =  LoadableClass.create(
         return itemIndex[x + y*(width)];
       },
       
-      obscure::{
-        isDark = true;
+      obscure::(ignore) {
         for(0, width)::(x) {
           for(0, height)::(y) {
-            scenery[x+y*width] |= IS_OBSCURED_MASK;
+            @:at = x+y*width
+            when (ignore != empty && ((scenery[at] & (~SETTINGS_MASK))-1) == ignore) empty;
+            scenery[at] |= IS_OBSCURED_MASK;
           }
         }
       },
@@ -1226,6 +1244,20 @@ Map =  LoadableClass.create(
           }
         }
       },
+      unobscureAt::(x, y) {
+        scenery[x+y*width] &= ~IS_OBSCURED_MASK
+      },
+
+      unobscureRadius::(x, y, radius) {        
+        for(y - radius-1, y + radius+1) ::(yIter) {
+          for(x - radius-1, x + radius+1) ::(xIter) {
+            if (distance(x0:x, y0:y, x1:xIter, y1:yIter) <= radius) ::<= {
+              scenery[xIter+yIter*width] &= ~IS_OBSCURED_MASK              
+            }
+          }
+        }
+      },
+
       
       clearItems::(x, y) {
         itemIndex[x + y*(width)] = empty;
@@ -1279,8 +1311,6 @@ Map =  LoadableClass.create(
       
         x = x->floor;
         y = y->floor;
-        when(x < 0 || x > width || y < 0 || y > height)
-          error(detail:'Bad');
 
 
         pointer.x = x;
@@ -1519,7 +1549,9 @@ Map =  LoadableClass.create(
 
       isLocationVisible ::(x, y) {
         when(scenery[x+y*width] & IS_OBSCURED_MASK) false;
-      
+        @mapSizeW  = canvas.width;
+        @mapSizeH  = canvas.height;
+
         return if (paged) ::<= {
           @:regionX = ((pointer.x+0) / mapSizeW)->floor;
           @:regionY = ((pointer.y+0) / mapSizeH)->floor;
@@ -1543,11 +1575,11 @@ Map =  LoadableClass.create(
       },
       
       MAP_CHARS_WIDTH: {
-        get::<- mapSizeW
+        get::<- canvas.width
       },
       
       MAP_CHARS_HEIGHT : {
-        get::<- mapSizeH
+        get::<- canvas.height
       },
       
       offsetX : {
@@ -1592,14 +1624,17 @@ Map =  LoadableClass.create(
       }, 
       
       
-      render :: {
-        canvas.fill();
+      render ::(noBlank)  {
+        if (noBlank != true)
+          canvas.fill(:'`');
         if (paged)
           renderPaged()
         else 
           renderUnpaged()
         ;
-        
+        @mapSizeW  = canvas.width;
+        @mapSizeH  = canvas.height;
+
         
         @:left = canvas.width/2 - mapSizeW/2;
         @:top = canvas.height/2 - mapSizeH/2;
