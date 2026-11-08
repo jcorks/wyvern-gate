@@ -129,7 +129,6 @@ canvas.onCommit = ::(lines, colorHints, renderNow){
   h = Number.parse(:h);
   @:hAdjust = ((h / 2)->floor)*2 -2;
   @:wAdjust = ((w / 2)->floor)*2 -2;
-  breakpoint();
   when (w >= 80 && h >= 24) empty;
   when (canvas.width == w && canvas.height == h) empty;
 

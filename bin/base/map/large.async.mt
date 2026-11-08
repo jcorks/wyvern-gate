@@ -71,9 +71,9 @@
 @:SEED_FILL_ITER = 4;
 @:SEED_RADIUS_MIN = 5;
 @:SEED_RADIUS_MAX = 9;
-@:GROW_LAYERS_MIN = 5;
-@:GROW_LAYERS_MAX = 9;
-@:SEED_COUNT ::(width, height) <- (4+(width+height)/18.0)->round
+@:GROW_LAYERS_MIN = 9;
+@:GROW_LAYERS_MAX = 14;
+@:SEED_COUNT ::(width, height) <- (12+(width+height)/18.0)->round
 
 
 
@@ -264,8 +264,8 @@
         
   @:table = out;
 
-  for(0, map.height) ::(y) {
-    for(0, map.width) ::(x) {
+  for(0, height) ::(y) {
+    for(0, width) ::(x) {
       @:val = table[x + (width + BUFFER_SPACE*2) * y];
       when(val == empty) empty;
       map.setSceneryIndex(
@@ -278,8 +278,8 @@
   
 
   // finally, border out bottoms and extend 
-  for(0, map.height) ::(y) {
-    for(0, map.width) ::(x) {
+  for(0, height) ::(y) {
+    for(0, width) ::(x) {
       @:val = map.sceneryAt(x, y);
       @:below = map.sceneryAt(x, y:y+1);
       @:belowbelow = map.sceneryAt(x, y:y+2);
@@ -294,7 +294,7 @@
         }
         iter += 1;
         
-        @scale = 1 - 2*((((x - BUFFER_SPACE) / (map.width - 2*BUFFER_SPACE)) - 0.5)->abs)
+        @scale = 1 - 2*((((x - BUFFER_SPACE) / (width - 2*BUFFER_SPACE)) - 0.5)->abs)
 
         //scale *= scale;
         
@@ -495,8 +495,8 @@
 
   // some places might have "holes" that need work.
   for(0, 2) ::(i) {
-    for(0, map.height) ::(y) {
-      for(0, map.width) ::(x) {
+    for(0, height) ::(y) {
+      for(0, width) ::(x) {
         @:val = map.sceneryAt(x, y);
              
         when(val == '▓' || val == ' ') empty;
@@ -515,8 +515,8 @@
     }
   }
   
-  for(0, map.height) ::(y) {
-    for(0, map.width) ::(x) {
+  for(0, height) ::(y) {
+    for(0, width) ::(x) {
       @:scen = map.sceneryAt(x, y);
       if (scen == '▓' ||
           scen == '▒' ||
@@ -543,13 +543,14 @@
   
 @:create::(sizeW, sizeH, symbols) {        
   @:map = Map.new();
-  map.width = sizeW + BUFFER_SPACE*2;
-  map.height = sizeH + BUFFER_SPACE*2;
+  map.obscure = true;
+  @:width = sizeW + BUFFER_SPACE*2;
+  @:height = sizeH + BUFFER_SPACE*2;
 
   @index = map.addScenerySymbol(character:'▓');
 
-  for(0, map.height)::(y) {
-    for(0, map.width)::(x) {
+  for(0, height)::(y) {
+    for(0, width)::(x) {
       map.setSceneryIndex(x, y, symbol:index);
     }
   }
@@ -584,8 +585,8 @@
   @:areas = [];
   @:args = {
     map : map,
-    width:map.width - BUFFER_SPACE*2,
-    height:map.height - BUFFER_SPACE*2,
+    width:width - BUFFER_SPACE*2,
+    height:height - BUFFER_SPACE*2,
     symbols: symbols,
     symbolList : symbolList,
     out : out,

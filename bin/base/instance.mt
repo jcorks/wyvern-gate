@@ -991,7 +991,6 @@ return empty;
                 @:enterName = import(module:'base/widgets/name.mt');
 
                 @choices = Scenario.database.getAll()->filter(::(value) <- value.experimental == false);
-                breakpoint();
                 choices->sort(comparator:::(a, b) {
                   when(a.name < b.name) -1;
                   when(a.name > b.name)  1;
@@ -1449,7 +1448,6 @@ return empty;
       
       
       savestate ::(nameOverride, saveOverride) {
-        breakpoint();
         when((world.saveName == empty || world.saveName == '') && 
              (nameOverride == empty   || nameOverride == '')) empty;
         onSaveState(

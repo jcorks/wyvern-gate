@@ -20,8 +20,12 @@ return ::{
       events : [
         
       ],
-      possibleSceneryCharacters : [
-        '^', '^', '^', '^', '^'
+      possibleBiomes : [
+        'base:mountains',
+        'base:mountains',
+        'base:mountains',
+        'base:mountains',
+        'base:mountains'
       ],
       
       traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,
@@ -50,8 +54,12 @@ return ::{
       events : [
         
       ],
-      possibleSceneryCharacters : [
-        '_', '-', '~', '-', '-'
+      possibleBiomes : [
+        'base:mountains',
+        'base:mountains',
+        'base:mountains',
+        'base:mountains',
+        'base:mountains',
       ],
       
       traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,
@@ -81,8 +89,12 @@ return ::{
       events : [
         
       ],
-      possibleSceneryCharacters : [
-        '.', '.', '.', '.', '.'
+      possibleBiomes : [
+        'base:plains',
+        'base:plains',
+        'base:plains',
+        'base:plains',
+        'base:plains'
       ],
       
       traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,
@@ -111,8 +123,12 @@ return ::{
       events : [
         
       ],
-      possibleSceneryCharacters : [
-        '^', '^', '^', '^', '^'
+      possibleBiomes : [
+        'base:wildflower',
+        'base:wildflower',
+        'base:wildflower',      
+        'base:wildflower',
+        'base:wildflower',
       ],
       
       traits : Island.TRAIT.DIVERSE | Island.TRAIT.SPECIAL,

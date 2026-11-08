@@ -21,6 +21,8 @@
 @:LoadableClass = import(module:'core/data/loadableclass.mt');
 @:State = import(module:'core/data/state.mt');
 @:EventSystem = import(module:'Matte.Core.EventSystem');
+@:JSON = import(module:'Matte.Core.JSON');
+
 @Map;
 
 @:StateType = State.create(
@@ -33,8 +35,6 @@
     legendEntriesCompressed : empty, // retired.
 
     pointer : empty,
-    width : 0,
-    height : 0,
     offsetX : 0,
     offsetY : 0,
     drawLegend : false,
@@ -88,6 +88,210 @@
 @:DEFAULT_OUT_OF_BOUNDS = '`'
 
 @:distance = import(module:'core/distance.mt');
+
+@:posToId ::(x, y) {
+  return ''+x+','+y;
+}
+
+
+
+@:CHUNK_SIZE = 20
+
+@:ChunkManager = LoadableClass.create(
+  name : 'Wyvern.Map.ChunkManager',
+  statics : {
+    CHUNK_SIZE : {get::<-CHUNK_SIZE}
+  },
+  items : {
+    // Cells. Indexed by 'x,y' strings
+    // When out of range, the chunk entry becomes a 
+    // saved string
+    chunks : empty,
+    chunksAwake : empty,
+    obscure : false
+
+  },
+  
+  define ::(this, state) {
+    @island;
+    @:events = EventSystem.new();
+    @CHUNK_ACTIVE_COUNT = 32;
+    events.events = {
+      onWakeChunk ::(detail){},
+      onSleepChunk ::(detail){},
+      onCreateChunk ::(detail){},
+    }
+    
+    @:posToChunk::(x) {
+      return (x / CHUNK_SIZE)->floor
+    }
+    
+
+    
+
+    
+    @:putChunkToSleep::(id) {
+      state.chunksAwake->remove(:id);
+      state.chunks[id] = JSON.encode(object:state.chunks[id].save());
+      events.emit(
+        event: 'onSleepChunk',
+        detail : {
+          data : state.chunks[id].data,
+          scenery : state.chunks[id].scenery,
+          x : state.chunks[id].x,
+          y : state.chunks[id].y
+        }
+      );
+    }
+    
+    @:wakeUpChunk ::(x, y) {
+      // TODO: this sucks
+      ::? { 
+        forever ::{
+          when (state.chunksAwake->keycount < CHUNK_ACTIVE_COUNT) send();
+          putChunkToSleep(:random.pickArrayItem(:state.chunksAwake->values));
+        }
+      }
+    
+      @:BiomeCell = import(module:'base/map/biomecell.mt');
+      @:id = posToId(x, y);
+      @:str = state.chunks[id]
+      //state.chunks[id] = BiomeCell.new(parent:this);
+      state.chunks[id].load(:JSON.decode(:str));
+      state.chunksAwake[id] = true;
+      events.emit(
+        event: 'onWakeChunk',
+        detail : {
+          data : state.chunks[id].data,
+          scenery : state.chunks[id].scenery,
+          x : x,
+          y : y
+        }
+      );
+    }
+    
+    @:createChunk ::(x, y) {
+      @:BiomeCell = import(:'base/map/biomecell.mt');
+      //@:cell = BiomeCell.new(base:island.getBiomeCellType(x, y), parent:this);
+      //cell.activate(x, y);
+      @:id = posToId(x, y);
+      state.chunks[id] = {scenery:[], data:{}, x:x, y:y};
+      state.chunksAwake[id] = true;
+      
+      if (state.obscure) {
+        @:scenery = state.chunks[id].scenery;
+        for(0, CHUNK_SIZE*CHUNK_SIZE) ::(i) {
+          scenery[i] = IS_OBSCURED_MASK;
+        }
+      } else {
+        @:scenery = state.chunks[id].scenery;
+        for(0, CHUNK_SIZE*CHUNK_SIZE) ::(i) {
+          scenery[i] = 0;
+        }      
+      }
+      
+      events.emit(
+        event: 'onCreateChunk',
+        detail : {
+          data : state.chunks[id].data,
+          scenery : state.chunks[id].scenery,
+          x : x,
+          y : y
+        }
+      );
+    }
+    
+    // returns true if already loaded
+    @:loadChunk ::(x, y) {
+      @val = state.chunks[posToId(x, y)];
+      // new chunk
+      when (val == empty) ::<= {
+        return createChunk(x, y);
+      }
+        
+      // Dormant, reload
+      when (val->type == String) ::<= {
+        return wakeUpChunk(x, y);
+      }
+      
+      return val;
+    }
+    
+    
+    this.interface = {
+      initialize ::(parent) {
+        island = parent
+      },
+      
+      defaultLoad::() {
+        state.chunks = {};
+        state.chunksAwake = {};
+      },
+      
+      getChunkSceneryForPosition::(x, y) {
+        @:xi = x % CHUNK_SIZE
+        @:yi = y % CHUNK_SIZE
+        return loadChunk(x, y).scenery[xi + yi*CHUNK_SIZE];
+      },
+      
+      setChunkSceneryForPosition::(x, y, value) {
+        @:xi = x % CHUNK_SIZE
+        @:yi = y % CHUNK_SIZE
+        loadChunk(x, y).scenery[xi + yi*CHUNK_SIZE] = value;
+      },
+      
+      andChunkSceneryForPosition::(x, y, value) {
+        @:xi = x % CHUNK_SIZE
+        @:yi = y % CHUNK_SIZE
+        loadChunk(x, y).scenery[xi + yi*CHUNK_SIZE] &= value;
+      },
+
+      orChunkSceneryForPosition::(x, y, value) {
+        @:xi = x % CHUNK_SIZE
+        @:yi = y % CHUNK_SIZE
+        loadChunk(x, y).scenery[xi + yi*CHUNK_SIZE] &= value;
+      },
+      
+      events : {
+        get ::<- events
+      },
+      
+      obscure : {
+        set ::(value) <- state.obscure = value,
+        get ::<- state.obscure
+      },
+      
+      loadScreenFor::(x, y) {
+        @:lenX = (canvas.width / CHUNK_SIZE)->ceil+1;
+        @:lenY = (canvas.height / CHUNK_SIZE)->ceil;
+        
+        @:middleX = posToChunk(:x);
+        @:middleY = posToChunk(:y);
+
+        if (CHUNK_ACTIVE_COUNT < (lenX + 2) * (lenY + 2))
+          CHUNK_ACTIVE_COUNT = (lenX + 2) * (lenY + 2);
+
+        @active = {};
+        for(middleY-(lenX/2)->floor-1, middleY+(lenX/2)->floor+2) ::(y) {
+          for(middleX-(lenY/2)->floor-1, middleX+(lenY/2)->floor+2) ::(x) {
+            @:id = posToId(x, y)
+            active[id] = true;
+            loadChunk(x, y)
+          }
+        }
+      }
+    }
+  }
+);
+
+
+
+
+
+
+
+
+
 
 
 @area_debug_index = 0;
@@ -190,7 +394,7 @@ Map =  LoadableClass.create(
       onSetItem:::{},
       onRemoveItem:::{},
       onMoveItem :::{},
-      
+      onPointerMove:::{}
     }
     @itemIndex = [];
     @entities = [];
@@ -205,8 +409,6 @@ Map =  LoadableClass.create(
       name: "(Party)"
     }
 
-    @width = 1;
-    @height = 1;
     @offsetX = 0;
     @offsetY = 0;
     @drawLegend = false;
@@ -214,14 +416,12 @@ Map =  LoadableClass.create(
     @undefinedCharacter = '`';
     @wallCharacter = '';//'▓';
     //@scenery = MemoryBuffer.new();
-    @scenery = [];
-    @sceneryValues = [];
-    @stepAction = [];
     @areas = [];
+    @chunkManager = ChunkManager.new();
     @isDark = false;
     @parent_;
-    @neighbors = [];
     @aStarPQCompareTable;
+    @sceneryValues = [];
 
 
     @:drawTarget = ::<= {
@@ -256,7 +456,6 @@ Map =  LoadableClass.create(
         foreach(targetTable) ::(k, char) {
           @:dx = targetOffsets[k][0];
           @:dy = targetOffsets[k][1];
-          @at = itemX+dx+((itemY+dy)*width);
 
           //if (scenery[at] == 0 || this.sceneryAt(x:itemX+dx, y:itemY+dy) == ' ') ::<= {
             canvas.movePen(x:x+dx, y:y+dy);  
@@ -268,21 +467,20 @@ Map =  LoadableClass.create(
 
     
     @:isWalled ::(x, y) {
-      @:id = x + y*width;
-      return (scenery[id] & IS_WALLED_MASK) != 0;
+      return (chunkManager.getChunkSceneryForPosition(x, y) & IS_WALLED_MASK) != 0;
     }
-    
-    @:isWalledID ::(id) {
-      return (scenery[id] & IS_WALLED_MASK) != 0;
+    @aStarNodeIDlookup = {};
+    @:aStarNewNode::(x, y) {
+      when (isWalled(x, y)) empty
+      @:id = ''+x+y;
+      aStarNodeIDlookup[id] = [x, y]
     }
 
     @:aStarHeuristicH::(from, to) {
-      @fromX = from%width;
-      @fromY = (from/width)->floor
-      
-      @toX = to%width;
-      @toY = (to/width)->floor
-      return distance(x0:fromX, y0:fromY, x1:toX, y1:toY)
+      @:fromn = aStarNodeIDlookup[from];
+      @:ton = aStarNodeIDlookup[to];
+    
+      return distance(x0:fromn[0], y0:fromn[1], x1:ton[0], y1:ton[1])
     }
 
     @:aStarMapEmplace::(map, key, value) {
@@ -295,11 +493,9 @@ Map =  LoadableClass.create(
       map.index[key] = empty;
     }
     @:aStarMapNew :: {
-      @:presized = [];
-      presized[width*height] = 1;
       return {
         //list: [],
-        index: presized
+        index: {}
       }
     }
     
@@ -312,9 +508,10 @@ Map =  LoadableClass.create(
       @:path = [];
       return ::? {
         forever ::{
+          @:n = aStarNodeIDlookup[current];
           path->push(value:{
-            x: current%width,
-            y:(current/width)->floor
+            x: n[0],
+            y: n[1]
           });
           @:contains = aStarMapFind(map:cameFrom, key:current);
           when(contains == start) send(message:path);
@@ -328,16 +525,12 @@ Map =  LoadableClass.create(
       return aStarPQGetFirst(pq:openSet);
     }
 
-    @:aStarNewNode::(x, y) {
-      @id = x + y*width;
-      when (!isWalledID(id) && x >= 0 && y >= 0 && x < width && y < height)
-        id;
-    }
 
     @:aStarGetNeighborsCorners::(neighbors, current) {
       neighbors->setSize(size:0);
-      @:x = current%width;
-      @:y = (current/width)->floor
+      @:n = aStarNodeIDlookup[current];
+      @:x = n[0];
+      @:y = n[1]
       
       @i;
       i = aStarNewNode(x:x+1, y:y+1); if (i != empty) neighbors->push(value:i);
@@ -354,8 +547,9 @@ Map =  LoadableClass.create(
 
     @:aStarGetNeighborsNoCorners::(neighbors, current) {
       neighbors->setSize(size:0);
-      @:x = current%width;
-      @:y = (current/width)->floor
+      @:n = aStarNodeIDlookup[current];
+      @:x = n[0];
+      @:y = n[1]
       
       @i;
       i = aStarNewNode(x:x-1, y:y  ); if (i != empty) neighbors->push(value:i);
@@ -425,6 +619,7 @@ Map =  LoadableClass.create(
            
       start = aStarNewNode(x:start.x, y:start.y);
       goal = aStarNewNode(x:goal.x, y:goal.y);
+      @:neighbors = [];
       
       when(start == goal) empty;
       // The set of discovered nodes that may need to be (re-)expanded.
@@ -482,8 +677,9 @@ Map =  LoadableClass.create(
     @:bfsQ = [];
     @:bfsPath::(start, goal, corners) {
       start = aStarNewNode(x:start.x, y:start.y);
-      goal = aStarNewNode(x:goal.x, y:goal.y);    
-      
+      goal = aStarNewNode(x:goal.x, y:goal.y);  
+      @:neighbors = [];   
+      aStarNodeIDlookup = {}      
       when (start == empty || goal == empty) empty;
       
       @:getNeighbors = if (corners)
@@ -493,20 +689,19 @@ Map =  LoadableClass.create(
     
       when (BFS_NATIVE!=empty) ::<= {
         @:result = BFS_NATIVE(
-          width,
-          height,
-          scenery,
-          start,
-          goal,
+          scenery: chunkManager.getChunkSceneryForPosition,
+          startX: start.x,
+          startY: start.y,
+          goalX : goal.x,
+          goalY : goal.y,
           corners
         );
         when(result == empty) empty;
         @:out = [];
-        for(0, result->size) ::(i) {
-          @:a = result[i];
+        for(0, result->size/2) ::(i) {
           out->push(value:{
-            x: a%width,
-            y: (a/width)->floor
+            x: result[i*2],
+            y: result[i*2+1]
           });
         }
         return out;
@@ -520,7 +715,6 @@ Map =  LoadableClass.create(
       q->setSize(size:0);
       @qIter = 0;
       @:visited = {}
-      @:neighbors = [];
       visited[start] = start;
       q->push(value:start);
       
@@ -540,9 +734,10 @@ Map =  LoadableClass.create(
                 @a = v;
                 @last;
                 forever ::{
+                  @:n = aStarNodeIDlookup[a];
                   @:next = {
-                    x: a%width,
-                    y: (a/width)->floor
+                    x: n[0],
+                    y: n[1]
                   };
                   path->push(value:next);      
                   when(visited[a] == start) ::<= {
@@ -574,118 +769,6 @@ Map =  LoadableClass.create(
     }
     
     
-    @:renderPaged ::{
-      
-      @mapSizeW  = canvas.width;
-      @mapSizeH  = canvas.height;
-
-      @:left = canvas.width/2 - mapSizeW/2;
-      @:top = canvas.height/2 - mapSizeH/2;
-
-      
-
-
-      @:regionX = ((pointer.x + mapSizeW*0.5) / mapSizeW)->floor;
-      @:regionY = ((pointer.y + mapSizeH*0.5) / mapSizeH)->floor;
-
-
-      @:centerX = (mapSizeW / 2)->floor;
-      @:centerY = (mapSizeH / 2)->floor;
-      
-      //@:map = [...scenery, ...items->values];
-      /*
-      scenery->foreach(do:::(item, data) {
-        @itemX = ((data.x - regionX) * mapSizeW)->floor;
-        @itemY = ((data.y - regionY) * mapSizeH)->floor;
-      
-        when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
-        canvas.movePen(x:left-1 + itemX, y:top-1 + itemY);  
-        canvas.drawText(text:data.symbol);
-      });
-      map->foreach(do:::(item, data) {
-        @itemX = ((x+data.x - regionX) * mapSizeW)->floor;
-        @itemY = ((y+data.y - regionY) * mapSizeH)->floor;
-      
-        when(itemX < 1 || itemY < 1 || itemX >= mapSizeW || itemY >= mapSizeH) empty;
-        canvas.movePen(x:left-1 + itemX, y:top + itemY);  
-        canvas.drawText(text:data.symbol);
-
-        canvas.movePen(x:left-1 + itemX+1, y:top + itemY+1);  
-        canvas.drawText(text:data.symbol);
-
-        canvas.movePen(x:left-1 + itemX, y:top + itemY+1);  
-        canvas.drawText(text:data.symbol);
-
-        canvas.movePen(x:left-1 + itemX+1, y:top + itemY);  
-        canvas.drawText(text:data.symbol);
-      });
-      */
-      @:targets = {};
-      @:importantItems = {};
-      
-      for(0, mapSizeH+1)::(y) {
-        for(0, mapSizeW+1)::(x) {
-          @itemX = (x) + regionX*mapSizeW - mapSizeW*0.5;
-          @itemY = (y) + regionY*mapSizeH - mapSizeH*0.5;
-          
-          when(itemX < 0 || itemY < 0 || itemX >= width || itemY >= height) empty;
-          
-          @symbol = this.sceneryAt(x:itemX, y:itemY);
-
-          canvas.movePen(x:left + x, y:top + y);  
-          
-
-          when(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0) ::<= {
-            when (symbol != empty)
-              canvas.drawChar(text:symbol);
-
-          }
-
-
-          @:items = this.itemsAt(x:itemX, y:itemY);
-          if (items != empty) ::<= {
-            @:discovered = (items[items->keycount-1].traits & Map.TRAIT.DISCOVERED) != 0;
-            
-            if (discovered == true)
-              targets->push(:{x:x, y:y, itemX:itemX, itemY:itemY});
-              
-            importantItems->push(:{
-              ch:if (discovered == false) '?' else items[items->keycount-1].symbol,
-              x: x,
-              y: y
-            });
-          }
-
-          when (symbol != empty) ::<= {
-            canvas.drawChar(text:symbol);
-          }
-
-
-          canvas.drawChar(text:undefinedCharacter);
-        }        
-      }        
-              
-      foreach(targets) ::(k, v) {
-        drawTarget(*v);
-      }
-
-      foreach(importantItems) ::(k, v) {
-        when(v.ch == '') empty;
-        @xt = left + v.x;
-        @yt = top + v.y
-        canvas.movePen(x:xt, y:yt);  
-        canvas.drawChar(text:v.ch);
-      }
-      
-  
-      canvas.movePen(
-        x:left + ((pointer.x - regionX*mapSizeW  + mapSizeW*0.5))->floor,
-        y:top  + ((pointer.y - regionY*mapSizeH  + mapSizeH*0.5))->floor     
-      );
-      
-      canvas.drawText(text:'Ø');
-          
-    }
     
     @:renderUnpaged ::{
       @mapSizeW  = canvas.width;
@@ -713,11 +796,14 @@ Map =  LoadableClass.create(
             y += rads->sin * SIGHT_RAY_EPSILON;
             
 
-            when((x < offsetX || y < offsetY || x >= width+offsetX || y >= height+offsetY)) send();
-
             when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
-            scenery[x->floor+y->floor*width] &= ~IS_OBSCURED_MASK;            
-            if (isDark == true) isLit[x->floor+y->floor*width] = true;
+            chunkManager.andChunkSceneryForPosition(
+              x : x->floor,
+              y : y->floor,
+              value : ~IS_OBSCURED_MASK
+            );
+
+            if (isDark == true) isLit[''+x->floor+y->floor] = true;
             if (isWalled(x:x->floor, y:y->floor))
               send();
           }
@@ -735,21 +821,7 @@ Map =  LoadableClass.create(
       } 
       
       
-      /*
-      [0, mapSizeH+1]->for(do:::(y) {
-        [0, mapSizeW+1]->for(do:::(x) {
-          @itemX = ((x + pointer.x - mapSizeW/2))->floor;
-          @itemY = ((y + pointer.y - mapSizeH/2))->floor;
 
-          when((itemX < offsetX || itemY < offsetY || itemX >= width+offsetX || itemY >= height+offsetY)) empty;
-          
-          
-          if (obscured[itemX][itemY])
-            if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
-              obscured[itemX][itemY] = false;
-        });
-      }); 
-      */  
       @:targets = {};   
       @:importantItems = {};  
       
@@ -759,15 +831,6 @@ Map =  LoadableClass.create(
       @itemYmin = pointer.y - mapSizeH/2;
       @itemYmax = pointer.y + mapSizeH/2;
       
-      if (itemXmin < 0) itemXmin = 0;
-      if (itemYmin < 0) itemYmin = 0;
-      if (itemXmin > width) itemXmin = width;
-      if (itemYmin > height) itemYmin = height;
-
-      if (itemXmax < 0) itemXmax = 0;
-      if (itemYmax < 0) itemYmax = 0;
-      if (itemXmax > width) itemXmax = width;
-      if (itemYmax > height) itemYmax = height;
 
 
       
@@ -777,11 +840,12 @@ Map =  LoadableClass.create(
           //if (obscured[itemX][itemY])
           //  if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
           //    obscured[itemX][itemY] = false;
+          @symbol = this.sceneryAt(x:itemX, y:itemY);
+
           
-          when(scenery[itemX+itemY*width] & IS_OBSCURED_MASK) empty
+          when(symbol & IS_OBSCURED_MASK) empty
           @:x = itemX - pointer.x + mapSizeW/2;
           @:y = itemY - pointer.y + mapSizeH/2;
-          @symbol = this.sceneryAt(x:itemX, y:itemY);
           canvas.movePen(x:left + x, y:top + y);  
           
 
@@ -818,7 +882,7 @@ Map =  LoadableClass.create(
             }
           }
 
-          when(isDark == true && isLit[itemX+itemY*width] != true && chosenChar != empty) ::<= {
+          when(isDark == true && isLit[''+itemX+itemY] != true && chosenChar != empty) ::<= {
             when(chosenChar != empty && chosenChar == ' ')
               canvas.drawChar(text:' ');            
               
@@ -830,7 +894,7 @@ Map =  LoadableClass.create(
       }       
       
       foreach(targets) ::(k, v) {
-        when(isDark && isLit[v.itemX+v.itemY*width] != true) empty;
+        when(isDark && isLit[''+v.itemX+v.itemY] != true) empty;
         drawTarget(*v);
       }
 
@@ -840,7 +904,7 @@ Map =  LoadableClass.create(
         @xt = v.x;
         @yt = v.y
         canvas.movePen(x:xt, y:yt);  
-        when(isDark && isLit[v.itemX+v.itemY*width] != true)
+        when(isDark && isLit[''+v.itemX+v.itemY] != true)
           canvas.drawChar(:TOO_FAR_SYMBOL_CHARACTER);
 
         canvas.drawChar(text:v.ch);
@@ -917,27 +981,6 @@ Map =  LoadableClass.create(
         get ::<- events
       },
       defaultLoad ::{},
-      width : {
-        get ::<- width,
-        set ::(value) {
-          width = value;
-          @:size = (width*height);
-          for(0, size)::(i) {
-            scenery[i] = 0;
-          }
-        }
-      },
-
-      height : {
-        get ::<- height,
-        set ::(value) {
-          height = value;
-          @:size = (width*height);
-          for(0, size)::(i) {
-            scenery[i] = 0;
-          }    
-        }
-      },
       
       drawLegend : {
         get ::<- drawLegend,
@@ -945,11 +988,11 @@ Map =  LoadableClass.create(
       },
       
       enableWall ::(x, y) {
-        scenery[x + y*(width)] |= IS_WALLED_MASK;        
+        chunkManager.orChunkSceneryForPosition(x, y, value:IS_WALLED_MASK);        
       },
       
-      disableWall ::(x, y) {    
-        scenery[x + y*(width)] &= (~IS_WALLED_MASK);
+      disableWall ::(x, y) {  
+        chunkManager.andChunkSceneryForPosition(x, y, value:~IS_WALLED_MASK);
       },
       
       mapCoordinatesToScreen ::(x, y) {
@@ -997,9 +1040,8 @@ Map =  LoadableClass.create(
         y =>Number,
         symbol => Number
       ) {
-        @index = x + y*(width);
-        
-        scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
+        @:val = chunkManager.getChunkSceneryForPosition(x, y);
+        chunkManager.setChunkSceneryForPosition(x, y, value: (val & SETTINGS_MASK) | (1+symbol));
       },
 
 
@@ -1012,50 +1054,22 @@ Map =  LoadableClass.create(
       ) {
         for(x, x+fillWidth)::(xi) {
           for(y, y+fillHeight)::(yi) {
-            @index = xi + yi*(width);
-          
-            scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
+            @:val = chunkManager.getChunkSceneryForPosition(x:xi, y:yi);
+            chunkManager.setChunkSceneryForPosition(x:xi, y:yi, value: (val & SETTINGS_MASK) | (1+symbol));
           }    
         }
       },        
       
-      fillSceneryIndex ::(
-        symbol => Number
-      ) {
-        for(0, height)::(y) {
-          for(0, width)::(x) {
-            @index = x + y*(width);
-          
-            scenery[index] = (scenery[index] & SETTINGS_MASK) | (1+symbol);
-          }    
-        }
-      },      
-      setStepAction ::(
-        x => Number,
-        y => Number,
-        action
-      ) {
-        stepAction[x + y*width] = action;
-      },
-
+ 
       clearScenery ::(
         x =>Number,
         y =>Number
       ) {
-        @index = x + y*(width);
-        
-        scenery[index] = SETTINGS_MASK & scenery[index];
+        chunkManager.setChunkSceneryForPosition(x, y, value:SETTINGS_MASK);
       },
       
       sceneryAt::(x, y) {
-        @at = x+(y*width);
-        when(x < 0 || y < 0)
-          undefinedCharacter;
-          
-        when(x >= width || y >= height)
-          undefinedCharacter;
-          
-        @:index = scenery[at] & (~SETTINGS_MASK);
+        @:index = chunkManager.getChunkSceneryForPosition(x, y) & (~SETTINGS_MASK);
         when(index == 0) empty;
         @:val = sceneryValues[index-1];
         
@@ -1159,13 +1173,11 @@ Map =  LoadableClass.create(
         x = x->floor;
         y = y->floor;
         
-        when(x < 0 || y < 0 || x >= width || y >= height)
-          error(detail:'Bad');
         
-        @loc = itemIndex[x + y * (width)];
+        @loc = itemIndex[posToId(x, y)];
         if (loc == empty) ::<= {
           loc = [];
-          itemIndex[x + y*(width)] = loc;
+          itemIndex[posToId(x, y)] = loc;
         }
         @:val = {
           x: x,
@@ -1218,41 +1230,46 @@ Map =  LoadableClass.create(
       }, 
       
       itemsAt::(x, y) {
-        return itemIndex[x + y*(width)];
+        return itemIndex[posToId(x, y)];
       },
       
-      obscure::(ignore) {
-        for(0, width)::(x) {
-          for(0, height)::(y) {
-            @:at = x+y*width
-            when (ignore != empty && ((scenery[at] & (~SETTINGS_MASK))-1) == ignore) empty;
-            scenery[at] |= IS_OBSCURED_MASK;
+      obscure : {
+        set ::(value => Boolean) <- chunkManager.obscure = value,
+        get ::<- chunkManager.obscure
+      },
+      
+      obscureRectangle::(ignore, x, y, width, height) {
+        for(x, x+width)::(x) {
+          for(y, y+height)::(y) {
+            @:sc = chunkManager.getChunkSceneryForPosition(x, y);
+            when (ignore != empty && ((sc & (~SETTINGS_MASK))-1) == ignore) empty;
+            chunkManager.orChunkSceneryForPosition(x, y, value: IS_OBSCURED_MASK);
           }
         }
       },
       
       obscureAt::(x, y) {
-        scenery[x+y*width] |= IS_OBSCURED_MASK
+        chunkManager.orChunkSceneryForPosition(x, y, value: IS_OBSCURED_MASK);
       },
       
       obscureRadius::(x, y, radius) {        
         for(y - radius-1, y + radius+1) ::(yIter) {
           for(x - radius-1, x + radius+1) ::(xIter) {
             if (distance(x0:x, y0:y, x1:xIter, y1:yIter) <= radius) ::<= {
-              scenery[xIter+yIter*width] |= IS_OBSCURED_MASK              
+              chunkManager.orChunkSceneryForPosition(x:xIter, y:yIter, value: IS_OBSCURED_MASK);
             }
           }
         }
       },
       unobscureAt::(x, y) {
-        scenery[x+y*width] &= ~IS_OBSCURED_MASK
+        chunkManager.andChunkSceneryForPosition(x, y, value: ~IS_OBSCURED_MASK);
       },
 
       unobscureRadius::(x, y, radius) {        
         for(y - radius-1, y + radius+1) ::(yIter) {
           for(x - radius-1, x + radius+1) ::(xIter) {
             if (distance(x0:x, y0:y, x1:xIter, y1:yIter) <= radius) ::<= {
-              scenery[xIter+yIter*width] &= ~IS_OBSCURED_MASK              
+              chunkManager.andChunkSceneryForPosition(x:xIter, y:yIter, value: ~IS_OBSCURED_MASK);
             }
           }
         }
@@ -1260,7 +1277,7 @@ Map =  LoadableClass.create(
 
       
       clearItems::(x, y) {
-        itemIndex[x + y*(width)] = empty;
+        chunkManager.setChunkSceneryForPosition(x, y, value:empty);
       },
         
       removeItem::(
@@ -1268,7 +1285,7 @@ Map =  LoadableClass.create(
       ) {
         @item = retrieveItem(data);
       
-        @itemsA = itemIndex[item.x + (item.y)*(width)];
+        @itemsA = itemIndex[posToId(x:item.x, y:item.y)];
         when(itemsA == empty) empty;
         ::? {
           foreach(itemsA)::(key, v) {
@@ -1282,7 +1299,7 @@ Map =  LoadableClass.create(
 
 
         if(itemsA->keycount == 0)
-          itemIndex[item.x + (item.y)*(width)] = empty;  
+          itemIndex[posToId(x:item.x, y:item.y)] = empty;  
         
         items = items->filter(by::(value) <- value.data != data);
         events.emit(
@@ -1316,10 +1333,13 @@ Map =  LoadableClass.create(
         pointer.x = x;
         pointer.y = y;
         
-
-        @:trigger = stepAction[x + y*width];
-        if (trigger != empty)
-          trigger(); 
+        events.emit(
+          event: 'onPointerMove',
+          detail : {
+            x : x,
+            y : y
+          }
+        )
       },
       
       getDistanceFromItem ::(data) {
@@ -1390,17 +1410,17 @@ Map =  LoadableClass.create(
       moveItem::(data, x, y) {
         @:ent = retrieveItem(data);      
 
-        @items =  itemIndex[ent.x + (ent.y)*(width)];
+        @items =  itemIndex[posToId(x:ent.x, y:ent.y)];
         items->remove(key:items->findIndex(value:ent));
 
         ent.x = x;
         ent.y = y;      
 
-        @loc = itemIndex[ent.x + (ent.y)*(width)];
+        @loc = itemIndex[posToId(x:ent.x, y:ent.y)];
 
         if (loc == empty) ::<= {
           loc = [];
-          itemIndex[ent.x + (ent.y)*(width)] = loc;
+          itemIndex[posToId(x:ent.x, y:ent.y)] = loc;
         }
         loc->push(value:ent);
         events.emit(
@@ -1464,8 +1484,6 @@ Map =  LoadableClass.create(
           @new = offset + old;
           y = pointer.y;
 
-          if (new < 0) new = 0;
-          if (new >= width) new = width-1;
 
           @greater = new > old;
 
@@ -1484,8 +1502,6 @@ Map =  LoadableClass.create(
           @new = offset + old;
           x = pointer.x;
 
-          if (new < 0) new = 0;
-          if (new >= height) new = height-1;
 
           @greater = new > old;
 
@@ -1548,29 +1564,20 @@ Map =  LoadableClass.create(
       },
 
       isLocationVisible ::(x, y) {
-        when(scenery[x+y*width] & IS_OBSCURED_MASK) false;
+        when(chunkManager.getChunkSceneryForPosition(x, y) & IS_OBSCURED_MASK) false;
         @mapSizeW  = canvas.width;
         @mapSizeH  = canvas.height;
 
-        return if (paged) ::<= {
-          @:regionX = ((pointer.x+0) / mapSizeW)->floor;
-          @:regionY = ((pointer.y+0) / mapSizeH)->floor;
-          @:itemX = (x) + regionX*mapSizeW;
-          @:itemY = (y) + regionY*mapSizeH;
-          return !(itemX < 0 || itemY < 0 || itemX >= width+0 || itemY >= height+0);
 
+        @camX = pointer.x;
+        @camY = pointer.y;
         
-        } else ::<= {
-          @camX = pointer.x;
-          @camY = pointer.y;
-          
-          @camLeft   = camX - mapSizeW/2;
-          @camTop  = camY - mapSizeH/2;
-          @camRight  = camX + mapSizeW/2;
-          @camBottom = camY + mapSizeH/2;
-          
-          return x >= camLeft && x <= camRight && y >= camTop && y <= camBottom;
-        }
+        @camLeft   = camX - mapSizeW/2;
+        @camTop  = camY - mapSizeH/2;
+        @camRight  = camX + mapSizeW/2;
+        @camBottom = camY + mapSizeH/2;
+        
+        return x >= camLeft && x <= camRight && y >= camTop && y <= camBottom;
 
       },
       
@@ -1626,12 +1633,9 @@ Map =  LoadableClass.create(
       
       render ::(noBlank)  {
         if (noBlank != true)
-          canvas.fill(:'`');
-        if (paged)
-          renderPaged()
-        else 
-          renderUnpaged()
-        ;
+          canvas.fill(:undefinedCharacter);
+
+        renderUnpaged()
         @mapSizeW  = canvas.width;
         @mapSizeH  = canvas.height;
 
@@ -1739,31 +1743,11 @@ Map =  LoadableClass.create(
           foreach(v) :: (index, loc) {
              locs[index] = itemsUnique[loc];
           }
-          itemIndexCompressed[''+k] = locs;
+          itemIndexCompressed[k] = locs;
         };
         
         
-        // EXTREMELY simple compression thats ideal for general maps
-        // since they have a lot of empty space (repeats)
-        @:sceneryCompressed = [scenery->size];
-        @sceneryLast = -1;
-        @sceneryCount = 0;
-        foreach(scenery) ::(index, value) {
-          if (sceneryLast != value) ::<= {
-            if (sceneryCount > 0) ::<= {
-              sceneryCompressed->push(value:sceneryLast);
-              sceneryCompressed->push(value:sceneryCount);
-            }
-            
-            sceneryLast = value;
-            sceneryCount = 0;
-          }
-          sceneryCount += 1;
-        }
-        if (sceneryCount > 0) ::<= {
-          sceneryCompressed->push(value:sceneryLast);
-          sceneryCompressed->push(value:sceneryCount);
-        }
+
         
       
         @:state = StateType.new();
@@ -1776,8 +1760,6 @@ Map =  LoadableClass.create(
           title : title,
 
           pointer : pointer,
-          width : width,
-          height : height,
           offsetX : offsetX,
           offsetY : offsetY,
           drawLegend : drawLegend,
@@ -1785,9 +1767,8 @@ Map =  LoadableClass.create(
           undefinedCharacter : undefinedCharacter,
           wallCharacter : wallCharacter,
           //@scenery = MemoryBuffer.new();
-          sceneryCompressed : sceneryCompressed,
+          sceneryCompressed : chunkManager.save(),
           sceneryValues : sceneryValues,
-          stepAction : stepAction,
           areas : areas,
           isDark : isDark,
         }
@@ -1812,37 +1793,13 @@ Map =  LoadableClass.create(
           foreach(locs) ::(index, loc) {
             locs[index] = items[loc]
           }
-          itemIndex[Number.parse(string:k)] = locs;
+          itemIndex[k] = locs;
         }
         
-
-        // unpack scenery by first presizing the array
-        scenery = [];
-        @sceneryIndex = 0;
-        scenery[v.sceneryCompressed[0]] = 0;
-        scenery->remove(key:v.sceneryCompressed[0]);
-        
-        @sceneryLast;
-        @sceneryCount;
-        for(1, v.sceneryCompressed->size) ::(index) {
-          @:value = v.sceneryCompressed[index];
-          when (sceneryLast == empty) ::<= {
-            sceneryLast = value;
-          }
-          
-          sceneryCount = value;
-          for(0, sceneryCount) ::(i) {
-            scenery[sceneryIndex] = sceneryLast;
-            sceneryIndex += 1;
-          }
-          sceneryLast = empty;
-        }         
         
         title = v.title;
 
         pointer = v.pointer;
-        width = v.width;
-        height = v.height;
         offsetX = v.offsetX;
         offsetY = v.offsetY;
         drawLegend = v.drawLegend;
@@ -1850,9 +1807,9 @@ Map =  LoadableClass.create(
         undefinedCharacter = v.undefinedCharacter;
         wallCharacter = v.wallCharacter;
         sceneryValues = v.sceneryValues;
-        stepAction = v.stepAction;
         areas = v.areas;
         isDark = v.isDark;
+        chunkManager.load(:v.sceneryCompressed);
       }
     }  
   }

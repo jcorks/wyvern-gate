@@ -445,8 +445,8 @@ Location.database.newEntry(data:{
   
   
     @:map = landmark.map;
-    map.width = 100;
-    map.height = 100;
+    @:width = 100;
+    @:height = 100;
     
     @:wall = map.addScenerySymbol(:'Y');
 
@@ -471,8 +471,8 @@ Location.database.newEntry(data:{
         Location.new(
           landmark,
           base: Location.database.find(id:'therogue:the-vault'),
-          x: (map.width/2)->floor  - (OFFSET/2)->floor + CHEST_LOCATION.x,
-          y: (map.height/2)->floor - (OFFSET/2)->floor + CHEST_LOCATION.y
+          x: (width/2)->floor  - (OFFSET/2)->floor + CHEST_LOCATION.x,
+          y: (height/2)->floor - (OFFSET/2)->floor + CHEST_LOCATION.y
         ),
         
       width: 1, height: 1,
@@ -485,8 +485,8 @@ Location.database.newEntry(data:{
         Location.new(
           landmark,
           base: Location.database.find(id:'therogue:stairs-down'),
-          x: (map.width/2)->floor  - (OFFSET/2)->floor + STAIRS_LOCATION.x,
-          y: (map.height/2)->floor - (OFFSET/2)->floor + STAIRS_LOCATION.y
+          x: (width/2)->floor  - (OFFSET/2)->floor + STAIRS_LOCATION.x,
+          y: (height/2)->floor - (OFFSET/2)->floor + STAIRS_LOCATION.y
         ),
         
       width: 1, height: 1,
@@ -504,14 +504,14 @@ Location.database.newEntry(data:{
       isWall : true,
       x : 0,
       y : 0,
-      width: map.width,
-      height: map.height
+      width: width,
+      height: height
     );
     
     map.paintScenerySolidRectangle(
       isWall : false,
-      x : (map.width/2)->floor  - (OFFSET/2)->floor,
-      y : (map.height/2)->floor - (OFFSET/2)->floor,
+      x : (width/2)->floor  - (OFFSET/2)->floor,
+      y : (height/2)->floor - (OFFSET/2)->floor,
       width: OFFSET,
       height: OFFSET
     );

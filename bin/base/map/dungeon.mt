@@ -296,9 +296,8 @@
   if (mapHint.roomAreaSizeLarge != empty) ROOM_AREA_SIZE_LARGE = mapHint.roomAreaSize;
   if (mapHint.emptyAreaCount != empty) ROOM_EMPTY_AREA_COUNT = mapHint.emptyAreaCount;
   if (mapHint.roomSize != empty) ROOM_SIZE = mapHint.roomSize;
-  map.width = ROOM_SIZE + GEN_OFFSET*2;
-  map.height = ROOM_SIZE + GEN_OFFSET*2;
-  map.obscure();  
+  //map.width = ROOM_SIZE + GEN_OFFSET*2;
+  //map.height = ROOM_SIZE + GEN_OFFSET*2;
   generateLayout();
   return areas;
 };
@@ -343,8 +342,8 @@
   @:WEST  = 2;
   @:SOUTH = 3;
   
-  map.width  = AREA_WIDTH  * (AREA_SIZE + AREA_GAP*2) + GEN_OFFSET*2;
-  map.height = AREA_HEIGHT * (AREA_SIZE + AREA_GAP*2) + GEN_OFFSET*2;
+  @:width  = AREA_WIDTH  * (AREA_SIZE + AREA_GAP*2) + GEN_OFFSET*2;
+  @:height = AREA_HEIGHT * (AREA_SIZE + AREA_GAP*2) + GEN_OFFSET*2;
   
   
   
@@ -1050,7 +1049,6 @@
   }
 
   
-  map.obscure();  
   return areas;
 };
 
@@ -1423,8 +1421,8 @@
       }
       
       @:span = root.getAllSpan();
-      map.width = span.x + span.width + 80;
-      map.height = span.y + span.height + 40;
+      @:width = span.x + span.width + 80;
+      @:height = span.y + span.height + 40;
 
       
       foreach(root.getAllAttached()) ::(k, space) {
@@ -1435,7 +1433,6 @@
         space.cap(map);
       }
 
-      map.obscure();
       return areas;
     },
     BlockSpace : BlockSpace,
@@ -1472,10 +1469,8 @@
   @:funnyIndex = map.addScenerySymbol(character:'.');
   @:spaceIndex = map.addScenerySymbol(:' ')  
   
-  map.width = 200;
-  map.height = 200;
-  @:mx = (map.width /2)->floor
-  @:my = (map.height/2)->floor
+  @:mx = (100)->floor
+  @:my = (100)->floor
 
 
   
@@ -2119,7 +2114,6 @@
  
 
 
-  map.obscure();  
   @allAreas = [];
   for(0, random.integer(from:LAYOUT_COUNT_MIN, to:LAYOUT_COUNT_MAX)) ::(i) {
     allAreas = [...allAreas, ...GammaLayout.new().areas]
@@ -2363,6 +2357,7 @@
 
       create ::(mapHint, parent) {
         @:map = Map.new(parent);
+        map.obscure = true;
 
         @areas;
 

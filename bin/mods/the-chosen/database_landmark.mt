@@ -552,8 +552,8 @@ return ::{
       events : {
         onLoadContent ::(landmark, island){
           @:map = landmark.map;
-          map.width = 100;
-          map.height = 60;
+          @:width = 100;
+          @:height = 60;
           map.undefinedCharacter = '.'
           
           
@@ -594,7 +594,7 @@ return ::{
           map.paintScenerySolidRectangle(
             x: CASTLE_MAIN_X + CASTLE_MAIN_WIDTH,
             y: 0,
-            width: map.width - (CASTLE_MAIN_X + CASTLE_MAIN_WIDTH)-1,
+            width: width - (CASTLE_MAIN_X + CASTLE_MAIN_WIDTH)-1,
             height: CASTLE_EXT_HEIGHT,
             symbol : map.addScenerySymbol(
               character: '▓'
@@ -703,7 +703,7 @@ return ::{
           map.paintScenerySolidRectangle(
             x: CASTLE_MAIN_X+CASTLE_MAIN_WIDTH/2+2,
             y: CASTLE_EXT_HEIGHT,
-            width: map.width - CASTLE_MAIN_X+CASTLE_MAIN_WIDTH/2-1,
+            width: width - CASTLE_MAIN_X+CASTLE_MAIN_WIDTH/2-1,
             height: PATH_HEIGHT,
             symbol : map.addScenerySymbol(
               character: '.'
@@ -715,8 +715,8 @@ return ::{
           map.paintScenerySolidRectangle(
             x: 0,
             y: CASTLE_EXT_HEIGHT + PATH_HEIGHT,
-            width: map.width-1,
-            height: map.height - (CASTLE_EXT_HEIGHT + PATH_HEIGHT) - 1,
+            width: width-1,
+            height: height - (CASTLE_EXT_HEIGHT + PATH_HEIGHT) - 1,
             symbol : map.addScenerySymbol(
               character: '.'
             ),

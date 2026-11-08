@@ -31,7 +31,6 @@
 @:databaseItemMutatorClass = import(module:'core/data/databaseitemmutatorclass.mt');
 @:Database = import(module:'core/data/database.mt');
 @:correctA = import(module:'base/util/correcta.mt');
-@:OverMap = import(module:'base/map/overmap.mt');
 
 @:CLIMATE = {
   WARM : 0,
@@ -101,7 +100,7 @@ Island.database.newEntry(
     events : [
       
     ],
-    possibleSceneryCharacters : [
+    possibleBiomes : [
       '╿', '.', '^', ',', 'Y'
     ],
     traits : TRAIT.SPECIAL | TRAIT.EMPTY,
@@ -145,8 +144,13 @@ Island.database.newEntry(
       'base:camp-out',
       'base:encounter:normal'      
     ],
-    possibleSceneryCharacters : [
-      '╿', '.', '^', ',', 'Y'
+    possibleBiomes : [
+      'base:plains',
+      'base:forest',
+      'base:wildflower',
+      'base:mountains',
+      'base:thick-forest',
+      //'╿', '.', '^', ',', 'Y'
     ],
     traits : TRAIT.DIVERSE | TRAIT.SPECIAL,
     
@@ -184,11 +188,17 @@ Island.database.newEntry(
       'base:camp-out',
       'base:encounter:normal'
     ],
-    possibleSceneryCharacters : [
-      '╿', '.', '^', ',',
-      ')', '(', ']', ']', '/',
-      '+', '~', '=', '|', '>',
-      '<', '*', '%', '-', '_'
+    possibleBiomes : [
+      'base:plains',
+      'base:forest',
+      'base:wildflower',
+      'base:mountains',
+      'base:thick-forest'
+
+      //'╿', '.', '^', ',',
+      //')', '(', ']', ']', '/',
+      //'+', '~', '=', '|', '>',
+      //'<', '*', '%', '-', '_'
     ],    
     traits : 0,
     overrideSpecies : empty,
@@ -317,6 +327,8 @@ Island.database.newEntry(
     
     // controller of the midmap
     overmap : empty,
+    
+    // 
   },
   
   database : Database.new(
@@ -330,7 +342,7 @@ Island.database.newEntry(
       minSize : Number,
       maxSize : Number,
       events : Object,
-      possibleSceneryCharacters : Object,
+      possibleBiomes : Object,
       
       overrideSpecies : Nullable,
       overrideNativeCreatures : Nullable,
@@ -384,7 +396,6 @@ Island.database.newEntry(
       }   
       
       @:landmarks = this.landmarks;
-      breakpoint();
       foreach(random.scrambled(:landmarks)) ::(k, self) {
         when (connected[self] != empty) empty;
 
@@ -709,7 +720,6 @@ Island.database.newEntry(
           }
           
           bridgeAllLandmarks();
-          state.overmap = OverMap.new(parent:this);
           onDone(:state.map);        
         }
         
@@ -730,14 +740,15 @@ Island.database.newEntry(
           }
         }
         
+        @:BiomeCell = import(:'base/map/biomecell.mt');
         LargeMap.create(
           parent:this, 
           sizeW:state.sizeW, 
           sizeH:state.sizeH, 
-          symbols:base.possibleSceneryCharacters,
+          // TODO use actual symbols eventually
+          symbols:(base.possibleBiomes)->map(::(value) <- BiomeCell.database.find(:value).overworldSymbol),
           onDone ::(map) {
             state.map = map;
-            state.map.obscure();
             // connect all known landmarks
             baseOnDone();
           }
@@ -1303,7 +1314,32 @@ Island.database.newEntry(
         
         
       },
-      createChunk::(x, y) {
+      getBiomeCellType::(x, y) {
+        @:BiomeCell = import(:'base/map/biomecell.mt');
+        @:ch = state.map.sceneryAt(x, y);
+        return ::?{
+          foreach(state.base.possibleBiomes) ::(k, v) {
+            @:biome = BiomeCell.database.find(id:v);
+            if (biome.overworldSymbol == ch)
+              send(:biome);
+          }
+
+          // special biomes
+          foreach([
+            'base:road-horizontal',
+            'base:road-vertical',
+            'base:sky-3',
+            'base:sky-2',
+            'base:sky-1',
+          ]) ::(k, v) {
+            @:biome = BiomeCell.database.find(id:v);
+            if (biome.overworldSymbol == ch)
+              send(:biome);
+          }
+          
+          breakpoint();
+        }
+        /*
         @:l =  Landmark.new(base:Landmark.database.find(id:'base:overmap-chunk'));
         l.loadContent();
         l.map.width = OverMap.CHUNK_SIZE;
@@ -1325,6 +1361,7 @@ Island.database.newEntry(
         breakpoint();
         l.name = this.name;
         return l;
+        */
       },
       
       getLandmarkPosition::(landmark) {
@@ -1336,6 +1373,7 @@ Island.database.newEntry(
         }
       },
       travelMidworld ::{
+        /*
         @:island = this;
         state.overmap.movePointerTo(
           x:state.map.pointerX*(OverMap.CHUNK_SIZE) + (OverMap.CHUNK_SIZE/2)->floor,
@@ -1418,13 +1456,16 @@ Island.database.newEntry(
             }
           },
           onMove ::(choice) {
-            @:x = (state.overmap.pointerX / OverMap.CHUNK_SIZE)->floor
-            @:y = (state.overmap.pointerY / OverMap.CHUNK_SIZE)->floor
+            @x = (state.overmap.pointerX / OverMap.CHUNK_SIZE)->floor
+            @y = (state.overmap.pointerY / OverMap.CHUNK_SIZE)->floor
 
-            state.overmap.movePointerRelative(
-              x: if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0,
-              y: if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
-            );
+            x = x + if (choice == windowEvent.CURSOR_ACTIONS.RIGHT) 1 else if (choice == windowEvent.CURSOR_ACTIONS.LEFT) -1 else 0
+            y = y + if (choice == windowEvent.CURSOR_ACTIONS.DOWN)  1 else if (choice == windowEvent.CURSOR_ACTIONS.UP)   -1 else 0
+
+            //if (state.overmap.current.landmark.map.isWalled(x, y
+
+            state.overmap.movePointer(x, y);
+
             @:xNext = (state.overmap.pointerX / OverMap.CHUNK_SIZE)->floor
             @:yNext = (state.overmap.pointerY / OverMap.CHUNK_SIZE)->floor
 
@@ -1433,7 +1474,7 @@ Island.database.newEntry(
               state.map.unobscureRadius(x:xNext, y:yNext, radius:5);
           }
         );
-
+        */
       
       }
     }

@@ -115,6 +115,7 @@
     Dungeon : import(:'base/map/dungeon.mt'),
     Landmark : import(:'base/map/landmark.mt'),
     Island : import(:'base/map/island.mt'),
+    BiomeCell: import(:'base/map/biomecell.mt'),
     // no need for public
     //Large
     //Structure

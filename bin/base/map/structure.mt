@@ -831,7 +831,9 @@
 return ::(mapHint => Object, landmark, objects) {
   @Location = import(module:'base/map/location.mt');
 
-  @map;
+  @map; 
+  @width;
+  @height;
   @landmark
   @hasZoningWalls = true;
   @hasFillerBuildings = true;
@@ -900,8 +902,8 @@ return ::(mapHint => Object, landmark, objects) {
     when (
       top < STRUCTURE_MAP_PADDING ||
       left < STRUCTURE_MAP_PADDING ||
-      left + zone.width  > map.width - STRUCTURE_MAP_PADDING ||
-      top + zone.height > map.height - STRUCTURE_MAP_PADDING
+      left + zone.width  > width - STRUCTURE_MAP_PADDING ||
+      top + zone.height > height - STRUCTURE_MAP_PADDING
       
     ) false;
 
@@ -950,22 +952,22 @@ return ::(mapHint => Object, landmark, objects) {
       match(zone.gateSide) {
         (NORTH):::<= {
           top = STRUCTURE_MAP_PADDING;
-          left = ((map.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+          left = ((width - STRUCTURE_MAP_PADDING) / 2)->floor;
         },
 
         (EAST):::<= {
-          top = ((map.height - STRUCTURE_MAP_PADDING) / 2)->floor;
-          left = (map.width - STRUCTURE_MAP_PADDING) - zone.width;
+          top = ((height - STRUCTURE_MAP_PADDING) / 2)->floor;
+          left = (width - STRUCTURE_MAP_PADDING) - zone.width;
         },
         
         (WEST):::<= {
-          top = ((map.height - STRUCTURE_MAP_PADDING) / 2)->floor;
+          top = ((height - STRUCTURE_MAP_PADDING) / 2)->floor;
           left = STRUCTURE_MAP_PADDING;
         },
         
         (SOUTH):::<= {
-          top = (map.height - STRUCTURE_MAP_PADDING) - zone.height;
-          left = ((map.width - STRUCTURE_MAP_PADDING) / 2)->floor;
+          top = (height - STRUCTURE_MAP_PADDING) - zone.height;
+          left = ((width - STRUCTURE_MAP_PADDING) / 2)->floor;
         },
 
         default: ::<= {
@@ -1067,8 +1069,8 @@ return ::(mapHint => Object, landmark, objects) {
     map = landmark.map;
     map.paged = false;
     map.undefinedCharacter = ' ';
-    map.width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
-    map.height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+    width = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
+    height = STRUCTURE_MAP_SIZE+STRUCTURE_MAP_PADDING*2;
     
 
     if (mapHint.wallCharacter != empty) map.wallCharacter = mapHint.wallCharacter;

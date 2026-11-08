@@ -7,6 +7,7 @@
 #include "../matte/src/matte_store.h"
 #include "../matte/src/matte_string.h"
 #include "../matte/src/matte_array.h"
+#include "../matte/src/matte_mvt2.h"
 
 #define SETTINGS_MASK 0x110000
 #define IS_WALLED_MASK 0x010000
@@ -18,14 +19,35 @@
 
 
 
-#define wyvern_gate__native__bfs__xy_to_id(__x__, __y__) ((__x__) + (__y__)*map.width)
-#define wyvern_gate__native__bfs__id_to_x(__id__) (__id__%(map.width))
-#define wyvern_gate__native__bfs__id_to_y(__id__) (__id__/(map.width))
 
-#define wyvern_gate__native__bfs__q_push(__v__) (q[qLen++] = __v__)
+#define wyvern_gate__native__bfs__q_push(__v__) (matte_array_push(q, __v__))
 
 
-#define WYVERN_GATE__NATIVE__BFS__BAD_ID -1
+uint64_t WYVERN_GATE__NATIVE__BFS__BAD_ID() {
+    uint64_t data = 0;
+    ((int*)&data)[0] = -(0xffffffff/2);
+    ((int*)&data)[1] = -(0xffffffff/2);
+    return data;
+}
+
+#define WYVERN_GATE__NATIVE__BFS__TOO_BIG 4096
+
+
+static uint64_t wyvern_gate__native__bfs__xy_to_id(int x, int y) {
+    uint64_t data = 0;
+    ((int*)&data)[0] = x;
+    ((int*)&data)[1] = y;
+    return data;
+}
+
+static uint64_t wyvern_gate__native__bfs__id_to_x(uint64_t id) {
+    return ((int*)&id)[0];
+}
+static uint64_t wyvern_gate__native__bfs__id_to_y(uint64_t id) {
+    return ((int*)&id)[1];
+}
+
+
 
 
 
@@ -50,33 +72,45 @@ WINDOW * nc = NULL;
 
 // represents the external map
 typedef struct {
-    // width of the map;
-    int width;
-    // height of the map
-    int height;
     
     // scenery of the map, always width * height size
     matteValue_t scenery;
     
     // reference to the store
     matteStore_t * store;
+    
+    matte_t * matte;
 } wyvern_gate__native__bfs__map_t;
 
 
 
-static int wyvern_gate__native__bfs__new_node(int x, int y, wyvern_gate__native__bfs__map_t map) {
-    int id = wyvern_gate__native__bfs__xy_to_id(x, y);
-    matteValue_t * atScenery = matte_value_object_array_at_unsafe(map.store, map.scenery, id);
-    int atSceneryValue = (int)matte_value_as_number(map.store, *atScenery);
-    if (!(atSceneryValue & IS_WALLED_MASK) && x >= 0 && y >= 0 && x < map.width && y < map.height) return id;
-    return WYVERN_GATE__NATIVE__BFS__BAD_ID;
+static uint64_t wyvern_gate__native__bfs__new_node(int x, int y, wyvern_gate__native__bfs__map_t map) {
+    uint64_t id = wyvern_gate__native__bfs__xy_to_id(x, y);
+    //matteValue_t * atScenery = matte_value_object_array_at_unsafe(map.store, map.scenery, id);
+    matteValue_t xV = matte_store_new_value(map.store);
+    matteValue_t yV = matte_store_new_value(map.store);
+    
+    matte_value_into_number(map.store, &xV, x); 
+    matte_value_into_number(map.store, &yV, y); 
+    matteValue_t atScenery = matte_call(
+        map.matte,
+        map.scenery,
+        "x", xV,
+        "y", yV,
+        NULL
+    );
+    
+    
+    int atSceneryValue = (int)matte_value_as_number(map.store, atScenery);
+    if (!(atSceneryValue & IS_WALLED_MASK)) return id;
+    return WYVERN_GATE__NATIVE__BFS__BAD_ID();
 }
 
 
 
 static int wyvern_gate__native__bfs__get_neighbors(
-    int current,
-    int * neighbors,
+    uint64_t current,
+    uint64_t * neighbors,
     wyvern_gate__native__bfs__map_t map,
     int * pattern,
     int patternSize
@@ -88,7 +122,7 @@ static int wyvern_gate__native__bfs__get_neighbors(
     int x = wyvern_gate__native__bfs__id_to_x(current);
     int y = wyvern_gate__native__bfs__id_to_y(current);
     
-    int i;
+    uint64_t i;
     int n;
     for(n = 0; n < patternSize; ++n) {
         
@@ -98,21 +132,39 @@ static int wyvern_gate__native__bfs__get_neighbors(
             map
         );
         
-        if (i != WYVERN_GATE__NATIVE__BFS__BAD_ID)
+        if (i != WYVERN_GATE__NATIVE__BFS__BAD_ID())
             neighbors[neighborCount++] = i;
     }
     
     return neighborCount;
 }
 
+static uint64_t * wyvern_gate__native__bfs__get_visited(matteMVT2_t * visited, uint64_t w) {
+    matteValue_t v = {};
+    v.data = w;
+    matteValue_t * out = matte_mvt2_find(visited, v);
+    if (out == NULL) return NULL;
+    return &out->data;  
+  
+}
+static void wyvern_gate__native__bfs__set_visited(matteMVT2_t * visited, uint64_t w, uint64_t v) {
+    matteValue_t wv = {};
+    wv.data = v;
+
+    matteValue_t ww = {};
+    ww.data = w;
+
+    matte_mvt2_insert(visited, wv, ww);
+}
+
 
 /*
-    5 arguments:
-        0 -> "width" (NUMBER), width of the entire map
-        1 -> "height" (NUMBER), height of the entire map
-        2 -> "scenery" (OBJECT), array of number values
-        3 -> "start" (NUMBER), packed ID of start
-        4 -> "goal" (NUMBER), packed ID of goal
+    6 arguments:
+        0 -> "scenery" (OBJECT), function taking an x and a y to get the scenery
+        1 -> "startX" (NUMBER), x of start
+        2 -> "startY" (NUMBER), y of start
+        3 -> "goalX" (NUMBER), x of goal
+        4 -> "goalY" (NUMBER), y of goal
         5 -> "corners" (BOOLEAN), false if no diagnal movement
 */
 static matteValue_t wyvern_gate__native__bfs(
@@ -125,9 +177,9 @@ static matteValue_t wyvern_gate__native__bfs(
 
     // Preflight checks in case a mod got ahold of the BFS and is 
     // trying to be silly.
-    CHECK_ARG(args[0], MATTE_VALUE_TYPE_NUMBER);
+    CHECK_ARG(args[0], MATTE_VALUE_TYPE_OBJECT);
     CHECK_ARG(args[1], MATTE_VALUE_TYPE_NUMBER);
-    CHECK_ARG(args[2], MATTE_VALUE_TYPE_OBJECT);
+    CHECK_ARG(args[2], MATTE_VALUE_TYPE_NUMBER);
     CHECK_ARG(args[3], MATTE_VALUE_TYPE_NUMBER);
     CHECK_ARG(args[4], MATTE_VALUE_TYPE_NUMBER);
     CHECK_ARG(args[5], MATTE_VALUE_TYPE_BOOLEAN);
@@ -167,22 +219,24 @@ static matteValue_t wyvern_gate__native__bfs(
     
     
     
-    int width = matte_value_as_number(store, args[0]);
-    int height = matte_value_as_number(store, args[1]);    
     
-    assert(matte_value_object_get_number_key_count(store, args[2]) == width * height);
 
 
     wyvern_gate__native__bfs__map_t map;
-    map.width = width;
-    map.height = height;
-    map.scenery = args[2];
+    map.scenery = args[0];
     map.store = store;
+    map.matte = userData;
 
 
 
-    int start = matte_value_as_number(store, args[3]);
-    int goal = matte_value_as_number(store, args[4]);
+    uint64_t start = wyvern_gate__native__bfs__xy_to_id(
+        matte_value_as_number(store, args[1]),
+        matte_value_as_number(store, args[2])
+    );
+    uint64_t goal = wyvern_gate__native__bfs__xy_to_id(
+        matte_value_as_number(store, args[3]),
+        matte_value_as_number(store, args[4])
+    );
 
     matteValue_t out = matte_store_new_value(store);
     
@@ -190,39 +244,49 @@ static matteValue_t wyvern_gate__native__bfs(
     // already done. no path
     if (start == goal) return out;    
 
-    int * q = (int*)malloc(width*height * sizeof(int));
-    int qLen = 0;
-    int * visited = (int*)calloc(width*height, sizeof(int));
+    matteArray_t * q = matte_array_create(sizeof(uint64_t));
+    matteMVT2_t * visited = matte_mvt2_create();
     int qIter = 0;
 
-    int neighbors[8];
+    uint64_t neighbors[8];
     int neighborCount;
     
-    visited[start] = start;
+    wyvern_gate__native__bfs__set_visited(visited, start, start);
     wyvern_gate__native__bfs__q_push(start);
     
-    while(qIter < qLen) {
-        int v = q[qIter];
+    while(qIter < matte_array_get_size(q)) {
+        if (qIter > WYVERN_GATE__NATIVE__BFS__TOO_BIG) {
+            matte_array_remove_n(q, 0, WYVERN_GATE__NATIVE__BFS__TOO_BIG);
+            qIter -= WYVERN_GATE__NATIVE__BFS__TOO_BIG;
+        }
+
+        uint64_t v = matte_array_at(q, uint64_t, qIter);
         qIter++;
+        
         
         // Success! Build the path based on parent history.
         if (v == goal) {
             
-            int a = v;
-            int last;
+            uint64_t a = v;
+            uint64_t last;
             matteArray_t * returnOut = matte_array_create(sizeof(matteValue_t));
             for(;;) {
-                matteValue_t aValue = matte_store_new_value(store);
-                matte_value_into_number(store, &aValue, a);
-                matte_array_push(returnOut, aValue);
+                matteValue_t xValue = matte_store_new_value(store);
+                matte_value_into_number(store, &xValue, wyvern_gate__native__bfs__id_to_x(a));
+                matte_array_push(returnOut, xValue);
+
+                matteValue_t yValue = matte_store_new_value(store);
+                matte_value_into_number(store, &yValue, wyvern_gate__native__bfs__id_to_y(a));
+                matte_array_push(returnOut, yValue);
+
                 
-                if (visited[a] == start) {
+                if (*wyvern_gate__native__bfs__get_visited(visited, a) == start) {
                     matte_value_into_new_object_array_ref(store, &out, returnOut);
                     matte_array_destroy(returnOut);
                     goto L_DONE;
                 }                    
                 
-                a = visited[a];
+                a = *wyvern_gate__native__bfs__get_visited(visited, a);
             }
         }
         
@@ -236,17 +300,18 @@ static matteValue_t wyvern_gate__native__bfs(
         
         int i;
         for(i = 0; i < neighborCount; ++i) {
-            int w = neighbors[i];
+            uint64_t w = neighbors[i];
             // this will exclude 0,0 and is a bug, by the way.
-            if (visited[w]) continue;
-            visited[w] = v;
+            
+            if (wyvern_gate__native__bfs__get_visited(visited, w)) continue;
+            wyvern_gate__native__bfs__set_visited(visited, w, v);
             wyvern_gate__native__bfs__q_push(w);
         }
     }
 L_DONE:
     // no path
-    free(q);
-    free(visited);
+    matte_mvt2_destroy(visited);
+    matte_array_destroy(q);
     return out;
 }
 
@@ -2515,7 +2580,7 @@ void wyvern_gate_add_native(matte_t * m) {
         m,
         "wyvern_gate__native__bfs",
         wyvern_gate__native__bfs,
-        NULL,
+        m,
         
         "width",    
         "height",

@@ -169,7 +169,7 @@ Landmark.database.newEntry(
     requiredObjects : [
     ],
     mapHint : {
-      roomSize: import(:'base/map/overmap.mt').CHUNK_SIZE
+      roomSize: 20
     },
     events :{
 
@@ -1678,9 +1678,6 @@ Landmark.database.newEntry(
         @:Island = import(module:'base/map/island.mt');
         if (parent->type == Island.type)
           island = parent
-        else if (parent)
-          island = parent.parent; // parents of locations are always maps
-
         // backup: just take the current world's island
         if (island == empty)  
           island = import(:'base/world.mt').island;
