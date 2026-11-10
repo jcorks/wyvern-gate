@@ -313,10 +313,12 @@
         for(middleY-(lenX/2)->floor-1, middleY+(lenX/2)->floor+2) ::(y) {
           for(middleX-(lenY/2)->floor-1, middleX+(lenY/2)->floor+2) ::(x) {
             @:id = posToId(x, y)
-            active[id] = true;
-            loadChunk(x, y)
+            active[id] = loadChunk(x, y).scenery;
+            
           }
         }
+        
+        return active;
       }
     }
   }
@@ -871,17 +873,41 @@ Map =  LoadableClass.create(
       
 
 
-      
+      @:chunks = chunkManager.loadScreenFor(x:pointer.x, y:pointer.y);
       for(itemYmin, itemYmax)::(itemY) {
         for(itemXmin, itemXmax)::(itemX) {
           
-          //if (obscured[itemX][itemY])
-          //  if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
-          //    obscured[itemX][itemY] = false;
-
-          @:scenery = chunkManager.getChunkSceneryForPosition(x:itemX, y:itemY); 
+          
+          @:id = posToId(x:(itemX / CHUNK_SIZE)->floor, y:(itemY / CHUNK_SIZE)->floor);
+          @:scenery = chunks[id][(itemX->abs % CHUNK_SIZE) + (itemY->abs % CHUNK_SIZE)*CHUNK_SIZE];
+          
+          //@:scenery = chunkManager.getChunkSceneryForPosition(x:itemX, y:itemY);
           when(scenery != empty && scenery & IS_OBSCURED_MASK) empty
-          @symbol = this.sceneryAt(x:itemX, y:itemY);
+
+
+
+          /*
+          @symbol 
+          @:index = scenery & (~SETTINGS_MASK);
+          if (index != 0)
+            symbol = sceneryValues[index-1];
+          
+          if (symbol == '') symbol = empty;          
+          */
+          // a shiny quarter to anyone who can figure out 
+          // why the above doesnt work as an alternative for whats below
+          @symbol ::<= {
+            @:index = scenery & (~SETTINGS_MASK);
+            when(index == 0) empty;
+            @:val = sceneryValues[index-1];
+            
+            when(val == '') empty;
+            return val;          
+          }
+          
+
+
+
           @:x = itemX - pointer.x + mapSizeW/2;
           @:y = itemY - pointer.y + mapSizeH/2;
           canvas.movePen(x:left + x, y:top + y);  
