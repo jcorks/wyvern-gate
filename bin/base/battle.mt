@@ -140,6 +140,7 @@
 
     @:finishEnd :: {
       groups = [];
+      breakpoint();
       onEnd_(result);      
       foreach(onFinish) ::(k, v) {
         v(:result);
@@ -908,6 +909,7 @@
 
                 when(ended) ::<= {
                   if (windowEvent.hasAnyQueued() == false) ::<= {
+                    breakpoint();
                     battleEnd();                
                   }
                 }

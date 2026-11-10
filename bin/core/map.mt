@@ -171,7 +171,6 @@
     
     @:putChunkToSleep::(id) {
       state.chunksAwake->remove(:id);
-      breakpoint();
       events.emit(
         event: 'onSleepChunk',
         detail : {
@@ -512,8 +511,9 @@ Map =  LoadableClass.create(
     @aStarNodeIDlookup = {};
     @:aStarNewNode::(x, y) {
       when (isWalled(x, y)) empty
-      @:id = ''+x+y;
+      @:id = ''+x+','+y;
       aStarNodeIDlookup[id] = [x, y]
+      return id;
     }
 
     @:aStarHeuristicH::(from, to) {
@@ -651,6 +651,7 @@ Map =  LoadableClass.create(
     // A* finds a path from start to goal.
     // h is the heuristic function. h(n) estimates the cost to reach goal from node n.
     @:aStarPath::(start, goal, corners) { 
+      breakpoint();
       @:getNeighbors = if (corners)
         aStarGetNeighborsCorners
       else 
@@ -716,10 +717,10 @@ Map =  LoadableClass.create(
     
     @:bfsQ = [];
     @:bfsPath::(start, goal, corners) {
-      start = aStarNewNode(x:start.x, y:start.y);
-      goal = aStarNewNode(x:goal.x, y:goal.y);  
-      @:neighbors = [];   
       aStarNodeIDlookup = {}      
+      @:startID = aStarNewNode(x:start.x, y:start.y);
+      @:goalID = aStarNewNode(x:goal.x, y:goal.y);  
+      @:neighbors = [];   
       when (start == empty || goal == empty) empty;
       
       @:getNeighbors = if (corners)
@@ -750,13 +751,13 @@ Map =  LoadableClass.create(
       // fallback on slow version
 
       
-      when(start == goal) empty;
+      when(startID == goalID) empty;
       @:q = bfsQ;
       q->setSize(size:0);
       @qIter = 0;
       @:visited = {}
-      visited[start] = start;
-      q->push(value:start);
+      visited[startID] = startID;
+      q->push(value:startID);
       
       @:searched = {};
       return ::? {
@@ -766,7 +767,7 @@ Map =  LoadableClass.create(
           @v = q[qIter];
           qIter +=1;
 
-          when(v == goal) ::<= {
+          when(v == goalID) ::<= {
             // build path
             send(message: ::<={
               @:path = [];
@@ -780,7 +781,7 @@ Map =  LoadableClass.create(
                     y: n[1]
                   };
                   path->push(value:next);      
-                  when(visited[a] == start) ::<= {
+                  when(visited[a] == startID) ::<= {
                     send();        
                   }  
 
@@ -1102,8 +1103,6 @@ Map =  LoadableClass.create(
         y =>Number,
         symbol => Number
       ) {
-        if (symbol != 0)
-          breakpoint();
         @:val = chunkManager.getChunkSceneryForPosition(x, y);
         chunkManager.setChunkSceneryForPosition(x, y, value: (1+symbol) | (val & SETTINGS_MASK));
       },
@@ -1348,8 +1347,9 @@ Map =  LoadableClass.create(
         data
       ) {
         @item = retrieveItem(data);
+        @id = posToId(x:item.x, y:item.y);
       
-        @itemsA = itemIndex[posToId(x:item.x, y:item.y)];
+        @itemsA = itemIndex[id];
         when(itemsA == empty) empty;
         ::? {
           foreach(itemsA)::(key, v) {
@@ -1363,7 +1363,7 @@ Map =  LoadableClass.create(
 
 
         if(itemsA->keycount == 0)
-          itemIndex[posToId(x:item.x, y:item.y)] = empty;  
+          itemIndex->remove(key:id);  
         
         items = items->filter(by::(value) <- value.data != data);
         events.emit(

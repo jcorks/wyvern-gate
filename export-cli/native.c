@@ -2582,11 +2582,11 @@ void wyvern_gate_add_native(matte_t * m) {
         wyvern_gate__native__bfs,
         m,
         
-        "width",    
-        "height",
         "scenery",
-        "start",
-        "goal",
+        "startX",
+        "startY",
+        "goalX",
+        "goalY",
         "corners",
         NULL
     );

@@ -17,7 +17,7 @@
 */
 @:AsyncWorker = 
 ::? {
-  return empty;//import(:'Matte.System.AsyncWorker');
+  return import(:'Matte.System.AsyncWorker');
 } => {
   onError::(message) {
     // synchronous
@@ -268,7 +268,6 @@
     for(0, widthFull) ::(x) {
       @:val = table[x + (width + BUFFER_SPACE*2) * y];
       when(val == empty) empty;
-      breakpoint();
       map.setSceneryIndex(
         x:x,
         y:y,

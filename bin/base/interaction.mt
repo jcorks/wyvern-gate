@@ -379,9 +379,9 @@ Interaction.newEntry(
               map.removeItem(:location);
 
               @val = random.number();
-              if (world.data['interaction_base:chop-dark-tree'].visited == empty) {
+              if (world.data['interaction_base:chop-dark-tree'] == empty) {
                 val = 0.75;
-                world.data['interaction_base:chop-dark-tree'].visited = true;
+                world.data['interaction_base:chop-dark-tree'] = true;
               }
               // Bees!
               when (val > 0.9) ::<={

@@ -299,7 +299,15 @@
               to : exp,
               max : set.expToNext
             }
-          }
+          },
+          
+          onFinish: if (onDone != empty) 
+              (::(client, value) {
+                if (client == 0) 
+                  onDone();
+              }) 
+            else 
+              empty
         );
       },
       

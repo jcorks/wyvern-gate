@@ -23,7 +23,7 @@
 @:windowEvent = import(module:'core/windowevent.mt');
 
 @:Async = ::? {
-  return empty;//import(:'Matte.System.Async');
+  return import(:'Matte.System.Async');
 } => {
   onError::(message) {
     

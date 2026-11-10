@@ -572,7 +572,6 @@
           @:high = (data.maxHeight * canvas.height)->floor;
           if (PAGE_SIZE > high)
             PAGE_SIZE = high
-          breakpoint();
         }
         
         @:WIDTH = ::<= {
