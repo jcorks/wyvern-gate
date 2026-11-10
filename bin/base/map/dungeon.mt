@@ -2358,6 +2358,7 @@
       create ::(mapHint, parent) {
         @:map = Map.new(parent);
         map.obscure = true;
+        map.isDark = true;
 
         @areas;
 

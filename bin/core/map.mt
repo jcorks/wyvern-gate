@@ -97,6 +97,45 @@
 
 @:CHUNK_SIZE = 20
 
+@:ChunkState = LoadableClass.create(
+  name: 'Wyvern.Map.ChunkState',
+  items : {
+    data : empty,
+    scenery : empty,
+    x : 0,
+    y : 0
+  },
+  
+  define ::(state, this) {
+    this.interface = {
+      defaultLoad ::(x, y, obscure) {
+        state.x = x;
+        state.y = y;
+        state.data = {};
+        @:scenery = [];
+        if (obscure) {
+          for(0, CHUNK_SIZE*CHUNK_SIZE) ::(i) {
+            scenery[i] = IS_OBSCURED_MASK;
+          }
+        } else {
+          for(0, CHUNK_SIZE*CHUNK_SIZE) ::(i) {
+            scenery[i] = 0;
+          }      
+        }
+        
+        state.scenery = scenery;
+      },
+      
+
+      
+      x : {get ::<- state.x},
+      y : {get ::<- state.y},
+      data : {get ::<- state.data},
+      scenery : {get ::<- state.scenery},
+    }
+  }
+);
+
 @:ChunkManager = LoadableClass.create(
   name : 'Wyvern.Map.ChunkManager',
   statics : {
@@ -116,15 +155,15 @@
     @island;
     @:events = EventSystem.new();
     @CHUNK_ACTIVE_COUNT = 32;
+
+
     events.events = {
       onWakeChunk ::(detail){},
       onSleepChunk ::(detail){},
       onCreateChunk ::(detail){},
     }
     
-    @:posToChunk::(x) {
-      return (x / CHUNK_SIZE)->floor
-    }
+    @:posToChunk::(x) <- (x / CHUNK_SIZE)->floor
     
 
     
@@ -132,7 +171,7 @@
     
     @:putChunkToSleep::(id) {
       state.chunksAwake->remove(:id);
-      state.chunks[id] = JSON.encode(object:state.chunks[id].save());
+      breakpoint();
       events.emit(
         event: 'onSleepChunk',
         detail : {
@@ -142,63 +181,61 @@
           y : state.chunks[id].y
         }
       );
+      state.chunks[id] = JSON.encode(object:state.chunks[id].save());
+
     }
     
     @:wakeUpChunk ::(x, y) {
-      // TODO: this sucks
-      ::? { 
-        forever ::{
-          when (state.chunksAwake->keycount < CHUNK_ACTIVE_COUNT) send();
-          putChunkToSleep(:random.pickArrayItem(:state.chunksAwake->values));
-        }
-      }
-    
+
       @:BiomeCell = import(module:'base/map/biomecell.mt');
       @:id = posToId(x, y);
       @:str = state.chunks[id]
       //state.chunks[id] = BiomeCell.new(parent:this);
-      state.chunks[id].load(:JSON.decode(:str));
+      @:chunk = ChunkState.new(x:0, y:0);
+      state.chunks[id] = chunk;
+      chunk.load(:JSON.decode(:str));
       state.chunksAwake[id] = true;
       events.emit(
         event: 'onWakeChunk',
         detail : {
-          data : state.chunks[id].data,
-          scenery : state.chunks[id].scenery,
-          x : x,
-          y : y
+          data : chunk.data,
+          scenery : chunk.scenery,
+          x : chunk.x,
+          y : chunk.y
         }
       );
+      return chunk;
     }
     
     @:createChunk ::(x, y) {
+      // TODO: this sucks
+      ::? { 
+        forever ::{
+          when (state.chunksAwake->keycount < CHUNK_ACTIVE_COUNT) send();
+          putChunkToSleep(:random.pickArrayItem(:state.chunksAwake->keys));
+        }
+      }
+
       @:BiomeCell = import(:'base/map/biomecell.mt');
       //@:cell = BiomeCell.new(base:island.getBiomeCellType(x, y), parent:this);
       //cell.activate(x, y);
       @:id = posToId(x, y);
-      state.chunks[id] = {scenery:[], data:{}, x:x, y:y};
-      state.chunksAwake[id] = true;
+      @:chunk = ChunkState.new(x, y, obscure:state.obscure);
       
-      if (state.obscure) {
-        @:scenery = state.chunks[id].scenery;
-        for(0, CHUNK_SIZE*CHUNK_SIZE) ::(i) {
-          scenery[i] = IS_OBSCURED_MASK;
-        }
-      } else {
-        @:scenery = state.chunks[id].scenery;
-        for(0, CHUNK_SIZE*CHUNK_SIZE) ::(i) {
-          scenery[i] = 0;
-        }      
-      }
+      state.chunks[id] = chunk;
+      state.chunksAwake[id] = true;
+
       
       events.emit(
         event: 'onCreateChunk',
         detail : {
-          data : state.chunks[id].data,
-          scenery : state.chunks[id].scenery,
+          data : chunk.data,
+          scenery : chunk.scenery,
           x : x,
           y : y
         }
       );
+      return chunk;
     }
     
     // returns true if already loaded
@@ -229,27 +266,27 @@
       },
       
       getChunkSceneryForPosition::(x, y) {
-        @:xi = x % CHUNK_SIZE
-        @:yi = y % CHUNK_SIZE
-        return loadChunk(x, y).scenery[xi + yi*CHUNK_SIZE];
+        @:xi = (x->floor % CHUNK_SIZE)->abs
+        @:yi = (y->floor % CHUNK_SIZE)->abs
+        return loadChunk(x:posToChunk(:x), y:posToChunk(:y)).scenery[xi + yi*CHUNK_SIZE] => Number;
       },
       
       setChunkSceneryForPosition::(x, y, value) {
-        @:xi = x % CHUNK_SIZE
-        @:yi = y % CHUNK_SIZE
-        loadChunk(x, y).scenery[xi + yi*CHUNK_SIZE] = value;
+        @:xi = (x->floor % CHUNK_SIZE)->abs
+        @:yi = (y->floor % CHUNK_SIZE)->abs
+        loadChunk(x:posToChunk(:x), y:posToChunk(:y)).scenery[xi + yi*CHUNK_SIZE] = value;
       },
       
       andChunkSceneryForPosition::(x, y, value) {
-        @:xi = x % CHUNK_SIZE
-        @:yi = y % CHUNK_SIZE
-        loadChunk(x, y).scenery[xi + yi*CHUNK_SIZE] &= value;
+        @:xi = (x->floor % CHUNK_SIZE)->abs
+        @:yi = (y->floor % CHUNK_SIZE)->abs
+        loadChunk(x:posToChunk(:x), y:posToChunk(:y)).scenery[xi + yi*CHUNK_SIZE] &= value;
       },
 
       orChunkSceneryForPosition::(x, y, value) {
-        @:xi = x % CHUNK_SIZE
-        @:yi = y % CHUNK_SIZE
-        loadChunk(x, y).scenery[xi + yi*CHUNK_SIZE] &= value;
+        @:xi = (x->floor % CHUNK_SIZE)->abs
+        @:yi = (y->floor % CHUNK_SIZE)->abs
+        loadChunk(x:posToChunk(:x), y:posToChunk(:y)).scenery[xi + yi*CHUNK_SIZE] |= value;
       },
       
       events : {
@@ -260,6 +297,7 @@
         set ::(value) <- state.obscure = value,
         get ::<- state.obscure
       },
+
       
       loadScreenFor::(x, y) {
         @:lenX = (canvas.width / CHUNK_SIZE)->ceil+1;
@@ -784,7 +822,6 @@ Map =  LoadableClass.create(
       @:centerY = (mapSizeH / 2)->floor;
       
       
-      
       @isLit = [];
       @:sightRay ::(degrees) {
         @x = pointer.x + 0.5;
@@ -794,7 +831,8 @@ Map =  LoadableClass.create(
           forever ::{
             x += rads->cos * SIGHT_RAY_EPSILON;
             y += rads->sin * SIGHT_RAY_EPSILON;
-            
+            @:id = ''+x->floor+y->floor
+            when(isLit[id] == true) empty;
 
             when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
             chunkManager.andChunkSceneryForPosition(
@@ -803,7 +841,7 @@ Map =  LoadableClass.create(
               value : ~IS_OBSCURED_MASK
             );
 
-            if (isDark == true) isLit[''+x->floor+y->floor] = true;
+            isLit[id] = true;
             if (isWalled(x:x->floor, y:y->floor))
               send();
           }
@@ -840,21 +878,19 @@ Map =  LoadableClass.create(
           //if (obscured[itemX][itemY])
           //  if (distance(x0:pointer.x, y0:pointer.y, x1:itemX, y1:itemY) < 5)
           //    obscured[itemX][itemY] = false;
-          @symbol = this.sceneryAt(x:itemX, y:itemY);
 
-          
-          when(symbol & IS_OBSCURED_MASK) empty
+          @:scenery = chunkManager.getChunkSceneryForPosition(x:itemX, y:itemY); 
+          when(scenery != empty && scenery & IS_OBSCURED_MASK) empty
+          @symbol = this.sceneryAt(x:itemX, y:itemY);
           @:x = itemX - pointer.x + mapSizeW/2;
           @:y = itemY - pointer.y + mapSizeH/2;
           canvas.movePen(x:left + x, y:top + y);  
-          
-
 
           
           
           @chosenChar = ::<= {
-            
-            when(wallCharacter->length > 0 && symbol == empty && isWalled(x:itemX, y:itemY)) ::<= {
+            @:isWalled = (scenery & IS_WALLED_MASK);
+            when(wallCharacter->length > 0 && symbol == empty && isWalled) ::<= {
               return wallCharacter;
             }
 
@@ -1040,8 +1076,10 @@ Map =  LoadableClass.create(
         y =>Number,
         symbol => Number
       ) {
+        if (symbol != 0)
+          breakpoint();
         @:val = chunkManager.getChunkSceneryForPosition(x, y);
-        chunkManager.setChunkSceneryForPosition(x, y, value: (val & SETTINGS_MASK) | (1+symbol));
+        chunkManager.setChunkSceneryForPosition(x, y, value: (1+symbol) | (val & SETTINGS_MASK));
       },
 
 
@@ -1055,7 +1093,7 @@ Map =  LoadableClass.create(
         for(x, x+fillWidth)::(xi) {
           for(y, y+fillHeight)::(yi) {
             @:val = chunkManager.getChunkSceneryForPosition(x:xi, y:yi);
-            chunkManager.setChunkSceneryForPosition(x:xi, y:yi, value: (val & SETTINGS_MASK) | (1+symbol));
+            chunkManager.setChunkSceneryForPosition(x:xi, y:yi, value: (1+symbol)|(val & SETTINGS_MASK));
           }    
         }
       },        
@@ -1065,7 +1103,7 @@ Map =  LoadableClass.create(
         x =>Number,
         y =>Number
       ) {
-        chunkManager.setChunkSceneryForPosition(x, y, value:SETTINGS_MASK);
+        chunkManager.andChunkSceneryForPosition(x, y, value:SETTINGS_MASK);
       },
       
       sceneryAt::(x, y) {
@@ -1695,6 +1733,10 @@ Map =  LoadableClass.create(
       },
       
       
+      isDark : {
+        set ::(value) <- isDark = value,
+        get ::<- isDark
+      },
       
       /*
         Custom saving loading to save on data and reduce repeats 
@@ -1767,7 +1809,7 @@ Map =  LoadableClass.create(
           undefinedCharacter : undefinedCharacter,
           wallCharacter : wallCharacter,
           //@scenery = MemoryBuffer.new();
-          sceneryCompressed : chunkManager.save(),
+          sceneryCompressed : chunkManager,
           sceneryValues : sceneryValues,
           areas : areas,
           isDark : isDark,
@@ -1809,7 +1851,7 @@ Map =  LoadableClass.create(
         sceneryValues = v.sceneryValues;
         areas = v.areas;
         isDark = v.isDark;
-        chunkManager.load(:v.sceneryCompressed);
+        chunkManager = v.sceneryCompressed;
       }
     }  
   }

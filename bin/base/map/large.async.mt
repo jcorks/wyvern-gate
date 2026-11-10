@@ -17,7 +17,7 @@
 */
 @:AsyncWorker = 
 ::? {
-  return import(:'Matte.System.AsyncWorker');
+  return empty;//import(:'Matte.System.AsyncWorker');
 } => {
   onError::(message) {
     // synchronous
@@ -260,14 +260,15 @@
   }
 }
 
-@:generateTerrain_finalize1::(out, map, width, height, symbols, symbolList, land, spire, spireEnd, border) {
+@:generateTerrain_finalize1::(out, map, width, height, widthFull, heightFull, symbols, symbolList, land, spire, spireEnd, border) {
         
   @:table = out;
 
-  for(0, height) ::(y) {
-    for(0, width) ::(x) {
+  for(0, heightFull) ::(y) {
+    for(0, widthFull) ::(x) {
       @:val = table[x + (width + BUFFER_SPACE*2) * y];
       when(val == empty) empty;
+      breakpoint();
       map.setSceneryIndex(
         x:x,
         y:y,
@@ -278,8 +279,8 @@
   
 
   // finally, border out bottoms and extend 
-  for(0, height) ::(y) {
-    for(0, width) ::(x) {
+  for(0, heightFull) ::(y) {
+    for(0, widthFull) ::(x) {
       @:val = map.sceneryAt(x, y);
       @:below = map.sceneryAt(x, y:y+1);
       @:belowbelow = map.sceneryAt(x, y:y+2);
@@ -294,7 +295,7 @@
         }
         iter += 1;
         
-        @scale = 1 - 2*((((x - BUFFER_SPACE) / (width - 2*BUFFER_SPACE)) - 0.5)->abs)
+        @scale = 1 - 2*((((x - BUFFER_SPACE) / (widthFull - 2*BUFFER_SPACE)) - 0.5)->abs)
 
         //scale *= scale;
         
@@ -327,7 +328,7 @@
   }        
 }
 
-@:generateTerrain_connect::(out, map, width, height, symbols, symbolList, land, areas) {
+@:generateTerrain_connect::(out, map, width, height, widthFull, heightFull, symbols, symbolList, land, areas) {
 
   
   
@@ -490,13 +491,13 @@
 }
 
 
-@:generateTerrain_cleanup::(out, map, width, height, symbols, symbolList, land) {
+@:generateTerrain_cleanup::(out, map, width, height, widthFull, heightFull, symbols, symbolList, land) {
 
 
   // some places might have "holes" that need work.
   for(0, 2) ::(i) {
-    for(0, height) ::(y) {
-      for(0, width) ::(x) {
+    for(0, heightFull) ::(y) {
+      for(0, widthFull) ::(x) {
         @:val = map.sceneryAt(x, y);
              
         when(val == '▓' || val == ' ') empty;
@@ -515,8 +516,8 @@
     }
   }
   
-  for(0, height) ::(y) {
-    for(0, width) ::(x) {
+  for(0, heightFull) ::(y) {
+    for(0, widthFull) ::(x) {
       @:scen = map.sceneryAt(x, y);
       if (scen == '▓' ||
           scen == '▒' ||
@@ -587,6 +588,8 @@
     map : map,
     width:width - BUFFER_SPACE*2,
     height:height - BUFFER_SPACE*2,
+    heightFull:height,
+    widthFull:width,
     symbols: symbols,
     symbolList : symbolList,
     out : out,

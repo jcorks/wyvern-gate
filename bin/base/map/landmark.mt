@@ -1318,9 +1318,7 @@ Landmark.database.newEntry(
   @:left = pattern.left + buffer;
   
   @:map = state.map;
-  map.width = pattern.width + top  + buffer;
-  map.height = pattern.height + left  + buffer;
-  
+
 
   foreach(pattern.scenery) ::(k, v) {
     @:next = v;
@@ -1787,13 +1785,7 @@ Landmark.database.newEntry(
       },
       
       
-      width : {
-        get ::<- state.map.width
-      },
-      height : {
-        get ::<- state.map.height
-      },
-      
+
       peaceful : {
         get :: <- state.peaceful,
         set ::(value) <- state.peaceful = value
