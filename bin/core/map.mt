@@ -834,18 +834,20 @@ Map =  LoadableClass.create(
           forever ::{
             x += rads->cos * SIGHT_RAY_EPSILON;
             y += rads->sin * SIGHT_RAY_EPSILON;
-            @:id = ''+x->floor+y->floor
-            when(isLit[id] == true) empty;
+            @:id = ''+x->floor+','+y->floor
 
             when(distance(x0:pointer.x, y0:pointer.y, x1:x, y1:y) > SIGHT_RAY_LIMIT) send();
-            chunkManager.andChunkSceneryForPosition(
-              x : x->floor,
-              y : y->floor,
-              value : ~IS_OBSCURED_MASK
-            );
 
-            isLit[id] = true;
-            if (isWalled(x:x->floor, y:y->floor))
+            if (isLit[id] == empty) ::<= {
+              chunkManager.andChunkSceneryForPosition(
+                x : x->floor,
+                y : y->floor,
+                value : ~IS_OBSCURED_MASK
+              );
+              isLit[id] = isWalled(x:x->floor, y:y->floor)
+            }
+
+            if (isLit[id] == true)
               send();
           }
         }
@@ -945,7 +947,7 @@ Map =  LoadableClass.create(
             }
           }
 
-          when(isDark == true && isLit[''+itemX+itemY] != true && chosenChar != empty) ::<= {
+          when(isDark == true && isLit[''+itemX+','+itemY] == empty && chosenChar != empty) ::<= {
             when(chosenChar != empty && chosenChar == ' ')
               canvas.drawChar(text:' ');            
               
@@ -957,7 +959,7 @@ Map =  LoadableClass.create(
       }       
       
       foreach(targets) ::(k, v) {
-        when(isDark && isLit[''+v.itemX+v.itemY] != true) empty;
+        when(isDark && isLit[''+v.itemX+','+v.itemY] == empty) empty;
         drawTarget(*v);
       }
 
@@ -967,7 +969,7 @@ Map =  LoadableClass.create(
         @xt = v.x;
         @yt = v.y
         canvas.movePen(x:xt, y:yt);  
-        when(isDark && isLit[''+v.itemX+v.itemY] != true)
+        when(isDark && isLit[''+v.itemX+','+v.itemY] == empty)
           canvas.drawChar(:TOO_FAR_SYMBOL_CHARACTER);
 
         canvas.drawChar(text:v.ch);

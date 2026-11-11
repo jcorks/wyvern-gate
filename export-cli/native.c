@@ -101,7 +101,7 @@ static uint64_t wyvern_gate__native__bfs__new_node(int x, int y, wyvern_gate__na
     );
     
     
-    int atSceneryValue = (int)matte_value_as_number(map.store, atScenery);
+    uint32_t atSceneryValue = (uint32_t)matte_value_as_number(map.store, atScenery);
     if (!(atSceneryValue & IS_WALLED_MASK)) return id;
     return WYVERN_GATE__NATIVE__BFS__BAD_ID();
 }
@@ -154,7 +154,7 @@ static void wyvern_gate__native__bfs__set_visited(matteMVT2_t * visited, uint64_
     matteValue_t ww = {};
     ww.data = w;
 
-    matte_mvt2_insert(visited, wv, ww);
+    matte_mvt2_insert(visited, ww, wv);
 }
 
 
